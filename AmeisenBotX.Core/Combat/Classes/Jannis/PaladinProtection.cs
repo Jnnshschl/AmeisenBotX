@@ -4,17 +4,18 @@ using AmeisenBotX.Core.Character.Talents.Objects;
 using AmeisenBotX.Core.Fsm;
 using AmeisenBotX.Core.Fsm.Utils.Auras.Objects;
 using AmeisenBotX.Wow.Objects.Enums;
+using System.Linq;
 
 namespace AmeisenBotX.Core.Combat.Classes.Jannis
 {
     public class PaladinProtection : BasicCombatClass
     {
-        public PaladinProtection(WowInterface wowInterface, AmeisenBotFsm stateMachine) : base(wowInterface, stateMachine)
+        public PaladinProtection(AmeisenBotInterfaces bot, AmeisenBotFsm stateMachine) : base(bot, stateMachine)
         {
-            MyAuraManager.Jobs.Add(new KeepActiveAuraJob(devotionAuraSpell, () => TryCastSpell(devotionAuraSpell, 0, true)));
-            MyAuraManager.Jobs.Add(new KeepActiveAuraJob(blessingOfKingsSpell, () => TryCastSpell(blessingOfKingsSpell, 0, true)));
-            MyAuraManager.Jobs.Add(new KeepActiveAuraJob(sealOfVengeanceSpell, () => TryCastSpell(sealOfVengeanceSpell, 0, true)));
-            MyAuraManager.Jobs.Add(new KeepActiveAuraJob(righteousFurySpell, () => TryCastSpell(righteousFurySpell, 0, true)));
+            MyAuraManager.Jobs.Add(new KeepActiveAuraJob(bot.Db, devotionAuraSpell, () => TryCastSpell(devotionAuraSpell, 0, true)));
+            MyAuraManager.Jobs.Add(new KeepActiveAuraJob(bot.Db, blessingOfKingsSpell, () => TryCastSpell(blessingOfKingsSpell, 0, true)));
+            MyAuraManager.Jobs.Add(new KeepActiveAuraJob(bot.Db, sealOfVengeanceSpell, () => TryCastSpell(sealOfVengeanceSpell, 0, true)));
+            MyAuraManager.Jobs.Add(new KeepActiveAuraJob(bot.Db, righteousFurySpell, () => TryCastSpell(righteousFurySpell, 0, true)));
 
             InterruptManager.InterruptSpells = new()
             {
@@ -89,18 +90,18 @@ namespace AmeisenBotX.Core.Combat.Classes.Jannis
 
             if (SelectTarget(TargetProviderTank))
             {
-                if (WowInterface.Player.HealthPercentage < 10.0
+                if (Bot.Player.HealthPercentage < 10.0
                     && TryCastSpell(layOnHandsSpell, 0, true))
                 {
                     return;
                 }
 
-                if (WowInterface.Player.HealthPercentage < 20.0
+                if (Bot.Player.HealthPercentage < 20.0
                     && TryCastSpell(flashOfLightSpell, 0, true))
                 {
                     return;
                 }
-                else if (WowInterface.Player.HealthPercentage < 35.0
+                else if (Bot.Player.HealthPercentage < 35.0
                     && TryCastSpell(holyLightSpell, 0, true))
                 {
                     return;
@@ -112,31 +113,31 @@ namespace AmeisenBotX.Core.Combat.Classes.Jannis
                     return;
                 }
 
-                if (WowInterface.Target != null)
+                if (Bot.Target != null)
                 {
-                    if (WowInterface.Target.TargetGuid != WowInterface.Player.Guid
-                        && TryCastSpell(handOfReckoningSpell, WowInterface.Target.Guid, true))
+                    if (Bot.Target.TargetGuid != Bot.Wow.PlayerGuid
+                        && TryCastSpell(handOfReckoningSpell, Bot.Wow.TargetGuid, true))
                     {
                         return;
                     }
 
-                    if (TryCastSpell(avengersShieldSpell, WowInterface.Target.Guid, true)
-                        || (WowInterface.Target.HealthPercentage < 20.0 && TryCastSpell(hammerOfWrathSpell, WowInterface.Target.Guid, true)))
+                    if (TryCastSpell(avengersShieldSpell, Bot.Wow.TargetGuid, true)
+                        || (Bot.Target.HealthPercentage < 20.0 && TryCastSpell(hammerOfWrathSpell, Bot.Wow.TargetGuid, true)))
                     {
                         return;
                     }
 
                     if (Use9SecSpell
-                        && (((WowInterface.Player.HasBuffByName(sealOfVengeanceSpell) || WowInterface.Player.HasBuffByName(sealOfWisdomSpell))
-                                && TryCastSpell(judgementOfLightSpell, WowInterface.Target.Guid, true))
-                            || TryCastSpell(consecrationSpell, WowInterface.Target.Guid, true)
-                            || TryCastSpell(holyShieldSpell, WowInterface.Target.Guid, true)))
+                        && (((Bot.Player.Auras.Any(e => Bot.Db.GetSpellName(e.SpellId) == sealOfVengeanceSpell) || Bot.Player.Auras.Any(e => Bot.Db.GetSpellName(e.SpellId) == sealOfWisdomSpell))
+                                && TryCastSpell(judgementOfLightSpell, Bot.Wow.TargetGuid, true))
+                            || TryCastSpell(consecrationSpell, Bot.Wow.TargetGuid, true)
+                            || TryCastSpell(holyShieldSpell, Bot.Wow.TargetGuid, true)))
                     {
                         Use9SecSpell = false;
                         return;
                     }
-                    else if (TryCastSpell(shieldOfTheRighteousnessSpell, WowInterface.Target.Guid, true)
-                             || TryCastSpell(hammerOfTheRighteousSpell, WowInterface.Target.Guid, true))
+                    else if (TryCastSpell(shieldOfTheRighteousnessSpell, Bot.Wow.TargetGuid, true)
+                             || TryCastSpell(hammerOfTheRighteousSpell, Bot.Wow.TargetGuid, true))
                     {
                         Use9SecSpell = true;
                         return;

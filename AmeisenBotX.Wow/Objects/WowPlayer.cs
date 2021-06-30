@@ -16,7 +16,7 @@ namespace AmeisenBotX.Core.Data.Objects
         private VisibleItemEnchantment[] itemEnchantments;
         private QuestlogEntry[] questlogEntries;
 
-        public WowPlayer(IntPtr baseAddress, WowObjectType type, IntPtr descriptorAddress, Func<int, string> spellNamePred) : base(baseAddress, type, descriptorAddress, spellNamePred)
+        public WowPlayer(IntPtr baseAddress, WowObjectType type, IntPtr descriptorAddress) : base(baseAddress, type, descriptorAddress)
         {
         }
 

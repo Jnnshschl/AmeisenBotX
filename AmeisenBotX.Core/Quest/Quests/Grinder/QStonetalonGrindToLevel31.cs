@@ -7,13 +7,13 @@ namespace AmeisenBotX.Core.Quest.Quests.Grinder
 {
     internal class QStonetalonGrindToLevel31 : GrindingBotQuest
     {
-        public QStonetalonGrindToLevel31(WowInterface wowInterface)
+        public QStonetalonGrindToLevel31(AmeisenBotInterfaces bot)
             : base("StonetalonGrindToLevel31",
                 new List<IQuestObjective>()
                 {
                     new QuestObjectiveChain(new List<IQuestObjective>()
                     {
-                        new GrindingObjective(wowInterface, 31, new List<List<Vector3>> {
+                        new GrindingObjective(bot, 31, new List<List<Vector3>> {
                             new()
                             {
                                 new Vector3(652.70f, 1937.45f, -5.25f),

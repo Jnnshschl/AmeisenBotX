@@ -7,15 +7,15 @@ namespace AmeisenBotX.Core.Quest.Quests.TheBarrens.Crossroads
 {
     internal class QHarpyRaiders : BotQuest
     {
-        public QHarpyRaiders(WowInterface wowInterface)
-            : base(wowInterface, 867, "Harpy Raiders", 12, 1,
-                () => (wowInterface.Objects.GetClosestWowUnitByNpcId(wowInterface.Player.Position, new List<int> { 3449 }), new Vector3(-474.89f, -2607.74f, 127.89f)),
-                () => (wowInterface.Objects.GetClosestWowUnitByNpcId(wowInterface.Player.Position, new List<int> { 3449 }), new Vector3(-474.89f, -2607.74f, 127.89f)),
+        public QHarpyRaiders(AmeisenBotInterfaces bot)
+            : base(bot, 867, "Harpy Raiders", 12, 1,
+                () => (bot.Objects.GetClosestWowUnitByNpcId(bot.Player.Position, new List<int> { 3449 }), new Vector3(-474.89f, -2607.74f, 127.89f)),
+                () => (bot.Objects.GetClosestWowUnitByNpcId(bot.Player.Position, new List<int> { 3449 }), new Vector3(-474.89f, -2607.74f, 127.89f)),
                 new List<IQuestObjective>()
                 {
                     new QuestObjectiveChain(new List<IQuestObjective>()
                     {
-                        new KillAndLootQuestObjective(wowInterface, new List<int> { 3276,3277,3279,3280,3278,3452 }, 8, 5064, new List<List<Vector3>> {
+                        new KillAndLootQuestObjective(bot, new List<int> { 3276,3277,3279,3280,3278,3452 }, 8, 5064, new List<List<Vector3>> {
                             new()
                             {
                                 new Vector3(550.50f, -1152.00f, 91.79f),

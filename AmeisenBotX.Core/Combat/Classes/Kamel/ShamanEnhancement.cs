@@ -58,9 +58,9 @@ namespace AmeisenBotX.Core.Combat.Classes.Kamel
         //Stunns|Interrupting
         private const string windShearSpell = "Wind Shear";
 
-        public ShamanEnhancement(WowInterface wowInterface) : base()
+        public ShamanEnhancement(AmeisenBotInterfaces bot) : base()
         {
-            WowInterface = wowInterface;
+            Bot = bot;
 
             //Shield
             spellCoolDown.Add(lightningShieldSpell, DateTime.Now);
@@ -182,7 +182,7 @@ namespace AmeisenBotX.Core.Combat.Classes.Kamel
 
         private void Shield()
         {
-            if (!WowInterface.Player.HasBuffByName("Lightning Shield") && CustomCastSpellMana(lightningShieldSpell))
+            if (!Bot.Player.Auras.Any(e => Bot.Db.GetSpellName(e.SpellId) == "Lightning Shield") && CustomCastSpellMana(lightningShieldSpell))
             {
                 return;
             }
@@ -190,38 +190,38 @@ namespace AmeisenBotX.Core.Combat.Classes.Kamel
 
         private void StartAttack()
         {
-            if (WowInterface.Target.Guid != 0)
+            if (Bot.Wow.TargetGuid != 0)
             {
                 ChangeTargetToAttack();
 
-                if (WowInterface.Db.GetReaction(WowInterface.Player, WowInterface.Target) == WowUnitReaction.Friendly)
+                if (Bot.Db.GetReaction(Bot.Player, Bot.Target) == WowUnitReaction.Friendly)
                 {
-                    WowInterface.NewWowInterface.WowClearTarget();
+                    Bot.Wow.WowClearTarget();
                     return;
                 }
 
-                if (WowInterface.Player.IsInMeleeRange(WowInterface.Target))
+                if (Bot.Player.IsInMeleeRange(Bot.Target))
                 {
-                    if (!WowInterface.Player.IsAutoAttacking && AutoAttackEvent.Run())
+                    if (!Bot.Player.IsAutoAttacking && AutoAttackEvent.Run())
                     {
-                        WowInterface.NewWowInterface.LuaStartAutoAttack();
+                        Bot.Wow.LuaStartAutoAttack();
                     }
 
-                    if (WowInterface.Player.Auras.FirstOrDefault(e => e.Name == "Maelstrom Weapon")?.StackCount >= 5
-                    && ((WowInterface.Player.HealthPercentage >= 50 && CustomCastSpellMana(lightningBoltSpell)) || CustomCastSpellMana(healingWaveSpell)))
+                    if (Bot.Player.Auras.FirstOrDefault(e => Bot.Db.GetSpellName(e.SpellId) == "Maelstrom Weapon").StackCount >= 5
+                    && ((Bot.Player.HealthPercentage >= 50 && CustomCastSpellMana(lightningBoltSpell)) || CustomCastSpellMana(healingWaveSpell)))
                     {
                         return;
                     }
-                    if (WowInterface.Target.IsCasting && CustomCastSpellMana(windShearSpell))
+                    if (Bot.Target.IsCasting && CustomCastSpellMana(windShearSpell))
                     {
                         return;
                     }
                     if (PurgeEvent.Run() &&
-                        (WowInterface.Target.HasBuffByName("Mana Shield")
-                      || WowInterface.Target.HasBuffByName("Power Word: Shield")
-                      || WowInterface.Target.HasBuffByName("Renew")
-                      || WowInterface.Target.HasBuffByName("Riptide")
-                      || WowInterface.Target.HasBuffByName("Earth Shield")) && CustomCastSpellMana(purgeSpell))
+                        (Bot.Target.Auras.Any(e => Bot.Db.GetSpellName(e.SpellId) == "Mana Shield")
+                      || Bot.Target.Auras.Any(e => Bot.Db.GetSpellName(e.SpellId) == "Power Word: Shield")
+                      || Bot.Target.Auras.Any(e => Bot.Db.GetSpellName(e.SpellId) == "Renew")
+                      || Bot.Target.Auras.Any(e => Bot.Db.GetSpellName(e.SpellId) == "Riptide")
+                      || Bot.Target.Auras.Any(e => Bot.Db.GetSpellName(e.SpellId) == "Earth Shield")) && CustomCastSpellMana(purgeSpell))
                     {
                         return;
                     }
@@ -245,7 +245,7 @@ namespace AmeisenBotX.Core.Combat.Classes.Kamel
                     {
                         return;
                     }
-                    if (!WowInterface.Target.HasBuffByName("Flame Shock") && CustomCastSpellMana(flameShockSpell))
+                    if (!Bot.Target.Auras.Any(e => Bot.Db.GetSpellName(e.SpellId) == "Flame Shock") && CustomCastSpellMana(flameShockSpell))
                     {
                         return;
                     }

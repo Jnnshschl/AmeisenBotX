@@ -4,9 +4,9 @@
 
     public class CastSpellQuestObjective : IQuestObjective
     {
-        public CastSpellQuestObjective(WowInterface wowInterface, int spellId, CastSpellQuestObjectiveCondition condition)
+        public CastSpellQuestObjective(AmeisenBotInterfaces bot, int spellId, CastSpellQuestObjectiveCondition condition)
         {
-            WowInterface = wowInterface;
+            Bot = bot;
             SpellId = spellId;
             Condition = condition;
         }
@@ -19,15 +19,15 @@
 
         private int SpellId { get; }
 
-        private WowInterface WowInterface { get; }
+        private AmeisenBotInterfaces Bot { get; }
 
         public void Execute()
         {
-            if (Finished || WowInterface.Player.IsCasting) { return; }
+            if (Finished || Bot.Player.IsCasting) { return; }
 
-            WowInterface.MovementEngine.Reset();
-            WowInterface.NewWowInterface.WowStopClickToMove();
-            WowInterface.NewWowInterface.LuaCastSpellById(SpellId);
+            Bot.Movement.Reset();
+            Bot.Wow.WowStopClickToMove();
+            Bot.Wow.LuaCastSpellById(SpellId);
         }
     }
 }

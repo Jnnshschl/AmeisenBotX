@@ -14,19 +14,19 @@ namespace AmeisenBotX.Core.Fsm.States
 {
     public class StateIdle : BasicState
     {
-        public StateIdle(AmeisenBotFsm stateMachine, AmeisenBotConfig config, WowInterface wowInterface) : base(stateMachine, config, wowInterface)
+        public StateIdle(AmeisenBotFsm stateMachine, AmeisenBotConfig config, AmeisenBotInterfaces bot) : base(stateMachine, config, bot)
         {
             FirstStart = true;
             IdleActionManager = new IdleActionManager(config.IdleActionsMaxCooldown, config.IdleActionsMinCooldown, new List<IIdleAction>()
             {
-                new AuctionHouseIdleAction(wowInterface),
-                new CheckMailsIdleAction(wowInterface),
-                new FishingIdleAction(wowInterface),
-                new LookAroundIdleAction(wowInterface),
-                new LookAtGroupIdleAction(wowInterface),
-                new RandomEmoteIdleAction(wowInterface),
-                new SitByCampfireIdleAction(wowInterface),
-                new SitToChairIdleAction(wowInterface, stateMachine, Config.MinFollowDistance),
+                new AuctionHouseIdleAction(bot),
+                new CheckMailsIdleAction(bot),
+                new FishingIdleAction(bot),
+                new LookAroundIdleAction(bot),
+                new LookAtGroupIdleAction(bot),
+                new RandomEmoteIdleAction(bot),
+                new SitByCampfireIdleAction(bot),
+                new SitToChairIdleAction(bot, stateMachine, Config.MinFollowDistance),
             });
 
             BagSlotCheckEvent = new(TimeSpan.FromMilliseconds(5000));
@@ -61,30 +61,30 @@ namespace AmeisenBotX.Core.Fsm.States
 
         public override void Enter()
         {
-            if (WowInterface.Objects.IsWorldLoaded)
+            if (Bot.Objects.IsWorldLoaded)
             {
-                if (WowInterface.WowProcess != null && !WowInterface.WowProcess.HasExited && FirstStart)
+                if (Bot.Memory.Process != null && !Bot.Memory.Process.HasExited && FirstStart)
                 {
                     FirstStart = false;
 
-                    if (!WowInterface.EventHookManager.IsActive)
+                    if (!Bot.Events.IsActive)
                     {
-                        WowInterface.EventHookManager.Start();
+                        Bot.Events.Start();
                     }
 
-                    WowInterface.NewWowInterface.LuaDoString($"SetCVar(\"maxfps\", {Config.MaxFps});SetCVar(\"maxfpsbk\", {Config.MaxFps})");
-                    WowInterface.NewWowInterface.WowEnableClickToMove();
+                    Bot.Wow.LuaDoString($"SetCVar(\"maxfps\", {Config.MaxFps});SetCVar(\"maxfpsbk\", {Config.MaxFps})");
+                    Bot.Wow.WowEnableClickToMove();
                 }
 
                 if (RefreshCharacterEvent.Run())
                 {
-                    WowInterface.CharacterManager.UpdateAll();
+                    Bot.Character.UpdateAll();
                 }
 
-                if (WowInterface.Player != null)
+                if (Bot.Player != null)
                 {
                     // prevent endless running
-                    WowInterface.MovementEngine.SetMovementAction(MovementAction.Move, WowInterface.Player.Position);
+                    Bot.Movement.SetMovementAction(MovementAction.Move, Bot.Player.Position);
                 }
 
                 IdleActionManager.Reset();
@@ -93,12 +93,12 @@ namespace AmeisenBotX.Core.Fsm.States
 
         public override void Execute()
         {
-            // WowInterface.MovementEngine.SetMovementAction(MovementAction.Moving, new Vector3(-4918, -940, 501));
+            // Bot.MovementEngine.SetMovementAction(MovementAction.Moving, new Vector3(-4918, -940, 501));
             // return;
 
             // do we need to loot stuff
             if (LootCheckEvent.Run()
-                && WowInterface.CharacterManager.Inventory.FreeBagSlots > 0
+                && Bot.Character.Inventory.FreeBagSlots > 0
                 && StateMachine.GetNearLootableUnits().Any())
             {
                 StateMachine.SetState(BotState.Looting);
@@ -114,7 +114,7 @@ namespace AmeisenBotX.Core.Fsm.States
             }
 
             // we are on a battleground
-            if (WowInterface.XMemory.Read(WowInterface.OffsetList.BattlegroundStatus, out int bgStatus)
+            if (Bot.Memory.Read(Bot.Offsets.BattlegroundStatus, out int bgStatus)
                 && bgStatus == 3
                 && !Config.BattlegroundUsePartyMode)
             {
@@ -123,7 +123,7 @@ namespace AmeisenBotX.Core.Fsm.States
             }
 
             // we are in a dungeon
-            if (WowInterface.Objects.MapId.IsDungeonMap()
+            if (Bot.Objects.MapId.IsDungeonMap()
                 && !Config.DungeonUsePartyMode)
             {
                 StateMachine.SetState(BotState.Dungeon);
@@ -164,16 +164,16 @@ namespace AmeisenBotX.Core.Fsm.States
             }
 
             // do i need to follow someone
-            if ((!Config.Autopilot || WowInterface.Objects.MapId.IsDungeonMap()) && IsUnitToFollowThere(out _))
+            if ((!Config.Autopilot || Bot.Objects.MapId.IsDungeonMap()) && IsUnitToFollowThere(out _))
             {
                 StateMachine.SetState(BotState.Following);
                 return;
             }
 
             // do buffing etc...
-            if (WowInterface.CombatClass != null)
+            if (Bot.CombatClass != null)
             {
-                WowInterface.CombatClass.OutOfCombatExecute();
+                Bot.CombatClass.OutOfCombatExecute();
             }
 
             if (StateMachine.StateOverride != BotState.Idle
@@ -190,15 +190,15 @@ namespace AmeisenBotX.Core.Fsm.States
 
         public bool IsUnitToFollowThere(out WowUnit playerToFollow, bool ignoreRange = false)
         {
-            IEnumerable<WowPlayer> wowPlayers = WowInterface.Objects.WowObjects.OfType<WowPlayer>().Where(e => !e.IsDead);
+            IEnumerable<WowPlayer> wowPlayers = Bot.Objects.WowObjects.OfType<WowPlayer>().Where(e => !e.IsDead);
 
             if (wowPlayers.Any())
             {
                 WowUnit[] playersToTry =
                 {
-                    Config.FollowSpecificCharacter ? wowPlayers.FirstOrDefault(p => WowInterface.Db.GetUnitName(p, out string name) && name.Equals(Config.SpecificCharacterToFollow, StringComparison.OrdinalIgnoreCase)) : null,
-                    Config.FollowGroupLeader ? WowInterface.Objects.Partyleader : null,
-                    Config.FollowGroupMembers ? WowInterface.Objects.Partymembers.FirstOrDefault() : null
+                    Config.FollowSpecificCharacter ? wowPlayers.FirstOrDefault(p => Bot.Db.GetUnitName(p, out string name) && name.Equals(Config.SpecificCharacterToFollow, StringComparison.OrdinalIgnoreCase)) : null,
+                    Config.FollowGroupLeader ? Bot.Objects.Partyleader : null,
+                    Config.FollowGroupMembers ? Bot.Objects.Partymembers.FirstOrDefault() : null
                 };
 
                 for (int i = 0; i < playersToTry.Length; ++i)
@@ -217,25 +217,25 @@ namespace AmeisenBotX.Core.Fsm.States
 
         public override void Leave()
         {
-            WowInterface.CharacterManager.ItemSlotsToSkip.Clear();
+            Bot.Character.ItemSlotsToSkip.Clear();
         }
 
         private void CheckForBattlegroundInvites()
         {
-            if (WowInterface.XMemory.Read(WowInterface.OffsetList.BattlegroundStatus, out int bgStatus)
+            if (Bot.Memory.Read(Bot.Offsets.BattlegroundStatus, out int bgStatus)
                 && bgStatus == 2)
             {
-                WowInterface.NewWowInterface.LuaAcceptBattlegroundInvite();
+                Bot.Wow.LuaAcceptBattlegroundInvite();
             }
         }
 
         private bool HandleAutoQuestMode(WowUnit wowPlayer)
         {
-            WowUnit possibleQuestgiver = WowInterface.Objects.GetWowObjectByGuid<WowUnit>(wowPlayer.TargetGuid);
+            WowUnit possibleQuestgiver = Bot.Objects.GetWowObjectByGuid<WowUnit>(wowPlayer.TargetGuid);
 
             if (possibleQuestgiver != null && (possibleQuestgiver.IsQuestgiver || possibleQuestgiver.IsGossip))
             {
-                double distance = WowInterface.Player.Position.GetDistance(possibleQuestgiver.Position);
+                double distance = Bot.Player.Position.GetDistance(possibleQuestgiver.Position);
 
                 if (distance > 32.0)
                 {
@@ -244,19 +244,19 @@ namespace AmeisenBotX.Core.Fsm.States
 
                 if (distance > 4.0)
                 {
-                    WowInterface.MovementEngine.SetMovementAction(MovementAction.Move, possibleQuestgiver.Position);
+                    Bot.Movement.SetMovementAction(MovementAction.Move, possibleQuestgiver.Position);
                     return true;
                 }
                 else
                 {
                     if (QuestgiverRightClickEvent.Run())
                     {
-                        if (!BotMath.IsFacing(WowInterface.Player.Position, WowInterface.Player.Rotation, possibleQuestgiver.Position))
+                        if (!BotMath.IsFacing(Bot.Player.Position, Bot.Player.Rotation, possibleQuestgiver.Position))
                         {
-                            WowInterface.NewWowInterface.WowFacePosition(WowInterface.Player.BaseAddress, WowInterface.Player.Position, possibleQuestgiver.Position);
+                            Bot.Wow.WowFacePosition(Bot.Player.BaseAddress, Bot.Player.Position, possibleQuestgiver.Position);
                         }
 
-                        WowInterface.NewWowInterface.WowUnitRightClick(possibleQuestgiver.BaseAddress);
+                        Bot.Wow.WowUnitRightClick(possibleQuestgiver.BaseAddress);
                         return true;
                     }
                 }
@@ -276,7 +276,7 @@ namespace AmeisenBotX.Core.Fsm.States
                     pos += StateMachine.GetState<StateFollowing>().Offset;
                 }
 
-                double distance = pos.GetDistance(WowInterface.Player.Position);
+                double distance = pos.GetDistance(Bot.Player.Position);
 
                 if (distance > Config.MinFollowDistance && distance < Config.MaxFollowDistance)
                 {

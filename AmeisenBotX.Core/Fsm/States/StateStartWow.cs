@@ -3,6 +3,7 @@ using AmeisenBotX.Logging;
 using AmeisenBotX.Memory;
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.IO;
 using System.Linq;
 
@@ -10,7 +11,7 @@ namespace AmeisenBotX.Core.Fsm.States
 {
     public class StateStartWow : BasicState
     {
-        public StateStartWow(AmeisenBotFsm stateMachine, AmeisenBotConfig config, WowInterface wowInterface) : base(stateMachine, config, wowInterface)
+        public StateStartWow(AmeisenBotFsm stateMachine, AmeisenBotConfig config, AmeisenBotInterfaces bot) : base(stateMachine, config, bot)
         {
         }
 
@@ -32,19 +33,19 @@ namespace AmeisenBotX.Core.Fsm.States
         {
             if (!StateMachine.ShouldExit && File.Exists(Config.PathToWowExe))
             {
-                if (WowInterface.WowProcess == null || WowInterface.WowProcess.HasExited)
+                if (Bot.Memory.Process == null || Bot.Memory.Process.HasExited)
                 {
                     AmeisenLogger.I.Log("StartWow", "Starting WoW Process");
-                    WowInterface.WowProcess = XMemory.StartProcessNoActivate($"\"{Config.PathToWowExe}\" -windowed -d3d9", out IntPtr processHandle, out IntPtr mainThreadHandle);
+                    Process p = XMemory.StartProcessNoActivate($"\"{Config.PathToWowExe}\" -windowed -d3d9", out IntPtr processHandle, out IntPtr mainThreadHandle);
 
                     AmeisenLogger.I.Log("StartWow", "Waiting for input idle");
-                    WowInterface.WowProcess.WaitForInputIdle();
+                    p.WaitForInputIdle();
 
                     try
                     {
-                        AmeisenLogger.I.Log("StartWow", $"Attaching XMemory to {WowInterface.WowProcess.ProcessName}:{WowInterface.WowProcess.Id}");
+                        AmeisenLogger.I.Log("StartWow", $"Attaching XMemory to {p.ProcessName}:{p.Id}");
 
-                        if (WowInterface.XMemory.Init(WowInterface.WowProcess, processHandle, mainThreadHandle))
+                        if (Bot.Memory.Init(p, processHandle, mainThreadHandle))
                         {
                             try
                             {

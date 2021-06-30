@@ -8,9 +8,9 @@ namespace AmeisenBotX.Core.Combat.Classes.Kamel
 {
     internal class RogueAssassination : BasicKamelClass
     {
-        public RogueAssassination(WowInterface wowInterface) : base()
+        public RogueAssassination(AmeisenBotInterfaces bot) : base()
         {
-            WowInterface = wowInterface;
+            Bot = bot;
         }
 
         public override string Author => "Lukas";
@@ -85,21 +85,21 @@ namespace AmeisenBotX.Core.Combat.Classes.Kamel
 
         private void StartAttack()
         {
-            if (WowInterface.Target.Guid != 0)
+            if (Bot.Wow.TargetGuid != 0)
             {
                 ChangeTargetToAttack();
 
-                if (WowInterface.Db.GetReaction(WowInterface.Player, WowInterface.Target) == WowUnitReaction.Friendly)
+                if (Bot.Db.GetReaction(Bot.Player, Bot.Target) == WowUnitReaction.Friendly)
                 {
-                    WowInterface.NewWowInterface.WowClearTarget();
+                    Bot.Wow.WowClearTarget();
                     return;
                 }
 
-                if (WowInterface.Player.IsInMeleeRange(WowInterface.Target))
+                if (Bot.Player.IsInMeleeRange(Bot.Target))
                 {
-                    if (!WowInterface.Player.IsAutoAttacking && AutoAttackEvent.Run())
+                    if (!Bot.Player.IsAutoAttacking && AutoAttackEvent.Run())
                     {
-                        WowInterface.NewWowInterface.LuaStartAutoAttack();
+                        Bot.Wow.LuaStartAutoAttack();
                     }
                 }
             }

@@ -14,9 +14,9 @@ namespace AmeisenBotX.Core.Character.Inventory
         private readonly object queryLock = new();
         private Dictionary<WowEquipmentSlot, IWowItem> items;
 
-        public CharacterEquipment(WowInterface wowInterface)
+        public CharacterEquipment(AmeisenBotInterfaces bot)
         {
-            WowInterface = wowInterface;
+            Bot = bot;
 
             Items = new();
         }
@@ -42,17 +42,17 @@ namespace AmeisenBotX.Core.Character.Inventory
             }
         }
 
-        private WowInterface WowInterface { get; }
+        private AmeisenBotInterfaces Bot { get; }
 
         public bool HasEnchantment(WowEquipmentSlot slot, int enchantmentId)
         {
-            if (WowInterface.CharacterManager.Equipment.Items.ContainsKey(slot))
+            if (Bot.Character.Equipment.Items.ContainsKey(slot))
             {
                 int itemId = Items[slot].Id;
 
                 if (itemId > 0)
                 {
-                    WowItem item = WowInterface.Objects.WowObjects.OfType<WowItem>().FirstOrDefault(e => e.EntryId == itemId);
+                    WowItem item = Bot.Objects.WowObjects.OfType<WowItem>().FirstOrDefault(e => e.EntryId == itemId);
 
                     if (item != null && item.ItemEnchantments.Any(e => e.Id == enchantmentId))
                     {
@@ -66,7 +66,7 @@ namespace AmeisenBotX.Core.Character.Inventory
 
         public void Update()
         {
-            string resultJson = WowInterface.NewWowInterface.LuaGetEquipmentItems();
+            string resultJson = Bot.Wow.LuaGetEquipmentItems();
 
             if (string.IsNullOrWhiteSpace(resultJson))
             {

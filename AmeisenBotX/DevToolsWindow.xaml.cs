@@ -2,6 +2,7 @@
 using AmeisenBotX.Common.Utils;
 using AmeisenBotX.Core;
 using AmeisenBotX.Core.Data.Objects;
+using AmeisenBotX.Wow.Cache.Enums;
 using AmeisenBotX.Wow.Objects.Enums;
 using Newtonsoft.Json;
 using System;
@@ -30,12 +31,12 @@ namespace AmeisenBotX
 
         private void ButtonEventSubscribe_Click(object sender, RoutedEventArgs e)
         {
-            AmeisenBot.WowInterface.EventHookManager.Subscribe(textboxEventName.Text, OnWowEventFired);
+            AmeisenBot.Bot.Events.Subscribe(textboxEventName.Text, OnWowEventFired);
         }
 
         private void ButtonEventUnsubscribe_Click(object sender, RoutedEventArgs e)
         {
-            AmeisenBot.WowInterface.EventHookManager.Unsubscribe(textboxEventName.Text, OnWowEventFired);
+            AmeisenBot.Bot.Events.Unsubscribe(textboxEventName.Text, OnWowEventFired);
         }
 
         private void ButtonExit_Click(object sender, RoutedEventArgs e)
@@ -45,7 +46,7 @@ namespace AmeisenBotX
 
         private void ButtonLuaExecute_Click(object sender, RoutedEventArgs e)
         {
-            if (AmeisenBot.WowInterface.NewWowInterface.WowExecuteLuaAndRead(BotUtils.ObfuscateLua(textboxLuaCode.Text), out string result))
+            if (AmeisenBot.Bot.Wow.WowExecuteLuaAndRead(BotUtils.ObfuscateLua(textboxLuaCode.Text), out string result))
             {
                 textboxLuaResult.Text = result;
             }
@@ -57,7 +58,7 @@ namespace AmeisenBotX
 
         private void ButtonLuaExecute_Copy_Click(object sender, RoutedEventArgs e)
         {
-            AmeisenBot.WowInterface.NewWowInterface.LuaDoString(textboxLuaCode.Text);
+            AmeisenBot.Bot.Wow.LuaDoString(textboxLuaCode.Text);
         }
 
         private void ButtonRefresh_Click(object sender, RoutedEventArgs e)
@@ -79,7 +80,7 @@ namespace AmeisenBotX
             {
                 listviewCachePoi.Items.Clear();
 
-                foreach (KeyValuePair<WowMapId, Dictionary<PoiType, List<Vector3>>> mapIdPair in AmeisenBot.WowInterface.Db.AllPointsOfInterest().OrderBy(e => e.Key))
+                foreach (KeyValuePair<WowMapId, Dictionary<PoiType, List<Vector3>>> mapIdPair in AmeisenBot.Bot.Db.AllPointsOfInterest().OrderBy(e => e.Key))
                 {
                     foreach (KeyValuePair<PoiType, List<Vector3>> typePair in mapIdPair.Value.OrderBy(e => e.Key))
                     {
@@ -91,7 +92,7 @@ namespace AmeisenBotX
             {
                 listviewCacheOre.Items.Clear();
 
-                foreach (KeyValuePair<WowMapId, Dictionary<WowOreId, List<Vector3>>> mapIdPair in AmeisenBot.WowInterface.Db.AllOreNodes().OrderBy(e => e.Key))
+                foreach (KeyValuePair<WowMapId, Dictionary<WowOreId, List<Vector3>>> mapIdPair in AmeisenBot.Bot.Db.AllOreNodes().OrderBy(e => e.Key))
                 {
                     foreach (KeyValuePair<WowOreId, List<Vector3>> typePair in mapIdPair.Value.OrderBy(e => e.Key))
                     {
@@ -103,7 +104,7 @@ namespace AmeisenBotX
             {
                 listviewCacheHerb.Items.Clear();
 
-                foreach (KeyValuePair<WowMapId, Dictionary<WowHerbId, List<Vector3>>> mapIdPair in AmeisenBot.WowInterface.Db.AllHerbNodes().OrderBy(e => e.Key))
+                foreach (KeyValuePair<WowMapId, Dictionary<WowHerbId, List<Vector3>>> mapIdPair in AmeisenBot.Bot.Db.AllHerbNodes().OrderBy(e => e.Key))
                 {
                     foreach (KeyValuePair<WowHerbId, List<Vector3>> typePair in mapIdPair.Value.OrderBy(e => e.Key))
                     {
@@ -115,7 +116,7 @@ namespace AmeisenBotX
             {
                 listviewCacheNames.Items.Clear();
 
-                foreach (KeyValuePair<ulong, string> x in AmeisenBot.WowInterface.Db.AllNames().OrderBy(e => e.Value))
+                foreach (KeyValuePair<ulong, string> x in AmeisenBot.Bot.Db.AllNames().OrderBy(e => e.Value))
                 {
                     listviewCacheNames.Items.Add(x);
                 }
@@ -124,7 +125,7 @@ namespace AmeisenBotX
             {
                 listviewCacheReactions.Items.Clear();
 
-                foreach (KeyValuePair<int, Dictionary<int, WowUnitReaction>> mapIdPair in AmeisenBot.WowInterface.Db.AllReactions().OrderBy(e => e.Key))
+                foreach (KeyValuePair<int, Dictionary<int, WowUnitReaction>> mapIdPair in AmeisenBot.Bot.Db.AllReactions().OrderBy(e => e.Key))
                 {
                     foreach (KeyValuePair<int, WowUnitReaction> typePair in mapIdPair.Value.OrderBy(e => e.Key))
                     {
@@ -136,7 +137,7 @@ namespace AmeisenBotX
             {
                 listviewCacheSpellnames.Items.Clear();
 
-                foreach (KeyValuePair<int, string> x in AmeisenBot.WowInterface.Db.AllSpellNames().OrderBy(e => e.Value))
+                foreach (KeyValuePair<int, string> x in AmeisenBot.Bot.Db.AllSpellNames().OrderBy(e => e.Value))
                 {
                     listviewCacheSpellnames.Items.Add(x);
                 }
@@ -147,14 +148,14 @@ namespace AmeisenBotX
 
                 List<(WowObject, double)> wowObjects = new();
 
-                foreach (WowObject x in AmeisenBot.WowInterface.Objects.WowObjects)
+                foreach (WowObject x in AmeisenBot.Bot.Objects.WowObjects)
                 {
                     if (x == null)
                     {
                         break;
                     }
 
-                    wowObjects.Add((x, Math.Round(x.Position.GetDistance(AmeisenBot.WowInterface.Player.Position), 2)));
+                    wowObjects.Add((x, Math.Round(x.Position.GetDistance(AmeisenBot.Bot.Player.Position), 2)));
                 }
 
                 foreach ((WowObject, double) x in wowObjects.OrderBy(e => e.Item2))

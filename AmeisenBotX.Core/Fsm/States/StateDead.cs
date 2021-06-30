@@ -5,7 +5,7 @@ namespace AmeisenBotX.Core.Fsm.States
 {
     public class StateDead : BasicState
     {
-        public StateDead(AmeisenBotFsm stateMachine, AmeisenBotConfig config, WowInterface wowInterface) : base(stateMachine, config, wowInterface)
+        public StateDead(AmeisenBotFsm stateMachine, AmeisenBotConfig config, AmeisenBotInterfaces bot) : base(stateMachine, config, bot)
         {
         }
 
@@ -13,35 +13,35 @@ namespace AmeisenBotX.Core.Fsm.States
 
         public override void Enter()
         {
-            WowInterface.MovementEngine.StopMovement();
+            Bot.Movement.StopMovement();
         }
 
         public override void Execute()
         {
-            if (WowInterface.Player.IsDead)
+            if (Bot.Player.IsDead)
             {
                 if (!SetMapAndPosition) // prevent re-setting the stuff in loading screen
                 {
                     SetMapAndPosition = true;
-                    StateMachine.LastDiedMap = WowInterface.Objects.MapId;
+                    StateMachine.LastDiedMap = Bot.Objects.MapId;
 
                     if (StateMachine.LastDiedMap.IsDungeonMap())
                     {
                         // when we died in a dungeon, we need to return to its portal
-                        StateMachine.LastDiedPosition = WowInterface.DungeonEngine.Profile.WorldEntry;
+                        StateMachine.LastDiedPosition = Bot.Dungeon.Profile.WorldEntry;
                     }
                     else
                     {
-                        StateMachine.LastDiedPosition = WowInterface.Player.Position;
+                        StateMachine.LastDiedPosition = Bot.Player.Position;
                     }
                 }
 
-                if (Config.ReleaseSpirit || WowInterface.Objects.MapId.IsBattlegroundMap())
+                if (Config.ReleaseSpirit || Bot.Objects.MapId.IsBattlegroundMap())
                 {
-                    WowInterface.NewWowInterface.LuaRepopMe();
+                    Bot.Wow.LuaRepopMe();
                 }
             }
-            else if (WowInterface.Player.IsGhost)
+            else if (Bot.Player.IsGhost)
             {
                 StateMachine.SetState(BotState.Ghost);
             }

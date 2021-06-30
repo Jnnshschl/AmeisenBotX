@@ -11,9 +11,9 @@ namespace AmeisenBotX.Core.Battleground.KamelBG
 {
     internal class StrandOfTheAncients : IBattlegroundEngine
     {
-        public StrandOfTheAncients(WowInterface wowInterface)
+        public StrandOfTheAncients(AmeisenBotInterfaces bot)
         {
-            WowInterface = wowInterface;
+            Bot = bot;
 
             CombatEvent = new(TimeSpan.FromSeconds(2));
         }
@@ -29,27 +29,27 @@ namespace AmeisenBotX.Core.Battleground.KamelBG
             new(1403, 69, 30)
         };
 
-        public WowInterface WowInterface { get; }
+        public AmeisenBotInterfaces Bot { get; }
 
         private TimegatedEvent CombatEvent { get; }
 
         public void Combat()
         {
-            WowPlayer weakestPlayer = WowInterface.Objects.GetNearEnemies<WowPlayer>(WowInterface.Db.GetReaction, WowInterface.Player.Position, 30.0f).OrderBy(e => e.Health).FirstOrDefault();
+            WowPlayer weakestPlayer = Bot.Objects.GetNearEnemies<WowPlayer>(Bot.Db.GetReaction, Bot.Player.Position, 30.0f).OrderBy(e => e.Health).FirstOrDefault();
 
             if (weakestPlayer != null)
             {
-                double distance = weakestPlayer.Position.GetDistance(WowInterface.Player.Position);
-                double threshold = WowInterface.CombatClass.IsMelee ? 3.0 : 28.0;
+                double distance = weakestPlayer.Position.GetDistance(Bot.Player.Position);
+                double threshold = Bot.CombatClass.IsMelee ? 3.0 : 28.0;
 
                 if (distance > threshold)
                 {
-                    WowInterface.MovementEngine.SetMovementAction(MovementAction.Move, weakestPlayer.Position);
+                    Bot.Movement.SetMovementAction(MovementAction.Move, weakestPlayer.Position);
                 }
                 else if (CombatEvent.Run())
                 {
-                    WowInterface.Globals.ForceCombat = true;
-                    WowInterface.NewWowInterface.WowTargetGuid(weakestPlayer.Guid);
+                    Bot.Globals.ForceCombat = true;
+                    Bot.Wow.WowTargetGuid(weakestPlayer.Guid);
                 }
             }
             else
@@ -65,31 +65,31 @@ namespace AmeisenBotX.Core.Battleground.KamelBG
         {
             Combat();
 
-            if (WowInterface.Objects.Vehicle == null)
+            if (Bot.Objects.Vehicle == null)
             {
-                WowGameobject VehicleNode = WowInterface.Objects.WowObjects
+                WowGameobject VehicleNode = Bot.Objects.WowObjects
                     .OfType<WowGameobject>()
                     .Where(x => Enum.IsDefined(typeof(Vehicle), x.DisplayId)
-                            && x.Position.GetDistance(WowInterface.Player.Position) < 20)
-                    .OrderBy(x => x.Position.GetDistance(WowInterface.Player.Position))
+                            && x.Position.GetDistance(Bot.Player.Position) < 20)
+                    .OrderBy(x => x.Position.GetDistance(Bot.Player.Position))
                     .FirstOrDefault();
 
                 if (VehicleNode != null)
                 {
-                    WowInterface.MovementEngine.SetMovementAction(MovementAction.Move, VehicleNode.Position);
+                    Bot.Movement.SetMovementAction(MovementAction.Move, VehicleNode.Position);
 
-                    if (WowInterface.Player.Position.GetDistance(VehicleNode.Position) <= 4)
+                    if (Bot.Player.Position.GetDistance(VehicleNode.Position) <= 4)
                     {
-                        WowInterface.MovementEngine.StopMovement();
+                        Bot.Movement.StopMovement();
 
-                        WowInterface.NewWowInterface.WowObjectRightClick(VehicleNode.BaseAddress);
+                        Bot.Wow.WowObjectRightClick(VehicleNode.BaseAddress);
                     }
                 }
             }
             else
             {
                 Vector3 currentNode = PathRight[0];
-                WowInterface.MovementEngine.SetMovementAction(MovementAction.Move, currentNode);
+                Bot.Movement.SetMovementAction(MovementAction.Move, currentNode);
             }
         }
 

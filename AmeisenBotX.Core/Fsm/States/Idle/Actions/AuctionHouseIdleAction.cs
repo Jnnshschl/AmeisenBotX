@@ -1,6 +1,7 @@
 ﻿using AmeisenBotX.Common.Math;
 using AmeisenBotX.Core.Data.Objects;
 using AmeisenBotX.Core.Movement.Enums;
+using AmeisenBotX.Wow.Cache.Enums;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -9,9 +10,9 @@ namespace AmeisenBotX.Core.Fsm.States.Idle.Actions
 {
     public class AuctionHouseIdleAction : IIdleAction
     {
-        public AuctionHouseIdleAction(WowInterface wowInterface)
+        public AuctionHouseIdleAction(AmeisenBotInterfaces bot)
         {
-            WowInterface = wowInterface;
+            Bot = bot;
             Rnd = new Random();
         }
 
@@ -37,17 +38,17 @@ namespace AmeisenBotX.Core.Fsm.States.Idle.Actions
 
         private bool TalkedToAuctioneer { get; set; }
 
-        private WowInterface WowInterface { get; }
+        private AmeisenBotInterfaces Bot { get; }
 
         public bool Enter()
         {
             TalkedToAuctioneer = false;
             AuctioneerTalkTime = default;
-            OriginPosition = WowInterface.Player.Position;
+            OriginPosition = Bot.Player.Position;
 
-            if (WowInterface.Db.TryGetPointsOfInterest(WowInterface.Objects.MapId, Data.Db.Enums.PoiType.Auctioneer, WowInterface.Player.Position, 256.0f, out IEnumerable<Vector3> auctioneers))
+            if (Bot.Db.TryGetPointsOfInterest(Bot.Objects.MapId, PoiType.Auctioneer, Bot.Player.Position, 256.0f, out IEnumerable<Vector3> auctioneers))
             {
-                CurrentAuctioneer = WowInterface.PathfindingHandler.GetRandomPointAround((int)WowInterface.Objects.MapId, auctioneers.OrderBy(e => e.GetDistance(WowInterface.Player.Position)).First(), 2.5f);
+                CurrentAuctioneer = Bot.PathfindingHandler.GetRandomPointAround((int)Bot.Objects.MapId, auctioneers.OrderBy(e => e.GetDistance(Bot.Player.Position)).First(), 2.5f);
                 return true;
             }
 
@@ -58,21 +59,21 @@ namespace AmeisenBotX.Core.Fsm.States.Idle.Actions
         {
             if (!TalkedToAuctioneer)
             {
-                if (CurrentAuctioneer.GetDistance(WowInterface.Player.Position) > 3.2f)
+                if (CurrentAuctioneer.GetDistance(Bot.Player.Position) > 3.2f)
                 {
-                    WowInterface.MovementEngine.SetMovementAction(MovementAction.Move, CurrentAuctioneer);
+                    Bot.Movement.SetMovementAction(MovementAction.Move, CurrentAuctioneer);
                 }
                 else
                 {
-                    WowInterface.MovementEngine.StopMovement();
+                    Bot.Movement.StopMovement();
 
-                    WowUnit auctioneer = WowInterface.Objects.WowObjects.OfType<WowUnit>()
+                    WowUnit auctioneer = Bot.Objects.WowObjects.OfType<WowUnit>()
                         .FirstOrDefault(e => e.IsAuctioneer && e.Position.GetDistance(CurrentAuctioneer) < 1.0f);
 
                     if (auctioneer != null)
                     {
-                        WowInterface.NewWowInterface.WowFacePosition(WowInterface.Player.BaseAddress, WowInterface.Player.Position, auctioneer.Position);
-                        WowInterface.NewWowInterface.WowUnitRightClick(auctioneer.BaseAddress);
+                        Bot.Wow.WowFacePosition(Bot.Player.BaseAddress, Bot.Player.Position, auctioneer.Position);
+                        Bot.Wow.WowUnitRightClick(auctioneer.BaseAddress);
                     }
 
                     TalkedToAuctioneer = true;
@@ -83,11 +84,11 @@ namespace AmeisenBotX.Core.Fsm.States.Idle.Actions
             {
                 if (CurrentAuctioneer.GetDistance(OriginPosition) > 8.0f)
                 {
-                    WowInterface.MovementEngine.SetMovementAction(MovementAction.Move, OriginPosition);
+                    Bot.Movement.SetMovementAction(MovementAction.Move, OriginPosition);
                 }
                 else
                 {
-                    WowInterface.MovementEngine.StopMovement();
+                    Bot.Movement.StopMovement();
                     ReturnedToOrigin = true;
                 }
             }

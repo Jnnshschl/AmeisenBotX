@@ -15,26 +15,26 @@ namespace AmeisenBotX.Core.Combat.Classes.Jannis
 {
     public class HunterMarksmanship : BasicCombatClass
     {
-        public HunterMarksmanship(WowInterface wowInterface, AmeisenBotFsm stateMachine) : base(wowInterface, stateMachine)
+        public HunterMarksmanship(AmeisenBotInterfaces bot, AmeisenBotFsm stateMachine) : base(bot, stateMachine)
         {
             PetManager = new PetManager
             (
-                WowInterface,
+                Bot,
                 TimeSpan.FromSeconds(15),
                 () => TryCastSpell(mendPetSpell, 0, true),
                 () => TryCastSpell(callPetSpell, 0),
                 () => TryCastSpell(revivePetSpell, 0)
             );
 
-            MyAuraManager.Jobs.Add(new KeepBestActiveAuraJob(new List<(string, Func<bool>)>()
+            MyAuraManager.Jobs.Add(new KeepBestActiveAuraJob(bot.Db, new List<(string, Func<bool>)>()
             {
-                (aspectOfTheViperSpell, () => WowInterface.Player.ManaPercentage < 25.0 && TryCastSpell(aspectOfTheViperSpell, 0, true)),
-                (aspectOfTheDragonhawkSpell, () => (!wowInterface.CharacterManager.SpellBook.IsSpellKnown(aspectOfTheViperSpell) || WowInterface.Player.ManaPercentage > 80.0) && TryCastSpell(aspectOfTheDragonhawkSpell, 0, true)),
+                (aspectOfTheViperSpell, () => Bot.Player.ManaPercentage < 25.0 && TryCastSpell(aspectOfTheViperSpell, 0, true)),
+                (aspectOfTheDragonhawkSpell, () => (!bot.Character.SpellBook.IsSpellKnown(aspectOfTheViperSpell) || Bot.Player.ManaPercentage > 80.0) && TryCastSpell(aspectOfTheDragonhawkSpell, 0, true)),
                 (aspectOfTheHawkSpell, () => TryCastSpell(aspectOfTheHawkSpell, 0, true))
             }));
 
-            TargetAuraManager.Jobs.Add(new KeepActiveAuraJob(huntersMarkSpell, () => TryCastSpell(huntersMarkSpell, WowInterface.Target.Guid, true)));
-            TargetAuraManager.Jobs.Add(new KeepActiveAuraJob(serpentStingSpell, () => TryCastSpell(serpentStingSpell, WowInterface.Target.Guid, true)));
+            TargetAuraManager.Jobs.Add(new KeepActiveAuraJob(bot.Db, huntersMarkSpell, () => TryCastSpell(huntersMarkSpell, Bot.Wow.TargetGuid, true)));
+            TargetAuraManager.Jobs.Add(new KeepActiveAuraJob(bot.Db, serpentStingSpell, () => TryCastSpell(serpentStingSpell, Bot.Wow.TargetGuid, true)));
 
             InterruptManager.InterruptSpells = new()
             {
@@ -113,20 +113,20 @@ namespace AmeisenBotX.Core.Combat.Classes.Jannis
             {
                 if (PetManager.Tick()) { return; }
 
-                WowUnit target = (WowUnit)WowInterface.Objects.WowObjects.FirstOrDefault(e => e != null && e.Guid == WowInterface.Target.Guid);
+                WowUnit target = (WowUnit)Bot.Objects.WowObjects.FirstOrDefault(e => e != null && e.Guid == Bot.Wow.TargetGuid);
 
                 if (target != null)
                 {
-                    double distanceToTarget = target.Position.GetDistance(WowInterface.Player.Position);
+                    double distanceToTarget = target.Position.GetDistance(Bot.Player.Position);
 
                     // make some distance
-                    if ((WowInterface.Target.Type == WowObjectType.Player && WowInterface.Target.Guid != 0 && distanceToTarget < 10.0)
-                        || (WowInterface.Target.Type == WowObjectType.Unit && WowInterface.Target.Guid != 0 && distanceToTarget < 3.0))
+                    if ((Bot.Target.Type == WowObjectType.Player && Bot.Wow.TargetGuid != 0 && distanceToTarget < 10.0)
+                        || (Bot.Target.Type == WowObjectType.Unit && Bot.Wow.TargetGuid != 0 && distanceToTarget < 3.0))
                     {
-                        WowInterface.MovementEngine.SetMovementAction(MovementAction.Flee, WowInterface.Target.Position, WowInterface.Target.Rotation);
+                        Bot.Movement.SetMovementAction(MovementAction.Flee, Bot.Target.Position, Bot.Target.Rotation);
                     }
 
-                    if (WowInterface.Player.HealthPercentage < 15
+                    if (Bot.Player.HealthPercentage < 15
                         && TryCastSpell(feignDeathSpell, 0))
                     {
                         return;
@@ -148,14 +148,14 @@ namespace AmeisenBotX.Core.Combat.Classes.Jannis
                             return;
                         }
 
-                        if (WowInterface.Player.HealthPercentage < 30
+                        if (Bot.Player.HealthPercentage < 30
                             && TryCastSpell(deterrenceSpell, 0, true))
                         {
                             return;
                         }
 
-                        if (TryCastSpell(raptorStrikeSpell, WowInterface.Target.Guid, true)
-                            || TryCastSpell(mongooseBiteSpell, WowInterface.Target.Guid, true))
+                        if (TryCastSpell(raptorStrikeSpell, Bot.Wow.TargetGuid, true)
+                            || TryCastSpell(mongooseBiteSpell, Bot.Wow.TargetGuid, true))
                         {
                             return;
                         }
@@ -170,25 +170,25 @@ namespace AmeisenBotX.Core.Combat.Classes.Jannis
                         }
 
                         if (target.HealthPercentage < 20
-                            && TryCastSpell(killShotSpell, WowInterface.Target.Guid, true))
+                            && TryCastSpell(killShotSpell, Bot.Wow.TargetGuid, true))
                         {
                             return;
                         }
 
-                        TryCastSpell(killCommandSpell, WowInterface.Target.Guid, true);
-                        TryCastSpell(rapidFireSpell, WowInterface.Target.Guid);
+                        TryCastSpell(killCommandSpell, Bot.Wow.TargetGuid, true);
+                        TryCastSpell(rapidFireSpell, Bot.Wow.TargetGuid);
 
-                        if (WowInterface.Objects.GetNearEnemies<WowUnit>(WowInterface.Db.GetReaction, WowInterface.Target.Position, 16.0f).Count() > 2
-                            && TryCastSpell(multiShotSpell, WowInterface.Target.Guid, true))
+                        if (Bot.Objects.GetNearEnemies<WowUnit>(Bot.Db.GetReaction, Bot.Target.Position, 16.0f).Count() > 2
+                            && TryCastSpell(multiShotSpell, Bot.Wow.TargetGuid, true))
                         {
                             return;
                         }
 
-                        if ((WowInterface.Objects.WowObjects.OfType<WowUnit>().Where(e => target.Position.GetDistance(e.Position) < 16).Count() > 2 && TryCastSpell(multiShotSpell, WowInterface.Target.Guid, true))
-                            || TryCastSpell(chimeraShotSpell, WowInterface.Target.Guid, true)
-                            || TryCastSpell(aimedShotSpell, WowInterface.Target.Guid, true)
-                            || TryCastSpell(arcaneShotSpell, WowInterface.Target.Guid, true)
-                            || TryCastSpell(steadyShotSpell, WowInterface.Target.Guid, true))
+                        if ((Bot.Objects.WowObjects.OfType<WowUnit>().Where(e => target.Position.GetDistance(e.Position) < 16).Count() > 2 && TryCastSpell(multiShotSpell, Bot.Wow.TargetGuid, true))
+                            || TryCastSpell(chimeraShotSpell, Bot.Wow.TargetGuid, true)
+                            || TryCastSpell(aimedShotSpell, Bot.Wow.TargetGuid, true)
+                            || TryCastSpell(arcaneShotSpell, Bot.Wow.TargetGuid, true)
+                            || TryCastSpell(steadyShotSpell, Bot.Wow.TargetGuid, true))
                         {
                             return;
                         }

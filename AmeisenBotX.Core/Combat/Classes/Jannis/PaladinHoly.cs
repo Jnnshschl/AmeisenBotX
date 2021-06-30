@@ -13,12 +13,12 @@ namespace AmeisenBotX.Core.Combat.Classes.Jannis
 {
     public class PaladinHoly : BasicCombatClass
     {
-        public PaladinHoly(WowInterface wowInterface, AmeisenBotFsm stateMachine) : base(wowInterface, stateMachine)
+        public PaladinHoly(AmeisenBotInterfaces bot, AmeisenBotFsm stateMachine) : base(bot, stateMachine)
         {
-            MyAuraManager.Jobs.Add(new KeepActiveAuraJob(blessingOfWisdomSpell, () => TryCastSpell(blessingOfWisdomSpell, WowInterface.Player.Guid, true)));
-            MyAuraManager.Jobs.Add(new KeepActiveAuraJob(devotionAuraSpell, () => TryCastSpell(devotionAuraSpell, WowInterface.Player.Guid, true)));
-            MyAuraManager.Jobs.Add(new KeepActiveAuraJob(sealOfWisdomSpell, () => WowInterface.CharacterManager.SpellBook.IsSpellKnown(sealOfWisdomSpell) && TryCastSpell(sealOfWisdomSpell, WowInterface.Player.Guid, true)));
-            MyAuraManager.Jobs.Add(new KeepActiveAuraJob(sealOfVengeanceSpell, () => !WowInterface.CharacterManager.SpellBook.IsSpellKnown(sealOfWisdomSpell) && TryCastSpell(sealOfVengeanceSpell, WowInterface.Player.Guid, true)));
+            MyAuraManager.Jobs.Add(new KeepActiveAuraJob(bot.Db, blessingOfWisdomSpell, () => TryCastSpell(blessingOfWisdomSpell, Bot.Wow.PlayerGuid, true)));
+            MyAuraManager.Jobs.Add(new KeepActiveAuraJob(bot.Db, devotionAuraSpell, () => TryCastSpell(devotionAuraSpell, Bot.Wow.PlayerGuid, true)));
+            MyAuraManager.Jobs.Add(new KeepActiveAuraJob(bot.Db, sealOfWisdomSpell, () => Bot.Character.SpellBook.IsSpellKnown(sealOfWisdomSpell) && TryCastSpell(sealOfWisdomSpell, Bot.Wow.PlayerGuid, true)));
+            MyAuraManager.Jobs.Add(new KeepActiveAuraJob(bot.Db, sealOfVengeanceSpell, () => !Bot.Character.SpellBook.IsSpellKnown(sealOfWisdomSpell) && TryCastSpell(sealOfVengeanceSpell, Bot.Wow.PlayerGuid, true)));
 
             SpellUsageHealDict = new Dictionary<int, string>()
             {
@@ -103,7 +103,7 @@ namespace AmeisenBotX.Core.Combat.Classes.Jannis
         {
             base.Execute();
 
-            if (WowInterface.Objects.Partymembers.Any(e => e.Guid != WowInterface.Player.Guid) || WowInterface.Player.HealthPercentage < 65.0)
+            if (Bot.Objects.Partymembers.Any(e => e.Guid != Bot.Wow.PlayerGuid) || Bot.Player.HealthPercentage < 65.0)
             {
                 if (NeedToHealSomeone())
                 {
@@ -112,27 +112,27 @@ namespace AmeisenBotX.Core.Combat.Classes.Jannis
             }
             else if (SelectTarget(TargetProviderDps))
             {
-                if ((WowInterface.Player.HasBuffByName(sealOfVengeanceSpell) || WowInterface.Player.HasBuffByName(sealOfWisdomSpell))
-                    && TryCastSpell(judgementOfLightSpell, WowInterface.Target.Guid, true))
+                if ((Bot.Player.Auras.Any(e => Bot.Db.GetSpellName(e.SpellId) == sealOfVengeanceSpell) || Bot.Player.Auras.Any(e => Bot.Db.GetSpellName(e.SpellId) == sealOfWisdomSpell))
+                    && TryCastSpell(judgementOfLightSpell, Bot.Wow.TargetGuid, true))
                 {
                     return;
                 }
 
-                if (TryCastSpell(exorcismSpell, WowInterface.Target.Guid, true))
+                if (TryCastSpell(exorcismSpell, Bot.Wow.TargetGuid, true))
                 {
                     return;
                 }
 
-                if (!WowInterface.Player.IsAutoAttacking
-                    && WowInterface.Target.Position.GetDistance(WowInterface.Player.Position) < 3.5
+                if (!Bot.Player.IsAutoAttacking
+                    && Bot.Target.Position.GetDistance(Bot.Player.Position) < 3.5
                     && EventAutoAttack.Run())
                 {
-                    WowInterface.NewWowInterface.LuaStartAutoAttack();
+                    Bot.Wow.LuaStartAutoAttack();
                     return;
                 }
                 else
                 {
-                    WowInterface.MovementEngine.SetMovementAction(MovementAction.Move, WowInterface.Target.Position);
+                    Bot.Movement.SetMovementAction(MovementAction.Move, Bot.Target.Position);
                     return;
                 }
             }
@@ -152,7 +152,7 @@ namespace AmeisenBotX.Core.Combat.Classes.Jannis
         {
             if (TargetProviderHeal.Get(out IEnumerable<WowUnit> unitsToHeal))
             {
-                WowUnit targetUnit = unitsToHeal.FirstOrDefault(e => !e.HasBuffByName(beaconOfLightSpell));
+                WowUnit targetUnit = unitsToHeal.FirstOrDefault(e => !e.Auras.Any(e => Bot.Db.GetSpellName(e.SpellId) == beaconOfLightSpell));
 
                 if (targetUnit == null)
                 {
@@ -170,7 +170,7 @@ namespace AmeisenBotX.Core.Combat.Classes.Jannis
                     return true;
                 }
 
-                if (unitsToHeal.Count(e => !e.HasBuffByName(beaconOfLightSpell)) > 1
+                if (unitsToHeal.Count(e => !e.Auras.Any(e => Bot.Db.GetSpellName(e.SpellId) == beaconOfLightSpell)) > 1
                     && TryCastSpell(beaconOfLightSpell, targetUnit.Guid, true))
                 {
                     return true;
@@ -184,14 +184,14 @@ namespace AmeisenBotX.Core.Combat.Classes.Jannis
                 //     return true;
                 // }
 
-                if (WowInterface.Player.ManaPercentage < 50
-                   && WowInterface.Player.ManaPercentage > 20
+                if (Bot.Player.ManaPercentage < 50
+                   && Bot.Player.ManaPercentage > 20
                    && TryCastSpell(divineIlluminationSpell, 0, true))
                 {
                     return true;
                 }
 
-                if (WowInterface.Player.ManaPercentage < 60
+                if (Bot.Player.ManaPercentage < 60
                     && TryCastSpell(divinePleaSpell, 0, true))
                 {
                     return true;

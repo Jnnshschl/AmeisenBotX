@@ -7,13 +7,13 @@ namespace AmeisenBotX.Core.Quest.Quests.Grinder
 {
     internal class QTanarisGrindToLevel49 : GrindingBotQuest
     {
-        public QTanarisGrindToLevel49(WowInterface wowInterface)
+        public QTanarisGrindToLevel49(AmeisenBotInterfaces bot)
             : base("TanarisGrindToLevel49",
                 new List<IQuestObjective>()
                 {
                     new QuestObjectiveChain(new List<IQuestObjective>()
                     {
-                        new GrindingObjective(wowInterface, 49, new List<List<Vector3>> {
+                        new GrindingObjective(bot, 49, new List<List<Vector3>> {
                             new()
                             {
                                 new Vector3(-7828.86f, -5111.13f, 4.30f),

@@ -10,9 +10,9 @@ namespace AmeisenBotX.Core.Character.Spells
 {
     public class SpellBook
     {
-        public SpellBook(WowInterface wowInterface)
+        public SpellBook(AmeisenBotInterfaces bot)
         {
-            WowInterface = wowInterface;
+            Bot = bot;
 
             Spells = new();
 
@@ -30,7 +30,7 @@ namespace AmeisenBotX.Core.Character.Spells
 
         public List<Spell> Spells { get; private set; }
 
-        private WowInterface WowInterface { get; }
+        private AmeisenBotInterfaces Bot { get; }
 
         public Spell GetSpellByName(string spellname)
         {
@@ -44,7 +44,7 @@ namespace AmeisenBotX.Core.Character.Spells
 
         public void Update()
         {
-            string rawSpells = WowInterface.NewWowInterface.LuaGetSpells();
+            string rawSpells = Bot.Wow.LuaGetSpells();
 
             try
             {

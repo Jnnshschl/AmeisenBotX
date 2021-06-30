@@ -52,9 +52,9 @@ namespace AmeisenBotX.Core.Combat.Classes.Kamel
         private const string victoryRushSpell = "Victory Rush";
         private const string whirlwindSpell = "Whirlwind";
 
-        public WarriorFury(WowInterface wowInterface) : base()
+        public WarriorFury(AmeisenBotInterfaces bot) : base()
         {
-            WowInterface = wowInterface;
+            Bot = bot;
             spellCoolDown.Add(ShootSpell, DateTime.Now);
             //Stances
             spellCoolDown.Add(defensiveStanceSpell, DateTime.Now);
@@ -177,30 +177,30 @@ namespace AmeisenBotX.Core.Combat.Classes.Kamel
 
         private bool CustomCastSpell(string spellName, string stance = "Berserker Stance")
         {
-            if (!WowInterface.CharacterManager.SpellBook.IsSpellKnown(stance))
+            if (!Bot.Character.SpellBook.IsSpellKnown(stance))
             {
                 stance = "Battle Stance";
             }
 
-            if (WowInterface.CharacterManager.SpellBook.IsSpellKnown(spellName))
+            if (Bot.Character.SpellBook.IsSpellKnown(spellName))
             {
-                if (WowInterface.Target != null)
+                if (Bot.Target != null)
                 {
-                    double distance = WowInterface.Player.Position.GetDistance(WowInterface.Target.Position);
-                    Spell spell = WowInterface.CharacterManager.SpellBook.GetSpellByName(spellName);
+                    double distance = Bot.Player.Position.GetDistance(Bot.Target.Position);
+                    Spell spell = Bot.Character.SpellBook.GetSpellByName(spellName);
 
-                    if ((WowInterface.Player.Rage >= spell.Costs && IsSpellReady(spellName)))
+                    if ((Bot.Player.Rage >= spell.Costs && IsSpellReady(spellName)))
                     {
                         if ((spell.MinRange == 0 && spell.MaxRange == 0) || (spell.MinRange <= distance && spell.MaxRange >= distance))
                         {
-                            if (!WowInterface.Player.HasBuffByName(stance))
+                            if (!Bot.Player.Auras.Any(e => Bot.Db.GetSpellName(e.SpellId) == stance))
                             {
-                                WowInterface.NewWowInterface.LuaCastSpell(stance);
+                                Bot.Wow.LuaCastSpell(stance);
                                 return true;
                             }
                             else
                             {
-                                WowInterface.NewWowInterface.LuaCastSpell(spellName);
+                                Bot.Wow.LuaCastSpell(spellName);
                                 return true;
                             }
                         }
@@ -213,21 +213,21 @@ namespace AmeisenBotX.Core.Combat.Classes.Kamel
 
         private void StartAttack()
         {
-            if (WowInterface.Target.Guid != 0)
+            if (Bot.Wow.TargetGuid != 0)
             {
                 ChangeTargetToAttack();
 
-                if (WowInterface.Db.GetReaction(WowInterface.Player, WowInterface.Target) == WowUnitReaction.Friendly)
+                if (Bot.Db.GetReaction(Bot.Player, Bot.Target) == WowUnitReaction.Friendly)
                 {
-                    WowInterface.NewWowInterface.WowClearTarget();
+                    Bot.Wow.WowClearTarget();
                     return;
                 }
 
-                if (WowInterface.Player.IsInMeleeRange(WowInterface.Target))
+                if (Bot.Player.IsInMeleeRange(Bot.Target))
                 {
-                    if (!WowInterface.Player.IsAutoAttacking && AutoAttackEvent.Run())
+                    if (!Bot.Player.IsAutoAttacking && AutoAttackEvent.Run())
                     {
-                        WowInterface.NewWowInterface.LuaStartAutoAttack();
+                        Bot.Wow.LuaStartAutoAttack();
                     }
 
                     if (CustomCastSpell(bloodrageSpell))
@@ -245,22 +245,22 @@ namespace AmeisenBotX.Core.Combat.Classes.Kamel
                         return;
                     }
 
-                    if (WowInterface.Target.IsCasting && CustomCastSpell(pummelSpell))
+                    if (Bot.Target.IsCasting && CustomCastSpell(pummelSpell))
                     {
                         return;
                     }
 
-                    if (WowInterface.Target.GetType() == typeof(WowPlayer) && !WowInterface.Target.HasBuffByName("Hamstring") && CustomCastSpell(hamstringSpell))
+                    if (Bot.Target.GetType() == typeof(WowPlayer) && !Bot.Target.Auras.Any(e => Bot.Db.GetSpellName(e.SpellId) == "Hamstring") && CustomCastSpell(hamstringSpell))
                     {
                         return;
                     }
 
-                    if (WowInterface.Target.HealthPercentage <= 20 && CustomCastSpell(executeSpell))
+                    if (Bot.Target.HealthPercentage <= 20 && CustomCastSpell(executeSpell))
                     {
                         return;
                     }
 
-                    if (WowInterface.Player.HealthPercentage <= 50 && (WowInterface.Player.HasBuffByName("Bloodrage") || WowInterface.Player.HasBuffByName("Recklessness") || WowInterface.Player.HasBuffByName("Berserker Rage")))
+                    if (Bot.Player.HealthPercentage <= 50 && (Bot.Player.Auras.Any(e => Bot.Db.GetSpellName(e.SpellId) == "Bloodrage") || Bot.Player.Auras.Any(e => Bot.Db.GetSpellName(e.SpellId) == "Recklessness") || Bot.Player.Auras.Any(e => Bot.Db.GetSpellName(e.SpellId) == "Berserker Rage")))
                     {
                         if (CustomCastSpell(enragedregenerationSpell))
                         {
@@ -268,22 +268,22 @@ namespace AmeisenBotX.Core.Combat.Classes.Kamel
                         }
                     }
 
-                    if ((WowInterface.Player.HealthPercentage <= 30) || (WowInterface.Target.GetType() == typeof(WowPlayer)) && CustomCastSpell(intimidatingShoutSpell))
+                    if ((Bot.Player.HealthPercentage <= 30) || (Bot.Target.GetType() == typeof(WowPlayer)) && CustomCastSpell(intimidatingShoutSpell))
                     {
                         return;
                     }
 
-                    if (WowInterface.Player.HealthPercentage <= 60 && CustomCastSpell(retaliationSpell, battleStanceSpell))
+                    if (Bot.Player.HealthPercentage <= 60 && CustomCastSpell(retaliationSpell, battleStanceSpell))
                     {
                         return;
                     }
 
-                    if (WowInterface.Target.GetType() == typeof(WowPlayer) && CustomCastSpell(disarmSpell, defensiveStanceSpell))
+                    if (Bot.Target.GetType() == typeof(WowPlayer) && CustomCastSpell(disarmSpell, defensiveStanceSpell))
                     {
                         return;
                     }
 
-                    if (WowInterface.Player.HasBuffByName("Slam!") && CustomCastSpell(slamSpell) && CustomCastSpell(recklessnessSpell))
+                    if (Bot.Player.Auras.Any(e => Bot.Db.GetSpellName(e.SpellId) == "Slam!") && CustomCastSpell(slamSpell) && CustomCastSpell(recklessnessSpell))
                     {
                         return;
                     }
@@ -303,59 +303,59 @@ namespace AmeisenBotX.Core.Combat.Classes.Kamel
                         return;
                     }
 
-                    if (RendEvent.Run() && !WowInterface.Target.HasBuffByName("Rend") && CustomCastSpell(rendSpell))
+                    if (RendEvent.Run() && !Bot.Target.Auras.Any(e => Bot.Db.GetSpellName(e.SpellId) == "Rend") && CustomCastSpell(rendSpell))
                     {
                         return;
                     }
 
-                    if (HeroicStrikeEvent.Run() && WowInterface.Player.Rage >= 60 && CustomCastSpell(heroicStrikeSpell))
+                    if (HeroicStrikeEvent.Run() && Bot.Player.Rage >= 60 && CustomCastSpell(heroicStrikeSpell))
                     {
                         return;
                     }
 
-                    IEnumerable<WowUnit> unitsNearPlayer = WowInterface.Objects.GetNearEnemies<WowUnit>(WowInterface.Db.GetReaction, WowInterface.Player.Position, 5);
+                    IEnumerable<WowUnit> unitsNearPlayer = Bot.Objects.GetNearEnemies<WowUnit>(Bot.Db.GetReaction, Bot.Player.Position, 5);
 
                     if (unitsNearPlayer != null)
                     {
-                        if (unitsNearPlayer.Count() >= 3 && WowInterface.Player.Rage >= 50 && CustomCastSpell(cleaveSpell))
+                        if (unitsNearPlayer.Count() >= 3 && Bot.Player.Rage >= 50 && CustomCastSpell(cleaveSpell))
                         {
                             return;
                         }
                     }
 
-                    if (!WowInterface.Player.HasBuffByName("Battle Shout") && CustomCastSpell(battleShoutSpell))
+                    if (!Bot.Player.Auras.Any(e => Bot.Db.GetSpellName(e.SpellId) == "Battle Shout") && CustomCastSpell(battleShoutSpell))
                     {
                         return;
                     }
                 }
                 else//Range
                 {
-                    if ((WowInterface.Player.IsDazed
-                        || WowInterface.Player.IsFleeing
-                        || WowInterface.Player.IsInfluenced
-                        || WowInterface.Player.IsPossessed)
-                        || WowInterface.Player.HasBuffByName("Frost Nova")
-                        || WowInterface.Player.HasBuffByName("Frost Trap Aura")
-                        || WowInterface.Player.HasBuffByName("Hamstring")
-                        || WowInterface.Player.HasBuffByName("Concussive Shot")
-                        || WowInterface.Player.HasBuffByName("Frostbolt")
-                        || WowInterface.Player.HasBuffByName("Frost Shock")
-                        || WowInterface.Player.HasBuffByName("Frostfire Bolt")
-                        || WowInterface.Player.HasBuffByName("Slow")
-                        || WowInterface.Player.HasBuffByName("Entangling Roots"))
+                    if ((Bot.Player.IsDazed
+                        || Bot.Player.IsFleeing
+                        || Bot.Player.IsInfluenced
+                        || Bot.Player.IsPossessed)
+                        || Bot.Player.Auras.Any(e => Bot.Db.GetSpellName(e.SpellId) == "Frost Nova")
+                        || Bot.Player.Auras.Any(e => Bot.Db.GetSpellName(e.SpellId) == "Frost Trap Aura")
+                        || Bot.Player.Auras.Any(e => Bot.Db.GetSpellName(e.SpellId) == "Hamstring")
+                        || Bot.Player.Auras.Any(e => Bot.Db.GetSpellName(e.SpellId) == "Concussive Shot")
+                        || Bot.Player.Auras.Any(e => Bot.Db.GetSpellName(e.SpellId) == "Frostbolt")
+                        || Bot.Player.Auras.Any(e => Bot.Db.GetSpellName(e.SpellId) == "Frost Shock")
+                        || Bot.Player.Auras.Any(e => Bot.Db.GetSpellName(e.SpellId) == "Frostfire Bolt")
+                        || Bot.Player.Auras.Any(e => Bot.Db.GetSpellName(e.SpellId) == "Slow")
+                        || Bot.Player.Auras.Any(e => Bot.Db.GetSpellName(e.SpellId) == "Entangling Roots"))
                     {
                         if (CustomCastSpell(heroicFurySpell))
                         {
                             return;
                         }
                     }
-                    if (WowInterface.Player.HasBuffByName("Entangling Roots")
-                        || WowInterface.Player.HasBuffByName("Frost Nova"))
+                    if (Bot.Player.Auras.Any(e => Bot.Db.GetSpellName(e.SpellId) == "Entangling Roots")
+                        || Bot.Player.Auras.Any(e => Bot.Db.GetSpellName(e.SpellId) == "Frost Nova"))
                     {
-                        if (WowInterface.MovementEngine.Status != Movement.Enums.MovementAction.None)
+                        if (Bot.Movement.Status != Movement.Enums.MovementAction.None)
                         {
-                            WowInterface.NewWowInterface.WowStopClickToMove();
-                            WowInterface.MovementEngine.Reset();
+                            Bot.Wow.WowStopClickToMove();
+                            Bot.Movement.Reset();
                         }
 
                         if (CustomCastSpell(ShootSpell))

@@ -9,9 +9,9 @@ namespace AmeisenBotX.Core.Movement.Objects
 {
     public class BasicVehicle
     {
-        public BasicVehicle(WowInterface wowInterface)
+        public BasicVehicle(AmeisenBotInterfaces bot)
         {
-            WowInterface = wowInterface;
+            Bot = bot;
         }
 
         public delegate void MoveCharacter(Vector3 positionToGoTo);
@@ -20,7 +20,7 @@ namespace AmeisenBotX.Core.Movement.Objects
 
         public Vector3 Velocity { get; private set; }
 
-        private WowInterface WowInterface { get; }
+        private AmeisenBotInterfaces Bot { get; }
 
         public Vector3 AvoidObstacles(float multiplier)
         {
@@ -29,7 +29,7 @@ namespace AmeisenBotX.Core.Movement.Objects
             acceleration += GetObjectForceAroundMe<WowObject>();
             acceleration += GetNearestBlacklistForce(12);
 
-            acceleration.Limit(WowInterface.MovementSettings.MaxAcceleration);
+            acceleration.Limit(Bot.MovementSettings.MaxAcceleration);
             acceleration.Multiply(multiplier);
 
             return acceleration;
@@ -43,16 +43,16 @@ namespace AmeisenBotX.Core.Movement.Objects
 
         public Vector3 Flee(Vector3 position, float multiplier)
         {
-            Vector3 currentPosition = WowInterface.Player.Position;
+            Vector3 currentPosition = Bot.Player.Position;
             Vector3 desired = currentPosition;
             float distanceToTarget = currentPosition.GetDistance(position);
 
             desired -= position;
             desired.Normalize2D(desired.GetMagnitude2D());
 
-            float maxVelocity = WowInterface.MovementSettings.MaxVelocity;
+            float maxVelocity = Bot.MovementSettings.MaxVelocity;
 
-            if (WowInterface.Player.IsMounted)
+            if (Bot.Player.IsMounted)
             {
                 maxVelocity *= 2;
             }
@@ -74,12 +74,12 @@ namespace AmeisenBotX.Core.Movement.Objects
             Vector3 steering = desired;
             steering -= Velocity;
 
-            if (WowInterface.Player.IsInCombat
-                || WowInterface.Globals.ForceCombat)
+            if (Bot.Player.IsInCombat
+                || Bot.Globals.ForceCombat)
             {
-                float maxSteeringCombat = WowInterface.MovementSettings.MaxSteeringCombat;
+                float maxSteeringCombat = Bot.MovementSettings.MaxSteeringCombat;
 
-                if (WowInterface.Player.IsMounted)
+                if (Bot.Player.IsMounted)
                 {
                     maxSteeringCombat *= 2;
                 }
@@ -88,9 +88,9 @@ namespace AmeisenBotX.Core.Movement.Objects
             }
             else
             {
-                float maxSteering = WowInterface.MovementSettings.MaxSteering;
+                float maxSteering = Bot.MovementSettings.MaxSteering;
 
-                if (WowInterface.Player.IsMounted)
+                if (Bot.Player.IsMounted)
                 {
                     maxSteering *= 2;
                 }
@@ -101,12 +101,12 @@ namespace AmeisenBotX.Core.Movement.Objects
             Vector3 acceleration = new(0, 0, 0);
             acceleration += steering;
 
-            if (WowInterface.Player.IsInCombat
-                || WowInterface.Globals.ForceCombat)
+            if (Bot.Player.IsInCombat
+                || Bot.Globals.ForceCombat)
             {
-                float maxAcceleration = WowInterface.MovementSettings.MaxAccelerationCombat;
+                float maxAcceleration = Bot.MovementSettings.MaxAccelerationCombat;
 
-                if (WowInterface.Player.IsMounted)
+                if (Bot.Player.IsMounted)
                 {
                     maxAcceleration *= 2;
                 }
@@ -115,9 +115,9 @@ namespace AmeisenBotX.Core.Movement.Objects
             }
             else
             {
-                float maxAcceleration = WowInterface.MovementSettings.MaxAcceleration;
+                float maxAcceleration = Bot.MovementSettings.MaxAcceleration;
 
-                if (WowInterface.Player.IsMounted)
+                if (Bot.Player.IsMounted)
                 {
                     maxAcceleration *= 2;
                 }
@@ -142,16 +142,16 @@ namespace AmeisenBotX.Core.Movement.Objects
 
         public Vector3 Seek(Vector3 position, float multiplier)
         {
-            Vector3 currentPosition = WowInterface.Player.Position;
+            Vector3 currentPosition = Bot.Player.Position;
             Vector3 desired = position;
             float distanceToTarget = currentPosition.GetDistance(position);
 
             desired -= currentPosition;
             desired.Normalize2D(desired.GetMagnitude2D());
 
-            float maxVelocity = WowInterface.MovementSettings.MaxVelocity;
+            float maxVelocity = Bot.MovementSettings.MaxVelocity;
 
-            if (WowInterface.Player.IsMounted)
+            if (Bot.Player.IsMounted)
             {
                 maxVelocity *= 2;
             }
@@ -166,9 +166,9 @@ namespace AmeisenBotX.Core.Movement.Objects
             Vector3 steering = desired;
             steering -= Velocity;
 
-            // float maxSteering = WowInterface.Player.IsInCombat ? WowInterface.MovementSettings.MaxSteeringCombat : WowInterface.MovementSettings.MaxSteering;
+            // float maxSteering = Bot.Player.IsInCombat ? Bot.MovementSettings.MaxSteeringCombat : Bot.MovementSettings.MaxSteering;
 
-            if (WowInterface.Player.IsMounted)
+            if (Bot.Player.IsMounted)
             {
                 maxVelocity *= 2;
             }
@@ -178,9 +178,9 @@ namespace AmeisenBotX.Core.Movement.Objects
             Vector3 acceleration = new(0, 0, 0);
             acceleration += steering;
 
-            float maxAcceleration = WowInterface.Player.IsInCombat ? WowInterface.MovementSettings.MaxAccelerationCombat : WowInterface.MovementSettings.MaxAcceleration;
+            float maxAcceleration = Bot.Player.IsInCombat ? Bot.MovementSettings.MaxAccelerationCombat : Bot.MovementSettings.MaxAcceleration;
 
-            if (WowInterface.Player.IsMounted)
+            if (Bot.Player.IsMounted)
             {
                 maxAcceleration *= 2;
             }
@@ -193,11 +193,11 @@ namespace AmeisenBotX.Core.Movement.Objects
         public Vector3 Seperate(float multiplier)
         {
             Vector3 acceleration = new(0, 0, 0);
-            acceleration += GetObjectForceAroundMe<WowPlayer>(WowInterface.MovementSettings.SeperationDistance);
+            acceleration += GetObjectForceAroundMe<WowPlayer>(Bot.MovementSettings.SeperationDistance);
 
-            float maxAcceleration = WowInterface.MovementSettings.MaxAcceleration;
+            float maxAcceleration = Bot.MovementSettings.MaxAcceleration;
 
-            if (WowInterface.Player.IsMounted)
+            if (Bot.Player.IsMounted)
             {
                 maxAcceleration *= 2;
             }
@@ -209,7 +209,7 @@ namespace AmeisenBotX.Core.Movement.Objects
 
         public Vector3 Unstuck(float multiplier)
         {
-            Vector3 positionBehindMe = CalculatPositionBehind(WowInterface.Player.Position, WowInterface.Player.Rotation, 8);
+            Vector3 positionBehindMe = CalculatPositionBehind(Bot.Player.Position, Bot.Player.Rotation, 8);
             return Seek(positionBehindMe, multiplier);
         }
 
@@ -233,16 +233,16 @@ namespace AmeisenBotX.Core.Movement.Objects
                 Velocity = new(Velocity.X, Velocity.Y, 0f);
             }
 
-            float maxVelocity = WowInterface.MovementSettings.MaxVelocity;
+            float maxVelocity = Bot.MovementSettings.MaxVelocity;
 
-            if (WowInterface.Player.IsMounted)
+            if (Bot.Player.IsMounted)
             {
                 maxVelocity *= 2;
             }
 
             Velocity.Limit(maxVelocity);
 
-            Vector3 currentPosition = WowInterface.Player.Position;
+            Vector3 currentPosition = Bot.Player.Position;
             currentPosition.Add(Velocity);
 
             moveCharacter?.Invoke(currentPosition);
@@ -254,10 +254,10 @@ namespace AmeisenBotX.Core.Movement.Objects
             //       maybe add a very weak force keeping it inside a given circle...
             // TODO: implement some sort of delay so that the target is not constantly walking
             Random rnd = new();
-            Vector3 currentPosition = WowInterface.Player.Position;
+            Vector3 currentPosition = Bot.Player.Position;
 
             Vector3 newRandomPosition = new(0, 0, 0);
-            newRandomPosition += CalculateFuturePosition(currentPosition, WowInterface.Player.Rotation, ((float)rnd.NextDouble() * 4.0f) + 4.0f);
+            newRandomPosition += CalculateFuturePosition(currentPosition, Bot.Player.Rotation, ((float)rnd.NextDouble() * 4.0f) + 4.0f);
 
             // rotate the vector by random amount of degrees
             newRandomPosition.Rotate(rnd.Next(-14, 14));
@@ -357,7 +357,7 @@ namespace AmeisenBotX.Core.Movement.Objects
         {
             Vector3 force = new(0, 0, 0);
 
-            if (WowInterface.Db.TryGetBlacklistPosition((int)WowInterface.Objects.MapId, WowInterface.Player.Position, maxDistance, out IEnumerable<Vector3> nodes))
+            if (Bot.Db.TryGetBlacklistPosition((int)Bot.Objects.MapId, Bot.Player.Position, maxDistance, out IEnumerable<Vector3> nodes))
             {
                 force += Flee(nodes.First(), 0.5f);
             }
@@ -368,7 +368,7 @@ namespace AmeisenBotX.Core.Movement.Objects
         private Vector3 GetObjectForceAroundMe<T>(float maxDistance = 3.0f) where T : WowObject
         {
             Vector3 force = new(0, 0, 0);
-            Vector3 vehiclePosition = WowInterface.Player.Position;
+            Vector3 vehiclePosition = Bot.Player.Position;
             int count = 0;
 
             List<(Vector3, float)> objectDistances = new();
@@ -376,7 +376,7 @@ namespace AmeisenBotX.Core.Movement.Objects
             // we need to know every objects position and distance
             // to later apply a force pushing us back from it that
             // is relational to the objects distance.
-            IEnumerable<T> objects = WowInterface.Objects.WowObjects.OfType<T>();
+            IEnumerable<T> objects = Bot.Objects.WowObjects.OfType<T>();
 
             for (int i = 0; i < objects.Count(); ++i)
             {

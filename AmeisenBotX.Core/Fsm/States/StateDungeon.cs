@@ -5,41 +5,41 @@ namespace AmeisenBotX.Core.Fsm.States
 {
     public class StateDungeon : BasicState
     {
-        public StateDungeon(AmeisenBotFsm stateMachine, AmeisenBotConfig config, WowInterface wowInterface) : base(stateMachine, config, wowInterface)
+        public StateDungeon(AmeisenBotFsm stateMachine, AmeisenBotConfig config, AmeisenBotInterfaces bot) : base(stateMachine, config, bot)
         {
         }
 
         public override void Enter()
         {
-            WowInterface.MovementEngine.Reset();
-            WowInterface.DungeonEngine.Enter();
+            Bot.Movement.Reset();
+            Bot.Dungeon.Enter();
             StateMachine.OnStateOverride += StateMachine_OnStateOverride;
         }
 
         public override void Execute()
         {
-            if (!WowInterface.Objects.MapId.IsDungeonMap())
+            if (!Bot.Objects.MapId.IsDungeonMap())
             {
                 StateMachine.SetState(BotState.Idle);
                 return;
             }
 
-            WowInterface.DungeonEngine.Execute();
-            WowInterface.CombatClass?.OutOfCombatExecute();
+            Bot.Dungeon.Execute();
+            Bot.CombatClass?.OutOfCombatExecute();
         }
 
         public override void Leave()
         {
             StateMachine.OnStateOverride -= StateMachine_OnStateOverride;
-            WowInterface.MovementEngine.Reset();
-            WowInterface.DungeonEngine.Exit();
+            Bot.Movement.Reset();
+            Bot.Dungeon.Exit();
         }
 
         private void StateMachine_OnStateOverride(BotState botState)
         {
             if (botState == BotState.Dead)
             {
-                WowInterface.DungeonEngine.OnDeath();
+                Bot.Dungeon.OnDeath();
             }
         }
     }

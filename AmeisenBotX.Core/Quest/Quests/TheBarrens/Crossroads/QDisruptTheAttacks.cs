@@ -7,15 +7,15 @@ namespace AmeisenBotX.Core.Quest.Quests.TheBarrens.Crossroads
 {
     internal class QDisruptTheAttacks : BotQuest
     {
-        public QDisruptTheAttacks(WowInterface wowInterface)
-            : base(wowInterface, 871, "Disrupt the Attacks", 9, 1,
-                () => (wowInterface.Objects.GetClosestWowUnitByNpcId(wowInterface.Player.Position, new List<int> { 3429 }), new Vector3(-473.20f, -2595.70f, 103.81f)),
-                () => (wowInterface.Objects.GetClosestWowUnitByNpcId(wowInterface.Player.Position, new List<int> { 3429 }), new Vector3(-473.20f, -2595.70f, 103.81f)),
+        public QDisruptTheAttacks(AmeisenBotInterfaces bot)
+            : base(bot, 871, "Disrupt the Attacks", 9, 1,
+                () => (bot.Objects.GetClosestWowUnitByNpcId(bot.Player.Position, new List<int> { 3429 }), new Vector3(-473.20f, -2595.70f, 103.81f)),
+                () => (bot.Objects.GetClosestWowUnitByNpcId(bot.Player.Position, new List<int> { 3429 }), new Vector3(-473.20f, -2595.70f, 103.81f)),
                 new List<IQuestObjective>()
                 {
                     new QuestObjectiveChain(new List<IQuestObjective>()
                     {
-                        new KillAndLootQuestObjective(wowInterface, new List<int> { 3267 }, 8, 0, new List<List<Vector3>> {
+                        new KillAndLootQuestObjective(bot, new List<int> { 3267 }, 8, 0, new List<List<Vector3>> {
                             new()
                             {
                                 new Vector3(-120.77f, -2820.86f, 91.79f),
@@ -47,7 +47,7 @@ namespace AmeisenBotX.Core.Quest.Quests.TheBarrens.Crossroads
                                 new Vector3(-188.73f, -3027.56f, 91.79f),
                             },
                         }),
-                        new KillAndLootQuestObjective(wowInterface, new List<int> { 3268 }, 8, 0, new List<List<Vector3>> {
+                        new KillAndLootQuestObjective(bot, new List<int> { 3268 }, 8, 0, new List<List<Vector3>> {
                             new()
                             {
                                 new Vector3(-183.96f, -2961.07f, 91.92f),
@@ -69,7 +69,7 @@ namespace AmeisenBotX.Core.Quest.Quests.TheBarrens.Crossroads
                                 new Vector3(-82.61f, -2864.88f, 91.79f),
                             },
                         }),
-                        new KillAndLootQuestObjective(wowInterface, new List<int> { 3265 }, 3, 0, new List<List<Vector3>> {
+                        new KillAndLootQuestObjective(bot, new List<int> { 3265 }, 3, 0, new List<List<Vector3>> {
                             new()
                             {
                                 new Vector3(1.45f, -3399.94f, 85.36f),

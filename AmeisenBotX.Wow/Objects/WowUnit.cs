@@ -14,16 +14,13 @@ namespace AmeisenBotX.Core.Data.Objects
 {
     public class WowUnit : WowObject
     {
-        public WowUnit(IntPtr baseAddress, WowObjectType type, IntPtr descriptorAddress, Func<int, string> spellNamePred) : base(baseAddress, type, descriptorAddress)
+        public WowUnit(IntPtr baseAddress, WowObjectType type, IntPtr descriptorAddress) : base(baseAddress, type, descriptorAddress)
         {
-            SpellNamePred = spellNamePred;
         }
-
-        protected Func<int, string> SpellNamePred { get; }
 
         public int AuraCount { get; set; }
 
-        public IEnumerable<WowAura> Auras { get; set; }
+        public IEnumerable<RawWowAura> Auras { get; set; }
 
         public WowClass Class { get; set; }
 
@@ -207,12 +204,7 @@ namespace AmeisenBotX.Core.Data.Objects
         public bool HasBuffById(int spellId)
         {
             return Auras != null && Auras.Any(e => e.SpellId == spellId);
-        }
-
-        public bool HasBuffByName(string auraName)
-        {
-            return Auras != null && Auras.Any(e => e.Name.Equals(auraName, StringComparison.OrdinalIgnoreCase));
-        }
+        }        
 
         public bool IsInMeleeRange(WowUnit wowUnit)
         {
@@ -303,7 +295,7 @@ namespace AmeisenBotX.Core.Data.Objects
             }
         }
 
-        public IEnumerable<WowAura> GetUnitAuras(XMemory xMemory, IOffsetList offsetList, IntPtr unitBase, out int auraCount)
+        public IEnumerable<RawWowAura> GetUnitAuras(XMemory xMemory, IOffsetList offsetList, IntPtr unitBase, out int auraCount)
         {
             if (xMemory.Read(IntPtr.Add(unitBase, (int)offsetList.AuraCount1), out int auraCount1))
             {
@@ -332,12 +324,12 @@ namespace AmeisenBotX.Core.Data.Objects
                 auraCount = 0;
             }
 
-            return Array.Empty<WowAura>();
+            return Array.Empty<RawWowAura>();
         }
 
-        private unsafe IEnumerable<WowAura> ReadAuraTable(XMemory xMemory, IntPtr buffBase, int auraCount)
+        private unsafe IEnumerable<RawWowAura> ReadAuraTable(XMemory xMemory, IntPtr buffBase, int auraCount)
         {
-            List<WowAura> auras = new();
+            List<RawWowAura> auras = new();
 
             if (auraCount > 40)
             {
@@ -347,7 +339,7 @@ namespace AmeisenBotX.Core.Data.Objects
             for (int i = 0; i < auraCount; ++i)
             {
                 xMemory.Read(buffBase + (sizeof(RawWowAura) * i), out RawWowAura rawWowAura);
-                auras.Add(new(rawWowAura, SpellNamePred(rawWowAura.SpellId)));
+                auras.Add(rawWowAura);
             }
 
             return auras;

@@ -1,10 +1,9 @@
 ﻿using AmeisenBotX.Common.Math;
-using AmeisenBotX.Common.Offsets;
 using AmeisenBotX.Core.Data.Objects;
-using AmeisenBotX.Memory;
 using AmeisenBotX.Wow.Cache.Enums;
 using AmeisenBotX.Wow.Combatlog.Enums;
 using AmeisenBotX.Wow.Combatlog.Objects;
+using AmeisenBotX.Wow.Objects;
 using AmeisenBotX.Wow.Objects.Enums;
 using System;
 using System.Collections.Generic;
@@ -13,6 +12,22 @@ namespace AmeisenBotX.Wow.Cache
 {
     public interface IAmeisenBotDb
     {
+        IReadOnlyDictionary<int, List<Vector3>> AllBlacklistNodes();
+
+        IReadOnlyDictionary<CombatLogEntryType, Dictionary<CombatLogEntrySubtype, List<(DateTime, BasicCombatLogEntry)>>> AllCombatLogEntries();
+
+        IReadOnlyDictionary<WowMapId, Dictionary<WowHerbId, List<Vector3>>> AllHerbNodes();
+
+        IReadOnlyDictionary<ulong, string> AllNames();
+
+        IReadOnlyDictionary<WowMapId, Dictionary<WowOreId, List<Vector3>>> AllOreNodes();
+
+        IReadOnlyDictionary<WowMapId, Dictionary<PoiType, List<Vector3>>> AllPointsOfInterest();
+
+        IReadOnlyDictionary<int, Dictionary<int, WowUnitReaction>> AllReactions();
+
+        IReadOnlyDictionary<int, string> AllSpellNames();
+
         void CacheCombatLogEntry(KeyValuePair<CombatLogEntryType, CombatLogEntrySubtype> key, BasicCombatLogEntry entry);
 
         void CacheHerb(WowMapId mapId, WowHerbId displayId, Vector3 position);
@@ -27,9 +42,9 @@ namespace AmeisenBotX.Wow.Cache
 
         BasicCombatLogEntrySubject GetCombatLogSubject();
 
-        WowUnitReaction GetReaction(Func<IntPtr, IntPtr, WowUnitReaction> pred, WowUnit a, WowUnit b);
+        WowUnitReaction GetReaction(WowUnit a, WowUnit b);
 
-        bool GetUnitName(XMemory xMemory, IOffsetList offsetList, WowUnit unit, out string name);
+        bool GetUnitName(WowUnit unit, out string name);
 
         void Save(string dbFile);
 
@@ -37,6 +52,6 @@ namespace AmeisenBotX.Wow.Cache
 
         bool TryGetPointsOfInterest(WowMapId mapId, PoiType poiType, Vector3 position, float maxRadius, out IEnumerable<Vector3> nodes);
 
-        bool TryGetSpellName(int spellId, out string name);
+        string GetSpellName(int spellId);
     }
 }

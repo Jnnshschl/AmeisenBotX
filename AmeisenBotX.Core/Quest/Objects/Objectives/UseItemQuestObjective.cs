@@ -7,9 +7,9 @@ namespace AmeisenBotX.Core.Quest.Objects.Objectives
 
     public class UseItemQuestObjective : IQuestObjective
     {
-        public UseItemQuestObjective(WowInterface wowInterface, int itemId, UseItemQuestObjectiveCondition condition)
+        public UseItemQuestObjective(AmeisenBotInterfaces bot, int itemId, UseItemQuestObjectiveCondition condition)
         {
-            WowInterface = wowInterface;
+            Bot = bot;
             ItemId = itemId;
             Condition = condition;
         }
@@ -22,19 +22,19 @@ namespace AmeisenBotX.Core.Quest.Objects.Objectives
 
         private int ItemId { get; }
 
-        private WowInterface WowInterface { get; }
+        private AmeisenBotInterfaces Bot { get; }
 
         public void Execute()
         {
-            if (Finished || WowInterface.Player.IsCasting) { return; }
+            if (Finished || Bot.Player.IsCasting) { return; }
 
-            IWowItem item = WowInterface.CharacterManager.Inventory.Items.FirstOrDefault(e => e.Id == ItemId);
+            IWowItem item = Bot.Character.Inventory.Items.FirstOrDefault(e => e.Id == ItemId);
 
             if (item != null)
             {
-                WowInterface.MovementEngine.Reset();
-                WowInterface.NewWowInterface.WowStopClickToMove();
-                WowInterface.NewWowInterface.LuaUseContainerItem(item.BagId, item.BagSlot);
+                Bot.Movement.Reset();
+                Bot.Wow.WowStopClickToMove();
+                Bot.Wow.LuaUseContainerItem(item.BagId, item.BagSlot);
             }
         }
     }

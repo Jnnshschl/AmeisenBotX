@@ -11,15 +11,13 @@ namespace AmeisenBotX.Wow
     /// <summary>
     /// Interface to the wow game. All functions that interact with the game should be reachable via this interface.
     /// </summary>
-    public interface INewWowInterface
+    public interface IWowInterface
     {
         ulong HookCallCount { get; }
 
         bool IsWoWHooked { get; }
 
         IObjectProvider Objects { get; }
-
-        WowUnit Player { get; }
 
         void BotOverrideWorldLoadedCheck(bool enabled);
 
@@ -182,5 +180,13 @@ namespace AmeisenBotX.Wow
         void WowTargetGuid(ulong guid);
 
         void WowUnitRightClick(IntPtr unitBase);
+
+        public ulong PlayerGuid => Objects.Player != null ? Objects.Player.Guid : 0ul;
+
+        public ulong TargetGuid => Objects.Target != null ? Objects.Target.Guid : 0ul;
+
+        public ulong PetGuid => Objects.Pet != null ? Objects.Pet.Guid : 0ul;
+
+        public ulong PartyleaderGuid => Objects.Partyleader != null ? Objects.Partyleader.Guid : 0ul;
     }
 }

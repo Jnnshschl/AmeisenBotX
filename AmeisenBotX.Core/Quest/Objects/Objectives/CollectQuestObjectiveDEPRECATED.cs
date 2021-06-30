@@ -9,9 +9,9 @@ namespace AmeisenBotX.Core.Quest.Objects.Objectives
 {
     public class CollectQuestObjectiveDEPRECATED : IQuestObjective
     {
-        public CollectQuestObjectiveDEPRECATED(WowInterface wowInterface, int itemId, int itemAmount, int objectDisplayId, List<AreaNode> area)
+        public CollectQuestObjectiveDEPRECATED(AmeisenBotInterfaces bot, int itemId, int itemAmount, int objectDisplayId, List<AreaNode> area)
         {
-            WowInterface = wowInterface;
+            Bot = bot;
             ItemId = itemId;
             WantedItemAmount = itemAmount;
             ObjectDisplayId = objectDisplayId;
@@ -26,7 +26,7 @@ namespace AmeisenBotX.Core.Quest.Objects.Objectives
 
         public double Progress => Math.Round(CurrentItemAmount / (double)WantedItemAmount * 100.0, 1);
 
-        private int CurrentItemAmount => WowInterface.CharacterManager.Inventory.Items.Count(e => e.Id == ItemId);
+        private int CurrentItemAmount => Bot.Character.Inventory.Items.Count(e => e.Id == ItemId);
 
         private int ItemId { get; }
 
@@ -36,42 +36,42 @@ namespace AmeisenBotX.Core.Quest.Objects.Objectives
 
         private int WantedItemAmount { get; }
 
-        private WowInterface WowInterface { get; }
+        private AmeisenBotInterfaces Bot { get; }
 
         public void Execute()
         {
             if (Finished) { return; }
 
-            WowGameobject lootableObject = WowInterface.Objects.WowObjects.OfType<WowGameobject>()
+            WowGameobject lootableObject = Bot.Objects.WowObjects.OfType<WowGameobject>()
                 .Where(e => e.DisplayId == ObjectDisplayId)
-                .OrderBy(e => e.Position.GetDistance(WowInterface.Player.Position))
+                .OrderBy(e => e.Position.GetDistance(Bot.Player.Position))
                 .FirstOrDefault();
 
             if (lootableObject != null)
             {
-                if (lootableObject.Position.GetDistance(WowInterface.Player.Position) > 3.0)
+                if (lootableObject.Position.GetDistance(Bot.Player.Position) > 3.0)
                 {
-                    WowInterface.MovementEngine.SetMovementAction(MovementAction.Move, lootableObject.Position);
+                    Bot.Movement.SetMovementAction(MovementAction.Move, lootableObject.Position);
                 }
                 else
                 {
                     if (RightClickEvent.Run())
                     {
-                        WowInterface.MovementEngine.Reset();
-                        WowInterface.NewWowInterface.WowStopClickToMove();
-                        WowInterface.NewWowInterface.WowObjectRightClick(lootableObject.BaseAddress);
+                        Bot.Movement.Reset();
+                        Bot.Wow.WowStopClickToMove();
+                        Bot.Wow.WowObjectRightClick(lootableObject.BaseAddress);
                     }
                 }
             }
             else
             {
                 AreaNode selectedArea = Area
-                    .OrderBy(e => e.Position.GetDistance(WowInterface.Player.Position))
-                    .FirstOrDefault(e => e.Position.GetDistance(WowInterface.Player.Position) < e.Radius);
+                    .OrderBy(e => e.Position.GetDistance(Bot.Player.Position))
+                    .FirstOrDefault(e => e.Position.GetDistance(Bot.Player.Position) < e.Radius);
 
                 if (selectedArea != null)
                 {
-                    WowInterface.MovementEngine.SetMovementAction(MovementAction.Move, selectedArea.Position);
+                    Bot.Movement.SetMovementAction(MovementAction.Move, selectedArea.Position);
                 }
             }
         }

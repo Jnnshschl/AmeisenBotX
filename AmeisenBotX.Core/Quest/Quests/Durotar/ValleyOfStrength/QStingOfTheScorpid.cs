@@ -7,15 +7,15 @@ namespace AmeisenBotX.Core.Quest.Quests.Durotar.ValleyOfStrength
 {
     internal class QStingOfTheScorpid : BotQuest
     {
-        public QStingOfTheScorpid(WowInterface wowInterface)
-            : base(wowInterface, 789, "Sting of the Scorpid", 1, 1,
-                () => (wowInterface.Objects.GetClosestWowUnitByNpcId(wowInterface.Player.Position, new List<int> { 3143 }), new Vector3(-600.13f, -4186.19f, 41.27f)),
-                () => (wowInterface.Objects.GetClosestWowUnitByNpcId(wowInterface.Player.Position, new List<int> { 3143 }), new Vector3(-600.13f, -4186.19f, 41.27f)),
+        public QStingOfTheScorpid(AmeisenBotInterfaces bot)
+            : base(bot, 789, "Sting of the Scorpid", 1, 1,
+                () => (bot.Objects.GetClosestWowUnitByNpcId(bot.Player.Position, new List<int> { 3143 }), new Vector3(-600.13f, -4186.19f, 41.27f)),
+                () => (bot.Objects.GetClosestWowUnitByNpcId(bot.Player.Position, new List<int> { 3143 }), new Vector3(-600.13f, -4186.19f, 41.27f)),
                 new List<IQuestObjective>()
                 {
                     new QuestObjectiveChain(new List<IQuestObjective>()
                     {
-                        new KillAndLootQuestObjective(wowInterface, new List<int> { 3124,3281 }, 8, 4862, new List<List<Vector3>> {
+                        new KillAndLootQuestObjective(bot, new List<int> { 3124,3281 }, 8, 4862, new List<List<Vector3>> {
                             new()
                             {
                                 new Vector3(-756.20f, -4352.79f, 52.21f),

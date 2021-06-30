@@ -6,17 +6,17 @@ namespace AmeisenBotX.Core.Utils.Aura
 {
     public class AuraManager
     {
-        public AuraManager(WowInterface wowInterface)
+        public AuraManager(AmeisenBotInterfaces bot)
         {
-            WowInterface = wowInterface;
+            Bot = bot;
             Jobs = new();
         }
 
         public List<IAuraJob> Jobs { get; set; }
 
-        public WowInterface WowInterface { get; }
+        public AmeisenBotInterfaces Bot { get; }
 
-        public bool Tick(IEnumerable<WowAura> auras)
+        public bool Tick(IEnumerable<RawWowAura> auras)
         {
             foreach (IAuraJob job in Jobs)
             {

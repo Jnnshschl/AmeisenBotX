@@ -8,9 +8,9 @@ namespace AmeisenBotX.Core.Quest.Objects.Objectives
 
     public class RuneforgingQuestObjective : IQuestObjective
     {
-        public RuneforgingQuestObjective(WowInterface wowInterface, EnchantItemQuestObjectiveCondition condition)
+        public RuneforgingQuestObjective(AmeisenBotInterfaces bot, EnchantItemQuestObjectiveCondition condition)
         {
-            WowInterface = wowInterface;
+            Bot = bot;
             Condition = condition;
 
             EnchantEvent = new(TimeSpan.FromSeconds(1));
@@ -24,24 +24,24 @@ namespace AmeisenBotX.Core.Quest.Objects.Objectives
 
         private TimegatedEvent EnchantEvent { get; }
 
-        private WowInterface WowInterface { get; }
+        private AmeisenBotInterfaces Bot { get; }
 
         public void Execute()
         {
-            if (Finished || WowInterface.Player.IsCasting)
+            if (Finished || Bot.Player.IsCasting)
             {
-                WowInterface.NewWowInterface.LuaClickUiElement("TradeSkillFrameCloseButton"); return;
+                Bot.Wow.LuaClickUiElement("TradeSkillFrameCloseButton"); return;
             }
 
             if (EnchantEvent.Run())
             {
-                WowInterface.MovementEngine.Reset();
-                WowInterface.NewWowInterface.WowStopClickToMove();
+                Bot.Movement.Reset();
+                Bot.Wow.WowStopClickToMove();
 
-                WowInterface.NewWowInterface.LuaCastSpell("Runeforging");
-                WowInterface.NewWowInterface.LuaClickUiElement("TradeSkillCreateButton");
-                WowInterface.NewWowInterface.LuaUseInventoryItem(WowEquipmentSlot.INVSLOT_MAINHAND);
-                WowInterface.NewWowInterface.LuaClickUiElement("StaticPopup1Button1");
+                Bot.Wow.LuaCastSpell("Runeforging");
+                Bot.Wow.LuaClickUiElement("TradeSkillCreateButton");
+                Bot.Wow.LuaUseInventoryItem(WowEquipmentSlot.INVSLOT_MAINHAND);
+                Bot.Wow.LuaClickUiElement("StaticPopup1Button1");
             }
         }
     }

@@ -14,13 +14,13 @@ namespace AmeisenBotX.Core.Combat.Classes.Shino
 {
     public class MageFrost : TemplateCombatClass
     {
-        public MageFrost(WowInterface wowInterface, AmeisenBotFsm stateMachine) : base(wowInterface, stateMachine)
+        public MageFrost(AmeisenBotInterfaces bot, AmeisenBotFsm stateMachine) : base(bot, stateMachine)
         {
-            MyAuraManager.Jobs.Add(new KeepActiveAuraJob(arcaneIntellectSpell, () => TryCastSpell(arcaneIntellectSpell, 0, true)));
-            MyAuraManager.Jobs.Add(new KeepActiveAuraJob(frostArmorSpell, () => TryCastSpell(frostArmorSpell, 0, true)));
-            MyAuraManager.Jobs.Add(new KeepActiveAuraJob(iceArmorSpell, () => TryCastSpell(iceArmorSpell, 0, true)));
-            MyAuraManager.Jobs.Add(new KeepActiveAuraJob(manaShieldSpell, () => TryCastSpell(manaShieldSpell, 0, true)));
-            MyAuraManager.Jobs.Add(new KeepActiveAuraJob(iceBarrierSpell, () => TryCastSpell(iceBarrierSpell, 0, true)));
+            MyAuraManager.Jobs.Add(new KeepActiveAuraJob(bot.Db, arcaneIntellectSpell, () => TryCastSpell(arcaneIntellectSpell, 0, true)));
+            MyAuraManager.Jobs.Add(new KeepActiveAuraJob(bot.Db, frostArmorSpell, () => TryCastSpell(frostArmorSpell, 0, true)));
+            MyAuraManager.Jobs.Add(new KeepActiveAuraJob(bot.Db, iceArmorSpell, () => TryCastSpell(iceArmorSpell, 0, true)));
+            MyAuraManager.Jobs.Add(new KeepActiveAuraJob(bot.Db, manaShieldSpell, () => TryCastSpell(manaShieldSpell, 0, true)));
+            MyAuraManager.Jobs.Add(new KeepActiveAuraJob(bot.Db, iceBarrierSpell, () => TryCastSpell(iceBarrierSpell, 0, true)));
 
             InterruptManager.InterruptSpells = new()
             {
@@ -92,14 +92,14 @@ namespace AmeisenBotX.Core.Combat.Classes.Shino
         {
             base.Execute();
 
-            if (WowInterface.Player.IsCasting)
+            if (Bot.Player.IsCasting)
             {
                 return;
             }
 
             if (SelectTarget(out WowUnit target))
             {
-                if (WowInterface.Player.ManaPercentage <= 25.0 && TryCastSpell(evocationSpell, 0, true))
+                if (Bot.Player.ManaPercentage <= 25.0 && TryCastSpell(evocationSpell, 0, true))
                 {
                     return;
                 }
@@ -110,13 +110,13 @@ namespace AmeisenBotX.Core.Combat.Classes.Shino
                     TryCastSpell(coldSnapSpell, 0);
                 }
 
-                if (WowInterface.CharacterManager.SpellBook.IsSpellKnown(freezeSpell))
+                if (Bot.Character.SpellBook.IsSpellKnown(freezeSpell))
                 {
                     TryCastAoeSpell(freezeSpell, target.Guid);
                 }
 
-                System.Collections.Generic.IEnumerable<WowUnit> nearbyTargets = WowInterface.Objects.GetEnemiesInCombatWithParty<WowUnit>(WowInterface.Db.GetReaction, WowInterface.Player.Position, 64.0f);
-                if (nearbyTargets.Count(e => e.Position.GetDistance(WowInterface.Player.Position) <= 9.0) == 1
+                System.Collections.Generic.IEnumerable<WowUnit> nearbyTargets = Bot.Objects.GetEnemiesInCombatWithParty<WowUnit>(Bot.Db.GetReaction, Bot.Player.Position, 64.0f);
+                if (nearbyTargets.Count(e => e.Position.GetDistance(Bot.Player.Position) <= 9.0) == 1
                     && TryCastSpell(frostNovaSpell, 0, true))
                 {
                     return;
@@ -124,23 +124,23 @@ namespace AmeisenBotX.Core.Combat.Classes.Shino
 
                 if (DateTime.Now.Subtract(LastSheep).TotalMilliseconds >= 3000.0)
                 {
-                    if (nearbyTargets.Count() > 1 && !nearbyTargets.Any(e => e.Auras.Any(aura => aura.Name == polymorphSpell)))
+                    if (nearbyTargets.Count() > 1 && !nearbyTargets.Any(e => e.Auras.Any(aura => Bot.Db.GetSpellName(aura.SpellId) == polymorphSpell)))
                     {
                         WowUnit targetInDistance = nearbyTargets
-                            .Where(e => e.Guid != WowInterface.Target.Guid)
-                            .OrderBy(e => e.Position.GetDistance(WowInterface.Player.Position))
+                            .Where(e => e.Guid != Bot.Wow.TargetGuid)
+                            .OrderBy(e => e.Position.GetDistance(Bot.Player.Position))
                             .FirstOrDefault();
-                        WowInterface.NewWowInterface.WowTargetGuid(targetInDistance.Guid);
+                        Bot.Wow.WowTargetGuid(targetInDistance.Guid);
                         if (TryCastSpell(polymorphSpell, targetInDistance.Guid, true))
                         {
-                            WowInterface.NewWowInterface.WowTargetGuid(target.Guid);
+                            Bot.Wow.WowTargetGuid(target.Guid);
                             LastSheep = DateTime.Now;
                             return;
                         }
                     }
                 }
 
-                if (WowInterface.Target.Position.GetDistance(WowInterface.Player.Position) <= 4.0)
+                if (Bot.Target.Position.GetDistance(Bot.Player.Position) <= 4.0)
                 {
                     // TODO: Logic to check if the target blink location is dangerous
                     if (!TryCastSpell(blinkSpell, 0, true))
@@ -153,8 +153,8 @@ namespace AmeisenBotX.Core.Combat.Classes.Shino
                     }
                 }
 
-                if (WowInterface.Target.Position.GetDistance(WowInterface.Player.Position) <= 4.0
-                    && WowInterface.Player.HealthPercentage <= 50.0
+                if (Bot.Target.Position.GetDistance(Bot.Player.Position) <= 4.0
+                    && Bot.Player.HealthPercentage <= 50.0
                     && CooldownManager.IsSpellOnCooldown(blinkSpell) && TryCastSpell(iceBlockSpell, 0, true))
                 {
                     return;
@@ -184,59 +184,59 @@ namespace AmeisenBotX.Core.Combat.Classes.Shino
 
         public override void OutOfCombatExecute()
         {
-            if (WowInterface.CharacterManager.SpellBook.IsSpellKnown(conjureWaterSpell))
+            if (Bot.Character.SpellBook.IsSpellKnown(conjureWaterSpell))
             {
-                Spell spell = WowInterface.CharacterManager.SpellBook.GetSpellByName(conjureWaterSpell);
+                Spell spell = Bot.Character.SpellBook.GetSpellByName(conjureWaterSpell);
                 spell.TryGetRank(out int spellRank);
                 if (spellRank >= 2)
                 {
-                    WowInterface.CharacterManager.Inventory.DestroyItemByName("Conjured Water");
+                    Bot.Character.Inventory.DestroyItemByName("Conjured Water");
                 }
 
                 if (spellRank >= 3)
                 {
-                    WowInterface.CharacterManager.Inventory.DestroyItemByName("Conjured Fresh Water");
+                    Bot.Character.Inventory.DestroyItemByName("Conjured Fresh Water");
                 }
 
                 if (spellRank >= 4)
                 {
-                    WowInterface.CharacterManager.Inventory.DestroyItemByName("Conjured Spring Water");
+                    Bot.Character.Inventory.DestroyItemByName("Conjured Spring Water");
                 }
 
                 if (spellRank >= 5)
                 {
-                    WowInterface.CharacterManager.Inventory.DestroyItemByName("Conjured Mineral Water");
+                    Bot.Character.Inventory.DestroyItemByName("Conjured Mineral Water");
                 }
 
                 if (spellRank >= 6)
                 {
-                    WowInterface.CharacterManager.Inventory.DestroyItemByName("Conjured Sparkling Water");
+                    Bot.Character.Inventory.DestroyItemByName("Conjured Sparkling Water");
                 }
 
                 if (spellRank >= 7)
                 {
-                    WowInterface.CharacterManager.Inventory.DestroyItemByName("Conjured Crystal Water");
+                    Bot.Character.Inventory.DestroyItemByName("Conjured Crystal Water");
                 }
 
                 if (spellRank >= 8)
                 {
-                    WowInterface.CharacterManager.Inventory.DestroyItemByName("Conjured Mountain Spring Water");
+                    Bot.Character.Inventory.DestroyItemByName("Conjured Mountain Spring Water");
                 }
 
-                if (WowInterface.CharacterManager.SpellBook.IsSpellKnown(conjureRefreshment))
+                if (Bot.Character.SpellBook.IsSpellKnown(conjureRefreshment))
                 {
-                    WowInterface.CharacterManager.Inventory.DestroyItemByName("Conjured Glacier Water");
+                    Bot.Character.Inventory.DestroyItemByName("Conjured Glacier Water");
                 }
 
                 if (
-                    (spellRank == 1 && !WowInterface.CharacterManager.Inventory.HasItemByName("Conjured Water"))
-                    || (spellRank == 2 && !WowInterface.CharacterManager.Inventory.HasItemByName("Conjured Fresh Water"))
-                    || (spellRank == 3 && !WowInterface.CharacterManager.Inventory.HasItemByName("Conjured Spring Water"))
-                    || (spellRank == 4 && !WowInterface.CharacterManager.Inventory.HasItemByName("Conjured Mineral Water"))
-                    || (spellRank == 5 && !WowInterface.CharacterManager.Inventory.HasItemByName("Conjured Sparkling Water"))
-                    || (spellRank == 6 && !WowInterface.CharacterManager.Inventory.HasItemByName("Conjured Crystal Water"))
-                    || (spellRank == 7 && !WowInterface.CharacterManager.Inventory.HasItemByName("Conjured Mountain Spring Water"))
-                    || (spellRank == 8 && !WowInterface.CharacterManager.Inventory.HasItemByName("Conjured Glacier Water"))
+                    (spellRank == 1 && !Bot.Character.Inventory.HasItemByName("Conjured Water"))
+                    || (spellRank == 2 && !Bot.Character.Inventory.HasItemByName("Conjured Fresh Water"))
+                    || (spellRank == 3 && !Bot.Character.Inventory.HasItemByName("Conjured Spring Water"))
+                    || (spellRank == 4 && !Bot.Character.Inventory.HasItemByName("Conjured Mineral Water"))
+                    || (spellRank == 5 && !Bot.Character.Inventory.HasItemByName("Conjured Sparkling Water"))
+                    || (spellRank == 6 && !Bot.Character.Inventory.HasItemByName("Conjured Crystal Water"))
+                    || (spellRank == 7 && !Bot.Character.Inventory.HasItemByName("Conjured Mountain Spring Water"))
+                    || (spellRank == 8 && !Bot.Character.Inventory.HasItemByName("Conjured Glacier Water"))
                     )
                 {
                     TryCastSpell(conjureWaterSpell, 0, true);
@@ -244,59 +244,59 @@ namespace AmeisenBotX.Core.Combat.Classes.Shino
                 }
             }
 
-            if (WowInterface.CharacterManager.SpellBook.IsSpellKnown(conjureFoodSpell))
+            if (Bot.Character.SpellBook.IsSpellKnown(conjureFoodSpell))
             {
-                Spell spell = WowInterface.CharacterManager.SpellBook.GetSpellByName(conjureFoodSpell);
+                Spell spell = Bot.Character.SpellBook.GetSpellByName(conjureFoodSpell);
                 spell.TryGetRank(out int spellRank);
                 if (spellRank >= 2)
                 {
-                    WowInterface.CharacterManager.Inventory.DestroyItemByName("Conjured Muffin");
+                    Bot.Character.Inventory.DestroyItemByName("Conjured Muffin");
                 }
 
                 if (spellRank >= 3)
                 {
-                    WowInterface.CharacterManager.Inventory.DestroyItemByName("Conjured Bread");
+                    Bot.Character.Inventory.DestroyItemByName("Conjured Bread");
                 }
 
                 if (spellRank >= 4)
                 {
-                    WowInterface.CharacterManager.Inventory.DestroyItemByName("Conjured Rye");
+                    Bot.Character.Inventory.DestroyItemByName("Conjured Rye");
                 }
 
                 if (spellRank >= 5)
                 {
-                    WowInterface.CharacterManager.Inventory.DestroyItemByName("Conjured Pumpernickel");
+                    Bot.Character.Inventory.DestroyItemByName("Conjured Pumpernickel");
                 }
 
                 if (spellRank >= 6)
                 {
-                    WowInterface.CharacterManager.Inventory.DestroyItemByName("Conjured Sourdough");
+                    Bot.Character.Inventory.DestroyItemByName("Conjured Sourdough");
                 }
 
                 if (spellRank >= 7)
                 {
-                    WowInterface.CharacterManager.Inventory.DestroyItemByName("Conjured Sweet Roll");
+                    Bot.Character.Inventory.DestroyItemByName("Conjured Sweet Roll");
                 }
 
                 if (spellRank >= 8)
                 {
-                    WowInterface.CharacterManager.Inventory.DestroyItemByName("Conjured Cinnamon Roll");
+                    Bot.Character.Inventory.DestroyItemByName("Conjured Cinnamon Roll");
                 }
 
-                if (WowInterface.CharacterManager.SpellBook.IsSpellKnown(conjureRefreshment))
+                if (Bot.Character.SpellBook.IsSpellKnown(conjureRefreshment))
                 {
-                    WowInterface.CharacterManager.Inventory.DestroyItemByName("Conjured Croissant");
+                    Bot.Character.Inventory.DestroyItemByName("Conjured Croissant");
                 }
 
                 if (
-                    (spellRank == 1 && !WowInterface.CharacterManager.Inventory.HasItemByName("Conjured Muffin"))
-                    || (spellRank == 2 && !WowInterface.CharacterManager.Inventory.HasItemByName("Conjured Bread"))
-                    || (spellRank == 3 && !WowInterface.CharacterManager.Inventory.HasItemByName("Conjured Rye"))
-                    || (spellRank == 4 && !WowInterface.CharacterManager.Inventory.HasItemByName("Conjured Pumpernickel"))
-                    || (spellRank == 5 && !WowInterface.CharacterManager.Inventory.HasItemByName("Conjured Sourdough"))
-                    || (spellRank == 6 && !WowInterface.CharacterManager.Inventory.HasItemByName("Conjured Sweet Roll"))
-                    || (spellRank == 7 && !WowInterface.CharacterManager.Inventory.HasItemByName("Conjured Cinnamon Roll"))
-                    || (spellRank == 8 && !WowInterface.CharacterManager.Inventory.HasItemByName("Conjured Croissant"))
+                    (spellRank == 1 && !Bot.Character.Inventory.HasItemByName("Conjured Muffin"))
+                    || (spellRank == 2 && !Bot.Character.Inventory.HasItemByName("Conjured Bread"))
+                    || (spellRank == 3 && !Bot.Character.Inventory.HasItemByName("Conjured Rye"))
+                    || (spellRank == 4 && !Bot.Character.Inventory.HasItemByName("Conjured Pumpernickel"))
+                    || (spellRank == 5 && !Bot.Character.Inventory.HasItemByName("Conjured Sourdough"))
+                    || (spellRank == 6 && !Bot.Character.Inventory.HasItemByName("Conjured Sweet Roll"))
+                    || (spellRank == 7 && !Bot.Character.Inventory.HasItemByName("Conjured Cinnamon Roll"))
+                    || (spellRank == 8 && !Bot.Character.Inventory.HasItemByName("Conjured Croissant"))
                     )
                 {
                     TryCastSpell(conjureFoodSpell, 0, true);
@@ -304,19 +304,19 @@ namespace AmeisenBotX.Core.Combat.Classes.Shino
                 }
             }
 
-            if (WowInterface.CharacterManager.SpellBook.IsSpellKnown(conjureRefreshment))
+            if (Bot.Character.SpellBook.IsSpellKnown(conjureRefreshment))
             {
-                Spell spell = WowInterface.CharacterManager.SpellBook.GetSpellByName(conjureRefreshment);
+                Spell spell = Bot.Character.SpellBook.GetSpellByName(conjureRefreshment);
                 spell.TryGetRank(out int spellRank);
 
                 if (spellRank >= 2)
                 {
-                    WowInterface.CharacterManager.Inventory.DestroyItemByName("Conjured Mana Pie");
+                    Bot.Character.Inventory.DestroyItemByName("Conjured Mana Pie");
                 }
 
                 if (
-                    (spellRank == 1 && !WowInterface.CharacterManager.Inventory.HasItemByName("Conjured Mana Pie"))
-                    || (spellRank == 2 && !WowInterface.CharacterManager.Inventory.HasItemByName("Conjured Mana Strudel"))
+                    (spellRank == 1 && !Bot.Character.Inventory.HasItemByName("Conjured Mana Pie"))
+                    || (spellRank == 2 && !Bot.Character.Inventory.HasItemByName("Conjured Mana Strudel"))
                 )
                 {
                     TryCastSpell(conjureRefreshment, 0, true);
@@ -329,12 +329,12 @@ namespace AmeisenBotX.Core.Combat.Classes.Shino
 
         protected override Spell GetOpeningSpell()
         {
-            Spell spell = WowInterface.CharacterManager.SpellBook.GetSpellByName(frostBoltSpell);
+            Spell spell = Bot.Character.SpellBook.GetSpellByName(frostBoltSpell);
             if (spell != null)
             {
                 return spell;
             }
-            return WowInterface.CharacterManager.SpellBook.GetSpellByName(fireballSpell);
+            return Bot.Character.SpellBook.GetSpellByName(fireballSpell);
         }
     }
 }

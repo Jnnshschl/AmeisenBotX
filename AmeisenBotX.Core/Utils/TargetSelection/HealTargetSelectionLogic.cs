@@ -6,18 +6,18 @@ namespace AmeisenBotX.Core.Utils.TargetSelection
 {
     public class HealTargetSelectionLogic : BasicTargetSelectionLogic
     {
-        public HealTargetSelectionLogic(WowInterface wowInterface) : base(wowInterface)
+        public HealTargetSelectionLogic(AmeisenBotInterfaces bot) : base(bot)
         {
         }
 
         public override bool SelectTarget(out IEnumerable<WowUnit> possibleTargets)
         {
-            List<WowUnit> healableUnits = new(WowInterface.Objects.Partymembers)
+            List<WowUnit> healableUnits = new(Bot.Objects.Partymembers)
             {
-                WowInterface.Player
+                Bot.Player
             };
 
-            // healableUnits.AddRange(WowInterface.ObjectManager.PartyPets);
+            // healableUnits.AddRange(Bot.ObjectManager.PartyPets);
 
             possibleTargets = healableUnits
                 .Where(e => !e.IsDead && e.Health < e.MaxHealth)

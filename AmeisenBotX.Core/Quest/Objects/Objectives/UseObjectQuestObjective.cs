@@ -11,18 +11,18 @@ namespace AmeisenBotX.Core.Quest.Objects.Objectives
 
     public class UseObjectQuestObjective : IQuestObjective
     {
-        public UseObjectQuestObjective(WowInterface wowInterface, int objectDisplayId, UseObjectQuestObjectiveCondition condition)
+        public UseObjectQuestObjective(AmeisenBotInterfaces bot, int objectDisplayId, UseObjectQuestObjectiveCondition condition)
         {
-            WowInterface = wowInterface;
+            Bot = bot;
             ObjectDisplayIds = new List<int>() { objectDisplayId };
             Condition = condition;
 
             UseEvent = new(TimeSpan.FromSeconds(1));
         }
 
-        public UseObjectQuestObjective(WowInterface wowInterface, List<int> objectDisplayIds, UseObjectQuestObjectiveCondition condition)
+        public UseObjectQuestObjective(AmeisenBotInterfaces bot, List<int> objectDisplayIds, UseObjectQuestObjectiveCondition condition)
         {
-            WowInterface = wowInterface;
+            Bot = bot;
             ObjectDisplayIds = objectDisplayIds;
             Condition = condition;
 
@@ -41,33 +41,33 @@ namespace AmeisenBotX.Core.Quest.Objects.Objectives
 
         private WowGameobject WowGameobject { get; set; }
 
-        private WowInterface WowInterface { get; }
+        private AmeisenBotInterfaces Bot { get; }
 
         public void Execute()
         {
-            if (Finished || WowInterface.Player.IsCasting) { return; }
+            if (Finished || Bot.Player.IsCasting) { return; }
 
-            WowGameobject = WowInterface.Objects.WowObjects
+            WowGameobject = Bot.Objects.WowObjects
                 .OfType<WowGameobject>()
                 .Where(e => ObjectDisplayIds.Contains(e.DisplayId))
-                .OrderBy(e => e.Position.GetDistance(WowInterface.Player.Position))
+                .OrderBy(e => e.Position.GetDistance(Bot.Player.Position))
                 .FirstOrDefault();
 
             if (WowGameobject != null)
             {
-                if (WowGameobject.Position.GetDistance(WowInterface.Player.Position) < 3.0)
+                if (WowGameobject.Position.GetDistance(Bot.Player.Position) < 3.0)
                 {
                     if (UseEvent.Run())
                     {
-                        WowInterface.NewWowInterface.WowStopClickToMove();
-                        WowInterface.MovementEngine.Reset();
+                        Bot.Wow.WowStopClickToMove();
+                        Bot.Movement.Reset();
 
-                        WowInterface.NewWowInterface.WowObjectRightClick(WowGameobject.BaseAddress);
+                        Bot.Wow.WowObjectRightClick(WowGameobject.BaseAddress);
                     }
                 }
                 else
                 {
-                    WowInterface.MovementEngine.SetMovementAction(MovementAction.Move, WowGameobject.Position);
+                    Bot.Movement.SetMovementAction(MovementAction.Move, WowGameobject.Position);
                 }
             }
         }

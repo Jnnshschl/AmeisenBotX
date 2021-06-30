@@ -8,9 +8,9 @@ namespace AmeisenBotX.Core.Fsm.States.Idle.Actions
 {
     public class SitToChairIdleAction : IIdleAction
     {
-        public SitToChairIdleAction(WowInterface wowInterface, AmeisenBotFsm stateMachine, double maxDistance)
+        public SitToChairIdleAction(AmeisenBotInterfaces bot, AmeisenBotFsm stateMachine, double maxDistance)
         {
-            WowInterface = wowInterface;
+            Bot = bot;
             StateMachine = stateMachine;
             MaxDistance = maxDistance;
         }
@@ -25,7 +25,7 @@ namespace AmeisenBotX.Core.Fsm.States.Idle.Actions
 
         public int MinDuration => 25 * 1000;
 
-        public WowInterface WowInterface { get; }
+        public AmeisenBotInterfaces Bot { get; }
 
         private WowGameobject CurrentSeat { get; set; }
 
@@ -42,14 +42,14 @@ namespace AmeisenBotX.Core.Fsm.States.Idle.Actions
             // get the center from where to cal the distance, this is needed
             // to prevent going out of the follow trigger radius, which
             // would cause a suspicous loop of running around
-            Vector3 originPos = StateMachine.GetState<StateIdle>().IsUnitToFollowThere(out WowUnit unit, false) ? unit.Position : WowInterface.Player.Position;
+            Vector3 originPos = StateMachine.GetState<StateIdle>().IsUnitToFollowThere(out WowUnit unit, false) ? unit.Position : Bot.Player.Position;
 
-            WowGameobject seat = WowInterface.Objects.WowObjects.OfType<WowGameobject>()
+            WowGameobject seat = Bot.Objects.WowObjects.OfType<WowGameobject>()
                 .OrderBy(e => e.Position.GetDistance(originPos))
                 .FirstOrDefault(e => e.GameobjectType == WowGameobjectType.Chair
                     // make sure no one sits on the chair besides ourself
-                    && !WowInterface.Objects.WowObjects.OfType<WowUnit>()
-                        .Where(e => e.Guid != WowInterface.Player.Guid)
+                    && !Bot.Objects.WowObjects.OfType<WowUnit>()
+                        .Where(e => e.Guid != Bot.Wow.PlayerGuid)
                         .Any(x => e.Position.GetDistance(x.Position) < 0.6f)
                     && e.Position.GetDistance(originPos) < MaxDistance - 0.2f);
 
@@ -66,14 +66,14 @@ namespace AmeisenBotX.Core.Fsm.States.Idle.Actions
         {
             if (!SatDown)
             {
-                if (CurrentSeat.Position.GetDistance(WowInterface.Player.Position) > 1.5f)
+                if (CurrentSeat.Position.GetDistance(Bot.Player.Position) > 1.5f)
                 {
-                    WowInterface.MovementEngine.SetMovementAction(MovementAction.Move, CurrentSeat.Position);
+                    Bot.Movement.SetMovementAction(MovementAction.Move, CurrentSeat.Position);
                 }
                 else
                 {
-                    WowInterface.MovementEngine.StopMovement();
-                    WowInterface.NewWowInterface.WowObjectRightClick(CurrentSeat.BaseAddress);
+                    Bot.Movement.StopMovement();
+                    Bot.Wow.WowObjectRightClick(CurrentSeat.BaseAddress);
 
                     SatDown = true;
                 }

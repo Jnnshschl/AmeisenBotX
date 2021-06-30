@@ -84,44 +84,41 @@ namespace AmeisenBotX.Core
 
             ExecutionMsStopwatch = new();
 
-            WowInterface = new();
+            Bot = new();
 
-            WowInterface.OffsetList = new OffsetList335a();
-            AmeisenLogger.I.Log("AmeisenBot", $"Using OffsetList: {WowInterface.OffsetList.GetType()}", LogLevel.Master);
+            Bot.Offsets = new OffsetList335a();
+            AmeisenLogger.I.Log("AmeisenBot", $"Using OffsetList: {Bot.Offsets.GetType()}", LogLevel.Master);
 
-            WowInterface.Globals = new();
-            WowInterface.XMemory = new();
+            Bot.Globals = new();
+            Bot.Memory = new();
 
-            string dbPath = Path.Combine(DataFolder, "db.json");
-            AmeisenLogger.I.Log("AmeisenBot", $"Loading DB from: {dbPath}", LogLevel.Master);
-            WowInterface.Db = LocalAmeisenBotDb.FromJson(dbPath);
+            Bot.Chat = new(Config, DataFolder);
+            Bot.Chat = new(Config, DataFolder);
+            Bot.Chat = new(Config, DataFolder);
+            Bot.CombatLog = new(Bot.Db);
+            //Bot.NewBot = new HookManager(Bot, Config);
+            //Bot.ObjectManager = new ObjectManager(Bot, Config);
+            Bot.Character = new CharacterManager(Bot);
+            Bot.Events = new(Bot);
+            Bot.Jobs = new(Bot, Config);
+            Bot.Dungeon = new DungeonEngine(Bot);
+            Bot.Tactic = new();
+            Bot.PathfindingHandler = new NavmeshServerPathfindingHandler(Config.NavmeshServerIp, Config.NameshServerPort);
+            Bot.MovementSettings = Config.MovementSettings;
+            Bot.Movement = new AMovementEngine(Bot, Config);
 
-            WowInterface.Personality = new();
-            WowInterface.ChatManager = new(Config, DataFolder);
-            WowInterface.CombatLogParser = new(WowInterface);
-            //WowInterface.NewWowInterface = new HookManager(WowInterface, Config);
-            //WowInterface.ObjectManager = new ObjectManager(WowInterface, Config);
-            WowInterface.CharacterManager = new CharacterManager(WowInterface);
-            WowInterface.EventHookManager = new(WowInterface);
-            WowInterface.JobEngine = new(WowInterface, Config);
-            WowInterface.DungeonEngine = new DungeonEngine(WowInterface);
-            WowInterface.TacticEngine = new();
-            WowInterface.PathfindingHandler = new NavmeshServerPathfindingHandler(Config.NavmeshServerIp, Config.NameshServerPort);
-            WowInterface.MovementSettings = Config.MovementSettings;
-            WowInterface.MovementEngine = new AMovementEngine(WowInterface, Config);
-
-            TracelineJumpHookModule jumpModule = new(null, null, WowInterface.XMemory, WowInterface.OffsetList);
+            TracelineJumpHookModule jumpModule = new(null, null, Bot.Memory, Bot.Offsets);
             jumpModule.Tick = () =>
             {
                 // update Traceline Jump Check data
-                if (Config.MovementSettings.EnableTracelineJumpCheck && WowInterface.Player != null)
+                if (Config.MovementSettings.EnableTracelineJumpCheck && Bot.Player != null)
                 {
-                    Vector3 playerPosition = WowInterface.Player.Position;
-                    playerPosition.Z += WowInterface.MovementSettings.ObstacleCheckHeight;
+                    Vector3 playerPosition = Bot.Player.Position;
+                    playerPosition.Z += Bot.MovementSettings.ObstacleCheckHeight;
 
-                    Vector3 pos = BotUtils.MoveAhead(playerPosition, WowInterface.Player.Rotation, WowInterface.MovementSettings.ObstacleCheckDistance);
+                    Vector3 pos = BotUtils.MoveAhead(playerPosition, Bot.Player.Rotation, Bot.MovementSettings.ObstacleCheckDistance);
 
-                    WowInterface.XMemory.Write(jumpModule.DataAddress, (1.0f, playerPosition, pos));
+                    Bot.Memory.Write(jumpModule.DataAddress, (1.0f, playerPosition, pos));
                 }
             };
 
@@ -132,7 +129,7 @@ namespace AmeisenBotX.Core
             string eventHookOutput = BotUtils.FastRandomStringOnlyLetters();
             string eventHookFrameName = BotUtils.FastRandomStringOnlyLetters();
 
-            WowInterface.EventHookManager.EventHookFrameName = eventHookFrameName;
+            Bot.Events.EventHookFrameName = eventHookFrameName;
 
             string oldPoupString = string.Empty;
             string oldBattlegroundStatus = string.Empty;
@@ -142,11 +139,11 @@ namespace AmeisenBotX.Core
                 // Module to process wows events.
                 new RunLuaHookModule((x) =>
                 {
-                    if (WowInterface.XMemory.ReadString(x, Encoding.UTF8, out string s, 8192))
+                    if (Bot.Memory.ReadString(x, Encoding.UTF8, out string s, 8192))
                     {
-                        WowInterface.EventHookManager?.OnEventPush(s);
+                        Bot.Events?.OnEventPush(s);
                     }
-                }, null, WowInterface.XMemory, WowInterface.OffsetList, $"{eventHookOutput}='['function {handlerName}(self,a,...)table.insert({tableName},{{time(),a,{{...}}}})end if {eventHookFrameName}==nil then {tableName}={{}}{eventHookFrameName}=CreateFrame(\"FRAME\"){eventHookFrameName}:SetScript(\"OnEvent\",{handlerName})else for b,c in pairs({tableName})do {eventHookOutput}={eventHookOutput}..'{{'for d,e in pairs(c)do if type(e)==\"table\"then {eventHookOutput}={eventHookOutput}..'\"args\": ['for f,g in pairs(e)do {eventHookOutput}={eventHookOutput}..'\"'..g..'\"'if f<=table.getn(e)then {eventHookOutput}={eventHookOutput}..','end end {eventHookOutput}={eventHookOutput}..']}}'if b<table.getn({tableName})then {eventHookOutput}={eventHookOutput}..','end else if type(e)==\"string\"then {eventHookOutput}={eventHookOutput}..'\"event\": \"'..e..'\",'else {eventHookOutput}={eventHookOutput}..'\"time\": \"'..e..'\",'end end end end end {eventHookOutput}={eventHookOutput}..']'{tableName}={{}}", eventHookOutput),
+                }, null, Bot.Memory, Bot.Offsets, $"{eventHookOutput}='['function {handlerName}(self,a,...)table.insert({tableName},{{time(),a,{{...}}}})end if {eventHookFrameName}==nil then {tableName}={{}}{eventHookFrameName}=CreateFrame(\"FRAME\"){eventHookFrameName}:SetScript(\"OnEvent\",{handlerName})else for b,c in pairs({tableName})do {eventHookOutput}={eventHookOutput}..'{{'for d,e in pairs(c)do if type(e)==\"table\"then {eventHookOutput}={eventHookOutput}..'\"args\": ['for f,g in pairs(e)do {eventHookOutput}={eventHookOutput}..'\"'..g..'\"'if f<=table.getn(e)then {eventHookOutput}={eventHookOutput}..','end end {eventHookOutput}={eventHookOutput}..']}}'if b<table.getn({tableName})then {eventHookOutput}={eventHookOutput}..','end else if type(e)==\"string\"then {eventHookOutput}={eventHookOutput}..'\"event\": \"'..e..'\",'else {eventHookOutput}={eventHookOutput}..'\"time\": \"'..e..'\",'end end end end end {eventHookOutput}={eventHookOutput}..']'{tableName}={{}}", eventHookOutput),
 
                 // Module that does a traceline in front of the character
                 // to detect small obstacles that can be jumped over.
@@ -155,7 +152,7 @@ namespace AmeisenBotX.Core
                 // Modules that monitors the STATIC_POPUP windows.
                 new RunLuaHookModule((x) =>
                 {
-                    if (WowInterface.XMemory.ReadString(x, Encoding.UTF8, out string s, 128))
+                    if (Bot.Memory.ReadString(x, Encoding.UTF8, out string s, 128))
                     {
                         if (!string.IsNullOrWhiteSpace(s))
                         {
@@ -170,12 +167,12 @@ namespace AmeisenBotX.Core
                             oldPoupString = string.Empty;
                         }
                     }
-                }, null, WowInterface.XMemory, WowInterface.OffsetList, $"{staticPopupsVarName}=\"\"for b=1,STATICPOPUP_NUMDIALOGS do local c=_G[\"StaticPopup\"..b]if c:IsShown()then {staticPopupsVarName}={staticPopupsVarName}..b..\":\"..c.which..\"; \"end end", staticPopupsVarName),
+                }, null, Bot.Memory, Bot.Offsets, $"{staticPopupsVarName}=\"\"for b=1,STATICPOPUP_NUMDIALOGS do local c=_G[\"StaticPopup\"..b]if c:IsShown()then {staticPopupsVarName}={staticPopupsVarName}..b..\":\"..c.which..\"; \"end end", staticPopupsVarName),
 
                 // Module to monitor the battleground (and queue) status.
                 new RunLuaHookModule((x) =>
                 {
-                    if (WowInterface.XMemory.ReadString(x, Encoding.UTF8, out string s, 128))
+                    if (Bot.Memory.ReadString(x, Encoding.UTF8, out string s, 128))
                     {
                         if (!string.IsNullOrWhiteSpace(s))
                         {
@@ -190,12 +187,16 @@ namespace AmeisenBotX.Core
                             oldPoupString = string.Empty;
                         }
                     }
-                }, null, WowInterface.XMemory, WowInterface.OffsetList, $"{battlegroundStatusVarName}=\"\"for b=1,MAX_BATTLEFIELD_QUEUES do local c,d,e,f,g,h=GetBattlefieldStatus(b)local i=GetBattlefieldTimeWaited(b)/1000;{battlegroundStatusVarName}={battlegroundStatusVarName}..b..\":\"..tostring(c or\"unknown\")..\":\"..tostring(d or\"unknown\")..\":\"..tostring(e or\"unknown\")..\":\"..tostring(f or\"unknown\")..\":\"..tostring(g or\"unknown\")..\":\"..tostring(h or\"unknown\")..\":\"..tostring(i or\"unknown\")..\";\"end", battlegroundStatusVarName),
+                }, null, Bot.Memory, Bot.Offsets, $"{battlegroundStatusVarName}=\"\"for b=1,MAX_BATTLEFIELD_QUEUES do local c,d,e,f,g,h=GetBattlefieldStatus(b)local i=GetBattlefieldTimeWaited(b)/1000;{battlegroundStatusVarName}={battlegroundStatusVarName}..b..\":\"..tostring(c or\"unknown\")..\":\"..tostring(d or\"unknown\")..\":\"..tostring(e or\"unknown\")..\":\"..tostring(f or\"unknown\")..\":\"..tostring(g or\"unknown\")..\":\"..tostring(h or\"unknown\")..\":\"..tostring(i or\"unknown\")..\";\"end", battlegroundStatusVarName),
             };
 
-            WowInterface.NewWowInterface = new WowInterface335a(WowInterface.XMemory, WowInterface.OffsetList, hookModules);
+            Bot.Wow = new WowInterface335a(Bot.Memory, Bot.Offsets, hookModules);
 
-            StateMachine = new(Config, WowInterface);
+            string dbPath = Path.Combine(DataFolder, "db.json");
+            AmeisenLogger.I.Log("AmeisenBot", $"Loading DB from: {dbPath}", LogLevel.Master);
+            Bot.Db = LocalAmeisenBotDb.FromJson(dbPath, Bot.Memory, Bot.Offsets, Bot.Wow.LuaGetSpellNameById, Bot.Wow.WowGetReaction);
+
+            StateMachine = new(Config, Bot);
             StateMachine.GetState<StateStartWow>().OnWoWStarted += () =>
             {
                 if (Config.SaveWowWindowPosition)
@@ -204,10 +205,10 @@ namespace AmeisenBotX.Core
                 }
             };
 
-            WowInterface.QuestEngine = new(WowInterface, Config, StateMachine);
-            WowInterface.GrindingEngine = new(WowInterface, Config, StateMachine);
+            Bot.Quest = new(Bot, Config, StateMachine);
+            Bot.Grinding = new(Bot, Config, StateMachine);
 
-            AmeisenLogger.I.Log("AmeisenBot", "Finished setting up WowInterface", LogLevel.Verbose);
+            AmeisenLogger.I.Log("AmeisenBot", "Finished setting up Bot", LogLevel.Verbose);
 
             if (Config.RconEnabled)
             {
@@ -275,7 +276,7 @@ namespace AmeisenBotX.Core
 
         public AmeisenBotFsm StateMachine { get; set; }
 
-        public WowInterface WowInterface { get; set; }
+        public AmeisenBotInterfaces Bot { get; set; }
 
         private TimegatedEvent BagUpdateEvent { get; set; }
 
@@ -309,21 +310,21 @@ namespace AmeisenBotX.Core
                 RconClientTimer.Dispose();
             }
 
-            WowInterface.EventHookManager.Stop();
+            Bot.Events.Stop();
 
             if (Config.AutocloseWow || Config.AutoPositionWow)
             {
-                WowInterface.NewWowInterface.LuaDoString("ForceQuit()");
+                Bot.Wow.LuaDoString("ForceQuit()");
 
                 // wait 5 sec for wow to exit, otherwise we kill it
                 TimeSpan timeToWait = TimeSpan.FromSeconds(5);
                 DateTime exited = DateTime.UtcNow;
 
-                while (!WowInterface.WowProcess.HasExited)
+                while (!Bot.Memory.Process.HasExited)
                 {
                     if (DateTime.UtcNow - exited > timeToWait)
                     {
-                        WowInterface.WowProcess.Kill();
+                        Bot.Memory.Process.Kill();
                         break;
                     }
                     else
@@ -333,10 +334,10 @@ namespace AmeisenBotX.Core
                 }
             }
 
-            WowInterface.NewWowInterface.Dispose();
-            WowInterface.XMemory.Dispose();
+            Bot.Wow.Dispose();
+            Bot.Memory.Dispose();
 
-            WowInterface.Db.Save(Path.Combine(DataFolder, "db.json"));
+            Bot.Db.Save(Path.Combine(DataFolder, "db.json"));
 
             AmeisenLogger.I.Log("AmeisenBot", $"Exiting AmeisenBot", LogLevel.Debug);
             AmeisenLogger.I.Stop();
@@ -446,11 +447,11 @@ namespace AmeisenBotX.Core
             // add battleground engines here
             BattlegroundEngines = new List<IBattlegroundEngine>()
             {
-                new UniversalBattlegroundEngine(WowInterface),
-                new ArathiBasin(WowInterface),
-                new StrandOfTheAncients(WowInterface),
-                new EyeOfTheStorm(WowInterface),
-                new RunBoyRunEngine(WowInterface)
+                new UniversalBattlegroundEngine(Bot),
+                new ArathiBasin(Bot),
+                new StrandOfTheAncients(Bot),
+                new EyeOfTheStorm(Bot),
+                new RunBoyRunEngine(Bot)
             };
         }
 
@@ -459,49 +460,49 @@ namespace AmeisenBotX.Core
             // add combat classes here
             CombatClasses = new List<ICombatClass>()
             {
-                new Combat.Classes.Jannis.DeathknightBlood(WowInterface, StateMachine),
-                new Combat.Classes.Jannis.DeathknightFrost(WowInterface, StateMachine),
-                new Combat.Classes.Jannis.DeathknightUnholy(WowInterface, StateMachine),
-                new Combat.Classes.Jannis.DruidBalance(WowInterface, StateMachine),
-                new Combat.Classes.Jannis.DruidFeralBear(WowInterface, StateMachine),
-                new Combat.Classes.Jannis.DruidFeralCat(WowInterface, StateMachine),
-                new Combat.Classes.Jannis.DruidRestoration(WowInterface, StateMachine),
-                new Combat.Classes.Jannis.HunterBeastmastery(WowInterface, StateMachine),
-                new Combat.Classes.Jannis.HunterMarksmanship(WowInterface, StateMachine),
-                new Combat.Classes.Jannis.HunterSurvival(WowInterface, StateMachine),
-                new Combat.Classes.Jannis.MageArcane(WowInterface, StateMachine),
-                new Combat.Classes.Jannis.MageFire(WowInterface, StateMachine),
-                new Combat.Classes.Jannis.PaladinHoly(WowInterface, StateMachine),
-                new Combat.Classes.Jannis.PaladinProtection(WowInterface, StateMachine),
-                new Combat.Classes.Jannis.PaladinRetribution(WowInterface, StateMachine),
-                new Combat.Classes.Jannis.PriestDiscipline(WowInterface, StateMachine),
-                new Combat.Classes.Jannis.PriestHoly(WowInterface, StateMachine),
-                new Combat.Classes.Jannis.PriestShadow(WowInterface, StateMachine),
-                new Combat.Classes.Jannis.RogueAssassination(WowInterface, StateMachine),
-                new Combat.Classes.Jannis.ShamanElemental(WowInterface, StateMachine),
-                new Combat.Classes.Jannis.ShamanEnhancement(WowInterface, StateMachine),
-                new Combat.Classes.Jannis.ShamanRestoration(WowInterface, StateMachine),
-                new Combat.Classes.Jannis.WarlockAffliction(WowInterface, StateMachine),
-                new Combat.Classes.Jannis.WarlockDemonology(WowInterface, StateMachine),
-                new Combat.Classes.Jannis.WarlockDestruction(WowInterface, StateMachine),
-                new Combat.Classes.Jannis.WarriorArms(WowInterface, StateMachine),
-                new Combat.Classes.Jannis.WarriorFury(WowInterface, StateMachine),
-                new Combat.Classes.Jannis.WarriorProtection(WowInterface, StateMachine),
-                new Combat.Classes.Kamel.DeathknightBlood(WowInterface),
-                new Combat.Classes.Kamel.RestorationShaman(WowInterface),
-                new Combat.Classes.Kamel.ShamanEnhancement(WowInterface),
-                new Combat.Classes.Kamel.PaladinProtection(WowInterface),
-                new Combat.Classes.Kamel.PriestHoly(WowInterface),
-                new Combat.Classes.Kamel.WarriorFury(WowInterface),
-                new Combat.Classes.Kamel.WarriorArms(WowInterface),
-                new Combat.Classes.Kamel.RogueAssassination(WowInterface),
-                new Combat.Classes.einTyp.PaladinProtection(WowInterface),
-                new Combat.Classes.einTyp.RogueAssassination(WowInterface),
-                new Combat.Classes.einTyp.WarriorArms(WowInterface),
-                new Combat.Classes.einTyp.WarriorFury(WowInterface),
-                new Combat.Classes.ToadLump.Rogue(WowInterface, StateMachine),
-                new Combat.Classes.Shino.PriestShadow(WowInterface, StateMachine),
-                new Combat.Classes.Shino.MageFrost(WowInterface, StateMachine),
+                new Combat.Classes.Jannis.DeathknightBlood(Bot, StateMachine),
+                new Combat.Classes.Jannis.DeathknightFrost(Bot, StateMachine),
+                new Combat.Classes.Jannis.DeathknightUnholy(Bot, StateMachine),
+                new Combat.Classes.Jannis.DruidBalance(Bot, StateMachine),
+                new Combat.Classes.Jannis.DruidFeralBear(Bot, StateMachine),
+                new Combat.Classes.Jannis.DruidFeralCat(Bot, StateMachine),
+                new Combat.Classes.Jannis.DruidRestoration(Bot, StateMachine),
+                new Combat.Classes.Jannis.HunterBeastmastery(Bot, StateMachine),
+                new Combat.Classes.Jannis.HunterMarksmanship(Bot, StateMachine),
+                new Combat.Classes.Jannis.HunterSurvival(Bot, StateMachine),
+                new Combat.Classes.Jannis.MageArcane(Bot, StateMachine),
+                new Combat.Classes.Jannis.MageFire(Bot, StateMachine),
+                new Combat.Classes.Jannis.PaladinHoly(Bot, StateMachine),
+                new Combat.Classes.Jannis.PaladinProtection(Bot, StateMachine),
+                new Combat.Classes.Jannis.PaladinRetribution(Bot, StateMachine),
+                new Combat.Classes.Jannis.PriestDiscipline(Bot, StateMachine),
+                new Combat.Classes.Jannis.PriestHoly(Bot, StateMachine),
+                new Combat.Classes.Jannis.PriestShadow(Bot, StateMachine),
+                new Combat.Classes.Jannis.RogueAssassination(Bot, StateMachine),
+                new Combat.Classes.Jannis.ShamanElemental(Bot, StateMachine),
+                new Combat.Classes.Jannis.ShamanEnhancement(Bot, StateMachine),
+                new Combat.Classes.Jannis.ShamanRestoration(Bot, StateMachine),
+                new Combat.Classes.Jannis.WarlockAffliction(Bot, StateMachine),
+                new Combat.Classes.Jannis.WarlockDemonology(Bot, StateMachine),
+                new Combat.Classes.Jannis.WarlockDestruction(Bot, StateMachine),
+                new Combat.Classes.Jannis.WarriorArms(Bot, StateMachine),
+                new Combat.Classes.Jannis.WarriorFury(Bot, StateMachine),
+                new Combat.Classes.Jannis.WarriorProtection(Bot, StateMachine),
+                new Combat.Classes.Kamel.DeathknightBlood(Bot),
+                new Combat.Classes.Kamel.RestorationShaman(Bot),
+                new Combat.Classes.Kamel.ShamanEnhancement(Bot),
+                new Combat.Classes.Kamel.PaladinProtection(Bot),
+                new Combat.Classes.Kamel.PriestHoly(Bot),
+                new Combat.Classes.Kamel.WarriorFury(Bot),
+                new Combat.Classes.Kamel.WarriorArms(Bot),
+                new Combat.Classes.Kamel.RogueAssassination(Bot),
+                new Combat.Classes.einTyp.PaladinProtection(Bot),
+                new Combat.Classes.einTyp.RogueAssassination(Bot),
+                new Combat.Classes.einTyp.WarriorArms(Bot),
+                new Combat.Classes.einTyp.WarriorFury(Bot),
+                new Combat.Classes.ToadLump.Rogue(Bot, StateMachine),
+                new Combat.Classes.Shino.PriestShadow(Bot, StateMachine),
+                new Combat.Classes.Shino.MageFrost(Bot, StateMachine),
             };
         }
 
@@ -530,9 +531,9 @@ namespace AmeisenBotX.Core
             // add quest profiles here
             QuestProfiles = new List<IQuestProfile>()
             {
-                new DeathknightStartAreaQuestProfile(WowInterface),
-                new X5Horde1To80Profile(WowInterface),
-                new Horde1To60GrinderProfile(WowInterface)
+                new DeathknightStartAreaQuestProfile(Bot),
+                new X5Horde1To80Profile(Bot),
+                new Horde1To60GrinderProfile(Bot)
             };
         }
 
@@ -544,13 +545,13 @@ namespace AmeisenBotX.Core
                 || !File.Exists(Config.CustomCombatClassFile))
             {
                 AmeisenLogger.I.Log("AmeisenBot", "Loading default CombatClass", LogLevel.Debug);
-                WowInterface.CombatClass = LoadClassByName(CombatClasses, Config.BuiltInCombatClassName);
+                Bot.CombatClass = LoadClassByName(CombatClasses, Config.BuiltInCombatClassName);
             }
             else
             {
                 try
                 {
-                    WowInterface.CombatClass = CompileCustomCombatClass();
+                    Bot.CombatClass = CompileCustomCombatClass();
                     OnCombatClassCompilationStatusChanged?.Invoke(true, string.Empty, string.Empty);
                     AmeisenLogger.I.Log("AmeisenBot", $"Compiling custom CombatClass successful", LogLevel.Debug);
                 }
@@ -558,7 +559,7 @@ namespace AmeisenBotX.Core
                 {
                     AmeisenLogger.I.Log("AmeisenBot", $"Compiling custom CombatClass failed:\n{e}", LogLevel.Error);
                     OnCombatClassCompilationStatusChanged?.Invoke(false, e.GetType().Name, e.ToString());
-                    WowInterface.CombatClass = LoadClassByName(CombatClasses, Config.BuiltInCombatClassName);
+                    Bot.CombatClass = LoadClassByName(CombatClasses, Config.BuiltInCombatClassName);
                 }
             }
         }
@@ -567,7 +568,7 @@ namespace AmeisenBotX.Core
         {
             if (Config.UseBuiltInCombatClass)
             {
-                WowInterface.CombatClass = LoadClassByName(CombatClasses, Config.BuiltInCombatClassName);
+                Bot.CombatClass = LoadClassByName(CombatClasses, Config.BuiltInCombatClassName);
             }
             else
             {
@@ -576,29 +577,29 @@ namespace AmeisenBotX.Core
 
             // if a combatclass specified an ItemComparator
             // use it instead of the default one
-            if (WowInterface.CombatClass?.ItemComparator != null)
+            if (Bot.CombatClass?.ItemComparator != null)
             {
-                WowInterface.CharacterManager.ItemComparator = WowInterface.CombatClass.ItemComparator;
+                Bot.Character.ItemComparator = Bot.CombatClass.ItemComparator;
             }
 
-            WowInterface.BattlegroundEngine = LoadClassByName(BattlegroundEngines, Config.BattlegroundEngine);
-            WowInterface.GrindingEngine.Profile = LoadClassByName(GrindingProfiles, Config.GrindingProfile);
-            WowInterface.JobEngine.Profile = LoadClassByName(JobProfiles, Config.JobProfile);
-            WowInterface.QuestEngine.Profile = LoadClassByName(QuestProfiles, Config.QuestProfile);
+            Bot.Battleground = LoadClassByName(BattlegroundEngines, Config.BattlegroundEngine);
+            Bot.Grinding.Profile = LoadClassByName(GrindingProfiles, Config.GrindingProfile);
+            Bot.Jobs.Profile = LoadClassByName(JobProfiles, Config.JobProfile);
+            Bot.Quest.Profile = LoadClassByName(QuestProfiles, Config.QuestProfile);
         }
 
         private void LoadWowWindowPosition()
         {
             if (Config.SaveWowWindowPosition && !Config.AutoPositionWow)
             {
-                if (WowInterface.XMemory.Process.MainWindowHandle != IntPtr.Zero && Config.WowWindowRect != new Rect() { Left = -1, Top = -1, Right = -1, Bottom = -1 })
+                if (Bot.Memory.Process.MainWindowHandle != IntPtr.Zero && Config.WowWindowRect != new Rect() { Left = -1, Top = -1, Right = -1, Bottom = -1 })
                 {
-                    XMemory.SetWindowPosition(WowInterface.XMemory.Process.MainWindowHandle, Config.WowWindowRect);
+                    XMemory.SetWindowPosition(Bot.Memory.Process.MainWindowHandle, Config.WowWindowRect);
                     AmeisenLogger.I.Log("AmeisenBot", $"Loaded window position: {Config.WowWindowRect}", LogLevel.Verbose);
                 }
                 else
                 {
-                    AmeisenLogger.I.Log("AmeisenBot", $"Unable to load window position of {WowInterface.XMemory.Process.MainWindowHandle} to {Config.WowWindowRect}", LogLevel.Warning);
+                    AmeisenLogger.I.Log("AmeisenBot", $"Unable to load window position of {Bot.Memory.Process.MainWindowHandle} to {Config.WowWindowRect}", LogLevel.Warning);
                 }
             }
         }
@@ -607,24 +608,24 @@ namespace AmeisenBotX.Core
         {
             if (BagUpdateEvent.Run())
             {
-                WowInterface.CharacterManager.Inventory.Update();
-                WowInterface.CharacterManager.Equipment.Update();
+                Bot.Character.Inventory.Update();
+                Bot.Character.Equipment.Update();
 
-                WowInterface.CharacterManager.UpdateCharacterGear();
-                WowInterface.CharacterManager.UpdateCharacterBags();
+                Bot.Character.UpdateCharacterGear();
+                Bot.Character.UpdateCharacterBags();
 
-                WowInterface.CharacterManager.Inventory.Update();
+                Bot.Character.Inventory.Update();
             }
         }
 
         private void OnConfirmBindOnPickup(long timestamp, List<string> args)
         {
-            WowInterface.NewWowInterface.LuaCofirmStaticPopup();
+            Bot.Wow.LuaCofirmStaticPopup();
         }
 
         private void OnConfirmLootRoll(long timestamp, List<string> args)
         {
-            WowInterface.NewWowInterface.LuaCofirmLootRoll();
+            Bot.Wow.LuaCofirmLootRoll();
         }
 
         private void OnEquipmentChanged(long timestamp, List<string> args)
@@ -639,7 +640,7 @@ namespace AmeisenBotX.Core
         {
             if (Config.AutojoinLfg)
             {
-                WowInterface.NewWowInterface.LuaClickUiElement("LFDDungeonReadyDialogEnterDungeonButton");
+                Bot.Wow.LuaClickUiElement("LFDDungeonReadyDialogEnterDungeonButton");
             }
         }
 
@@ -647,7 +648,7 @@ namespace AmeisenBotX.Core
         {
             if (Config.AutojoinLfg)
             {
-                WowInterface.NewWowInterface.LuaSetLfgRole(WowInterface.CombatClass != null ? WowInterface.CombatClass.Role : WowRole.Dps);
+                Bot.Wow.LuaSetLfgRole(Bot.CombatClass != null ? Bot.CombatClass.Role : WowRole.Dps);
             }
         }
 
@@ -655,42 +656,42 @@ namespace AmeisenBotX.Core
         {
             if (int.TryParse(args[0], out int rollId))
             {
-                string itemLink = WowInterface.NewWowInterface.LuaGetLootRollItemLink(rollId);
-                string itemJson = WowInterface.NewWowInterface.LuaGetItemJsonByNameOrLink(itemLink);
+                string itemLink = Bot.Wow.LuaGetLootRollItemLink(rollId);
+                string itemJson = Bot.Wow.LuaGetItemJsonByNameOrLink(itemLink);
 
                 WowBasicItem item = ItemFactory.BuildSpecificItem(ItemFactory.ParseItem(itemJson));
 
                 if (item.Name == "0" || item.ItemLink == "0")
                 {
                     // get the item id and try again
-                    itemJson = WowInterface.NewWowInterface.LuaGetItemJsonByNameOrLink(
+                    itemJson = Bot.Wow.LuaGetItemJsonByNameOrLink(
                         itemLink.Split(new string[] { "Hitem:" }, StringSplitOptions.RemoveEmptyEntries)[1]
                         .Split(new string[] { ":" }, StringSplitOptions.RemoveEmptyEntries)[0]);
 
                     item = ItemFactory.BuildSpecificItem(ItemFactory.ParseItem(itemJson));
                 }
 
-                if (WowInterface.CharacterManager.IsItemAnImprovement(item, out IWowItem itemToReplace))
+                if (Bot.Character.IsItemAnImprovement(item, out IWowItem itemToReplace))
                 {
                     AmeisenLogger.I.Log("WoWEvents", $"Would like to replace item {item?.Name} with {itemToReplace?.Name}, rolling need", LogLevel.Verbose);
 
-                    WowInterface.NewWowInterface.LuaRollOnLoot(rollId, WowRollType.Need);
+                    Bot.Wow.LuaRollOnLoot(rollId, WowRollType.Need);
                     return;
                 }
             }
 
-            WowInterface.NewWowInterface.LuaRollOnLoot(rollId, WowRollType.Pass);
+            Bot.Wow.LuaRollOnLoot(rollId, WowRollType.Pass);
         }
 
         private void OnLootWindowOpened(long timestamp, List<string> args)
         {
             if (Config.LootOnlyMoneyAndQuestitems)
             {
-                WowInterface.NewWowInterface.LuaLootMoneyAndQuestItems();
+                Bot.Wow.LuaLootMoneyAndQuestItems();
                 return;
             }
 
-            WowInterface.NewWowInterface.LuaLootEveryThing();
+            Bot.Wow.LuaLootEveryThing();
         }
 
         private void OnPartyInvitation(long timestamp, List<string> args)
@@ -700,7 +701,7 @@ namespace AmeisenBotX.Core
                 return;
             }
 
-            WowInterface.NewWowInterface.LuaAcceptPartyInvite();
+            Bot.Wow.LuaAcceptPartyInvite();
         }
 
         private void OnPvpQueueShow(long timestamp, List<string> args)
@@ -709,7 +710,7 @@ namespace AmeisenBotX.Core
             {
                 if (args.Count == 1 && args[0] == "1")
                 {
-                    WowInterface.NewWowInterface.LuaAcceptBattlegroundInvite();
+                    Bot.Wow.LuaAcceptBattlegroundInvite();
                 }
             }
         }
@@ -718,7 +719,7 @@ namespace AmeisenBotX.Core
         {
             if (Config.AutoAcceptQuests && StateMachine.CurrentState.Key != BotState.Questing)
             {
-                WowInterface.NewWowInterface.LuaDoString("ConfirmAcceptQuest();");
+                Bot.Wow.LuaDoString("ConfirmAcceptQuest();");
             }
         }
 
@@ -728,7 +729,7 @@ namespace AmeisenBotX.Core
                 && StateMachine.CurrentState.Key != BotState.Selling
                 && StateMachine.CurrentState.Key != BotState.Repairing)
             {
-                WowInterface.NewWowInterface.LuaAcceptQuests();
+                Bot.Wow.LuaAcceptQuests();
             }
         }
 
@@ -736,47 +737,47 @@ namespace AmeisenBotX.Core
         {
             if (Config.AutoAcceptQuests && StateMachine.CurrentState.Key != BotState.Questing)
             {
-                WowInterface.NewWowInterface.LuaClickUiElement("QuestFrameCompleteQuestButton");
+                Bot.Wow.LuaClickUiElement("QuestFrameCompleteQuestButton");
             }
         }
 
         private void OnReadyCheck(long timestamp, List<string> args)
         {
-            WowInterface.NewWowInterface.LuaCofirmReadyCheck(true);
+            Bot.Wow.LuaCofirmReadyCheck(true);
         }
 
         private void OnResurrectRequest(long timestamp, List<string> args)
         {
-            WowInterface.NewWowInterface.LuaAcceptResurrect();
+            Bot.Wow.LuaAcceptResurrect();
         }
 
         private void OnShowQuestFrame(long timestamp, List<string> args)
         {
             if (Config.AutoAcceptQuests && StateMachine.CurrentState.Key != BotState.Questing)
             {
-                WowInterface.NewWowInterface.LuaDoString("AcceptQuest();");
+                Bot.Wow.LuaDoString("AcceptQuest();");
             }
         }
 
         private void OnSummonRequest(long timestamp, List<string> args)
         {
-            WowInterface.NewWowInterface.LuaAcceptSummon();
+            Bot.Wow.LuaAcceptSummon();
         }
 
         private void OnTalentPointsChange(long timestamp, List<string> args)
         {
-            if (WowInterface.CombatClass != null && WowInterface.CombatClass.Talents != null && !TalentUpdateRunning)
+            if (Bot.CombatClass != null && Bot.CombatClass.Talents != null && !TalentUpdateRunning)
             {
                 TalentUpdateRunning = true;
-                WowInterface.CharacterManager.TalentManager.Update();
-                WowInterface.CharacterManager.TalentManager.SelectTalents(WowInterface.CombatClass.Talents, WowInterface.NewWowInterface.LuaGetUnspentTalentPoints());
+                Bot.Character.TalentManager.Update();
+                Bot.Character.TalentManager.SelectTalents(Bot.CombatClass.Talents, Bot.Wow.LuaGetUnspentTalentPoints());
                 TalentUpdateRunning = false;
             }
         }
 
         private void OnTradeAcceptUpdate(long timestamp, List<string> args)
         {
-            WowInterface.NewWowInterface.LuaDoString("AcceptTrade();");
+            Bot.Wow.LuaDoString("AcceptTrade();");
         }
 
         private void RconClientTimerTick(object state)
@@ -789,59 +790,59 @@ namespace AmeisenBotX.Core
 
             try
             {
-                if (WowInterface.RconClient != null)
+                if (Bot.Rcon != null)
                 {
                     try
                     {
-                        if (WowInterface.RconClient.NeedToRegister)
+                        if (Bot.Rcon.NeedToRegister)
                         {
-                            WowInterface.RconClient.Register();
+                            Bot.Rcon.Register();
                         }
                         else
                         {
-                            int currentResource = WowInterface.Player.Class switch
+                            int currentResource = Bot.Player.Class switch
                             {
-                                WowClass.Deathknight => WowInterface.Player.Runeenergy,
-                                WowClass.Rogue => WowInterface.Player.Energy,
-                                WowClass.Warrior => WowInterface.Player.Rage,
-                                _ => WowInterface.Player.Mana,
+                                WowClass.Deathknight => Bot.Player.Runeenergy,
+                                WowClass.Rogue => Bot.Player.Energy,
+                                WowClass.Warrior => Bot.Player.Rage,
+                                _ => Bot.Player.Mana,
                             };
 
-                            int maxResource = WowInterface.Player.Class switch
+                            int maxResource = Bot.Player.Class switch
                             {
-                                WowClass.Deathknight => WowInterface.Player.MaxRuneenergy,
-                                WowClass.Rogue => WowInterface.Player.MaxEnergy,
-                                WowClass.Warrior => WowInterface.Player.MaxRage,
-                                _ => WowInterface.Player.MaxMana,
+                                WowClass.Deathknight => Bot.Player.MaxRuneenergy,
+                                WowClass.Rogue => Bot.Player.MaxEnergy,
+                                WowClass.Warrior => Bot.Player.MaxRage,
+                                _ => Bot.Player.MaxMana,
                             };
 
-                            WowInterface.RconClient.SendData(new DataMessage()
+                            Bot.Rcon.SendData(new DataMessage()
                             {
                                 BagSlotsFree = 0,
-                                CombatClass = WowInterface.CombatClass != null ? WowInterface.CombatClass.Role.ToString() : "NoCombatClass",
+                                CombatClass = Bot.CombatClass != null ? Bot.CombatClass.Role.ToString() : "NoCombatClass",
                                 CurrentProfile = "",
                                 Energy = currentResource,
-                                Exp = WowInterface.Player.Xp,
-                                Health = WowInterface.Player.Health,
-                                ItemLevel = (int)Math.Round(WowInterface.CharacterManager.Equipment.AverageItemLevel),
-                                Level = WowInterface.Player.Level,
-                                MapName = WowInterface.Objects.MapId.ToString(),
+                                Exp = Bot.Player.Xp,
+                                Health = Bot.Player.Health,
+                                ItemLevel = (int)Math.Round(Bot.Character.Equipment.AverageItemLevel),
+                                Level = Bot.Player.Level,
+                                MapName = Bot.Objects.MapId.ToString(),
                                 MaxEnergy = maxResource,
-                                MaxExp = WowInterface.Player.NextLevelXp,
-                                MaxHealth = WowInterface.Player.MaxHealth,
-                                Money = WowInterface.CharacterManager.Money,
-                                PosX = WowInterface.Player.Position.X,
-                                PosY = WowInterface.Player.Position.Y,
-                                PosZ = WowInterface.Player.Position.Z,
+                                MaxExp = Bot.Player.NextLevelXp,
+                                MaxHealth = Bot.Player.MaxHealth,
+                                Money = Bot.Character.Money,
+                                PosX = Bot.Player.Position.X,
+                                PosY = Bot.Player.Position.Y,
+                                PosZ = Bot.Player.Position.Z,
                                 State = StateMachine.CurrentState.Key.ToString(),
-                                SubZoneName = WowInterface.Objects.ZoneSubName,
-                                ZoneName = WowInterface.Objects.ZoneName,
+                                SubZoneName = Bot.Objects.ZoneSubName,
+                                ZoneName = Bot.Objects.ZoneName,
                             });
 
                             if (Config.RconSendScreenshots && RconScreenshotEvent.Run())
                             {
                                 Rect rc = new();
-                                Win32Imports.GetWindowRect(WowInterface.XMemory.Process.MainWindowHandle, ref rc);
+                                Win32Imports.GetWindowRect(Bot.Memory.Process.MainWindowHandle, ref rc);
                                 Bitmap bmp = new(rc.Right - rc.Left, rc.Bottom - rc.Top, PixelFormat.Format32bppArgb);
 
                                 using (Graphics g = Graphics.FromImage(bmp))
@@ -852,14 +853,14 @@ namespace AmeisenBotX.Core
                                 using MemoryStream ms = new();
                                 bmp.Save(ms, ImageFormat.Png);
 
-                                WowInterface.RconClient.SendImage($"data:image/png;base64,{Convert.ToBase64String(ms.GetBuffer())}");
+                                Bot.Rcon.SendImage($"data:image/png;base64,{Convert.ToBase64String(ms.GetBuffer())}");
                             }
 
-                            WowInterface.RconClient.PullPendingActions();
+                            Bot.Rcon.PullPendingActions();
 
-                            if (WowInterface.RconClient.PendingActions.Any())
+                            if (Bot.Rcon.PendingActions.Any())
                             {
-                                switch (WowInterface.RconClient.PendingActions.First())
+                                switch (Bot.Rcon.PendingActions.First())
                                 {
                                     case ActionType.PauseResume:
                                         if (IsRunning)
@@ -893,7 +894,7 @@ namespace AmeisenBotX.Core
             {
                 try
                 {
-                    Config.WowWindowRect = XMemory.GetWindowPosition(WowInterface.XMemory.Process.MainWindowHandle);
+                    Config.WowWindowRect = XMemory.GetWindowPosition(Bot.Memory.Process.MainWindowHandle);
                 }
                 catch (Exception e)
                 {
@@ -904,19 +905,19 @@ namespace AmeisenBotX.Core
 
         private void SetupRconClient()
         {
-            WowInterface.Objects.OnObjectUpdateComplete += delegate
+            Bot.Objects.OnObjectUpdateComplete += delegate
             {
-                if (!NeedToSetupRconClient && WowInterface.Player != null)
+                if (!NeedToSetupRconClient && Bot.Player != null)
                 {
                     NeedToSetupRconClient = true;
-                    WowInterface.RconClient = new
+                    Bot.Rcon = new
                     (
                         Config.RconServerAddress,
-                        WowInterface.Db.GetUnitName(WowInterface.Player, out string name) ? name : "unknown",
-                        WowInterface.Player.Race.ToString(),
-                        WowInterface.Player.Gender.ToString(),
-                        WowInterface.Player.Class.ToString(),
-                        WowInterface.CombatClass != null ? WowInterface.CombatClass.Role.ToString() : "dps",
+                        Bot.Db.GetUnitName(Bot.Player, out string name) ? name : "unknown",
+                        Bot.Player.Race.ToString(),
+                        Bot.Player.Gender.ToString(),
+                        Bot.Player.Class.ToString(),
+                        Bot.CombatClass != null ? Bot.CombatClass.Role.ToString() : "dps",
                         Config.RconServerImage,
                         Config.RconServerGuid
                     );
@@ -951,73 +952,73 @@ namespace AmeisenBotX.Core
             EquipmentUpdateEvent = new(TimeSpan.FromSeconds(1));
 
             // Request Events
-            WowInterface.EventHookManager.Subscribe("PARTY_INVITE_REQUEST", OnPartyInvitation);
-            WowInterface.EventHookManager.Subscribe("RESURRECT_REQUEST", OnResurrectRequest);
-            WowInterface.EventHookManager.Subscribe("CONFIRM_SUMMON", OnSummonRequest);
-            WowInterface.EventHookManager.Subscribe("READY_CHECK", OnReadyCheck);
+            Bot.Events.Subscribe("PARTY_INVITE_REQUEST", OnPartyInvitation);
+            Bot.Events.Subscribe("RESURRECT_REQUEST", OnResurrectRequest);
+            Bot.Events.Subscribe("CONFIRM_SUMMON", OnSummonRequest);
+            Bot.Events.Subscribe("READY_CHECK", OnReadyCheck);
 
             // Loot/Item Events
-            WowInterface.EventHookManager.Subscribe("LOOT_OPENED", OnLootWindowOpened);
-            WowInterface.EventHookManager.Subscribe("LOOT_BIND_CONFIRM", OnConfirmBindOnPickup);
-            WowInterface.EventHookManager.Subscribe("AUTOEQUIP_BIND_CONFIRM", OnConfirmBindOnPickup);
-            WowInterface.EventHookManager.Subscribe("CONFIRM_LOOT_ROLL", OnConfirmLootRoll);
-            WowInterface.EventHookManager.Subscribe("START_LOOT_ROLL", OnLootRollStarted);
-            WowInterface.EventHookManager.Subscribe("BAG_UPDATE", OnBagChanged);
-            WowInterface.EventHookManager.Subscribe("PLAYER_EQUIPMENT_CHANGED", OnEquipmentChanged);
-            // WowInterface.EventHookManager.Subscribe("DELETE_ITEM_CONFIRM", OnConfirmDeleteItem);
+            Bot.Events.Subscribe("LOOT_OPENED", OnLootWindowOpened);
+            Bot.Events.Subscribe("LOOT_BIND_CONFIRM", OnConfirmBindOnPickup);
+            Bot.Events.Subscribe("AUTOEQUIP_BIND_CONFIRM", OnConfirmBindOnPickup);
+            Bot.Events.Subscribe("CONFIRM_LOOT_ROLL", OnConfirmLootRoll);
+            Bot.Events.Subscribe("START_LOOT_ROLL", OnLootRollStarted);
+            Bot.Events.Subscribe("BAG_UPDATE", OnBagChanged);
+            Bot.Events.Subscribe("PLAYER_EQUIPMENT_CHANGED", OnEquipmentChanged);
+            // Bot.EventHookManager.Subscribe("DELETE_ITEM_CONFIRM", OnConfirmDeleteItem);
 
             // Merchant Events
-            // WowInterface.EventHookManager.Subscribe("MERCHANT_SHOW", OnMerchantShow);
+            // Bot.EventHookManager.Subscribe("MERCHANT_SHOW", OnMerchantShow);
 
             // PvP Events
-            WowInterface.EventHookManager.Subscribe("UPDATE_BATTLEFIELD_STATUS", OnPvpQueueShow);
-            WowInterface.EventHookManager.Subscribe("PVPQUEUE_ANYWHERE_SHOW", OnPvpQueueShow);
+            Bot.Events.Subscribe("UPDATE_BATTLEFIELD_STATUS", OnPvpQueueShow);
+            Bot.Events.Subscribe("PVPQUEUE_ANYWHERE_SHOW", OnPvpQueueShow);
 
             // Dungeon Events
-            WowInterface.EventHookManager.Subscribe("LFG_ROLE_CHECK_SHOW", OnLfgRoleCheckShow);
-            WowInterface.EventHookManager.Subscribe("LFG_PROPOSAL_SHOW", OnLfgProposalShow);
+            Bot.Events.Subscribe("LFG_ROLE_CHECK_SHOW", OnLfgRoleCheckShow);
+            Bot.Events.Subscribe("LFG_PROPOSAL_SHOW", OnLfgProposalShow);
 
             // Quest Events
-            WowInterface.EventHookManager.Subscribe("QUEST_DETAIL", OnShowQuestFrame);
-            WowInterface.EventHookManager.Subscribe("QUEST_ACCEPT_CONFIRM", OnQuestAcceptConfirm);
-            WowInterface.EventHookManager.Subscribe("QUEST_GREETING", OnQuestGreeting);
-            WowInterface.EventHookManager.Subscribe("QUEST_COMPLETE", OnQuestProgress);
-            WowInterface.EventHookManager.Subscribe("QUEST_PROGRESS", OnQuestProgress);
-            WowInterface.EventHookManager.Subscribe("GOSSIP_SHOW", OnQuestGreeting);
+            Bot.Events.Subscribe("QUEST_DETAIL", OnShowQuestFrame);
+            Bot.Events.Subscribe("QUEST_ACCEPT_CONFIRM", OnQuestAcceptConfirm);
+            Bot.Events.Subscribe("QUEST_GREETING", OnQuestGreeting);
+            Bot.Events.Subscribe("QUEST_COMPLETE", OnQuestProgress);
+            Bot.Events.Subscribe("QUEST_PROGRESS", OnQuestProgress);
+            Bot.Events.Subscribe("GOSSIP_SHOW", OnQuestGreeting);
 
             // Trading Events
-            WowInterface.EventHookManager.Subscribe("TRADE_ACCEPT_UPDATE", OnTradeAcceptUpdate);
+            Bot.Events.Subscribe("TRADE_ACCEPT_UPDATE", OnTradeAcceptUpdate);
 
             // Chat Events
-            WowInterface.EventHookManager.Subscribe("CHAT_MSG_ADDON", (t, a) => WowInterface.ChatManager.TryParseMessage(WowChat.ADDON, t, a));
-            WowInterface.EventHookManager.Subscribe("CHAT_MSG_CHANNEL", (t, a) => WowInterface.ChatManager.TryParseMessage(WowChat.CHANNEL, t, a));
-            WowInterface.EventHookManager.Subscribe("CHAT_MSG_EMOTE", (t, a) => WowInterface.ChatManager.TryParseMessage(WowChat.EMOTE, t, a));
-            WowInterface.EventHookManager.Subscribe("CHAT_MSG_FILTERED", (t, a) => WowInterface.ChatManager.TryParseMessage(WowChat.FILTERED, t, a));
-            WowInterface.EventHookManager.Subscribe("CHAT_MSG_GUILD", (t, a) => WowInterface.ChatManager.TryParseMessage(WowChat.GUILD, t, a));
-            WowInterface.EventHookManager.Subscribe("CHAT_MSG_GUILD_ACHIEVEMENT", (t, a) => WowInterface.ChatManager.TryParseMessage(WowChat.GUILD_ACHIEVEMENT, t, a));
-            WowInterface.EventHookManager.Subscribe("CHAT_MSG_IGNORED", (t, a) => WowInterface.ChatManager.TryParseMessage(WowChat.IGNORED, t, a));
-            WowInterface.EventHookManager.Subscribe("CHAT_MSG_MONSTER_EMOTE", (t, a) => WowInterface.ChatManager.TryParseMessage(WowChat.MONSTER_EMOTE, t, a));
-            WowInterface.EventHookManager.Subscribe("CHAT_MSG_MONSTER_PARTY", (t, a) => WowInterface.ChatManager.TryParseMessage(WowChat.MONSTER_PARTY, t, a));
-            WowInterface.EventHookManager.Subscribe("CHAT_MSG_MONSTER_SAY", (t, a) => WowInterface.ChatManager.TryParseMessage(WowChat.MONSTER_SAY, t, a));
-            WowInterface.EventHookManager.Subscribe("CHAT_MSG_MONSTER_WHISPER", (t, a) => WowInterface.ChatManager.TryParseMessage(WowChat.MONSTER_WHISPER, t, a));
-            WowInterface.EventHookManager.Subscribe("CHAT_MSG_MONSTER_YELL", (t, a) => WowInterface.ChatManager.TryParseMessage(WowChat.MONSTER_YELL, t, a));
-            WowInterface.EventHookManager.Subscribe("CHAT_MSG_OFFICER", (t, a) => WowInterface.ChatManager.TryParseMessage(WowChat.OFFICER, t, a));
-            WowInterface.EventHookManager.Subscribe("CHAT_MSG_PARTY", (t, a) => WowInterface.ChatManager.TryParseMessage(WowChat.PARTY, t, a));
-            WowInterface.EventHookManager.Subscribe("CHAT_MSG_PARTY_LEADER", (t, a) => WowInterface.ChatManager.TryParseMessage(WowChat.PARTY_LEADER, t, a));
-            WowInterface.EventHookManager.Subscribe("CHAT_MSG_RAID", (t, a) => WowInterface.ChatManager.TryParseMessage(WowChat.RAID, t, a));
-            WowInterface.EventHookManager.Subscribe("CHAT_MSG_RAID_BOSS_EMOTE", (t, a) => WowInterface.ChatManager.TryParseMessage(WowChat.RAID_BOSS_EMOTE, t, a));
-            WowInterface.EventHookManager.Subscribe("CHAT_MSG_RAID_BOSS_WHISPER", (t, a) => WowInterface.ChatManager.TryParseMessage(WowChat.RAID_BOSS_WHISPER, t, a));
-            WowInterface.EventHookManager.Subscribe("CHAT_MSG_RAID_LEADER", (t, a) => WowInterface.ChatManager.TryParseMessage(WowChat.RAID_LEADER, t, a));
-            WowInterface.EventHookManager.Subscribe("CHAT_MSG_RAID_WARNING", (t, a) => WowInterface.ChatManager.TryParseMessage(WowChat.RAID_WARNING, t, a));
-            WowInterface.EventHookManager.Subscribe("CHAT_MSG_SAY", (t, a) => WowInterface.ChatManager.TryParseMessage(WowChat.SAY, t, a));
-            WowInterface.EventHookManager.Subscribe("CHAT_MSG_SYSTEM", (t, a) => WowInterface.ChatManager.TryParseMessage(WowChat.SYSTEM, t, a));
-            WowInterface.EventHookManager.Subscribe("CHAT_MSG_TEXT_EMOTE", (t, a) => WowInterface.ChatManager.TryParseMessage(WowChat.TEXT_EMOTE, t, a));
-            WowInterface.EventHookManager.Subscribe("CHAT_MSG_WHISPER", (t, a) => WowInterface.ChatManager.TryParseMessage(WowChat.WHISPER, t, a));
-            WowInterface.EventHookManager.Subscribe("CHAT_MSG_YELL", (t, a) => WowInterface.ChatManager.TryParseMessage(WowChat.YELL, t, a));
+            Bot.Events.Subscribe("CHAT_MSG_ADDON", (t, a) => Bot.Chat.TryParseMessage(WowChat.ADDON, t, a));
+            Bot.Events.Subscribe("CHAT_MSG_CHANNEL", (t, a) => Bot.Chat.TryParseMessage(WowChat.CHANNEL, t, a));
+            Bot.Events.Subscribe("CHAT_MSG_EMOTE", (t, a) => Bot.Chat.TryParseMessage(WowChat.EMOTE, t, a));
+            Bot.Events.Subscribe("CHAT_MSG_FILTERED", (t, a) => Bot.Chat.TryParseMessage(WowChat.FILTERED, t, a));
+            Bot.Events.Subscribe("CHAT_MSG_GUILD", (t, a) => Bot.Chat.TryParseMessage(WowChat.GUILD, t, a));
+            Bot.Events.Subscribe("CHAT_MSG_GUILD_ACHIEVEMENT", (t, a) => Bot.Chat.TryParseMessage(WowChat.GUILD_ACHIEVEMENT, t, a));
+            Bot.Events.Subscribe("CHAT_MSG_IGNORED", (t, a) => Bot.Chat.TryParseMessage(WowChat.IGNORED, t, a));
+            Bot.Events.Subscribe("CHAT_MSG_MONSTER_EMOTE", (t, a) => Bot.Chat.TryParseMessage(WowChat.MONSTER_EMOTE, t, a));
+            Bot.Events.Subscribe("CHAT_MSG_MONSTER_PARTY", (t, a) => Bot.Chat.TryParseMessage(WowChat.MONSTER_PARTY, t, a));
+            Bot.Events.Subscribe("CHAT_MSG_MONSTER_SAY", (t, a) => Bot.Chat.TryParseMessage(WowChat.MONSTER_SAY, t, a));
+            Bot.Events.Subscribe("CHAT_MSG_MONSTER_WHISPER", (t, a) => Bot.Chat.TryParseMessage(WowChat.MONSTER_WHISPER, t, a));
+            Bot.Events.Subscribe("CHAT_MSG_MONSTER_YELL", (t, a) => Bot.Chat.TryParseMessage(WowChat.MONSTER_YELL, t, a));
+            Bot.Events.Subscribe("CHAT_MSG_OFFICER", (t, a) => Bot.Chat.TryParseMessage(WowChat.OFFICER, t, a));
+            Bot.Events.Subscribe("CHAT_MSG_PARTY", (t, a) => Bot.Chat.TryParseMessage(WowChat.PARTY, t, a));
+            Bot.Events.Subscribe("CHAT_MSG_PARTY_LEADER", (t, a) => Bot.Chat.TryParseMessage(WowChat.PARTY_LEADER, t, a));
+            Bot.Events.Subscribe("CHAT_MSG_RAID", (t, a) => Bot.Chat.TryParseMessage(WowChat.RAID, t, a));
+            Bot.Events.Subscribe("CHAT_MSG_RAID_BOSS_EMOTE", (t, a) => Bot.Chat.TryParseMessage(WowChat.RAID_BOSS_EMOTE, t, a));
+            Bot.Events.Subscribe("CHAT_MSG_RAID_BOSS_WHISPER", (t, a) => Bot.Chat.TryParseMessage(WowChat.RAID_BOSS_WHISPER, t, a));
+            Bot.Events.Subscribe("CHAT_MSG_RAID_LEADER", (t, a) => Bot.Chat.TryParseMessage(WowChat.RAID_LEADER, t, a));
+            Bot.Events.Subscribe("CHAT_MSG_RAID_WARNING", (t, a) => Bot.Chat.TryParseMessage(WowChat.RAID_WARNING, t, a));
+            Bot.Events.Subscribe("CHAT_MSG_SAY", (t, a) => Bot.Chat.TryParseMessage(WowChat.SAY, t, a));
+            Bot.Events.Subscribe("CHAT_MSG_SYSTEM", (t, a) => Bot.Chat.TryParseMessage(WowChat.SYSTEM, t, a));
+            Bot.Events.Subscribe("CHAT_MSG_TEXT_EMOTE", (t, a) => Bot.Chat.TryParseMessage(WowChat.TEXT_EMOTE, t, a));
+            Bot.Events.Subscribe("CHAT_MSG_WHISPER", (t, a) => Bot.Chat.TryParseMessage(WowChat.WHISPER, t, a));
+            Bot.Events.Subscribe("CHAT_MSG_YELL", (t, a) => Bot.Chat.TryParseMessage(WowChat.YELL, t, a));
 
             // Misc Events
-            WowInterface.EventHookManager.Subscribe("CHARACTER_POINTS_CHANGED", OnTalentPointsChange);
-            // WowInterface.EventHookManager.Subscribe("COMBAT_LOG_EVENT_UNFILTERED", WowInterface.CombatLogParser.Parse);
+            Bot.Events.Subscribe("CHARACTER_POINTS_CHANGED", OnTalentPointsChange);
+            // Bot.EventHookManager.Subscribe("COMBAT_LOG_EVENT_UNFILTERED", Bot.CombatLogParser.Parse);
         }
     }
 }

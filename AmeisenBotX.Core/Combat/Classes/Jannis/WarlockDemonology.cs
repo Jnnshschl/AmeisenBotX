@@ -14,35 +14,35 @@ namespace AmeisenBotX.Core.Combat.Classes.Jannis
 {
     public class WarlockDemonology : BasicCombatClass
     {
-        public WarlockDemonology(WowInterface wowInterface, AmeisenBotFsm stateMachine) : base(wowInterface, stateMachine)
+        public WarlockDemonology(AmeisenBotInterfaces bot, AmeisenBotFsm stateMachine) : base(bot, stateMachine)
         {
             PetManager = new PetManager
             (
-                WowInterface,
+                Bot,
                 TimeSpan.FromSeconds(1),
                 null,
-                () => (WowInterface.CharacterManager.SpellBook.IsSpellKnown(summonFelguardSpell)
-                       && WowInterface.CharacterManager.Inventory.HasItemByName("Soul Shard")
+                () => (Bot.Character.SpellBook.IsSpellKnown(summonFelguardSpell)
+                       && Bot.Character.Inventory.HasItemByName("Soul Shard")
                        && TryCastSpell(summonFelguardSpell, 0, true))
-                   || (WowInterface.CharacterManager.SpellBook.IsSpellKnown(summonImpSpell)
+                   || (Bot.Character.SpellBook.IsSpellKnown(summonImpSpell)
                        && TryCastSpell(summonImpSpell, 0, true)),
-                () => (WowInterface.CharacterManager.SpellBook.IsSpellKnown(summonFelguardSpell)
-                       && WowInterface.CharacterManager.Inventory.HasItemByName("Soul Shard")
+                () => (Bot.Character.SpellBook.IsSpellKnown(summonFelguardSpell)
+                       && Bot.Character.Inventory.HasItemByName("Soul Shard")
                        && TryCastSpell(summonFelguardSpell, 0, true))
-                   || (WowInterface.CharacterManager.SpellBook.IsSpellKnown(summonImpSpell)
+                   || (Bot.Character.SpellBook.IsSpellKnown(summonImpSpell)
                        && TryCastSpell(summonImpSpell, 0, true))
             );
 
-            MyAuraManager.Jobs.Add(new KeepBestActiveAuraJob(new List<(string, Func<bool>)>()
+            MyAuraManager.Jobs.Add(new KeepBestActiveAuraJob(bot.Db, new List<(string, Func<bool>)>()
             {
                 (felArmorSpell, () => TryCastSpell(felArmorSpell, 0, true)),
                 (demonArmorSpell, () => TryCastSpell(demonArmorSpell, 0, true)),
                 (demonSkinSpell, () => TryCastSpell(demonSkinSpell, 0, true)),
             }));
 
-            TargetAuraManager.Jobs.Add(new KeepActiveAuraJob(corruptionSpell, () => WowInterface.Target != null && !WowInterface.Target.HasBuffByName(seedOfCorruptionSpell) && TryCastSpell(corruptionSpell, WowInterface.Target.Guid, true)));
-            TargetAuraManager.Jobs.Add(new KeepActiveAuraJob(curseOfTonguesSpell, () => TryCastSpell(curseOfTonguesSpell, WowInterface.Target.Guid, true)));
-            TargetAuraManager.Jobs.Add(new KeepActiveAuraJob(immolateSpell, () => TryCastSpell(immolateSpell, WowInterface.Target.Guid, true)));
+            TargetAuraManager.Jobs.Add(new KeepActiveAuraJob(bot.Db, corruptionSpell, () => Bot.Target != null && !Bot.Target.Auras.Any(e => Bot.Db.GetSpellName(e.SpellId) == seedOfCorruptionSpell) && TryCastSpell(corruptionSpell, Bot.Wow.TargetGuid, true)));
+            TargetAuraManager.Jobs.Add(new KeepActiveAuraJob(bot.Db, curseOfTonguesSpell, () => TryCastSpell(curseOfTonguesSpell, Bot.Wow.TargetGuid, true)));
+            TargetAuraManager.Jobs.Add(new KeepActiveAuraJob(bot.Db, immolateSpell, () => TryCastSpell(immolateSpell, Bot.Wow.TargetGuid, true)));
         }
 
         public override string Description => "FCFS based CombatClass for the Demonology Warlock spec.";
@@ -112,65 +112,65 @@ namespace AmeisenBotX.Core.Combat.Classes.Jannis
             {
                 if (PetManager.Tick()) { return; }
 
-                if (WowInterface.Player.ManaPercentage < 50.0
-                        && WowInterface.Player.HealthPercentage > 60.0
+                if (Bot.Player.ManaPercentage < 50.0
+                        && Bot.Player.HealthPercentage > 60.0
                         && TryCastSpell(lifeTapSpell, 0)
-                    || (WowInterface.Player.HealthPercentage < 80.0
-                        && TryCastSpell(deathCoilSpell, WowInterface.Target.Guid, true))
-                    || (WowInterface.Player.HealthPercentage < 50.0
-                        && TryCastSpell(drainLifeSpell, WowInterface.Target.Guid, true))
+                    || (Bot.Player.HealthPercentage < 80.0
+                        && TryCastSpell(deathCoilSpell, Bot.Wow.TargetGuid, true))
+                    || (Bot.Player.HealthPercentage < 50.0
+                        && TryCastSpell(drainLifeSpell, Bot.Wow.TargetGuid, true))
                     || TryCastSpell(metamorphosisSpell, 0)
-                    || (WowInterface.Objects.Pet?.Health > 0 && TryCastSpell(demonicEmpowermentSpell, 0)))
+                    || (Bot.Objects.Pet?.Health > 0 && TryCastSpell(demonicEmpowermentSpell, 0)))
                 {
                     return;
                 }
 
-                if (WowInterface.Target != null)
+                if (Bot.Target != null)
                 {
-                    if (WowInterface.Target.GetType() == typeof(WowPlayer))
+                    if (Bot.Target.GetType() == typeof(WowPlayer))
                     {
                         if (DateTime.UtcNow - LastFearAttempt > TimeSpan.FromSeconds(5)
-                            && ((WowInterface.Player.Position.GetDistance(WowInterface.Target.Position) < 6.0f
+                            && ((Bot.Player.Position.GetDistance(Bot.Target.Position) < 6.0f
                                 && TryCastSpell(howlOfTerrorSpell, 0, true))
-                            || (WowInterface.Player.Position.GetDistance(WowInterface.Target.Position) < 12.0f
-                                && TryCastSpell(fearSpell, WowInterface.Target.Guid, true))))
+                            || (Bot.Player.Position.GetDistance(Bot.Target.Position) < 12.0f
+                                && TryCastSpell(fearSpell, Bot.Wow.TargetGuid, true))))
                         {
                             LastFearAttempt = DateTime.UtcNow;
                             return;
                         }
                     }
 
-                    if (WowInterface.CharacterManager.Inventory.Items.Count(e => e.Name.Equals("Soul Shard", StringComparison.OrdinalIgnoreCase)) < 5.0
-                        && WowInterface.Target.HealthPercentage < 25.0
-                        && TryCastSpell(drainSoulSpell, WowInterface.Target.Guid, true))
+                    if (Bot.Character.Inventory.Items.Count(e => e.Name.Equals("Soul Shard", StringComparison.OrdinalIgnoreCase)) < 5.0
+                        && Bot.Target.HealthPercentage < 25.0
+                        && TryCastSpell(drainSoulSpell, Bot.Wow.TargetGuid, true))
                     {
                         return;
                     }
                 }
 
-                if (WowInterface.Objects.GetNearEnemies<WowUnit>(WowInterface.Db.GetReaction, WowInterface.Target.Position, 16.0f).Count() > 2
-                    && !WowInterface.Target.HasBuffByName(seedOfCorruptionSpell)
-                    && TryCastSpell(seedOfCorruptionSpell, WowInterface.Target.Guid, true))
+                if (Bot.Objects.GetNearEnemies<WowUnit>(Bot.Db.GetReaction, Bot.Target.Position, 16.0f).Count() > 2
+                    && !Bot.Target.Auras.Any(e => Bot.Db.GetSpellName(e.SpellId) == seedOfCorruptionSpell)
+                    && TryCastSpell(seedOfCorruptionSpell, Bot.Wow.TargetGuid, true))
                 {
                     return;
                 }
 
-                bool hasDecimation = WowInterface.Player.HasBuffByName(decimationSpell);
-                bool hasMoltenCore = WowInterface.Player.HasBuffByName(moltenCoreSpell);
+                bool hasDecimation = Bot.Player.Auras.Any(e => Bot.Db.GetSpellName(e.SpellId) == decimationSpell);
+                bool hasMoltenCore = Bot.Player.Auras.Any(e => Bot.Db.GetSpellName(e.SpellId) == moltenCoreSpell);
 
-                if (hasDecimation && hasMoltenCore && TryCastSpell(soulfireSpell, WowInterface.Target.Guid, true))
+                if (hasDecimation && hasMoltenCore && TryCastSpell(soulfireSpell, Bot.Wow.TargetGuid, true))
                 {
                     return;
                 }
-                else if (hasDecimation && TryCastSpell(soulfireSpell, WowInterface.Target.Guid, true))
+                else if (hasDecimation && TryCastSpell(soulfireSpell, Bot.Wow.TargetGuid, true))
                 {
                     return;
                 }
-                else if (hasMoltenCore && TryCastSpell(incinerateSpell, WowInterface.Target.Guid, true))
+                else if (hasMoltenCore && TryCastSpell(incinerateSpell, Bot.Wow.TargetGuid, true))
                 {
                     return;
                 }
-                else if (TryCastSpell(shadowBoltSpell, WowInterface.Target.Guid, true))
+                else if (TryCastSpell(shadowBoltSpell, Bot.Wow.TargetGuid, true))
                 {
                     return;
                 }

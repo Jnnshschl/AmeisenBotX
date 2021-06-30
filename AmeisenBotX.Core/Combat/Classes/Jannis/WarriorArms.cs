@@ -13,12 +13,12 @@ namespace AmeisenBotX.Core.Combat.Classes.Jannis
 {
     public class WarriorArms : BasicCombatClass
     {
-        public WarriorArms(WowInterface wowInterface, AmeisenBotFsm stateMachine) : base(wowInterface, stateMachine)
+        public WarriorArms(AmeisenBotInterfaces bot, AmeisenBotFsm stateMachine) : base(bot, stateMachine)
         {
-            MyAuraManager.Jobs.Add(new KeepActiveAuraJob(battleShoutSpell, () => TryCastSpell(battleShoutSpell, 0, true)));
+            MyAuraManager.Jobs.Add(new KeepActiveAuraJob(bot.Db, battleShoutSpell, () => TryCastSpell(battleShoutSpell, 0, true)));
 
-            TargetAuraManager.Jobs.Add(new KeepActiveAuraJob(hamstringSpell, () => WowInterface.Target?.Type == WowObjectType.Player && TryCastSpell(hamstringSpell, WowInterface.Target.Guid, true)));
-            TargetAuraManager.Jobs.Add(new KeepActiveAuraJob(rendSpell, () => WowInterface.Target?.Type == WowObjectType.Player && WowInterface.Player.Rage > 75 && TryCastSpell(rendSpell, WowInterface.Target.Guid, true)));
+            TargetAuraManager.Jobs.Add(new KeepActiveAuraJob(bot.Db, hamstringSpell, () => Bot.Target?.Type == WowObjectType.Player && TryCastSpell(hamstringSpell, Bot.Wow.TargetGuid, true)));
+            TargetAuraManager.Jobs.Add(new KeepActiveAuraJob(bot.Db, rendSpell, () => Bot.Target?.Type == WowObjectType.Player && Bot.Player.Rage > 75 && TryCastSpell(rendSpell, Bot.Wow.TargetGuid, true)));
 
             InterruptManager.InterruptSpells = new()
             {
@@ -97,30 +97,30 @@ namespace AmeisenBotX.Core.Combat.Classes.Jannis
 
             if (SelectTarget(TargetProviderDps))
             {
-                if (WowInterface.Target != null)
+                if (Bot.Target != null)
                 {
-                    double distanceToTarget = WowInterface.Target.Position.GetDistance(WowInterface.Player.Position);
+                    double distanceToTarget = Bot.Target.Position.GetDistance(Bot.Player.Position);
 
                     if (distanceToTarget > 3.0)
                     {
-                        if (TryCastSpellWarrior(chargeSpell, battleStanceSpell, WowInterface.Target.Guid, true)
-                            || TryCastSpellWarrior(interceptSpell, berserkerStanceSpell, WowInterface.Target.Guid, true))
+                        if (TryCastSpellWarrior(chargeSpell, battleStanceSpell, Bot.Wow.TargetGuid, true)
+                            || TryCastSpellWarrior(interceptSpell, berserkerStanceSpell, Bot.Wow.TargetGuid, true))
                         {
                             return;
                         }
                     }
                     else
                     {
-                        if ((WowInterface.Target.HealthPercentage < 20 || WowInterface.Target.HasBuffByName("Sudden Death"))
-                           && TryCastSpellWarrior(executeSpell, battleStanceSpell, WowInterface.Target.Guid, true))
+                        if ((Bot.Target.HealthPercentage < 20 || Bot.Target.Auras.Any(e => Bot.Db.GetSpellName(e.SpellId) == "Sudden Death"))
+                           && TryCastSpellWarrior(executeSpell, battleStanceSpell, Bot.Wow.TargetGuid, true))
                         {
                             return;
                         }
 
-                        if ((WowInterface.Objects.WowObjects.OfType<WowUnit>().Where(e => WowInterface.Target.Position.GetDistance(e.Position) < 8).Count() > 2 && TryCastSpell(bladestormSpell, 0, true))
-                            || TryCastSpellWarrior(overpowerSpell, battleStanceSpell, WowInterface.Target.Guid, true)
-                            || TryCastSpellWarrior(mortalStrikeSpell, battleStanceSpell, WowInterface.Target.Guid, true)
-                            || (HeroicStrikeEvent.Run() && TryCastSpellWarrior(heroicStrikeSpell, battleStanceSpell, WowInterface.Target.Guid, true)))
+                        if ((Bot.Objects.WowObjects.OfType<WowUnit>().Where(e => Bot.Target.Position.GetDistance(e.Position) < 8).Count() > 2 && TryCastSpell(bladestormSpell, 0, true))
+                            || TryCastSpellWarrior(overpowerSpell, battleStanceSpell, Bot.Wow.TargetGuid, true)
+                            || TryCastSpellWarrior(mortalStrikeSpell, battleStanceSpell, Bot.Wow.TargetGuid, true)
+                            || (HeroicStrikeEvent.Run() && TryCastSpellWarrior(heroicStrikeSpell, battleStanceSpell, Bot.Wow.TargetGuid, true)))
                         {
                             return;
                         }

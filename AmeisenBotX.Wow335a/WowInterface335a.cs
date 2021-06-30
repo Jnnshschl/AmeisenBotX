@@ -14,7 +14,10 @@ using System.Collections.Generic;
 
 namespace AmeisenBotX.Wow335a
 {
-    public class WowInterface335a : INewWowInterface
+    /// <summary>
+    /// WowInterface for the game version 3.3.5a 12340.
+    /// </summary>
+    public class WowInterface335a : IWowInterface
     {
         public WowInterface335a(XMemory xMemory, IOffsetList offsetList, List<IHookModule> hookModules)
         {

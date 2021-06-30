@@ -7,15 +7,15 @@ namespace AmeisenBotX.Core.Quest.Quests.TheBarrens.Crossroads
 {
     internal class QRaptorThieves : BotQuest
     {
-        public QRaptorThieves(WowInterface wowInterface)
-            : base(wowInterface, 869, "Raptor Thieves", 9, 1,
-                () => (wowInterface.Objects.GetClosestWowUnitByNpcId(wowInterface.Player.Position, new List<int> { 3464 }), new Vector3(-435.95f, -2639.21f, 96.36f)),
-                () => (wowInterface.Objects.GetClosestWowUnitByNpcId(wowInterface.Player.Position, new List<int> { 3464 }), new Vector3(-435.95f, -2639.21f, 96.36f)),
+        public QRaptorThieves(AmeisenBotInterfaces bot)
+            : base(bot, 869, "Raptor Thieves", 9, 1,
+                () => (bot.Objects.GetClosestWowUnitByNpcId(bot.Player.Position, new List<int> { 3464 }), new Vector3(-435.95f, -2639.21f, 96.36f)),
+                () => (bot.Objects.GetClosestWowUnitByNpcId(bot.Player.Position, new List<int> { 3464 }), new Vector3(-435.95f, -2639.21f, 96.36f)),
                 new List<IQuestObjective>()
                 {
                     new QuestObjectiveChain(new List<IQuestObjective>()
                     {
-                        new KillAndLootQuestObjective(wowInterface, new List<int> { 3254,3255,3256,3257,5842 }, 12, 5062, new List<List<Vector3>> {
+                        new KillAndLootQuestObjective(bot, new List<int> { 3254,3255,3256,3257,5842 }, 12, 5062, new List<List<Vector3>> {
                             new()
                             {
                                 new Vector3(-332.38f, -1044.35f, 41.14f),

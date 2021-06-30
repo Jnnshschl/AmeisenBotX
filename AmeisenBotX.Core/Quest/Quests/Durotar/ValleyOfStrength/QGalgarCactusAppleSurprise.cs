@@ -7,15 +7,15 @@ namespace AmeisenBotX.Core.Quest.Quests.Durotar.ValleyOfStrength
 {
     internal class QGalgarCactusAppleSurprise : BotQuest
     {
-        public QGalgarCactusAppleSurprise(WowInterface wowInterface)
-            : base(wowInterface, 4402, "Galgar's Cactus Apple Surprise", 1, 1,
-                () => (wowInterface.Objects.GetClosestWowUnitByNpcId(wowInterface.Player.Position, new List<int> { 9796 }), new Vector3(-561.63f, -4221.80f, 41.67f)),
-                () => (wowInterface.Objects.GetClosestWowUnitByNpcId(wowInterface.Player.Position, new List<int> { 9796 }), new Vector3(-561.63f, -4221.80f, 41.67f)),
+        public QGalgarCactusAppleSurprise(AmeisenBotInterfaces bot)
+            : base(bot, 4402, "Galgar's Cactus Apple Surprise", 1, 1,
+                () => (bot.Objects.GetClosestWowUnitByNpcId(bot.Player.Position, new List<int> { 9796 }), new Vector3(-561.63f, -4221.80f, 41.67f)),
+                () => (bot.Objects.GetClosestWowUnitByNpcId(bot.Player.Position, new List<int> { 9796 }), new Vector3(-561.63f, -4221.80f, 41.67f)),
                 new List<IQuestObjective>()
                 {
                     new QuestObjectiveChain(new List<IQuestObjective>()
                     {
-                        new CollectQuestObjective(wowInterface, 11583, 6, new List<int> { 171938 }, new List<Vector3> {
+                        new CollectQuestObjective(bot, 11583, 6, new List<int> { 171938 }, new List<Vector3> {
                             new Vector3(-489.09f, -4301.17f, 42.87f),
                             new Vector3(-406.27f, -4279.20f, 46.38f),
                             new Vector3(-487.61f, -4277.06f, 43.01f),

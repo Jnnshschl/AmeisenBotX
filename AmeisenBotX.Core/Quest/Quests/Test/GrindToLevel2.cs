@@ -7,13 +7,13 @@ namespace AmeisenBotX.Core.Quest.Quests.StartArea.ValleyOfStrength
 {
     internal class GrindToLevel2 : GrindingBotQuest
     {
-        public GrindToLevel2(WowInterface wowInterface)
+        public GrindToLevel2(AmeisenBotInterfaces bot)
             : base("Test Grind Boars in Valley of Strength",
                 new List<IQuestObjective>()
                 {
                     new QuestObjectiveChain(new List<IQuestObjective>()
                     {
-                        new GrindingObjective(wowInterface, 2, new List<List<Vector3>> {
+                        new GrindingObjective(bot, 2, new List<List<Vector3>> {
                             new()
                             {
                                 new Vector3(-486.28f, -4144.73f, 54.75f),

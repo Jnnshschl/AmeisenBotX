@@ -13,9 +13,9 @@ namespace AmeisenBotX.Core.Event
     /// </summary>
     public class EventHook
     {
-        public EventHook(WowInterface wowInterface)
+        public EventHook(AmeisenBotInterfaces bot)
         {
-            WowInterface = wowInterface;
+            Bot = bot;
 
             Setup();
 
@@ -51,7 +51,7 @@ namespace AmeisenBotX.Core.Event
 
         private Queue<string> PendingLuaToExecute { get; set; }
 
-        private WowInterface WowInterface { get; }
+        private AmeisenBotInterfaces Bot { get; }
 
         /// <summary>
         /// Call this periodically to handle the subscription and unsubscription queues.
@@ -63,7 +63,7 @@ namespace AmeisenBotX.Core.Event
 
             // execute the pending lua stuff
             if (PendingLuaToExecute.Count > 0
-                && WowInterface.NewWowInterface.LuaDoString(PendingLuaToExecute.Peek()))
+                && Bot.Wow.LuaDoString(PendingLuaToExecute.Peek()))
             {
                 PendingLuaToExecute.Dequeue();
             }
@@ -122,10 +122,10 @@ namespace AmeisenBotX.Core.Event
 
                 IsActive = false;
 
-                if (WowInterface.NewWowInterface.IsWoWHooked)
+                if (Bot.Wow.IsWoWHooked)
                 {
-                    WowInterface.NewWowInterface.LuaDoString($"{EventHookFrameName}:UnregisterAllEvents();");
-                    WowInterface.NewWowInterface.LuaDoString($"{EventHookFrameName}:SetScript(\"OnEvent\", nil);");
+                    Bot.Wow.LuaDoString($"{EventHookFrameName}:UnregisterAllEvents();");
+                    Bot.Wow.LuaDoString($"{EventHookFrameName}:SetScript(\"OnEvent\", nil);");
                 }
             }
         }

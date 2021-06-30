@@ -11,9 +11,9 @@ namespace AmeisenBotX.Core.Tactic.Dungeon.PitOfSaron
 {
     public class IckAndKrickTactic : ITactic
     {
-        public IckAndKrickTactic(WowInterface wowInterface)
+        public IckAndKrickTactic(AmeisenBotInterfaces bot)
         {
-            WowInterface = wowInterface;
+            Bot = bot;
 
             Configureables = new()
             {
@@ -31,14 +31,14 @@ namespace AmeisenBotX.Core.Tactic.Dungeon.PitOfSaron
 
         private bool ChasingActive => (ChasingActivated + TimeSpan.FromSeconds(14)) > DateTime.UtcNow;
 
-        private WowInterface WowInterface { get; }
+        private AmeisenBotInterfaces Bot { get; }
 
         public bool ExecuteTactic(WowRole role, bool isMelee, out bool preventMovement, out bool allowAttacking)
         {
             preventMovement = false;
             allowAttacking = true;
 
-            WowUnit wowUnit = WowInterface.Objects.GetClosestWowUnitByDisplayId(WowInterface.Player.Position, IckDisplayId, false);
+            WowUnit wowUnit = Bot.Objects.GetClosestWowUnitByDisplayId(Bot.Player.Position, IckDisplayId, false);
 
             if (wowUnit != null)
             {
@@ -47,22 +47,22 @@ namespace AmeisenBotX.Core.Tactic.Dungeon.PitOfSaron
                     ChasingActivated = DateTime.UtcNow;
                     return true;
                 }
-                else if (ChasingActive && wowUnit.TargetGuid == WowInterface.Player.Guid && wowUnit.Position.GetDistance(WowInterface.Player.Position) < 7.0f)
+                else if (ChasingActive && wowUnit.TargetGuid == Bot.Wow.PlayerGuid && wowUnit.Position.GetDistance(Bot.Player.Position) < 7.0f)
                 {
-                    WowInterface.MovementEngine.SetMovementAction(MovementAction.Flee, wowUnit.Position);
+                    Bot.Movement.SetMovementAction(MovementAction.Flee, wowUnit.Position);
 
                     preventMovement = true;
                     allowAttacking = false;
                     return true;
                 }
 
-                WowUnit unitOrb = WowInterface.Objects.WowObjects.OfType<WowUnit>()
-                    .OrderBy(e => e.Position.GetDistance(WowInterface.Player.Position))
-                    .FirstOrDefault(e => e.DisplayId == 11686 && e.HasBuffById(69017) && e.Position.GetDistance(WowInterface.Player.Position) < 3.0f);
+                WowUnit unitOrb = Bot.Objects.WowObjects.OfType<WowUnit>()
+                    .OrderBy(e => e.Position.GetDistance(Bot.Player.Position))
+                    .FirstOrDefault(e => e.DisplayId == 11686 && e.HasBuffById(69017) && e.Position.GetDistance(Bot.Player.Position) < 3.0f);
 
                 if (unitOrb != null) // orbs
                 {
-                    WowInterface.MovementEngine.SetMovementAction(MovementAction.Flee, unitOrb.Position);
+                    Bot.Movement.SetMovementAction(MovementAction.Flee, unitOrb.Position);
 
                     preventMovement = true;
                     allowAttacking = false;
@@ -71,15 +71,15 @@ namespace AmeisenBotX.Core.Tactic.Dungeon.PitOfSaron
 
                 if (role == WowRole.Tank)
                 {
-                    if (wowUnit.TargetGuid == WowInterface.Player.Guid)
+                    if (wowUnit.TargetGuid == Bot.Wow.PlayerGuid)
                     {
-                        Vector3 modifiedCenterPosition = BotUtils.MoveAhead(MidPosition, BotMath.GetFacingAngle(WowInterface.Objects.MeanGroupPosition, MidPosition), 8.0f);
-                        float distanceToMid = WowInterface.Player.Position.GetDistance(modifiedCenterPosition);
+                        Vector3 modifiedCenterPosition = BotUtils.MoveAhead(MidPosition, BotMath.GetFacingAngle(Bot.Objects.MeanGroupPosition, MidPosition), 8.0f);
+                        float distanceToMid = Bot.Player.Position.GetDistance(modifiedCenterPosition);
 
-                        if (distanceToMid > 5.0f && WowInterface.Player.Position.GetDistance(wowUnit.Position) < 3.5)
+                        if (distanceToMid > 5.0f && Bot.Player.Position.GetDistance(wowUnit.Position) < 3.5)
                         {
                             // move the boss to mid
-                            WowInterface.MovementEngine.SetMovementAction(MovementAction.Move, modifiedCenterPosition);
+                            Bot.Movement.SetMovementAction(MovementAction.Move, modifiedCenterPosition);
 
                             preventMovement = true;
                             allowAttacking = false;

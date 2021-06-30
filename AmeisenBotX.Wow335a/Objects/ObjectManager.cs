@@ -224,11 +224,6 @@ namespace AmeisenBotX.Wow335a.Objects
             OnObjectUpdateComplete?.Invoke(wowObjects);
         }
 
-        private static Func<int, string> SpellNamePredicate = (int spellId) =>
-        {
-            return 
-        };
-
         /// <summary>
         /// Process a wow object pointer into a full object. Object will be placed
         /// in "wowObjects", pointers will be taken from "wowObjectPointers".

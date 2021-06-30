@@ -7,13 +7,13 @@ namespace AmeisenBotX.Core.Quest.Quests.Grinder
 {
     internal class QTheBarrensGrindToLevel16 : GrindingBotQuest
     {
-        public QTheBarrensGrindToLevel16(WowInterface wowInterface)
+        public QTheBarrensGrindToLevel16(AmeisenBotInterfaces bot)
             : base("TheBarrensGrindToLevel16",
                 new List<IQuestObjective>()
                 {
                     new QuestObjectiveChain(new List<IQuestObjective>()
                     {
-                        new GrindingObjective(wowInterface, 16, new List<List<Vector3>> {
+                        new GrindingObjective(bot, 16, new List<List<Vector3>> {
                             new()
                             {
                                 new Vector3(-1731.59f, -3715.31f, 16.97f),

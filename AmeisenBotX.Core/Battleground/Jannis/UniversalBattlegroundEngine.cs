@@ -5,9 +5,9 @@ namespace AmeisenBotX.Core.Battleground.Jannis
 {
     public class UniversalBattlegroundEngine : IBattlegroundEngine
     {
-        public UniversalBattlegroundEngine(WowInterface wowInterface)
+        public UniversalBattlegroundEngine(AmeisenBotInterfaces bot)
         {
-            WowInterface = wowInterface;
+            Bot = bot;
         }
 
         public string Author => "Jannis";
@@ -18,7 +18,7 @@ namespace AmeisenBotX.Core.Battleground.Jannis
 
         public IBattlegroundProfile Profile { get; set; }
 
-        private WowInterface WowInterface { get; }
+        private AmeisenBotInterfaces Bot { get; }
 
         public void Enter()
         {
@@ -27,7 +27,7 @@ namespace AmeisenBotX.Core.Battleground.Jannis
 
         public void Execute()
         {
-            WowInterface.CombatClass.OutOfCombatExecute();
+            Bot.CombatClass.OutOfCombatExecute();
 
             Profile?.Execute();
         }
@@ -43,10 +43,10 @@ namespace AmeisenBotX.Core.Battleground.Jannis
 
         private bool TryLoadProfile()
         {
-            switch (WowInterface.Objects.MapId)
+            switch (Bot.Objects.MapId)
             {
                 case WowMapId.WarsongGulch:
-                    Profile = new WarsongGulchProfile(WowInterface);
+                    Profile = new WarsongGulchProfile(Bot);
                     return true;
 
                 default:

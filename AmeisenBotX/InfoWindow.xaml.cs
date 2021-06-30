@@ -61,7 +61,7 @@ namespace AmeisenBotX
         private void DisplayStuff()
         {
             equipmentWrapPanel.Children.Clear();
-            labelAvgItemLvl.Content = Math.Ceiling(AmeisenBot.WowInterface.CharacterManager.Equipment.AverageItemLevel);
+            labelAvgItemLvl.Content = Math.Ceiling(AmeisenBot.Bot.Character.Equipment.AverageItemLevel);
 
             switch (CurrentDisplayMode)
             {
@@ -70,7 +70,7 @@ namespace AmeisenBotX
                     buttonInventory.BorderBrush = new SolidColorBrush((Color)Application.Current.Resources["DarkBorder"]);
                     buttonSpells.BorderBrush = new SolidColorBrush((Color)Application.Current.Resources["DarkBorder"]);
 
-                    IWowItem[] equipmentItems = AmeisenBot.WowInterface.CharacterManager.Equipment.Items.Values.ToArray();
+                    IWowItem[] equipmentItems = AmeisenBot.Bot.Character.Equipment.Items.Values.ToArray();
 
                     for (int i = 0; i < equipmentItems.Length; ++i)
                     {
@@ -84,7 +84,7 @@ namespace AmeisenBotX
                     buttonInventory.BorderBrush = new SolidColorBrush((Color)Application.Current.Resources["DarkAccent1"]);
                     buttonSpells.BorderBrush = new SolidColorBrush((Color)Application.Current.Resources["DarkBorder"]);
 
-                    IWowItem[] inventoryItems = AmeisenBot.WowInterface.CharacterManager.Inventory.Items.ToArray();
+                    IWowItem[] inventoryItems = AmeisenBot.Bot.Character.Inventory.Items.ToArray();
 
                     for (int i = 0; i < inventoryItems.Length; ++i)
                     {
@@ -98,7 +98,7 @@ namespace AmeisenBotX
                     buttonInventory.BorderBrush = new SolidColorBrush((Color)Application.Current.Resources["DarkBorder"]);
                     buttonSpells.BorderBrush = new SolidColorBrush((Color)Application.Current.Resources["DarkAccent1"]);
 
-                    foreach (Spell spell in AmeisenBot.WowInterface.CharacterManager.SpellBook.Spells.GroupBy(e => e.Name).Select(e => e.First()))
+                    foreach (Spell spell in AmeisenBot.Bot.Character.SpellBook.Spells.GroupBy(e => e.Name).Select(e => e.First()))
                     {
                         equipmentWrapPanel.Children.Add(new SpellDisplay(spell));
                     }

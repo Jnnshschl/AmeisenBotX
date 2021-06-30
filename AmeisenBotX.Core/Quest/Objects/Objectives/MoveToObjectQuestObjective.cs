@@ -6,23 +6,23 @@ namespace AmeisenBotX.Core.Quest.Objects.Objectives
 {
     public class MoveToObjectQuestObjective : IQuestObjective
     {
-        public MoveToObjectQuestObjective(WowInterface wowInterface, int objectDisplayId, double distance)
+        public MoveToObjectQuestObjective(AmeisenBotInterfaces bot, int objectDisplayId, double distance)
         {
-            WowInterface = wowInterface;
+            Bot = bot;
             ObjectDisplayIds = new List<int>() { objectDisplayId };
             Distance = distance;
         }
 
-        public MoveToObjectQuestObjective(WowInterface wowInterface, List<int> objectDisplayIds, double distance)
+        public MoveToObjectQuestObjective(AmeisenBotInterfaces bot, List<int> objectDisplayIds, double distance)
         {
-            WowInterface = wowInterface;
+            Bot = bot;
             ObjectDisplayIds = objectDisplayIds;
             Distance = distance;
         }
 
         public bool Finished => Progress == 100.0;
 
-        public double Progress => WowGameobject != null && WowGameobject.Position.GetDistance(WowInterface.Player.Position) < Distance ? 100.0 : 0.0;
+        public double Progress => WowGameobject != null && WowGameobject.Position.GetDistance(Bot.Player.Position) < Distance ? 100.0 : 0.0;
 
         private double Distance { get; }
 
@@ -30,24 +30,24 @@ namespace AmeisenBotX.Core.Quest.Objects.Objectives
 
         private WowGameobject WowGameobject { get; set; }
 
-        private WowInterface WowInterface { get; }
+        private AmeisenBotInterfaces Bot { get; }
 
         public void Execute()
         {
             if (Finished)
             {
-                WowInterface.MovementEngine.Reset();
-                WowInterface.NewWowInterface.WowStopClickToMove();
+                Bot.Movement.Reset();
+                Bot.Wow.WowStopClickToMove();
                 return;
             }
 
-            WowGameobject = WowInterface.Objects.GetClosestWowGameobjectByDisplayId(WowInterface.Player.Position, ObjectDisplayIds);
+            WowGameobject = Bot.Objects.GetClosestWowGameobjectByDisplayId(Bot.Player.Position, ObjectDisplayIds);
 
             if (WowGameobject != null)
             {
-                if (WowGameobject.Position.GetDistance2D(WowInterface.Player.Position) > Distance)
+                if (WowGameobject.Position.GetDistance2D(Bot.Player.Position) > Distance)
                 {
-                    WowInterface.MovementEngine.SetMovementAction(MovementAction.Move, WowGameobject.Position);
+                    Bot.Movement.SetMovementAction(MovementAction.Move, WowGameobject.Position);
                 }
             }
         }

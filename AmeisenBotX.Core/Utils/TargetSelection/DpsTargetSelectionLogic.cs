@@ -6,7 +6,7 @@ namespace AmeisenBotX.Core.Utils.TargetSelection
 {
     public class DpsTargetSelectionLogic : BasicTargetSelectionLogic
     {
-        public DpsTargetSelectionLogic(WowInterface wowInterface) : base(wowInterface)
+        public DpsTargetSelectionLogic(AmeisenBotInterfaces bot) : base(bot)
         {
         }
 
@@ -14,12 +14,12 @@ namespace AmeisenBotX.Core.Utils.TargetSelection
         {
             possibleTargets = null;
 
-            if (WowInterface.Target.Guid == 0 || WowInterface.Target == null)
+            if (Bot.Wow.TargetGuid == 0 || Bot.Target == null)
             {
-                IEnumerable<WowUnit> priorityTargets = WowInterface.Objects.WowObjects
+                IEnumerable<WowUnit> priorityTargets = Bot.Objects.WowObjects
                     .OfType<WowUnit>()
                     .Where(e => IsValidUnit(e) && IsPriorityTarget(e))
-                    .OrderBy(e => e.DistanceTo(WowInterface.Player));
+                    .OrderBy(e => e.DistanceTo(Bot.Player));
 
                 if (priorityTargets.Any())
                 {
@@ -27,17 +27,17 @@ namespace AmeisenBotX.Core.Utils.TargetSelection
                     return true;
                 }
 
-                possibleTargets = WowInterface.Objects.WowObjects
+                possibleTargets = Bot.Objects.WowObjects
                     .OfType<WowUnit>()
                     .Where(e => IsValidUnit(e))
                     .OrderByDescending(e => e.Type)
-                    .ThenBy(e => e.DistanceTo(WowInterface.Player));
+                    .ThenBy(e => e.DistanceTo(Bot.Player));
 
                 return true;
             }
-            else if (!IsValidUnit(WowInterface.Target))
+            else if (!IsValidUnit(Bot.Target))
             {
-                WowInterface.NewWowInterface.WowClearTarget();
+                Bot.Wow.WowClearTarget();
                 return true;
             }
 

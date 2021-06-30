@@ -7,13 +7,13 @@ namespace AmeisenBotX.Core.Quest.Quests.Grinder
 {
     internal class QDurotarGrindToLevel6 : GrindingBotQuest
     {
-        public QDurotarGrindToLevel6(WowInterface wowInterface)
+        public QDurotarGrindToLevel6(AmeisenBotInterfaces bot)
             : base("DurotarGrindToLevel6",
                 new List<IQuestObjective>()
                 {
                     new QuestObjectiveChain(new List<IQuestObjective>()
                     {
-                        new GrindingObjective(wowInterface, 6, new List<List<Vector3>> {
+                        new GrindingObjective(bot, 6, new List<List<Vector3>> {
                             new()
                             {
                                 new Vector3(-787.39f, -4246.54f, 52.66f),

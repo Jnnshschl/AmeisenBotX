@@ -7,13 +7,13 @@ namespace AmeisenBotX.Core.Quest.Quests.Grinder
 {
     internal class QUngoroGrindToLevel54 : GrindingBotQuest
     {
-        public QUngoroGrindToLevel54(WowInterface wowInterface)
+        public QUngoroGrindToLevel54(AmeisenBotInterfaces bot)
             : base("UngoroGrindToLevel54",
                 new List<IQuestObjective>()
                 {
                     new QuestObjectiveChain(new List<IQuestObjective>()
                     {
-                        new GrindingObjective(wowInterface, 54, new List<List<Vector3>> {
+                        new GrindingObjective(bot, 54, new List<List<Vector3>> {
                             new()
                             {
                                 new Vector3(-7869.45f, -1589.07f, -262.72f),

@@ -11,12 +11,12 @@ namespace AmeisenBotX.Core.Combat.Classes.Jannis
 {
     public class ShamanEnhancement : BasicCombatClass
     {
-        public ShamanEnhancement(WowInterface wowInterface, AmeisenBotFsm stateMachine) : base(wowInterface, stateMachine)
+        public ShamanEnhancement(AmeisenBotInterfaces bot, AmeisenBotFsm stateMachine) : base(bot, stateMachine)
         {
-            MyAuraManager.Jobs.Add(new KeepActiveAuraJob(lightningShieldSpell, () => WowInterface.Player.ManaPercentage > 60.0 && TryCastSpell(lightningShieldSpell, 0, true)));
-            MyAuraManager.Jobs.Add(new KeepActiveAuraJob(waterShieldSpell, () => WowInterface.Player.ManaPercentage < 20.0 && TryCastSpell(waterShieldSpell, 0, true)));
+            MyAuraManager.Jobs.Add(new KeepActiveAuraJob(bot.Db, lightningShieldSpell, () => Bot.Player.ManaPercentage > 60.0 && TryCastSpell(lightningShieldSpell, 0, true)));
+            MyAuraManager.Jobs.Add(new KeepActiveAuraJob(bot.Db, waterShieldSpell, () => Bot.Player.ManaPercentage < 20.0 && TryCastSpell(waterShieldSpell, 0, true)));
 
-            TargetAuraManager.Jobs.Add(new KeepActiveAuraJob(flameShockSpell, () => TryCastSpell(flameShockSpell, WowInterface.Target.Guid, true)));
+            TargetAuraManager.Jobs.Add(new KeepActiveAuraJob(bot.Db, flameShockSpell, () => TryCastSpell(flameShockSpell, Bot.Wow.TargetGuid, true)));
 
             InterruptManager.InterruptSpells = new()
             {
@@ -97,35 +97,35 @@ namespace AmeisenBotX.Core.Combat.Classes.Jannis
                     return;
                 }
 
-                if (WowInterface.Player.HealthPercentage < 30
-                    && WowInterface.Target.Type == WowObjectType.Player
-                    && TryCastSpell(hexSpell, WowInterface.Target.Guid, true))
+                if (Bot.Player.HealthPercentage < 30
+                    && Bot.Target.Type == WowObjectType.Player
+                    && TryCastSpell(hexSpell, Bot.Wow.TargetGuid, true))
                 {
                     HexedTarget = true;
                     return;
                 }
 
-                if (WowInterface.Player.HealthPercentage < 60
-                    && TryCastSpell(healingWaveSpell, WowInterface.Player.Guid, true))
+                if (Bot.Player.HealthPercentage < 60
+                    && TryCastSpell(healingWaveSpell, Bot.Wow.PlayerGuid, true))
                 {
                     return;
                 }
 
-                if (WowInterface.Target != null)
+                if (Bot.Target != null)
                 {
-                    if ((WowInterface.Target.MaxHealth > 10000000
-                            && WowInterface.Target.HealthPercentage < 25
+                    if ((Bot.Target.MaxHealth > 10000000
+                            && Bot.Target.HealthPercentage < 25
                             && TryCastSpell(heroismSpell, 0))
-                        || TryCastSpell(stormstrikeSpell, WowInterface.Target.Guid, true)
-                        || TryCastSpell(lavaLashSpell, WowInterface.Target.Guid, true)
-                        || TryCastSpell(earthShockSpell, WowInterface.Target.Guid, true))
+                        || TryCastSpell(stormstrikeSpell, Bot.Wow.TargetGuid, true)
+                        || TryCastSpell(lavaLashSpell, Bot.Wow.TargetGuid, true)
+                        || TryCastSpell(earthShockSpell, Bot.Wow.TargetGuid, true))
                     {
                         return;
                     }
 
-                    if (WowInterface.Player.HasBuffByName(maelstromWeaponSpell)
-                        && WowInterface.Player.Auras.FirstOrDefault(e => e.Name == maelstromWeaponSpell).StackCount >= 5
-                        && TryCastSpell(lightningBoltSpell, WowInterface.Target.Guid, true))
+                    if (Bot.Player.Auras.Any(e => Bot.Db.GetSpellName(e.SpellId) == maelstromWeaponSpell)
+                        && Bot.Player.Auras.FirstOrDefault(e => Bot.Db.GetSpellName(e.SpellId) == maelstromWeaponSpell).StackCount >= 5
+                        && TryCastSpell(lightningBoltSpell, Bot.Wow.TargetGuid, true))
                     {
                         return;
                     }

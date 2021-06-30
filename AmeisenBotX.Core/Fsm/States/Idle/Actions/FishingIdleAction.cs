@@ -3,6 +3,7 @@ using AmeisenBotX.Core.Character.Inventory.Enums;
 using AmeisenBotX.Core.Character.Inventory.Objects;
 using AmeisenBotX.Core.Data.Objects;
 using AmeisenBotX.Core.Movement.Enums;
+using AmeisenBotX.Wow.Cache.Enums;
 using AmeisenBotX.Wow.Objects.Enums;
 using System;
 using System.Collections.Generic;
@@ -12,9 +13,9 @@ namespace AmeisenBotX.Core.Fsm.States.Idle.Actions
 {
     public class FishingIdleAction : IIdleAction
     {
-        public FishingIdleAction(WowInterface wowInterface)
+        public FishingIdleAction(AmeisenBotInterfaces bot)
         {
-            WowInterface = wowInterface;
+            Bot = bot;
             Rnd = new Random();
         }
 
@@ -40,7 +41,7 @@ namespace AmeisenBotX.Core.Fsm.States.Idle.Actions
 
         public bool Started { get; set; }
 
-        public WowInterface WowInterface { get; }
+        public AmeisenBotInterfaces Bot { get; }
 
         private Random Rnd { get; }
 
@@ -48,19 +49,19 @@ namespace AmeisenBotX.Core.Fsm.States.Idle.Actions
         {
             bool fishingPoleEquipped = IsFishingRodEquipped();
             bool status =  // we cant fish while swimming
-                    !WowInterface.Player.IsSwimming && !WowInterface.Player.IsFlying
+                    !Bot.Player.IsSwimming && !Bot.Player.IsFlying
                     // do i have the fishing skill
-                    && WowInterface.CharacterManager.Skills.Any(e => e.Key.Contains("fishing", StringComparison.OrdinalIgnoreCase))
+                    && Bot.Character.Skills.Any(e => e.Key.Contains("fishing", StringComparison.OrdinalIgnoreCase))
                     // do i have a fishing pole in my inventory or equipped
-                    && (WowInterface.CharacterManager.Inventory.Items.OfType<WowWeapon>().Any(e => e.WeaponType == WowWeaponType.FISHING_POLES)
+                    && (Bot.Character.Inventory.Items.OfType<WowWeapon>().Any(e => e.WeaponType == WowWeaponType.FISHING_POLES)
                         || IsFishingRodEquipped())
                     // do i know any fishing spot around here
-                    && WowInterface.Db.TryGetPointsOfInterest(WowInterface.Objects.MapId, Data.Db.Enums.PoiType.FishingSpot, WowInterface.Player.Position, 256.0f, out IEnumerable<Vector3> pois);
+                    && Bot.Db.TryGetPointsOfInterest(Bot.Objects.MapId, PoiType.FishingSpot, Bot.Player.Position, 256.0f, out IEnumerable<Vector3> pois);
 
             if (status)
             {
-                WowInterface.CharacterManager.ItemSlotsToSkip.Add(WowEquipmentSlot.INVSLOT_MAINHAND);
-                WowInterface.CharacterManager.ItemSlotsToSkip.Add(WowEquipmentSlot.INVSLOT_OFFHAND);
+                Bot.Character.ItemSlotsToSkip.Add(WowEquipmentSlot.INVSLOT_MAINHAND);
+                Bot.Character.ItemSlotsToSkip.Add(WowEquipmentSlot.INVSLOT_OFFHAND);
             }
 
             return status;
@@ -69,8 +70,8 @@ namespace AmeisenBotX.Core.Fsm.States.Idle.Actions
         public void Execute()
         {
             if ((CurrentSpot == default || SpotSelected + SpotDuration <= DateTime.UtcNow)
-                && !WowInterface.Player.IsCasting
-                && WowInterface.Db.TryGetPointsOfInterest(WowInterface.Objects.MapId, Data.Db.Enums.PoiType.FishingSpot, WowInterface.Player.Position, 256.0f, out IEnumerable<Vector3> pois))
+                && !Bot.Player.IsCasting
+                && Bot.Db.TryGetPointsOfInterest(Bot.Objects.MapId, PoiType.FishingSpot, Bot.Player.Position, 256.0f, out IEnumerable<Vector3> pois))
             {
                 CurrentSpot = pois.ElementAt(Rnd.Next(0, pois.Count() - 1));
                 SpotSelected = DateTime.UtcNow;
@@ -79,37 +80,37 @@ namespace AmeisenBotX.Core.Fsm.States.Idle.Actions
 
             if (CurrentSpot != default)
             {
-                if (WowInterface.Player.Position.GetDistance(CurrentSpot) > 3.5f)
+                if (Bot.Player.Position.GetDistance(CurrentSpot) > 3.5f)
                 {
-                    WowInterface.MovementEngine.SetMovementAction(MovementAction.Move, CurrentSpot);
+                    Bot.Movement.SetMovementAction(MovementAction.Move, CurrentSpot);
                     return;
                 }
-                else if (WowInterface.NewWowInterface.WowIsClickToMoveActive())
+                else if (Bot.Wow.WowIsClickToMoveActive())
                 {
-                    WowInterface.MovementEngine.StopMovement();
+                    Bot.Movement.StopMovement();
                     return;
                 }
 
-                if (!BotMath.IsFacing(WowInterface.Player.Position, WowInterface.Player.Rotation, CurrentSpot))
+                if (!BotMath.IsFacing(Bot.Player.Position, Bot.Player.Rotation, CurrentSpot))
                 {
-                    WowInterface.NewWowInterface.WowFacePosition(WowInterface.Player.BaseAddress, WowInterface.Player.Position, CurrentSpot);
+                    Bot.Wow.WowFacePosition(Bot.Player.BaseAddress, Bot.Player.Position, CurrentSpot);
                     return;
                 }
             }
 
             if (!IsFishingRodEquipped())
             {
-                IWowItem fishingRod = WowInterface.CharacterManager.Inventory.Items.OfType<WowWeapon>()
+                IWowItem fishingRod = Bot.Character.Inventory.Items.OfType<WowWeapon>()
                     .FirstOrDefault(e => e.WeaponType == WowWeaponType.FISHING_POLES);
 
                 if (fishingRod != null)
                 {
-                    WowInterface.NewWowInterface.LuaEquipItem(fishingRod.Name);
+                    Bot.Wow.LuaEquipItem(fishingRod.Name);
                 }
             }
 
-            WowGameobject fishingBobber = WowInterface.Objects.WowObjects.OfType<WowGameobject>()
-                .FirstOrDefault(e => e.GameobjectType == WowGameobjectType.FishingBobber && e.CreatedBy == WowInterface.Player.Guid);
+            WowGameobject fishingBobber = Bot.Objects.WowObjects.OfType<WowGameobject>()
+                .FirstOrDefault(e => e.GameobjectType == WowGameobjectType.FishingBobber && e.CreatedBy == Bot.Wow.PlayerGuid);
 
             if (!Started)
             {
@@ -126,21 +127,21 @@ namespace AmeisenBotX.Core.Fsm.States.Idle.Actions
                 return;
             }
 
-            if (!WowInterface.Player.IsCasting || fishingBobber == null)
+            if (!Bot.Player.IsCasting || fishingBobber == null)
             {
-                WowInterface.NewWowInterface.LuaCastSpell("Fishing");
+                Bot.Wow.LuaCastSpell("Fishing");
             }
             else if (fishingBobber.Flags[(int)WowGameobjectFlags.DoesNotDespawn])
             {
-                WowInterface.NewWowInterface.WowObjectRightClick(fishingBobber.BaseAddress);
-                WowInterface.NewWowInterface.LuaLootEveryThing();
+                Bot.Wow.WowObjectRightClick(fishingBobber.BaseAddress);
+                Bot.Wow.LuaLootEveryThing();
             }
         }
 
         private bool IsFishingRodEquipped()
         {
-            return (WowInterface.CharacterManager.Equipment.Items[WowEquipmentSlot.INVSLOT_MAINHAND] != null
-                && ((WowWeapon)WowInterface.CharacterManager.Equipment.Items[WowEquipmentSlot.INVSLOT_MAINHAND]).WeaponType == WowWeaponType.FISHING_POLES);
+            return (Bot.Character.Equipment.Items[WowEquipmentSlot.INVSLOT_MAINHAND] != null
+                && ((WowWeapon)Bot.Character.Equipment.Items[WowEquipmentSlot.INVSLOT_MAINHAND]).WeaponType == WowWeaponType.FISHING_POLES);
         }
     }
 }

@@ -57,7 +57,7 @@ namespace AmeisenBotX
             OreBrush = new SolidBrush((Color)new ColorConverter().ConvertFromString("#FF6F4E37"));
             HerbBrush = new SolidBrush((Color)new ColorConverter().ConvertFromString("#FF7BB661"));
 
-            AmeisenBot.WowInterface.Objects.OnObjectUpdateComplete += (IEnumerable<WowObject> wowObjects) => { NeedToUpdateMap = true; };
+            AmeisenBot.Bot.Objects.OnObjectUpdateComplete += (IEnumerable<WowObject> wowObjects) => { NeedToUpdateMap = true; };
 
             InitializeComponent();
         }
@@ -313,15 +313,15 @@ namespace AmeisenBotX
 
             Graphics.Clear(Color.Transparent);
 
-            if (AmeisenBot.WowInterface.Player != null)
+            if (AmeisenBot.Bot.Player != null)
             {
-                Vector3 playerPosition = AmeisenBot.WowInterface.Player.Position;
-                float playerRotation = AmeisenBot.WowInterface.Player.Rotation;
+                Vector3 playerPosition = AmeisenBot.Bot.Player.Position;
+                float playerRotation = AmeisenBot.Bot.Player.Rotation;
 
                 // Render current dungeon nodes
                 // ---------------------------- >
 
-                if (AmeisenBot.Config.MapRenderDungeonNodes && AmeisenBot.WowInterface.DungeonEngine.Nodes?.Count > 0)
+                if (AmeisenBot.Config.MapRenderDungeonNodes && AmeisenBot.Bot.Dungeon.Nodes?.Count > 0)
                 {
                     RenderDungeonNodes(halfWidth, halfHeight, graphics, Scale, playerPosition, playerRotation);
                 }
@@ -329,7 +329,7 @@ namespace AmeisenBotX
                 // Render current movement path
                 // ---------------------------- >
 
-                if (AmeisenBot.Config.MapRenderCurrentPath && AmeisenBot.WowInterface.MovementEngine.Path.Any())
+                if (AmeisenBot.Config.MapRenderCurrentPath && AmeisenBot.Bot.Movement.Path.Any())
                 {
                     RenderCurrentPath(halfWidth, halfHeight, graphics, Scale, playerPosition, playerRotation);
                 }
@@ -337,7 +337,7 @@ namespace AmeisenBotX
                 // Render blacklisted nodes
                 // ------------------------ >
 
-                // if (AmeisenBot.WowInterface.BotCache.TryGetBlacklistPosition((int)AmeisenBot.WowInterface.ObjectManager.MapId, playerPosition, 64, out List<Vector3> blacklistNodes))
+                // if (AmeisenBot.Bot.BotCache.TryGetBlacklistPosition((int)AmeisenBot.Bot.ObjectManager.MapId, playerPosition, 64, out List<Vector3> blacklistNodes))
                 // {
                 //     for (int i = 0; i < blacklistNodes.Count; ++i)
                 //     {
@@ -371,7 +371,7 @@ namespace AmeisenBotX
 
                 if (AmeisenBot.Config.MapRenderMe)
                 {
-                    RenderUnit(halfWidth, halfHeight, AmeisenBot.WowInterface.Db.GetUnitName(AmeisenBot.WowInterface.Player, out string name) ? name : "unknown", "<Me>", MeBrush, TextBrush, TextFont, SubTextFont, SubTextBrush, graphics, 7);
+                    RenderUnit(halfWidth, halfHeight, AmeisenBot.Bot.Db.GetUnitName(AmeisenBot.Bot.Player, out string name) ? name : "unknown", "<Me>", MeBrush, TextBrush, TextFont, SubTextFont, SubTextBrush, graphics, 7);
                 }
             }
 
@@ -419,7 +419,7 @@ namespace AmeisenBotX
 
         private void RenderCurrentPath(int halfWidth, int halfHeight, Graphics graphics, float scale, Vector3 playerPosition, float playerRotation)
         {
-            List<Vector3> path = AmeisenBot.WowInterface.MovementEngine.Path.ToList();
+            List<Vector3> path = AmeisenBot.Bot.Movement.Path.ToList();
 
             for (int i = 0; i < path.Count; ++i)
             {
@@ -435,10 +435,10 @@ namespace AmeisenBotX
 
         private void RenderDungeonNodes(int halfWidth, int halfHeight, Graphics graphics, float scale, Vector3 playerPosition, float playerRotation)
         {
-            for (int i = 1; i < AmeisenBot.WowInterface.DungeonEngine.Nodes.Count; ++i)
+            for (int i = 1; i < AmeisenBot.Bot.Dungeon.Nodes.Count; ++i)
             {
-                Vector3 node = AmeisenBot.WowInterface.DungeonEngine.Nodes[i].Position;
-                Vector3 prevNode = AmeisenBot.WowInterface.DungeonEngine.Nodes[i - 1].Position;
+                Vector3 node = AmeisenBot.Bot.Dungeon.Nodes[i].Position;
+                Vector3 prevNode = AmeisenBot.Bot.Dungeon.Nodes[i - 1].Position;
 
                 Point nodePositionOnMap = GetRelativePosition(playerPosition, node, playerRotation, halfWidth, halfHeight, scale);
                 Point prevNodePositionOnMap = GetRelativePosition(playerPosition, prevNode, playerRotation, halfWidth, halfHeight, scale);
@@ -449,7 +449,7 @@ namespace AmeisenBotX
 
         private void RenderHerbs(int halfWidth, int halfHeight, Graphics graphics, float scale, Vector3 playerPosition, float playerRotation)
         {
-            IEnumerable<WowGameobject> herbNodes = AmeisenBot.WowInterface.Objects.WowObjects
+            IEnumerable<WowGameobject> herbNodes = AmeisenBot.Bot.Objects.WowObjects
                 .ToList()
                 .OfType<WowGameobject>()
                 .Where(e => Enum.IsDefined(typeof(WowHerbId), e.DisplayId));
@@ -464,7 +464,7 @@ namespace AmeisenBotX
 
         private void RenderOres(int halfWidth, int halfHeight, Graphics graphics, float scale, Vector3 playerPosition, float playerRotation)
         {
-            List<WowGameobject> oreNodes = AmeisenBot.WowInterface.Objects.WowObjects
+            List<WowGameobject> oreNodes = AmeisenBot.Bot.Objects.WowObjects
                 .ToList()
                 .OfType<WowGameobject>()
                 .Where(e => Enum.IsDefined(typeof(WowOreId), e.DisplayId))
@@ -480,7 +480,7 @@ namespace AmeisenBotX
 
         private void RenderUnits(int halfWidth, int halfHeight, Graphics graphics, float scale, Vector3 playerPosition, float playerRotation)
         {
-            List<WowUnit> wowUnits = AmeisenBot.WowInterface.Objects.WowObjects
+            List<WowUnit> wowUnits = AmeisenBot.Bot.Objects.WowObjects
                 .OfType<WowUnit>()
                 .ToList();
 
@@ -488,7 +488,7 @@ namespace AmeisenBotX
             {
                 WowUnit unit = wowUnits[i];
 
-                Brush selectedBrush = unit.IsDead ? DeadBrush : AmeisenBot.WowInterface.Db.GetReaction(AmeisenBot.WowInterface.Player, unit) switch
+                Brush selectedBrush = unit.IsDead ? DeadBrush : AmeisenBot.Bot.Db.GetReaction(AmeisenBot.Bot.Player, unit) switch
                 {
                     WowUnitReaction.HostileGuard => EnemyBrush,
                     WowUnitReaction.Hostile => EnemyBrush,
@@ -503,7 +503,7 @@ namespace AmeisenBotX
                 {
                     if (AmeisenBot.Config.MapRenderPlayers)
                     {
-                        string playerName = AmeisenBot.Config.MapRenderPlayerNames && AmeisenBot.WowInterface.Db.GetUnitName(AmeisenBot.WowInterface.Target, out string name) ? name : string.Empty;
+                        string playerName = AmeisenBot.Config.MapRenderPlayerNames && AmeisenBot.Bot.Db.GetUnitName(AmeisenBot.Bot.Target, out string name) ? name : string.Empty;
                         string playerExtra = AmeisenBot.Config.MapRenderPlayerExtra ? $"<{unit.Level} {unit.Race} {unit.Class}>" : string.Empty;
 
                         RenderUnit(positionOnMap.X, positionOnMap.Y, playerName, playerExtra, selectedBrush, WowColorsDrawing.GetClassPrimaryBrush(unit.Class), TextFont, SubTextFont, SubTextBrush, graphics, 7);
@@ -513,7 +513,7 @@ namespace AmeisenBotX
                 {
                     if (AmeisenBot.Config.MapRenderUnits)
                     {
-                        string unitName = AmeisenBot.Config.MapRenderUnitNames && AmeisenBot.WowInterface.Db.GetUnitName(AmeisenBot.WowInterface.Target, out string name) ? name : string.Empty;
+                        string unitName = AmeisenBot.Config.MapRenderUnitNames && AmeisenBot.Bot.Db.GetUnitName(AmeisenBot.Bot.Target, out string name) ? name : string.Empty;
                         string unitExtra = AmeisenBot.Config.MapRenderPlayerExtra ? $"<{unit.Level}>" : string.Empty;
 
                         RenderUnit(positionOnMap.X, positionOnMap.Y, unitName, unitExtra, selectedBrush, TextBrush, TextFont, SubTextFont, SubTextBrush, graphics);

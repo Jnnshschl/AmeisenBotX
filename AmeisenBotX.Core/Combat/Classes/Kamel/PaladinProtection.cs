@@ -46,9 +46,9 @@ namespace AmeisenBotX.Core.Combat.Classes.Kamel
         private const string sealofLightSpell = "Seal of Light";
         private const string sealofWisdomSpell = "Seal of Wisdom";
 
-        public PaladinProtection(WowInterface wowInterface) : base()
+        public PaladinProtection(AmeisenBotInterfaces bot) : base()
         {
-            WowInterface = wowInterface;
+            Bot = bot;
 
             //Spells Race
             //spellCoolDown.Add(EveryManforHimselfSpell, DateTime.Now);
@@ -163,44 +163,44 @@ namespace AmeisenBotX.Core.Combat.Classes.Kamel
         {
             if (TargetSelectEvent.Run())
             {
-                List<WowUnit> CastBuff = new List<WowUnit>(WowInterface.Objects.Partymembers)
+                List<WowUnit> CastBuff = new List<WowUnit>(Bot.Objects.Partymembers)
                 {
-                    WowInterface.Player
+                    Bot.Player
                 };
 
-                CastBuff = CastBuff.Where(e => !e.HasBuffByName("Blessing of Kings") && !e.IsDead).OrderBy(e => e.HealthPercentage).ToList();
+                CastBuff = CastBuff.Where(e => !e.Auras.Any(e => Bot.Db.GetSpellName(e.SpellId) == "Blessing of Kings") && !e.IsDead).OrderBy(e => e.HealthPercentage).ToList();
 
                 if (CastBuff != null)
                 {
                     if (CastBuff.Count > 0)
                     {
-                        if (WowInterface.Target.Guid != CastBuff.FirstOrDefault().Guid)
+                        if (Bot.Wow.TargetGuid != CastBuff.FirstOrDefault().Guid)
                         {
-                            WowInterface.NewWowInterface.WowTargetGuid(CastBuff.FirstOrDefault().Guid);
+                            Bot.Wow.WowTargetGuid(CastBuff.FirstOrDefault().Guid);
                         }
                     }
-                    if (WowInterface.Target.Guid != 0 && WowInterface.Target != null)
+                    if (Bot.Wow.TargetGuid != 0 && Bot.Target != null)
                     {
                         if (!TargetInLineOfSight)
                         {
                             return;
                         }
-                        if (!WowInterface.Target.HasBuffByName("Blessing of Kings") && CustomCastSpell(blessingofKingsSpell))
+                        if (!Bot.Target.Auras.Any(e => Bot.Db.GetSpellName(e.SpellId) == "Blessing of Kings") && CustomCastSpell(blessingofKingsSpell))
                         {
                             return;
                         }
                     }
                 }
             }
-            if (!WowInterface.Player.HasBuffByName("Seal of Wisdom") && CustomCastSpell(sealofWisdomSpell))
+            if (!Bot.Player.Auras.Any(e => Bot.Db.GetSpellName(e.SpellId) == "Seal of Wisdom") && CustomCastSpell(sealofWisdomSpell))
             {
                 return;
             }
-            if (!WowInterface.Player.HasBuffByName("Devotion Aura") && CustomCastSpell(devotionAuraSpell))
+            if (!Bot.Player.Auras.Any(e => Bot.Db.GetSpellName(e.SpellId) == "Devotion Aura") && CustomCastSpell(devotionAuraSpell))
             {
                 return;
             }
-            if (!WowInterface.Player.HasBuffByName("Righteous Fury") && CustomCastSpell(righteousFurySpell))
+            if (!Bot.Player.Auras.Any(e => Bot.Db.GetSpellName(e.SpellId) == "Righteous Fury") && CustomCastSpell(righteousFurySpell))
             {
                 return;
             }
@@ -208,18 +208,18 @@ namespace AmeisenBotX.Core.Combat.Classes.Kamel
 
         private bool CustomCastSpell(string spellName)
         {
-            if (WowInterface.CharacterManager.SpellBook.IsSpellKnown(spellName))
+            if (Bot.Character.SpellBook.IsSpellKnown(spellName))
             {
-                if (WowInterface.Target != null)
+                if (Bot.Target != null)
                 {
-                    double distance = WowInterface.Player.Position.GetDistance(WowInterface.Target.Position);
-                    Spell spell = WowInterface.CharacterManager.SpellBook.GetSpellByName(spellName);
+                    double distance = Bot.Player.Position.GetDistance(Bot.Target.Position);
+                    Spell spell = Bot.Character.SpellBook.GetSpellByName(spellName);
 
-                    if ((WowInterface.Player.Mana >= spell.Costs && IsSpellReady(spellName)))
+                    if ((Bot.Player.Mana >= spell.Costs && IsSpellReady(spellName)))
                     {
                         if ((spell.MinRange == 0 && spell.MaxRange == 0) || (spell.MinRange <= distance && spell.MaxRange >= distance))
                         {
-                            WowInterface.NewWowInterface.LuaCastSpell(spellName);
+                            Bot.Wow.LuaCastSpell(spellName);
                             return true;
                         }
                     }
@@ -231,29 +231,29 @@ namespace AmeisenBotX.Core.Combat.Classes.Kamel
 
         private void StartAttack()
         {
-            // WowUnit wowUnit = WowInterface.ObjectManager.GetClosestWowUnitByDisplayId(AnubRhekanDisplayId, false);
+            // WowUnit wowUnit = Bot.ObjectManager.GetClosestWowUnitByDisplayId(AnubRhekanDisplayId, false);
 
-            if (WowInterface.Target.Guid != 0)
+            if (Bot.Wow.TargetGuid != 0)
             {
-                if (WowInterface.Target.Guid != WowInterface.Player.Guid)
+                if (Bot.Wow.TargetGuid != Bot.Wow.PlayerGuid)
                 {
                     TargetselectionTank();
                 }
 
-                if (WowInterface.Db.GetReaction(WowInterface.Player, WowInterface.Target) == WowUnitReaction.Friendly)
+                if (Bot.Db.GetReaction(Bot.Player, Bot.Target) == WowUnitReaction.Friendly)
                 {
-                    WowInterface.NewWowInterface.WowClearTarget();
+                    Bot.Wow.WowClearTarget();
                     return;
                 }
 
-                if (WowInterface.Player.IsInMeleeRange(WowInterface.Target))
+                if (Bot.Player.IsInMeleeRange(Bot.Target))
                 {
-                    if (!WowInterface.Player.IsAutoAttacking && AutoAttackEvent.Run())
+                    if (!Bot.Player.IsAutoAttacking && AutoAttackEvent.Run())
                     {
-                        WowInterface.NewWowInterface.LuaStartAutoAttack();
+                        Bot.Wow.LuaStartAutoAttack();
                     }
 
-                    if ((WowInterface.Player.IsConfused || WowInterface.Player.IsSilenced || WowInterface.Player.IsDazed) && CustomCastSpell(EveryManforHimselfSpell))
+                    if ((Bot.Player.IsConfused || Bot.Player.IsSilenced || Bot.Player.IsDazed) && CustomCastSpell(EveryManforHimselfSpell))
                     {
                         return;
                     }
@@ -263,7 +263,7 @@ namespace AmeisenBotX.Core.Combat.Classes.Kamel
                         return;
                     }
 
-                    if (WowInterface.Player.ManaPercentage <= 20 && CustomCastSpell(DivinePleaSpell))
+                    if (Bot.Player.ManaPercentage <= 20 && CustomCastSpell(DivinePleaSpell))
                     {
                         return;
                     }
@@ -273,27 +273,27 @@ namespace AmeisenBotX.Core.Combat.Classes.Kamel
                         return;
                     }
 
-                    if (WowInterface.Player.HealthPercentage <= 15 && CustomCastSpell(layonHandsSpell))
+                    if (Bot.Player.HealthPercentage <= 15 && CustomCastSpell(layonHandsSpell))
                     {
                         return;
                     }
-                    if (WowInterface.Player.HealthPercentage <= 25 && CustomCastSpell(holyLightSpell))
+                    if (Bot.Player.HealthPercentage <= 25 && CustomCastSpell(holyLightSpell))
                     {
                         return;
                     }
-                    if (WowInterface.Player.HealthPercentage <= 50 && CustomCastSpell(divineProtectionSpell))
+                    if (Bot.Player.HealthPercentage <= 50 && CustomCastSpell(divineProtectionSpell))
                     {
                         return;
                     }
-                    if (WowInterface.Target.HealthPercentage <= 20 && CustomCastSpell(hammerofWrathSpell))
+                    if (Bot.Target.HealthPercentage <= 20 && CustomCastSpell(hammerofWrathSpell))
                     {
                         return;
                     }
-                    if ((WowInterface.Target.HealthPercentage <= 20 || WowInterface.Player.HealthPercentage <= 30 || WowInterface.Target.IsCasting) && CustomCastSpell(hammerofJusticeSpell))
+                    if ((Bot.Target.HealthPercentage <= 20 || Bot.Player.HealthPercentage <= 30 || Bot.Target.IsCasting) && CustomCastSpell(hammerofJusticeSpell))
                     {
                         return;
                     }
-                    if (WowInterface.Db.GetUnitName(WowInterface.Target, out string name) && name != "Anub'Rekhan" && CustomCastSpell(handofReckoningSpell))
+                    if (Bot.Db.GetUnitName(Bot.Target, out string name) && name != "Anub'Rekhan" && CustomCastSpell(handofReckoningSpell))
                     {
                         return;
                     }

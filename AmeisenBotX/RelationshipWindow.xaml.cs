@@ -34,11 +34,6 @@ namespace AmeisenBotX
         private void DisplayStuff()
         {
             relationshipWrapPanel.Children.Clear();
-
-            foreach (KeyValuePair<ulong, Relationship> kv in AmeisenBot.WowInterface.Db.AllPlayerRelationships())
-            {
-                relationshipWrapPanel.Children.Add(new RelationshipDisplay(AmeisenBot.WowInterface, kv.Key, kv.Value));
-            }
         }
 
         private void Window_Loaded(object sender, RoutedEventArgs e)

@@ -114,7 +114,7 @@ namespace AmeisenBotX
             {
                 Dispatcher.InvokeAsync(() =>
                 {
-                    AmeisenBot.WowInterface.XMemory.ResizeParentWindow
+                    AmeisenBot.Bot.Memory.ResizeParentWindow
                     (
                         (int)(wowRect.Margin.Left * M11 + 1),
                         (int)(wowRect.Margin.Top * M22 + 1),
@@ -150,7 +150,7 @@ namespace AmeisenBotX
 
         private void ButtonClearCache_Click(object sender, RoutedEventArgs e)
         {
-            AmeisenBot.WowInterface.Db.Clear();
+            AmeisenBot.Bot.Db.Clear();
         }
 
         private void ButtonConfig_Click(object sender, RoutedEventArgs e)
@@ -250,7 +250,7 @@ namespace AmeisenBotX
         private void ButtonToggleRendering_Click(object sender, RoutedEventArgs e)
         {
             RenderState = !RenderState;
-            AmeisenBot.WowInterface.NewWowInterface.WowSetRenderState(RenderState);
+            AmeisenBot.Bot.Wow.WowSetRenderState(RenderState);
         }
 
         private void ComboboxStateOverride_SelectionChanged(object sender, System.Windows.Controls.SelectionChangedEventArgs e)
@@ -271,7 +271,7 @@ namespace AmeisenBotX
                 {
                     if (!PendingNotification)
                     {
-                        WowChatMessage message = AmeisenBot.WowInterface.ChatManager.ChatMessages
+                        WowChatMessage message = AmeisenBot.Bot.Chat.ChatMessages
                             .Where(e => e.Timestamp > NotificationLastTimestamp)
                             .FirstOrDefault(e => e.Type == WowChat.WHISPER);
 
@@ -308,7 +308,7 @@ namespace AmeisenBotX
                 }
 
                 // Update the main view
-                WowPlayer player = AmeisenBot.WowInterface.Player;
+                WowPlayer player = AmeisenBot.Bot.Player;
 
                 switch (player.Class)
                 {
@@ -362,7 +362,7 @@ namespace AmeisenBotX
                 // Overlay drawing
                 if (DrawOverlay)
                 {
-                    Overlay ??= new(AmeisenBot.WowInterface.XMemory);
+                    Overlay ??= new(AmeisenBot.Bot.Memory);
                     OverlayRenderCurrentPath();
 
                     Overlay?.Draw();
@@ -378,24 +378,24 @@ namespace AmeisenBotX
 
         private void OverlayRenderCurrentPath()
         {
-            if (AmeisenBot.WowInterface.MovementEngine.Path != null
-                && AmeisenBot.WowInterface.MovementEngine.Path.Any())
+            if (AmeisenBot.Bot.Movement.Path != null
+                && AmeisenBot.Bot.Movement.Path.Any())
             {
-                List<Vector3> currentNodes = AmeisenBot.WowInterface.MovementEngine.Path.ToList();
+                List<Vector3> currentNodes = AmeisenBot.Bot.Movement.Path.ToList();
 
                 for (int i = 0; i < currentNodes.Count; ++i)
                 {
                     Vector3 start = currentNodes[i];
-                    Vector3 end = i == 0 ? AmeisenBot.WowInterface.Player.Position : currentNodes[i - 1];
+                    Vector3 end = i == 0 ? AmeisenBot.Bot.Player.Position : currentNodes[i - 1];
 
                     System.Drawing.Color lineColor = System.Drawing.Color.White;
                     System.Drawing.Color startDot = System.Drawing.Color.Cyan;
                     System.Drawing.Color endDot = i == 0 ? System.Drawing.Color.Orange : i == currentNodes.Count ? System.Drawing.Color.Orange : System.Drawing.Color.Cyan;
 
-                    Memory.Win32.Rect windowRect = XMemory.GetClientSize(AmeisenBot.WowInterface.XMemory.Process.MainWindowHandle);
+                    Memory.Win32.Rect windowRect = XMemory.GetClientSize(AmeisenBot.Bot.Memory.Process.MainWindowHandle);
 
-                    if (OverlayMath.WorldToScreen(windowRect, AmeisenBot.WowInterface.Objects.Camera, start, out System.Drawing.Point startPoint)
-                        && OverlayMath.WorldToScreen(windowRect, AmeisenBot.WowInterface.Objects.Camera, end, out System.Drawing.Point endPoint))
+                    if (OverlayMath.WorldToScreen(windowRect, AmeisenBot.Bot.Objects.Camera, start, out System.Drawing.Point startPoint)
+                        && OverlayMath.WorldToScreen(windowRect, AmeisenBot.Bot.Objects.Camera, end, out System.Drawing.Point endPoint))
                     {
                         Overlay.AddLine(startPoint.X, startPoint.Y, endPoint.X, endPoint.Y, lineColor);
                         Overlay.AddRectangle(startPoint.X - 4, startPoint.Y - 4, 7, 7, startDot);
@@ -434,25 +434,25 @@ namespace AmeisenBotX
         private void UpdateBotInfo(int maxSecondary, int secondary, Brush primaryBrush, Brush secondaryBrush)
         {
             // Generic labels
-            labelPlayerName.Content = AmeisenBot.WowInterface.Db.GetUnitName(AmeisenBot.WowInterface.Player, out string name) ? name : "unknown";
+            labelPlayerName.Content = AmeisenBot.Bot.Db.GetUnitName(AmeisenBot.Bot.Player, out string name) ? name : "unknown";
 
-            labelMapName.Content = AmeisenBot.WowInterface.Objects.MapId.ToString();
-            labelZoneName.Content = AmeisenBot.WowInterface.Objects.ZoneName;
-            labelZoneSubName.Content = AmeisenBot.WowInterface.Objects.ZoneSubName;
+            labelMapName.Content = AmeisenBot.Bot.Objects.MapId.ToString();
+            labelZoneName.Content = AmeisenBot.Bot.Objects.ZoneName;
+            labelZoneSubName.Content = AmeisenBot.Bot.Objects.ZoneSubName;
 
-            labelCurrentLevel.Content = $"{AmeisenBot.WowInterface.Player.Level} (iLvl. {Math.Round(AmeisenBot.WowInterface.CharacterManager.Equipment.AverageItemLevel)})";
-            labelCurrentRace.Content = $"{AmeisenBot.WowInterface.Player.Race} {AmeisenBot.WowInterface.Player.Gender}";
-            labelCurrentClass.Content = AmeisenBot.WowInterface.Player.Class;
+            labelCurrentLevel.Content = $"{AmeisenBot.Bot.Player.Level} (iLvl. {Math.Round(AmeisenBot.Bot.Character.Equipment.AverageItemLevel)})";
+            labelCurrentRace.Content = $"{AmeisenBot.Bot.Player.Race} {AmeisenBot.Bot.Player.Gender}";
+            labelCurrentClass.Content = AmeisenBot.Bot.Player.Class;
 
-            progressbarExp.Maximum = AmeisenBot.WowInterface.Player.NextLevelXp;
-            progressbarExp.Value = AmeisenBot.WowInterface.Player.Xp;
-            labelCurrentExp.Content = $"{Math.Round(AmeisenBot.WowInterface.Player.XpPercentage)}%";
+            progressbarExp.Maximum = AmeisenBot.Bot.Player.NextLevelXp;
+            progressbarExp.Value = AmeisenBot.Bot.Player.Xp;
+            labelCurrentExp.Content = $"{Math.Round(AmeisenBot.Bot.Player.XpPercentage)}%";
 
-            progressbarHealth.Maximum = AmeisenBot.WowInterface.Player.MaxHealth;
-            progressbarHealth.Value = AmeisenBot.WowInterface.Player.Health;
-            labelCurrentHealth.Content = BotUtils.BigValueToString(AmeisenBot.WowInterface.Player.Health);
+            progressbarHealth.Maximum = AmeisenBot.Bot.Player.MaxHealth;
+            progressbarHealth.Value = AmeisenBot.Bot.Player.Health;
+            labelCurrentHealth.Content = BotUtils.BigValueToString(AmeisenBot.Bot.Player.Health);
 
-            labelCurrentCombatclass.Content = AmeisenBot.WowInterface.CombatClass == null ? $"No CombatClass" : AmeisenBot.WowInterface.CombatClass.ToString();
+            labelCurrentCombatclass.Content = AmeisenBot.Bot.CombatClass == null ? $"No CombatClass" : AmeisenBot.Bot.CombatClass.ToString();
 
             // Class specific labels
             progressbarSecondary.Maximum = maxSecondary;
@@ -468,7 +468,7 @@ namespace AmeisenBotX
         private void UpdateBottomLabels()
         {
             // Object count label
-            labelCurrentObjectCount.Content = AmeisenBot.WowInterface.Objects.ObjectCount.ToString(CultureInfo.InvariantCulture).PadLeft(4);
+            labelCurrentObjectCount.Content = AmeisenBot.Bot.Objects.ObjectCount.ToString(CultureInfo.InvariantCulture).PadLeft(4);
 
             // Tick time label
             float executionMs = AmeisenBot.CurrentExecutionMs;
@@ -491,9 +491,9 @@ namespace AmeisenBotX
             }
 
             // HookCall label
-            labelHookCallCount.Content = AmeisenBot.WowInterface.NewWowInterface.HookCallCount.ToString(CultureInfo.InvariantCulture).PadLeft(2);
+            labelHookCallCount.Content = AmeisenBot.Bot.Wow.HookCallCount.ToString(CultureInfo.InvariantCulture).PadLeft(2);
 
-            if (AmeisenBot.WowInterface.NewWowInterface.HookCallCount <= (AmeisenBot.WowInterface.Player.IsInCombat ? (ulong)AmeisenBot.Config.MaxFpsCombat : (ulong)AmeisenBot.Config.MaxFps))
+            if (AmeisenBot.Bot.Wow.HookCallCount <= (AmeisenBot.Bot.Player.IsInCombat ? (ulong)AmeisenBot.Config.MaxFpsCombat : (ulong)AmeisenBot.Config.MaxFps))
             {
                 labelHookCallCount.Foreground = CurrentTickTimeGoodBrush;
             }
@@ -504,8 +504,8 @@ namespace AmeisenBotX
             }
 
             // RPM/WPM labels
-            labelRpmCallCount.Content = AmeisenBot.WowInterface.XMemory.RpmCallCount.ToString(CultureInfo.InvariantCulture).PadLeft(5);
-            labelWpmCallCount.Content = AmeisenBot.WowInterface.XMemory.WpmCallCount.ToString(CultureInfo.InvariantCulture).PadLeft(3);
+            labelRpmCallCount.Content = AmeisenBot.Bot.Memory.RpmCallCount.ToString(CultureInfo.InvariantCulture).PadLeft(5);
+            labelWpmCallCount.Content = AmeisenBot.Bot.Memory.WpmCallCount.ToString(CultureInfo.InvariantCulture).PadLeft(3);
         }
 
         private void Window_Closing(object sender, System.ComponentModel.CancelEventArgs e)
@@ -541,21 +541,6 @@ namespace AmeisenBotX
                 MessageBox.Show("You need to move the content of your \"\\\\data\\\\\" folder to \"%AppData%\\\\Roaming\\\\AmeisenbotX\\\\profiles\\\\\". Otherwise your profiles may not be displayed.", "New Data Location", MessageBoxButton.OK, MessageBoxImage.Warning);
             }
 
-            // Init GUI related stuff
-            MainWindowHandle = new WindowInteropHelper(this).EnsureHandle(); // obtain a window handle (HWND) to out current WPF window
-
-            // load the state overrides
-            comboboxStateOverride.Items.Add(BotState.Idle);
-            comboboxStateOverride.Items.Add(BotState.Attacking);
-            comboboxStateOverride.Items.Add(BotState.Grinding);
-            comboboxStateOverride.Items.Add(BotState.Job);
-            comboboxStateOverride.Items.Add(BotState.Questing);
-
-            comboboxStateOverride.SelectedIndex = 0;
-
-            // display the PID, maybe remove this when not debugging
-            labelPID.Content = $"PID: {Environment.ProcessId}";
-
             // create our data folder, default will be placed at "%APPDATA%/AmeisenBotX/..."
             if (!Directory.Exists(DataPath))
             {
@@ -569,17 +554,33 @@ namespace AmeisenBotX
             // exit if the user selected no config
             if (string.IsNullOrWhiteSpace(loadConfigWindow.ConfigToLoad))
             {
-                Close();
+                // TODO: close the window without crashing here
+                // Close();
             }
             else
             {
+                // Init GUI related stuff
+                MainWindowHandle = new WindowInteropHelper(this).EnsureHandle(); // obtain a window handle (HWND) to out current WPF window
+
+                // load the state overrides
+                comboboxStateOverride.Items.Add(BotState.Idle);
+                comboboxStateOverride.Items.Add(BotState.Attacking);
+                comboboxStateOverride.Items.Add(BotState.Grinding);
+                comboboxStateOverride.Items.Add(BotState.Job);
+                comboboxStateOverride.Items.Add(BotState.Questing);
+
+                comboboxStateOverride.SelectedIndex = 0;
+
+                // display the PID, maybe remove this when not debugging
+                labelPID.Content = $"PID: {Environment.ProcessId}";
+
                 // init the bots engine
                 if (File.Exists(loadConfigWindow.ConfigToLoad) && TryLoadConfig(loadConfigWindow.ConfigToLoad, out AmeisenBotConfig config))
                 {
                     AmeisenBot = new(config);
 
                     // events used to update our GUI
-                    AmeisenBot.WowInterface.Objects.OnObjectUpdateComplete += OnObjectUpdateComplete;
+                    AmeisenBot.Bot.Objects.OnObjectUpdateComplete += OnObjectUpdateComplete;
                     AmeisenBot.StateMachine.OnStateMachineStateChanged += () =>
                     {
                         Dispatcher.InvokeAsync(() => { labelCurrentState.Content = $"{AmeisenBot.StateMachine.CurrentState.Key}"; });
@@ -597,7 +598,7 @@ namespace AmeisenBotX
                         {
                             Dispatcher.Invoke(() =>
                             {
-                                AmeisenBot.WowInterface.XMemory.SetupAutoPosition
+                                AmeisenBot.Bot.Memory.SetupAutoPosition
                                 (
                                     MainWindowHandle,
                                     (int)(wowRect.Margin.Left * M11 + 1),

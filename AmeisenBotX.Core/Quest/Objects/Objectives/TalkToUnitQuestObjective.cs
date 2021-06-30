@@ -11,9 +11,9 @@ namespace AmeisenBotX.Core.Quest.Objects.Objectives
 
     public class TalkToUnitQuestObjective : IQuestObjective
     {
-        public TalkToUnitQuestObjective(WowInterface wowInterface, int displayId, List<int> gossipIds, TalkToUnitQuestObjectiveCondition condition)
+        public TalkToUnitQuestObjective(AmeisenBotInterfaces bot, int displayId, List<int> gossipIds, TalkToUnitQuestObjectiveCondition condition)
         {
-            WowInterface = wowInterface;
+            Bot = bot;
             DisplayIds = new List<int>() { displayId };
             GossipIds = gossipIds;
             Condition = condition;
@@ -21,9 +21,9 @@ namespace AmeisenBotX.Core.Quest.Objects.Objectives
             TalkEvent = new(TimeSpan.FromMilliseconds(500));
         }
 
-        public TalkToUnitQuestObjective(WowInterface wowInterface, List<int> displayIds, List<int> gossipIds, TalkToUnitQuestObjectiveCondition condition)
+        public TalkToUnitQuestObjective(AmeisenBotInterfaces bot, List<int> displayIds, List<int> gossipIds, TalkToUnitQuestObjectiveCondition condition)
         {
-            WowInterface = wowInterface;
+            Bot = bot;
             DisplayIds = displayIds;
             GossipIds = gossipIds;
             Condition = condition;
@@ -45,30 +45,30 @@ namespace AmeisenBotX.Core.Quest.Objects.Objectives
 
         private TimegatedEvent TalkEvent { get; }
 
-        private WowInterface WowInterface { get; }
+        private AmeisenBotInterfaces Bot { get; }
 
         private WowUnit WowUnit { get; set; }
 
         public void Execute()
         {
-            if (Finished || WowInterface.Player.IsCasting) { return; }
+            if (Finished || Bot.Player.IsCasting) { return; }
 
-            WowUnit = WowInterface.Objects.WowObjects
+            WowUnit = Bot.Objects.WowObjects
                 .OfType<WowUnit>()
                 .Where(e => e.IsGossip && !e.IsDead && DisplayIds.Contains(e.DisplayId))
-                .OrderBy(e => e.Position.GetDistance(WowInterface.Player.Position))
+                .OrderBy(e => e.Position.GetDistance(Bot.Player.Position))
                 .FirstOrDefault();
 
             if (WowUnit != null)
             {
-                if (WowUnit.Position.GetDistance(WowInterface.Player.Position) < 3.0)
+                if (WowUnit.Position.GetDistance(Bot.Player.Position) < 3.0)
                 {
                     if (TalkEvent.Run())
                     {
-                        WowInterface.NewWowInterface.WowStopClickToMove();
-                        WowInterface.MovementEngine.Reset();
+                        Bot.Wow.WowStopClickToMove();
+                        Bot.Movement.Reset();
 
-                        WowInterface.NewWowInterface.WowUnitRightClick(WowUnit.BaseAddress);
+                        Bot.Wow.WowUnitRightClick(WowUnit.BaseAddress);
 
                         ++Counter;
                         if (Counter > GossipIds.Count)
@@ -76,12 +76,12 @@ namespace AmeisenBotX.Core.Quest.Objects.Objectives
                             Counter = 1;
                         }
 
-                        WowInterface.NewWowInterface.LuaSelectGossipOption(GossipIds[Counter - 1]);
+                        Bot.Wow.LuaSelectGossipOption(GossipIds[Counter - 1]);
                     }
                 }
                 else
                 {
-                    WowInterface.MovementEngine.SetMovementAction(MovementAction.Move, WowUnit.Position);
+                    Bot.Movement.SetMovementAction(MovementAction.Move, WowUnit.Position);
                 }
             }
         }

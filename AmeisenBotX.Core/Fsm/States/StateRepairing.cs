@@ -12,7 +12,7 @@ namespace AmeisenBotX.Core.Fsm.States
 {
     public class StateRepairing : BasicState
     {
-        public StateRepairing(AmeisenBotFsm stateMachine, AmeisenBotConfig config, WowInterface wowInterface) : base(stateMachine, config, wowInterface)
+        public StateRepairing(AmeisenBotFsm stateMachine, AmeisenBotConfig config, AmeisenBotInterfaces bot) : base(stateMachine, config, bot)
         {
             InteractionEvent = new(TimeSpan.FromMilliseconds(1000));
             EquipmentUpdateEvent = new(TimeSpan.FromSeconds(1));
@@ -26,14 +26,14 @@ namespace AmeisenBotX.Core.Fsm.States
 
         public override void Enter()
         {
-            WowInterface.EventHookManager.Subscribe("MERCHANT_SHOW", OnMerchantShow);
+            Bot.Events.Subscribe("MERCHANT_SHOW", OnMerchantShow);
         }
 
         public override void Execute()
         {
             if (EquipmentUpdateEvent.Run())
             {
-                WowInterface.CharacterManager.Equipment.Update();
+                Bot.Character.Equipment.Update();
             }
 
             if (!NeedToRepair())
@@ -48,19 +48,19 @@ namespace AmeisenBotX.Core.Fsm.States
 
             if (IsRepairNpcNear(out WowUnit selectedUnit))
             {
-                float distance = WowInterface.Player.Position.GetDistance(selectedUnit.Position);
+                float distance = Bot.Player.Position.GetDistance(selectedUnit.Position);
 
                 if (distance > 3.0f)
                 {
-                    WowInterface.MovementEngine.SetMovementAction(MovementAction.Move, selectedUnit.Position);
+                    Bot.Movement.SetMovementAction(MovementAction.Move, selectedUnit.Position);
                 }
                 else if (distance < 2.25f)
                 {
-                    WowInterface.MovementEngine.StopMovement();
+                    Bot.Movement.StopMovement();
 
                     if (InteractionEvent.Run())
                     {
-                        SpeakToMerchantRoutine.Run(WowInterface, selectedUnit);
+                        SpeakToMerchantRoutine.Run(Bot, selectedUnit);
                     }
                 }
             }
@@ -68,38 +68,38 @@ namespace AmeisenBotX.Core.Fsm.States
 
         public bool IsRepairNpcNear(out WowUnit unit)
         {
-            unit = WowInterface.Objects.WowObjects.OfType<WowUnit>()
+            unit = Bot.Objects.WowObjects.OfType<WowUnit>()
                 .FirstOrDefault(e => e.GetType() != typeof(WowPlayer)
                     && !e.IsDead
                     && e.IsRepairVendor
-                    && WowInterface.Db.GetReaction(WowInterface.Player, e) != WowUnitReaction.Hostile
-                    && e.Position.GetDistance(WowInterface.Player.Position) < Config.RepairNpcSearchRadius);
+                    && Bot.Db.GetReaction(Bot.Player, e) != WowUnitReaction.Hostile
+                    && e.Position.GetDistance(Bot.Player.Position) < Config.RepairNpcSearchRadius);
 
             return unit != null;
         }
 
         public override void Leave()
         {
-            WowInterface.EventHookManager.Unsubscribe("MERCHANT_SHOW", OnMerchantShow);
+            Bot.Events.Unsubscribe("MERCHANT_SHOW", OnMerchantShow);
         }
 
         internal bool NeedToRepair()
         {
-            return WowInterface.CharacterManager.Equipment.Items
+            return Bot.Character.Equipment.Items
                        .Any(e => e.Value.MaxDurability > 0 && (e.Value.Durability / (double)e.Value.MaxDurability * 100.0) <= Config.ItemRepairThreshold)
                    && IsRepairNpcNear(out _);
         }
 
         private void OnMerchantShow(long timestamp, List<string> args)
         {
-            if (Config.AutoRepair && WowInterface.Target.IsRepairVendor)
+            if (Config.AutoRepair && Bot.Target.IsRepairVendor)
             {
-                WowInterface.NewWowInterface.LuaRepairAllItems();
+                Bot.Wow.LuaRepairAllItems();
             }
 
             if (Config.AutoSell)
             {
-                SellItemsRoutine.Run(WowInterface, Config);
+                SellItemsRoutine.Run(Bot, Config);
                 SellingFinished = DateTime.UtcNow;
             }
         }

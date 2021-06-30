@@ -21,14 +21,14 @@ namespace AmeisenBotX.Core.Character
 {
     public class CharacterManager : ICharacterManager
     {
-        public CharacterManager(WowInterface wowInterface)
+        public CharacterManager(AmeisenBotInterfaces bot)
         {
-            WowInterface = wowInterface;
+            Bot = bot;
 
-            Inventory = new(WowInterface);
-            Equipment = new(WowInterface);
-            SpellBook = new(WowInterface);
-            TalentManager = new(WowInterface);
+            Inventory = new(Bot);
+            Equipment = new(Bot);
+            SpellBook = new(Bot);
+            TalentManager = new(Bot);
             ItemComparator = new ItemLevelComparator();
             Skills = new();
 
@@ -53,11 +53,11 @@ namespace AmeisenBotX.Core.Character
 
         public TalentManager TalentManager { get; }
 
-        private WowInterface WowInterface { get; }
+        private AmeisenBotInterfaces Bot { get; }
 
         public void AntiAfk()
         {
-            WowInterface.XMemory.Write(WowInterface.OffsetList.TickCount, Environment.TickCount);
+            Bot.Memory.Write(Bot.Offsets.TickCount, Environment.TickCount);
         }
 
         public void ClickToMove(Vector3 pos, ulong guid, WowClickToMoveType clickToMoveType = WowClickToMoveType.Move, float turnSpeed = 20.9f, float distance = 0.5f)
@@ -69,16 +69,16 @@ namespace AmeisenBotX.Core.Character
                 return;
             }
 
-            WowInterface.XMemory.Write(WowInterface.OffsetList.ClickToMoveTurnSpeed, turnSpeed);
-            WowInterface.XMemory.Write(WowInterface.OffsetList.ClickToMoveDistance, distance);
+            Bot.Memory.Write(Bot.Offsets.ClickToMoveTurnSpeed, turnSpeed);
+            Bot.Memory.Write(Bot.Offsets.ClickToMoveDistance, distance);
 
             if (guid > 0)
             {
-                WowInterface.XMemory.Write(WowInterface.OffsetList.ClickToMoveGuid, guid);
+                Bot.Memory.Write(Bot.Offsets.ClickToMoveGuid, guid);
             }
 
-            WowInterface.XMemory.Write(WowInterface.OffsetList.ClickToMoveAction, clickToMoveType);
-            WowInterface.XMemory.Write(WowInterface.OffsetList.ClickToMoveX, pos);
+            Bot.Memory.Write(Bot.Offsets.ClickToMoveAction, clickToMoveType);
+            Bot.Memory.Write(Bot.Offsets.ClickToMoveX, pos);
         }
 
         public Dictionary<int, int> GetConsumeables()
@@ -181,7 +181,7 @@ namespace AmeisenBotX.Core.Character
         public void Jump()
         {
             AmeisenLogger.I.Log("Movement", $"Jumping", LogLevel.Verbose);
-            Task.Run(() => BotUtils.SendKey(WowInterface.XMemory.Process.MainWindowHandle, new((int)VirtualKey.VKSPACE), 500, 1000));
+            Task.Run(() => BotUtils.SendKey(Bot.Memory.Process.MainWindowHandle, new((int)VirtualKey.VKSPACE), 500, 1000));
         }
 
         public void MoveToPosition(Vector3 pos, float turnSpeed = 20.9f, float distance = 0.1f)
@@ -215,7 +215,7 @@ namespace AmeisenBotX.Core.Character
                 {
                     if (Equipment.Items.All(keyPair => keyPair.Key != (WowEquipmentSlot)i))
                     {
-                        WowInterface.NewWowInterface.LuaEquipItem(container.First().Name);
+                        Bot.Wow.LuaEquipItem(container.First().Name);
                         break;
                     }
                 }
@@ -255,7 +255,7 @@ namespace AmeisenBotX.Core.Character
                             if (IsItemAnImprovement(item, out IWowItem itemToReplace))
                             {
                                 AmeisenLogger.I.Log("Equipment", $"Replacing \"{itemToReplace}\" with \"{item}\"", LogLevel.Verbose);
-                                WowInterface.NewWowInterface.LuaEquipItem(item.Name/*, itemToReplace.Name*/);
+                                Bot.Wow.LuaEquipItem(item.Name/*, itemToReplace.Name*/);
                                 Equipment.Update();
                                 break;
                             }
@@ -269,7 +269,7 @@ namespace AmeisenBotX.Core.Character
                             || (string.Equals(itemToEquip.Type, "Weapon", StringComparison.OrdinalIgnoreCase) && IsAbleToUseWeapon((WowWeapon)itemToEquip)))
                         {
                             AmeisenLogger.I.Log("Equipment", $"Equipping \"{itemToEquip}\"", LogLevel.Verbose);
-                            WowInterface.NewWowInterface.LuaEquipItem(itemToEquip.Name);
+                            Bot.Wow.LuaEquipItem(itemToEquip.Name);
                             Equipment.Update();
                         }
                     }
@@ -394,7 +394,7 @@ namespace AmeisenBotX.Core.Character
 
         private void UpdateMoney()
         {
-            if (int.TryParse(WowInterface.NewWowInterface.LuaGetMoney(), out int money))
+            if (int.TryParse(Bot.Wow.LuaGetMoney(), out int money))
             {
                 Money = money;
             }
@@ -404,14 +404,14 @@ namespace AmeisenBotX.Core.Character
         {
             try
             {
-                Mounts = JsonConvert.DeserializeObject<List<WowMount>>(WowInterface.NewWowInterface.LuaGetMounts());
+                Mounts = JsonConvert.DeserializeObject<List<WowMount>>(Bot.Wow.LuaGetMounts());
             }
             catch { }
         }
 
         private void UpdateSkills()
         {
-            Skills = WowInterface.NewWowInterface.LuaGetSkills();
+            Skills = Bot.Wow.LuaGetSkills();
         }
     }
 }

@@ -1,0 +1,8 @@
+{
+  "profiles": {
+    "AmeisenBotX": {
+      "commandName": "Project",
+      "nativeDebugging": false
+    }
+  }
+}

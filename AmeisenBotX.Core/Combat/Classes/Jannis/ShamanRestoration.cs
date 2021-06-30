@@ -13,9 +13,9 @@ namespace AmeisenBotX.Core.Combat.Classes.Jannis
 {
     public class ShamanRestoration : BasicCombatClass
     {
-        public ShamanRestoration(WowInterface wowInterface, AmeisenBotFsm stateMachine) : base(wowInterface, stateMachine)
+        public ShamanRestoration(AmeisenBotInterfaces bot, AmeisenBotFsm stateMachine) : base(bot, stateMachine)
         {
-            MyAuraManager.Jobs.Add(new KeepActiveAuraJob(waterShieldSpell, () => TryCastSpell(waterShieldSpell, 0, true)));
+            MyAuraManager.Jobs.Add(new KeepActiveAuraJob(bot.Db, waterShieldSpell, () => TryCastSpell(waterShieldSpell, 0, true)));
 
             SpellUsageHealDict = new Dictionary<int, string>()
             {
@@ -94,13 +94,13 @@ namespace AmeisenBotX.Core.Combat.Classes.Jannis
 
             if (SelectTarget(TargetProviderDps))
             {
-                if (WowInterface.Target.HasBuffByName(flameShockSpell)
-                    && TryCastSpell(flameShockSpell, WowInterface.Target.Guid, true))
+                if (Bot.Target.Auras.Any(e => Bot.Db.GetSpellName(e.SpellId) == flameShockSpell)
+                    && TryCastSpell(flameShockSpell, Bot.Wow.TargetGuid, true))
                 {
                     return;
                 }
 
-                if (TryCastSpell(lightningBoltSpell, WowInterface.Target.Guid, true))
+                if (TryCastSpell(lightningBoltSpell, Bot.Wow.TargetGuid, true))
                 {
                     return;
                 }
@@ -126,35 +126,35 @@ namespace AmeisenBotX.Core.Combat.Classes.Jannis
         {
             if (TargetProviderHeal.Get(out IEnumerable<WowUnit> unitsToHeal))
             {
-                WowInterface.NewWowInterface.WowTargetGuid(unitsToHeal.First().Guid);
+                Bot.Wow.WowTargetGuid(unitsToHeal.First().Guid);
 
-                if (WowInterface.Target != null)
+                if (Bot.Target != null)
                 {
-                    if (WowInterface.Target.HealthPercentage < 25
+                    if (Bot.Target.HealthPercentage < 25
                         && TryCastSpell(earthShieldSpell, 0, true))
                     {
                         return true;
                     }
 
                     if (unitsToHeal.Count() > 4
-                        && TryCastSpell(chainHealSpell, WowInterface.Target.Guid, true))
+                        && TryCastSpell(chainHealSpell, Bot.Wow.TargetGuid, true))
                     {
                         return true;
                     }
 
                     if (unitsToHeal.Count() > 6
                         && (TryCastSpell(naturesSwiftnessSpell, 0, true)
-                        || TryCastSpell(tidalForceSpell, WowInterface.Target.Guid, true)))
+                        || TryCastSpell(tidalForceSpell, Bot.Wow.TargetGuid, true)))
                     {
                         return true;
                     }
 
-                    double healthDifference = WowInterface.Target.MaxHealth - WowInterface.Target.Health;
+                    double healthDifference = Bot.Target.MaxHealth - Bot.Target.Health;
                     List<KeyValuePair<int, string>> spellsToTry = SpellUsageHealDict.Where(e => e.Key <= healthDifference).ToList();
 
                     foreach (KeyValuePair<int, string> keyValuePair in spellsToTry.OrderByDescending(e => e.Value))
                     {
-                        if (TryCastSpell(keyValuePair.Value, WowInterface.Target.Guid, true))
+                        if (TryCastSpell(keyValuePair.Value, Bot.Wow.TargetGuid, true))
                         {
                             return true;
                         }

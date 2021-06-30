@@ -6,50 +6,50 @@ namespace AmeisenBotX.Core.Quest.Profiles.Shino
 {
     internal class Horde1To60GrinderProfile : IQuestProfile
     {
-        public Horde1To60GrinderProfile(WowInterface wowInterface)
+        public Horde1To60GrinderProfile(AmeisenBotInterfaces bot)
         {
             Quests = new Queue<List<IBotQuest>>();
             Quests.Enqueue(new List<IBotQuest>() {
-                new QDurotarGrindToLevel6(wowInterface)
+                new QDurotarGrindToLevel6(bot)
             });
             Quests.Enqueue(new List<IBotQuest>() {
-                new QDurotarGrindToLevel9(wowInterface)
+                new QDurotarGrindToLevel9(bot)
             });
             Quests.Enqueue(new List<IBotQuest>() {
-                new QDurotarGrindToLevel11(wowInterface)
+                new QDurotarGrindToLevel11(bot)
             });
             Quests.Enqueue(new List<IBotQuest>() {
-                new QTheBarrensGrindToLevel14(wowInterface)
+                new QTheBarrensGrindToLevel14(bot)
             });
             Quests.Enqueue(new List<IBotQuest>() {
-                new QTheBarrensGrindToLevel16(wowInterface)
+                new QTheBarrensGrindToLevel16(bot)
             });
             Quests.Enqueue(new List<IBotQuest>() {
-                new QTheBarrensGrindToLevel19(wowInterface)
+                new QTheBarrensGrindToLevel19(bot)
             });
             Quests.Enqueue(new List<IBotQuest>() {
-                new QStonetalonGrindToLevel23(wowInterface)
+                new QStonetalonGrindToLevel23(bot)
             });
             Quests.Enqueue(new List<IBotQuest>() {
-                new QStonetalonGrindToLevel31(wowInterface)
+                new QStonetalonGrindToLevel31(bot)
             });
             Quests.Enqueue(new List<IBotQuest>() {
-                new QDesolaceGrindToLevel35(wowInterface)
+                new QDesolaceGrindToLevel35(bot)
             });
             Quests.Enqueue(new List<IBotQuest>() {
-                new QDesolaceGrindToLevel40(wowInterface)
+                new QDesolaceGrindToLevel40(bot)
             });
             Quests.Enqueue(new List<IBotQuest>() {
-                new QTanarisGrindToLevel44(wowInterface)
+                new QTanarisGrindToLevel44(bot)
             });
             Quests.Enqueue(new List<IBotQuest>() {
-                new QTanarisGrindToLevel49(wowInterface)
+                new QTanarisGrindToLevel49(bot)
             });
             Quests.Enqueue(new List<IBotQuest>() {
-                new QUngoroGrindToLevel54(wowInterface)
+                new QUngoroGrindToLevel54(bot)
             });
             Quests.Enqueue(new List<IBotQuest>() {
-                new QSilithusGrindToLevel60(wowInterface)
+                new QSilithusGrindToLevel60(bot)
             });
         }
 

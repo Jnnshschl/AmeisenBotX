@@ -10,16 +10,16 @@ namespace AmeisenBotX.Core.Quest.Objects.Objectives
 
     public class KillUnitQuestObjective : IQuestObjective
     {
-        public KillUnitQuestObjective(WowInterface wowInterface, int objectDisplayId, KillUnitQuestObjectiveCondition condition)
+        public KillUnitQuestObjective(AmeisenBotInterfaces bot, int objectDisplayId, KillUnitQuestObjectiveCondition condition)
         {
-            WowInterface = wowInterface;
+            Bot = bot;
             ObjectDisplayIds = new Dictionary<int, int>() { { 0, objectDisplayId } };
             Condition = condition;
         }
 
-        public KillUnitQuestObjective(WowInterface wowInterface, Dictionary<int, int> objectDisplayIds, KillUnitQuestObjectiveCondition condition)
+        public KillUnitQuestObjective(AmeisenBotInterfaces bot, Dictionary<int, int> objectDisplayIds, KillUnitQuestObjectiveCondition condition)
         {
-            WowInterface = wowInterface;
+            Bot = bot;
             ObjectDisplayIds = objectDisplayIds;
             Condition = condition;
         }
@@ -32,44 +32,44 @@ namespace AmeisenBotX.Core.Quest.Objects.Objectives
 
         private Dictionary<int, int> ObjectDisplayIds { get; }
 
-        private WowInterface WowInterface { get; }
+        private AmeisenBotInterfaces Bot { get; }
 
         private WowUnit WowUnit { get; set; }
 
         public void Execute()
         {
-            if (Finished || WowInterface.Player.IsCasting) { return; }
+            if (Finished || Bot.Player.IsCasting) { return; }
 
-            if (WowInterface.Target != null
-                && !WowInterface.Target.IsDead
-                && !WowInterface.Target.IsNotAttackable
-                && WowInterface.Db.GetReaction(WowInterface.Player, WowInterface.Target) != WowUnitReaction.Friendly)
+            if (Bot.Target != null
+                && !Bot.Target.IsDead
+                && !Bot.Target.IsNotAttackable
+                && Bot.Db.GetReaction(Bot.Player, Bot.Target) != WowUnitReaction.Friendly)
             {
-                WowUnit = WowInterface.Target;
+                WowUnit = Bot.Target;
             }
             else
             {
-                WowInterface.NewWowInterface.WowClearTarget();
+                Bot.Wow.WowClearTarget();
 
-                WowUnit = WowInterface.Objects.WowObjects
+                WowUnit = Bot.Objects.WowObjects
                     .OfType<WowUnit>()
                     .Where(e => !e.IsDead && ObjectDisplayIds.Values.Contains(e.DisplayId))
-                    .OrderBy(e => e.Position.GetDistance(WowInterface.Player.Position))
+                    .OrderBy(e => e.Position.GetDistance(Bot.Player.Position))
                     .OrderBy(e => ObjectDisplayIds.First(x => x.Value == e.DisplayId).Key)
                     .FirstOrDefault();
             }
 
             if (WowUnit != null)
             {
-                if (WowUnit.Position.GetDistance(WowInterface.Player.Position) < 3.0)
+                if (WowUnit.Position.GetDistance(Bot.Player.Position) < 3.0)
                 {
-                    WowInterface.NewWowInterface.WowStopClickToMove();
-                    WowInterface.MovementEngine.Reset();
-                    WowInterface.NewWowInterface.WowUnitRightClick(WowUnit.BaseAddress);
+                    Bot.Wow.WowStopClickToMove();
+                    Bot.Movement.Reset();
+                    Bot.Wow.WowUnitRightClick(WowUnit.BaseAddress);
                 }
                 else
                 {
-                    WowInterface.MovementEngine.SetMovementAction(MovementAction.Move, WowUnit.Position);
+                    Bot.Movement.SetMovementAction(MovementAction.Move, WowUnit.Position);
                 }
             }
         }

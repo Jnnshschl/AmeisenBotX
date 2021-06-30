@@ -7,6 +7,7 @@ using AmeisenBotX.Memory;
 using AmeisenBotX.Wow.Cache.Enums;
 using AmeisenBotX.Wow.Combatlog.Enums;
 using AmeisenBotX.Wow.Combatlog.Objects;
+using AmeisenBotX.Wow.Objects;
 using AmeisenBotX.Wow.Objects.Enums;
 using Newtonsoft.Json;
 using System;
@@ -20,8 +21,24 @@ namespace AmeisenBotX.Wow.Cache
 {
     public class LocalAmeisenBotDb : IAmeisenBotDb
     {
+        /// <summary>
+        /// Constructor for the from JSON method, you need to set GetUnitReactionFunc manually
+        /// </summary>
         public LocalAmeisenBotDb()
         {
+            CombatLogSubject = new BasicCombatLogEntrySubject();
+            Clear();
+
+            CleanupTimer = new Timer(CleanupTimerTick, null, 0, 6000);
+        }
+
+        public LocalAmeisenBotDb(XMemory xMemory, IOffsetList offsetList, Func<int, string> getSpellnameFunc, Func<IntPtr, IntPtr, WowUnitReaction> getUnitReactionFunc)
+        {
+            XMemory = xMemory;
+            OffsetList = offsetList;
+            GetSpellnameFunc = getSpellnameFunc;
+            GetUnitReactionFunc = getUnitReactionFunc;
+
             CombatLogSubject = new BasicCombatLogEntrySubject();
             Clear();
 
@@ -48,7 +65,15 @@ namespace AmeisenBotX.Wow.Cache
 
         private Timer CleanupTimer { get; }
 
-        public static LocalAmeisenBotDb FromJson(string dbFile)
+        private Func<int, string> GetSpellnameFunc { get; set; }
+
+        private Func<IntPtr, IntPtr, WowUnitReaction> GetUnitReactionFunc { get; set; }
+
+        private IOffsetList OffsetList { get; set; }
+
+        private XMemory XMemory { get; set; }
+
+        public static LocalAmeisenBotDb FromJson(string dbFile, XMemory xMemory, IOffsetList offsetList, Func<int, string> getSpellnameFunc, Func<IntPtr, IntPtr, WowUnitReaction> getUnitReactionFunc)
         {
             if (!Directory.Exists(Path.GetDirectoryName(dbFile)))
             {
@@ -60,7 +85,12 @@ namespace AmeisenBotX.Wow.Cache
 
                 try
                 {
-                    return JsonConvert.DeserializeObject<LocalAmeisenBotDb>(File.ReadAllText(dbFile));
+                    LocalAmeisenBotDb db = JsonConvert.DeserializeObject<LocalAmeisenBotDb>(File.ReadAllText(dbFile));
+                    db.XMemory = xMemory;
+                    db.OffsetList = offsetList;
+                    db.GetSpellnameFunc = getSpellnameFunc;
+                    db.GetUnitReactionFunc = getUnitReactionFunc;
+                    return db;
                 }
                 catch (Exception ex)
                 {
@@ -68,7 +98,47 @@ namespace AmeisenBotX.Wow.Cache
                 }
             }
 
-            return new();
+            return new(xMemory, offsetList, getSpellnameFunc, getUnitReactionFunc);
+        }
+
+        public IReadOnlyDictionary<int, List<Vector3>> AllBlacklistNodes()
+        {
+            return BlacklistNodes;
+        }
+
+        public IReadOnlyDictionary<CombatLogEntryType, Dictionary<CombatLogEntrySubtype, List<(DateTime, BasicCombatLogEntry)>>> AllCombatLogEntries()
+        {
+            return CombatLogEntries;
+        }
+
+        public IReadOnlyDictionary<WowMapId, Dictionary<WowHerbId, List<Vector3>>> AllHerbNodes()
+        {
+            return HerbNodes;
+        }
+
+        public IReadOnlyDictionary<ulong, string> AllNames()
+        {
+            return Names;
+        }
+
+        public IReadOnlyDictionary<WowMapId, Dictionary<WowOreId, List<Vector3>>> AllOreNodes()
+        {
+            return OreNodes;
+        }
+
+        public IReadOnlyDictionary<WowMapId, Dictionary<PoiType, List<Vector3>>> AllPointsOfInterest()
+        {
+            return PointsOfInterest;
+        }
+
+        public IReadOnlyDictionary<int, Dictionary<int, WowUnitReaction>> AllReactions()
+        {
+            return Reactions;
+        }
+
+        public IReadOnlyDictionary<int, string> AllSpellNames()
+        {
+            return SpellNames;
         }
 
         public void CacheCombatLogEntry(KeyValuePair<CombatLogEntryType, CombatLogEntrySubtype> key, BasicCombatLogEntry entry)
@@ -176,7 +246,7 @@ namespace AmeisenBotX.Wow.Cache
             return CombatLogSubject;
         }
 
-        public WowUnitReaction GetReaction(Func<IntPtr, IntPtr, WowUnitReaction> pred, WowUnit a, WowUnit b)
+        public WowUnitReaction GetReaction(WowUnit a, WowUnit b)
         {
             if (Reactions.ContainsKey(a.FactionTemplate) && Reactions[a.FactionTemplate].ContainsKey(b.FactionTemplate))
             {
@@ -184,13 +254,13 @@ namespace AmeisenBotX.Wow.Cache
             }
             else
             {
-                WowUnitReaction reaction = pred(a.BaseAddress, b.BaseAddress);
+                WowUnitReaction reaction = GetUnitReactionFunc(a.BaseAddress, b.BaseAddress);
                 CacheReaction(a.FactionTemplate, b.FactionTemplate, reaction);
                 return reaction;
             }
         }
 
-        public bool GetUnitName(XMemory xMemory, IOffsetList offsetList, WowUnit unit, out string name)
+        public bool GetUnitName(WowUnit unit, out string name)
         {
             if (Names.ContainsKey(unit.Guid))
             {
@@ -199,7 +269,7 @@ namespace AmeisenBotX.Wow.Cache
             }
             else
             {
-                name = unit.ReadName(xMemory, offsetList);
+                name = unit.ReadName(XMemory, OffsetList);
                 Names.TryAdd(unit.Guid, name);
                 return true;
             }
@@ -236,7 +306,7 @@ namespace AmeisenBotX.Wow.Cache
 
         public bool TryGetPointsOfInterest(WowMapId mapId, PoiType poiType, Vector3 position, float maxRadius, out IEnumerable<Vector3> nodes)
         {
-            KeyValuePair<WowMapId, PoiType> KeyValuePair = new KeyValuePair<WowMapId, PoiType>(mapId, poiType);
+            KeyValuePair<WowMapId, PoiType> KeyValuePair = new(mapId, poiType);
 
             if (PointsOfInterest.ContainsKey(mapId)
                 && PointsOfInterest[mapId].ContainsKey(poiType))
@@ -249,16 +319,18 @@ namespace AmeisenBotX.Wow.Cache
             return false;
         }
 
-        public bool TryGetSpellName(int spellId, out string name)
+        public string GetSpellName(int spellId)
         {
             if (SpellNames.ContainsKey(spellId))
             {
-                name = SpellNames[spellId];
-                return true;
+                return SpellNames[spellId];
             }
-
-            name = string.Empty;
-            return false;
+            else
+            {
+                string name = GetSpellnameFunc(spellId);
+                CacheSpellName(spellId, name);
+                return name;
+            }
         }
 
         private void CleanupTimerTick(object state)

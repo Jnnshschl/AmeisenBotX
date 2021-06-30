@@ -7,9 +7,9 @@ namespace AmeisenBotX.Core.Fsm.States.Idle.Actions
 {
     public class RandomEmoteIdleAction : IIdleAction
     {
-        public RandomEmoteIdleAction(WowInterface wowInterface)
+        public RandomEmoteIdleAction(AmeisenBotInterfaces bot)
         {
-            WowInterface = wowInterface;
+            Bot = bot;
 
             Emotes = new List<string>()
             {
@@ -51,7 +51,7 @@ namespace AmeisenBotX.Core.Fsm.States.Idle.Actions
 
         public int MinDuration => 0;
 
-        public WowInterface WowInterface { get; }
+        public AmeisenBotInterfaces Bot { get; }
 
         private Random Rnd { get; }
 
@@ -62,24 +62,24 @@ namespace AmeisenBotX.Core.Fsm.States.Idle.Actions
 
         public void Execute()
         {
-            IEnumerable<WowPlayer> friendsAroundMe = WowInterface.Objects.GetNearFriends<WowPlayer>(WowInterface.Db.GetReaction, WowInterface.Player.Position, 24.0f)
-                .Where(e => e.Guid != WowInterface.Player.Guid && WowInterface.Objects.PartymemberGuids.Contains(e.Guid));
+            IEnumerable<WowPlayer> friendsAroundMe = Bot.Objects.GetNearFriends<WowPlayer>(Bot.Db.GetReaction, Bot.Player.Position, 24.0f)
+                .Where(e => e.Guid != Bot.Wow.PlayerGuid && Bot.Objects.PartymemberGuids.Contains(e.Guid));
 
             if (friendsAroundMe.Any() && Rnd.NextDouble() > 0.5)
             {
                 WowPlayer player = friendsAroundMe.ElementAt(Rnd.Next(0, friendsAroundMe.Count()));
 
-                if (WowInterface.Target.Guid != player.Guid)
+                if (Bot.Wow.TargetGuid != player.Guid)
                 {
-                    WowInterface.NewWowInterface.WowTargetGuid(player.Guid);
-                    WowInterface.NewWowInterface.WowFacePosition(WowInterface.Player.BaseAddress, WowInterface.Player.Position, player.Position);
+                    Bot.Wow.WowTargetGuid(player.Guid);
+                    Bot.Wow.WowFacePosition(Bot.Player.BaseAddress, Bot.Player.Position, player.Position);
                 }
 
-                WowInterface.NewWowInterface.LuaSendChatMessage($"/{EmotesWithInteraction[Rnd.Next(0, EmotesWithInteraction.Count)]}");
+                Bot.Wow.LuaSendChatMessage($"/{EmotesWithInteraction[Rnd.Next(0, EmotesWithInteraction.Count)]}");
             }
             else
             {
-                WowInterface.NewWowInterface.LuaSendChatMessage($"/{Emotes[Rnd.Next(0, Emotes.Count)]}");
+                Bot.Wow.LuaSendChatMessage($"/{Emotes[Rnd.Next(0, Emotes.Count)]}");
             }
         }
     }

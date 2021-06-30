@@ -4,9 +4,9 @@
 
     public class CastVehicleSpellQuestObjective : IQuestObjective
     {
-        public CastVehicleSpellQuestObjective(WowInterface wowInterface, int spellId, CastVehicleSpellQuestObjectiveCondition condition)
+        public CastVehicleSpellQuestObjective(AmeisenBotInterfaces bot, int spellId, CastVehicleSpellQuestObjectiveCondition condition)
         {
-            WowInterface = wowInterface;
+            Bot = bot;
             SpellId = spellId;
             Condition = condition;
         }
@@ -19,15 +19,15 @@
 
         private int SpellId { get; }
 
-        private WowInterface WowInterface { get; }
+        private AmeisenBotInterfaces Bot { get; }
 
         public void Execute()
         {
-            if (Finished || WowInterface.Objects.Vehicle.IsCasting) { return; }
+            if (Finished || Bot.Objects.Vehicle.IsCasting) { return; }
 
-            WowInterface.MovementEngine.Reset();
-            WowInterface.NewWowInterface.WowStopClickToMove();
-            WowInterface.NewWowInterface.LuaCastSpellById(SpellId);
+            Bot.Movement.Reset();
+            Bot.Wow.WowStopClickToMove();
+            Bot.Wow.LuaCastSpellById(SpellId);
         }
     }
 }

@@ -12,7 +12,7 @@ namespace AmeisenBotX.Core.Quest.Profiles.StartAreas
 {
     public class DeathknightStartAreaQuestProfile : IQuestProfile
     {
-        public DeathknightStartAreaQuestProfile(WowInterface wowInterface)
+        public DeathknightStartAreaQuestProfile(AmeisenBotInterfaces bot)
         {
             Quests = new Queue<List<IBotQuest>>();
 
@@ -22,9 +22,9 @@ namespace AmeisenBotX.Core.Quest.Profiles.StartAreas
                 {
                     new BotQuest
                     (
-                        wowInterface, 12593, "In Service of the Lich King", 55, 1,
-                        () => (wowInterface.Objects.GetClosestWowUnitByDisplayId(wowInterface.Player.Position, new List<int> { 24191 }), default),
-                        () => (wowInterface.Objects.GetClosestWowUnitByDisplayId(wowInterface.Player.Position, new List<int> { 16582 }), default),
+                        bot, 12593, "In Service of the Lich King", 55, 1,
+                        () => (bot.Objects.GetClosestWowUnitByDisplayId(bot.Player.Position, new List<int> { 24191 }), default),
+                        () => (bot.Objects.GetClosestWowUnitByDisplayId(bot.Player.Position, new List<int> { 16582 }), default),
                         null
                     )
                 }
@@ -36,19 +36,19 @@ namespace AmeisenBotX.Core.Quest.Profiles.StartAreas
                 {
                     new BotQuest
                     (
-                        wowInterface, 12619, "The Emblazoned Runeblade", 55, 1,
-                        () => (wowInterface.Objects.GetClosestWowUnitByDisplayId(wowInterface.Player.Position, new List<int> { 16582 }), default),
-                        () => (wowInterface.Objects.GetClosestWowUnitByDisplayId(wowInterface.Player.Position, new List<int> { 16582 }), default),
+                        bot, 12619, "The Emblazoned Runeblade", 55, 1,
+                        () => (bot.Objects.GetClosestWowUnitByDisplayId(bot.Player.Position, new List<int> { 16582 }), default),
+                        () => (bot.Objects.GetClosestWowUnitByDisplayId(bot.Player.Position, new List<int> { 16582 }), default),
                         new List<IQuestObjective>()
                         {
                             new QuestObjectiveChain(new List<IQuestObjective>()
                             {
-                                new CollectQuestObjectiveDEPRECATED(wowInterface, 38607, 1, 7961, new List<AreaNode>()
+                                new CollectQuestObjectiveDEPRECATED(bot, 38607, 1, 7961, new List<AreaNode>()
                                 {
                                     new AreaNode(new Vector3(2504, -5563, 421), 32.0)
                                 }),
-                                new MoveToObjectQuestObjective(wowInterface, 8175, 8.0),
-                                new UseItemQuestObjective(wowInterface, 38607, () => wowInterface.CharacterManager.Inventory.Items.Any(e => e.Id == 38631))
+                                new MoveToObjectQuestObjective(bot, 8175, 8.0),
+                                new UseItemQuestObjective(bot, 38607, () => bot.Character.Inventory.Items.Any(e => e.Id == 38631))
                             })
                         }
                     )
@@ -61,16 +61,16 @@ namespace AmeisenBotX.Core.Quest.Profiles.StartAreas
                 {
                     new BotQuest
                     (
-                        wowInterface, 12842, "Preperation For Battle", 55, 1,
-                        () => (wowInterface.Objects.GetClosestWowUnitByDisplayId(wowInterface.Player.Position, new List<int> { 16582 }), default),
-                        () => (wowInterface.Objects.GetClosestWowUnitByDisplayId(wowInterface.Player.Position, new List<int> { 16582 }), default),
+                        bot, 12842, "Preperation For Battle", 55, 1,
+                        () => (bot.Objects.GetClosestWowUnitByDisplayId(bot.Player.Position, new List<int> { 16582 }), default),
+                        () => (bot.Objects.GetClosestWowUnitByDisplayId(bot.Player.Position, new List<int> { 16582 }), default),
                         new List<IQuestObjective>()
                         {
                             new QuestObjectiveChain(new List<IQuestObjective>()
                             {
-                                new MoveToObjectQuestObjective(wowInterface, 8175, 8.0),
-                                new RuneforgingQuestObjective(wowInterface, () => wowInterface.CharacterManager.Equipment.HasEnchantment(WowEquipmentSlot.INVSLOT_MAINHAND, 3369)
-                                                                               || wowInterface.CharacterManager.Equipment.HasEnchantment(WowEquipmentSlot.INVSLOT_MAINHAND, 3370))
+                                new MoveToObjectQuestObjective(bot, 8175, 8.0),
+                                new RuneforgingQuestObjective(bot, () => bot.Character.Equipment.HasEnchantment(WowEquipmentSlot.INVSLOT_MAINHAND, 3369)
+                                                                               || bot.Character.Equipment.HasEnchantment(WowEquipmentSlot.INVSLOT_MAINHAND, 3370))
                             })
                         }
                     )
@@ -83,15 +83,15 @@ namespace AmeisenBotX.Core.Quest.Profiles.StartAreas
                 {
                     new BotQuest
                     (
-                        wowInterface, 12848, "The Endless Hunger", 55, 1,
-                        () => (wowInterface.Objects.GetClosestWowUnitByDisplayId(wowInterface.Player.Position, new List<int> { 16582 }), default),
-                        () => (wowInterface.Objects.GetClosestWowUnitByDisplayId(wowInterface.Player.Position, new List<int> { 16582 }), default),
+                        bot, 12848, "The Endless Hunger", 55, 1,
+                        () => (bot.Objects.GetClosestWowUnitByDisplayId(bot.Player.Position, new List<int> { 16582 }), default),
+                        () => (bot.Objects.GetClosestWowUnitByDisplayId(bot.Player.Position, new List<int> { 16582 }), default),
                         new List<IQuestObjective>()
                         {
                             new QuestObjectiveChain(new List<IQuestObjective>()
                             {
-                                new MoveToObjectQuestObjective(wowInterface, 8115, 4.0),
-                                new UseObjectQuestObjective(wowInterface, 8115, () => wowInterface.Objects.Player.QuestlogEntries.FirstOrDefault(e => e.Id == 12848).Finished == 1)
+                                new MoveToObjectQuestObjective(bot, 8115, 4.0),
+                                new UseObjectQuestObjective(bot, 8115, () => bot.Objects.Player.QuestlogEntries.FirstOrDefault(e => e.Id == 12848).Finished == 1)
                             })
                         }
                     )
@@ -104,9 +104,9 @@ namespace AmeisenBotX.Core.Quest.Profiles.StartAreas
                 {
                     new BotQuest
                     (
-                        wowInterface, 12636, "The Eye Of Acherus", 55, 1,
-                        () => (wowInterface.Objects.GetClosestWowUnitByDisplayId(wowInterface.Player.Position, new List<int> { 16582 }), default),
-                        () => (wowInterface.Objects.GetClosestWowUnitByDisplayId(wowInterface.Player.Position, new List<int> { 24191 }), default),
+                        bot, 12636, "The Eye Of Acherus", 55, 1,
+                        () => (bot.Objects.GetClosestWowUnitByDisplayId(bot.Player.Position, new List<int> { 16582 }), default),
+                        () => (bot.Objects.GetClosestWowUnitByDisplayId(bot.Player.Position, new List<int> { 24191 }), default),
                         null
                     )
                 }
@@ -118,25 +118,25 @@ namespace AmeisenBotX.Core.Quest.Profiles.StartAreas
                 {
                     new BotQuest
                     (
-                        wowInterface, 12641, "Death Comes From On High", 55, 1,
-                        () => (wowInterface.Objects.GetClosestWowUnitByDisplayId(wowInterface.Player.Position, new List<int> { 24191 }), default),
-                        () => (wowInterface.Objects.GetClosestWowUnitByDisplayId(wowInterface.Player.Position, new List<int> { 24191 }), default),
+                        bot, 12641, "Death Comes From On High", 55, 1,
+                        () => (bot.Objects.GetClosestWowUnitByDisplayId(bot.Player.Position, new List<int> { 24191 }), default),
+                        () => (bot.Objects.GetClosestWowUnitByDisplayId(bot.Player.Position, new List<int> { 24191 }), default),
                         new List<IQuestObjective>()
                         {
                             new QuestObjectiveChain(new List<IQuestObjective>()
                             {
-                                new MoveToObjectQuestObjective(wowInterface, 8123, 5.0),
-                                new UseObjectQuestObjective(wowInterface, 8123, () => wowInterface.Objects.Vehicle != null),
-                                new WaitUntilQuestObjective(() => wowInterface.Objects.Vehicle != null && wowInterface.Objects.Vehicle.Position.GetDistance(new Vector3(1758, -5876, 166)) < 32.0),
-                                new MoveVehicleToPositionQuestObjective(wowInterface, new Vector3(1813, -5991, 131), 4.0, MovementAction.DirectMove, true),
-                                new CastVehicleSpellQuestObjective(wowInterface, 51859, () => CheckEyeCastingState(wowInterface, 0, new Vector3(1813, -5991, 131), 5.0)),
-                                new MoveVehicleToPositionQuestObjective(wowInterface, new Vector3(1652, -5996, 151), 4.0, MovementAction.DirectMove, true),
-                                new CastVehicleSpellQuestObjective(wowInterface, 51859, () => CheckEyeCastingState(wowInterface, 1, new Vector3(1652, -5996, 151), 5.0)),
-                                new MoveVehicleToPositionQuestObjective(wowInterface, new Vector3(1601, -5738, 140), 4.0, MovementAction.DirectMove, true),
-                                new CastVehicleSpellQuestObjective(wowInterface, 51859, () => CheckEyeCastingState(wowInterface, 2, new Vector3(1601, -5738, 140), 5.0)),
-                                new MoveVehicleToPositionQuestObjective(wowInterface, new Vector3(1392, -5704, 162), 4.0, MovementAction.DirectMove, true),
-                                new CastVehicleSpellQuestObjective(wowInterface, 51859, () => CheckEyeCastingState(wowInterface, 3, new Vector3(1392, -5704, 162), 5.0)),
-                                new CastVehicleSpellQuestObjective(wowInterface, 52694, () => CastedSpell[3] == true && wowInterface.Objects.Vehicle == null)
+                                new MoveToObjectQuestObjective(bot, 8123, 5.0),
+                                new UseObjectQuestObjective(bot, 8123, () => bot.Objects.Vehicle != null),
+                                new WaitUntilQuestObjective(() => bot.Objects.Vehicle != null && bot.Objects.Vehicle.Position.GetDistance(new Vector3(1758, -5876, 166)) < 32.0),
+                                new MoveVehicleToPositionQuestObjective(bot, new Vector3(1813, -5991, 131), 4.0, MovementAction.DirectMove, true),
+                                new CastVehicleSpellQuestObjective(bot, 51859, () => CheckEyeCastingState(bot, 0, new Vector3(1813, -5991, 131), 5.0)),
+                                new MoveVehicleToPositionQuestObjective(bot, new Vector3(1652, -5996, 151), 4.0, MovementAction.DirectMove, true),
+                                new CastVehicleSpellQuestObjective(bot, 51859, () => CheckEyeCastingState(bot, 1, new Vector3(1652, -5996, 151), 5.0)),
+                                new MoveVehicleToPositionQuestObjective(bot, new Vector3(1601, -5738, 140), 4.0, MovementAction.DirectMove, true),
+                                new CastVehicleSpellQuestObjective(bot, 51859, () => CheckEyeCastingState(bot, 2, new Vector3(1601, -5738, 140), 5.0)),
+                                new MoveVehicleToPositionQuestObjective(bot, new Vector3(1392, -5704, 162), 4.0, MovementAction.DirectMove, true),
+                                new CastVehicleSpellQuestObjective(bot, 51859, () => CheckEyeCastingState(bot, 3, new Vector3(1392, -5704, 162), 5.0)),
+                                new CastVehicleSpellQuestObjective(bot, 52694, () => CastedSpell[3] == true && bot.Objects.Vehicle == null)
                             })
                         }
                     )
@@ -149,15 +149,15 @@ namespace AmeisenBotX.Core.Quest.Profiles.StartAreas
                 {
                     new BotQuest
                     (
-                        wowInterface, 12657, "The Might Of The Scourge", 55, 1,
-                        () => (wowInterface.Objects.GetClosestWowUnitByDisplayId(wowInterface.Player.Position, new List<int> { 24191 }), default),
-                        () => (wowInterface.Objects.GetClosestWowUnitByDisplayId(wowInterface.Player.Position, new List<int> { 25444 }), default),
+                        bot, 12657, "The Might Of The Scourge", 55, 1,
+                        () => (bot.Objects.GetClosestWowUnitByDisplayId(bot.Player.Position, new List<int> { 24191 }), default),
+                        () => (bot.Objects.GetClosestWowUnitByDisplayId(bot.Player.Position, new List<int> { 25444 }), default),
                         new List<IQuestObjective>()
                         {
                             new QuestObjectiveChain(new List<IQuestObjective>()
                             {
-                                new MoveToPositionQuestObjective(wowInterface, new Vector3(2385, -5645, 421), 2.5),
-                                new WaitUntilQuestObjective(() => wowInterface.Objects.Player.Position.Z < 390.0 && wowInterface.Objects.Player.Position.Z > 350.0)
+                                new MoveToPositionQuestObjective(bot, new Vector3(2385, -5645, 421), 2.5),
+                                new WaitUntilQuestObjective(() => bot.Objects.Player.Position.Z < 390.0 && bot.Objects.Player.Position.Z > 350.0)
                             })
                         }
                     )
@@ -170,12 +170,12 @@ namespace AmeisenBotX.Core.Quest.Profiles.StartAreas
                 {
                     new BotQuest
                     (
-                        wowInterface, 12850, "Report To Scourge Commander Thalanor", 55, 1,
-                        () => (wowInterface.Objects.GetClosestWowUnitByDisplayId(wowInterface.Player.Position, new List<int> { 25444 }), default),
-                        () => (wowInterface.Objects.GetClosestWowUnitByDisplayId(wowInterface.Player.Position, new List<int> { 25496 }), default),
+                        bot, 12850, "Report To Scourge Commander Thalanor", 55, 1,
+                        () => (bot.Objects.GetClosestWowUnitByDisplayId(bot.Player.Position, new List<int> { 25444 }), default),
+                        () => (bot.Objects.GetClosestWowUnitByDisplayId(bot.Player.Position, new List<int> { 25496 }), default),
                         new List<IQuestObjective>()
                         {
-                            new MoveToPositionQuestObjective(wowInterface, new Vector3(2348, -5670, 382), 40.0)
+                            new MoveToPositionQuestObjective(bot, new Vector3(2348, -5670, 382), 40.0)
                         }
                     )
                 }
@@ -187,16 +187,16 @@ namespace AmeisenBotX.Core.Quest.Profiles.StartAreas
                 {
                     new BotQuest
                     (
-                        wowInterface, 12670, "The Scarlet Harvest", 55, 1,
-                        () => (wowInterface.Objects.GetClosestWowUnitByDisplayId(wowInterface.Player.Position, new List<int> { 25496 }), default),
-                        () => (wowInterface.Objects.GetClosestWowUnitByDisplayId(wowInterface.Player.Position, new List<int> { 25514 }), default),
+                        bot, 12670, "The Scarlet Harvest", 55, 1,
+                        () => (bot.Objects.GetClosestWowUnitByDisplayId(bot.Player.Position, new List<int> { 25496 }), default),
+                        () => (bot.Objects.GetClosestWowUnitByDisplayId(bot.Player.Position, new List<int> { 25514 }), default),
                         new List<IQuestObjective>()
                         {
                             new QuestObjectiveChain(new List<IQuestObjective>()
                             {
-                                new MoveToUnitQuestObjective(wowInterface, 26308, 3.0),
-                                new UseUnitQuestObjective(wowInterface, 26308, false, () => wowInterface.Objects.Player.Position.GetDistance(new Vector3(2430, -5730, 158)) < 8.0),
-                                new WaitUntilQuestObjective(() => wowInterface.Objects.Player.Position.Z < 180.0)
+                                new MoveToUnitQuestObjective(bot, 26308, 3.0),
+                                new UseUnitQuestObjective(bot, 26308, false, () => bot.Objects.Player.Position.GetDistance(new Vector3(2430, -5730, 158)) < 8.0),
+                                new WaitUntilQuestObjective(() => bot.Objects.Player.Position.Z < 180.0)
                             })
                         }
                     )
@@ -209,73 +209,73 @@ namespace AmeisenBotX.Core.Quest.Profiles.StartAreas
                 {
                     new BotQuest
                     (
-                        wowInterface, 12678, "If Chaos Drives, Let Suffering Hold The Reins", 55, 1,
-                        () => (wowInterface.Objects.GetClosestWowUnitByDisplayId(wowInterface.Player.Position, new List<int> { 25514 }), new Vector3(2340, -5687, 154)),
-                        () => (wowInterface.Objects.GetClosestWowUnitByDisplayId(wowInterface.Player.Position, new List<int> { 25514 }), new Vector3(2340, -5687, 154)),
+                        bot, 12678, "If Chaos Drives, Let Suffering Hold The Reins", 55, 1,
+                        () => (bot.Objects.GetClosestWowUnitByDisplayId(bot.Player.Position, new List<int> { 25514 }), new Vector3(2340, -5687, 154)),
+                        () => (bot.Objects.GetClosestWowUnitByDisplayId(bot.Player.Position, new List<int> { 25514 }), new Vector3(2340, -5687, 154)),
                         new List<IQuestObjective>()
                         {
                             new QuestObjectiveChain(new List<IQuestObjective>()
                             {
-                                new MoveToPositionQuestObjective(wowInterface, new Vector3(2088, -5744, 100), 60.0),
-                                new KillUnitQuestObjective(wowInterface, new Dictionary<int, int> { { 0, 25506 }, { 1, 25509 }, { 2, 25555 }, { 3, 25558 }, { 4, 10311 }, { 5, 24573 }, { 6, 25504 } }, () => wowInterface.Objects.Player.QuestlogEntries.FirstOrDefault(e => e.Id == 12678).Finished == 1)
+                                new MoveToPositionQuestObjective(bot, new Vector3(2088, -5744, 100), 60.0),
+                                new KillUnitQuestObjective(bot, new Dictionary<int, int> { { 0, 25506 }, { 1, 25509 }, { 2, 25555 }, { 3, 25558 }, { 4, 10311 }, { 5, 24573 }, { 6, 25504 } }, () => bot.Objects.Player.QuestlogEntries.FirstOrDefault(e => e.Id == 12678).Finished == 1)
                             })
                         }
                     ),
                     new BotQuest
                     (
-                        wowInterface, 12680, "Grand Theft Palomino", 55, 1,
-                        () => (wowInterface.Objects.GetClosestWowUnitByDisplayId(wowInterface.Player.Position, new List<int> { 16416 }), new Vector3(2340, -5687, 154)),
-                        () => (wowInterface.Objects.GetClosestWowUnitByDisplayId(wowInterface.Player.Position, new List<int> { 16416 }), new Vector3(2340, -5687, 154)),
+                        bot, 12680, "Grand Theft Palomino", 55, 1,
+                        () => (bot.Objects.GetClosestWowUnitByDisplayId(bot.Player.Position, new List<int> { 16416 }), new Vector3(2340, -5687, 154)),
+                        () => (bot.Objects.GetClosestWowUnitByDisplayId(bot.Player.Position, new List<int> { 16416 }), new Vector3(2340, -5687, 154)),
                         new List<IQuestObjective>()
                         {
-                            new BotActionQuestObjective(() => wowInterface.Globals.IgnoreCombat = true),
+                            new BotActionQuestObjective(() => bot.Globals.IgnoreCombat = true),
                             new QuestObjectiveChain(new List<IQuestObjective>()
                             {
-                                new MoveToPositionQuestObjective(wowInterface, new Vector3(2243, -5834, 101), 48.0),
-                                new MoveToUnitQuestObjective(wowInterface, 25571, 32.0),
-                                new UseUnitQuestObjective(wowInterface, 25571, false, () => wowInterface.Objects.Pet.Guid > 0),
-                                new MoveToPositionQuestObjective(wowInterface, new Vector3(2353, -5704, 153), 48.0),
-                                new MoveToUnitQuestObjective(wowInterface, 16416, 16.0),
-                                new CastVehicleSpellQuestObjective(wowInterface, 52264, () => wowInterface.Objects.Player.QuestlogEntries.FirstOrDefault(e => e.Id == 12680).Finished == 1)
+                                new MoveToPositionQuestObjective(bot, new Vector3(2243, -5834, 101), 48.0),
+                                new MoveToUnitQuestObjective(bot, 25571, 32.0),
+                                new UseUnitQuestObjective(bot, 25571, false, () => bot.Objects.Pet.Guid > 0),
+                                new MoveToPositionQuestObjective(bot, new Vector3(2353, -5704, 153), 48.0),
+                                new MoveToUnitQuestObjective(bot, 16416, 16.0),
+                                new CastVehicleSpellQuestObjective(bot, 52264, () => bot.Objects.Player.QuestlogEntries.FirstOrDefault(e => e.Id == 12680).Finished == 1)
                             }),
-                            new BotActionQuestObjective(() => wowInterface.Globals.IgnoreCombat = false)
+                            new BotActionQuestObjective(() => bot.Globals.IgnoreCombat = false)
                         }
                     ),
                     new BotQuest
                     (
-                        wowInterface, 12679, "Tonight We Dine In Havenshire", 55, 1,
-                        () => (wowInterface.Objects.GetClosestWowUnitByDisplayId(wowInterface.Player.Position, new List<int> { 25589 }), new Vector3(2340, -5687, 154)),
-                        () => (wowInterface.Objects.GetClosestWowUnitByDisplayId(wowInterface.Player.Position, new List<int> { 25589 }), new Vector3(2340, -5687, 154)),
+                        bot, 12679, "Tonight We Dine In Havenshire", 55, 1,
+                        () => (bot.Objects.GetClosestWowUnitByDisplayId(bot.Player.Position, new List<int> { 25589 }), new Vector3(2340, -5687, 154)),
+                        () => (bot.Objects.GetClosestWowUnitByDisplayId(bot.Player.Position, new List<int> { 25589 }), new Vector3(2340, -5687, 154)),
                         new List<IQuestObjective>()
                         {
                             new QuestObjectiveChain(new List<IQuestObjective>()
                             {
-                                new MoveToPositionQuestObjective(wowInterface, new Vector3(2088, -5795, 101), 64.0),
-                                new MoveToObjectQuestObjective(wowInterface, 8094, 4.0),
-                                new UseObjectQuestObjective(wowInterface, 8094, () => wowInterface.CharacterManager.Inventory.Items.FirstOrDefault(e => e.Id == 39160)?.Count >= 15),
+                                new MoveToPositionQuestObjective(bot, new Vector3(2088, -5795, 101), 64.0),
+                                new MoveToObjectQuestObjective(bot, 8094, 4.0),
+                                new UseObjectQuestObjective(bot, 8094, () => bot.Character.Inventory.Items.FirstOrDefault(e => e.Id == 39160)?.Count >= 15),
                             })
                         }
                     ),
                     new BotQuest
                     (
-                        wowInterface, 12733, "Death's Challenge", 55, 1,
-                        () => (wowInterface.Objects.GetClosestWowUnitByDisplayId(wowInterface.Player.Position, new List<int> { 26762 }), new Vector3(2340, -5687, 154)),
-                        () => (wowInterface.Objects.GetClosestWowUnitByDisplayId(wowInterface.Player.Position, new List<int> { 26762 }), new Vector3(2340, -5687, 154)),
+                        bot, 12733, "Death's Challenge", 55, 1,
+                        () => (bot.Objects.GetClosestWowUnitByDisplayId(bot.Player.Position, new List<int> { 26762 }), new Vector3(2340, -5687, 154)),
+                        () => (bot.Objects.GetClosestWowUnitByDisplayId(bot.Player.Position, new List<int> { 26762 }), new Vector3(2340, -5687, 154)),
                         new List<IQuestObjective>()
                         {
                             new QuestObjectiveChain(new List<IQuestObjective>()
                             {
-                                new MoveToPositionQuestObjective(wowInterface, new Vector3(2340, -5687, 154), 40.0),
-                                new WaitUntilQuestObjective(() => wowInterface.Objects.Player.HealthPercentage > 50.0),
-                                new TalkToUnitQuestObjective(wowInterface, new List<int>(){ 25375, 25412, 25426, 25375 }, new List<int>() { 1 }, () => wowInterface.Objects.Player.QuestlogEntries.FirstOrDefault(e => e.Id == 12733).Finished == 1)
+                                new MoveToPositionQuestObjective(bot, new Vector3(2340, -5687, 154), 40.0),
+                                new WaitUntilQuestObjective(() => bot.Objects.Player.HealthPercentage > 50.0),
+                                new TalkToUnitQuestObjective(bot, new List<int>(){ 25375, 25412, 25426, 25375 }, new List<int>() { 1 }, () => bot.Objects.Player.QuestlogEntries.FirstOrDefault(e => e.Id == 12733).Finished == 1)
                             })
                         }
                     ),
                     new BotQuest
                     (
-                        wowInterface, 12711, "Abandonned Mail", 55, 1,
-                        () => (wowInterface.Objects.GetClosestWowGameobjectByDisplayId(wowInterface.Player.Position, new List<int> { 4851 }), new Vector3(2130, -5799, 99)),
-                        () => (wowInterface.Objects.GetClosestWowGameobjectByDisplayId(wowInterface.Player.Position, new List<int> { 4851 }), new Vector3(2130, -5799, 99)),
+                        bot, 12711, "Abandonned Mail", 55, 1,
+                        () => (bot.Objects.GetClosestWowGameobjectByDisplayId(bot.Player.Position, new List<int> { 4851 }), new Vector3(2130, -5799, 99)),
+                        () => (bot.Objects.GetClosestWowGameobjectByDisplayId(bot.Player.Position, new List<int> { 4851 }), new Vector3(2130, -5799, 99)),
                         null
                     ),
                 }
@@ -295,7 +295,7 @@ namespace AmeisenBotX.Core.Quest.Profiles.StartAreas
             return $"[55-59] Deathknight Start Area (Jannis)";
         }
 
-        private bool CheckEyeCastingState(WowInterface wowInterface, int id, Vector3 positionToCast, double distance)
+        private bool CheckEyeCastingState(AmeisenBotInterfaces bot, int id, Vector3 positionToCast, double distance)
         {
             if (CastedSpell[id])
             {
@@ -303,21 +303,21 @@ namespace AmeisenBotX.Core.Quest.Profiles.StartAreas
             }
             else
             {
-                if (wowInterface.Objects.Vehicle == null)
+                if (bot.Objects.Vehicle == null)
                 {
                     return false;
                 }
 
                 if (!StartedCasting[id])
                 {
-                    if (positionToCast.GetDistance(wowInterface.Objects.Vehicle.Position) > distance)
+                    if (positionToCast.GetDistance(bot.Objects.Vehicle.Position) > distance)
                     {
                         return false;
                     }
 
-                    StartedCasting[id] = wowInterface.Objects.Vehicle.IsCasting;
+                    StartedCasting[id] = bot.Objects.Vehicle.IsCasting;
                 }
-                else if (!wowInterface.Objects.Vehicle.IsCasting)
+                else if (!bot.Objects.Vehicle.IsCasting)
                 {
                     CastedSpell[id] = true;
                 }

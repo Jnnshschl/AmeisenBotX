@@ -13,7 +13,7 @@ namespace AmeisenBotX.Core.Fsm.States
 {
     public class StateSelling : BasicState
     {
-        public StateSelling(AmeisenBotFsm stateMachine, AmeisenBotConfig config, WowInterface wowInterface) : base(stateMachine, config, wowInterface)
+        public StateSelling(AmeisenBotFsm stateMachine, AmeisenBotConfig config, AmeisenBotInterfaces bot) : base(stateMachine, config, bot)
         {
             InteractionEvent = new(TimeSpan.FromMilliseconds(1000));
             InventoryUpdateEvent = new(TimeSpan.FromSeconds(1));
@@ -27,14 +27,14 @@ namespace AmeisenBotX.Core.Fsm.States
 
         public override void Enter()
         {
-            WowInterface.EventHookManager.Subscribe("MERCHANT_SHOW", OnMerchantShow);
+            Bot.Events.Subscribe("MERCHANT_SHOW", OnMerchantShow);
         }
 
         public override void Execute()
         {
             if (InventoryUpdateEvent.Run())
             {
-                WowInterface.CharacterManager.Inventory.Update();
+                Bot.Character.Inventory.Update();
             }
 
             if (!NeedToSell())
@@ -49,19 +49,19 @@ namespace AmeisenBotX.Core.Fsm.States
 
             if (IsVendorNpcNear(out WowUnit selectedUnit))
             {
-                float distance = WowInterface.Player.Position.GetDistance(selectedUnit.Position);
+                float distance = Bot.Player.Position.GetDistance(selectedUnit.Position);
 
                 if (distance > 3.0f)
                 {
-                    WowInterface.MovementEngine.SetMovementAction(MovementAction.Move, selectedUnit.Position);
+                    Bot.Movement.SetMovementAction(MovementAction.Move, selectedUnit.Position);
                 }
                 else if (distance < 2.25f)
                 {
-                    WowInterface.MovementEngine.StopMovement();
+                    Bot.Movement.StopMovement();
 
                     if (InteractionEvent.Run())
                     {
-                        SpeakToMerchantRoutine.Run(WowInterface, selectedUnit);
+                        SpeakToMerchantRoutine.Run(Bot, selectedUnit);
                     }
                 }
             }
@@ -69,13 +69,13 @@ namespace AmeisenBotX.Core.Fsm.States
 
         public bool IsVendorNpcNear(out WowUnit unit)
         {
-            unit = WowInterface.Objects.WowObjects.OfType<WowUnit>()
+            unit = Bot.Objects.WowObjects.OfType<WowUnit>()
                 .Where(e => e.GetType() != typeof(WowPlayer)
                     && !e.IsDead
                     && e.IsVendor
-                    && WowInterface.Db.GetReaction(WowInterface.Player, e) != WowUnitReaction.Hostile
-                    && e.Position.GetDistance(WowInterface.Player.Position) < Config.RepairNpcSearchRadius)
-                .OrderBy(e => e.Position.GetDistance(WowInterface.Player.Position))
+                    && Bot.Db.GetReaction(Bot.Player, e) != WowUnitReaction.Hostile
+                    && e.Position.GetDistance(Bot.Player.Position) < Config.RepairNpcSearchRadius)
+                .OrderBy(e => e.Position.GetDistance(Bot.Player.Position))
                 .FirstOrDefault();
 
             return unit != null;
@@ -83,16 +83,16 @@ namespace AmeisenBotX.Core.Fsm.States
 
         public override void Leave()
         {
-            WowInterface.EventHookManager.Unsubscribe("MERCHANT_SHOW", OnMerchantShow);
+            Bot.Events.Unsubscribe("MERCHANT_SHOW", OnMerchantShow);
 
-            WowInterface.NewWowInterface.WowClearTarget();
-            WowInterface.NewWowInterface.LuaClickUiElement("MerchantFrameCloseButton");
+            Bot.Wow.WowClearTarget();
+            Bot.Wow.LuaClickUiElement("MerchantFrameCloseButton");
         }
 
         internal bool NeedToSell()
         {
-            return WowInterface.CharacterManager.Inventory.FreeBagSlots < Config.BagSlotsToGoSell
-                && WowInterface.CharacterManager.Inventory.Items.Where(e => !Config.ItemSellBlacklist.Contains(e.Name)
+            return Bot.Character.Inventory.FreeBagSlots < Config.BagSlotsToGoSell
+                && Bot.Character.Inventory.Items.Where(e => !Config.ItemSellBlacklist.Contains(e.Name)
                     && ((Config.SellGrayItems && e.ItemQuality == WowItemQuality.Poor)
                         || (Config.SellWhiteItems && e.ItemQuality == WowItemQuality.Common)
                         || (Config.SellGreenItems && e.ItemQuality == WowItemQuality.Uncommon)
@@ -104,16 +104,16 @@ namespace AmeisenBotX.Core.Fsm.States
 
         private void OnMerchantShow(long timestamp, List<string> args)
         {
-            if (WowInterface.Target != null)
+            if (Bot.Target != null)
             {
-                if (Config.AutoRepair && WowInterface.Target.IsRepairVendor)
+                if (Config.AutoRepair && Bot.Target.IsRepairVendor)
                 {
-                    WowInterface.NewWowInterface.LuaRepairAllItems();
+                    Bot.Wow.LuaRepairAllItems();
                 }
 
                 if (Config.AutoSell)
                 {
-                    SellItemsRoutine.Run(WowInterface, Config);
+                    SellItemsRoutine.Run(Bot, Config);
                     SellingFinished = DateTime.UtcNow;
                 }
             }
