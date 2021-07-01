@@ -59,37 +59,37 @@ namespace AmeisenBotX.Core.Data.Objects
                 || Race == WowRace.Troll;
         }
 
-        public override string ReadName(XMemory xMemory, IOffsetList offsetList)
+        public override string ReadName(IMemoryApi memoryApi, IOffsetList offsetList)
         {
-            xMemory.Read(IntPtr.Add(offsetList.NameStore, (int)offsetList.NameMask), out uint nameMask);
-            xMemory.Read(IntPtr.Add(offsetList.NameStore, (int)offsetList.NameBase), out uint nameBase);
+            memoryApi.Read(IntPtr.Add(offsetList.NameStore, (int)offsetList.NameMask), out uint nameMask);
+            memoryApi.Read(IntPtr.Add(offsetList.NameStore, (int)offsetList.NameBase), out uint nameBase);
 
             uint shortGuid = (uint)Guid & 0xfffffff;
             uint offset = 12 * (nameMask & shortGuid);
 
-            xMemory.Read(new(nameBase + offset + 8), out uint current);
-            xMemory.Read(new(nameBase + offset), out offset);
+            memoryApi.Read(new(nameBase + offset + 8), out uint current);
+            memoryApi.Read(new(nameBase + offset), out offset);
 
             if ((current & 0x1) == 0x1)
             {
                 return string.Empty;
             }
 
-            xMemory.Read(new(current), out uint testGuid);
+            memoryApi.Read(new(current), out uint testGuid);
 
             while (testGuid != shortGuid)
             {
-                xMemory.Read(new(current + offset + 4), out current);
+                memoryApi.Read(new(current + offset + 4), out current);
 
                 if ((current & 0x1) == 0x1)
                 {
                     return string.Empty;
                 }
 
-                xMemory.Read(new(current), out testGuid);
+                memoryApi.Read(new(current), out testGuid);
             }
 
-            xMemory.ReadString(new(current + (int)offsetList.NameString), Encoding.UTF8, out string name, 16);
+            memoryApi.ReadString(new(current + (int)offsetList.NameString), Encoding.UTF8, out string name, 16);
 
             return name;
         }
@@ -99,16 +99,16 @@ namespace AmeisenBotX.Core.Data.Objects
             return $"Player: {Guid} lvl. {Level}";
         }
 
-        public override void Update(XMemory xMemory, IOffsetList offsetList)
+        public override void Update(IMemoryApi memoryApi, IOffsetList offsetList)
         {
-            base.Update(xMemory, offsetList);
+            base.Update(memoryApi, offsetList);
 
-            if (xMemory.Read(DescriptorAddress + RawWowObject.EndOffset + RawWowUnit.EndOffset, out RawWowPlayer objPtr))
+            if (memoryApi.Read(DescriptorAddress + RawWowObject.EndOffset + RawWowUnit.EndOffset, out RawWowPlayer objPtr))
             {
                 Xp = objPtr.Xp;
                 NextLevelXp = objPtr.NextLevelXp;
                 XpPercentage = BotMath.Percentage(Xp, NextLevelXp);
-                // Name = ReadPlayerName(xMemory, offsetList);
+                // Name = ReadPlayerName(memoryApi, offsetList);
 
                 questlogEntries = new QuestlogEntry[]
                 {
@@ -163,18 +163,18 @@ namespace AmeisenBotX.Core.Data.Objects
                 };
             }
 
-            if (xMemory.Read(IntPtr.Add(BaseAddress, (int)offsetList.WowUnitSwimFlags), out uint swimFlags))
+            if (memoryApi.Read(IntPtr.Add(BaseAddress, (int)offsetList.WowUnitSwimFlags), out uint swimFlags))
             {
                 IsSwimming = (swimFlags & 0x200000) != 0;
             }
 
-            if (xMemory.Read(IntPtr.Add(BaseAddress, (int)offsetList.WowUnitFlyFlagsPointer), out IntPtr flyFlagsPointer)
-                && xMemory.Read(IntPtr.Add(flyFlagsPointer, (int)offsetList.WowUnitFlyFlags), out uint flyFlags))
+            if (memoryApi.Read(IntPtr.Add(BaseAddress, (int)offsetList.WowUnitFlyFlagsPointer), out IntPtr flyFlagsPointer)
+                && memoryApi.Read(IntPtr.Add(flyFlagsPointer, (int)offsetList.WowUnitFlyFlags), out uint flyFlags))
             {
                 IsFlying = (flyFlags & 0x2000000) != 0;
             }
 
-            if (xMemory.Read(offsetList.BreathTimer, out int breathTimer))
+            if (memoryApi.Read(offsetList.BreathTimer, out int breathTimer))
             {
                 IsUnderwater = breathTimer > 0;
             }

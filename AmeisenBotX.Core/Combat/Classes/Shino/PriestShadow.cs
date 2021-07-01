@@ -38,7 +38,7 @@ namespace AmeisenBotX.Core.Combat.Classes.Shino
         public override IItemComparator ItemComparator
         {
             get =>
-                new SimpleItemComparator((CharacterManager)Bot.Character, new Dictionary<string, double>()
+                new SimpleItemComparator((DefaultCharacterManager)Bot.Character, new Dictionary<string, double>()
                 {
                     { WowStatType.INTELLECT, 2.5 },
                     { WowStatType.SPELL_POWER, 2.5 },

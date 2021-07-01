@@ -7,7 +7,7 @@ namespace AmeisenBotX.Core.Hook.Modules
 {
     public class RunLuaHookModule : RunAsmHookModule
     {
-        public RunLuaHookModule(Action<IntPtr> onUpdate, Action tick, XMemory xMemory, IOffsetList offsetList, string lua, string varName, uint allocSize = 128) : base(onUpdate, tick, xMemory, allocSize)
+        public RunLuaHookModule(Action<IntPtr> onUpdate, Action tick, IMemoryApi memoryApi, IOffsetList offsetList, string lua, string varName, uint allocSize = 128) : base(onUpdate, tick, memoryApi, allocSize)
         {
             OffsetList = offsetList;
             Lua = lua;
@@ -16,9 +16,9 @@ namespace AmeisenBotX.Core.Hook.Modules
 
         ~RunLuaHookModule()
         {
-            if (CommandAddress != IntPtr.Zero) { XMemory.FreeMemory(CommandAddress); }
-            if (ReturnAddress != IntPtr.Zero) { XMemory.FreeMemory(ReturnAddress); }
-            if (VarAddress != IntPtr.Zero) { XMemory.FreeMemory(VarAddress); }
+            if (CommandAddress != IntPtr.Zero) { MemoryApi.FreeMemory(CommandAddress); }
+            if (ReturnAddress != IntPtr.Zero) { MemoryApi.FreeMemory(ReturnAddress); }
+            if (VarAddress != IntPtr.Zero) { MemoryApi.FreeMemory(VarAddress); }
         }
 
         public IntPtr CommandAddress { get; private set; }
@@ -35,7 +35,7 @@ namespace AmeisenBotX.Core.Hook.Modules
 
         public override IntPtr GetDataPointer()
         {
-            if (XMemory.Read(ReturnAddress, out IntPtr pString))
+            if (MemoryApi.Read(ReturnAddress, out IntPtr pString))
             {
                 return pString;
             }
@@ -48,35 +48,35 @@ namespace AmeisenBotX.Core.Hook.Modules
             byte[] luaBytes = Encoding.ASCII.GetBytes(Lua);
             byte[] luaVarBytes = Encoding.ASCII.GetBytes(VarName);
 
-            if (XMemory.AllocateMemory(4, out IntPtr returnAddress)
-                && XMemory.AllocateMemory((uint)(luaBytes.Length + 1), out IntPtr commandAddress)
-                && XMemory.AllocateMemory((uint)(luaVarBytes.Length + 1), out IntPtr varAddress))
+            if (MemoryApi.AllocateMemory(4, out IntPtr returnAddress)
+                && MemoryApi.AllocateMemory((uint)(luaBytes.Length + 1), out IntPtr commandAddress)
+                && MemoryApi.AllocateMemory((uint)(luaVarBytes.Length + 1), out IntPtr varAddress))
             {
-                XMemory.WriteBytes(commandAddress, luaBytes);
-                XMemory.WriteBytes(varAddress, luaVarBytes);
+                MemoryApi.WriteBytes(commandAddress, luaBytes);
+                MemoryApi.WriteBytes(varAddress, luaVarBytes);
 
                 ReturnAddress = returnAddress;
                 CommandAddress = commandAddress;
                 VarAddress = varAddress;
 
-                XMemory.Fasm.Clear();
+                MemoryApi.AssemblyBuffer.Clear();
 
-                XMemory.Fasm.AppendLine("X:");
+                MemoryApi.AssemblyBuffer.AppendLine("X:");
 
-                XMemory.Fasm.AppendLine("PUSH 0");
-                XMemory.Fasm.AppendLine($"PUSH {commandAddress}");
-                XMemory.Fasm.AppendLine($"PUSH {commandAddress}");
-                XMemory.Fasm.AppendLine($"CALL {OffsetList.FunctionLuaDoString}");
-                XMemory.Fasm.AppendLine("ADD ESP, 0xC");
+                MemoryApi.AssemblyBuffer.AppendLine("PUSH 0");
+                MemoryApi.AssemblyBuffer.AppendLine($"PUSH {commandAddress}");
+                MemoryApi.AssemblyBuffer.AppendLine($"PUSH {commandAddress}");
+                MemoryApi.AssemblyBuffer.AppendLine($"CALL {OffsetList.FunctionLuaDoString}");
+                MemoryApi.AssemblyBuffer.AppendLine("ADD ESP, 0xC");
 
-                XMemory.Fasm.AppendLine($"CALL {OffsetList.FunctionGetActivePlayerObject}");
-                XMemory.Fasm.AppendLine("MOV ECX, EAX");
-                XMemory.Fasm.AppendLine("PUSH -1");
-                XMemory.Fasm.AppendLine($"PUSH {varAddress}");
-                XMemory.Fasm.AppendLine($"CALL {OffsetList.FunctionGetLocalizedText}");
-                XMemory.Fasm.AppendLine($"MOV DWORD [{returnAddress}], EAX");
+                MemoryApi.AssemblyBuffer.AppendLine($"CALL {OffsetList.FunctionGetActivePlayerObject}");
+                MemoryApi.AssemblyBuffer.AppendLine("MOV ECX, EAX");
+                MemoryApi.AssemblyBuffer.AppendLine("PUSH -1");
+                MemoryApi.AssemblyBuffer.AppendLine($"PUSH {varAddress}");
+                MemoryApi.AssemblyBuffer.AppendLine($"CALL {OffsetList.FunctionGetLocalizedText}");
+                MemoryApi.AssemblyBuffer.AppendLine($"MOV DWORD [{returnAddress}], EAX");
 
-                XMemory.Fasm.AppendLine($"RET");
+                MemoryApi.AssemblyBuffer.AppendLine($"RET");
 
                 return true;
             }

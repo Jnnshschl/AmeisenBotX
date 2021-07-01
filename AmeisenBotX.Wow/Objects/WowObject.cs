@@ -85,9 +85,9 @@ namespace AmeisenBotX.Core.Data.Objects
             return $"Object: {Guid}";
         }
 
-        public virtual void Update(XMemory xMemory, IOffsetList offsetList)
+        public virtual void Update(IMemoryApi memoryApi, IOffsetList offsetList)
         {
-            if (xMemory.Read(DescriptorAddress, out RawWowObject objPtr))
+            if (memoryApi.Read(DescriptorAddress, out RawWowObject objPtr))
             {
                 EntryId = objPtr.EntryId;
                 Guid = objPtr.Guid;

@@ -7,22 +7,28 @@ using AmeisenBotX.Core.Battleground.KamelBG;
 using AmeisenBotX.Core.Character;
 using AmeisenBotX.Core.Character.Inventory;
 using AmeisenBotX.Core.Character.Inventory.Objects;
+using AmeisenBotX.Core.Chat;
 using AmeisenBotX.Core.Combat.Classes;
 using AmeisenBotX.Core.Dungeon;
+using AmeisenBotX.Core.Event;
 using AmeisenBotX.Core.Fsm;
 using AmeisenBotX.Core.Fsm.Enums;
 using AmeisenBotX.Core.Fsm.States;
+using AmeisenBotX.Core.Grinding;
 using AmeisenBotX.Core.Grinding.Profiles;
 using AmeisenBotX.Core.Grinding.Profiles.Profiles.Alliance.Group;
 using AmeisenBotX.Core.Hook.Modules;
+using AmeisenBotX.Core.Jobs;
 using AmeisenBotX.Core.Jobs.Profiles;
 using AmeisenBotX.Core.Jobs.Profiles.Gathering;
 using AmeisenBotX.Core.Jobs.Profiles.Gathering.Jannis;
 using AmeisenBotX.Core.Movement.AMovementEngine;
 using AmeisenBotX.Core.Movement.Pathfinding;
+using AmeisenBotX.Core.Quest;
 using AmeisenBotX.Core.Quest.Profiles;
 using AmeisenBotX.Core.Quest.Profiles.Shino;
 using AmeisenBotX.Core.Quest.Profiles.StartAreas;
+using AmeisenBotX.Core.Tactic;
 using AmeisenBotX.Logging;
 using AmeisenBotX.Logging.Enums;
 using AmeisenBotX.Memory;
@@ -30,6 +36,7 @@ using AmeisenBotX.Memory.Win32;
 using AmeisenBotX.RconClient.Enums;
 using AmeisenBotX.RconClient.Messages;
 using AmeisenBotX.Wow.Cache;
+using AmeisenBotX.Wow.Combatlog;
 using AmeisenBotX.Wow.Objects.Enums;
 using AmeisenBotX.Wow335a;
 using AmeisenBotX.Wow335a.Offsets;
@@ -60,23 +67,30 @@ namespace AmeisenBotX.Core
         /// Initializes a new bot.
         ///
         /// Call Start(), Pause(), Resume(), Dispose() to control the bots engine.
+        ///
+        /// More stuff of the bot can be reached via its "Bot" property.
         /// </summary>
         /// <param name="config">The bot configuration.</param>
-        /// <param name="logfilePath">Logfile folder path, not a file path.</param>
+        /// <param name="logfilePath">Logfile folder path, not a file path. Leave DEFAULT to put it into bots profile folder. Set to string.Empty to disable logging.</param>
         /// <param name="initialLogLevel">The initial LogLevel of the bots logger.</param>
-        public AmeisenBot(AmeisenBotConfig config, string logfilePath = "", LogLevel initialLogLevel = LogLevel.Verbose)
+        public AmeisenBot(AmeisenBotConfig config, string logfilePath = "DEFAULT", LogLevel initialLogLevel = LogLevel.Verbose)
         {
             Config = config ?? throw new ArgumentException("config cannot be null", nameof(config));
-            if (string.IsNullOrWhiteSpace(config.Path)) { throw new ArgumentException("config.Path cannot be empty, make sure you set it after loading", nameof(config)); }
+            if (string.IsNullOrWhiteSpace(config.Path)) { throw new ArgumentException("config.Path cannot be empty, make sure you set it after loading the config", nameof(config)); }
+            if (!File.Exists(config.Path)) { throw new ArgumentException("config.Path does not exist", nameof(config)); }
 
             DataFolder = Path.GetDirectoryName(config.Path);
             AccountName = Path.GetFileName(DataFolder);
 
-            if (string.IsNullOrWhiteSpace(logfilePath)) { logfilePath = Path.Combine(DataFolder, "log/"); }
+            if (logfilePath == "DEFAULT") { logfilePath = Path.Combine(DataFolder, "log/"); }
 
             AmeisenLogger.I.ChangeLogFolder(logfilePath);
             AmeisenLogger.I.ActiveLogLevel = initialLogLevel;
-            AmeisenLogger.I.Start();
+
+            if (Directory.Exists(logfilePath))
+            {
+                AmeisenLogger.I.Start();
+            }
 
             AmeisenLogger.I.Log("AmeisenBot", $"AmeisenBot ({Assembly.GetExecutingAssembly().GetName().Version}) starting", LogLevel.Master);
             AmeisenLogger.I.Log("AmeisenBot", $"AccountName: {AccountName}", LogLevel.Master);
@@ -86,16 +100,11 @@ namespace AmeisenBotX.Core
 
             // start initializing the wow interface
             Bot = new();
-            Bot.Offsets = new OffsetList335a();
             Bot.Globals = new();
-            Bot.Memory = new();
-            Bot.Chat = new(Config, DataFolder);
-            Bot.Chat = new(Config, DataFolder);
-            Bot.Chat = new(Config, DataFolder);
-            Bot.CombatLog = new(Bot.Db);
-            Bot.Tactic = new();
-            Bot.PathfindingHandler = new NavmeshServerPathfindingHandler(Config.NavmeshServerIp, Config.NameshServerPort);
-            Bot.MovementSettings = Config.MovementSettings;
+            Bot.Offsets = new OffsetList335a();
+            Bot.Memory = new XMemory();
+            Bot.Chat = new DefaultChatManager(Config, DataFolder);
+            Bot.Tactic = new DefaultTacticEngine();
 
             // module is initialized out here because it needs to write to its own data address
             TracelineJumpHookModule jumpModule = new(null, null, Bot.Memory, Bot.Offsets);
@@ -108,7 +117,6 @@ namespace AmeisenBotX.Core
                     playerPosition.Z += Bot.MovementSettings.ObstacleCheckHeight;
 
                     Vector3 pos = BotUtils.MoveAhead(playerPosition, Bot.Player.Rotation, Bot.MovementSettings.ObstacleCheckDistance);
-
                     Bot.Memory.Write(jumpModule.DataAddress, (1.0f, playerPosition, pos));
                 }
             };
@@ -194,21 +202,27 @@ namespace AmeisenBotX.Core
                 ),
             };
 
+            // load the wow specific interface
             Bot.Wow = new WowInterface335a(Bot.Memory, Bot.Offsets, hookModules);
-            Bot.Events = new(Bot.Wow);
-            Bot.Events.EventHookFrameName = eventHookFrameName;
-            Bot.Character = new CharacterManager(Bot.Wow, Bot.Memory, Bot.Offsets);
+
+            Bot.Events = new DefaultEventManager(Bot.Wow, eventHookFrameName);
+            Bot.Character = new DefaultCharacterManager(Bot.Wow, Bot.Memory, Bot.Offsets);
 
             string dbPath = Path.Combine(DataFolder, "db.json");
             AmeisenLogger.I.Log("AmeisenBot", $"Loading DB from: {dbPath}", LogLevel.Master);
             Bot.Db = LocalAmeisenBotDb.FromJson(dbPath, Bot.Memory, Bot.Offsets, Bot.Wow.LuaGetSpellNameById, Bot.Wow.WowGetReaction);
 
+            Bot.CombatLog = new DefaultCombatLogParser(Bot.Db);
+
             // setup all instances that use the whole Bot class last
-            Bot.Dungeon = new DungeonEngine(Bot);
-            Bot.Jobs = new(Bot, Config);
-            Bot.Movement = new AMovementEngine(Bot, Config);
-            Bot.Quest = new(Bot, Config, StateMachine);
-            Bot.Grinding = new(Bot, Config, StateMachine);
+            Bot.Dungeon = new DefaultDungeonEngine(Bot);
+            Bot.Jobs = new DefaultJobEngine(Bot, Config);
+            Bot.Quest = new DefaultQuestEngine(Bot, Config, StateMachine);
+            Bot.Grinding = new DefaultGrindingEngine(Bot, Config, StateMachine);
+
+            Bot.PathfindingHandler = new NavmeshServerPathfindingHandler(Config.NavmeshServerIp, Config.NameshServerPort);
+            Bot.MovementSettings = Config.MovementSettings;
+            Bot.Movement = new DefaultMovementEngine(Bot, Config);
             // wow interface setup done
 
             AmeisenLogger.I.Log("AmeisenBot", $"Using OffsetList: {Bot.Offsets.GetType()}", LogLevel.Master);
@@ -250,18 +264,39 @@ namespace AmeisenBotX.Core
             }
         }
 
-        public event Action<bool, string, string> OnCombatClassCompilationStatusChanged;
+        /// <summary>
+        /// Fires when a custom BombatClass was compiled.
+        /// </summary>
+        public event Action<bool, string, string> OnCombatClassCompilationResult;
 
+        /// <summary>
+        /// Current account name used.
+        /// </summary>
         public string AccountName { get; }
 
+        /// <summary>
+        /// All currently loaded battleground engines.
+        /// </summary>
         public IEnumerable<IBattlegroundEngine> BattlegroundEngines { get; private set; }
 
-        public AmeisenBotInterfaces Bot { get; set; }
+        /// <summary>
+        /// Collection of all useful interfaces used to control the bots behavior.
+        /// </summary>
+        public AmeisenBotInterfaces Bot { get; private set; }
 
+        /// <summary>
+        /// All currently loaded combat classes.
+        /// </summary>
         public IEnumerable<ICombatClass> CombatClasses { get; private set; }
 
-        public AmeisenBotConfig Config { get; set; }
+        /// <summary>
+        /// Current configuration.
+        /// </summary>
+        public AmeisenBotConfig Config { get; private set; }
 
+        /// <summary>
+        /// How long last tick of the Bot took.
+        /// </summary>
         public float CurrentExecutionMs
         {
             get
@@ -274,23 +309,35 @@ namespace AmeisenBotX.Core
             private set => currentExecutionMs = value;
         }
 
+        /// <summary>
+        /// Folder where the config lies, logs get written, ...
+        /// </summary>
         public string DataFolder { get; }
 
-        public Stopwatch ExecutionMsStopwatch { get; private set; }
-
+        /// <summary>
+        /// All currently loaded grinding profiles.
+        /// </summary>
         public IEnumerable<IGrindingProfile> GrindingProfiles { get; private set; }
 
+        /// <summary>
+        /// Whether the bot is running or paused.
+        /// </summary>
         public bool IsRunning { get; private set; }
 
+        /// <summary>
+        /// All currently loaded job profiles.
+        /// </summary>
         public IEnumerable<IJobProfile> JobProfiles { get; private set; }
 
-        public bool NeedToSetupRconClient { get; set; }
-
+        /// <summary>
+        /// All currently loaded quest profiles.
+        /// </summary>
         public IEnumerable<IQuestProfile> QuestProfiles { get; private set; }
 
-        public TimegatedEvent RconScreenshotEvent { get; }
-
-        public AmeisenBotFsm StateMachine { get; set; }
+        /// <summary>
+        /// State machine of the bot.
+        /// </summary>
+        public AmeisenBotFsm StateMachine { get; private set; }
 
         private TimegatedEvent BagUpdateEvent { get; set; }
 
@@ -298,7 +345,13 @@ namespace AmeisenBotX.Core
 
         private TimegatedEvent EquipmentUpdateEvent { get; set; }
 
+        private Stopwatch ExecutionMsStopwatch { get; }
+
+        private bool NeedToSetupRconClient { get; set; }
+
         private Timer RconClientTimer { get; set; }
+
+        private TimegatedEvent RconScreenshotEvent { get; }
 
         private Timer StateMachineTimer { get; set; }
 
@@ -566,13 +619,13 @@ namespace AmeisenBotX.Core
                 try
                 {
                     Bot.CombatClass = CompileCustomCombatClass();
-                    OnCombatClassCompilationStatusChanged?.Invoke(true, string.Empty, string.Empty);
+                    OnCombatClassCompilationResult?.Invoke(true, string.Empty, string.Empty);
                     AmeisenLogger.I.Log("AmeisenBot", $"Compiling custom CombatClass successful", LogLevel.Debug);
                 }
                 catch (Exception e)
                 {
                     AmeisenLogger.I.Log("AmeisenBot", $"Compiling custom CombatClass failed:\n{e}", LogLevel.Error);
-                    OnCombatClassCompilationStatusChanged?.Invoke(false, e.GetType().Name, e.ToString());
+                    OnCombatClassCompilationResult?.Invoke(false, e.GetType().Name, e.ToString());
                     Bot.CombatClass = LoadClassByName(CombatClasses, Config.BuiltInCombatClassName);
                 }
             }
@@ -608,7 +661,7 @@ namespace AmeisenBotX.Core
             {
                 if (Bot.Memory.Process.MainWindowHandle != IntPtr.Zero && Config.WowWindowRect != new Rect() { Left = -1, Top = -1, Right = -1, Bottom = -1 })
                 {
-                    XMemory.SetWindowPosition(Bot.Memory.Process.MainWindowHandle, Config.WowWindowRect);
+                    Bot.Memory.SetWindowPosition(Bot.Memory.Process.MainWindowHandle, Config.WowWindowRect);
                     AmeisenLogger.I.Log("AmeisenBot", $"Loaded window position: {Config.WowWindowRect}", LogLevel.Verbose);
                 }
                 else
@@ -856,7 +909,7 @@ namespace AmeisenBotX.Core
                             if (Config.RconSendScreenshots && RconScreenshotEvent.Run())
                             {
                                 Rect rc = new();
-                                Win32Imports.GetWindowRect(Bot.Memory.Process.MainWindowHandle, ref rc);
+                                Bot.Memory.GetClientSize();
                                 Bitmap bmp = new(rc.Right - rc.Left, rc.Bottom - rc.Top, PixelFormat.Format32bppArgb);
 
                                 using (Graphics g = Graphics.FromImage(bmp))
@@ -908,7 +961,7 @@ namespace AmeisenBotX.Core
             {
                 try
                 {
-                    Config.WowWindowRect = XMemory.GetWindowPosition(Bot.Memory.Process.MainWindowHandle);
+                    Config.WowWindowRect = Bot.Memory.GetWindowPosition();
                 }
                 catch (Exception e)
                 {

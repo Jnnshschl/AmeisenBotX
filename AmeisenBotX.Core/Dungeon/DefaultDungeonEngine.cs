@@ -17,9 +17,9 @@ using System.Linq;
 
 namespace AmeisenBotX.Core.Dungeon
 {
-    public class DungeonEngine : IDungeonEngine
+    public class DefaultDungeonEngine : IDungeonEngine
     {
-        public DungeonEngine(AmeisenBotInterfaces bot)
+        public DefaultDungeonEngine(AmeisenBotInterfaces bot)
         {
             Bot = bot;
 

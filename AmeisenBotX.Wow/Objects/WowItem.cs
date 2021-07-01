@@ -40,11 +40,11 @@ namespace AmeisenBotX.Core.Data.Objects
             return $"Item: [{Guid}] ({EntryId}) Owner: {Owner} Count: {Count}";
         }
 
-        public override void Update(XMemory xMemory, IOffsetList offsetList)
+        public override void Update(IMemoryApi memoryApi, IOffsetList offsetList)
         {
-            base.Update(xMemory, offsetList);
+            base.Update(memoryApi, offsetList);
 
-            if (xMemory.Read(DescriptorAddress + RawWowObject.EndOffset, out RawWowItem objPtr))
+            if (memoryApi.Read(DescriptorAddress + RawWowObject.EndOffset, out RawWowItem objPtr))
             {
                 Count = objPtr.StackCount;
                 Owner = objPtr.Owner;

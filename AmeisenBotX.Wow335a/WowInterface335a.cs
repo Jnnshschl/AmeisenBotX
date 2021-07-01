@@ -19,12 +19,12 @@ namespace AmeisenBotX.Wow335a
     /// </summary>
     public class WowInterface335a : IWowInterface
     {
-        public WowInterface335a(XMemory xMemory, IOffsetList offsetList, List<IHookModule> hookModules)
+        public WowInterface335a(IMemoryApi memoryApi, IOffsetList offsetList, List<IHookModule> hookModules)
         {
             HookModules = hookModules;
 
-            ObjectManager = new(xMemory, offsetList);
-            Hook = new(xMemory, offsetList, ObjectManager);
+            ObjectManager = new(memoryApi, offsetList);
+            Hook = new(memoryApi, offsetList, ObjectManager);
             Hook.OnGameInfoPush += ObjectManager.HookManagerOnGameInfoPush;
         }
 

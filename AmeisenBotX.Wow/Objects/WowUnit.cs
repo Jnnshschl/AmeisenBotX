@@ -200,18 +200,18 @@ namespace AmeisenBotX.Core.Data.Objects
             return unit != null && !unit.IsNotAttackable;
         }
 
-        public IEnumerable<RawWowAura> GetUnitAuras(XMemory xMemory, IOffsetList offsetList, IntPtr unitBase, out int auraCount)
+        public IEnumerable<RawWowAura> GetUnitAuras(IMemoryApi memoryApi, IOffsetList offsetList, IntPtr unitBase, out int auraCount)
         {
-            if (xMemory.Read(IntPtr.Add(unitBase, (int)offsetList.AuraCount1), out int auraCount1))
+            if (memoryApi.Read(IntPtr.Add(unitBase, (int)offsetList.AuraCount1), out int auraCount1))
             {
                 if (auraCount1 == -1)
                 {
-                    if (xMemory.Read(IntPtr.Add(unitBase, (int)offsetList.AuraCount2), out int auraCount2)
+                    if (memoryApi.Read(IntPtr.Add(unitBase, (int)offsetList.AuraCount2), out int auraCount2)
                         && auraCount2 > 0
-                        && xMemory.Read(IntPtr.Add(unitBase, (int)offsetList.AuraTable2), out IntPtr auraTable))
+                        && memoryApi.Read(IntPtr.Add(unitBase, (int)offsetList.AuraTable2), out IntPtr auraTable))
                     {
                         auraCount = auraCount2;
-                        return ReadAuraTable(xMemory, auraTable, auraCount2);
+                        return ReadAuraTable(memoryApi, auraTable, auraCount2);
                     }
                     else
                     {
@@ -221,7 +221,7 @@ namespace AmeisenBotX.Core.Data.Objects
                 else
                 {
                     auraCount = auraCount1;
-                    return ReadAuraTable(xMemory, IntPtr.Add(unitBase, (int)offsetList.AuraTable1), auraCount1);
+                    return ReadAuraTable(memoryApi, IntPtr.Add(unitBase, (int)offsetList.AuraTable1), auraCount1);
                 }
             }
             else
@@ -242,11 +242,11 @@ namespace AmeisenBotX.Core.Data.Objects
             return wowUnit != null && Position.GetDistance(wowUnit.Position) < MathF.Max(4.5f, CombatReach + wowUnit.CombatReach + 1.0f);
         }
 
-        public virtual string ReadName(XMemory xMemory, IOffsetList offsetList)
+        public virtual string ReadName(IMemoryApi memoryApi, IOffsetList offsetList)
         {
-            if (xMemory.Read(IntPtr.Add(BaseAddress, (int)offsetList.WowUnitName1), out IntPtr objName)
-                && xMemory.Read(IntPtr.Add(objName, (int)offsetList.WowUnitName2), out objName)
-                && xMemory.ReadString(objName, Encoding.UTF8, out string name))
+            if (memoryApi.Read(IntPtr.Add(BaseAddress, (int)offsetList.WowUnitName1), out IntPtr objName)
+                && memoryApi.Read(IntPtr.Add(objName, (int)offsetList.WowUnitName2), out objName)
+                && memoryApi.ReadString(objName, Encoding.UTF8, out string name))
             {
                 return name;
             }
@@ -259,11 +259,11 @@ namespace AmeisenBotX.Core.Data.Objects
             return $"Unit: {Guid} lvl. {Level} Position: {Position} DisplayId: {DisplayId}";
         }
 
-        public override void Update(XMemory xMemory, IOffsetList offsetList)
+        public override void Update(IMemoryApi memoryApi, IOffsetList offsetList)
         {
-            base.Update(xMemory, offsetList);
+            base.Update(memoryApi, offsetList);
 
-            if (xMemory.Read(DescriptorAddress + RawWowObject.EndOffset, out RawWowUnit objPtr))
+            if (memoryApi.Read(DescriptorAddress + RawWowObject.EndOffset, out RawWowUnit objPtr))
             {
                 Class = (WowClass)objPtr.Class;
                 CombatReach = objPtr.CombatReach;
@@ -297,36 +297,36 @@ namespace AmeisenBotX.Core.Data.Objects
                 RuneenergyPercentage = BotMath.Percentage(Runeenergy, MaxRuneenergy);
             }
 
-            Auras = GetUnitAuras(xMemory, offsetList, BaseAddress, out int auraCount);
+            Auras = GetUnitAuras(memoryApi, offsetList, BaseAddress, out int auraCount);
             AuraCount = auraCount;
 
-            if (xMemory.Read(IntPtr.Add(BaseAddress, (int)offsetList.WowUnitPosition), out Vector3 position))
+            if (memoryApi.Read(IntPtr.Add(BaseAddress, (int)offsetList.WowUnitPosition), out Vector3 position))
             {
                 Position = position;
             }
 
-            if (xMemory.Read(IntPtr.Add(BaseAddress, (int)offsetList.WowUnitRotation), out float rotation))
+            if (memoryApi.Read(IntPtr.Add(BaseAddress, (int)offsetList.WowUnitRotation), out float rotation))
             {
                 Rotation = rotation;
             }
 
-            if (xMemory.Read(IntPtr.Add(BaseAddress, (int)offsetList.WowUnitIsAutoAttacking), out int isAutoAttacking))
+            if (memoryApi.Read(IntPtr.Add(BaseAddress, (int)offsetList.WowUnitIsAutoAttacking), out int isAutoAttacking))
             {
                 IsAutoAttacking = isAutoAttacking == 1;
             }
 
-            if (xMemory.Read(IntPtr.Add(BaseAddress, (int)offsetList.CurrentlyCastingSpellId), out int castingId))
+            if (memoryApi.Read(IntPtr.Add(BaseAddress, (int)offsetList.CurrentlyCastingSpellId), out int castingId))
             {
                 CurrentlyCastingSpellId = castingId;
             }
 
-            if (xMemory.Read(IntPtr.Add(BaseAddress, (int)offsetList.CurrentlyChannelingSpellId), out int channelingId))
+            if (memoryApi.Read(IntPtr.Add(BaseAddress, (int)offsetList.CurrentlyChannelingSpellId), out int channelingId))
             {
                 CurrentlyChannelingSpellId = channelingId;
             }
         }
 
-        private unsafe IEnumerable<RawWowAura> ReadAuraTable(XMemory xMemory, IntPtr buffBase, int auraCount)
+        private unsafe IEnumerable<RawWowAura> ReadAuraTable(IMemoryApi memoryApi, IntPtr buffBase, int auraCount)
         {
             List<RawWowAura> auras = new();
 
@@ -337,7 +337,7 @@ namespace AmeisenBotX.Core.Data.Objects
 
             for (int i = 0; i < auraCount; ++i)
             {
-                xMemory.Read(buffBase + (sizeof(RawWowAura) * i), out RawWowAura rawWowAura);
+                memoryApi.Read(buffBase + (sizeof(RawWowAura) * i), out RawWowAura rawWowAura);
                 auras.Add(rawWowAura);
             }
 

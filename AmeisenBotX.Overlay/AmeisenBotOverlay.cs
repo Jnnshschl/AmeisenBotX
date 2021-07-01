@@ -1,19 +1,19 @@
 ﻿using AmeisenBotX.Memory;
 using GameOverlay.Drawing;
 using GameOverlay.Windows;
+using System;
 using System.Collections.Generic;
 
 namespace AmeisenBotX.Overlay
 {
     public class AmeisenBotOverlay
     {
-        public AmeisenBotOverlay(XMemory xMemory)
+        public AmeisenBotOverlay(IntPtr mainWindowHandle)
         {
-            XMemory = xMemory;
             LinesToRender = new();
             RectanglesToRender = new();
 
-            OverlayWindow = new(xMemory.Process.MainWindowHandle)
+            OverlayWindow = new(mainWindowHandle)
             {
                 IsTopmost = true,
                 IsVisible = true,
@@ -29,8 +29,6 @@ namespace AmeisenBotX.Overlay
         public Graphics Gfx { get; }
 
         public StickyWindow OverlayWindow { get; }
-
-        public XMemory XMemory { get; }
 
         private List<(SolidBrush, (Point, Point))> LinesToRender { get; }
 

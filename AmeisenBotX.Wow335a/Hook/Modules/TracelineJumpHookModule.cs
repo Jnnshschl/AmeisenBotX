@@ -7,16 +7,16 @@ namespace AmeisenBotX.Core.Hook.Modules
 {
     public class TracelineJumpHookModule : RunAsmHookModule
     {
-        public TracelineJumpHookModule(Action<IntPtr> onUpdate, Action tick, XMemory xMemory, IOffsetList offsetList) : base(onUpdate, tick, xMemory, 256)
+        public TracelineJumpHookModule(Action<IntPtr> onUpdate, Action tick, IMemoryApi memoryApi, IOffsetList offsetList) : base(onUpdate, tick, memoryApi, 256)
         {
             OffsetList = offsetList;
         }
 
         ~TracelineJumpHookModule()
         {
-            if (CommandAddress != IntPtr.Zero) { XMemory.FreeMemory(CommandAddress); }
-            if (DataAddress != IntPtr.Zero) { XMemory.FreeMemory(DataAddress); }
-            if (ExecuteAddress != IntPtr.Zero) { XMemory.FreeMemory(ExecuteAddress); }
+            if (CommandAddress != IntPtr.Zero) { MemoryApi.FreeMemory(CommandAddress); }
+            if (DataAddress != IntPtr.Zero) { MemoryApi.FreeMemory(DataAddress); }
+            if (ExecuteAddress != IntPtr.Zero) { MemoryApi.FreeMemory(ExecuteAddress); }
         }
 
         public IntPtr CommandAddress { get; private set; }
@@ -36,11 +36,11 @@ namespace AmeisenBotX.Core.Hook.Modules
         {
             byte[] luaJumpBytes = Encoding.ASCII.GetBytes("JumpOrAscendStart();AscendStop()");
 
-            if (base.XMemory.AllocateMemory(4, out IntPtr executeAddress)
-                && base.XMemory.AllocateMemory(40, out IntPtr dataAddress)
-                && base.XMemory.AllocateMemory((uint)(luaJumpBytes.Length + 1), out IntPtr commandAddress))
+            if (base.MemoryApi.AllocateMemory(4, out IntPtr executeAddress)
+                && base.MemoryApi.AllocateMemory(40, out IntPtr dataAddress)
+                && base.MemoryApi.AllocateMemory((uint)(luaJumpBytes.Length + 1), out IntPtr commandAddress))
             {
-                base.XMemory.WriteBytes(commandAddress, luaJumpBytes);
+                base.MemoryApi.WriteBytes(commandAddress, luaJumpBytes);
 
                 ExecuteAddress = executeAddress;
                 CommandAddress = commandAddress;
@@ -51,33 +51,33 @@ namespace AmeisenBotX.Core.Hook.Modules
                 IntPtr endPointer = IntPtr.Add(startPointer, 0xC);
                 IntPtr resultPointer = IntPtr.Add(endPointer, 0xC);
 
-                base.XMemory.Fasm.Clear();
+                base.MemoryApi.AssemblyBuffer.Clear();
 
-                base.XMemory.Fasm.AppendLine("X:");
-                base.XMemory.Fasm.AppendLine($"TEST DWORD [{executeAddress}], 1");
-                base.XMemory.Fasm.AppendLine("JE @out");
+                base.MemoryApi.AssemblyBuffer.AppendLine("X:");
+                base.MemoryApi.AssemblyBuffer.AppendLine($"TEST DWORD [{executeAddress}], 1");
+                base.MemoryApi.AssemblyBuffer.AppendLine("JE @out");
 
-                base.XMemory.Fasm.AppendLine("PUSH 0");
-                base.XMemory.Fasm.AppendLine("PUSH 0x120171");
-                base.XMemory.Fasm.AppendLine($"PUSH {distancePointer}");
-                base.XMemory.Fasm.AppendLine($"PUSH {resultPointer}");
-                base.XMemory.Fasm.AppendLine($"PUSH {endPointer}");
-                base.XMemory.Fasm.AppendLine($"PUSH {startPointer}");
-                base.XMemory.Fasm.AppendLine($"CALL {OffsetList.FunctionTraceline}");
-                base.XMemory.Fasm.AppendLine("ADD ESP, 0x18");
+                base.MemoryApi.AssemblyBuffer.AppendLine("PUSH 0");
+                base.MemoryApi.AssemblyBuffer.AppendLine("PUSH 0x120171");
+                base.MemoryApi.AssemblyBuffer.AppendLine($"PUSH {distancePointer}");
+                base.MemoryApi.AssemblyBuffer.AppendLine($"PUSH {resultPointer}");
+                base.MemoryApi.AssemblyBuffer.AppendLine($"PUSH {endPointer}");
+                base.MemoryApi.AssemblyBuffer.AppendLine($"PUSH {startPointer}");
+                base.MemoryApi.AssemblyBuffer.AppendLine($"CALL {OffsetList.FunctionTraceline}");
+                base.MemoryApi.AssemblyBuffer.AppendLine("ADD ESP, 0x18");
 
-                base.XMemory.Fasm.AppendLine("TEST AL, 1");
-                base.XMemory.Fasm.AppendLine("JE @out");
+                base.MemoryApi.AssemblyBuffer.AppendLine("TEST AL, 1");
+                base.MemoryApi.AssemblyBuffer.AppendLine("JE @out");
 
-                base.XMemory.Fasm.AppendLine("PUSH 0");
-                base.XMemory.Fasm.AppendLine($"PUSH {commandAddress}");
-                base.XMemory.Fasm.AppendLine($"PUSH {commandAddress}");
-                base.XMemory.Fasm.AppendLine($"CALL {OffsetList.FunctionLuaDoString}");
-                base.XMemory.Fasm.AppendLine("ADD ESP, 0xC");
+                base.MemoryApi.AssemblyBuffer.AppendLine("PUSH 0");
+                base.MemoryApi.AssemblyBuffer.AppendLine($"PUSH {commandAddress}");
+                base.MemoryApi.AssemblyBuffer.AppendLine($"PUSH {commandAddress}");
+                base.MemoryApi.AssemblyBuffer.AppendLine($"CALL {OffsetList.FunctionLuaDoString}");
+                base.MemoryApi.AssemblyBuffer.AppendLine("ADD ESP, 0xC");
 
-                base.XMemory.Fasm.AppendLine($"MOV DWORD [{executeAddress}], 0");
-                base.XMemory.Fasm.AppendLine("@out:");
-                base.XMemory.Fasm.AppendLine("RET");
+                base.MemoryApi.AssemblyBuffer.AppendLine($"MOV DWORD [{executeAddress}], 0");
+                base.MemoryApi.AssemblyBuffer.AppendLine("@out:");
+                base.MemoryApi.AssemblyBuffer.AppendLine("RET");
 
                 return true;
             }

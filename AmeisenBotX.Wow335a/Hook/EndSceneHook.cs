@@ -28,9 +28,9 @@ namespace AmeisenBotX.Wow335a.Hook
 
         private ulong hookCalls;
 
-        public EndSceneHook(XMemory xMemory, IOffsetList offsetList, ObjectManager objectManager)
+        public EndSceneHook(IMemoryApi memoryApi, IOffsetList offsetList, ObjectManager objectManager)
         {
-            XMemory = xMemory;
+            Memory = memoryApi;
             OffsetList = offsetList;
             ObjectManager = objectManager;
             OriginalFunctionBytes = new();
@@ -51,7 +51,7 @@ namespace AmeisenBotX.Wow335a.Hook
             }
         }
 
-        public bool IsWoWHooked => XMemory.Read(WowEndSceneAddress, out byte c) && c == 0xE9;
+        public bool IsWoWHooked => Memory.Read(WowEndSceneAddress, out byte c) && c == 0xE9;
 
         /// <summary>
         /// Codecave that hold the code, the bot want's to execute.
@@ -158,13 +158,13 @@ namespace AmeisenBotX.Wow335a.Hook
         /// </summary>
         private IntPtr WowEndSceneAddress { get; set; }
 
-        private XMemory XMemory { get; }
+        private IMemoryApi Memory { get; }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public void BotOverrideWorldLoadedCheck(bool status)
         {
             OverrideWorldCheck = status;
-            XMemory.Write(OverrideWorldCheckAddress, status ? 1 : 0);
+            Memory.Write(OverrideWorldCheckAddress, status ? 1 : 0);
         }
 
         public bool Hook(int hookSize, List<IHookModule> hookModules)
@@ -188,7 +188,7 @@ namespace AmeisenBotX.Wow335a.Hook
             }
             while (WowEndSceneAddress == IntPtr.Zero);
 
-            if (!XMemory.ReadBytes(WowEndSceneAddress, hookSize, out byte[] bytes))
+            if (!Memory.ReadBytes(WowEndSceneAddress, hookSize, out byte[] bytes))
             {
                 AmeisenLogger.I.Log("HookManager", $"Failed reading the original EndScene bytes at: 0x{WowEndSceneAddress:X}", LogLevel.Error);
                 return false;
@@ -213,86 +213,86 @@ namespace AmeisenBotX.Wow335a.Hook
             }
 
             // check for code to be executed
-            XMemory.Fasm.AppendLine($"TEST DWORD [{IntShouldExecute}], 1");
-            XMemory.Fasm.AppendLine("JE @out");
+            Memory.AssemblyBuffer.AppendLine($"TEST DWORD [{IntShouldExecute}], 1");
+            Memory.AssemblyBuffer.AppendLine("JE @out");
 
             // check if we want to override our is ingame check
             // going to be used while we are in the login screen
-            XMemory.Fasm.AppendLine($"TEST DWORD [{OverrideWorldCheckAddress}], 1");
-            XMemory.Fasm.AppendLine("JNE @ovr");
+            Memory.AssemblyBuffer.AppendLine($"TEST DWORD [{OverrideWorldCheckAddress}], 1");
+            Memory.AssemblyBuffer.AppendLine("JNE @ovr");
 
             // check for world to be loaded
             // we dont want to execute code in
             // the loadingscreen, cause that
             // mostly results in crashes
-            XMemory.Fasm.AppendLine($"TEST DWORD [{OffsetList.IsWorldLoaded}], 1");
-            XMemory.Fasm.AppendLine("JE @out");
-            XMemory.Fasm.AppendLine("@ovr:");
+            Memory.AssemblyBuffer.AppendLine($"TEST DWORD [{OffsetList.IsWorldLoaded}], 1");
+            Memory.AssemblyBuffer.AppendLine("JE @out");
+            Memory.AssemblyBuffer.AppendLine("@ovr:");
 
             // execute our stuff and get return address
-            XMemory.Fasm.AppendLine($"CALL {CExecution}");
-            XMemory.Fasm.AppendLine($"MOV [{ReturnValueAddress}], EAX");
+            Memory.AssemblyBuffer.AppendLine($"CALL {CExecution}");
+            Memory.AssemblyBuffer.AppendLine($"MOV [{ReturnValueAddress}], EAX");
 
             // finish up our execution
-            XMemory.Fasm.AppendLine("@out:");
-            XMemory.Fasm.AppendLine($"MOV DWORD [{IntShouldExecute}], 0");
+            Memory.AssemblyBuffer.AppendLine("@out:");
+            Memory.AssemblyBuffer.AppendLine($"MOV DWORD [{IntShouldExecute}], 0");
 
             // ----------------------------
             // # GameInfo & EventHook stuff
             // ----------------------------
             // world loaded and should execute check
-            XMemory.Fasm.AppendLine($"TEST DWORD [{OffsetList.IsWorldLoaded}], 1");
-            XMemory.Fasm.AppendLine("JE @skpgi");
-            XMemory.Fasm.AppendLine($"TEST DWORD [{GameInfoExecuteAddress}], 1");
-            XMemory.Fasm.AppendLine("JE @skpgi");
+            Memory.AssemblyBuffer.AppendLine($"TEST DWORD [{OffsetList.IsWorldLoaded}], 1");
+            Memory.AssemblyBuffer.AppendLine("JE @skpgi");
+            Memory.AssemblyBuffer.AppendLine($"TEST DWORD [{GameInfoExecuteAddress}], 1");
+            Memory.AssemblyBuffer.AppendLine("JE @skpgi");
 
             // isOutdoors
-            XMemory.Fasm.AppendLine($"CALL {OffsetList.FunctionGetActivePlayerObject}");
-            XMemory.Fasm.AppendLine("MOV ECX, EAX");
-            XMemory.Fasm.AppendLine($"CALL {OffsetList.FunctionIsOutdoors}");
-            XMemory.Fasm.AppendLine($"MOV DWORD [{GameInfoAddress}], EAX");
+            Memory.AssemblyBuffer.AppendLine($"CALL {OffsetList.FunctionGetActivePlayerObject}");
+            Memory.AssemblyBuffer.AppendLine("MOV ECX, EAX");
+            Memory.AssemblyBuffer.AppendLine($"CALL {OffsetList.FunctionIsOutdoors}");
+            Memory.AssemblyBuffer.AppendLine($"MOV DWORD [{GameInfoAddress}], EAX");
 
             // isTargetInLineOfSight
-            XMemory.Fasm.AppendLine($"MOV BYTE [{GameInfoAddress + 1}], 0");
+            Memory.AssemblyBuffer.AppendLine($"MOV BYTE [{GameInfoAddress + 1}], 0");
 
-            XMemory.Fasm.AppendLine($"TEST DWORD [{GameInfoExecuteLosCheckAddress}], 1");
-            XMemory.Fasm.AppendLine("JE @loscheck");
+            Memory.AssemblyBuffer.AppendLine($"TEST DWORD [{GameInfoExecuteLosCheckAddress}], 1");
+            Memory.AssemblyBuffer.AppendLine("JE @loscheck");
 
             IntPtr distancePointer = GameInfoLosCheckDataAddress;
             IntPtr startPointer = IntPtr.Add(distancePointer, 0x4);
             IntPtr endPointer = IntPtr.Add(startPointer, 0xC);
             IntPtr resultPointer = IntPtr.Add(endPointer, 0xC);
 
-            XMemory.Fasm.AppendLine("PUSH 0");
-            XMemory.Fasm.AppendLine("PUSH 0x120171");
-            XMemory.Fasm.AppendLine($"PUSH {distancePointer}");
-            XMemory.Fasm.AppendLine($"PUSH {resultPointer}");
-            XMemory.Fasm.AppendLine($"PUSH {endPointer}");
-            XMemory.Fasm.AppendLine($"PUSH {startPointer}");
-            XMemory.Fasm.AppendLine($"CALL {OffsetList.FunctionTraceline}");
-            XMemory.Fasm.AppendLine("ADD ESP, 0x18");
+            Memory.AssemblyBuffer.AppendLine("PUSH 0");
+            Memory.AssemblyBuffer.AppendLine("PUSH 0x120171");
+            Memory.AssemblyBuffer.AppendLine($"PUSH {distancePointer}");
+            Memory.AssemblyBuffer.AppendLine($"PUSH {resultPointer}");
+            Memory.AssemblyBuffer.AppendLine($"PUSH {endPointer}");
+            Memory.AssemblyBuffer.AppendLine($"PUSH {startPointer}");
+            Memory.AssemblyBuffer.AppendLine($"CALL {OffsetList.FunctionTraceline}");
+            Memory.AssemblyBuffer.AppendLine("ADD ESP, 0x18");
 
-            XMemory.Fasm.AppendLine("XOR AL, 1");
-            XMemory.Fasm.AppendLine($"MOV BYTE [{GameInfoAddress + 1}], AL");
+            Memory.AssemblyBuffer.AppendLine("XOR AL, 1");
+            Memory.AssemblyBuffer.AppendLine($"MOV BYTE [{GameInfoAddress + 1}], AL");
 
-            XMemory.Fasm.AppendLine($"MOV DWORD [{GameInfoExecuteLosCheckAddress}], 0");
-            XMemory.Fasm.AppendLine("@loscheck:");
+            Memory.AssemblyBuffer.AppendLine($"MOV DWORD [{GameInfoExecuteLosCheckAddress}], 0");
+            Memory.AssemblyBuffer.AppendLine("@loscheck:");
 
             foreach (IHookModule module in hookModules)
             {
-                XMemory.Fasm.AppendLine($"CALL {module.AsmAddress}");
+                Memory.AssemblyBuffer.AppendLine($"CALL {module.AsmAddress}");
             }
 
-            XMemory.Fasm.AppendLine($"MOV DWORD [{GameInfoExecutedAddress}], 1");
-            XMemory.Fasm.AppendLine("@skpgi:");
-            XMemory.Fasm.AppendLine($"MOV DWORD [{GameInfoExecuteAddress}], 0");
+            Memory.AssemblyBuffer.AppendLine($"MOV DWORD [{GameInfoExecutedAddress}], 1");
+            Memory.AssemblyBuffer.AppendLine("@skpgi:");
+            Memory.AssemblyBuffer.AppendLine($"MOV DWORD [{GameInfoExecuteAddress}], 0");
             // ----------------
 
-            XMemory.Fasm.AppendLine($"JMP {CGateway}");
+            Memory.AssemblyBuffer.AppendLine($"JMP {CGateway}");
 
-            if (!XMemory.FasmInject(CRoutine))
+            if (!Memory.InjectAssembly(CRoutine))
             {
-                XMemory.ResumeMainThread();
+                Memory.ResumeMainThread();
                 AmeisenLogger.I.Log("HookManager", $"Failed to inject hook check", LogLevel.Error);
                 return false;
             }
@@ -303,13 +303,13 @@ namespace AmeisenBotX.Wow335a.Hook
             // ---------------------------------------------------
 
             // write the original EndScene instructions
-            XMemory.WriteBytes(CGateway, OriginalEndsceneBytes);
-            XMemory.Fasm.AppendLine($"JMP {IntPtr.Add(WowEndSceneAddress, hookSize)}");
+            Memory.WriteBytes(CGateway, OriginalEndsceneBytes);
+            Memory.AssemblyBuffer.AppendLine($"JMP {IntPtr.Add(WowEndSceneAddress, hookSize)}");
 
             // jump back to the original EndScene
-            if (!XMemory.FasmInject(CGateway + OriginalEndsceneBytes.Length))
+            if (!Memory.InjectAssembly(CGateway + OriginalEndsceneBytes.Length))
             {
-                XMemory.ResumeMainThread();
+                Memory.ResumeMainThread();
                 AmeisenLogger.I.Log("HookManager", $"Failed to inject hook check", LogLevel.Error);
                 return false;
             }
@@ -320,24 +320,24 @@ namespace AmeisenBotX.Wow335a.Hook
             // ---------------------------------------------------
 
             // modify original EndScene instructions to start the hook
-            XMemory.Fasm.AppendLine($"JMP {CRoutine}");
+            Memory.AssemblyBuffer.AppendLine($"JMP {CRoutine}");
 
             for (int i = 5; i < hookSize; ++i)
             {
-                XMemory.Fasm.AppendLine("NOP");
+                Memory.AssemblyBuffer.AppendLine("NOP");
             }
 
             // suspend wows main thread and inject
-            XMemory.SuspendMainThread();
+            Memory.SuspendMainThread();
 
-            if (!XMemory.FasmInject(WowEndSceneAddress, true))
+            if (!Memory.InjectAssembly(WowEndSceneAddress, true))
             {
-                XMemory.ResumeMainThread();
+                Memory.ResumeMainThread();
                 AmeisenLogger.I.Log("HookManager", $"Failed to modify original endscene bytes", LogLevel.Error);
                 return false;
             }
 
-            XMemory.ResumeMainThread();
+            Memory.ResumeMainThread();
 
             // try to update the GameInfo struct every 100ms
             GameInfoTimer = new((_) => GameInfoTimerTick(), null, 0, 100);
@@ -498,12 +498,12 @@ namespace AmeisenBotX.Wow335a.Hook
             {
                 byte[] bytes = Encoding.UTF8.GetBytes(command);
 
-                if (XMemory.AllocateMemory((uint)bytes.Length + 1, out IntPtr memAlloc))
+                if (Memory.AllocateMemory((uint)bytes.Length + 1, out IntPtr memAlloc))
                 {
                     if (memAlloc != IntPtr.Zero)
                     {
-                        XMemory.WriteBytes(memAlloc, bytes);
-                        XMemory.Write<byte>(memAlloc + (bytes.Length + 1), 0);
+                        Memory.WriteBytes(memAlloc, bytes);
+                        Memory.Write<byte>(memAlloc + (bytes.Length + 1), 0);
 
                         string[] asm = new string[]
                         {
@@ -516,7 +516,7 @@ namespace AmeisenBotX.Wow335a.Hook
                         };
 
                         bool status = InjectAndExecute(asm, false, out _);
-                        XMemory.FreeMemory(memAlloc);
+                        Memory.FreeMemory(memAlloc);
                         return status;
                     }
                 }
@@ -1077,11 +1077,11 @@ namespace AmeisenBotX.Wow335a.Hook
 
             lock (hookLock)
             {
-                XMemory.SuspendMainThread();
-                XMemory.WriteBytes(WowEndSceneAddress, OriginalEndsceneBytes);
-                XMemory.ResumeMainThread();
+                Memory.SuspendMainThread();
+                Memory.WriteBytes(WowEndSceneAddress, OriginalEndsceneBytes);
+                Memory.ResumeMainThread();
 
-                XMemory.FreeAllMemory();
+                Memory.FreeAllMemory();
             }
         }
 
@@ -1093,10 +1093,10 @@ namespace AmeisenBotX.Wow335a.Hook
 
         public void WowClickOnTerrain(Vector3 position)
         {
-            if (XMemory.AllocateMemory(20, out IntPtr codeCaveVector3))
+            if (Memory.AllocateMemory(20, out IntPtr codeCaveVector3))
             {
-                XMemory.Write<ulong>(codeCaveVector3, 0);
-                XMemory.Write(IntPtr.Add(codeCaveVector3, 0x8), position);
+                Memory.Write<ulong>(codeCaveVector3, 0);
+                Memory.Write(IntPtr.Add(codeCaveVector3, 0x8), position);
 
                 string[] asm = new string[]
                 {
@@ -1107,28 +1107,28 @@ namespace AmeisenBotX.Wow335a.Hook
                 };
 
                 InjectAndExecute(asm, false, out _);
-                XMemory.FreeMemory(codeCaveVector3);
+                Memory.FreeMemory(codeCaveVector3);
             }
         }
 
         public void WowClickToMove(IntPtr playerBase, Vector3 position)
         {
-            if (XMemory.AllocateMemory(12, out IntPtr codeCaveVector3))
+            if (Memory.AllocateMemory(12, out IntPtr codeCaveVector3))
             {
-                XMemory.Write(codeCaveVector3, position);
+                Memory.Write(codeCaveVector3, position);
 
                 WowCallObjectFunction(playerBase, OffsetList.FunctionPlayerClickToMove, new List<object>() { codeCaveVector3 });
-                XMemory.FreeMemory(codeCaveVector3);
+                Memory.FreeMemory(codeCaveVector3);
             }
         }
 
         public void WowEnableClickToMove()
         {
-            if (XMemory.Read(OffsetList.ClickToMovePointer, out IntPtr ctmPointer)
-                && XMemory.Read(IntPtr.Add(ctmPointer, (int)OffsetList.ClickToMoveEnabled), out int ctmEnabled)
+            if (Memory.Read(OffsetList.ClickToMovePointer, out IntPtr ctmPointer)
+                && Memory.Read(IntPtr.Add(ctmPointer, (int)OffsetList.ClickToMoveEnabled), out int ctmEnabled)
                 && ctmEnabled != 1)
             {
-                XMemory.Write(IntPtr.Add(ctmPointer, (int)OffsetList.ClickToMoveEnabled), 1);
+                Memory.Write(IntPtr.Add(ctmPointer, (int)OffsetList.ClickToMoveEnabled), 1);
             }
         }
 
@@ -1148,7 +1148,7 @@ namespace AmeisenBotX.Wow335a.Hook
                 byte[] commandBytes = Encoding.UTF8.GetBytes(command);
                 byte[] variableBytes = Encoding.UTF8.GetBytes(variable);
 
-                if (XMemory.AllocateMemory((uint)commandBytes.Length + (uint)variableBytes.Length + 2, out IntPtr memAllocCmdVar))
+                if (Memory.AllocateMemory((uint)commandBytes.Length + (uint)variableBytes.Length + 2, out IntPtr memAllocCmdVar))
                 {
                     int varOffset = commandBytes.Length + 1;
                     byte[] bytesToWrite = new byte[commandBytes.Length + (uint)variableBytes.Length + 2];
@@ -1156,7 +1156,7 @@ namespace AmeisenBotX.Wow335a.Hook
                     Array.Copy(commandBytes, bytesToWrite, commandBytes.Length);
                     Array.Copy(variableBytes, 0, bytesToWrite, varOffset, variableBytes.Length);
 
-                    XMemory.WriteBytes(memAllocCmdVar, bytesToWrite);
+                    Memory.WriteBytes(memAllocCmdVar, bytesToWrite);
 
                     string[] asm = new string[]
                     {
@@ -1179,12 +1179,12 @@ namespace AmeisenBotX.Wow335a.Hook
                         {
                             result = Encoding.UTF8.GetString(bytes);
 
-                            XMemory.FreeMemory(memAllocCmdVar);
+                            Memory.FreeMemory(memAllocCmdVar);
                             return true;
                         }
                     }
 
-                    XMemory.FreeMemory(memAllocCmdVar);
+                    Memory.FreeMemory(memAllocCmdVar);
                 }
             }
 
@@ -1205,10 +1205,10 @@ namespace AmeisenBotX.Wow335a.Hook
             {
                 byte[] variableBytes = Encoding.UTF8.GetBytes(variable);
 
-                if (XMemory.AllocateMemory((uint)variableBytes.Length + 1, out IntPtr memAlloc))
+                if (Memory.AllocateMemory((uint)variableBytes.Length + 1, out IntPtr memAlloc))
                 {
-                    XMemory.WriteBytes(memAlloc, variableBytes);
-                    XMemory.Write<byte>(memAlloc + (variableBytes.Length + 1), 0);
+                    Memory.WriteBytes(memAlloc, variableBytes);
+                    Memory.Write<byte>(memAlloc + (variableBytes.Length + 1), 0);
 
                     if (memAlloc != IntPtr.Zero)
                     {
@@ -1225,7 +1225,7 @@ namespace AmeisenBotX.Wow335a.Hook
                         if (InjectAndExecute(asm, true, out byte[] bytes))
                         {
                             result = Encoding.UTF8.GetString(bytes);
-                            XMemory.FreeMemory(memAlloc);
+                            Memory.FreeMemory(memAlloc);
                             return true;
                         }
                     }
@@ -1248,8 +1248,8 @@ namespace AmeisenBotX.Wow335a.Hook
 
             for (int i = 0; i < 6; ++i)
             {
-                if (XMemory.Read(OffsetList.RuneType + (4 * i), out int type)
-                    && XMemory.Read(OffsetList.Runes, out byte runeStatus)
+                if (Memory.Read(OffsetList.RuneType + (4 * i), out int type)
+                    && Memory.Read(OffsetList.Runes, out byte runeStatus)
                     && ((1 << i) & runeStatus) != 0)
                 {
                     ++runes[type];
@@ -1270,7 +1270,7 @@ namespace AmeisenBotX.Wow335a.Hook
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public bool WowIsClickToMoveActive()
         {
-            return XMemory.Read(OffsetList.ClickToMoveAction, out int ctmState)
+            return Memory.Read(OffsetList.ClickToMoveAction, out int ctmState)
                 && ctmState != 0    // None
                 && ctmState != 3    // Stop
                 && ctmState != 13;  // Halted
@@ -1287,7 +1287,7 @@ namespace AmeisenBotX.Wow335a.Hook
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public bool WowIsRuneReady(int runeId)
         {
-            return XMemory.Read(OffsetList.Runes, out byte runeStatus) && ((1 << runeId) & runeStatus) != 0;
+            return Memory.Read(OffsetList.Runes, out byte runeStatus) && ((1 << runeId) & runeStatus) != 0;
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -1309,7 +1309,7 @@ namespace AmeisenBotX.Wow335a.Hook
                 LuaDoString("WorldFrame:Show();UIParent:Show()");
             }
 
-            XMemory.SuspendMainThread();
+            Memory.SuspendMainThread();
 
             if (renderingEnabled)
             {
@@ -1317,11 +1317,11 @@ namespace AmeisenBotX.Wow335a.Hook
                 EnableFunction(OffsetList.FunctionWorldRenderWorld);
                 EnableFunction(OffsetList.FunctionWorldFrame);
 
-                XMemory.Write(OffsetList.RenderFlags, OldRenderFlags);
+                Memory.Write(OffsetList.RenderFlags, OldRenderFlags);
             }
             else
             {
-                if (XMemory.Read(OffsetList.RenderFlags, out int renderFlags))
+                if (Memory.Read(OffsetList.RenderFlags, out int renderFlags))
                 {
                     OldRenderFlags = renderFlags;
                 }
@@ -1330,10 +1330,10 @@ namespace AmeisenBotX.Wow335a.Hook
                 DisableFunction(OffsetList.FunctionWorldRenderWorld);
                 DisableFunction(OffsetList.FunctionWorldFrame);
 
-                XMemory.Write(OffsetList.RenderFlags, 0);
+                Memory.Write(OffsetList.RenderFlags, 0);
             }
 
-            XMemory.ResumeMainThread();
+            Memory.ResumeMainThread();
 
             if (!renderingEnabled)
             {
@@ -1368,7 +1368,7 @@ namespace AmeisenBotX.Wow335a.Hook
 
         public byte WowTraceLine(Vector3 start, Vector3 end, out Vector3 result, uint flags = 0x120171)
         {
-            if (XMemory.AllocateMemory(40, out IntPtr tracelineCodecave))
+            if (Memory.AllocateMemory(40, out IntPtr tracelineCodecave))
             {
                 (float, Vector3, Vector3) tracelineCombo = (1.0f, start, end);
 
@@ -1377,7 +1377,7 @@ namespace AmeisenBotX.Wow335a.Hook
                 IntPtr endPointer = IntPtr.Add(startPointer, 0xC);
                 IntPtr resultPointer = IntPtr.Add(endPointer, 0xC);
 
-                if (XMemory.Write(distancePointer, tracelineCombo))
+                if (Memory.Write(distancePointer, tracelineCombo))
                 {
                     string[] asm = new string[]
                     {
@@ -1394,13 +1394,13 @@ namespace AmeisenBotX.Wow335a.Hook
 
                     if (InjectAndExecute(asm, true, out byte[] bytes)
                         && bytes != null && bytes.Length > 0
-                        && XMemory.Read(resultPointer, out result))
+                        && Memory.Read(resultPointer, out result))
                     {
-                        XMemory.FreeMemory(tracelineCodecave);
+                        Memory.FreeMemory(tracelineCodecave);
                         return bytes[0];
                     }
 
-                    XMemory.FreeMemory(tracelineCodecave);
+                    Memory.FreeMemory(tracelineCodecave);
                 }
             }
 
@@ -1417,11 +1417,11 @@ namespace AmeisenBotX.Wow335a.Hook
         private void DisableFunction(IntPtr address)
         {
             // check whether we already replaced the function or not
-            if (XMemory.Read(address, out byte opcode)
+            if (Memory.Read(address, out byte opcode)
                 && opcode != 0xC3)
             {
                 SaveOriginalFunctionBytes(address);
-                XMemory.PatchMemory<byte>(address, 0xC3);
+                Memory.PatchMemory<byte>(address, 0xC3);
             }
         }
 
@@ -1429,10 +1429,10 @@ namespace AmeisenBotX.Wow335a.Hook
         {
             // check for RET opcode to be present before restoring original function
             if (OriginalFunctionBytes.ContainsKey(address)
-                && XMemory.Read(address, out byte opcode)
+                && Memory.Read(address, out byte opcode)
                 && opcode == 0xC3)
             {
-                XMemory.PatchMemory(address, OriginalFunctionBytes[address]);
+                Memory.PatchMemory(address, OriginalFunctionBytes[address]);
             }
         }
 
@@ -1454,14 +1454,14 @@ namespace AmeisenBotX.Wow335a.Hook
 
         private void GameInfoTimerTick()
         {
-            if (XMemory.Read(GameInfoExecuteAddress, out int executeStatus)
+            if (Memory.Read(GameInfoExecuteAddress, out int executeStatus)
                 && executeStatus == 1)
             {
                 // still waiting for execution
                 return;
             }
 
-            if (XMemory.Read(GameInfoExecutedAddress, out int executedStatus)
+            if (Memory.Read(GameInfoExecutedAddress, out int executedStatus)
                 && executedStatus == 0)
             {
                 if (ObjectManager.TargetGuid != 0 && ObjectManager.Target != null)
@@ -1472,26 +1472,26 @@ namespace AmeisenBotX.Wow335a.Hook
                     Vector3 targetPosition = ObjectManager.Target.Position;
                     targetPosition.Z += 1.5f;
 
-                    if (XMemory.Write(GameInfoLosCheckDataAddress, (1.0f, playerPosition, targetPosition)))
+                    if (Memory.Write(GameInfoLosCheckDataAddress, (1.0f, playerPosition, targetPosition)))
                     {
                         // run the los check if we have a target
-                        XMemory.Write(GameInfoExecuteLosCheckAddress, 1);
+                        Memory.Write(GameInfoExecuteLosCheckAddress, 1);
                     }
                 }
 
                 // run the gameinfo update
-                XMemory.Write(GameInfoExecuteAddress, 1);
+                Memory.Write(GameInfoExecuteAddress, 1);
             }
             else
             {
                 // process the info
-                if (XMemory.Read(GameInfoAddress, out GameInfo gameInfo))
+                if (Memory.Read(GameInfoAddress, out GameInfo gameInfo))
                 {
                     OnGameInfoPush?.Invoke(gameInfo);
                     AmeisenLogger.I.Log("GameInfo", $"Pushing GameInfo Update: {JsonConvert.SerializeObject(gameInfo)}");
                 }
 
-                XMemory.Write(GameInfoExecutedAddress, 0);
+                Memory.Write(GameInfoExecutedAddress, 0);
 
                 foreach (IHookModule module in HookModules)
                 {
@@ -1502,10 +1502,10 @@ namespace AmeisenBotX.Wow335a.Hook
 
         private IntPtr GetEndScene()
         {
-            if (XMemory.Read(OffsetList.EndSceneStaticDevice, out IntPtr pDevice)
-                && XMemory.Read(IntPtr.Add(pDevice, (int)OffsetList.EndSceneOffsetDevice), out IntPtr pEnd)
-                && XMemory.Read(pEnd, out IntPtr pScene)
-                && XMemory.Read(IntPtr.Add(pScene, (int)OffsetList.EndSceneOffset), out IntPtr pEndscene))
+            if (Memory.Read(OffsetList.EndSceneStaticDevice, out IntPtr pDevice)
+                && Memory.Read(IntPtr.Add(pDevice, (int)OffsetList.EndSceneOffsetDevice), out IntPtr pEnd)
+                && Memory.Read(pEnd, out IntPtr pScene)
+                && Memory.Read(IntPtr.Add(pScene, (int)OffsetList.EndSceneOffset), out IntPtr pEndscene))
             {
                 return pEndscene;
             }
@@ -1517,7 +1517,7 @@ namespace AmeisenBotX.Wow335a.Hook
 
         private bool InjectAndExecute(string[] asm, bool readReturnBytes, out byte[] bytes)
         {
-            if (!IsWoWHooked || XMemory.Process.HasExited)
+            if (!IsWoWHooked || Memory.Process.HasExited)
             {
                 bytes = null;
                 return false;
@@ -1528,7 +1528,7 @@ namespace AmeisenBotX.Wow335a.Hook
             lock (hookLock)
             {
                 // zero our memory
-                if (XMemory.ZeroMemory(CExecution, MEM_ALLOC_EXECUTION_SIZE))
+                if (Memory.ZeroMemory(CExecution, MEM_ALLOC_EXECUTION_SIZE))
                 {
                     bool frozenMainThread = false;
 
@@ -1537,21 +1537,21 @@ namespace AmeisenBotX.Wow335a.Hook
                         // add all lines
                         for (int i = 0; i < asm.Length; ++i)
                         {
-                            XMemory.Fasm.AppendLine(asm[i]);
+                            Memory.AssemblyBuffer.AppendLine(asm[i]);
                         }
 
                         // inject it
-                        XMemory.SuspendMainThread();
+                        Memory.SuspendMainThread();
                         frozenMainThread = true;
-                        XMemory.FasmInject(CExecution);
+                        Memory.InjectAssembly(CExecution);
 
                         // now there is code to be executed
-                        XMemory.Write(IntShouldExecute, 1);
-                        XMemory.ResumeMainThread();
+                        Memory.Write(IntShouldExecute, 1);
+                        Memory.ResumeMainThread();
                         frozenMainThread = false;
 
                         // wait for the code to be executed
-                        while (XMemory.Read(IntShouldExecute, out int codeToBeExecuted)
+                        while (Memory.Read(IntShouldExecute, out int codeToBeExecuted)
                                && codeToBeExecuted > 0)
                         {
                             Thread.Sleep(1);
@@ -1560,11 +1560,11 @@ namespace AmeisenBotX.Wow335a.Hook
                         // if we want to read the return value do it otherwise we're done
                         if (readReturnBytes)
                         {
-                            XMemory.Read(ReturnValueAddress, out uint dwAddress);
+                            Memory.Read(ReturnValueAddress, out uint dwAddress);
                             IntPtr addrPointer = new(dwAddress);
 
                             // read all parameter-bytes until we the buffer is 0
-                            XMemory.Read(addrPointer, out byte buffer);
+                            Memory.Read(addrPointer, out byte buffer);
 
                             if (buffer != 0)
                             {
@@ -1572,7 +1572,7 @@ namespace AmeisenBotX.Wow335a.Hook
                                 {
                                     returnBytes.Add(buffer);
                                     addrPointer += 1;
-                                } while (XMemory.Read(addrPointer, out buffer) && buffer != 0);
+                                } while (Memory.Read(addrPointer, out buffer) && buffer != 0);
                             }
                             else
                             {
@@ -1583,7 +1583,7 @@ namespace AmeisenBotX.Wow335a.Hook
                     catch
                     {
                         // now there is no more code to be executed
-                        XMemory.Write(IntShouldExecute, 0);
+                        Memory.Write(IntShouldExecute, 0);
 
                         bytes = null;
                         return false;
@@ -1592,7 +1592,7 @@ namespace AmeisenBotX.Wow335a.Hook
                     {
                         if (frozenMainThread)
                         {
-                            XMemory.ResumeMainThread();
+                            Memory.ResumeMainThread();
                         }
                     }
                 }
@@ -1611,7 +1611,7 @@ namespace AmeisenBotX.Wow335a.Hook
 
         private void SaveOriginalFunctionBytes(IntPtr address)
         {
-            if (XMemory.Read(address, out byte opcode))
+            if (Memory.Read(address, out byte opcode))
             {
                 if (!OriginalFunctionBytes.ContainsKey(address))
                 {
@@ -1631,32 +1631,32 @@ namespace AmeisenBotX.Wow335a.Hook
             #region EndScene Hook
 
             // integer to check if there is code waiting to be executed
-            if (!XMemory.AllocateMemory(4, out IntPtr codeToExecuteAddress)) { return false; }
+            if (!Memory.AllocateMemory(4, out IntPtr codeToExecuteAddress)) { return false; }
 
             IntShouldExecute = codeToExecuteAddress;
 
             // integer to save the pointer to the return value
-            if (!XMemory.AllocateMemory(4, out IntPtr returnValueAddress)) { return false; }
+            if (!Memory.AllocateMemory(4, out IntPtr returnValueAddress)) { return false; }
 
             ReturnValueAddress = returnValueAddress;
 
             // codecave to override the is ingame check, used at the login
-            if (!XMemory.AllocateMemory(4, out IntPtr overrideWorldCheckAddress)) { return false; }
+            if (!Memory.AllocateMemory(4, out IntPtr overrideWorldCheckAddress)) { return false; }
 
             OverrideWorldCheckAddress = overrideWorldCheckAddress;
 
             // codecave for the original endscene code
-            if (!XMemory.AllocateMemory(MEM_ALLOC_GATEWAY_SIZE, out IntPtr codecaveForGateway)) { return false; }
+            if (!Memory.AllocateMemory(MEM_ALLOC_GATEWAY_SIZE, out IntPtr codecaveForGateway)) { return false; }
 
             CGateway = codecaveForGateway;
 
             // codecave to check whether we need to execute something
-            if (!XMemory.AllocateMemory(MEM_ALLOC_ROUTINE_SIZE, out IntPtr codecaveForCheck)) { return false; }
+            if (!Memory.AllocateMemory(MEM_ALLOC_ROUTINE_SIZE, out IntPtr codecaveForCheck)) { return false; }
 
             CRoutine = codecaveForCheck;
 
             // codecave for the code we wan't to execute
-            if (!XMemory.AllocateMemory(MEM_ALLOC_EXECUTION_SIZE, out IntPtr codecaveForExecution)) { return false; }
+            if (!Memory.AllocateMemory(MEM_ALLOC_EXECUTION_SIZE, out IntPtr codecaveForExecution)) { return false; }
 
             CExecution = codecaveForExecution;
 
@@ -1665,32 +1665,32 @@ namespace AmeisenBotX.Wow335a.Hook
             #region GameInfo
 
             // codecave for the gameinfo execution
-            if (!XMemory.AllocateMemory(4, out IntPtr gameInfoExecute)) { return false; }
+            if (!Memory.AllocateMemory(4, out IntPtr gameInfoExecute)) { return false; }
 
             GameInfoExecuteAddress = gameInfoExecute;
-            XMemory.Write(GameInfoExecuteAddress, 0);
+            Memory.Write(GameInfoExecuteAddress, 0);
 
             // codecave for the gameinfo executed
-            if (!XMemory.AllocateMemory(4, out IntPtr gameInfoExecuted)) { return false; }
+            if (!Memory.AllocateMemory(4, out IntPtr gameInfoExecuted)) { return false; }
 
             GameInfoExecutedAddress = gameInfoExecuted;
-            XMemory.Write(GameInfoExecutedAddress, 0);
+            Memory.Write(GameInfoExecutedAddress, 0);
 
             // codecave for the gameinfo struct
             uint gameinfoSize = (uint)sizeof(GameInfo);
 
-            if (!XMemory.AllocateMemory(gameinfoSize, out IntPtr gameInfo)) { return false; }
+            if (!Memory.AllocateMemory(gameinfoSize, out IntPtr gameInfo)) { return false; }
 
             GameInfoAddress = gameInfo;
 
             // codecave for the gameinfo line of sight check
-            if (!XMemory.AllocateMemory(4, out IntPtr executeLosCheck)) { return false; }
+            if (!Memory.AllocateMemory(4, out IntPtr executeLosCheck)) { return false; }
 
             GameInfoExecuteLosCheckAddress = executeLosCheck;
-            XMemory.Write(GameInfoExecuteLosCheckAddress, 0);
+            Memory.Write(GameInfoExecuteLosCheckAddress, 0);
 
             // codecave for the gameinfo line of sight check data
-            if (!XMemory.AllocateMemory(40, out IntPtr losCheckData)) { return false; }
+            if (!Memory.AllocateMemory(40, out IntPtr losCheckData)) { return false; }
 
             GameInfoLosCheckDataAddress = losCheckData;
 

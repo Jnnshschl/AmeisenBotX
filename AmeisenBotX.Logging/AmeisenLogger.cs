@@ -98,7 +98,7 @@ namespace AmeisenBotX.Logging
 
         public void Log(string tag, string log, LogLevel logLevel = LogLevel.Debug, [CallerFilePath] string callingClass = "", [CallerMemberName] string callingFunction = "", [CallerLineNumber] int callingCodeline = 0)
         {
-            if (logLevel <= ActiveLogLevel)
+            if (Enabled && logLevel <= ActiveLogLevel)
             {
                 LogBuilder.Enqueue(new(logLevel, $"{$"[{tag}]",-24} {log}", Path.GetFileNameWithoutExtension(callingClass), callingFunction, callingCodeline));
             }
@@ -106,15 +106,21 @@ namespace AmeisenBotX.Logging
 
         public void Start()
         {
-            Enabled = true;
-            LogFileWriter.Enabled = true;
+            if (!Enabled)
+            {
+                Enabled = true;
+                LogFileWriter.Enabled = true;
+            }
         }
 
         public void Stop()
         {
-            Enabled = false;
-            LogFileWriter.Enabled = false;
-            LogFileWriterTick(null, null);
+            if (Enabled)
+            {
+                Enabled = false;
+                LogFileWriter.Enabled = false;
+                LogFileWriterTick(null, null);
+            }
         }
 
         private void LogFileWriterTick(object sender, ElapsedEventArgs e)

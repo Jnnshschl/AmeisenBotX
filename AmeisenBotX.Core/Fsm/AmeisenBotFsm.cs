@@ -128,7 +128,7 @@ namespace AmeisenBotX.Core.Fsm
                             Bot.Movement.Execute();
 
                             // handle event subbing
-                            Bot.Events.ExecutePendingLua();
+                            Bot.Events.Tick();
 
                             if (Bot.Player.IsDead)
                             {
@@ -166,7 +166,7 @@ namespace AmeisenBotX.Core.Fsm
                     // auto disable rendering when not in focus
                     if (Config.AutoDisableRender && RenderSwitchEvent.Run())
                     {
-                        IntPtr foregroundWindow = XMemory.GetForegroundWindow();
+                        IntPtr foregroundWindow = Bot.Memory.GetForegroundWindow();
                         Bot.Wow.WowSetRenderState(foregroundWindow == Bot.Memory.Process.MainWindowHandle);
                     }
                 }
