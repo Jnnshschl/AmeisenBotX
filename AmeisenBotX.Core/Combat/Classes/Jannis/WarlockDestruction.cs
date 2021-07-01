@@ -106,13 +106,9 @@ namespace AmeisenBotX.Core.Combat.Classes.Jannis
             {
                 if (PetManager.Tick()) { return; }
 
-                if (Bot.Player.ManaPercentage < 20
-                        && Bot.Player.HealthPercentage > 60
-                        && TryCastSpell(lifeTapSpell, 0)
-                    || (Bot.Player.HealthPercentage < 80
-                        && TryCastSpell(deathCoilSpell, Bot.Wow.TargetGuid, true))
-                    || (Bot.Player.HealthPercentage < 50
-                        && TryCastSpell(drainLifeSpell, Bot.Wow.TargetGuid, true)))
+                if ((Bot.Player.ManaPercentage < 75.0 && Bot.Player.HealthPercentage > 60.0 && TryCastSpell(lifeTapSpell, 0))
+                    || (Bot.Player.HealthPercentage < 80.0 && TryCastSpell(deathCoilSpell, Bot.Wow.TargetGuid, true))
+                    || (Bot.Player.HealthPercentage < 50.0 && TryCastSpell(drainLifeSpell, Bot.Wow.TargetGuid, true)))
                 {
                     return;
                 }
@@ -122,10 +118,8 @@ namespace AmeisenBotX.Core.Combat.Classes.Jannis
                     if (Bot.Target.GetType() == typeof(WowPlayer))
                     {
                         if (DateTime.UtcNow - LastFearAttempt > TimeSpan.FromSeconds(5)
-                            && ((Bot.Player.Position.GetDistance(Bot.Target.Position) < 6.0f
-                                && TryCastSpell(howlOfTerrorSpell, 0, true))
-                            || (Bot.Player.Position.GetDistance(Bot.Target.Position) < 12.0f
-                                && TryCastSpell(fearSpell, Bot.Wow.TargetGuid, true))))
+                            && ((Bot.Player.Position.GetDistance(Bot.Target.Position) < 6.0f && TryCastSpell(howlOfTerrorSpell, 0, true))
+                            || (Bot.Player.Position.GetDistance(Bot.Target.Position) < 12.0f && TryCastSpell(fearSpell, Bot.Wow.TargetGuid, true))))
                         {
                             LastFearAttempt = DateTime.UtcNow;
                             return;
@@ -148,7 +142,6 @@ namespace AmeisenBotX.Core.Combat.Classes.Jannis
                 }
 
                 if (TryCastSpell(chaosBoltSpell, Bot.Wow.TargetGuid, true)
-                    // || CastSpellIfPossible(conflagrateSpell, Bot.NewBot.TargetGuid, true)
                     || TryCastSpell(incinerateSpell, Bot.Wow.TargetGuid, true))
                 {
                     return;

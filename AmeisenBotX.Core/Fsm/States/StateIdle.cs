@@ -17,7 +17,7 @@ namespace AmeisenBotX.Core.Fsm.States
         public StateIdle(AmeisenBotFsm stateMachine, AmeisenBotConfig config, AmeisenBotInterfaces bot) : base(stateMachine, config, bot)
         {
             FirstStart = true;
-            IdleActionManager = new IdleActionManager(config.IdleActionsMaxCooldown, config.IdleActionsMinCooldown, new List<IIdleAction>()
+            IdleActionManager = new IdleActionManager(new List<IIdleAction>()
             {
                 new AuctionHouseIdleAction(bot),
                 new CheckMailsIdleAction(bot),

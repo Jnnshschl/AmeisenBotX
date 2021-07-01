@@ -7,10 +7,8 @@ namespace AmeisenBotX.Core.Fsm.States.Idle
 {
     public class IdleActionManager
     {
-        public IdleActionManager(int maxCooldown, int minCooldown, IEnumerable<IIdleAction> idleActions)
+        public IdleActionManager(IEnumerable<IIdleAction> idleActions)
         {
-            MaxCooldown = maxCooldown;
-            MinCooldown = minCooldown;
             IdleActions = idleActions;
 
             Rnd = new Random();
@@ -27,10 +25,6 @@ namespace AmeisenBotX.Core.Fsm.States.Idle
 
         public List<KeyValuePair<DateTime, Type>> LastActions { get; private set; }
 
-        public int MaxCooldown { get; set; }
-
-        public int MinCooldown { get; set; }
-
         private IIdleAction CurrentAction { get; set; }
 
         private Random Rnd { get; }
@@ -39,7 +33,6 @@ namespace AmeisenBotX.Core.Fsm.States.Idle
         {
             ExecuteUntil = default;
             LastActionExecuted = DateTime.UtcNow;
-            Cooldown = TimeSpan.FromMilliseconds(Rnd.Next(MinCooldown, MaxCooldown));
         }
 
         public bool Tick(bool autopilotEnabled)
@@ -52,7 +45,12 @@ namespace AmeisenBotX.Core.Fsm.States.Idle
 
             if (LastActionExecuted + Cooldown <= DateTime.UtcNow)
             {
-                IEnumerable<IIdleAction> filteredActions = IdleActions.Where(e => (!e.AutopilotOnly || autopilotEnabled) && !LastActions.Any(e => e.Value == e.GetType()) || LastActions.Where(x => x.Value == e.GetType() && (DateTime.UtcNow - x.Key).TotalMilliseconds > Rnd.Next(CurrentAction.MinCooldown, CurrentAction.MaxCooldown)).Any());
+                IEnumerable<IIdleAction> filteredActions = IdleActions.Where
+                (
+                    e => (!e.AutopilotOnly || autopilotEnabled) 
+                    && !LastActions.Any(e => e.Value == e.GetType())
+                    || LastActions.Where(x => x.Value == e.GetType() && (DateTime.UtcNow - x.Key).TotalMilliseconds > Rnd.Next(CurrentAction.MinCooldown, CurrentAction.MaxCooldown)).Any()
+                );
 
                 if (filteredActions.Any())
                 {
@@ -61,7 +59,7 @@ namespace AmeisenBotX.Core.Fsm.States.Idle
                     if (CurrentAction != null && CurrentAction.Enter())
                     {
                         LastActionExecuted = DateTime.UtcNow;
-                        Cooldown = TimeSpan.FromMilliseconds(Rnd.Next(MinCooldown, MaxCooldown));
+                        Cooldown = TimeSpan.FromMilliseconds(Rnd.Next(CurrentAction.MinCooldown, CurrentAction.MaxCooldown));
                         ExecuteUntil = LastActionExecuted + TimeSpan.FromMilliseconds(Rnd.Next(CurrentAction.MinDuration, CurrentAction.MaxDuration));
 
                         LastActions.Add(new KeyValuePair<DateTime, Type>(LastActionExecuted, CurrentAction.GetType()));
