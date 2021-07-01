@@ -12,11 +12,12 @@ namespace AmeisenBotX.Core.Event
     /// <summary>
     /// This class is an interface to wow's ingame event system.
     /// </summary>
-    public class EventHook
+    public class DefaultEventManager : IEventManager
     {
-        public EventHook(IWowInterface wowInterface)
+        public DefaultEventManager(IWowInterface wowInterface, string frameName)
         {
             Wow = wowInterface;
+            FrameName = frameName;
 
             Setup();
 
@@ -26,26 +27,19 @@ namespace AmeisenBotX.Core.Event
             };
         }
 
-        /// <summary>
-        /// Contains all the subscribed events and functions.
-        /// </summary>
-        public Dictionary<string, List<Action<long, List<string>>>> EventDictionary { get; private set; }
+        ///<inheritdoc cref="IEventManager.Events"/>
+        public Dictionary<string, List<Action<long, List<string>>>> Events { get; private set; }
 
-        /// <summary>
-        /// The current wow event frame name.
-        /// </summary>
-        public string EventHookFrameName { get; set; }
+        ///<inheritdoc cref="IEventManager.FrameName"/>
+        public string FrameName { get; set; }
 
+        ///<inheritdoc cref="IEventManager.IsActive"/>
         public bool IsActive { get; private set; }
 
-        /// <summary>
-        /// Pending subscribe actions.
-        /// </summary>
+        ///<inheritdoc cref="IEventManager.SubscribeQueue"/>
         public Queue<(string, Action<long, List<string>>)> SubscribeQueue { get; private set; }
 
-        /// <summary>
-        /// Pending unsubscribe actions.
-        /// </summary>
+        ///<inheritdoc cref="IEventManager.UnsubscribeQueue"/>
         public Queue<(string, Action<long, List<string>>)> UnsubscribeQueue { get; private set; }
 
         private JsonSerializerSettings JsonSerializerSettings { get; }
@@ -54,26 +48,7 @@ namespace AmeisenBotX.Core.Event
 
         private IWowInterface Wow { get; }
 
-        /// <summary>
-        /// Call this periodically to handle the subscription and unsubscription queues.
-        /// </summary>
-        public void ExecutePendingLua()
-        {
-            HandleSubEventQueue();
-            HandleUnsubEventQueue();
-
-            // execute the pending lua stuff
-            if (PendingLuaToExecute.Count > 0
-                && Wow.LuaDoString(PendingLuaToExecute.Peek()))
-            {
-                PendingLuaToExecute.Dequeue();
-            }
-        }
-
-        /// <summary>
-        /// Call this with the new event string received from the hook module.
-        /// </summary>
-        /// <param name="eventJson">JSON events string</param>
+        ///<inheritdoc cref="IEventManager.OnEventPush(string)"/>
         public void OnEventPush(string eventJson)
         {
             if (eventJson.Length > 2)
@@ -85,9 +60,9 @@ namespace AmeisenBotX.Core.Event
                 {
                     foreach (WowEvent x in events)
                     {
-                        if (x.Name != null && EventDictionary.ContainsKey(x.Name))
+                        if (x.Name != null && Events.ContainsKey(x.Name))
                         {
-                            List<Action<long, List<string>>> actions = EventDictionary[x.Name];
+                            List<Action<long, List<string>>> actions = Events[x.Name];
 
                             for (int i = 0; i < actions.Count; ++i)
                             {
@@ -99,9 +74,7 @@ namespace AmeisenBotX.Core.Event
             }
         }
 
-        /// <summary>
-        /// Initializes the event hookand sets it to active.
-        /// </summary>
+        ///<inheritdoc cref="IEventManager.Start"/>
         public void Start()
         {
             if (!IsActive)
@@ -111,9 +84,7 @@ namespace AmeisenBotX.Core.Event
             }
         }
 
-        /// <summary>
-        /// Unloads the event hook and unregisters all events ingame.
-        /// </summary>
+        ///<inheritdoc cref="IEventManager.Stop"/>
         public void Stop()
         {
             if (IsActive)
@@ -125,27 +96,32 @@ namespace AmeisenBotX.Core.Event
 
                 if (Wow.IsReady)
                 {
-                    Wow.LuaDoString($"{EventHookFrameName}:UnregisterAllEvents();{EventHookFrameName}:SetScript(\"OnEvent\", nil);");
+                    Wow.LuaDoString($"{FrameName}:UnregisterAllEvents();{FrameName}:SetScript(\"OnEvent\", nil);");
                 }
             }
         }
 
-        /// <summary>
-        /// Subscribe to a wow event.
-        /// </summary>
-        /// <param name="eventName">Wow event name</param>
-        /// <param name="onEventFired">Callback</param>
+        ///<inheritdoc cref="IEventManager.Subscribe(string, Action{long, List{string}})"/>
         public void Subscribe(string eventName, Action<long, List<string>> onEventFired)
         {
             AmeisenLogger.I.Log("EventHook", $"Subscribing to event: {eventName}", LogLevel.Verbose);
             SubscribeQueue.Enqueue((eventName, onEventFired));
         }
 
-        /// <summary>
-        /// Unsubscribe from a wow event.
-        /// </summary>
-        /// <param name="eventName">Wow event name</param>
-        /// <param name="onEventFired">Callback to remove</param>
+        ///<inheritdoc cref="IEventManager.Tick"/>
+        public void Tick()
+        {
+            HandleSubEventQueue();
+            HandleUnsubEventQueue();
+
+            if (PendingLuaToExecute.Count > 0
+                && Wow.LuaDoString(PendingLuaToExecute.Peek()))
+            {
+                PendingLuaToExecute.Dequeue();
+            }
+        }
+
+        ///<inheritdoc cref="IEventManager.Unsubscribe(string, Action{long, List{string}})"/>
         public void Unsubscribe(string eventName, Action<long, List<string>> onEventFired)
         {
             AmeisenLogger.I.Log("EventHook", $"Unsubscribing from event: {eventName}", LogLevel.Verbose);
@@ -162,14 +138,14 @@ namespace AmeisenBotX.Core.Event
                 {
                     (string, Action<long, List<string>>) queueElement = SubscribeQueue.Dequeue();
 
-                    if (!EventDictionary.ContainsKey(queueElement.Item1))
+                    if (!Events.ContainsKey(queueElement.Item1))
                     {
-                        EventDictionary.Add(queueElement.Item1, new List<Action<long, List<string>>>() { queueElement.Item2 });
-                        sb.Append($"{EventHookFrameName}:RegisterEvent(\"{queueElement.Item1}\");");
+                        Events.Add(queueElement.Item1, new List<Action<long, List<string>>>() { queueElement.Item2 });
+                        sb.Append($"{FrameName}:RegisterEvent(\"{queueElement.Item1}\");");
                     }
                     else
                     {
-                        EventDictionary[queueElement.Item1].Add(queueElement.Item2);
+                        Events[queueElement.Item1].Add(queueElement.Item2);
                     }
                 }
 
@@ -187,13 +163,13 @@ namespace AmeisenBotX.Core.Event
                 {
                     (string, Action<long, List<string>>) queueElement = UnsubscribeQueue.Dequeue();
 
-                    if (EventDictionary.ContainsKey(queueElement.Item1))
+                    if (Events.ContainsKey(queueElement.Item1))
                     {
-                        EventDictionary[queueElement.Item1].Remove(queueElement.Item2);
+                        Events[queueElement.Item1].Remove(queueElement.Item2);
 
-                        if (EventDictionary[queueElement.Item1].Count == 0)
+                        if (Events[queueElement.Item1].Count == 0)
                         {
-                            sb.Append($"{EventHookFrameName}:UnregisterEvent(\"{queueElement.Item1}\");");
+                            sb.Append($"{FrameName}:UnregisterEvent(\"{queueElement.Item1}\");");
                         }
                     }
                 }
@@ -204,7 +180,7 @@ namespace AmeisenBotX.Core.Event
 
         private void Setup()
         {
-            EventDictionary = new();
+            Events = new();
             SubscribeQueue = new();
             UnsubscribeQueue = new();
             PendingLuaToExecute = new();

@@ -25,12 +25,12 @@ namespace AmeisenBotX.Core.Data.Objects
             return $"DynamicObject: [{Guid}] SpellId: {SpellId} Caster: {Caster} Radius: {Radius}";
         }
 
-        public override void Update(XMemory xMemory, IOffsetList offsetList)
+        public override void Update(IMemoryApi memoryApi, IOffsetList offsetList)
         {
-            base.Update(xMemory, offsetList);
+            base.Update(memoryApi, offsetList);
 
-            if (xMemory.Read(DescriptorAddress + RawWowObject.EndOffset, out RawWowDynobject objPtr)
-                && xMemory.Read(IntPtr.Add(BaseAddress, (int)offsetList.WowDynobjectPosition), out Vector3 position))
+            if (memoryApi.Read(DescriptorAddress + RawWowObject.EndOffset, out RawWowDynobject objPtr)
+                && memoryApi.Read(IntPtr.Add(BaseAddress, (int)offsetList.WowDynobjectPosition), out Vector3 position))
             {
                 Caster = objPtr.Caster;
                 Radius = objPtr.Radius;

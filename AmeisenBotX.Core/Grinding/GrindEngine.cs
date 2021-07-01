@@ -13,9 +13,9 @@ using System.Linq;
 
 namespace AmeisenBotX.Core.Grinding
 {
-    public class GrindingEngine
+    public class DefaultGrindingEngine : IGrindingEngine
     {
-        public GrindingEngine(AmeisenBotInterfaces bot, AmeisenBotConfig config, AmeisenBotFsm stateMachine)
+        public DefaultGrindingEngine(AmeisenBotInterfaces bot, AmeisenBotConfig config, AmeisenBotFsm stateMachine)
         {
             Bot = bot;
             Config = config;
@@ -50,6 +50,10 @@ namespace AmeisenBotX.Core.Grinding
         private bool TargetInLos { get; set; }
 
         private TimegatedEvent TargetInLosEvent { get; }
+
+        public void Enter()
+        {
+        }
 
         public void Execute()
         {

@@ -6,9 +6,9 @@ using System.IO;
 
 namespace AmeisenBotX.Core.Chat
 {
-    public class ChatManager
+    public class DefaultChatManager : IChatManager
     {
-        public ChatManager(AmeisenBotConfig config, string dataPath)
+        public DefaultChatManager(AmeisenBotConfig config, string dataPath)
         {
             Config = config;
             DataPath = dataPath;

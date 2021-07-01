@@ -10,6 +10,14 @@ namespace AmeisenBotX.Overlay.Utils
     {
         public const float DEG_TO_RAD = MathF.PI / 180.0f;
 
+        /// <summary>
+        /// Transform world coordinates to screen coordinates.
+        /// </summary>
+        /// <param name="clientRect">Window size</param>
+        /// <param name="cameraInfo">Game camera info</param>
+        /// <param name="position">World position</param>
+        /// <param name="screenCoordinates">Screen Position</param>
+        /// <returns>True when coordinates are on th window, fals eif not</returns>
         public static bool WorldToScreen(Rect clientRect, RawCameraInfo cameraInfo, Vector3 position, out Point screenCoordinates)
         {
             Vector3 diff = position - cameraInfo.Pos;
@@ -28,7 +36,7 @@ namespace AmeisenBotX.Overlay.Utils
             screenCoordinates = new()
             {
                 X = (int)MathF.Abs(screenX + (-view.Y * tmpX / view.X)),
-                Y = (int)MathF.Abs(screenY + (-view.Z * tmpY / view.X)) - 20
+                Y = (int)MathF.Abs(screenY + (-view.Z * tmpY / view.X))
             };
 
             return screenCoordinates.X > 0 && screenCoordinates.Y > 0 && screenCoordinates.X < windowWidth && screenCoordinates.Y < windowHeight;

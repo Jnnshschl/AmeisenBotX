@@ -3,9 +3,9 @@ using System.Collections.Generic;
 
 namespace AmeisenBotX.Core.Tactic
 {
-    public class TacticEngine
+    public class DefaultTacticEngine : ITacticEngine
     {
-        public TacticEngine()
+        public DefaultTacticEngine()
         {
             Tactics = new();
         }

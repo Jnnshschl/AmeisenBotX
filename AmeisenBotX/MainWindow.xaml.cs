@@ -210,7 +210,6 @@ namespace AmeisenBotX
 
                 if (((IStateConfigWindow)selectedWindow).ShouldSave)
                 {
-                    AmeisenBot.Config = ((IStateConfigWindow)selectedWindow).Config;
                     AmeisenBot.ReloadConfig(((IStateConfigWindow)selectedWindow).Config);
                     SaveConfig();
                 }
@@ -362,7 +361,7 @@ namespace AmeisenBotX
                 // Overlay drawing
                 if (DrawOverlay)
                 {
-                    Overlay ??= new(AmeisenBot.Bot.Memory);
+                    Overlay ??= new(AmeisenBot.Bot.Memory.Process.MainWindowHandle);
                     OverlayRenderCurrentPath();
 
                     Overlay?.Draw();
@@ -381,6 +380,7 @@ namespace AmeisenBotX
             if (AmeisenBot.Bot.Movement.Path != null
                 && AmeisenBot.Bot.Movement.Path.Any())
             {
+                // explicitly copy the path as it might change during rendering
                 List<Vector3> currentNodes = AmeisenBot.Bot.Movement.Path.ToList();
 
                 for (int i = 0; i < currentNodes.Count; ++i)
@@ -392,7 +392,7 @@ namespace AmeisenBotX
                     System.Drawing.Color startDot = System.Drawing.Color.Cyan;
                     System.Drawing.Color endDot = i == 0 ? System.Drawing.Color.Orange : i == currentNodes.Count ? System.Drawing.Color.Orange : System.Drawing.Color.Cyan;
 
-                    Memory.Win32.Rect windowRect = XMemory.GetClientSize(AmeisenBot.Bot.Memory.Process.MainWindowHandle);
+                    Memory.Win32.Rect windowRect = AmeisenBot.Bot.Memory.GetClientSize();
 
                     if (OverlayMath.WorldToScreen(windowRect, AmeisenBot.Bot.Objects.Camera, start, out System.Drawing.Point startPoint)
                         && OverlayMath.WorldToScreen(windowRect, AmeisenBot.Bot.Objects.Camera, end, out System.Drawing.Point endPoint))
@@ -411,7 +411,7 @@ namespace AmeisenBotX
             {
                 try
                 {
-                    AmeisenBot.Config.BotWindowRect = XMemory.GetWindowPosition(MainWindowHandle);
+                    AmeisenBot.Config.BotWindowRect = AmeisenBot.Bot.Memory.GetWindowPosition();
                 }
                 catch (Exception e)
                 {
@@ -559,7 +559,7 @@ namespace AmeisenBotX
             }
             else
             {
-                // Init GUI related stuff
+                // init GUI related stuff
                 MainWindowHandle = new WindowInteropHelper(this).EnsureHandle(); // obtain a window handle (HWND) to out current WPF window
 
                 // load the state overrides
@@ -632,7 +632,7 @@ namespace AmeisenBotX
                     {
                         if (MainWindowHandle != IntPtr.Zero && AmeisenBot.Config.BotWindowRect != new Memory.Win32.Rect() { Left = -1, Top = -1, Right = -1, Bottom = -1 })
                         {
-                            XMemory.SetWindowPosition(MainWindowHandle, AmeisenBot.Config.BotWindowRect);
+                            AmeisenBot.Bot.Memory.SetWindowPosition(MainWindowHandle, AmeisenBot.Config.BotWindowRect);
                             AmeisenLogger.I.Log("AmeisenBot", $"Loaded window position: {AmeisenBot.Config.BotWindowRect}", LogLevel.Verbose);
                         }
                         else

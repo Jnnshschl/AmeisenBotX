@@ -11,9 +11,9 @@ using System.Linq;
 
 namespace AmeisenBotX.Core.Quest
 {
-    public class QuestEngine
+    public class DefaultQuestEngine : IQuestEngine
     {
-        public QuestEngine(AmeisenBotInterfaces bot, AmeisenBotConfig config, AmeisenBotFsm stateMachine)
+        public DefaultQuestEngine(AmeisenBotInterfaces bot, AmeisenBotConfig config, AmeisenBotFsm stateMachine)
         {
             Bot = bot;
             Config = config;
@@ -48,7 +48,7 @@ namespace AmeisenBotX.Core.Quest
 
             if (!UpdatedCompletedQuests)
             {
-                if (Bot.Events.EventDictionary.All(e => e.Key != "QUEST_QUERY_COMPLETE"))
+                if (Bot.Events.Events.All(e => e.Key != "QUEST_QUERY_COMPLETE"))
                 {
                     Bot.Events.Subscribe("QUEST_QUERY_COMPLETE", OnGetQuestsCompleted);
                 }

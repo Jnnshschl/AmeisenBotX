@@ -10,9 +10,9 @@ using System.Linq;
 
 namespace AmeisenBotX.Core.Movement.AMovementEngine
 {
-    public class AMovementEngine : IMovementEngine
+    public class DefaultMovementEngine : IMovementEngine
     {
-        public AMovementEngine(AmeisenBotInterfaces bot, AmeisenBotConfig config)
+        public DefaultMovementEngine(AmeisenBotInterfaces bot, AmeisenBotConfig config)
         {
             Bot = bot;
             Config = config;

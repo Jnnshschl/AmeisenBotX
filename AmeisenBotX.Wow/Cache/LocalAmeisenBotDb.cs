@@ -31,9 +31,9 @@ namespace AmeisenBotX.Wow.Cache
             CleanupTimer = new Timer(CleanupTimerTick, null, 0, 6000);
         }
 
-        public LocalAmeisenBotDb(XMemory xMemory, IOffsetList offsetList, Func<int, string> getSpellnameFunc, Func<IntPtr, IntPtr, WowUnitReaction> getUnitReactionFunc)
+        public LocalAmeisenBotDb(IMemoryApi memoryApi, IOffsetList offsetList, Func<int, string> getSpellnameFunc, Func<IntPtr, IntPtr, WowUnitReaction> getUnitReactionFunc)
         {
-            XMemory = xMemory;
+            MemoryApi = memoryApi;
             OffsetList = offsetList;
             GetSpellnameFunc = getSpellnameFunc;
             GetUnitReactionFunc = getUnitReactionFunc;
@@ -70,9 +70,9 @@ namespace AmeisenBotX.Wow.Cache
 
         private IOffsetList OffsetList { get; set; }
 
-        private XMemory XMemory { get; set; }
+        private IMemoryApi MemoryApi { get; set; }
 
-        public static LocalAmeisenBotDb FromJson(string dbFile, XMemory xMemory, IOffsetList offsetList, Func<int, string> getSpellnameFunc, Func<IntPtr, IntPtr, WowUnitReaction> getUnitReactionFunc)
+        public static LocalAmeisenBotDb FromJson(string dbFile, IMemoryApi memoryApi, IOffsetList offsetList, Func<int, string> getSpellnameFunc, Func<IntPtr, IntPtr, WowUnitReaction> getUnitReactionFunc)
         {
             if (!Directory.Exists(Path.GetDirectoryName(dbFile)))
             {
@@ -85,7 +85,7 @@ namespace AmeisenBotX.Wow.Cache
                 try
                 {
                     LocalAmeisenBotDb db = JsonConvert.DeserializeObject<LocalAmeisenBotDb>(File.ReadAllText(dbFile));
-                    db.XMemory = xMemory;
+                    db.MemoryApi = memoryApi;
                     db.OffsetList = offsetList;
                     db.GetSpellnameFunc = getSpellnameFunc;
                     db.GetUnitReactionFunc = getUnitReactionFunc;
@@ -97,7 +97,7 @@ namespace AmeisenBotX.Wow.Cache
                 }
             }
 
-            return new(xMemory, offsetList, getSpellnameFunc, getUnitReactionFunc);
+            return new(memoryApi, offsetList, getSpellnameFunc, getUnitReactionFunc);
         }
 
         public IReadOnlyDictionary<int, List<Vector3>> AllBlacklistNodes()
@@ -282,7 +282,7 @@ namespace AmeisenBotX.Wow.Cache
             }
             else
             {
-                name = unit.ReadName(XMemory, OffsetList);
+                name = unit.ReadName(MemoryApi, OffsetList);
                 Names.TryAdd(unit.Guid, name);
                 return true;
             }

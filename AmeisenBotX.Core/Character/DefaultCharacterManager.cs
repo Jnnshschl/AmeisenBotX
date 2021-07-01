@@ -22,12 +22,12 @@ using System.Threading.Tasks;
 
 namespace AmeisenBotX.Core.Character
 {
-    public class CharacterManager : ICharacterManager
+    public class DefaultCharacterManager : ICharacterManager
     {
-        public CharacterManager(IWowInterface wowInterface, XMemory xMemory, IOffsetList offsetList)
+        public DefaultCharacterManager(IWowInterface wowInterface, IMemoryApi memoryApi, IOffsetList offsetList)
         {
             Wow = wowInterface;
-            XMemory = xMemory;
+            MemoryApi = memoryApi;
             Offsets = offsetList;
 
             Inventory = new(Wow);
@@ -62,11 +62,11 @@ namespace AmeisenBotX.Core.Character
 
         private IWowInterface Wow { get; }
 
-        private XMemory XMemory { get; }
+        private IMemoryApi MemoryApi { get; }
 
         public void AntiAfk()
         {
-            XMemory.Write(Offsets.TickCount, Environment.TickCount);
+            MemoryApi.Write(Offsets.TickCount, Environment.TickCount);
         }
 
         public void ClickToMove(Vector3 pos, ulong guid, WowClickToMoveType clickToMoveType = WowClickToMoveType.Move, float turnSpeed = 20.9f, float distance = 0.5f)
@@ -78,16 +78,16 @@ namespace AmeisenBotX.Core.Character
                 return;
             }
 
-            XMemory.Write(Offsets.ClickToMoveTurnSpeed, turnSpeed);
-            XMemory.Write(Offsets.ClickToMoveDistance, distance);
+            MemoryApi.Write(Offsets.ClickToMoveTurnSpeed, turnSpeed);
+            MemoryApi.Write(Offsets.ClickToMoveDistance, distance);
 
             if (guid > 0)
             {
-                XMemory.Write(Offsets.ClickToMoveGuid, guid);
+                MemoryApi.Write(Offsets.ClickToMoveGuid, guid);
             }
 
-            XMemory.Write(Offsets.ClickToMoveAction, clickToMoveType);
-            XMemory.Write(Offsets.ClickToMoveX, pos);
+            MemoryApi.Write(Offsets.ClickToMoveAction, clickToMoveType);
+            MemoryApi.Write(Offsets.ClickToMoveX, pos);
         }
 
         public Dictionary<int, int> GetConsumeables()
@@ -190,7 +190,7 @@ namespace AmeisenBotX.Core.Character
         public void Jump()
         {
             AmeisenLogger.I.Log("Movement", $"Jumping", LogLevel.Verbose);
-            Task.Run(() => BotUtils.SendKey(XMemory.Process.MainWindowHandle, new((int)VirtualKey.VKSPACE), 500, 1000));
+            Task.Run(() => BotUtils.SendKey(MemoryApi.Process.MainWindowHandle, new((int)VirtualKey.VKSPACE), 500, 1000));
         }
 
         public void MoveToPosition(Vector3 pos, float turnSpeed = 20.9f, float distance = 0.1f)

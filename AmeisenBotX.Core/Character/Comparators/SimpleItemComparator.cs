@@ -6,7 +6,7 @@ namespace AmeisenBotX.Core.Character.Comparators
 {
     public class SimpleItemComparator : IItemComparator
     {
-        public SimpleItemComparator(CharacterManager characterManager, Dictionary<string, double> statPriorities)
+        public SimpleItemComparator(DefaultCharacterManager characterManager, Dictionary<string, double> statPriorities)
         {
             // This introduces a cyclic dependency. Are we fine with that?
             CharacterManager = characterManager;
@@ -15,7 +15,7 @@ namespace AmeisenBotX.Core.Character.Comparators
 
         protected GearscoreFactory GearscoreFactory { get; set; }
 
-        private CharacterManager CharacterManager { get; }
+        private DefaultCharacterManager CharacterManager { get; }
 
         public bool IsBetter(IWowItem current, IWowItem item)
         {

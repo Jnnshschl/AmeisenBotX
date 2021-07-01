@@ -5,9 +5,9 @@ namespace AmeisenBotX.Core.Hook.Modules
 {
     public abstract class RunAsmHookModule : IHookModule
     {
-        public RunAsmHookModule(Action<IntPtr> onUpdate, Action tick, XMemory xMemory, uint allocSize)
+        public RunAsmHookModule(Action<IntPtr> onUpdate, Action tick, IMemoryApi memoryApi, uint allocSize)
         {
-            XMemory = xMemory;
+            MemoryApi = memoryApi;
             AllocSize = allocSize;
             OnDataUpdate = onUpdate;
             Tick = tick;
@@ -15,7 +15,7 @@ namespace AmeisenBotX.Core.Hook.Modules
 
         ~RunAsmHookModule()
         {
-            if (AsmAddress != IntPtr.Zero) { XMemory.FreeMemory(AsmAddress); }
+            if (AsmAddress != IntPtr.Zero) { MemoryApi.FreeMemory(AsmAddress); }
         }
 
         public IntPtr AsmAddress { get; set; }
@@ -26,17 +26,17 @@ namespace AmeisenBotX.Core.Hook.Modules
 
         protected uint AllocSize { get; }
 
-        protected XMemory XMemory { get; }
+        protected IMemoryApi MemoryApi { get; }
 
         public abstract IntPtr GetDataPointer();
 
         public virtual bool Inject()
         {
             if (PrepareAsm()
-                && XMemory.AllocateMemory(AllocSize, out IntPtr address))
+                && MemoryApi.AllocateMemory(AllocSize, out IntPtr address))
             {
                 AsmAddress = address;
-                return XMemory.FasmInject(address);
+                return MemoryApi.InjectAssembly(address);
             }
             else
             {

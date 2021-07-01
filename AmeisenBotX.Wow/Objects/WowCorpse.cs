@@ -24,11 +24,11 @@ namespace AmeisenBotX.Core.Data.Objects
             return $"Corpse: [{Guid}] Owner: {Owner} Party: {Party} DisplayId: {DisplayId}";
         }
 
-        public override void Update(XMemory xMemory, IOffsetList offsetList)
+        public override void Update(IMemoryApi memoryApi, IOffsetList offsetList)
         {
-            base.Update(xMemory, offsetList);
+            base.Update(memoryApi, offsetList);
 
-            if (xMemory.Read(DescriptorAddress + RawWowObject.EndOffset, out RawWowCorpse objPtr))
+            if (memoryApi.Read(DescriptorAddress + RawWowObject.EndOffset, out RawWowCorpse objPtr))
             {
                 DisplayId = objPtr.DisplayId;
                 Owner = objPtr.Owner;

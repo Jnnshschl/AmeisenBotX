@@ -24,9 +24,9 @@ namespace AmeisenBotX.Wow335a.Objects
         private readonly IntPtr[] wowObjectPointers;
         private readonly WowObject[] wowObjects;
 
-        public ObjectManager(XMemory xMemory, IOffsetList offsetList)
+        public ObjectManager(IMemoryApi memoryApi, IOffsetList offsetList)
         {
-            XMemory = xMemory;
+            MemoryApi = memoryApi;
             OffsetList = offsetList;
 
             wowObjectPointers = new IntPtr[MAX_OBJECT_COUNT];
@@ -126,7 +126,7 @@ namespace AmeisenBotX.Wow335a.Objects
 
         private bool PlayerGuidIsVehicle { get; set; }
 
-        private XMemory XMemory { get; }
+        private IMemoryApi MemoryApi { get; }
 
         /// <summary>
         /// Process the pushed game info that we receive from the EndScene hook.
@@ -146,7 +146,7 @@ namespace AmeisenBotX.Wow335a.Objects
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public bool RefreshIsWorldLoaded()
         {
-            if (XMemory.Read(OffsetList.IsWorldLoaded, out int isWorldLoaded))
+            if (MemoryApi.Read(OffsetList.IsWorldLoaded, out int isWorldLoaded))
             {
                 IsWorldLoaded = isWorldLoaded == 1;
                 return IsWorldLoaded;
@@ -173,18 +173,18 @@ namespace AmeisenBotX.Wow335a.Objects
                 ZoneId = UpdateGlobalVar<int>(OffsetList.ZoneId);
                 GameState = UpdateGlobalVarString(OffsetList.GameState);
 
-                if (XMemory.Read(OffsetList.CameraPointer, out IntPtr cameraPointer)
-                    && XMemory.Read(IntPtr.Add(cameraPointer, (int)OffsetList.CameraOffset), out cameraPointer))
+                if (MemoryApi.Read(OffsetList.CameraPointer, out IntPtr cameraPointer)
+                    && MemoryApi.Read(IntPtr.Add(cameraPointer, (int)OffsetList.CameraOffset), out cameraPointer))
                 {
                     Camera = UpdateGlobalVar<RawCameraInfo>(cameraPointer);
                 }
 
-                if (XMemory.Read(OffsetList.ZoneText, out IntPtr zoneNamePointer))
+                if (MemoryApi.Read(OffsetList.ZoneText, out IntPtr zoneNamePointer))
                 {
                     ZoneName = UpdateGlobalVarString(zoneNamePointer);
                 }
 
-                if (XMemory.Read(OffsetList.ZoneSubText, out IntPtr zoneSubNamePointer))
+                if (MemoryApi.Read(OffsetList.ZoneSubText, out IntPtr zoneSubNamePointer))
                 {
                     ZoneSubName = UpdateGlobalVarString(zoneSubNamePointer);
                 }
@@ -194,11 +194,11 @@ namespace AmeisenBotX.Wow335a.Objects
                 if (LastTargetGuid == 0) { LastTarget = null; }
                 if (PartyleaderGuid == 0) { Partyleader = null; }
 
-                XMemory.Read(OffsetList.ClientConnection, out IntPtr clientConnection);
-                XMemory.Read(IntPtr.Add(clientConnection, (int)OffsetList.CurrentObjectManager), out IntPtr currentObjectManager);
+                MemoryApi.Read(OffsetList.ClientConnection, out IntPtr clientConnection);
+                MemoryApi.Read(IntPtr.Add(clientConnection, (int)OffsetList.CurrentObjectManager), out IntPtr currentObjectManager);
 
                 // read the first object
-                XMemory.Read(IntPtr.Add(currentObjectManager, (int)OffsetList.FirstObject), out IntPtr activeObjectBaseAddress);
+                MemoryApi.Read(IntPtr.Add(currentObjectManager, (int)OffsetList.FirstObject), out IntPtr activeObjectBaseAddress);
 
                 int c = 0;
                 Array.Clear(wowObjectPointers, 0, MAX_OBJECT_COUNT);
@@ -206,7 +206,7 @@ namespace AmeisenBotX.Wow335a.Objects
                 for (; (int)activeObjectBaseAddress > 0 && c < MAX_OBJECT_COUNT; ++c)
                 {
                     wowObjectPointers[c] = activeObjectBaseAddress;
-                    XMemory.Read(IntPtr.Add(activeObjectBaseAddress, (int)OffsetList.NextObject), out activeObjectBaseAddress);
+                    MemoryApi.Read(IntPtr.Add(activeObjectBaseAddress, (int)OffsetList.NextObject), out activeObjectBaseAddress);
                 }
 
                 ObjectCount = c;
@@ -249,8 +249,8 @@ namespace AmeisenBotX.Wow335a.Objects
             IntPtr ptr = wowObjectPointers[i];
 
             if (ptr != IntPtr.Zero
-                && XMemory.Read(IntPtr.Add(ptr, (int)OffsetList.WowObjectType), out WowObjectType type)
-                && XMemory.Read(IntPtr.Add(ptr, (int)OffsetList.WowObjectDescriptor), out IntPtr descriptorAddress))
+                && MemoryApi.Read(IntPtr.Add(ptr, (int)OffsetList.WowObjectType), out WowObjectType type)
+                && MemoryApi.Read(IntPtr.Add(ptr, (int)OffsetList.WowObjectDescriptor), out IntPtr descriptorAddress))
             {
                 WowObject obj = type switch
                 {
@@ -264,7 +264,7 @@ namespace AmeisenBotX.Wow335a.Objects
                     _ => new WowObject(ptr, type, descriptorAddress),
                 };
 
-                obj.Update(XMemory, OffsetList);
+                obj.Update(MemoryApi, OffsetList);
 
                 if (type == WowObjectType.Unit || type == WowObjectType.Player)
                 {
@@ -274,7 +274,7 @@ namespace AmeisenBotX.Wow335a.Objects
 
                         if (!PlayerGuidIsVehicle)
                         {
-                            if (XMemory.Read(OffsetList.ComboPoints, out byte comboPoints))
+                            if (MemoryApi.Read(OffsetList.ComboPoints, out byte comboPoints))
                             {
                                 ((WowPlayer)obj).ComboPoints = comboPoints;
                             }
@@ -300,10 +300,10 @@ namespace AmeisenBotX.Wow335a.Objects
 
         private ulong ReadLeaderGuid()
         {
-            if (XMemory.Read(OffsetList.RaidLeader, out ulong partyleaderGuid))
+            if (MemoryApi.Read(OffsetList.RaidLeader, out ulong partyleaderGuid))
             {
                 if (partyleaderGuid == 0
-                    && XMemory.Read(OffsetList.PartyLeader, out partyleaderGuid))
+                    && MemoryApi.Read(OffsetList.PartyLeader, out partyleaderGuid))
                 {
                     return partyleaderGuid;
                 }
@@ -318,23 +318,23 @@ namespace AmeisenBotX.Wow335a.Objects
         {
             List<ulong> partymemberGuids = new();
 
-            if (XMemory.Read(OffsetList.PartyLeader, out ulong partyLeader)
+            if (MemoryApi.Read(OffsetList.PartyLeader, out ulong partyLeader)
                 && partyLeader != 0
-                && XMemory.Read(OffsetList.PartyPlayerGuids, out RawPartyGuids partyMembers))
+                && MemoryApi.Read(OffsetList.PartyPlayerGuids, out RawPartyGuids partyMembers))
             {
                 partymemberGuids.AddRange(partyMembers.AsArray());
             }
 
-            if (XMemory.Read(OffsetList.RaidLeader, out ulong raidLeader)
+            if (MemoryApi.Read(OffsetList.RaidLeader, out ulong raidLeader)
                 && raidLeader != 0
-                && XMemory.Read(OffsetList.RaidGroupStart, out RawRaidStruct raidStruct))
+                && MemoryApi.Read(OffsetList.RaidGroupStart, out RawRaidStruct raidStruct))
             {
                 IEnumerable<IntPtr> raidPointers = raidStruct.GetPointers();
                 ConcurrentBag<ulong> guids = new();
 
                 foreach (IntPtr raidPointer in raidPointers)
                 {
-                    if (XMemory.Read(raidPointer, out ulong guid) && guid != 0)
+                    if (MemoryApi.Read(raidPointer, out ulong guid) && guid != 0)
                     {
                         guids.Add(guid);
                     }
@@ -349,13 +349,13 @@ namespace AmeisenBotX.Wow335a.Objects
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         private T UpdateGlobalVar<T>(IntPtr address) where T : unmanaged
         {
-            return XMemory.Read(address, out T v) ? v : default;
+            return MemoryApi.Read(address, out T v) ? v : default;
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         private string UpdateGlobalVarString(IntPtr address, int maxLenght = 128)
         {
-            return XMemory.ReadString(address, Encoding.UTF8, out string v, maxLenght) ? v : string.Empty;
+            return MemoryApi.ReadString(address, Encoding.UTF8, out string v, maxLenght) ? v : string.Empty;
         }
     }
 }

@@ -8,9 +8,9 @@ using System.Collections.Generic;
 
 namespace AmeisenBotX.Wow.Combatlog
 {
-    public class CombatLogParser
+    public class DefaultCombatLogParser : ICombatLogParser
     {
-        public CombatLogParser(IAmeisenBotDb db)
+        public DefaultCombatLogParser(IAmeisenBotDb db)
         {
             Db = db;
         }

@@ -20,11 +20,11 @@ namespace AmeisenBotX.Core.Data.Objects
             return $"Container: [{Guid}] SlotCount: {SlotCount}";
         }
 
-        public override void Update(XMemory xMemory, IOffsetList offsetList)
+        public override void Update(IMemoryApi memoryApi, IOffsetList offsetList)
         {
-            base.Update(xMemory, offsetList);
+            base.Update(memoryApi, offsetList);
 
-            if (xMemory.Read(DescriptorAddress + RawWowObject.EndOffset, out RawWowContainer objPtr))
+            if (memoryApi.Read(DescriptorAddress + RawWowObject.EndOffset, out RawWowContainer objPtr))
             {
                 SlotCount = objPtr.SlotCount;
             }

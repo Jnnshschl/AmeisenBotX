@@ -34,12 +34,12 @@ namespace AmeisenBotX.Core.Data.Objects
             return $"GameObject: [{EntryId}] ({(Enum.IsDefined(typeof(WowGameobjectDisplayId), DisplayId) ? ((WowGameobjectDisplayId)DisplayId).ToString() : DisplayId.ToString(CultureInfo.InvariantCulture))}:{DisplayId})";
         }
 
-        public override void Update(XMemory xMemory, IOffsetList offsetList)
+        public override void Update(IMemoryApi memoryApi, IOffsetList offsetList)
         {
-            base.Update(xMemory, offsetList);
+            base.Update(memoryApi, offsetList);
 
-            if (xMemory.Read(DescriptorAddress + RawWowObject.EndOffset, out RawWowGameobject objPtr)
-                && xMemory.Read(IntPtr.Add(BaseAddress, (int)offsetList.WowGameobjectPosition), out Vector3 position))
+            if (memoryApi.Read(DescriptorAddress + RawWowObject.EndOffset, out RawWowGameobject objPtr)
+                && memoryApi.Read(IntPtr.Add(BaseAddress, (int)offsetList.WowGameobjectPosition), out Vector3 position))
             {
                 GameobjectType = (WowGameobjectType)objPtr.GameobjectBytes1;
                 CreatedBy = objPtr.CreatedBy;

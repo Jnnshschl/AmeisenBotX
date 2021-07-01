@@ -14,9 +14,9 @@ using System.Linq;
 
 namespace AmeisenBotX.Core.Jobs
 {
-    public class JobEngine
+    public class DefaultJobEngine : IJobEngine
     {
-        public JobEngine(AmeisenBotInterfaces bot, AmeisenBotConfig config)
+        public DefaultJobEngine(AmeisenBotInterfaces bot, AmeisenBotConfig config)
         {
             AmeisenLogger.I.Log("JobEngine", $"Initializing", LogLevel.Verbose);
 
@@ -30,7 +30,7 @@ namespace AmeisenBotX.Core.Jobs
             NodeBlacklist = new();
         }
 
-        public AmeisenBotConfig Config { get; set; }
+        private AmeisenBotConfig Config { get; }
 
         public bool GeneratedPathToNode { get; set; }
 

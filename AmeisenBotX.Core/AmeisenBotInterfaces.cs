@@ -28,27 +28,27 @@ namespace AmeisenBotX.Core
 
         public ICharacterManager Character { get; set; }
 
-        public ChatManager Chat { get; set; }
+        public IChatManager Chat { get; set; }
 
         public ICombatClass CombatClass { get; set; }
 
-        public CombatLogParser CombatLog { get; set; }
+        public ICombatLogParser CombatLog { get; set; }
 
         public IAmeisenBotDb Db { get; set; }
 
         public IDungeonEngine Dungeon { get; set; }
 
-        public EventHook Events { get; set; }
+        public IEventManager Events { get; set; }
 
         public AmeisenBotGlobals Globals { get; set; }
 
-        public GrindingEngine Grinding { get; set; }
+        public IGrindingEngine Grinding { get; set; }
 
-        public JobEngine Jobs { get; set; }
+        public IJobEngine Jobs { get; set; }
 
         public WowUnit LastTarget => Objects.LastTarget;
 
-        public XMemory Memory { get; set; }
+        public IMemoryApi Memory { get; set; }
 
         public IMovementEngine Movement { get; set; }
 
@@ -64,11 +64,11 @@ namespace AmeisenBotX.Core
 
         public WowPlayer Player => Objects.Player;
 
-        public QuestEngine Quest { get; set; }
+        public IQuestEngine Quest { get; set; }
 
         public AmeisenBotRconClient Rcon { get; set; }
 
-        public TacticEngine Tactic { get; set; }
+        public ITacticEngine Tactic { get; set; }
 
         public WowUnit Target => Objects.Target;
 

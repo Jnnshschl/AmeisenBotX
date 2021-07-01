@@ -36,7 +36,7 @@ namespace AmeisenBotX.Core.Fsm.States
                 if (Bot.Memory.Process == null || Bot.Memory.Process.HasExited)
                 {
                     AmeisenLogger.I.Log("StartWow", "Starting WoW Process");
-                    Process p = XMemory.StartProcessNoActivate($"\"{Config.PathToWowExe}\" -windowed -d3d9", out IntPtr processHandle, out IntPtr mainThreadHandle);
+                    Process p = Bot.Memory.StartProcessNoActivate($"\"{Config.PathToWowExe}\" -windowed -d3d9", out IntPtr processHandle, out IntPtr mainThreadHandle);
 
                     AmeisenLogger.I.Log("StartWow", "Waiting for input idle");
                     p.WaitForInputIdle();
