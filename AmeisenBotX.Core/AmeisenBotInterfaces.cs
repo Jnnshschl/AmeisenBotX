@@ -89,7 +89,7 @@ namespace AmeisenBotX.Core
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public WowGameobject GetClosestGameobjectByDisplayId(Vector3 position, IEnumerable<int> displayIds)
+        public WowGameobject GetClosestGameobjectByDisplayId(Vector3 position, IEnumerable<int> displayIds,)
         {
             return Objects.WowObjects.OfType<WowGameobject>()
                 .Where(e => displayIds.Contains(e.DisplayId))
@@ -98,19 +98,19 @@ namespace AmeisenBotX.Core
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public WowUnit GetClosestQuestgiverByDisplayId(Vector3 position, IEnumerable<int> displayIds)
+        public WowUnit GetClosestQuestgiverByDisplayId(Vector3 position, IEnumerable<int> displayIds, bool onlyQuestgivers = true)
         {
             return Objects.WowObjects.OfType<WowUnit>()
-                .Where(e => e.IsQuestgiver && !e.IsDead && displayIds.Contains(e.DisplayId))
+                .Where(e => !e.IsDead && (!onlyQuestgivers || e.IsQuestgiver) && displayIds.Contains(e.DisplayId))
                 .OrderBy(e => e.Position.GetDistance(position))
                 .FirstOrDefault();
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public WowUnit GetClosestQuestgiverByNpcId(Vector3 position, IEnumerable<int> npcIds)
+        public WowUnit GetClosestQuestgiverByNpcId(Vector3 position, IEnumerable<int> npcIds, bool onlyQuestgivers = true)
         {
             return Objects.WowObjects.OfType<WowUnit>()
-                .Where(e => e.IsQuestgiver && !e.IsDead && npcIds.Contains(WowGuid.ToNpcId(e.Guid)))
+                .Where(e => !e.IsDead && (!onlyQuestgivers || e.IsQuestgiver) && npcIds.Contains(WowGuid.ToNpcId(e.Guid)))
                 .OrderBy(e => e.Position.GetDistance(position))
                 .FirstOrDefault();
         }

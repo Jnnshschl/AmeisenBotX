@@ -3,7 +3,7 @@
 namespace AmeisenBotX.Wow.Objects.SubStructs
 {
     [StructLayout(LayoutKind.Sequential)]
-    public record QuestlogEntry
+    public struct QuestlogEntry
     {
         public int Id { get; set; }
 

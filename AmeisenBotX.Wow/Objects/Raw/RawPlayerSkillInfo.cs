@@ -3,7 +3,7 @@
 namespace AmeisenBotX.Wow.Objects
 {
     [StructLayout(LayoutKind.Sequential)]
-    public record RawPlayerSkillInfo
+    public struct RawPlayerSkillInfo
     {
         public ushort Id { get; set; }
 

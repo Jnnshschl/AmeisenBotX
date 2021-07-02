@@ -4,7 +4,7 @@ using System.Runtime.InteropServices;
 namespace AmeisenBotX.Wow.Objects
 {
     [StructLayout(LayoutKind.Sequential)]
-    public record RawWowAura
+    public struct RawWowAura
     {
         public ulong Creator { get; set; }
 

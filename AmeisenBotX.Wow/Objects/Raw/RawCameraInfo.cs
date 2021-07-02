@@ -4,7 +4,7 @@ using System.Runtime.InteropServices;
 namespace AmeisenBotX.Wow.Objects
 {
     [StructLayout(LayoutKind.Sequential)]
-    public record RawCameraInfo
+    public struct RawCameraInfo
     {
         public uint VTable { get; set; }
         public uint Unk1 { get; set; }

@@ -3,7 +3,7 @@
 namespace AmeisenBotX.Wow.Objects.SubStructs
 {
     [StructLayout(LayoutKind.Sequential)]
-    public record VisibleItemEnchantment
+    public struct VisibleItemEnchantment
     {
         public int Id { get; set; }
 

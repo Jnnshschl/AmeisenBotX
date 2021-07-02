@@ -3,7 +3,7 @@
 namespace AmeisenBotX.Wow.Objects
 {
     [StructLayout(LayoutKind.Sequential)]
-    public record RawPartyGuids
+    public struct RawPartyGuids
     {
         public ulong PartymemberGuid1 { get; set; }
 
