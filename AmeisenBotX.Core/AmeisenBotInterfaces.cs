@@ -89,7 +89,7 @@ namespace AmeisenBotX.Core
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public WowGameobject GetClosestGameobjectByDisplayId(Vector3 position, IEnumerable<int> displayIds,)
+        public WowGameobject GetClosestGameobjectByDisplayId(Vector3 position, IEnumerable<int> displayIds)
         {
             return Objects.WowObjects.OfType<WowGameobject>()
                 .Where(e => displayIds.Contains(e.DisplayId))
