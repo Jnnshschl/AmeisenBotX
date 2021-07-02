@@ -1,5 +1,5 @@
-﻿using AmeisenBotX.Core.Character.Inventory.Objects;
-using AmeisenBotX.Core.Common;
+﻿using AmeisenBotX.Core.Common;
+using AmeisenBotX.Core.Engines.Character.Inventory.Objects;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Media;

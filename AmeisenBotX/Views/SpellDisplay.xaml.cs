@@ -1,4 +1,4 @@
-﻿using AmeisenBotX.Core.Character.Spells.Objects;
+﻿using AmeisenBotX.Core.Engines.Character.Spells.Objects;
 using System.Windows;
 using System.Windows.Controls;
 

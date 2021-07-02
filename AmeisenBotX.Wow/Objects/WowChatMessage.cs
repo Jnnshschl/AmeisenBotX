@@ -3,7 +3,7 @@ using System.Collections.Generic;
 
 namespace AmeisenBotX.Core.Data.Objects
 {
-    public class WowChatMessage
+    public record WowChatMessage
     {
         public WowChatMessage(WowChat type, long timestamp, List<string> args)
         {

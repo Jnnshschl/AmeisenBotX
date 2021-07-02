@@ -1,4 +1,4 @@
-﻿namespace AmeisenBotX.Core.Character.Inventory.Enums
+﻿namespace AmeisenBotX.Wow.Objects.Enums
 {
     public static class WowStatType
     {

@@ -1,5 +1,4 @@
-﻿using AmeisenBotX.Core.Character.Inventory.Enums;
-using AmeisenBotX.Wow.Objects.Enums;
+﻿using AmeisenBotX.Wow.Objects.Enums;
 
 namespace AmeisenBotX.Core.Common
 {

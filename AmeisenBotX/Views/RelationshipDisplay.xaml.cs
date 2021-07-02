@@ -30,7 +30,7 @@ namespace AmeisenBotX.Views
 
         public void Update(ulong guid, int relationship)
         {
-            if (Bot.Db.GetUnitName(Bot.Objects.GetWowObjectByGuid<WowUnit>(guid), out string name))
+            if (Bot.Db.GetUnitName(Bot.GetWowObjectByGuid<WowUnit>(guid), out string name))
             {
                 labelName.Content = name;
             }

@@ -5,7 +5,7 @@ using System.Runtime.InteropServices;
 namespace AmeisenBotX.Wow.Objects
 {
     [StructLayout(LayoutKind.Sequential)]
-    public struct RawRaidStruct
+    public record RawRaidStruct
     {
         public IntPtr RaidPlayer1 { get; set; }
 

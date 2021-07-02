@@ -47,7 +47,7 @@ namespace AmeisenBotX.Core.Fsm.States.Idle
             {
                 IEnumerable<IIdleAction> filteredActions = IdleActions.Where
                 (
-                    e => (!e.AutopilotOnly || autopilotEnabled) 
+                    e => (!e.AutopilotOnly || autopilotEnabled)
                     && !LastActions.Any(e => e.Value == e.GetType())
                     || LastActions.Where(x => x.Value == e.GetType() && (DateTime.UtcNow - x.Key).TotalMilliseconds > Rnd.Next(CurrentAction.MinCooldown, CurrentAction.MaxCooldown)).Any()
                 );

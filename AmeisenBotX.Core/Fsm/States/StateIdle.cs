@@ -2,10 +2,10 @@
 using AmeisenBotX.Common.Utils;
 using AmeisenBotX.Core.Common;
 using AmeisenBotX.Core.Data.Objects;
+using AmeisenBotX.Core.Engines.Movement.Enums;
 using AmeisenBotX.Core.Fsm.Enums;
 using AmeisenBotX.Core.Fsm.States.Idle;
 using AmeisenBotX.Core.Fsm.States.Idle.Actions;
-using AmeisenBotX.Core.Movement.Enums;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -231,7 +231,7 @@ namespace AmeisenBotX.Core.Fsm.States
 
         private bool HandleAutoQuestMode(WowUnit wowPlayer)
         {
-            WowUnit possibleQuestgiver = Bot.Objects.GetWowObjectByGuid<WowUnit>(wowPlayer.TargetGuid);
+            WowUnit possibleQuestgiver = Bot.GetWowObjectByGuid<WowUnit>(wowPlayer.TargetGuid);
 
             if (possibleQuestgiver != null && (possibleQuestgiver.IsQuestgiver || possibleQuestgiver.IsGossip))
             {

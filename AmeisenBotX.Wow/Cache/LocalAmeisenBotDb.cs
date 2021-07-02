@@ -31,12 +31,11 @@ namespace AmeisenBotX.Wow.Cache
             CleanupTimer = new Timer(CleanupTimerTick, null, 0, 6000);
         }
 
-        public LocalAmeisenBotDb(IMemoryApi memoryApi, IOffsetList offsetList, Func<int, string> getSpellnameFunc, Func<IntPtr, IntPtr, WowUnitReaction> getUnitReactionFunc)
+        public LocalAmeisenBotDb(IMemoryApi memoryApi, IOffsetList offsetList, IWowInterface wowInterface)
         {
             MemoryApi = memoryApi;
             OffsetList = offsetList;
-            GetSpellnameFunc = getSpellnameFunc;
-            GetUnitReactionFunc = getUnitReactionFunc;
+            Wow = wowInterface;
 
             CombatLogSubject = new BasicCombatLogEntrySubject();
             Clear();
@@ -64,15 +63,13 @@ namespace AmeisenBotX.Wow.Cache
 
         private Timer CleanupTimer { get; }
 
-        private Func<int, string> GetSpellnameFunc { get; set; }
-
-        private Func<IntPtr, IntPtr, WowUnitReaction> GetUnitReactionFunc { get; set; }
-
-        private IOffsetList OffsetList { get; set; }
+        private IWowInterface Wow { get; set; }
 
         private IMemoryApi MemoryApi { get; set; }
 
-        public static LocalAmeisenBotDb FromJson(string dbFile, IMemoryApi memoryApi, IOffsetList offsetList, Func<int, string> getSpellnameFunc, Func<IntPtr, IntPtr, WowUnitReaction> getUnitReactionFunc)
+        private IOffsetList OffsetList { get; set; }
+
+        public static LocalAmeisenBotDb FromJson(string dbFile, IMemoryApi memoryApi, IOffsetList offsetList, IWowInterface wowInterface)
         {
             if (!Directory.Exists(Path.GetDirectoryName(dbFile)))
             {
@@ -87,8 +84,7 @@ namespace AmeisenBotX.Wow.Cache
                     LocalAmeisenBotDb db = JsonConvert.DeserializeObject<LocalAmeisenBotDb>(File.ReadAllText(dbFile));
                     db.MemoryApi = memoryApi;
                     db.OffsetList = offsetList;
-                    db.GetSpellnameFunc = getSpellnameFunc;
-                    db.GetUnitReactionFunc = getUnitReactionFunc;
+                    db.Wow = wowInterface;
                     return db;
                 }
                 catch (Exception ex)
@@ -97,7 +93,7 @@ namespace AmeisenBotX.Wow.Cache
                 }
             }
 
-            return new(memoryApi, offsetList, getSpellnameFunc, getUnitReactionFunc);
+            return new(memoryApi, offsetList, wowInterface);
         }
 
         public IReadOnlyDictionary<int, List<Vector3>> AllBlacklistNodes()
@@ -253,7 +249,7 @@ namespace AmeisenBotX.Wow.Cache
             }
             else
             {
-                WowUnitReaction reaction = GetUnitReactionFunc(a.BaseAddress, b.BaseAddress);
+                WowUnitReaction reaction = Wow.WowGetReaction(a.BaseAddress, b.BaseAddress);
                 CacheReaction(a.FactionTemplate, b.FactionTemplate, reaction);
                 return reaction;
             }
@@ -267,7 +263,7 @@ namespace AmeisenBotX.Wow.Cache
             }
             else
             {
-                string name = GetSpellnameFunc(spellId);
+                string name = Wow.LuaGetSpellNameById(spellId);
                 CacheSpellName(spellId, name);
                 return name;
             }

@@ -1,5 +1,4 @@
-﻿using AmeisenBotX.Core.Character.Inventory.Enums;
-using AmeisenBotX.Core.Character.Inventory.Objects;
+﻿using AmeisenBotX.Core.Engines.Character.Inventory.Objects;
 using AmeisenBotX.Wow.Objects.Enums;
 using System;
 using System.Linq;

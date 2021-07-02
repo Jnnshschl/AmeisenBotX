@@ -1,8 +1,7 @@
 ﻿using AmeisenBotX.Common.Math;
-using AmeisenBotX.Core.Character.Inventory.Enums;
-using AmeisenBotX.Core.Character.Inventory.Objects;
 using AmeisenBotX.Core.Data.Objects;
-using AmeisenBotX.Core.Movement.Enums;
+using AmeisenBotX.Core.Engines.Character.Inventory.Objects;
+using AmeisenBotX.Core.Engines.Movement.Enums;
 using AmeisenBotX.Wow.Cache.Enums;
 using AmeisenBotX.Wow.Objects.Enums;
 using System;

@@ -5,9 +5,9 @@ using AmeisenBotX.Common.Math;
 using AmeisenBotX.Common.Utils;
 using AmeisenBotX.Core.Common;
 using AmeisenBotX.Core.Data.Objects;
+using AmeisenBotX.Core.Engines.Movement.Enums;
 using AmeisenBotX.Core.Fsm.Enums;
 using AmeisenBotX.Core.Fsm.States.StaticDeathRoutes;
-using AmeisenBotX.Core.Movement.Enums;
 using AmeisenBotX.Wow.Objects.Enums;
 using System;
 using System.Collections.Generic;
@@ -80,7 +80,7 @@ namespace AmeisenBotX.Core.Fsm.States
 
         private IEnumerable<WowGameobject> NearPortals { get; set; }
 
-        private WowPlayer PlayerToFollow => Bot.Objects.GetWowObjectByGuid<WowPlayer>(playerToFollowGuid);
+        private WowPlayer PlayerToFollow => Bot.GetWowObjectByGuid<WowPlayer>(playerToFollowGuid);
 
         private bool SearchedStaticRoutes { get; set; }
 

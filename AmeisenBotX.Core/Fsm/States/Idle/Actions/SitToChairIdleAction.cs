@@ -1,6 +1,6 @@
 ﻿using AmeisenBotX.Common.Math;
 using AmeisenBotX.Core.Data.Objects;
-using AmeisenBotX.Core.Movement.Enums;
+using AmeisenBotX.Core.Engines.Movement.Enums;
 using AmeisenBotX.Wow.Objects.Enums;
 using System.Linq;
 

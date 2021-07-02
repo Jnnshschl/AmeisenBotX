@@ -1,12 +1,12 @@
 ﻿using AmeisenBotX.Common.Math;
 using AmeisenBotX.Common.Utils;
 using AmeisenBotX.Core.Data.Objects;
+using AmeisenBotX.Core.Engines.Movement.Enums;
+using AmeisenBotX.Core.Engines.Tactic.Bosses.Naxxramas10;
+using AmeisenBotX.Core.Engines.Tactic.Bosses.TheObsidianDungeon;
+using AmeisenBotX.Core.Engines.Tactic.Dungeon.ForgeOfSouls;
+using AmeisenBotX.Core.Engines.Tactic.Dungeon.PitOfSaron;
 using AmeisenBotX.Core.Fsm.Enums;
-using AmeisenBotX.Core.Movement.Enums;
-using AmeisenBotX.Core.Tactic.Bosses.Naxxramas10;
-using AmeisenBotX.Core.Tactic.Bosses.TheObsidianDungeon;
-using AmeisenBotX.Core.Tactic.Dungeon.ForgeOfSouls;
-using AmeisenBotX.Core.Tactic.Dungeon.PitOfSaron;
 using AmeisenBotX.Wow.Objects.Enums;
 using System;
 using System.Collections.Generic;
@@ -42,7 +42,7 @@ namespace AmeisenBotX.Core.Fsm.States
             if (!(Bot.Globals.ForceCombat
                 || Bot.Player.IsInCombat
                 || StateMachine.IsAnyPartymemberInCombat()
-                || Bot.Objects.GetEnemiesInCombatWithParty<WowUnit>(Bot.Db.GetReaction, Bot.Player.Position, 100.0f).Any()))
+                || Bot.GetEnemiesInCombatWithParty<WowUnit>(Bot.Player.Position, 100.0f).Any()))
             {
                 StateMachine.SetState(BotState.Idle);
                 return;
@@ -140,7 +140,7 @@ namespace AmeisenBotX.Core.Fsm.States
         {
             if (Bot.Objects.IsTargetInLineOfSight)
             {
-                return Bot.Movement.SetMovementAction(MovementAction.Move, Bot.Objects.MeanGroupPosition);
+                return Bot.Movement.SetMovementAction(MovementAction.Move, Bot.Objects.CenterPartyPosition);
             }
             else
             {
@@ -165,7 +165,7 @@ namespace AmeisenBotX.Core.Fsm.States
             if (target == null)
             {
                 // just move to our group
-                return Bot.Movement.SetMovementAction(MovementAction.Move, Bot.Objects.MeanGroupPosition);
+                return Bot.Movement.SetMovementAction(MovementAction.Move, Bot.Objects.CenterPartyPosition);
             }
             else if (Bot.CombatClass != null)
             {

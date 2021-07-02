@@ -116,6 +116,8 @@ namespace AmeisenBotX.Wow335a.Hook
         /// </summary>
         private IntPtr IntShouldExecute { get; set; }
 
+        private IMemoryApi Memory { get; }
+
         private ObjectManager ObjectManager { get; }
 
         private IOffsetList OffsetList { get; }
@@ -157,8 +159,6 @@ namespace AmeisenBotX.Wow335a.Hook
         /// The address of the EndScene function of wow.
         /// </summary>
         private IntPtr WowEndSceneAddress { get; set; }
-
-        private IMemoryApi Memory { get; }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public void BotOverrideWorldLoadedCheck(bool status)

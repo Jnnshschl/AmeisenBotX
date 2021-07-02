@@ -2,7 +2,7 @@
 
 namespace AmeisenBotX.Wow.Cache.Structs
 {
-    public struct StaticVendor : ILikeUnit
+    public record StaticVendor : ILikeUnit
     {
         public StaticVendor(int entry, int mapId, float posX, float posY, float posZ, bool ammo, bool food, bool poison, bool reagent, bool repairer, bool likesHorde, bool likesAlliance)
         {

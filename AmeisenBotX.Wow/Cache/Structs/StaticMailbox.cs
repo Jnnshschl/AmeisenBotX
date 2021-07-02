@@ -2,7 +2,7 @@
 
 namespace AmeisenBotX.Wow.Cache.Structs
 {
-    public struct StaticMailbox : ILikeUnit
+    public record StaticMailbox : ILikeUnit
     {
         public StaticMailbox(int entry, int mapId, float posX, float posY, float posZ, bool likesHorde, bool likesAlliance)
         {

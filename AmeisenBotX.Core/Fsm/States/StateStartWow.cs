@@ -1,6 +1,5 @@
 ﻿using AmeisenBotX.Core.Fsm.Enums;
 using AmeisenBotX.Logging;
-using AmeisenBotX.Memory;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;

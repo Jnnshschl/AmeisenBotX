@@ -1,34 +1,34 @@
 ﻿using AmeisenBotX.Common.Math;
 using AmeisenBotX.Common.Utils;
-using AmeisenBotX.Core.Battleground;
-using AmeisenBotX.Core.Battleground.einTyp;
-using AmeisenBotX.Core.Battleground.Jannis;
-using AmeisenBotX.Core.Battleground.KamelBG;
-using AmeisenBotX.Core.Character;
-using AmeisenBotX.Core.Character.Inventory;
-using AmeisenBotX.Core.Character.Inventory.Objects;
-using AmeisenBotX.Core.Chat;
-using AmeisenBotX.Core.Combat.Classes;
-using AmeisenBotX.Core.Dungeon;
-using AmeisenBotX.Core.Event;
+using AmeisenBotX.Core.Engines.Battleground;
+using AmeisenBotX.Core.Engines.Battleground.einTyp;
+using AmeisenBotX.Core.Engines.Battleground.Jannis;
+using AmeisenBotX.Core.Engines.Battleground.KamelBG;
+using AmeisenBotX.Core.Engines.Character;
+using AmeisenBotX.Core.Engines.Character.Inventory;
+using AmeisenBotX.Core.Engines.Character.Inventory.Objects;
+using AmeisenBotX.Core.Engines.Chat;
+using AmeisenBotX.Core.Engines.Combat.Classes;
+using AmeisenBotX.Core.Engines.Dungeon;
+using AmeisenBotX.Core.Engines.Event;
+using AmeisenBotX.Core.Engines.Grinding;
+using AmeisenBotX.Core.Engines.Grinding.Profiles;
+using AmeisenBotX.Core.Engines.Grinding.Profiles.Profiles.Alliance.Group;
+using AmeisenBotX.Core.Engines.Jobs;
+using AmeisenBotX.Core.Engines.Jobs.Profiles;
+using AmeisenBotX.Core.Engines.Jobs.Profiles.Gathering;
+using AmeisenBotX.Core.Engines.Jobs.Profiles.Gathering.Jannis;
+using AmeisenBotX.Core.Engines.Movement.AMovementEngine;
+using AmeisenBotX.Core.Engines.Movement.Pathfinding;
+using AmeisenBotX.Core.Engines.Quest;
+using AmeisenBotX.Core.Engines.Quest.Profiles;
+using AmeisenBotX.Core.Engines.Quest.Profiles.Shino;
+using AmeisenBotX.Core.Engines.Quest.Profiles.StartAreas;
+using AmeisenBotX.Core.Engines.Tactic;
 using AmeisenBotX.Core.Fsm;
 using AmeisenBotX.Core.Fsm.Enums;
 using AmeisenBotX.Core.Fsm.States;
-using AmeisenBotX.Core.Grinding;
-using AmeisenBotX.Core.Grinding.Profiles;
-using AmeisenBotX.Core.Grinding.Profiles.Profiles.Alliance.Group;
 using AmeisenBotX.Core.Hook.Modules;
-using AmeisenBotX.Core.Jobs;
-using AmeisenBotX.Core.Jobs.Profiles;
-using AmeisenBotX.Core.Jobs.Profiles.Gathering;
-using AmeisenBotX.Core.Jobs.Profiles.Gathering.Jannis;
-using AmeisenBotX.Core.Movement.AMovementEngine;
-using AmeisenBotX.Core.Movement.Pathfinding;
-using AmeisenBotX.Core.Quest;
-using AmeisenBotX.Core.Quest.Profiles;
-using AmeisenBotX.Core.Quest.Profiles.Shino;
-using AmeisenBotX.Core.Quest.Profiles.StartAreas;
-using AmeisenBotX.Core.Tactic;
 using AmeisenBotX.Logging;
 using AmeisenBotX.Logging.Enums;
 using AmeisenBotX.Memory;
@@ -121,96 +121,29 @@ namespace AmeisenBotX.Core
                 }
             };
 
-            // lua variable names for the event hook
-            string staticPopupsVarName = BotUtils.FastRandomStringOnlyLetters();
-            string battlegroundStatusVarName = BotUtils.FastRandomStringOnlyLetters();
-            string handlerName = BotUtils.FastRandomStringOnlyLetters();
-            string tableName = BotUtils.FastRandomStringOnlyLetters();
-            string eventHookOutput = BotUtils.FastRandomStringOnlyLetters();
-            string eventHookFrameName = BotUtils.FastRandomStringOnlyLetters();
-
-            string oldPoupString = string.Empty;
-            string oldBattlegroundStatus = string.Empty;
-
+            // add hook modules here, they are used to execute assembly on every tick
             List<IHookModule> hookModules = new()
             {
                 // module that does a traceline in front of the character
                 // to detect small obstacles that can be jumped over.
-                jumpModule,
-
-                // module to process wows events.
-                new RunLuaHookModule
-                (
-                    (x) => { if (Bot.Memory.ReadString(x, Encoding.UTF8, out string s, 8192) && !string.IsNullOrWhiteSpace(s)) { Bot.Events?.OnEventPush(s); } },
-                    null,
-                    Bot.Memory,
-                    Bot.Offsets,
-                    $"{eventHookOutput}='['function {handlerName}(self,a,...)table.insert({tableName},{{time(),a,{{...}}}})end if {eventHookFrameName}==nil then {tableName}={{}}{eventHookFrameName}=CreateFrame(\"FRAME\"){eventHookFrameName}:SetScript(\"OnEvent\",{handlerName})else for b,c in pairs({tableName})do {eventHookOutput}={eventHookOutput}..'{{'for d,e in pairs(c)do if type(e)==\"table\"then {eventHookOutput}={eventHookOutput}..'\"args\": ['for f,g in pairs(e)do {eventHookOutput}={eventHookOutput}..'\"'..g..'\"'if f<=table.getn(e)then {eventHookOutput}={eventHookOutput}..','end end {eventHookOutput}={eventHookOutput}..']}}'if b<table.getn({tableName})then {eventHookOutput}={eventHookOutput}..','end else if type(e)==\"string\"then {eventHookOutput}={eventHookOutput}..'\"event\": \"'..e..'\",'else {eventHookOutput}={eventHookOutput}..'\"time\": \"'..e..'\",'end end end end end {eventHookOutput}={eventHookOutput}..']'{tableName}={{}}",
-                    eventHookOutput
-                ),
-
-                // module that monitors the STATIC_POPUP windows.
-                new RunLuaHookModule
-                (
-                    (x) =>
-                    {
-                        if (Bot.Memory.ReadString(x, Encoding.UTF8, out string s, 128)
-                            && !string.IsNullOrWhiteSpace(s))
-                        {
-                            if (!oldPoupString.Equals(s))
-                            {
-                                AmeisenLogger.I.Log("StaticPopups", s);
-                                oldPoupString = s;
-                            }
-                        }
-                        else
-                        {
-                            oldPoupString = string.Empty;
-                        }
-                    },
-                    null,
-                    Bot.Memory,
-                    Bot.Offsets,
-                    $"{staticPopupsVarName}=\"\"for b=1,STATICPOPUP_NUMDIALOGS do local c=_G[\"StaticPopup\"..b]if c:IsShown()then {staticPopupsVarName}={staticPopupsVarName}..b..\":\"..c.which..\"; \"end end",
-                    staticPopupsVarName
-                ),
-
-                // module to monitor the battleground (and queue) status.
-                new RunLuaHookModule
-                (
-                    (x) =>
-                    {
-                        if (Bot.Memory.ReadString(x, Encoding.UTF8, out string s, 128)
-                            && !string.IsNullOrWhiteSpace(s))
-                        {
-                            if (!oldBattlegroundStatus.Equals(s))
-                            {
-                                AmeisenLogger.I.Log("BgStatus", s);
-                                oldBattlegroundStatus = s;
-                            }
-                        }
-                        else
-                        {
-                            oldPoupString = string.Empty;
-                        }
-                    },
-                    null,
-                    Bot.Memory,
-                    Bot.Offsets,
-                    $"{battlegroundStatusVarName}=\"\"for b=1,MAX_BATTLEFIELD_QUEUES do local c,d,e,f,g,h=GetBattlefieldStatus(b)local i=GetBattlefieldTimeWaited(b)/1000;{battlegroundStatusVarName}={battlegroundStatusVarName}..b..\":\"..tostring(c or\"unknown\")..\":\"..tostring(d or\"unknown\")..\":\"..tostring(e or\"unknown\")..\":\"..tostring(f or\"unknown\")..\":\"..tostring(g or\"unknown\")..\":\"..tostring(h or\"unknown\")..\":\"..tostring(i or\"unknown\")..\";\"end",
-                    battlegroundStatusVarName
-                ),
+                jumpModule
             };
 
+            string eventHookFrameName = BotUtils.FastRandomStringOnlyLetters();
+
             // load the wow specific interface
-            Bot.Wow = new WowInterface335a(Bot.Memory, Bot.Offsets, hookModules);
+            Bot.Wow = new WowInterface335a(Bot.Memory, Bot.Offsets, hookModules, eventHookFrameName);
+            Bot.Wow.OnStaticPopup += OnStaticPopup;
+            Bot.Wow.OnBattlegroundStatus += OnBattlegroundStatusChanged;
 
             Bot.Events = new DefaultEventManager(Bot.Wow, eventHookFrameName);
+            Bot.Wow.OnEventPush += Bot.Events.OnEventPush;
+
             Bot.Character = new DefaultCharacterManager(Bot.Wow, Bot.Memory, Bot.Offsets);
 
             string dbPath = Path.Combine(DataFolder, "db.json");
             AmeisenLogger.I.Log("AmeisenBot", $"Loading DB from: {dbPath}", LogLevel.Master);
-            Bot.Db = LocalAmeisenBotDb.FromJson(dbPath, Bot.Memory, Bot.Offsets, Bot.Wow.LuaGetSpellNameById, Bot.Wow.WowGetReaction);
+            Bot.Db = LocalAmeisenBotDb.FromJson(dbPath, Bot.Memory, Bot.Offsets, Bot.Wow);
 
             Bot.CombatLog = new DefaultCombatLogParser(Bot.Db);
 
@@ -527,49 +460,49 @@ namespace AmeisenBotX.Core
             // add combat classes here
             CombatClasses = new List<ICombatClass>()
             {
-                new Combat.Classes.Jannis.DeathknightBlood(Bot, StateMachine),
-                new Combat.Classes.Jannis.DeathknightFrost(Bot, StateMachine),
-                new Combat.Classes.Jannis.DeathknightUnholy(Bot, StateMachine),
-                new Combat.Classes.Jannis.DruidBalance(Bot, StateMachine),
-                new Combat.Classes.Jannis.DruidFeralBear(Bot, StateMachine),
-                new Combat.Classes.Jannis.DruidFeralCat(Bot, StateMachine),
-                new Combat.Classes.Jannis.DruidRestoration(Bot, StateMachine),
-                new Combat.Classes.Jannis.HunterBeastmastery(Bot, StateMachine),
-                new Combat.Classes.Jannis.HunterMarksmanship(Bot, StateMachine),
-                new Combat.Classes.Jannis.HunterSurvival(Bot, StateMachine),
-                new Combat.Classes.Jannis.MageArcane(Bot, StateMachine),
-                new Combat.Classes.Jannis.MageFire(Bot, StateMachine),
-                new Combat.Classes.Jannis.PaladinHoly(Bot, StateMachine),
-                new Combat.Classes.Jannis.PaladinProtection(Bot, StateMachine),
-                new Combat.Classes.Jannis.PaladinRetribution(Bot, StateMachine),
-                new Combat.Classes.Jannis.PriestDiscipline(Bot, StateMachine),
-                new Combat.Classes.Jannis.PriestHoly(Bot, StateMachine),
-                new Combat.Classes.Jannis.PriestShadow(Bot, StateMachine),
-                new Combat.Classes.Jannis.RogueAssassination(Bot, StateMachine),
-                new Combat.Classes.Jannis.ShamanElemental(Bot, StateMachine),
-                new Combat.Classes.Jannis.ShamanEnhancement(Bot, StateMachine),
-                new Combat.Classes.Jannis.ShamanRestoration(Bot, StateMachine),
-                new Combat.Classes.Jannis.WarlockAffliction(Bot, StateMachine),
-                new Combat.Classes.Jannis.WarlockDemonology(Bot, StateMachine),
-                new Combat.Classes.Jannis.WarlockDestruction(Bot, StateMachine),
-                new Combat.Classes.Jannis.WarriorArms(Bot, StateMachine),
-                new Combat.Classes.Jannis.WarriorFury(Bot, StateMachine),
-                new Combat.Classes.Jannis.WarriorProtection(Bot, StateMachine),
-                new Combat.Classes.Kamel.DeathknightBlood(Bot),
-                new Combat.Classes.Kamel.RestorationShaman(Bot),
-                new Combat.Classes.Kamel.ShamanEnhancement(Bot),
-                new Combat.Classes.Kamel.PaladinProtection(Bot),
-                new Combat.Classes.Kamel.PriestHoly(Bot),
-                new Combat.Classes.Kamel.WarriorFury(Bot),
-                new Combat.Classes.Kamel.WarriorArms(Bot),
-                new Combat.Classes.Kamel.RogueAssassination(Bot),
-                new Combat.Classes.einTyp.PaladinProtection(Bot),
-                new Combat.Classes.einTyp.RogueAssassination(Bot),
-                new Combat.Classes.einTyp.WarriorArms(Bot),
-                new Combat.Classes.einTyp.WarriorFury(Bot),
-                new Combat.Classes.ToadLump.Rogue(Bot, StateMachine),
-                new Combat.Classes.Shino.PriestShadow(Bot, StateMachine),
-                new Combat.Classes.Shino.MageFrost(Bot, StateMachine),
+                new Engines.Combat.Classes.Jannis.DeathknightBlood(Bot, StateMachine),
+                new Engines.Combat.Classes.Jannis.DeathknightFrost(Bot, StateMachine),
+                new Engines.Combat.Classes.Jannis.DeathknightUnholy(Bot, StateMachine),
+                new Engines.Combat.Classes.Jannis.DruidBalance(Bot, StateMachine),
+                new Engines.Combat.Classes.Jannis.DruidFeralBear(Bot, StateMachine),
+                new Engines.Combat.Classes.Jannis.DruidFeralCat(Bot, StateMachine),
+                new Engines.Combat.Classes.Jannis.DruidRestoration(Bot, StateMachine),
+                new Engines.Combat.Classes.Jannis.HunterBeastmastery(Bot, StateMachine),
+                new Engines.Combat.Classes.Jannis.HunterMarksmanship(Bot, StateMachine),
+                new Engines.Combat.Classes.Jannis.HunterSurvival(Bot, StateMachine),
+                new Engines.Combat.Classes.Jannis.MageArcane(Bot, StateMachine),
+                new Engines.Combat.Classes.Jannis.MageFire(Bot, StateMachine),
+                new Engines.Combat.Classes.Jannis.PaladinHoly(Bot, StateMachine),
+                new Engines.Combat.Classes.Jannis.PaladinProtection(Bot, StateMachine),
+                new Engines.Combat.Classes.Jannis.PaladinRetribution(Bot, StateMachine),
+                new Engines.Combat.Classes.Jannis.PriestDiscipline(Bot, StateMachine),
+                new Engines.Combat.Classes.Jannis.PriestHoly(Bot, StateMachine),
+                new Engines.Combat.Classes.Jannis.PriestShadow(Bot, StateMachine),
+                new Engines.Combat.Classes.Jannis.RogueAssassination(Bot, StateMachine),
+                new Engines.Combat.Classes.Jannis.ShamanElemental(Bot, StateMachine),
+                new Engines.Combat.Classes.Jannis.ShamanEnhancement(Bot, StateMachine),
+                new Engines.Combat.Classes.Jannis.ShamanRestoration(Bot, StateMachine),
+                new Engines.Combat.Classes.Jannis.WarlockAffliction(Bot, StateMachine),
+                new Engines.Combat.Classes.Jannis.WarlockDemonology(Bot, StateMachine),
+                new Engines.Combat.Classes.Jannis.WarlockDestruction(Bot, StateMachine),
+                new Engines.Combat.Classes.Jannis.WarriorArms(Bot, StateMachine),
+                new Engines.Combat.Classes.Jannis.WarriorFury(Bot, StateMachine),
+                new Engines.Combat.Classes.Jannis.WarriorProtection(Bot, StateMachine),
+                new Engines.Combat.Classes.Kamel.DeathknightBlood(Bot),
+                new Engines.Combat.Classes.Kamel.RestorationShaman(Bot),
+                new Engines.Combat.Classes.Kamel.ShamanEnhancement(Bot),
+                new Engines.Combat.Classes.Kamel.PaladinProtection(Bot),
+                new Engines.Combat.Classes.Kamel.PriestHoly(Bot),
+                new Engines.Combat.Classes.Kamel.WarriorFury(Bot),
+                new Engines.Combat.Classes.Kamel.WarriorArms(Bot),
+                new Engines.Combat.Classes.Kamel.RogueAssassination(Bot),
+                new Engines.Combat.Classes.einTyp.PaladinProtection(Bot),
+                new Engines.Combat.Classes.einTyp.RogueAssassination(Bot),
+                new Engines.Combat.Classes.einTyp.WarriorArms(Bot),
+                new Engines.Combat.Classes.einTyp.WarriorFury(Bot),
+                new Engines.Combat.Classes.ToadLump.Rogue(Bot, StateMachine),
+                new Engines.Combat.Classes.Shino.PriestShadow(Bot, StateMachine),
+                new Engines.Combat.Classes.Shino.MageFrost(Bot, StateMachine),
             };
         }
 
@@ -683,6 +616,11 @@ namespace AmeisenBotX.Core
 
                 Bot.Character.Inventory.Update();
             }
+        }
+
+        private void OnBattlegroundStatusChanged(string s)
+        {
+            AmeisenLogger.I.Log("AmeisenBot", $"OnBattlegroundStatusChanged: {s}");
         }
 
         private void OnConfirmBindOnPickup(long timestamp, List<string> args)
@@ -824,6 +762,11 @@ namespace AmeisenBotX.Core
             {
                 Bot.Wow.LuaDoString("AcceptQuest();");
             }
+        }
+
+        private void OnStaticPopup(string s)
+        {
+            AmeisenLogger.I.Log("AmeisenBot", $"OnStaticPopup: {s}");
         }
 
         private void OnSummonRequest(long timestamp, List<string> args)

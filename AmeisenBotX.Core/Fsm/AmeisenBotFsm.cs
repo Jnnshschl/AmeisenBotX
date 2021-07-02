@@ -5,7 +5,6 @@ using AmeisenBotX.Core.Fsm.Enums;
 using AmeisenBotX.Core.Fsm.States;
 using AmeisenBotX.Logging;
 using AmeisenBotX.Logging.Enums;
-using AmeisenBotX.Memory;
 using AmeisenBotX.Wow.Objects.Enums;
 using System;
 using System.Collections.Generic;
@@ -152,7 +151,7 @@ namespace AmeisenBotX.Core.Fsm
                                 && !Bot.Globals.IgnoreCombat
                                 && !(Config.IgnoreCombatWhileMounted && Bot.Player.IsMounted)
                                 && (Bot.Globals.ForceCombat || Bot.Player.IsInCombat || IsAnyPartymemberInCombat()
-                                || Bot.Objects.GetEnemiesInCombatWithParty<WowUnit>(Bot.Db.GetReaction, Bot.Player.Position, 100.0f).Any()))
+                                || Bot.GetEnemiesInCombatWithParty<WowUnit>(Bot.Player.Position, 100.0f).Any()))
                             {
                                 if (SetState(BotState.Attacking, true))
                                 {

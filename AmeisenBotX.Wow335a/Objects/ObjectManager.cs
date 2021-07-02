@@ -44,6 +44,9 @@ namespace AmeisenBotX.Wow335a.Objects
         ///<inheritdoc cref="IObjectProvider.Camera"/>
         public RawCameraInfo Camera { get; private set; }
 
+        ///<inheritdoc cref="IObjectProvider.CenterPartyPosition"/>
+        public Vector3 CenterPartyPosition { get; private set; }
+
         ///<inheritdoc cref="IObjectProvider.GameState"/>
         public string GameState { get; private set; }
 
@@ -61,9 +64,6 @@ namespace AmeisenBotX.Wow335a.Objects
 
         ///<inheritdoc cref="IObjectProvider.MapId"/>
         public WowMapId MapId { get; private set; }
-
-        ///<inheritdoc cref="IObjectProvider.MeanGroupPosition"/>
-        public Vector3 MeanGroupPosition { get; private set; }
 
         ///<inheritdoc cref="IObjectProvider.ObjectCount"/>
         public int ObjectCount { get; set; }
@@ -122,11 +122,11 @@ namespace AmeisenBotX.Wow335a.Objects
         ///<inheritdoc cref="IObjectProvider.ZoneSubName"/>
         public string ZoneSubName { get; private set; }
 
+        private IMemoryApi MemoryApi { get; }
+
         private IOffsetList OffsetList { get; }
 
         private bool PlayerGuidIsVehicle { get; set; }
-
-        private IMemoryApi MemoryApi { get; }
 
         /// <summary>
         /// Process the pushed game info that we receive from the EndScene hook.

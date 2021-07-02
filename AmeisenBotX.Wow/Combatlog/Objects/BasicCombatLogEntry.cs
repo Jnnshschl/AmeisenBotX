@@ -6,7 +6,7 @@ using System.Globalization;
 namespace AmeisenBotX.Wow.Combatlog.Objects
 {
     [Serializable]
-    public class BasicCombatLogEntry
+    public record BasicCombatLogEntry
     {
         public List<string> Args { get; set; }
 

@@ -1,5 +1,4 @@
-﻿using AmeisenBotX.Memory;
-using GameOverlay.Drawing;
+﻿using GameOverlay.Drawing;
 using GameOverlay.Windows;
 using System;
 using System.Collections.Generic;

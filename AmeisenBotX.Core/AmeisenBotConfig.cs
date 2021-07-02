@@ -1,4 +1,4 @@
-﻿using AmeisenBotX.Core.Movement.Settings;
+﻿using AmeisenBotX.Core.Engines.Movement.Settings;
 using AmeisenBotX.Memory.Win32;
 using Newtonsoft.Json;
 using System;

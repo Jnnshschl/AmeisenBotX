@@ -53,12 +53,12 @@ namespace AmeisenBotX.Memory
         /// <returns>True if allocation was successful, false if not</returns>
         public bool AllocateMemory(uint size, out IntPtr address);
 
-        public void FocusWindow(IntPtr windowHandle, Rect rect, bool resizeWindow = true);
-
         /// <summary>
         /// Disposes XMemory and frees all memory allocated by it.
         /// </summary>
         public new void Dispose();
+
+        public void FocusWindow(IntPtr windowHandle, Rect rect, bool resizeWindow = true);
 
         /// <summary>
         /// Frees all allocated memory in the process.

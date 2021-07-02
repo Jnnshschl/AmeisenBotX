@@ -37,7 +37,7 @@ namespace AmeisenBotX.Core.Fsm.States
                     if (Bot.Player.HealthPercentage >= 95.0
                         && Bot.Player.ManaPercentage >= 95.0
                         && (Bot.Objects.Partyleader.Guid == 0
-                            || Bot.Player.Position.GetDistance(Bot.Objects.MeanGroupPosition) < 30.0f))
+                            || Bot.Player.Position.GetDistance(Bot.Objects.CenterPartyPosition) < 30.0f))
                     {
                         // exit if we are near full hp and power
                         StateMachine.SetState(BotState.Idle);
@@ -50,7 +50,7 @@ namespace AmeisenBotX.Core.Fsm.States
                 {
                     if (Bot.Player.HealthPercentage >= 95.0
                         && (Bot.Objects.Partyleader.Guid == 0
-                            || Bot.Player.Position.GetDistance(Bot.Objects.MeanGroupPosition) < 30.0f))
+                            || Bot.Player.Position.GetDistance(Bot.Objects.CenterPartyPosition) < 30.0f))
                     {
                         // exit if we are near full hp
                         StateMachine.SetState(BotState.Idle);
@@ -63,7 +63,7 @@ namespace AmeisenBotX.Core.Fsm.States
                 {
                     if (Bot.Player.ManaPercentage >= 95.0
                         && (Bot.Objects.Partyleader.Guid == 0
-                            || Bot.Player.Position.GetDistance(Bot.Objects.MeanGroupPosition) < 30.0f))
+                            || Bot.Player.Position.GetDistance(Bot.Objects.CenterPartyPosition) < 30.0f))
                     {
                         // exit if we are near full power
                         StateMachine.SetState(BotState.Idle);
@@ -129,7 +129,7 @@ namespace AmeisenBotX.Core.Fsm.States
         internal bool NeedToEat()
         {
             return Bot.Objects.Partyleader != null
-                && ((Bot.Objects.Partyleader.Guid == 0 || Bot.Player.Position.GetDistance(Bot.Objects.MeanGroupPosition) < 30.0f)
+                && ((Bot.Objects.Partyleader.Guid == 0 || Bot.Player.Position.GetDistance(Bot.Objects.CenterPartyPosition) < 30.0f)
                     && (Bot.Player.HealthPercentage < Config.EatUntilPercent
                              && Bot.Player.HealthPercentage < 95.0
                              && Bot.Player.ManaPercentage < Config.DrinkUntilPercent

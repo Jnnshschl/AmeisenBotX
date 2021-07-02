@@ -1,9 +1,8 @@
 ﻿using AmeisenBotX.Common.Utils;
-using AmeisenBotX.Core.Character.Inventory.Enums;
 using AmeisenBotX.Core.Data.Objects;
+using AmeisenBotX.Core.Engines.Movement.Enums;
 using AmeisenBotX.Core.Fsm.Enums;
 using AmeisenBotX.Core.Fsm.Routines;
-using AmeisenBotX.Core.Movement.Enums;
 using AmeisenBotX.Wow.Objects.Enums;
 using System;
 using System.Collections.Generic;

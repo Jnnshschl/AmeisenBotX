@@ -1,5 +1,6 @@
 ﻿using AmeisenBotX.Common.Math;
-using AmeisenBotX.Core.Character.Inventory.Enums;
+using AmeisenBotX.Core.Data.Objects;
+using AmeisenBotX.Wow.Cache;
 using AmeisenBotX.Wow.Objects;
 using AmeisenBotX.Wow.Objects.Enums;
 using System;
@@ -12,6 +13,23 @@ namespace AmeisenBotX.Wow
     /// </summary>
     public interface IWowInterface
     {
+        /// <summary>
+        /// Gets fired when the battleground state changes.
+        /// </summary>
+        event Action<string> OnBattlegroundStatus;
+
+        /// <summary>
+        /// Gets fired when new events are read from wow.
+        /// Format: JSON array of wow events.
+        /// </summary>
+        event Action<string> OnEventPush;
+
+        /// <summary>
+        /// Gets fired when a new static popup appears ingame.
+        /// Format: {ID}:{POPUPTYPE};... => 1:DELETE_ITEM;2:SAMPLE_POPUP;...
+        /// </summary>
+        event Action<string> OnStaticPopup;
+
         /// <summary>
         /// Used for the HookCall display in the bots main window.
         /// Use this to display cost intensive calls to the user.
@@ -27,32 +45,37 @@ namespace AmeisenBotX.Wow
         /// <summary>
         /// Shortcut to get the last targets guid.
         /// </summary>
-        public ulong LastTargetGuid => Objects.LastTarget != null ? Objects.LastTarget.Guid : 0ul;
+        public ulong LastTargetGuid => ObjectProvider.LastTarget != null ? ObjectProvider.LastTarget.Guid : 0ul;
 
         /// <summary>
         /// Use this to interact with wow's objects, units, players and more.
         /// </summary>
-        IObjectProvider Objects { get; }
+        IObjectProvider ObjectProvider { get; }
+
+        /// <summary>
+        /// Shortcut to all wow objects.
+        /// </summary>
+        IEnumerable<WowObject> Objects => ObjectProvider.WowObjects;
 
         /// <summary>
         /// Shortcut to get the current partyleaders guid.
         /// </summary>
-        public ulong PartyleaderGuid => Objects.Partyleader != null ? Objects.Partyleader.Guid : 0ul;
+        ulong PartyleaderGuid => ObjectProvider.Partyleader != null ? ObjectProvider.Partyleader.Guid : 0ul;
 
         /// <summary>
         /// Shortcut to get the current pets guid.
         /// </summary>
-        public ulong PetGuid => Objects.Pet != null ? Objects.Pet.Guid : 0ul;
+        public ulong PetGuid => ObjectProvider.Pet != null ? ObjectProvider.Pet.Guid : 0ul;
 
         /// <summary>
         /// Shortcut to get the current players guid.
         /// </summary>
-        public ulong PlayerGuid => Objects.Player != null ? Objects.Player.Guid : 0ul;
+        public ulong PlayerGuid => ObjectProvider.Player != null ? ObjectProvider.Player.Guid : 0ul;
 
         /// <summary>
         /// Shortcut to get the current targets guid.
         /// </summary>
-        public ulong TargetGuid => Objects.Target != null ? Objects.Target.Guid : 0ul;
+        public ulong TargetGuid => ObjectProvider.Target != null ? ObjectProvider.Target.Guid : 0ul;
 
         /// <summary>
         /// Dispose the wow interface making it realese and unhook all resources.

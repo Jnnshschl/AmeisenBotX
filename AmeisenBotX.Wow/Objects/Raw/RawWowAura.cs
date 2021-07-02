@@ -4,16 +4,23 @@ using System.Runtime.InteropServices;
 namespace AmeisenBotX.Wow.Objects
 {
     [StructLayout(LayoutKind.Sequential)]
-    public struct RawWowAura
+    public record RawWowAura
     {
-        public ulong Creator;
-        public int SpellId;
-        public byte Flags;
-        public byte Level;
-        public byte StackCount;
-        public byte Unknown;
-        public uint Duration;
-        public uint EndTime;
+        public ulong Creator { get; set; }
+
+        public int SpellId { get; set; }
+
+        public byte Flags { get; set; }
+
+        public byte Level { get; set; }
+
+        public byte StackCount { get; set; }
+
+        public byte Unknown { get; set; }
+
+        public uint Duration { get; set; }
+
+        public uint EndTime { get; set; }
 
         public bool IsActive => ((WowAuraFlags)Flags).HasFlag(WowAuraFlags.Active);
 

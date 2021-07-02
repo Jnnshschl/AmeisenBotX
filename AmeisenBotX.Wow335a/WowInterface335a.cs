@@ -1,6 +1,6 @@
 ﻿using AmeisenBotX.Common.Math;
 using AmeisenBotX.Common.Offsets;
-using AmeisenBotX.Core.Character.Inventory.Enums;
+using AmeisenBotX.Common.Utils;
 using AmeisenBotX.Core.Data.Objects;
 using AmeisenBotX.Core.Hook.Modules;
 using AmeisenBotX.Memory;
@@ -11,6 +11,7 @@ using AmeisenBotX.Wow335a.Hook;
 using AmeisenBotX.Wow335a.Objects;
 using System;
 using System.Collections.Generic;
+using System.Text;
 
 namespace AmeisenBotX.Wow335a
 {
@@ -19,20 +20,101 @@ namespace AmeisenBotX.Wow335a
     /// </summary>
     public class WowInterface335a : IWowInterface
     {
-        public WowInterface335a(IMemoryApi memoryApi, IOffsetList offsetList, List<IHookModule> hookModules)
+        public WowInterface335a(IMemoryApi memoryApi, IOffsetList offsetList, List<IHookModule> hookModules, string eventHookFrameName)
         {
             HookModules = hookModules;
 
+            // lua variable names for the event hook
+            string handlerName = BotUtils.FastRandomStringOnlyLetters();
+            string tableName = BotUtils.FastRandomStringOnlyLetters();
+            string eventHookOutput = BotUtils.FastRandomStringOnlyLetters();
+
+            // module to process wows events.
+            hookModules.Add(new RunLuaHookModule
+            (
+                (x) => { if (memoryApi.ReadString(x, Encoding.UTF8, out string s, 8192) && !string.IsNullOrWhiteSpace(s)) { OnEventPush?.Invoke(s); } },
+                null,
+                memoryApi,
+                offsetList,
+                $"{eventHookOutput}='['function {handlerName}(self,a,...)table.insert({tableName},{{time(),a,{{...}}}})end if {eventHookFrameName}==nil then {tableName}={{}}{eventHookFrameName}=CreateFrame(\"FRAME\"){eventHookFrameName}:SetScript(\"OnEvent\",{handlerName})else for b,c in pairs({tableName})do {eventHookOutput}={eventHookOutput}..'{{'for d,e in pairs(c)do if type(e)==\"table\"then {eventHookOutput}={eventHookOutput}..'\"args\": ['for f,g in pairs(e)do {eventHookOutput}={eventHookOutput}..'\"'..g..'\"'if f<=table.getn(e)then {eventHookOutput}={eventHookOutput}..','end end {eventHookOutput}={eventHookOutput}..']}}'if b<table.getn({tableName})then {eventHookOutput}={eventHookOutput}..','end else if type(e)==\"string\"then {eventHookOutput}={eventHookOutput}..'\"event\": \"'..e..'\",'else {eventHookOutput}={eventHookOutput}..'\"time\": \"'..e..'\",'end end end end end {eventHookOutput}={eventHookOutput}..']'{tableName}={{}}",
+                eventHookOutput
+            ));
+
+            string staticPopupsVarName = BotUtils.FastRandomStringOnlyLetters();
+            string oldPoupString = string.Empty;
+
+            // module that monitors the STATIC_POPUP windows.
+            hookModules.Add(new RunLuaHookModule
+            (
+                (x) =>
+                {
+                    if (memoryApi.ReadString(x, Encoding.UTF8, out string s, 128)
+                        && !string.IsNullOrWhiteSpace(s))
+                    {
+                        if (!oldPoupString.Equals(s))
+                        {
+                            OnStaticPopup?.Invoke(s);
+                            oldPoupString = s;
+                        }
+                    }
+                    else
+                    {
+                        oldPoupString = string.Empty;
+                    }
+                },
+                null,
+                memoryApi,
+                offsetList,
+                $"{staticPopupsVarName}=\"\"for b=1,STATICPOPUP_NUMDIALOGS do local c=_G[\"StaticPopup\"..b]if c:IsShown()then {staticPopupsVarName}={staticPopupsVarName}..b..\":\"..c.which..\"; \"end end",
+                staticPopupsVarName
+            ));
+
+            string battlegroundStatusVarName = BotUtils.FastRandomStringOnlyLetters();
+            string oldBattlegroundStatus = string.Empty;
+
+            // module to monitor the battleground (and queue) status.
+            hookModules.Add(new RunLuaHookModule
+            (
+                (x) =>
+                {
+                    if (memoryApi.ReadString(x, Encoding.UTF8, out string s, 128)
+                        && !string.IsNullOrWhiteSpace(s))
+                    {
+                        if (!oldBattlegroundStatus.Equals(s))
+                        {
+                            OnBattlegroundStatus?.Invoke(s);
+                            oldBattlegroundStatus = s;
+                        }
+                    }
+                    else
+                    {
+                        oldBattlegroundStatus = string.Empty;
+                    }
+                },
+                null,
+                memoryApi,
+                offsetList,
+                $"{battlegroundStatusVarName}=\"\"for b=1,MAX_BATTLEFIELD_QUEUES do local c,d,e,f,g,h=GetBattlefieldStatus(b)local i=GetBattlefieldTimeWaited(b)/1000;{battlegroundStatusVarName}={battlegroundStatusVarName}..b..\":\"..tostring(c or\"unknown\")..\":\"..tostring(d or\"unknown\")..\":\"..tostring(e or\"unknown\")..\":\"..tostring(f or\"unknown\")..\":\"..tostring(g or\"unknown\")..\":\"..tostring(h or\"unknown\")..\":\"..tostring(i or\"unknown\")..\";\"end",
+                battlegroundStatusVarName
+            ));
+
             ObjectManager = new(memoryApi, offsetList);
+
             Hook = new(memoryApi, offsetList, ObjectManager);
             Hook.OnGameInfoPush += ObjectManager.HookManagerOnGameInfoPush;
         }
+
+        public event Action<string> OnBattlegroundStatus;
+
+        public event Action<string> OnEventPush;
+
+        public event Action<string> OnStaticPopup;
 
         public ulong HookCallCount => Hook.HookCallCount;
 
         public bool IsReady => Hook.IsWoWHooked;
 
-        public IObjectProvider Objects => ObjectManager;
+        public IObjectProvider ObjectProvider => ObjectManager;
 
         public WowUnit Player => ObjectManager.Player;
 
@@ -47,132 +129,315 @@ namespace AmeisenBotX.Wow335a
             Hook.Unhook();
         }
 
-        public void LuaAbandonQuestsNotIn(IEnumerable<string> quests) => Hook.LuaAbandonQuestsNotIn(quests);
+        public void LuaAbandonQuestsNotIn(IEnumerable<string> quests)
+        {
+            Hook.LuaAbandonQuestsNotIn(quests);
+        }
 
-        public void LuaAcceptBattlegroundInvite() => Hook.LuaAcceptBattlegroundInvite();
+        public void LuaAcceptBattlegroundInvite()
+        {
+            Hook.LuaAcceptBattlegroundInvite();
+        }
 
-        public void LuaAcceptPartyInvite() => Hook.LuaAcceptPartyInvite();
+        public void LuaAcceptPartyInvite()
+        {
+            Hook.LuaAcceptPartyInvite();
+        }
 
-        public void LuaAcceptQuest() => Hook.LuaAcceptQuest();
+        public void LuaAcceptQuest()
+        {
+            Hook.LuaAcceptQuest();
+        }
 
-        public void LuaAcceptQuests() => Hook.LuaAcceptQuests();
+        public void LuaAcceptQuests()
+        {
+            Hook.LuaAcceptQuests();
+        }
 
-        public void LuaAcceptResurrect() => Hook.LuaAcceptResurrect();
+        public void LuaAcceptResurrect()
+        {
+            Hook.LuaAcceptResurrect();
+        }
 
-        public void LuaAcceptSummon() => Hook.LuaAcceptSummon();
+        public void LuaAcceptSummon()
+        {
+            Hook.LuaAcceptSummon();
+        }
 
-        public bool LuaAutoLootEnabled() => Hook.LuaAutoLootEnabled();
+        public bool LuaAutoLootEnabled()
+        {
+            return Hook.LuaAutoLootEnabled();
+        }
 
-        public void LuaCallCompanion(int index) => Hook.LuaCallCompanion(index);
+        public void LuaCallCompanion(int index)
+        {
+            Hook.LuaCallCompanion(index);
+        }
 
-        public void LuaCastSpell(string spellName, bool castOnSelf = false) => Hook.LuaCastSpell(spellName, castOnSelf);
+        public void LuaCastSpell(string spellName, bool castOnSelf = false)
+        {
+            Hook.LuaCastSpell(spellName, castOnSelf);
+        }
 
-        public void LuaCastSpellById(int spellId) => Hook.LuaCastSpellById(spellId);
+        public void LuaCastSpellById(int spellId)
+        {
+            Hook.LuaCastSpellById(spellId);
+        }
 
-        public void LuaClickUiElement(string uiElement) => Hook.LuaClickUiElement(uiElement);
+        public void LuaClickUiElement(string uiElement)
+        {
+            Hook.LuaClickUiElement(uiElement);
+        }
 
-        public void LuaCofirmLootRoll() => Hook.LuaCofirmLootRoll();
+        public void LuaCofirmLootRoll()
+        {
+            Hook.LuaCofirmLootRoll();
+        }
 
-        public void LuaCofirmReadyCheck(bool isReady) => Hook.LuaCofirmReadyCheck(isReady);
+        public void LuaCofirmReadyCheck(bool isReady)
+        {
+            Hook.LuaCofirmReadyCheck(isReady);
+        }
 
-        public void LuaCofirmStaticPopup() => Hook.LuaCofirmStaticPopup();
+        public void LuaCofirmStaticPopup()
+        {
+            Hook.LuaCofirmStaticPopup();
+        }
 
-        public void LuaCompleteQuest() => Hook.LuaCompleteQuest();
+        public void LuaCompleteQuest()
+        {
+            Hook.LuaCompleteQuest();
+        }
 
-        public void LuaDeleteInventoryItemByName(string name) => Hook.LuaDeleteInventoryItemByName(name);
+        public void LuaDeleteInventoryItemByName(string name)
+        {
+            Hook.LuaDeleteInventoryItemByName(name);
+        }
 
-        public void LuaDismissCompanion() => Hook.LuaDismissCompanion();
+        public void LuaDismissCompanion()
+        {
+            Hook.LuaDismissCompanion();
+        }
 
-        public bool LuaDoString(string v) => Hook.LuaDoString(v);
+        public bool LuaDoString(string v)
+        {
+            return Hook.LuaDoString(v);
+        }
 
-        public void LuaEquipItem(string itemName, int slot = -1) => Hook.LuaEquipItem(itemName, slot);
+        public void LuaEquipItem(string itemName, int slot = -1)
+        {
+            Hook.LuaEquipItem(itemName, slot);
+        }
 
-        public IEnumerable<int> LuaGetCompletedQuests() => Hook.LuaGetCompletedQuests();
+        public IEnumerable<int> LuaGetCompletedQuests()
+        {
+            return Hook.LuaGetCompletedQuests();
+        }
 
-        public string LuaGetEquipmentItems() => Hook.LuaGetEquipmentItems();
+        public string LuaGetEquipmentItems()
+        {
+            return Hook.LuaGetEquipmentItems();
+        }
 
-        public int LuaGetFreeBagSlotCount() => Hook.LuaGetFreeBagSlotCount();
+        public int LuaGetFreeBagSlotCount()
+        {
+            return Hook.LuaGetFreeBagSlotCount();
+        }
 
-        public string[] LuaGetGossipTypes() => Hook.LuaGetGossipTypes();
+        public string[] LuaGetGossipTypes()
+        {
+            return Hook.LuaGetGossipTypes();
+        }
 
-        public string LuaGetInventoryItems() => Hook.LuaGetInventoryItems();
+        public string LuaGetInventoryItems()
+        {
+            return Hook.LuaGetInventoryItems();
+        }
 
-        public string LuaGetItemJsonByNameOrLink(string itemLink) => Hook.LuaGetItemJsonByNameOrLink(itemLink);
+        public string LuaGetItemJsonByNameOrLink(string itemLink)
+        {
+            return Hook.LuaGetItemJsonByNameOrLink(itemLink);
+        }
 
-        public string LuaGetLootRollItemLink(int rollId) => Hook.LuaGetLootRollItemLink(rollId);
+        public string LuaGetLootRollItemLink(int rollId)
+        {
+            return Hook.LuaGetLootRollItemLink(rollId);
+        }
 
-        public string LuaGetMoney() => Hook.LuaGetMoney();
+        public string LuaGetMoney()
+        {
+            return Hook.LuaGetMoney();
+        }
 
-        public string LuaGetMounts() => Hook.LuaGetMounts();
+        public string LuaGetMounts()
+        {
+            return Hook.LuaGetMounts();
+        }
 
-        public bool LuaGetNumQuestLogChoices(out int numChoices) => Hook.LuaGetNumQuestLogChoices(out numChoices);
+        public bool LuaGetNumQuestLogChoices(out int numChoices)
+        {
+            return Hook.LuaGetNumQuestLogChoices(out numChoices);
+        }
 
-        public bool LuaGetQuestLogChoiceItemLink(int i, out string itemLink) => Hook.LuaGetQuestLogChoiceItemLink(i, out itemLink);
+        public bool LuaGetQuestLogChoiceItemLink(int i, out string itemLink)
+        {
+            return Hook.LuaGetQuestLogChoiceItemLink(i, out itemLink);
+        }
 
-        public bool LuaGetQuestLogIdByTitle(string name, out int questLogId) => Hook.LuaGetQuestLogIdByTitle(name, out questLogId);
+        public bool LuaGetQuestLogIdByTitle(string name, out int questLogId)
+        {
+            return Hook.LuaGetQuestLogIdByTitle(name, out questLogId);
+        }
 
-        public void LuaGetQuestReward(int i) => Hook.LuaGetQuestReward(i);
+        public void LuaGetQuestReward(int i)
+        {
+            Hook.LuaGetQuestReward(i);
+        }
 
-        public Dictionary<string, (int, int)> LuaGetSkills() => Hook.LuaGetSkills();
+        public Dictionary<string, (int, int)> LuaGetSkills()
+        {
+            return Hook.LuaGetSkills();
+        }
 
-        public double LuaGetSpellCooldown(string spellName) => Hook.LuaGetSpellCooldown(spellName);
+        public double LuaGetSpellCooldown(string spellName)
+        {
+            return Hook.LuaGetSpellCooldown(spellName);
+        }
 
-        public string LuaGetSpellNameById(int spellId) => Hook.LuaGetSpellNameById(spellId);
+        public string LuaGetSpellNameById(int spellId)
+        {
+            return Hook.LuaGetSpellNameById(spellId);
+        }
 
-        public string LuaGetSpells() => Hook.LuaGetSpells();
+        public string LuaGetSpells()
+        {
+            return Hook.LuaGetSpells();
+        }
 
-        public string LuaGetTalents() => Hook.LuaGetTalents();
+        public string LuaGetTalents()
+        {
+            return Hook.LuaGetTalents();
+        }
 
-        public (string, int) LuaGetUnitCastingInfo(WowLuaUnit target) => Hook.LuaGetUnitCastingInfo(target.ToString());
+        public (string, int) LuaGetUnitCastingInfo(WowLuaUnit target)
+        {
+            return Hook.LuaGetUnitCastingInfo(target.ToString());
+        }
 
-        public int LuaGetUnspentTalentPoints() => Hook.LuaGetUnspentTalentPoints();
+        public int LuaGetUnspentTalentPoints()
+        {
+            return Hook.LuaGetUnspentTalentPoints();
+        }
 
-        public bool LuaIsInLfgGroup() => Hook.LuaIsInLfgGroup();
+        public bool LuaIsInLfgGroup()
+        {
+            return Hook.LuaIsInLfgGroup();
+        }
 
-        public void LuaLeaveBattleground() => Hook.LuaLeaveBattleground();
+        public void LuaLeaveBattleground()
+        {
+            Hook.LuaLeaveBattleground();
+        }
 
-        public void LuaLootEveryThing() => Hook.LuaLootEveryThing();
+        public void LuaLootEveryThing()
+        {
+            Hook.LuaLootEveryThing();
+        }
 
-        public void LuaLootMoneyAndQuestItems() => Hook.LuaLootMoneyAndQuestItems();
+        public void LuaLootMoneyAndQuestItems()
+        {
+            Hook.LuaLootMoneyAndQuestItems();
+        }
 
-        public void LuaQueryQuestsCompleted() => Hook.LuaQueryQuestsCompleted();
+        public void LuaQueryQuestsCompleted()
+        {
+            Hook.LuaQueryQuestsCompleted();
+        }
 
-        public void LuaRepairAllItems() => Hook.LuaRepairAllItems();
+        public void LuaRepairAllItems()
+        {
+            Hook.LuaRepairAllItems();
+        }
 
-        public void LuaRepopMe() => Hook.LuaRepopMe();
+        public void LuaRepopMe()
+        {
+            Hook.LuaRepopMe();
+        }
 
-        public void LuaRetrieveCorpse() => Hook.LuaRetrieveCorpse();
+        public void LuaRetrieveCorpse()
+        {
+            Hook.LuaRetrieveCorpse();
+        }
 
-        public void LuaRollOnLoot(int rollId, WowRollType rollType) => Hook.LuaRollOnLoot(rollId, (int)rollType);
+        public void LuaRollOnLoot(int rollId, WowRollType rollType)
+        {
+            Hook.LuaRollOnLoot(rollId, (int)rollType);
+        }
 
-        public void LuaSelectGossipOption(int gossipId) => Hook.LuaSelectGossipOption(gossipId);
+        public void LuaSelectGossipOption(int gossipId)
+        {
+            Hook.LuaSelectGossipOption(gossipId);
+        }
 
-        public void LuaSelectQuestByNameOrGossipId(string name, int gossipId, bool isAvailableQuest) => Hook.LuaSelectQuestByNameOrGossipId(name, gossipId, isAvailableQuest);
+        public void LuaSelectQuestByNameOrGossipId(string name, int gossipId, bool isAvailableQuest)
+        {
+            Hook.LuaSelectQuestByNameOrGossipId(name, gossipId, isAvailableQuest);
+        }
 
-        public void LuaSelectQuestLogEntry(int questLogId) => Hook.LuaSelectQuestLogEntry(questLogId);
+        public void LuaSelectQuestLogEntry(int questLogId)
+        {
+            Hook.LuaSelectQuestLogEntry(questLogId);
+        }
 
-        public void LuaSendChatMessage(string msg) => Hook.LuaSendChatMessage(msg);
+        public void LuaSendChatMessage(string msg)
+        {
+            Hook.LuaSendChatMessage(msg);
+        }
 
-        public void LuaSetLfgRole(WowRole wowRole) => Hook.LuaSetLfgRole((int)wowRole);
+        public void LuaSetLfgRole(WowRole wowRole)
+        {
+            Hook.LuaSetLfgRole((int)wowRole);
+        }
 
-        public void LuaSpellStopCasting() => Hook.LuaSpellStopCasting();
+        public void LuaSpellStopCasting()
+        {
+            Hook.LuaSpellStopCasting();
+        }
 
-        public void LuaStartAutoAttack() => Hook.LuaStartAutoAttack();
+        public void LuaStartAutoAttack()
+        {
+            Hook.LuaStartAutoAttack();
+        }
 
-        public bool LuaUiIsVisible(params string[] v) => Hook.LuaUiIsVisible(v);
+        public bool LuaUiIsVisible(params string[] v)
+        {
+            return Hook.LuaUiIsVisible(v);
+        }
 
-        public void LuaUseContainerItem(int bagId, int bagSlot) => Hook.LuaUseContainerItem(bagId, bagSlot);
+        public void LuaUseContainerItem(int bagId, int bagSlot)
+        {
+            Hook.LuaUseContainerItem(bagId, bagSlot);
+        }
 
-        public void LuaUseInventoryItem(WowEquipmentSlot equipmentSlot) => Hook.LuaUseInventoryItem((int)equipmentSlot);
+        public void LuaUseInventoryItem(WowEquipmentSlot equipmentSlot)
+        {
+            Hook.LuaUseInventoryItem((int)equipmentSlot);
+        }
 
-        public void LuaUseItemByName(string name) => Hook.LuaUseItemByName(name);
+        public void LuaUseItemByName(string name)
+        {
+            Hook.LuaUseItemByName(name);
+        }
 
         public bool Setup()
         {
             return Hook.Hook(7, HookModules);
         }
 
-        public void SetWorldLoadedCheck(bool enabled) => Hook.BotOverrideWorldLoadedCheck(enabled);
+        public void SetWorldLoadedCheck(bool enabled)
+        {
+            Hook.BotOverrideWorldLoadedCheck(enabled);
+        }
 
         public void Tick()
         {
@@ -182,38 +447,89 @@ namespace AmeisenBotX.Wow335a
             }
         }
 
-        public void WowClearTarget() => Hook.WowClearTarget();
+        public void WowClearTarget()
+        {
+            Hook.WowClearTarget();
+        }
 
-        public void WowClickOnTerrain(Vector3 position) => Hook.WowClickOnTerrain(position);
+        public void WowClickOnTerrain(Vector3 position)
+        {
+            Hook.WowClickOnTerrain(position);
+        }
 
-        public void WowEnableClickToMove() => Hook.WowEnableClickToMove();
+        public void WowEnableClickToMove()
+        {
+            Hook.WowEnableClickToMove();
+        }
 
-        public bool WowExecuteLuaAndRead((string, string) p, out string result) => Hook.WowExecuteLuaAndRead(p, out result);
+        public bool WowExecuteLuaAndRead((string, string) p, out string result)
+        {
+            return Hook.WowExecuteLuaAndRead(p, out result);
+        }
 
-        public void WowFacePosition(IntPtr playerBase, Vector3 playerPosition, Vector3 position) => Hook.WowFacePosition(playerBase, playerPosition, position);
+        public void WowFacePosition(IntPtr playerBase, Vector3 playerPosition, Vector3 position)
+        {
+            Hook.WowFacePosition(playerBase, playerPosition, position);
+        }
 
-        public WowUnitReaction WowGetReaction(IntPtr a, IntPtr b) => (WowUnitReaction)Hook.WowGetUnitReaction(a, b);
+        public WowUnitReaction WowGetReaction(IntPtr a, IntPtr b)
+        {
+            return (WowUnitReaction)Hook.WowGetUnitReaction(a, b);
+        }
 
-        public Dictionary<int, int> WowGetRunesReady() => Hook.WowGetRunesReady();
+        public Dictionary<int, int> WowGetRunesReady()
+        {
+            return Hook.WowGetRunesReady();
+        }
 
-        public bool WowIsClickToMoveActive() => Hook.WowIsClickToMoveActive();
+        public bool WowIsClickToMoveActive()
+        {
+            return Hook.WowIsClickToMoveActive();
+        }
 
-        public bool WowIsInLineOfSight(Vector3 position1, Vector3 position2, float heightAdjust = 1.5F) => Hook.WowIsInLineOfSight(position1, position2, heightAdjust);
+        public bool WowIsInLineOfSight(Vector3 position1, Vector3 position2, float heightAdjust = 1.5F)
+        {
+            return Hook.WowIsInLineOfSight(position1, position2, heightAdjust);
+        }
 
-        public bool WowIsRuneReady(int id) => Hook.WowIsRuneReady(id);
+        public bool WowIsRuneReady(int id)
+        {
+            return Hook.WowIsRuneReady(id);
+        }
 
-        public void WowObjectRightClick(IntPtr objectBase) => Hook.WowObjectRightClick(objectBase);
+        public void WowObjectRightClick(IntPtr objectBase)
+        {
+            Hook.WowObjectRightClick(objectBase);
+        }
 
-        public void WowSetFacing(IntPtr playerBase, float angle) => Hook.WowSetFacing(playerBase, angle);
+        public void WowSetFacing(IntPtr playerBase, float angle)
+        {
+            Hook.WowSetFacing(playerBase, angle);
+        }
 
-        public void WowSetRenderState(bool state) => Hook.WowSetRenderState(state);
+        public void WowSetRenderState(bool state)
+        {
+            Hook.WowSetRenderState(state);
+        }
 
-        public void WowStopClickToMove(IntPtr playerBase) => Hook.WowStopClickToMove(playerBase);
+        public void WowStopClickToMove(IntPtr playerBase)
+        {
+            Hook.WowStopClickToMove(playerBase);
+        }
 
-        public void WowStopClickToMove() => Hook.WowStopClickToMove(Player.BaseAddress);
+        public void WowStopClickToMove()
+        {
+            Hook.WowStopClickToMove(Player.BaseAddress);
+        }
 
-        public void WowTargetGuid(ulong guid) => Hook.WowTargetGuid(guid);
+        public void WowTargetGuid(ulong guid)
+        {
+            Hook.WowTargetGuid(guid);
+        }
 
-        public void WowUnitRightClick(IntPtr unitBase) => Hook.WowUnitRightClick(unitBase);
+        public void WowUnitRightClick(IntPtr unitBase)
+        {
+            Hook.WowUnitRightClick(unitBase);
+        }
     }
 }

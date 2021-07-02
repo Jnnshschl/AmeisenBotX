@@ -6,7 +6,6 @@ using AmeisenBotX.Core.Fsm.Enums;
 using AmeisenBotX.Core.Fsm.States;
 using AmeisenBotX.Logging;
 using AmeisenBotX.Logging.Enums;
-using AmeisenBotX.Memory;
 using AmeisenBotX.Overlay;
 using AmeisenBotX.Overlay.Utils;
 using AmeisenBotX.StateConfig;

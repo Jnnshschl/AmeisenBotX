@@ -1,6 +1,6 @@
 ﻿using AmeisenBotX.Core;
-using AmeisenBotX.Core.Character.Inventory.Objects;
-using AmeisenBotX.Core.Character.Spells.Objects;
+using AmeisenBotX.Core.Engines.Character.Inventory.Objects;
+using AmeisenBotX.Core.Engines.Character.Spells.Objects;
 using AmeisenBotX.Views;
 using System;
 using System.Linq;

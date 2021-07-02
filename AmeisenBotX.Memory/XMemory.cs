@@ -74,6 +74,36 @@ namespace AmeisenBotX.Memory
 
         ///<inheritdoc cref="IMemoryApi.MainThreadHandle"/>
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public bool AllocateMemory(uint size, out IntPtr address)
+        {
+            lock (allocLock)
+            {
+                address = VirtualAllocEx(ProcessHandle, IntPtr.Zero, size, AllocationTypes.Commit, MemoryProtectionFlags.ExecuteReadWrite);
+
+                if (address != IntPtr.Zero)
+                {
+                    MemoryAllocations.Add(address, size);
+                    return true;
+                }
+
+                address = IntPtr.Zero;
+                return false;
+            }
+        }
+
+        ///<inheritdoc cref="IMemoryApi.MainThreadHandle"/>
+        public void Dispose()
+        {
+            GC.SuppressFinalize(this);
+
+            CloseHandle(MainThreadHandle);
+            CloseHandle(ProcessHandle);
+
+            FreeAllMemory();
+        }
+
+        ///<inheritdoc cref="IMemoryApi.MainThreadHandle"/>
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public void FocusWindow(IntPtr windowHandle, Rect rect, bool resizeWindow = true)
         {
             WindowFlags flags = WindowFlags.AsyncWindowPos | WindowFlags.NoActivate;
@@ -83,6 +113,36 @@ namespace AmeisenBotX.Memory
             if (rect.Left > 0 && rect.Right > 0 && rect.Top > 0 && rect.Bottom > 0)
             {
                 SetWindowPos(windowHandle, IntPtr.Zero, rect.Left, rect.Top, rect.Right - rect.Left, rect.Bottom - rect.Top, (int)flags);
+            }
+        }
+
+        ///<inheritdoc cref="IMemoryApi.MainThreadHandle"/>
+        public void FreeAllMemory()
+        {
+            List<IntPtr> memAllocs = MemoryAllocations.Keys.ToList();
+
+            for (int i = 0; i < memAllocs.Count; ++i)
+            {
+                FreeMemory(memAllocs[i]);
+            }
+
+            MemoryAllocations.Clear();
+        }
+
+        ///<inheritdoc cref="IMemoryApi.MainThreadHandle"/>
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public bool FreeMemory(IntPtr address)
+        {
+            lock (allocLock)
+            {
+                if (MemoryAllocations.ContainsKey(address)
+                    && VirtualFreeEx(ProcessHandle, address, 0, AllocationTypes.Release))
+                {
+                    MemoryAllocations.Remove(address);
+                    return true;
+                }
+
+                return false;
             }
         }
 
@@ -111,78 +171,30 @@ namespace AmeisenBotX.Memory
         }
 
         ///<inheritdoc cref="IMemoryApi.MainThreadHandle"/>
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public void SetForegroundWindow(IntPtr windowHandle)
+        public bool Init(Process process, IntPtr processHandle, IntPtr mainThreadHandle)
         {
-            Win32Imports.SetForegroundWindow(windowHandle);
-        }
+            Process = process;
 
-        ///<inheritdoc cref="IMemoryApi.MainThreadHandle"/>
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public void SetWindowPosition(IntPtr windowHandle, Rect rect, bool resizeWindow = true)
-        {
-            WindowFlags flags = WindowFlags.AsyncWindowPos | WindowFlags.NoZOrder | WindowFlags.NoActivate;
-
-            if (!resizeWindow) { flags |= WindowFlags.NoSize; }
-
-            if (rect.Left > 0 && rect.Right > 0 && rect.Top > 0 && rect.Bottom > 0)
+            if (Process == null || Process.HasExited)
             {
-                SetWindowPos(windowHandle, IntPtr.Zero, rect.Left, rect.Top, rect.Right - rect.Left, rect.Bottom - rect.Top, (int)flags);
-            }
-        }
-
-        ///<inheritdoc cref="IMemoryApi.MainThreadHandle"/>
-        public Process StartProcessNoActivate(string processCmd, out IntPtr processHandle, out IntPtr threadHandle)
-        {
-            StartupInfo startupInfo = new()
-            {
-                cb = Marshal.SizeOf<StartupInfo>(),
-                dwFlags = STARTF_USESHOWWINDOW,
-                wShowWindow = SW_SHOWMINNOACTIVE
-            };
-
-            if (CreateProcess(null, processCmd, IntPtr.Zero, IntPtr.Zero, true, 0x10, IntPtr.Zero, null, ref startupInfo, out ProcessInformation processInformation))
-            {
-                processHandle = processInformation.hProcess;
-                threadHandle = processInformation.hThread;
-                return Process.GetProcessById(processInformation.dwProcessId);
-            }
-            else
-            {
-                processHandle = IntPtr.Zero;
-                threadHandle = IntPtr.Zero;
-                return null;
-            }
-        }
-
-        ///<inheritdoc cref="IMemoryApi.MainThreadHandle"/>
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public bool AllocateMemory(uint size, out IntPtr address)
-        {
-            lock (allocLock)
-            {
-                address = VirtualAllocEx(ProcessHandle, IntPtr.Zero, size, AllocationTypes.Commit, MemoryProtectionFlags.ExecuteReadWrite);
-
-                if (address != IntPtr.Zero)
-                {
-                    MemoryAllocations.Add(address, size);
-                    return true;
-                }
-
-                address = IntPtr.Zero;
                 return false;
             }
-        }
 
-        ///<inheritdoc cref="IMemoryApi.MainThreadHandle"/>
-        public void Dispose()
-        {
-            GC.SuppressFinalize(this);
+            ProcessHandle = processHandle;
 
-            CloseHandle(MainThreadHandle);
-            CloseHandle(ProcessHandle);
+            if (ProcessHandle == IntPtr.Zero)
+            {
+                return false;
+            }
 
-            FreeAllMemory();
+            MainThreadHandle = mainThreadHandle;
+
+            if (MainThreadHandle == IntPtr.Zero)
+            {
+                return false;
+            }
+
+            return true;
         }
 
         ///<inheritdoc cref="IMemoryApi.MainThreadHandle"/>
@@ -224,63 +236,6 @@ namespace AmeisenBotX.Memory
                     return false;
                 }
             }
-        }
-
-        ///<inheritdoc cref="IMemoryApi.MainThreadHandle"/>
-        public void FreeAllMemory()
-        {
-            List<IntPtr> memAllocs = MemoryAllocations.Keys.ToList();
-
-            for (int i = 0; i < memAllocs.Count; ++i)
-            {
-                FreeMemory(memAllocs[i]);
-            }
-
-            MemoryAllocations.Clear();
-        }
-
-        ///<inheritdoc cref="IMemoryApi.MainThreadHandle"/>
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public bool FreeMemory(IntPtr address)
-        {
-            lock (allocLock)
-            {
-                if (MemoryAllocations.ContainsKey(address)
-                    && VirtualFreeEx(ProcessHandle, address, 0, AllocationTypes.Release))
-                {
-                    MemoryAllocations.Remove(address);
-                    return true;
-                }
-
-                return false;
-            }
-        }
-
-        ///<inheritdoc cref="IMemoryApi.MainThreadHandle"/>
-        public bool Init(Process process, IntPtr processHandle, IntPtr mainThreadHandle)
-        {
-            Process = process;
-
-            if (Process == null || Process.HasExited)
-            {
-                return false;
-            }
-
-            ProcessHandle = processHandle;
-
-            if (ProcessHandle == IntPtr.Zero)
-            {
-                return false;
-            }
-
-            MainThreadHandle = mainThreadHandle;
-
-            if (MainThreadHandle == IntPtr.Zero)
-            {
-                return false;
-            }
-
-            return true;
         }
 
         ///<inheritdoc cref="IMemoryApi.MainThreadHandle"/>
@@ -381,6 +336,13 @@ namespace AmeisenBotX.Memory
         }
 
         ///<inheritdoc cref="IMemoryApi.MainThreadHandle"/>
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public void SetForegroundWindow(IntPtr windowHandle)
+        {
+            Win32Imports.SetForegroundWindow(windowHandle);
+        }
+
+        ///<inheritdoc cref="IMemoryApi.MainThreadHandle"/>
         public void SetupAutoPosition(IntPtr mainWindowHandle, int offsetX, int offsetY, int width, int height)
         {
             if (Process.MainWindowHandle != IntPtr.Zero && mainWindowHandle != IntPtr.Zero)
@@ -391,6 +353,44 @@ namespace AmeisenBotX.Memory
                 SetWindowLong(Process.MainWindowHandle, GWL_STYLE, style);
 
                 ResizeParentWindow(offsetX, offsetY, width, height);
+            }
+        }
+
+        ///<inheritdoc cref="IMemoryApi.MainThreadHandle"/>
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public void SetWindowPosition(IntPtr windowHandle, Rect rect, bool resizeWindow = true)
+        {
+            WindowFlags flags = WindowFlags.AsyncWindowPos | WindowFlags.NoZOrder | WindowFlags.NoActivate;
+
+            if (!resizeWindow) { flags |= WindowFlags.NoSize; }
+
+            if (rect.Left > 0 && rect.Right > 0 && rect.Top > 0 && rect.Bottom > 0)
+            {
+                SetWindowPos(windowHandle, IntPtr.Zero, rect.Left, rect.Top, rect.Right - rect.Left, rect.Bottom - rect.Top, (int)flags);
+            }
+        }
+
+        ///<inheritdoc cref="IMemoryApi.MainThreadHandle"/>
+        public Process StartProcessNoActivate(string processCmd, out IntPtr processHandle, out IntPtr threadHandle)
+        {
+            StartupInfo startupInfo = new()
+            {
+                cb = Marshal.SizeOf<StartupInfo>(),
+                dwFlags = STARTF_USESHOWWINDOW,
+                wShowWindow = SW_SHOWMINNOACTIVE
+            };
+
+            if (CreateProcess(null, processCmd, IntPtr.Zero, IntPtr.Zero, true, 0x10, IntPtr.Zero, null, ref startupInfo, out ProcessInformation processInformation))
+            {
+                processHandle = processInformation.hProcess;
+                threadHandle = processInformation.hThread;
+                return Process.GetProcessById(processInformation.dwProcessId);
+            }
+            else
+            {
+                processHandle = IntPtr.Zero;
+                threadHandle = IntPtr.Zero;
+                return null;
             }
         }
 
