@@ -1,8 +1,12 @@
-﻿namespace AmeisenBotX.Core.Fsm.States.Idle.Actions
+﻿using System;
+
+namespace AmeisenBotX.Core.Fsm.States.Idle.Actions
 {
     public interface IIdleAction
     {
         bool AutopilotOnly { get; }
+
+        DateTime Cooldown { get; set; }
 
         int MaxCooldown { get; }
 

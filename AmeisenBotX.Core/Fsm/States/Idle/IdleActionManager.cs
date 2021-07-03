@@ -11,8 +11,8 @@ namespace AmeisenBotX.Core.Fsm.States.Idle
         {
             IdleActions = idleActions;
 
-            Rnd = new Random();
-            LastActions = new List<KeyValuePair<DateTime, Type>>();
+            Rnd = new();
+            LastActions = new();
         }
 
         public TimeSpan Cooldown { get; private set; }
@@ -23,9 +23,13 @@ namespace AmeisenBotX.Core.Fsm.States.Idle
 
         public DateTime LastActionExecuted { get; private set; }
 
-        public List<KeyValuePair<DateTime, Type>> LastActions { get; private set; }
+        public List<KeyValuePair<DateTime, IIdleAction>> LastActions { get; private set; }
 
         private IIdleAction CurrentAction { get; set; }
+
+        private int MaxActionCooldown { get; } = 28 * 1000;
+
+        private int MinActionCooldown { get; } = 12 * 1000;
 
         private Random Rnd { get; }
 
@@ -43,13 +47,15 @@ namespace AmeisenBotX.Core.Fsm.States.Idle
                 return true;
             }
 
+            // cleanup old events
+            LastActions.RemoveAll(e => e.Key < e.Value.Cooldown);
+
             if (LastActionExecuted + Cooldown <= DateTime.UtcNow)
             {
                 IEnumerable<IIdleAction> filteredActions = IdleActions.Where
                 (
                     e => (!e.AutopilotOnly || autopilotEnabled)
-                    && !LastActions.Any(e => e.Value == e.GetType())
-                    || LastActions.Where(x => x.Value == e.GetType() && (DateTime.UtcNow - x.Key).TotalMilliseconds > Rnd.Next(CurrentAction.MinCooldown, CurrentAction.MaxCooldown)).Any()
+                      && DateTime.Now > e.Cooldown
                 );
 
                 if (filteredActions.Any())
@@ -59,10 +65,12 @@ namespace AmeisenBotX.Core.Fsm.States.Idle
                     if (CurrentAction != null && CurrentAction.Enter())
                     {
                         LastActionExecuted = DateTime.UtcNow;
-                        Cooldown = TimeSpan.FromMilliseconds(Rnd.Next(CurrentAction.MinCooldown, CurrentAction.MaxCooldown));
+
+                        Cooldown = TimeSpan.FromMilliseconds(Rnd.Next(MinActionCooldown, MaxActionCooldown));
+                        CurrentAction.Cooldown = DateTime.Now + TimeSpan.FromMilliseconds(Rnd.Next(CurrentAction.MinCooldown, CurrentAction.MaxCooldown));
                         ExecuteUntil = LastActionExecuted + TimeSpan.FromMilliseconds(Rnd.Next(CurrentAction.MinDuration, CurrentAction.MaxDuration));
 
-                        LastActions.Add(new KeyValuePair<DateTime, Type>(LastActionExecuted, CurrentAction.GetType()));
+                        LastActions.Add(new(LastActionExecuted, CurrentAction));
 
                         CurrentAction.Execute();
                         return true;

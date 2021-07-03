@@ -162,7 +162,7 @@ namespace AmeisenBotX.Memory.Win32
         internal static extern int GetWindowLong(IntPtr windowHandle, int index);
 
         [DllImport("user32", SetLastError = true)]
-        internal static extern bool GetWindowRect(IntPtr windowHandle, ref Rect rectangle);
+        public static extern bool GetWindowRect(IntPtr windowHandle, ref Rect rectangle);
 
         [DllImport("user32", SetLastError = true)]
         internal static extern int GetWindowThreadProcessId(IntPtr windowHandle, int processId);

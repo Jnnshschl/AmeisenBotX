@@ -19,13 +19,15 @@ namespace AmeisenBotX.Core.Fsm.States.Idle.Actions
 
         public bool AutopilotOnly => true;
 
-        public int MaxCooldown => 25 * 60 * 1000;
+        public DateTime Cooldown { get; set; }
 
-        public int MaxDuration => 3 * 60 * 1000;
+        public int MaxCooldown => 7 * 60 * 1000;
 
-        public int MinCooldown => 15 * 60 * 1000;
+        public int MaxDuration => 2 * 60 * 1000;
 
-        public int MinDuration => 2 * 60 * 1000;
+        public int MinCooldown => 6 * 60 * 1000;
+
+        public int MinDuration => 1 * 60 * 1000;
 
         private AmeisenBotInterfaces Bot { get; }
 

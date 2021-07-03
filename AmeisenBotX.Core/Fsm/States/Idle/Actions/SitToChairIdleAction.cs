@@ -2,6 +2,7 @@
 using AmeisenBotX.Core.Data.Objects;
 using AmeisenBotX.Core.Engines.Movement.Enums;
 using AmeisenBotX.Wow.Objects.Enums;
+using System;
 using System.Linq;
 
 namespace AmeisenBotX.Core.Fsm.States.Idle.Actions
@@ -19,11 +20,13 @@ namespace AmeisenBotX.Core.Fsm.States.Idle.Actions
 
         public AmeisenBotInterfaces Bot { get; }
 
-        public int MaxCooldown => 16 * 1000;
+        public DateTime Cooldown { get; set; }
+
+        public int MaxCooldown => 69 * 1000;
 
         public int MaxDuration => 90 * 1000;
 
-        public int MinCooldown => 6 * 1000;
+        public int MinCooldown => 29 * 1000;
 
         public int MinDuration => 25 * 1000;
 

@@ -410,7 +410,9 @@ namespace AmeisenBotX
             {
                 try
                 {
-                    AmeisenBot.Config.BotWindowRect = AmeisenBot.Bot.Memory.GetWindowPosition();
+                    Memory.Win32.Rect rc = new();
+                    Memory.Win32.Win32Imports.GetWindowRect(MainWindowHandle, ref rc);
+                    AmeisenBot.Config.BotWindowRect = rc;
                 }
                 catch (Exception e)
                 {

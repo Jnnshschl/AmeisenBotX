@@ -22,19 +22,21 @@ namespace AmeisenBotX.Core.Fsm.States.Idle.Actions
 
         public AmeisenBotInterfaces Bot { get; }
 
+        public DateTime Cooldown { get; set; }
+
         public DateTime CooldownStart { get; set; }
 
         public Vector3 CurrentSpot { get; set; }
 
         public TimeSpan Duration { get; set; }
 
-        public int MaxCooldown => 25 * 60 * 1000;
+        public int MaxCooldown => 12 * 60 * 1000;
 
         public int MaxDuration { get; } = 20 * 60 * 1000;
 
-        public int MinCooldown => 15 * 60 * 1000;
+        public int MinCooldown => 7 * 60 * 1000;
 
-        public int MinDuration { get; } = 15 * 60 * 1000;
+        public int MinDuration { get; } = 10 * 60 * 1000;
 
         public TimeSpan SpotDuration { get; set; }
 
