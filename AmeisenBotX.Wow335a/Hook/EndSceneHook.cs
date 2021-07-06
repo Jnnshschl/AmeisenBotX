@@ -36,7 +36,7 @@ namespace AmeisenBotX.Wow335a.Hook
             OriginalFunctionBytes = new();
         }
 
-        public event Action<GameInfo> OnGameInfoPush;
+        internal event Action<GameInfo> OnGameInfoPush;
 
         public ulong HookCallCount
         {
@@ -139,12 +139,6 @@ namespace AmeisenBotX.Wow335a.Hook
         private Dictionary<IntPtr, byte> OriginalFunctionBytes { get; }
 
         /// <summary>
-        /// Wether the hook should ignore if the world is not loaded or not.
-        /// Used in the login screen as the world isnt loaded there.
-        /// </summary>
-        private bool OverrideWorldCheck { get; set; }
-
-        /// <summary>
         /// Integer that is used to skip the world loaded check;
         /// </summary>
         private IntPtr OverrideWorldCheckAddress { get; set; }
@@ -160,10 +154,13 @@ namespace AmeisenBotX.Wow335a.Hook
         /// </summary>
         private IntPtr WowEndSceneAddress { get; set; }
 
+        /// <summary>
+        /// Whether the hook should ignore if the world is not loaded or not.
+        /// Used in the login screen as the world isnt loaded there.
+        /// </summary>
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public void BotOverrideWorldLoadedCheck(bool status)
         {
-            OverrideWorldCheck = status;
             Memory.Write(OverrideWorldCheckAddress, status ? 1 : 0);
         }
 

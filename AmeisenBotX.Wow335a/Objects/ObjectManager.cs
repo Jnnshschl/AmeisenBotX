@@ -132,7 +132,7 @@ namespace AmeisenBotX.Wow335a.Objects
         /// Process the pushed game info that we receive from the EndScene hook.
         /// </summary>
         /// <param name="gameInfo"></param>
-        public void HookManagerOnGameInfoPush(GameInfo gameInfo)
+        internal void HookManagerOnGameInfoPush(GameInfo gameInfo)
         {
             if (Player != null)
             {

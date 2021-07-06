@@ -180,7 +180,7 @@ namespace AmeisenBotX.Core.Fsm.States
         }
 
         /// <summary>
-        /// Check wether the unit is out of range based on the config entries "MinFollowDistance" and "MaxFollowDistance".
+        /// Check whether the unit is out of range based on the config entries "MinFollowDistance" and "MaxFollowDistance".
         /// </summary>
         /// <param name="player">Player to check</param>
         /// <returns></returns>

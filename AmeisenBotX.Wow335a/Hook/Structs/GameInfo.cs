@@ -10,7 +10,7 @@ namespace AmeisenBotX.Core.Hook.Structs
     /// engine functions.
     /// </summary>
     [StructLayout(LayoutKind.Sequential)]
-    public struct GameInfo
+    internal struct GameInfo
     {
         public bool isOutdoors;
         public bool isTargetInLineOfSight;

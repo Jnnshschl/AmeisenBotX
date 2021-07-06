@@ -106,27 +106,29 @@ namespace AmeisenBotX.Core
             Bot.Chat = new DefaultChatManager(Config, DataFolder);
             Bot.Tactic = new DefaultTacticEngine();
 
-            // module is initialized out here because it needs to write to its own data address
-            TracelineJumpHookModule jumpModule = new(null, null, Bot.Memory, Bot.Offsets);
-            jumpModule.Tick = () =>
-            {
-                // update Traceline Jump Check data
-                if (Config.MovementSettings.EnableTracelineJumpCheck && Bot.Player != null)
-                {
-                    Vector3 playerPosition = Bot.Player.Position;
-                    playerPosition.Z += Bot.MovementSettings.ObstacleCheckHeight;
-
-                    Vector3 pos = BotUtils.MoveAhead(playerPosition, Bot.Player.Rotation, Bot.MovementSettings.ObstacleCheckDistance);
-                    Bot.Memory.Write(jumpModule.DataAddress, (1.0f, playerPosition, pos));
-                }
-            };
-
             // add hook modules here, they are used to execute assembly on every tick
             List<IHookModule> hookModules = new()
             {
                 // module that does a traceline in front of the character
                 // to detect small obstacles that can be jumped over.
-                jumpModule
+                new TracelineJumpHookModule
+                (
+                    null,
+                    (s) =>
+                    {
+                        // update Traceline Jump Check data
+                        if (Config.MovementSettings.EnableTracelineJumpCheck && Bot.Player != null)
+                        {
+                            Vector3 playerPosition = Bot.Player.Position;
+                            playerPosition.Z += Bot.MovementSettings.ObstacleCheckHeight;
+
+                            Vector3 pos = BotUtils.MoveAhead(playerPosition, Bot.Player.Rotation, Bot.MovementSettings.ObstacleCheckDistance);
+                            Bot.Memory.Write(s.GetDataPointer(), (1.0f, playerPosition, pos));
+                        }
+                    },
+                    Bot.Memory,
+                    Bot.Offsets
+                )
             };
 
             string eventHookFrameName = BotUtils.FastRandomStringOnlyLetters();

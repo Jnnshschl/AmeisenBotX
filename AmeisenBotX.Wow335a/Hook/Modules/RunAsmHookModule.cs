@@ -5,7 +5,7 @@ namespace AmeisenBotX.Core.Hook.Modules
 {
     public abstract class RunAsmHookModule : IHookModule
     {
-        public RunAsmHookModule(Action<IntPtr> onUpdate, Action tick, IMemoryApi memoryApi, uint allocSize)
+        public RunAsmHookModule(Action<IntPtr> onUpdate, Action<IHookModule> tick, IMemoryApi memoryApi, uint allocSize)
         {
             MemoryApi = memoryApi;
             AllocSize = allocSize;
@@ -22,7 +22,7 @@ namespace AmeisenBotX.Core.Hook.Modules
 
         public Action<IntPtr> OnDataUpdate { get; set; }
 
-        public Action Tick { get; set; }
+        public Action<IHookModule> Tick { get; set; }
 
         protected uint AllocSize { get; }
 
