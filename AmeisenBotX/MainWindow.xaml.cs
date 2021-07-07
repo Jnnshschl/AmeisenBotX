@@ -565,7 +565,7 @@ namespace AmeisenBotX
 
                 // load the state overrides
                 comboboxStateOverride.Items.Add(BotState.Idle);
-                comboboxStateOverride.Items.Add(BotState.Attacking);
+                comboboxStateOverride.Items.Add(BotState.Combat);
                 comboboxStateOverride.Items.Add(BotState.Grinding);
                 comboboxStateOverride.Items.Add(BotState.Job);
                 comboboxStateOverride.Items.Add(BotState.Questing);

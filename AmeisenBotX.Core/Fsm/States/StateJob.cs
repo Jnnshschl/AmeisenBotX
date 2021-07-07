@@ -9,7 +9,6 @@
         public override void Enter()
         {
             Bot.Jobs.Enter();
-            Bot.Globals.IgnoreMountDistance = true;
         }
 
         public override void Execute()
@@ -19,7 +18,6 @@
 
         public override void Leave()
         {
-            Bot.Globals.IgnoreMountDistance = false;
             Bot.Jobs.Reset();
         }
     }

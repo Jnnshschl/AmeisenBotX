@@ -32,7 +32,7 @@ namespace AmeisenBotX.Core.Fsm.States
                 () => Config.DungeonUsePartyMode,
                 new Selector
                 (
-                    () => Bot.Dungeon.TryGetProfileByMapId(StateMachine.LastDiedMap) != null,
+                    () => Bot.Dungeon.TryGetProfileByMapId(StateMachine.GetState<StateDead>().LastDiedMap) != null,
                     new Leaf(RunToDungeonProfileEntry),
                     new Selector
                     (
@@ -65,7 +65,7 @@ namespace AmeisenBotX.Core.Fsm.States
                         new Leaf(FollowStaticPath),
                         new Selector
                         (
-                            () => StateMachine.LastDiedMap.IsDungeonMap(),
+                            () => StateMachine.GetState<StateDead>().LastDiedMap.IsDungeonMap(),
                             dungeonSelector,
                             new Leaf(RunToCorpseAndRetrieveIt)
                         )
@@ -286,7 +286,7 @@ namespace AmeisenBotX.Core.Fsm.States
 
         private BehaviorTreeStatus RunToDungeonProfileEntry()
         {
-            Vector3 position = Bot.Dungeon.TryGetProfileByMapId(StateMachine.LastDiedMap).WorldEntry;
+            Vector3 position = Bot.Dungeon.TryGetProfileByMapId(StateMachine.GetState<StateDead>().LastDiedMap).WorldEntry;
             return RunToAndExecute(position, () => RunToNearestPortal());
         }
 

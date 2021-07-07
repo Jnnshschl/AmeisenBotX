@@ -101,40 +101,20 @@ namespace AmeisenBotX.Core
             // start initializing the wow interface
             Bot = new();
             Bot.Globals = new();
-            Bot.Offsets = new OffsetList335a();
             Bot.Memory = new XMemory();
             Bot.Chat = new DefaultChatManager(Config, DataFolder);
             Bot.Tactic = new DefaultTacticEngine();
 
-            // add hook modules here, they are used to execute assembly on every tick
-            List<IHookModule> hookModules = new()
-            {
-                // module that does a traceline in front of the character
-                // to detect small obstacles that can be jumped over.
-                new TracelineJumpHookModule
-                (
-                    null,
-                    (s) =>
-                    {
-                        // update Traceline Jump Check data
-                        if (Config.MovementSettings.EnableTracelineJumpCheck && Bot.Player != null)
-                        {
-                            Vector3 playerPosition = Bot.Player.Position;
-                            playerPosition.Z += Bot.MovementSettings.ObstacleCheckHeight;
-
-                            Vector3 pos = BotUtils.MoveAhead(playerPosition, Bot.Player.Rotation, Bot.MovementSettings.ObstacleCheckDistance);
-                            Bot.Memory.Write(s.GetDataPointer(), (1.0f, playerPosition, pos));
-                        }
-                    },
-                    Bot.Memory,
-                    Bot.Offsets
-                )
-            };
-
+            // name of the frame used to capture wows events
             string eventHookFrameName = BotUtils.FastRandomStringOnlyLetters();
 
-            // load the wow specific interface
-            Bot.Wow = new WowInterface335a(Bot.Memory, Bot.Offsets, hookModules, eventHookFrameName);
+            // load the wow specific interface based on file version (build number)
+            Bot.Wow = FileVersionInfo.GetVersionInfo(config.PathToWowExe).FilePrivatePart switch
+            {
+                12340 => new WowInterface335a(Bot.Memory, Bot.Offsets = new OffsetList335a(), new List<IHookModule> { new TracelineJumpHookModule(null, TraceLineJumpCheck, Bot.Memory, Bot.Offsets) }, eventHookFrameName),
+                _ => throw new ArgumentException("Unsupported wow version", nameof(config)),
+            };
+
             Bot.Wow.OnStaticPopup += OnStaticPopup;
             Bot.Wow.OnBattlegroundStatus += OnBattlegroundStatusChanged;
 
@@ -200,6 +180,22 @@ namespace AmeisenBotX.Core
         }
 
         /// <summary>
+        /// HookModule that does a traceline in front of the character
+        /// to detect small obstacles that can be jumped over.
+        /// </summary>
+        private void TraceLineJumpCheck(IHookModule s)
+        {
+            if (Config.MovementSettings.EnableTracelineJumpCheck && Bot.Player != null)
+            {
+                Vector3 playerPosition = Bot.Player.Position;
+                playerPosition.Z += Bot.MovementSettings.ObstacleCheckHeight;
+
+                Vector3 pos = BotUtils.MoveAhead(playerPosition, Bot.Player.Rotation, Bot.MovementSettings.ObstacleCheckDistance);
+                Bot.Memory.Write(s.GetDataPointer(), (1.0f, playerPosition, pos));
+            }
+        }
+
+        /// <summary>
         /// Fires when a custom BombatClass was compiled.
         /// </summary>
         public event Action<bool, string, string> OnCombatClassCompilationResult;
@@ -230,7 +226,7 @@ namespace AmeisenBotX.Core
         public AmeisenBotConfig Config { get; private set; }
 
         /// <summary>
-        /// How long last tick of the Bot took.
+        /// How long the bot needed to execute one tick.
         /// </summary>
         public float CurrentExecutionMs
         {
@@ -304,7 +300,6 @@ namespace AmeisenBotX.Core
                 SaveWowWindowPosition();
             }
 
-            StateMachine.ShouldExit = true;
             StateMachineTimer.Dispose();
 
             if (Config.RconEnabled)
@@ -613,8 +608,8 @@ namespace AmeisenBotX.Core
                 Bot.Character.Inventory.Update();
                 Bot.Character.Equipment.Update();
 
-                Bot.Character.UpdateCharacterGear();
-                Bot.Character.UpdateCharacterBags();
+                Bot.Character.UpdateGear();
+                Bot.Character.UpdateBags();
 
                 Bot.Character.Inventory.Update();
             }
@@ -671,9 +666,12 @@ namespace AmeisenBotX.Core
                 if (item.Name == "0" || item.ItemLink == "0")
                 {
                     // get the item id and try again
-                    itemJson = Bot.Wow.LuaGetItemJsonByNameOrLink(
-                        itemLink.Split(new string[] { "Hitem:" }, StringSplitOptions.RemoveEmptyEntries)[1]
-                        .Split(new string[] { ":" }, StringSplitOptions.RemoveEmptyEntries)[0]);
+                    itemJson = Bot.Wow.LuaGetItemJsonByNameOrLink
+                    (
+                        itemLink
+                            .Split(new string[] { "Hitem:" }, StringSplitOptions.RemoveEmptyEntries)[1]
+                            .Split(new string[] { ":" }, StringSplitOptions.RemoveEmptyEntries)[0]
+                    );
 
                     item = ItemFactory.BuildSpecificItem(ItemFactory.ParseItem(itemJson));
                 }

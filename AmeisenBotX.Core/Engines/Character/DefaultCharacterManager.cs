@@ -213,7 +213,7 @@ namespace AmeisenBotX.Core.Engines.Character
             );
         }
 
-        public void UpdateCharacterBags()
+        public void UpdateBags()
         {
             IEnumerable<IWowItem> container = Inventory.Items.Where(item => item.Type.Equals("container", StringComparison.CurrentCultureIgnoreCase));
 
@@ -230,7 +230,7 @@ namespace AmeisenBotX.Core.Engines.Character
             }
         }
 
-        public void UpdateCharacterGear()
+        public void UpdateGear()
         {
             System.Collections.IList list = Enum.GetValues(typeof(WowEquipmentSlot));
 

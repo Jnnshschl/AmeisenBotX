@@ -42,7 +42,7 @@ namespace AmeisenBotX.Core.Fsm.States
             // add nearby Units to the loot List
             if (Config.LootUnits)
             {
-                IEnumerable<WowUnit> wowUnits = StateMachine.GetNearLootableUnits().OrderBy(e => e.DistanceTo(Bot.Player));
+                IEnumerable<WowUnit> wowUnits = GetNearLootableUnits().OrderBy(e => e.DistanceTo(Bot.Player));
 
                 for (int i = 0; i < wowUnits.Count(); ++i)
                 {
@@ -104,6 +104,14 @@ namespace AmeisenBotX.Core.Fsm.States
 
         public override void Leave()
         {
+        }
+
+        internal IEnumerable<WowUnit> GetNearLootableUnits()
+        {
+            return Bot.Objects.WowObjects.OfType<WowUnit>()
+                .Where(e => e.IsLootable
+                    && !UnitsAlreadyLootedList.Contains(e.Guid)
+                    && e.Position.GetDistance(Bot.Player.Position) < Config.LootUnitsRadius);
         }
 
         private void Loot(WowUnit unit)

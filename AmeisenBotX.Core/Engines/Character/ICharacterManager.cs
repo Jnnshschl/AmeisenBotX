@@ -48,8 +48,8 @@ namespace AmeisenBotX.Core.Engines.Character
 
         void UpdateAll();
 
-        void UpdateCharacterBags();
+        void UpdateBags();
 
-        void UpdateCharacterGear();
+        void UpdateGear();
     }
 }

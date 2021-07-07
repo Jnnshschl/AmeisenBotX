@@ -99,7 +99,7 @@ namespace AmeisenBotX.Core.Fsm.States
             // do we need to loot stuff
             if (LootCheckEvent.Run()
                 && Bot.Character.Inventory.FreeBagSlots > 0
-                && StateMachine.GetNearLootableUnits().Any())
+                && StateMachine.GetState<StateLooting>().GetNearLootableUnits().Any())
             {
                 StateMachine.SetState(BotState.Looting);
                 return;

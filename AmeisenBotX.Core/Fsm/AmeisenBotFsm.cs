@@ -1,11 +1,9 @@
-﻿using AmeisenBotX.Common.Math;
-using AmeisenBotX.Common.Utils;
+﻿using AmeisenBotX.Common.Utils;
 using AmeisenBotX.Core.Data.Objects;
 using AmeisenBotX.Core.Fsm.Enums;
 using AmeisenBotX.Core.Fsm.States;
 using AmeisenBotX.Logging;
 using AmeisenBotX.Logging.Enums;
-using AmeisenBotX.Wow.Objects.Enums;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -23,13 +21,11 @@ namespace AmeisenBotX.Core.Fsm
             Config = config;
             Bot = bot;
 
-            LastState = BotState.None;
-
             States = new()
             {
                 { BotState.None, new StateNone(this, config, Bot) },
-                { BotState.Attacking, new StateAttacking(this, config, Bot) },
                 { BotState.Battleground, new StateBattleground(this, config, Bot) },
+                { BotState.Combat, new StateCombat(this, config, Bot) },
                 { BotState.Dead, new StateDead(this, config, Bot) },
                 { BotState.Dungeon, new StateDungeon(this, config, Bot) },
                 { BotState.Eating, new StateEating(this, config, Bot) },
@@ -45,6 +41,7 @@ namespace AmeisenBotX.Core.Fsm
                 { BotState.Repairing, new StateRepairing(this, config, Bot) },
                 { BotState.Selling, new StateSelling(this, config, Bot) },
                 { BotState.StartWow, new StateStartWow(this, config, Bot) }
+                // add new state here
             };
 
             AntiAfkEvent = new(TimeSpan.FromMilliseconds(Config.AntiAfkMs), Bot.Character.AntiAfk);
@@ -54,26 +51,39 @@ namespace AmeisenBotX.Core.Fsm
             CurrentState.Value.Enter();
         }
 
+        /// <summary>
+        /// Will be fired when our current state changes.
+        /// </summary>
         public event Action OnStateMachineStateChanged;
 
+        /// <summary>
+        /// Will be fired when the statemachine completed a tick.
+        /// </summary>
         public event Action OnStateMachineTick;
 
+        /// <summary>
+        /// Will be fired when the current state was overridden. For example when we died.
+        /// </summary>
         public event StateMachineOverride OnStateOverride;
 
-        public KeyValuePair<BotState, BasicState> CurrentState { get; protected set; }
+        /// <summary>
+        /// Pair of the current state id and its corresponding class.
+        /// </summary>
+        public KeyValuePair<BotState, BasicState> CurrentState { get; private set; }
 
-        public WowMapId LastDiedMap { get; internal set; }
-
-        public Vector3 LastDiedPosition { get; internal set; }
-
-        public BotState LastState { get; protected set; }
-
-        public bool ShouldExit { get; set; }
-
+        /// <summary>
+        /// Current overrider state.
+        /// </summary>
         public BotState StateOverride { get; set; }
 
-        public Dictionary<BotState, BasicState> States { get; protected set; }
+        /// <summary>
+        /// Returns all available states.
+        /// </summary>
+        public Dictionary<BotState, BasicState> States { get; }
 
+        /// <summary>
+        /// Returns true if the bot thinks wow has crashed.
+        /// </summary>
         public bool WowCrashed { get; internal set; }
 
         internal AmeisenBotInterfaces Bot { get; }
@@ -84,13 +94,16 @@ namespace AmeisenBotX.Core.Fsm
 
         private TimegatedEvent RenderSwitchEvent { get; set; }
 
+        /// <summary>
+        /// Runs a tick of the bots fsm.
+        /// </summary>
         public void Execute()
         {
-            // Override states
+            // no need to tick the states None and StartWow as the bot is not running
             if (CurrentState.Key != BotState.None
                 && CurrentState.Key != BotState.StartWow)
             {
-                // Handle Wow crash
+                // wow crashed or was closed by the user
                 if ((Bot.Memory.Process == null || Bot.Memory.Process.HasExited)
                     && SetState(BotState.None))
                 {
@@ -104,12 +117,10 @@ namespace AmeisenBotX.Core.Fsm
                     return;
                 }
 
+                // update the wow interface
                 Bot.Wow.Tick();
 
-                AntiAfkEvent.Run();
-
-                if (CurrentState.Key != BotState.Login
-                    && Bot.Objects != null)
+                if (CurrentState.Key != BotState.Login && Bot.Objects != null)
                 {
                     if (!Bot.Objects.IsWorldLoaded)
                     {
@@ -124,63 +135,73 @@ namespace AmeisenBotX.Core.Fsm
                     {
                         if (Bot.Player != null)
                         {
+                            // make sure we dont go afk
+                            AntiAfkEvent.Run();
+
                             Bot.Movement.Execute();
 
                             // handle event subbing
                             Bot.Events.Tick();
 
+                            // auto disable rendering when not in focus
+                            if (Config.AutoDisableRender && RenderSwitchEvent.Run())
+                            {
+                                IntPtr foregroundWindow = Bot.Memory.GetForegroundWindow();
+                                Bot.Wow.WowSetRenderState(foregroundWindow == Bot.Memory.Process.MainWindowHandle);
+                            }
+
+                            // override states, for example when we die, we need to revive
+                            // there is no way we can be a ghost or stay in combat
                             if (Bot.Player.IsDead)
                             {
-                                // we are dead, state needs to release the spirit
                                 if (SetState(BotState.Dead, true))
                                 {
                                     OnStateOverride?.Invoke(CurrentState.Key);
-                                    return;
                                 }
                             }
-                            else if (Bot.Player.IsGhost
-                                && SetState(BotState.Ghost, true))
+                            else if (Bot.Player.IsGhost)
                             {
-                                OnStateOverride?.Invoke(CurrentState.Key);
-                                return;
-                            }
-
-                            // we cant fight when we are dead or a ghost
-                            if (CurrentState.Key != BotState.Dead
-                                && CurrentState.Key != BotState.Ghost
-                                && !Bot.Globals.IgnoreCombat
-                                && !(Config.IgnoreCombatWhileMounted && Bot.Player.IsMounted)
-                                && (Bot.Globals.ForceCombat || Bot.Player.IsInCombat || IsAnyPartymemberInCombat()
-                                || Bot.GetEnemiesInCombatWithParty<WowUnit>(Bot.Player.Position, 100.0f).Any()))
-                            {
-                                if (SetState(BotState.Attacking, true))
+                                if (SetState(BotState.Ghost, true))
                                 {
                                     OnStateOverride?.Invoke(CurrentState.Key);
-                                    return;
+                                }
+                            }
+                            else if (!Bot.Globals.IgnoreCombat
+                                    && !(Config.IgnoreCombatWhileMounted && Bot.Player.IsMounted)
+                                    && (Bot.Globals.ForceCombat || Bot.Player.IsInCombat || GetState<StateCombat>().IsAnyPartymemberInCombat()
+                                    || Bot.GetEnemiesInCombatWithParty<WowUnit>(Bot.Player.Position, 100.0f).Any()))
+                            {
+                                if (SetState(BotState.Combat, true))
+                                {
+                                    OnStateOverride?.Invoke(CurrentState.Key);
                                 }
                             }
                         }
                     }
-
-                    // auto disable rendering when not in focus
-                    if (Config.AutoDisableRender && RenderSwitchEvent.Run())
-                    {
-                        IntPtr foregroundWindow = Bot.Memory.GetForegroundWindow();
-                        Bot.Wow.WowSetRenderState(foregroundWindow == Bot.Memory.Process.MainWindowHandle);
-                    }
                 }
             }
 
-            // execute the State and Movement
+            // execute the current state
             CurrentState.Value.Execute();
             OnStateMachineTick?.Invoke();
         }
 
+        /// <summary>
+        /// Returns a state instance by its type.
+        /// </summary>
+        /// <typeparam name="T">Type of the state</typeparam>
+        /// <returns>State instance or null if not found</returns>
         public T GetState<T>() where T : BasicState
         {
             return (T)States.FirstOrDefault(e => e.Value.GetType() == typeof(T)).Value;
         }
 
+        /// <summary>
+        /// Changes the current state of the bots fsm.
+        /// </summary>
+        /// <param name="state">State to change to</param>
+        /// <param name="ignoreExit">If true, the states Leave() function won't be called. This is used to override states and resume them.</param>
+        /// <returns>True when the state was changed, false if we are already in that state</returns>
         public bool SetState(BotState state, bool ignoreExit = false)
         {
             if (CurrentState.Key == state)
@@ -190,8 +211,6 @@ namespace AmeisenBotX.Core.Fsm
             }
 
             AmeisenLogger.I.Log("StateMachine", $"Changing State to {state}");
-
-            LastState = CurrentState.Key;
 
             // this is used by the combat state because
             // it will override any existing state
@@ -205,21 +224,6 @@ namespace AmeisenBotX.Core.Fsm
 
             OnStateMachineStateChanged?.Invoke();
             return true;
-        }
-
-        internal IEnumerable<WowUnit> GetNearLootableUnits()
-        {
-            return Bot.Objects.WowObjects.OfType<WowUnit>()
-                       .Where(e => e.IsLootable
-                           && !GetState<StateLooting>().UnitsAlreadyLootedList.Contains(e.Guid)
-                           && e.Position.GetDistance(Bot.Player.Position) < Config.LootUnitsRadius);
-        }
-
-        internal bool IsAnyPartymemberInCombat()
-        {
-            return !Config.OnlySupportMaster && Bot.Objects.WowObjects.OfType<WowPlayer>()
-                       .Where(e => Bot.Objects.PartymemberGuids.Contains(e.Guid) && e.Position.GetDistance(Bot.Player.Position) < Config.SupportRange)
-                       .Any(r => r.IsInCombat);
         }
     }
 }

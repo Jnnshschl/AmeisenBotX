@@ -1,5 +1,6 @@
 ﻿using AmeisenBotX.Core.Common;
 using AmeisenBotX.Core.Fsm.Enums;
+using AmeisenBotX.Wow.Objects.Enums;
 
 namespace AmeisenBotX.Core.Fsm.States
 {
@@ -8,6 +9,11 @@ namespace AmeisenBotX.Core.Fsm.States
         public StateDead(AmeisenBotFsm stateMachine, AmeisenBotConfig config, AmeisenBotInterfaces bot) : base(stateMachine, config, bot)
         {
         }
+
+        /// <summary>
+        /// Returns the map where we died on.
+        /// </summary>
+        public WowMapId LastDiedMap { get; set; }
 
         public bool SetMapAndPosition { get; set; }
 
@@ -23,17 +29,7 @@ namespace AmeisenBotX.Core.Fsm.States
                 if (!SetMapAndPosition) // prevent re-setting the stuff in loading screen
                 {
                     SetMapAndPosition = true;
-                    StateMachine.LastDiedMap = Bot.Objects.MapId;
-
-                    if (StateMachine.LastDiedMap.IsDungeonMap())
-                    {
-                        // when we died in a dungeon, we need to return to its portal
-                        StateMachine.LastDiedPosition = Bot.Dungeon.Profile.WorldEntry;
-                    }
-                    else
-                    {
-                        StateMachine.LastDiedPosition = Bot.Player.Position;
-                    }
+                    LastDiedMap = Bot.Objects.MapId;
                 }
 
                 if (Config.ReleaseSpirit || Bot.Objects.MapId.IsBattlegroundMap())

@@ -30,7 +30,7 @@ namespace AmeisenBotX.Core.Fsm.States
 
         public override void Execute()
         {
-            if (!StateMachine.ShouldExit && File.Exists(Config.PathToWowExe))
+            if (File.Exists(Config.PathToWowExe))
             {
                 if (Bot.Memory.Process == null || Bot.Memory.Process.HasExited)
                 {

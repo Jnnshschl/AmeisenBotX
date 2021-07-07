@@ -14,9 +14,9 @@ using System.Linq;
 
 namespace AmeisenBotX.Core.Fsm.States
 {
-    internal class StateAttacking : BasicState
+    internal class StateCombat : BasicState
     {
-        public StateAttacking(AmeisenBotFsm stateMachine, AmeisenBotConfig config, AmeisenBotInterfaces bot) : base(stateMachine, config, bot)
+        public StateCombat(AmeisenBotFsm stateMachine, AmeisenBotConfig config, AmeisenBotInterfaces bot) : base(stateMachine, config, bot)
         {
             FacingCheck = new(TimeSpan.FromMilliseconds(100));
         }
@@ -41,7 +41,7 @@ namespace AmeisenBotX.Core.Fsm.States
         {
             if (!(Bot.Globals.ForceCombat
                 || Bot.Player.IsInCombat
-                || StateMachine.IsAnyPartymemberInCombat()
+                || IsAnyPartymemberInCombat()
                 || Bot.GetEnemiesInCombatWithParty<WowUnit>(Bot.Player.Position, 100.0f).Any()))
             {
                 StateMachine.SetState(BotState.Idle);
@@ -111,6 +111,13 @@ namespace AmeisenBotX.Core.Fsm.States
                 // set our normal maxfps
                 Bot.Wow.LuaDoString($"SetCVar(\"maxfps\", {Config.MaxFps});SetCVar(\"maxfpsbk\", {Config.MaxFps})");
             }
+        }
+
+        internal bool IsAnyPartymemberInCombat()
+        {
+            return !Config.OnlySupportMaster && Bot.Objects.WowObjects.OfType<WowPlayer>()
+                .Where(e => Bot.Objects.PartymemberGuids.Contains(e.Guid) && e.Position.GetDistance(Bot.Player.Position) < Config.SupportRange)
+                .Any(r => r.IsInCombat);
         }
 
         private float GetMeeleRange()

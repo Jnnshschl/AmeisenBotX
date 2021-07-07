@@ -9,7 +9,7 @@
         Dead,
         Ghost,
         Following,
-        Attacking,
+        Combat,
         Eating,
         LoadingScreen,
         InsideAoeDamage,
