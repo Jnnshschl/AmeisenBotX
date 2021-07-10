@@ -116,10 +116,10 @@ namespace AmeisenBotX
                 {
                     AmeisenBot.Bot.Memory.ResizeParentWindow
                     (
-                        (int)(wowRect.Margin.Left * M11 + 1),
-                        (int)(wowRect.Margin.Top * M22 + 1),
-                        (int)(wowRect.ActualWidth * M11),
-                        (int)(wowRect.ActualHeight * M22)
+                        (int)((wowRect.Margin.Left + 1) * M11),
+                        (int)((wowRect.Margin.Top + 1) * M22),
+                        (int)((wowRect.ActualWidth - 1) * M11),
+                        (int)((wowRect.ActualHeight - 1) * M22)
                     );
                 });
             }
@@ -603,10 +603,10 @@ namespace AmeisenBotX
                                 AmeisenBot.Bot.Memory.SetupAutoPosition
                                 (
                                     MainWindowHandle,
-                                    (int)(wowRect.Margin.Left * M11 + 1),
-                                    (int)(wowRect.Margin.Top * M22 + 1),
-                                    (int)(wowRect.ActualWidth * M11),
-                                    (int)(wowRect.ActualHeight * M22)
+                                    (int)((wowRect.Margin.Left + 1) * M11),
+                                    (int)((wowRect.Margin.Top + 1) * M22),
+                                    (int)((wowRect.ActualWidth - 1) * M11),
+                                    (int)((wowRect.ActualHeight - 1) * M22)
                                 );
                             });
 

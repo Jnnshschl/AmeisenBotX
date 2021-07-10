@@ -4,13 +4,14 @@ using AmeisenBotX.Core.Data.Objects;
 using AmeisenBotX.Memory;
 using AmeisenBotX.Wow.Objects.Enums;
 using AmeisenBotX.Wow.Objects.SubStructs;
-using AmeisenBotX.Wow335a.Objects.Raw;
+using AmeisenBotX.Wow335a.Objects.Descriptors;
 using System;
 using System.Collections.Generic;
 using System.Text;
 
 namespace AmeisenBotX.Wow335a.Objects
 {
+    [Serializable]
     public class WowPlayer335a : WowUnit335a, IWowPlayer
     {
         private VisibleItemEnchantment[] itemEnchantments;
@@ -42,7 +43,7 @@ namespace AmeisenBotX.Wow335a.Objects
 
         public double XpPercentage => BotMath.Percentage(Xp, NextLevelXp);
 
-        protected RawWowPlayer RawWowPlayer { get; private set; }
+        protected WowPlayerDescriptor RawWowPlayer { get; private set; }
 
         public bool IsAlliance()
         {
@@ -64,37 +65,42 @@ namespace AmeisenBotX.Wow335a.Objects
 
         public override string ReadName(IMemoryApi memoryApi, IOffsetList offsetList)
         {
-            memoryApi.Read(IntPtr.Add(offsetList.NameStore, (int)offsetList.NameMask), out uint nameMask);
-            memoryApi.Read(IntPtr.Add(offsetList.NameStore, (int)offsetList.NameBase), out uint nameBase);
-
-            uint shortGuid = (uint)Guid & 0xfffffff;
-            uint offset = 12 * (nameMask & shortGuid);
-
-            memoryApi.Read(new(nameBase + offset + 8), out uint current);
-            memoryApi.Read(new(nameBase + offset), out offset);
-
-            if ((current & 0x1) == 0x1)
+            if (memoryApi.Read(IntPtr.Add(offsetList.NameStore, (int)offsetList.NameMask), out uint nameMask)
+                && memoryApi.Read(IntPtr.Add(offsetList.NameStore, (int)offsetList.NameBase), out uint nameBase))
             {
-                return string.Empty;
-            }
+                uint shortGuid = (uint)Guid & 0xfffffff;
+                uint offset = 12 * (nameMask & shortGuid);
 
-            memoryApi.Read(new(current), out uint testGuid);
-
-            while (testGuid != shortGuid)
-            {
-                memoryApi.Read(new(current + offset + 4), out current);
-
-                if ((current & 0x1) == 0x1)
+                if (memoryApi.Read(new(nameBase + offset + 8), out uint current)
+                    && memoryApi.Read(new(nameBase + offset), out offset))
                 {
-                    return string.Empty;
-                }
+                    if ((current & 0x1) == 0x1)
+                    {
+                        return string.Empty;
+                    }
 
-                memoryApi.Read(new(current), out testGuid);
+                    memoryApi.Read(new(current), out uint testGuid);
+
+                    while (testGuid != shortGuid)
+                    {
+                        memoryApi.Read(new(current + offset + 4), out current);
+
+                        if ((current & 0x1) == 0x1)
+                        {
+                            return string.Empty;
+                        }
+
+                        memoryApi.Read(new(current), out testGuid);
+                    }
+
+                    if (memoryApi.ReadString(new(current + (int)offsetList.NameString), Encoding.UTF8, out string name, 16))
+                    {
+                        return name;
+                    }
+                }
             }
 
-            memoryApi.ReadString(new(current + (int)offsetList.NameString), Encoding.UTF8, out string name, 16);
-
-            return name;
+            return string.Empty;
         }
 
         public override string ToString()
@@ -106,7 +112,7 @@ namespace AmeisenBotX.Wow335a.Objects
         {
             base.Update(memoryApi, offsetList);
 
-            if (memoryApi.Read(DescriptorAddress + RawWowObject.EndOffset + RawWowUnit.EndOffset, out RawWowPlayer obj))
+            if (memoryApi.Read(DescriptorAddress + WowObjectDescriptor.EndOffset + WowUnitDescriptor.EndOffset, out WowPlayerDescriptor obj))
             {
                 RawWowPlayer = obj;
 
@@ -177,6 +183,11 @@ namespace AmeisenBotX.Wow335a.Objects
             if (memoryApi.Read(offsetList.BreathTimer, out int breathTimer))
             {
                 IsUnderwater = breathTimer > 0;
+            }
+
+            if (memoryApi.Read(offsetList.ComboPoints, out byte comboPoints))
+            {
+                ComboPoints = comboPoints;
             }
 
             IsGhost = HasBuffById(8326);

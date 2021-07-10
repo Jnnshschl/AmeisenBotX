@@ -1,10 +1,10 @@
 ﻿using System.Collections.Specialized;
 using System.Runtime.InteropServices;
 
-namespace AmeisenBotX.Wow335a.Objects.Raw
+namespace AmeisenBotX.Wow335a.Objects.Descriptors
 {
     [StructLayout(LayoutKind.Sequential)]
-    public unsafe struct RawWowUnit
+    public unsafe struct WowUnitDescriptor
     {
         public ulong Charm;
         public ulong Summon;

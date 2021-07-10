@@ -1,9 +1,9 @@
 ﻿using System.Runtime.InteropServices;
 
-namespace AmeisenBotX.Wow335a.Objects.Raw
+namespace AmeisenBotX.Wow335a.Objects.Descriptors
 {
     [StructLayout(LayoutKind.Sequential)]
-    public unsafe struct RawWowContainer
+    public unsafe struct WowContainerDescriptor
     {
         public int SlotCount;
         public fixed byte WowContainerPad[4];

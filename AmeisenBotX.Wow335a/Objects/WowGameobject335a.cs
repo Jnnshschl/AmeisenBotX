@@ -3,13 +3,14 @@ using AmeisenBotX.Common.Offsets;
 using AmeisenBotX.Core.Data.Objects;
 using AmeisenBotX.Memory;
 using AmeisenBotX.Wow.Objects.Enums;
-using AmeisenBotX.Wow335a.Objects.Raw;
+using AmeisenBotX.Wow335a.Objects.Descriptors;
 using System;
 using System.Collections.Specialized;
 using System.Globalization;
 
 namespace AmeisenBotX.Wow335a.Objects
 {
+    [Serializable]
     public class WowGameobject335a : WowObject335a, IWowGameobject
     {
         public WowGameobject335a(IntPtr baseAddress, IntPtr descriptorAddress) : base(baseAddress, descriptorAddress)
@@ -39,7 +40,7 @@ namespace AmeisenBotX.Wow335a.Objects
         {
             base.Update(memoryApi, offsetList);
 
-            if (memoryApi.Read(DescriptorAddress + RawWowObject.EndOffset, out RawWowGameobject objPtr)
+            if (memoryApi.Read(DescriptorAddress + WowObjectDescriptor.EndOffset, out WowGameobjectDescriptor objPtr)
                 && memoryApi.Read(IntPtr.Add(BaseAddress, (int)offsetList.WowGameobjectPosition), out Vector3 position))
             {
                 GameobjectType = (WowGameobjectType)objPtr.GameobjectBytes1;

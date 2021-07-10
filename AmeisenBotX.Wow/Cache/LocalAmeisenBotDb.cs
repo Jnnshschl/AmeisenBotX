@@ -224,14 +224,14 @@ namespace AmeisenBotX.Wow.Cache
 
         public void Clear()
         {
-            Names = new ConcurrentDictionary<ulong, string>();
-            Reactions = new ConcurrentDictionary<int, Dictionary<int, WowUnitReaction>>();
-            SpellNames = new ConcurrentDictionary<int, string>();
-            CombatLogEntries = new ConcurrentDictionary<CombatLogEntryType, Dictionary<CombatLogEntrySubtype, List<(DateTime, BasicCombatLogEntry)>>>();
-            BlacklistNodes = new ConcurrentDictionary<int, List<Vector3>>();
-            PointsOfInterest = new ConcurrentDictionary<WowMapId, Dictionary<PoiType, List<Vector3>>>();
-            OreNodes = new ConcurrentDictionary<WowMapId, Dictionary<WowOreId, List<Vector3>>>();
-            HerbNodes = new ConcurrentDictionary<WowMapId, Dictionary<WowHerbId, List<Vector3>>>();
+            Names = new();
+            Reactions = new();
+            SpellNames = new();
+            CombatLogEntries = new();
+            BlacklistNodes = new();
+            PointsOfInterest = new();
+            OreNodes = new();
+            HerbNodes = new();
         }
 
         public BasicCombatLogEntrySubject GetCombatLogSubject()

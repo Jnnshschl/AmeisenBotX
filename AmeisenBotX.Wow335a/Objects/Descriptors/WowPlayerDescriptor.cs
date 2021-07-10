@@ -1,10 +1,10 @@
 ﻿using AmeisenBotX.Wow.Objects.SubStructs;
 using System.Runtime.InteropServices;
 
-namespace AmeisenBotX.Wow335a.Objects.Raw
+namespace AmeisenBotX.Wow335a.Objects.Descriptors
 {
     [StructLayout(LayoutKind.Sequential)]
-    public unsafe struct RawWowPlayer
+    public unsafe struct WowPlayerDescriptor
     {
         public ulong DuelArbiter;
         public int Flags;

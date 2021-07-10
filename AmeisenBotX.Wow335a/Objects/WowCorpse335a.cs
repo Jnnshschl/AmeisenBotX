@@ -1,7 +1,7 @@
 ﻿using AmeisenBotX.Common.Offsets;
 using AmeisenBotX.Core.Data.Objects;
 using AmeisenBotX.Memory;
-using AmeisenBotX.Wow335a.Objects.Raw;
+using AmeisenBotX.Wow335a.Objects.Descriptors;
 using System;
 
 namespace AmeisenBotX.Wow335a.Objects
@@ -19,7 +19,7 @@ namespace AmeisenBotX.Wow335a.Objects
 
         public ulong Party => RawWowCorpse.Party;
 
-        protected RawWowCorpse RawWowCorpse { get; private set; }
+        protected WowCorpseDescriptor RawWowCorpse { get; private set; }
 
         public override string ToString()
         {
@@ -30,7 +30,7 @@ namespace AmeisenBotX.Wow335a.Objects
         {
             base.Update(memoryApi, offsetList);
 
-            if (memoryApi.Read(DescriptorAddress + RawWowObject.EndOffset, out RawWowCorpse obj))
+            if (memoryApi.Read(DescriptorAddress + WowObjectDescriptor.EndOffset, out WowCorpseDescriptor obj))
             {
                 RawWowCorpse = obj;
             }

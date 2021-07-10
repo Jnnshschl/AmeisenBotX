@@ -3,12 +3,13 @@ using AmeisenBotX.Core.Data.Objects;
 using AmeisenBotX.Memory;
 using AmeisenBotX.Wow.Objects.Enums;
 using AmeisenBotX.Wow.Objects.SubStructs;
-using AmeisenBotX.Wow335a.Objects.Raw;
+using AmeisenBotX.Wow335a.Objects.Descriptors;
 using System;
 using System.Collections.Generic;
 
 namespace AmeisenBotX.Wow335a.Objects
 {
+    [Serializable]
     public class WowItem335a : WowObject335a, IWowItem
     {
         public WowItem335a(IntPtr baseAddress, IntPtr descriptorAddress) : base(baseAddress, descriptorAddress)
@@ -45,7 +46,7 @@ namespace AmeisenBotX.Wow335a.Objects
         {
             base.Update(memoryApi, offsetList);
 
-            if (memoryApi.Read(DescriptorAddress + RawWowObject.EndOffset, out RawWowItem objPtr))
+            if (memoryApi.Read(DescriptorAddress + WowObjectDescriptor.EndOffset, out WowItemDescriptor objPtr))
             {
                 Count = objPtr.StackCount;
                 Owner = objPtr.Owner;

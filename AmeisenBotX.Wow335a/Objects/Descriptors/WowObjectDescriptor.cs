@@ -1,9 +1,9 @@
 ﻿using System.Runtime.InteropServices;
 
-namespace AmeisenBotX.Wow335a.Objects.Raw
+namespace AmeisenBotX.Wow335a.Objects.Descriptors
 {
     [StructLayout(LayoutKind.Sequential)]
-    public struct RawWowObject
+    public struct WowObjectDescriptor
     {
         public ulong Guid;
         public int Type;

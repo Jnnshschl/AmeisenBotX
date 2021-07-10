@@ -2,7 +2,7 @@
 using AmeisenBotX.Common.Offsets;
 using AmeisenBotX.Core.Data.Objects;
 using AmeisenBotX.Memory;
-using AmeisenBotX.Wow335a.Objects.Raw;
+using AmeisenBotX.Wow335a.Objects.Descriptors;
 using System;
 
 namespace AmeisenBotX.Wow335a.Objects
@@ -29,7 +29,7 @@ namespace AmeisenBotX.Wow335a.Objects
         {
             base.Update(memoryApi, offsetList);
 
-            if (memoryApi.Read(DescriptorAddress + RawWowObject.EndOffset, out RawWowDynobject objPtr)
+            if (memoryApi.Read(DescriptorAddress + WowObjectDescriptor.EndOffset, out WowDynobjectDescriptor objPtr)
                 && memoryApi.Read(IntPtr.Add(BaseAddress, (int)offsetList.WowDynobjectPosition), out Vector3 position))
             {
                 Caster = objPtr.Caster;

@@ -4,7 +4,7 @@ using AmeisenBotX.Core.Data.Objects;
 using AmeisenBotX.Memory;
 using AmeisenBotX.Wow.Objects;
 using AmeisenBotX.Wow.Objects.Enums;
-using AmeisenBotX.Wow335a.Objects.Raw;
+using AmeisenBotX.Wow335a.Objects.Descriptors;
 using System;
 using System.Collections.Generic;
 using System.Collections.Specialized;
@@ -13,6 +13,7 @@ using System.Text;
 
 namespace AmeisenBotX.Wow335a.Objects
 {
+    [Serializable]
     public class WowUnit335a : WowObject335a, IWowUnit
     {
         public WowUnit335a(IntPtr baseAddress, IntPtr descriptorAddress) : base(baseAddress, descriptorAddress)
@@ -89,7 +90,7 @@ namespace AmeisenBotX.Wow335a.Objects
 
         public BitVector32 UnitFlagsDynamic => RawWowUnit.DynamicFlags;
 
-        protected RawWowUnit RawWowUnit { get; private set; }
+        protected WowUnitDescriptor RawWowUnit { get; private set; }
 
         public static IEnumerable<RawWowAura> GetUnitAuras(IMemoryApi memoryApi, IOffsetList offsetList, IntPtr unitBase, out int auraCount)
         {
@@ -154,7 +155,7 @@ namespace AmeisenBotX.Wow335a.Objects
         {
             base.Update(memoryApi, offsetList);
 
-            if (memoryApi.Read(DescriptorAddress + RawWowObject.EndOffset, out RawWowUnit objPtr))
+            if (memoryApi.Read(DescriptorAddress + WowObjectDescriptor.EndOffset, out WowUnitDescriptor objPtr))
             {
                 RawWowUnit = objPtr;
             }

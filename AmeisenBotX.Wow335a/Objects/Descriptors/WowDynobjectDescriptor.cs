@@ -1,9 +1,9 @@
 ﻿using System.Runtime.InteropServices;
 
-namespace AmeisenBotX.Wow335a.Objects.Raw
+namespace AmeisenBotX.Wow335a.Objects.Descriptors
 {
     [StructLayout(LayoutKind.Sequential)]
-    public unsafe struct RawWowDynobject
+    public unsafe struct WowDynobjectDescriptor
     {
         public ulong Caster;
         public fixed byte DynobjectBytes[4];

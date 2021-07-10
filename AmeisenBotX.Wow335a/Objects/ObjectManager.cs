@@ -252,7 +252,7 @@ namespace AmeisenBotX.Wow335a.Objects
                 && MemoryApi.Read(IntPtr.Add(ptr, (int)OffsetList.WowObjectType), out WowObjectType type)
                 && MemoryApi.Read(IntPtr.Add(ptr, (int)OffsetList.WowObjectDescriptor), out IntPtr descriptorAddress))
             {
-                IWowObject obj = type switch
+                wowObjects[i] = type switch
                 {
                     WowObjectType.Container => new WowContainer335a(ptr, descriptorAddress),
                     WowObjectType.Corpse => new WowCorpse335a(ptr, descriptorAddress),
@@ -264,37 +264,31 @@ namespace AmeisenBotX.Wow335a.Objects
                     _ => new WowObject335a(ptr, descriptorAddress),
                 };
 
-                obj.Update(MemoryApi, OffsetList);
+                wowObjects[i].Update(MemoryApi, OffsetList);
 
-                if (type == WowObjectType.Unit || type == WowObjectType.Player)
+                if (type is WowObjectType.Unit or WowObjectType.Player)
                 {
-                    if (obj.Guid == PlayerGuid)
+                    if (wowObjects[i].Guid == PlayerGuid)
                     {
-                        PlayerGuidIsVehicle = obj.GetType() != typeof(WowPlayer335a);
+                        PlayerGuidIsVehicle = wowObjects[i].GetType() != typeof(WowPlayer335a);
 
                         if (!PlayerGuidIsVehicle)
                         {
-                            if (MemoryApi.Read(OffsetList.ComboPoints, out byte comboPoints))
-                            {
-                                ((WowPlayer335a)obj).ComboPoints = comboPoints;
-                            }
-
-                            Player = (WowPlayer335a)obj;
+                            Player = (WowPlayer335a)wowObjects[i];
                             Vehicle = null;
                         }
                         else
                         {
-                            Vehicle = (WowUnit335a)obj;
+                            // player stays the old object
+                            Vehicle = (WowUnit335a)wowObjects[i];
                         }
                     }
 
-                    if (obj.Guid == TargetGuid) { Target = (WowUnit335a)obj; }
-                    if (obj.Guid == PetGuid) { Pet = (WowUnit335a)obj; }
-                    if (obj.Guid == LastTargetGuid) { LastTarget = (WowUnit335a)obj; }
-                    if (obj.Guid == PartyleaderGuid) { Partyleader = (WowUnit335a)obj; }
+                    if (wowObjects[i].Guid == TargetGuid) { Target = (WowUnit335a)wowObjects[i]; }
+                    if (wowObjects[i].Guid == LastTargetGuid) { LastTarget = (WowUnit335a)wowObjects[i]; }
+                    if (wowObjects[i].Guid == PartyleaderGuid) { Partyleader = (WowUnit335a)wowObjects[i]; }
+                    if (wowObjects[i].Guid == PetGuid) { Pet = (WowUnit335a)wowObjects[i]; }
                 }
-
-                wowObjects[i] = obj;
             }
         }
 

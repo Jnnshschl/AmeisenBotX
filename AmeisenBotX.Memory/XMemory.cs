@@ -304,16 +304,14 @@ namespace AmeisenBotX.Memory
             {
                 if (RpmGateWay(address, pBuffer, lenght))
                 {
-                    List<byte> strBuffer = new(lenght);
+                    int i = 0;
 
-                    for (int i = 0; i < lenght; ++i)
+                    while (i < lenght && pBuffer[i] != 0)
                     {
-                        if (pBuffer[i] == 0) { break; }
-
-                        strBuffer.Add(pBuffer[i]);
+                        ++i;
                     }
 
-                    value = encoding.GetString(strBuffer.ToArray());
+                    value = encoding.GetString(pBuffer, i);
                     return true;
                 }
             }

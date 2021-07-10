@@ -1,7 +1,7 @@
 ﻿using AmeisenBotX.Common.Offsets;
 using AmeisenBotX.Core.Data.Objects;
 using AmeisenBotX.Memory;
-using AmeisenBotX.Wow335a.Objects.Raw;
+using AmeisenBotX.Wow335a.Objects.Descriptors;
 using System;
 
 namespace AmeisenBotX.Wow335a.Objects
@@ -15,7 +15,7 @@ namespace AmeisenBotX.Wow335a.Objects
 
         public int SlotCount => RawWowContainer.SlotCount;
 
-        protected RawWowContainer RawWowContainer { get; private set; }
+        protected WowContainerDescriptor RawWowContainer { get; private set; }
 
         public override string ToString()
         {
@@ -26,7 +26,7 @@ namespace AmeisenBotX.Wow335a.Objects
         {
             base.Update(memoryApi, offsetList);
 
-            if (memoryApi.Read(DescriptorAddress + RawWowObject.EndOffset, out RawWowContainer obj))
+            if (memoryApi.Read(DescriptorAddress + WowObjectDescriptor.EndOffset, out WowContainerDescriptor obj))
             {
                 RawWowContainer = obj;
             }

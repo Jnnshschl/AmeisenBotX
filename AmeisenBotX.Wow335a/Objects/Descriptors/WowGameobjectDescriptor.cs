@@ -1,9 +1,9 @@
 ﻿using System.Runtime.InteropServices;
 
-namespace AmeisenBotX.Wow335a.Objects.Raw
+namespace AmeisenBotX.Wow335a.Objects.Descriptors
 {
     [StructLayout(LayoutKind.Sequential)]
-    public unsafe struct RawWowGameobject
+    public unsafe struct WowGameobjectDescriptor
     {
         public ulong CreatedBy;
         public int DisplayId;

@@ -3,7 +3,7 @@ using AmeisenBotX.Common.Offsets;
 using AmeisenBotX.Core.Data.Objects;
 using AmeisenBotX.Memory;
 using AmeisenBotX.Wow.Objects.Enums;
-using AmeisenBotX.Wow335a.Objects.Raw;
+using AmeisenBotX.Wow335a.Objects.Descriptors;
 using System;
 
 namespace AmeisenBotX.Wow335a.Objects
@@ -31,7 +31,7 @@ namespace AmeisenBotX.Wow335a.Objects
 
         public WowObjectType Type => (WowObjectType)RawObject.Type;
 
-        protected RawWowObject RawObject { get; private set; }
+        protected WowObjectDescriptor RawObject { get; private set; }
 
         public override string ToString()
         {
@@ -40,7 +40,7 @@ namespace AmeisenBotX.Wow335a.Objects
 
         public virtual void Update(IMemoryApi memoryApi, IOffsetList offsetList)
         {
-            if (memoryApi.Read(DescriptorAddress, out RawWowObject obj))
+            if (memoryApi.Read(DescriptorAddress, out WowObjectDescriptor obj))
             {
                 RawObject = obj;
             }
