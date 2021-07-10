@@ -174,7 +174,7 @@ namespace AmeisenBotX.Core.Engines.Combat.Classes.Kamel
         {
             Shield();
             WeaponEnhancement();
-            revivePartyMember(ancestralSpiritSpell);
+            RevivePartyMember(ancestralSpiritSpell);
             Targetselection();
             StartAttack();
         }
@@ -224,11 +224,11 @@ namespace AmeisenBotX.Core.Engines.Combat.Classes.Kamel
                     {
                         return;
                     }
-                    if (totemItemCheck() && CustomCastSpellMana(fireElementalTotem))
+                    if (TotemItemCheck() && CustomCastSpellMana(fireElementalTotem))
                     {
                         return;
                     }
-                    if (totemItemCheck() && CustomCastSpellMana(earthElementalTotem))
+                    if (TotemItemCheck() && CustomCastSpellMana(earthElementalTotem))
                     {
                         return;
                     }

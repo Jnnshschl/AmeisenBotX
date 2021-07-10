@@ -33,14 +33,12 @@ namespace AmeisenBotX.Core.Engines.Quest.Objects.Objectives
                     return 100.0;
                 }
 
-                Character.Inventory.Objects.IWowItem inventoryItem = Bot.Character.Inventory.Items.Find(item => item.Id == ItemId);
+                Character.Inventory.Objects.IWowInventoryItem inventoryItem = Bot.Character.Inventory.Items.Find(item => item.Id == ItemId);
                 return inventoryItem != null ? Math.Min(100.0 * ((float)inventoryItem.Count) / ((float)WantedItemAmount), 100.0) : 0.0;
             }
         }
 
         private AmeisenBotInterfaces Bot { get; }
-
-        private int CurrentItemAmount => Bot.Character.Inventory.Items.Count(e => e.Id == ItemId);
 
         private List<int> GameObjectIds { get; }
 
@@ -54,7 +52,7 @@ namespace AmeisenBotX.Core.Engines.Quest.Objects.Objectives
         {
             if (Finished) { return; }
 
-            WowGameobject lootableObject = Bot.Objects.WowObjects.OfType<WowGameobject>()
+            IWowGameobject lootableObject = Bot.Objects.WowObjects.OfType<IWowGameobject>()
                 .Where(e => GameObjectIds.Contains(e.EntryId))
                 .OrderBy(e => e.Position.GetDistance(Bot.Player.Position))
                 .FirstOrDefault();

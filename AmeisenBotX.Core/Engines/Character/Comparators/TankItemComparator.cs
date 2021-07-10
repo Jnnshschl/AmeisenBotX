@@ -6,7 +6,7 @@ namespace AmeisenBotX.Core.Engines.Character.Comparators
 {
     public class TankItemComparator : IItemComparator
     {
-        public bool IsBetter(IWowItem current, IWowItem item)
+        public bool IsBetter(IWowInventoryItem current, IWowInventoryItem item)
         {
             if (item == null)
             {
@@ -30,12 +30,12 @@ namespace AmeisenBotX.Core.Engines.Character.Comparators
             return currentRating < newItemRating;
         }
 
-        public bool IsBlacklistedItem(IWowItem item)
+        public bool IsBlacklistedItem(IWowInventoryItem item)
         {
             return false;
         }
 
-        private double GetRating(IWowItem item, WowEquipmentSlot slot)
+        private static double GetRating(IWowInventoryItem item, WowEquipmentSlot slot)
         {
             double rating = 0;
 

@@ -96,7 +96,7 @@ namespace AmeisenBotX.Core.Engines.Combat.Classes.Shino
                 return;
             }
 
-            if (SelectTarget(out WowUnit target))
+            if (SelectTarget(out IWowUnit target))
             {
                 if (Bot.Player.ManaPercentage <= 25.0 && TryCastSpell(evocationSpell, 0, true))
                 {
@@ -114,7 +114,7 @@ namespace AmeisenBotX.Core.Engines.Combat.Classes.Shino
                     TryCastAoeSpell(freezeSpell, target.Guid);
                 }
 
-                System.Collections.Generic.IEnumerable<WowUnit> nearbyTargets = Bot.GetEnemiesInCombatWithParty<WowUnit>(Bot.Player.Position, 64.0f);
+                System.Collections.Generic.IEnumerable<IWowUnit> nearbyTargets = Bot.GetEnemiesInCombatWithParty<IWowUnit>(Bot.Player.Position, 64.0f);
                 if (nearbyTargets.Count(e => e.Position.GetDistance(Bot.Player.Position) <= 9.0) == 1
                     && TryCastSpell(frostNovaSpell, 0, true))
                 {
@@ -125,7 +125,7 @@ namespace AmeisenBotX.Core.Engines.Combat.Classes.Shino
                 {
                     if (nearbyTargets.Count() > 1 && !nearbyTargets.Any(e => e.Auras.Any(aura => Bot.Db.GetSpellName(aura.SpellId) == polymorphSpell)))
                     {
-                        WowUnit targetInDistance = nearbyTargets
+                        IWowUnit targetInDistance = nearbyTargets
                             .Where(e => e.Guid != Bot.Wow.TargetGuid)
                             .OrderBy(e => e.Position.GetDistance(Bot.Player.Position))
                             .FirstOrDefault();

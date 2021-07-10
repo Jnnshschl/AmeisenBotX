@@ -2,7 +2,6 @@
 using AmeisenBotX.Common.Math;
 using AmeisenBotX.Common.Offsets;
 using AmeisenBotX.Common.Utils;
-using AmeisenBotX.Core.Data.Objects;
 using AmeisenBotX.Core.Engines.Character.Comparators;
 using AmeisenBotX.Core.Engines.Character.Inventory;
 using AmeisenBotX.Core.Engines.Character.Inventory.Objects;
@@ -12,6 +11,7 @@ using AmeisenBotX.Logging;
 using AmeisenBotX.Logging.Enums;
 using AmeisenBotX.Memory;
 using AmeisenBotX.Wow;
+using AmeisenBotX.Wow.Objects;
 using AmeisenBotX.Wow.Objects.Enums;
 using Newtonsoft.Json;
 using System;
@@ -117,7 +117,7 @@ namespace AmeisenBotX.Core.Engines.Character
             };
         }
 
-        public bool IsAbleToUseItem(IWowItem item)
+        public bool IsAbleToUseItem(IWowInventoryItem item)
         {
             return (string.Equals(item.Type, "Armor", StringComparison.OrdinalIgnoreCase) &&
                     IsAbleToUseArmor((WowArmor)item)) || (string.Equals(item.Type, "Weapon", StringComparison.OrdinalIgnoreCase) &&
@@ -149,7 +149,7 @@ namespace AmeisenBotX.Core.Engines.Character
             };
         }
 
-        public bool IsItemAnImprovement(IWowItem item, out IWowItem itemToReplace)
+        public bool IsItemAnImprovement(IWowInventoryItem item, out IWowInventoryItem itemToReplace)
         {
             itemToReplace = null;
 
@@ -160,7 +160,7 @@ namespace AmeisenBotX.Core.Engines.Character
 
             if (IsAbleToUseItem(item))
             {
-                if (GetItemsByEquiplocation(item.EquipLocation, out List<IWowItem> matchedItems, out _))
+                if (GetItemsByEquiplocation(item.EquipLocation, out List<IWowInventoryItem> matchedItems, out _))
                 {
                     // if we dont have an item in the slot or if we only have 3 of 4 bags
                     if (matchedItems.Count == 0)
@@ -170,7 +170,7 @@ namespace AmeisenBotX.Core.Engines.Character
 
                     for (int i = 0; i < matchedItems.Count; ++i)
                     {
-                        IWowItem matchedItem = matchedItems[i];
+                        IWowInventoryItem matchedItem = matchedItems[i];
 
                         if (matchedItem != null
                             && item.Id != matchedItem.Id
@@ -215,7 +215,7 @@ namespace AmeisenBotX.Core.Engines.Character
 
         public void UpdateBags()
         {
-            IEnumerable<IWowItem> container = Inventory.Items.Where(item => item.Type.Equals("container", StringComparison.CurrentCultureIgnoreCase));
+            IEnumerable<IWowInventoryItem> container = Inventory.Items.Where(item => item.Type.Equals("container", StringComparison.CurrentCultureIgnoreCase));
 
             if (container.Any())
             {
@@ -244,23 +244,23 @@ namespace AmeisenBotX.Core.Engines.Character
                 }
 
                 if (slot == WowEquipmentSlot.INVSLOT_OFFHAND
-                    && Equipment.Items.TryGetValue(WowEquipmentSlot.INVSLOT_MAINHAND, out IWowItem mainHandItem)
+                    && Equipment.Items.TryGetValue(WowEquipmentSlot.INVSLOT_MAINHAND, out IWowInventoryItem mainHandItem)
                     && mainHandItem.EquipLocation.Contains("INVTYPE_2HWEAPON", StringComparison.OrdinalIgnoreCase))
                 {
                     continue;
                 }
 
-                IEnumerable<IWowItem> itemsLikeEquipped = Inventory.Items.Where(e => !string.IsNullOrWhiteSpace(e.EquipLocation) && SlotToEquipLocation((int)slot).Contains(e.EquipLocation, StringComparison.OrdinalIgnoreCase)).OrderByDescending(e => e.ItemLevel).ToList();
+                IEnumerable<IWowInventoryItem> itemsLikeEquipped = Inventory.Items.Where(e => !string.IsNullOrWhiteSpace(e.EquipLocation) && SlotToEquipLocation((int)slot).Contains(e.EquipLocation, StringComparison.OrdinalIgnoreCase)).OrderByDescending(e => e.ItemLevel).ToList();
 
                 if (itemsLikeEquipped.Any())
                 {
-                    if (Equipment.Items.TryGetValue(slot, out IWowItem equippedItem))
+                    if (Equipment.Items.TryGetValue(slot, out IWowInventoryItem equippedItem))
                     {
                         for (int f = 0; f < itemsLikeEquipped.Count(); ++f)
                         {
-                            IWowItem item = itemsLikeEquipped.ElementAt(f);
+                            IWowInventoryItem item = itemsLikeEquipped.ElementAt(f);
 
-                            if (IsItemAnImprovement(item, out IWowItem itemToReplace))
+                            if (IsItemAnImprovement(item, out IWowInventoryItem itemToReplace))
                             {
                                 AmeisenLogger.I.Log("Equipment", $"Replacing \"{itemToReplace}\" with \"{item}\"", LogLevel.Verbose);
                                 Wow.LuaEquipItem(item.Name/*, itemToReplace.Name*/);
@@ -271,7 +271,7 @@ namespace AmeisenBotX.Core.Engines.Character
                     }
                     else
                     {
-                        IWowItem itemToEquip = itemsLikeEquipped.First();
+                        IWowInventoryItem itemToEquip = itemsLikeEquipped.First();
 
                         if ((string.Equals(itemToEquip.Type, "Armor", StringComparison.OrdinalIgnoreCase) && IsAbleToUseArmor((WowArmor)itemToEquip))
                             || (string.Equals(itemToEquip.Type, "Weapon", StringComparison.OrdinalIgnoreCase) && IsAbleToUseWeapon((WowWeapon)itemToEquip)))
@@ -317,7 +317,7 @@ namespace AmeisenBotX.Core.Engines.Character
             };
         }
 
-        private bool GetItemsByEquiplocation(string equiplocation, out List<IWowItem> matchedItems, out int expectedItemCount)
+        private bool GetItemsByEquiplocation(string equiplocation, out List<IWowInventoryItem> matchedItems, out int expectedItemCount)
         {
             expectedItemCount = 1;
             matchedItems = new();
@@ -358,7 +358,7 @@ namespace AmeisenBotX.Core.Engines.Character
             return true;
         }
 
-        private void TryAddAllBags(List<IWowItem> matchedItems, ref int expectedItemCount)
+        private void TryAddAllBags(List<IWowInventoryItem> matchedItems, ref int expectedItemCount)
         {
             TryAddItem(WowEquipmentSlot.CONTAINER_BAG_1, matchedItems);
             TryAddItem(WowEquipmentSlot.CONTAINER_BAG_2, matchedItems);
@@ -368,15 +368,15 @@ namespace AmeisenBotX.Core.Engines.Character
             expectedItemCount = 4;
         }
 
-        private void TryAddItem(WowEquipmentSlot slot, List<IWowItem> matchedItems)
+        private void TryAddItem(WowEquipmentSlot slot, List<IWowInventoryItem> matchedItems)
         {
-            if (Equipment.Items.TryGetValue(slot, out IWowItem ammoItem))
+            if (Equipment.Items.TryGetValue(slot, out IWowInventoryItem ammoItem))
             {
                 matchedItems.Add(ammoItem);
             }
         }
 
-        private void TryAddRings(List<IWowItem> matchedItems, ref int expectedItemCount)
+        private void TryAddRings(List<IWowInventoryItem> matchedItems, ref int expectedItemCount)
         {
             TryAddItem(WowEquipmentSlot.INVSLOT_RING1, matchedItems);
             TryAddItem(WowEquipmentSlot.INVSLOT_RING2, matchedItems);
@@ -384,7 +384,7 @@ namespace AmeisenBotX.Core.Engines.Character
             expectedItemCount = 2;
         }
 
-        private void TryAddTrinkets(List<IWowItem> matchedItems, ref int expectedItemCount)
+        private void TryAddTrinkets(List<IWowInventoryItem> matchedItems, ref int expectedItemCount)
         {
             TryAddItem(WowEquipmentSlot.INVSLOT_TRINKET1, matchedItems);
             TryAddItem(WowEquipmentSlot.INVSLOT_TRINKET2, matchedItems);
@@ -392,7 +392,7 @@ namespace AmeisenBotX.Core.Engines.Character
             expectedItemCount = 2;
         }
 
-        private void TryAddWeapons(List<IWowItem> matchedItems, ref int expectedItemCount)
+        private void TryAddWeapons(List<IWowInventoryItem> matchedItems, ref int expectedItemCount)
         {
             TryAddItem(WowEquipmentSlot.INVSLOT_MAINHAND, matchedItems);
             TryAddItem(WowEquipmentSlot.INVSLOT_OFFHAND, matchedItems);

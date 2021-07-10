@@ -9,7 +9,7 @@ namespace AmeisenBotX.Wow.Cache.Structs
 
         public bool LikesHorde { get; set; }
 
-        public bool LikesUnit(WowUnit wowUnit)
+        public bool LikesUnit(IWowUnit wowUnit)
         {
             return (LikesAlliance && (wowUnit.Race == WowRace.Human || wowUnit.Race == WowRace.Gnome ||
                                       wowUnit.Race == WowRace.Draenei || wowUnit.Race == WowRace.Dwarf ||

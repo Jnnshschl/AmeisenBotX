@@ -1,10 +1,10 @@
 ﻿using AmeisenBotX.Common.Math;
-using AmeisenBotX.Core.Data.Objects;
 using AmeisenBotX.Core.Engines.Character.Comparators;
 using AmeisenBotX.Core.Engines.Character.Inventory;
 using AmeisenBotX.Core.Engines.Character.Inventory.Objects;
 using AmeisenBotX.Core.Engines.Character.Spells;
 using AmeisenBotX.Core.Engines.Character.Talents;
+using AmeisenBotX.Wow.Objects;
 using AmeisenBotX.Wow.Objects.Enums;
 using System.Collections.Generic;
 
@@ -40,7 +40,7 @@ namespace AmeisenBotX.Core.Engines.Character
 
         bool IsAbleToUseWeapon(WowWeapon item);
 
-        bool IsItemAnImprovement(IWowItem item, out IWowItem itemToReplace);
+        bool IsItemAnImprovement(IWowInventoryItem item, out IWowInventoryItem itemToReplace);
 
         void Jump();
 

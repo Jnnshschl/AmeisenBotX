@@ -35,7 +35,7 @@ namespace AmeisenBotX.Core.Engines.Battleground.KamelBG
 
         public void Combat()
         {
-            WowPlayer weakestPlayer = Bot.GetNearEnemies<WowPlayer>(Bot.Player.Position, 30.0f).OrderBy(e => e.Health).FirstOrDefault();
+            IWowPlayer weakestPlayer = Bot.GetNearEnemies<IWowPlayer>(Bot.Player.Position, 30.0f).OrderBy(e => e.Health).FirstOrDefault();
 
             if (weakestPlayer != null)
             {
@@ -67,8 +67,8 @@ namespace AmeisenBotX.Core.Engines.Battleground.KamelBG
 
             if (Bot.Objects.Vehicle == null)
             {
-                WowGameobject VehicleNode = Bot.Objects.WowObjects
-                    .OfType<WowGameobject>()
+                IWowGameobject VehicleNode = Bot.Objects.WowObjects
+                    .OfType<IWowGameobject>()
                     .Where(x => Enum.IsDefined(typeof(Vehicle), x.DisplayId)
                             && x.Position.GetDistance(Bot.Player.Position) < 20)
                     .OrderBy(x => x.Position.GetDistance(Bot.Player.Position))

@@ -40,24 +40,24 @@ namespace AmeisenBotX
             DefaultEntityBrush = new SolidBrush((Color)new ColorConverter().ConvertFromString("#FFB4F2E1"));
 
             DungeonNodeBrush = new SolidBrush((Color)new ColorConverter().ConvertFromString("#FF808080"));
-            DungeonNodePen = new Pen((Color)new ColorConverter().ConvertFromString("#FFFFFFFF"), 1);
+            DungeonNodePen = new((Color)new ColorConverter().ConvertFromString("#FFFFFFFF"), 1);
 
             PathNodeBrush = new SolidBrush((Color)new ColorConverter().ConvertFromString("#FF00FFFF"));
-            PathNodePen = new Pen((Color)new ColorConverter().ConvertFromString("#FFE0FFFF"), 1);
+            PathNodePen = new((Color)new ColorConverter().ConvertFromString("#FFE0FFFF"), 1);
 
             BlacklistNodeBrush = new SolidBrush((Color)new ColorConverter().ConvertFromString("#FFFF0000"));
-            BlacklistNodePen = new Pen((Color)new ColorConverter().ConvertFromString("#FFFF0000"), 1);
+            BlacklistNodePen = new((Color)new ColorConverter().ConvertFromString("#FFFF0000"), 1);
 
             TextBrush = new SolidBrush((Color)new ColorConverter().ConvertFromString("#FFFFFFFF"));
-            TextFont = new Font("Bahnschrift Light", 6, System.Drawing.FontStyle.Regular);
+            TextFont = new("Bahnschrift Light", 6, System.Drawing.FontStyle.Regular);
 
             SubTextBrush = new SolidBrush((Color)new ColorConverter().ConvertFromString("#DCDCDC"));
-            SubTextFont = new Font("Bahnschrift Light", 5, System.Drawing.FontStyle.Regular);
+            SubTextFont = new("Bahnschrift Light", 5, System.Drawing.FontStyle.Regular);
 
             OreBrush = new SolidBrush((Color)new ColorConverter().ConvertFromString("#FF6F4E37"));
             HerbBrush = new SolidBrush((Color)new ColorConverter().ConvertFromString("#FF7BB661"));
 
-            AmeisenBot.Bot.Objects.OnObjectUpdateComplete += (IEnumerable<WowObject> wowObjects) => { NeedToUpdateMap = true; };
+            AmeisenBot.Bot.Objects.OnObjectUpdateComplete += (IEnumerable<IWowObject> wowObjects) => { NeedToUpdateMap = true; };
 
             InitializeComponent();
         }
@@ -449,14 +449,14 @@ namespace AmeisenBotX
 
         private void RenderHerbs(int halfWidth, int halfHeight, Graphics graphics, float scale, Vector3 playerPosition, float playerRotation)
         {
-            IEnumerable<WowGameobject> herbNodes = AmeisenBot.Bot.Objects.WowObjects
+            IEnumerable<IWowGameobject> herbNodes = AmeisenBot.Bot.Objects.WowObjects
                 .ToList()
-                .OfType<WowGameobject>()
+                .OfType<IWowGameobject>()
                 .Where(e => Enum.IsDefined(typeof(WowHerbId), e.DisplayId));
 
             for (int i = 0; i < herbNodes.Count(); ++i)
             {
-                WowGameobject gameobject = herbNodes.ElementAt(i);
+                IWowGameobject gameobject = herbNodes.ElementAt(i);
                 Point positionOnMap = GetRelativePosition(playerPosition, gameobject.Position, playerRotation, halfWidth, halfHeight, scale);
                 RenderGameobject(positionOnMap.X, positionOnMap.Y, ((WowHerbId)gameobject.DisplayId).ToString(), HerbBrush, TextBrush, TextFont, graphics);
             }
@@ -464,15 +464,15 @@ namespace AmeisenBotX
 
         private void RenderOres(int halfWidth, int halfHeight, Graphics graphics, float scale, Vector3 playerPosition, float playerRotation)
         {
-            List<WowGameobject> oreNodes = AmeisenBot.Bot.Objects.WowObjects
+            List<IWowGameobject> oreNodes = AmeisenBot.Bot.Objects.WowObjects
                 .ToList()
-                .OfType<WowGameobject>()
+                .OfType<IWowGameobject>()
                 .Where(e => Enum.IsDefined(typeof(WowOreId), e.DisplayId))
                 .ToList();
 
             for (int i = 0; i < oreNodes.Count; ++i)
             {
-                WowGameobject gameobject = oreNodes[i];
+                IWowGameobject gameobject = oreNodes[i];
                 Point positionOnMap = GetRelativePosition(playerPosition, gameobject.Position, playerRotation, halfWidth, halfHeight, scale);
                 RenderGameobject(positionOnMap.X, positionOnMap.Y, ((WowOreId)gameobject.DisplayId).ToString(), OreBrush, TextBrush, TextFont, graphics);
             }
@@ -480,13 +480,13 @@ namespace AmeisenBotX
 
         private void RenderUnits(int halfWidth, int halfHeight, Graphics graphics, float scale, Vector3 playerPosition, float playerRotation)
         {
-            List<WowUnit> wowUnits = AmeisenBot.Bot.Objects.WowObjects
-                .OfType<WowUnit>()
+            List<IWowUnit> wowUnits = AmeisenBot.Bot.Objects.WowObjects
+                .OfType<IWowUnit>()
                 .ToList();
 
             for (int i = 0; i < wowUnits.Count; ++i)
             {
-                WowUnit unit = wowUnits[i];
+                IWowUnit unit = wowUnits[i];
 
                 Brush selectedBrush = unit.IsDead ? DeadBrush : AmeisenBot.Bot.Db.GetReaction(AmeisenBot.Bot.Player, unit) switch
                 {
@@ -499,7 +499,7 @@ namespace AmeisenBotX
 
                 Point positionOnMap = GetRelativePosition(playerPosition, unit.Position, playerRotation, halfWidth, halfHeight, scale);
 
-                if (unit.GetType() == typeof(WowPlayer))
+                if (unit.GetType() == typeof(IWowPlayer))
                 {
                     if (AmeisenBot.Config.MapRenderPlayers)
                     {

@@ -37,37 +37,37 @@ namespace AmeisenBotX.Core.Engines.Quest.Objects.Objectives
 
         private UseObjectQuestObjectiveCondition Condition { get; }
 
+        private IWowGameobject IWowGameobject { get; set; }
+
         private List<int> ObjectDisplayIds { get; }
 
         private TimegatedEvent UseEvent { get; }
-
-        private WowGameobject WowGameobject { get; set; }
 
         public void Execute()
         {
             if (Finished || Bot.Player.IsCasting) { return; }
 
-            WowGameobject = Bot.Objects.WowObjects
-                .OfType<WowGameobject>()
+            IWowGameobject = Bot.Objects.WowObjects
+                .OfType<IWowGameobject>()
                 .Where(e => ObjectDisplayIds.Contains(e.DisplayId))
                 .OrderBy(e => e.Position.GetDistance(Bot.Player.Position))
                 .FirstOrDefault();
 
-            if (WowGameobject != null)
+            if (IWowGameobject != null)
             {
-                if (WowGameobject.Position.GetDistance(Bot.Player.Position) < 3.0)
+                if (IWowGameobject.Position.GetDistance(Bot.Player.Position) < 3.0)
                 {
                     if (UseEvent.Run())
                     {
                         Bot.Wow.WowStopClickToMove();
                         Bot.Movement.Reset();
 
-                        Bot.Wow.WowObjectRightClick(WowGameobject.BaseAddress);
+                        Bot.Wow.WowObjectRightClick(IWowGameobject.BaseAddress);
                     }
                 }
                 else
                 {
-                    Bot.Movement.SetMovementAction(MovementAction.Move, WowGameobject.Position);
+                    Bot.Movement.SetMovementAction(MovementAction.Move, IWowGameobject.Position);
                 }
             }
         }

@@ -100,8 +100,7 @@ namespace AmeisenBotX.Core.Fsm
         public void Execute()
         {
             // no need to tick the states None and StartWow as the bot is not running
-            if (CurrentState.Key != BotState.None
-                && CurrentState.Key != BotState.StartWow)
+            if (CurrentState.Key is not BotState.None and not BotState.StartWow)
             {
                 // wow crashed or was closed by the user
                 if ((Bot.Memory.Process == null || Bot.Memory.Process.HasExited)
@@ -120,6 +119,9 @@ namespace AmeisenBotX.Core.Fsm
                 // update the wow interface
                 Bot.Wow.Tick();
 
+                // make sure we dont go afk
+                AntiAfkEvent.Run();
+
                 if (CurrentState.Key != BotState.Login && Bot.Objects != null)
                 {
                     if (!Bot.Objects.IsWorldLoaded)
@@ -135,9 +137,6 @@ namespace AmeisenBotX.Core.Fsm
                     {
                         if (Bot.Player != null)
                         {
-                            // make sure we dont go afk
-                            AntiAfkEvent.Run();
-
                             Bot.Movement.Execute();
 
                             // handle event subbing
@@ -169,7 +168,7 @@ namespace AmeisenBotX.Core.Fsm
                             else if (!Bot.Globals.IgnoreCombat
                                     && !(Config.IgnoreCombatWhileMounted && Bot.Player.IsMounted)
                                     && (Bot.Globals.ForceCombat || Bot.Player.IsInCombat || GetState<StateCombat>().IsAnyPartymemberInCombat()
-                                    || Bot.GetEnemiesInCombatWithParty<WowUnit>(Bot.Player.Position, 100.0f).Any()))
+                                    || Bot.GetEnemiesInCombatWithParty<IWowUnit>(Bot.Player.Position, 100.0f).Any()))
                             {
                                 if (SetState(BotState.Combat, true))
                                 {

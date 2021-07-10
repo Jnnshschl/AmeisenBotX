@@ -11,7 +11,7 @@ namespace AmeisenBotX.Wow.Objects
         /// <summary>
         /// Gets fired when we updated all objects successfully.
         /// </summary>
-        event Action<IEnumerable<WowObject>> OnObjectUpdateComplete;
+        event Action<IEnumerable<IWowObject>> OnObjectUpdateComplete;
 
         /// <summary>
         /// Returns wow's camera information.
@@ -29,33 +29,33 @@ namespace AmeisenBotX.Wow.Objects
 
         bool IsWorldLoaded { get; }
 
-        WowUnit LastTarget { get; }
+        IWowUnit LastTarget { get; }
 
         WowMapId MapId { get; }
 
         int ObjectCount { get; set; }
 
-        WowUnit Partyleader { get; }
+        IWowUnit Partyleader { get; }
 
         IEnumerable<ulong> PartymemberGuids { get; }
 
-        IEnumerable<WowUnit> Partymembers { get; }
+        IEnumerable<IWowUnit> Partymembers { get; }
 
         IEnumerable<ulong> PartyPetGuids { get; }
 
-        IEnumerable<WowUnit> PartyPets { get; }
+        IEnumerable<IWowUnit> PartyPets { get; }
 
-        WowUnit Pet { get; }
+        IWowUnit Pet { get; }
 
-        WowPlayer Player { get; }
+        IWowPlayer Player { get; }
 
         IntPtr PlayerBase { get; }
 
-        WowUnit Target { get; }
+        IWowUnit Target { get; }
 
-        WowUnit Vehicle { get; }
+        IWowUnit Vehicle { get; }
 
-        IEnumerable<WowObject> WowObjects { get; }
+        IEnumerable<IWowObject> WowObjects { get; }
 
         int ZoneId { get; }
 

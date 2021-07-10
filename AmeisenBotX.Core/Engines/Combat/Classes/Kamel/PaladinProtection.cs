@@ -152,7 +152,7 @@ namespace AmeisenBotX.Core.Engines.Combat.Classes.Kamel
 
         public override void OutOfCombatExecute()
         {
-            revivePartyMember(redemptionSpell);
+            RevivePartyMember(redemptionSpell);
             BuffManager();
             TargetselectionTank();
             StartAttack();
@@ -162,7 +162,7 @@ namespace AmeisenBotX.Core.Engines.Combat.Classes.Kamel
         {
             if (TargetSelectEvent.Run())
             {
-                List<WowUnit> CastBuff = new List<WowUnit>(Bot.Objects.Partymembers)
+                List<IWowUnit> CastBuff = new(Bot.Objects.Partymembers)
                 {
                     Bot.Player
                 };
@@ -230,7 +230,7 @@ namespace AmeisenBotX.Core.Engines.Combat.Classes.Kamel
 
         private void StartAttack()
         {
-            // WowUnit wowUnit = Bot.ObjectManager.GetClosestWowUnitByDisplayId(AnubRhekanDisplayId, false);
+            // IWowUnit wowUnit = Bot.ObjectManager.GetClosestWowUnitByDisplayId(AnubRhekanDisplayId, false);
 
             if (Bot.Wow.TargetGuid != 0)
             {

@@ -33,7 +33,7 @@ namespace AmeisenBotX.Core.Engines.Tactic.Dungeon.ForgeOfSouls
             preventMovement = false;
             allowAttacking = true;
 
-            WowUnit wowUnit = Bot.GetClosestQuestgiverByDisplayId(Bot.Player.Position, DevourerOfSoulsDisplayId, false);
+            IWowUnit wowUnit = Bot.GetClosestQuestgiverByDisplayId(Bot.Player.Position, DevourerOfSoulsDisplayId, false);
 
             if (wowUnit != null)
             {

@@ -30,7 +30,7 @@ namespace AmeisenBotX.Core.Engines.Quest.Objects.Objectives
         {
             if (Finished || Bot.Player.IsCasting)
             {
-                Bot.Wow.LuaClickUiElement("TradeSkillFrameCloseButton"); 
+                Bot.Wow.LuaClickUiElement("TradeSkillFrameCloseButton");
                 return;
             }
 

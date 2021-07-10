@@ -6,7 +6,7 @@ namespace AmeisenBotX.Core.Fsm.Routines
 {
     public static class SpeakToMerchantRoutine
     {
-        public static bool Run(AmeisenBotInterfaces bot, WowUnit selectedUnit)
+        public static bool Run(AmeisenBotInterfaces bot, IWowUnit selectedUnit)
         {
             if (bot == null || selectedUnit == null)
             {

@@ -140,7 +140,7 @@ namespace AmeisenBotX.Core.Engines.Combat.Classes.Jannis
                         // do not return, hehe xd
                     }
 
-                    int nearEnemies = Bot.GetNearEnemies<WowUnit>(Bot.Player.Position, 10.0f).Count();
+                    int nearEnemies = Bot.GetNearEnemies<IWowUnit>(Bot.Player.Position, 10.0f).Count();
 
                     if ((nearEnemies > 2 || Bot.Player.Rage > 40)
                         && TryCastSpellWarrior(thunderClapSpell, defensiveStanceSpell, Bot.Wow.TargetGuid, true))
@@ -149,7 +149,7 @@ namespace AmeisenBotX.Core.Engines.Combat.Classes.Jannis
                     }
 
                     if (Bot.Target.TargetGuid != Bot.Wow.PlayerGuid
-                        && (Bot.Objects.WowObjects.OfType<WowUnit>().Where(e => Bot.Target.Position.GetDistance(e.Position) < 10.0).Count() > 3
+                        && (Bot.Objects.WowObjects.OfType<IWowUnit>().Where(e => Bot.Target.Position.GetDistance(e.Position) < 10.0).Count() > 3
                             && TryCastSpell(challengingShoutSpell, 0, true))
                         || TryCastSpellWarrior(tauntSpell, defensiveStanceSpell, Bot.Wow.TargetGuid))
                     {

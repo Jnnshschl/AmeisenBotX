@@ -48,7 +48,7 @@ namespace AmeisenBotX.Core.Fsm.States.Idle.Actions
                 return;
             }
 
-            WowGameobject nearCampfire = Bot.Objects.WowObjects.OfType<WowGameobject>()
+            IWowGameobject nearCampfire = Bot.Objects.WowObjects.OfType<IWowGameobject>()
                 .FirstOrDefault(e => e.DisplayId == (int)WowGameobjectDisplayId.CookingCampfire && Bot.Objects.PartymemberGuids.Contains(e.CreatedBy));
 
             if (nearCampfire != null && !SatDown)

@@ -128,13 +128,13 @@ namespace AmeisenBotX.Core.Engines.Quest.Profiles.StartAreas
                                 new MoveToObjectQuestObjective(bot, 8123, 5.0),
                                 new UseObjectQuestObjective(bot, 8123, () => bot.Objects.Vehicle != null),
                                 new WaitUntilQuestObjective(() => bot.Objects.Vehicle != null && bot.Objects.Vehicle.Position.GetDistance(new Vector3(1758, -5876, 166)) < 32.0),
-                                new MoveVehicleToPositionQuestObjective(bot, new Vector3(1813, -5991, 131), 4.0, MovementAction.DirectMove, true),
+                                new MoveVehicleToPositionQuestObjective(bot, new Vector3(1813, -5991, 131), 4.0, MovementAction.DirectMove),
                                 new CastVehicleSpellQuestObjective(bot, 51859, () => CheckEyeCastingState(bot, 0, new Vector3(1813, -5991, 131), 5.0)),
-                                new MoveVehicleToPositionQuestObjective(bot, new Vector3(1652, -5996, 151), 4.0, MovementAction.DirectMove, true),
+                                new MoveVehicleToPositionQuestObjective(bot, new Vector3(1652, -5996, 151), 4.0, MovementAction.DirectMove),
                                 new CastVehicleSpellQuestObjective(bot, 51859, () => CheckEyeCastingState(bot, 1, new Vector3(1652, -5996, 151), 5.0)),
-                                new MoveVehicleToPositionQuestObjective(bot, new Vector3(1601, -5738, 140), 4.0, MovementAction.DirectMove, true),
+                                new MoveVehicleToPositionQuestObjective(bot, new Vector3(1601, -5738, 140), 4.0, MovementAction.DirectMove),
                                 new CastVehicleSpellQuestObjective(bot, 51859, () => CheckEyeCastingState(bot, 2, new Vector3(1601, -5738, 140), 5.0)),
-                                new MoveVehicleToPositionQuestObjective(bot, new Vector3(1392, -5704, 162), 4.0, MovementAction.DirectMove, true),
+                                new MoveVehicleToPositionQuestObjective(bot, new Vector3(1392, -5704, 162), 4.0, MovementAction.DirectMove),
                                 new CastVehicleSpellQuestObjective(bot, 51859, () => CheckEyeCastingState(bot, 3, new Vector3(1392, -5704, 162), 5.0)),
                                 new CastVehicleSpellQuestObjective(bot, 52694, () => CastedSpell[3] == true && bot.Objects.Vehicle == null)
                             })
@@ -287,8 +287,6 @@ namespace AmeisenBotX.Core.Engines.Quest.Profiles.StartAreas
         private bool[] CastedSpell { get; } = new bool[4];
 
         private bool[] StartedCasting { get; } = new bool[4];
-
-        private bool StolenPalomino { get; set; }
 
         public override string ToString()
         {

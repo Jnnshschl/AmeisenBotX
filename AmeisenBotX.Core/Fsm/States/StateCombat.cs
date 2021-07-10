@@ -42,7 +42,7 @@ namespace AmeisenBotX.Core.Fsm.States
             if (!(Bot.Globals.ForceCombat
                 || Bot.Player.IsInCombat
                 || IsAnyPartymemberInCombat()
-                || Bot.GetEnemiesInCombatWithParty<WowUnit>(Bot.Player.Position, 100.0f).Any()))
+                || Bot.GetEnemiesInCombatWithParty<IWowUnit>(Bot.Player.Position, 100.0f).Any()))
             {
                 StateMachine.SetState(BotState.Idle);
                 return;
@@ -71,7 +71,7 @@ namespace AmeisenBotX.Core.Fsm.States
                                 Bot.Globals.ForceCombat = false;
                             }
 
-                            if (StateMachine.GetState<StateIdle>().IsUnitToFollowThere(out WowUnit player))
+                            if (StateMachine.GetState<StateIdle>().IsUnitToFollowThere(out IWowUnit player))
                             {
                                 Bot.Movement.SetMovementAction(MovementAction.Follow, player.Position);
                             }
@@ -115,7 +115,7 @@ namespace AmeisenBotX.Core.Fsm.States
 
         internal bool IsAnyPartymemberInCombat()
         {
-            return !Config.OnlySupportMaster && Bot.Objects.WowObjects.OfType<WowPlayer>()
+            return !Config.OnlySupportMaster && Bot.Objects.WowObjects.OfType<IWowPlayer>()
                 .Where(e => Bot.Objects.PartymemberGuids.Contains(e.Guid) && e.Position.GetDistance(Bot.Player.Position) < Config.SupportRange)
                 .Any(r => r.IsInCombat);
         }
@@ -125,7 +125,7 @@ namespace AmeisenBotX.Core.Fsm.States
             return Bot.Target.Type == WowObjectType.Player ? 1.5f : MathF.Min(3.0f, (Bot.Player.CombatReach + Bot.Target.CombatReach) * 0.9f);
         }
 
-        private bool HandleDpsMovement(WowUnit target, Vector3 targetPosition)
+        private bool HandleDpsMovement(IWowUnit target, Vector3 targetPosition)
         {
             // handle special movement needs
             if (Bot.CombatClass.WalkBehindEnemy
@@ -143,19 +143,12 @@ namespace AmeisenBotX.Core.Fsm.States
             }
         }
 
-        private bool HandleHealMovement(WowUnit target, Vector3 targetPosition)
+        private bool HandleHealMovement(Vector3 targetPosition)
         {
-            if (Bot.Objects.IsTargetInLineOfSight)
-            {
-                return Bot.Movement.SetMovementAction(MovementAction.Move, Bot.Objects.CenterPartyPosition);
-            }
-            else
-            {
-                return Bot.Movement.SetMovementAction(MovementAction.Move, targetPosition);
-            }
+            return Bot.Movement.SetMovementAction(MovementAction.Move, Bot.Objects.IsTargetInLineOfSight ? Bot.Objects.CenterPartyPosition : targetPosition);
         }
 
-        private bool HandleMovement(WowUnit target)
+        private bool HandleMovement(IWowUnit target)
         {
             // check if we are facing the unit
             if ((Bot.CombatClass == null || !Bot.CombatClass.HandlesFacing)
@@ -192,7 +185,7 @@ namespace AmeisenBotX.Core.Fsm.States
                         // return HandleTankMovement(target, targetPosition);
 
                         case WowRole.Heal:
-                            return HandleHealMovement(target, targetPosition);
+                            return HandleHealMovement(targetPosition);
                     }
                 }
 
@@ -209,7 +202,7 @@ namespace AmeisenBotX.Core.Fsm.States
             return false;
         }
 
-        private bool HandleTankMovement(WowUnit target, Vector3 targetPosition)
+        private bool HandleTankMovement(Vector3 targetPosition)
         {
             // handle special movement needs
             if (Bot.CombatClass.WalkBehindEnemy

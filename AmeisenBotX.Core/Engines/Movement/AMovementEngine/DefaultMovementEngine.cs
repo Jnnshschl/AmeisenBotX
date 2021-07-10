@@ -3,6 +3,7 @@ using AmeisenBotX.Common.Utils;
 using AmeisenBotX.Core.Data.Objects;
 using AmeisenBotX.Core.Engines.Movement.Enums;
 using AmeisenBotX.Core.Engines.Movement.Objects;
+using AmeisenBotX.Wow.Objects;
 using AmeisenBotX.Wow.Objects.Enums;
 using System;
 using System.Collections.Generic;
@@ -226,7 +227,7 @@ namespace AmeisenBotX.Core.Engines.Movement.AMovementEngine
         {
             List<(Vector3 position, float radius)> places = new(PlacesToAvoid);
             places.AddRange(Bot.GetAoeSpells(position)
-                .Where(e => Bot.GetWowObjectByGuid<WowUnit>(e.Caster)?.Type == WowObjectType.Unit)
+                .Where(e => Bot.GetWowObjectByGuid<IWowUnit>(e.Caster)?.Type == WowObjectType.Unit)
                 .Select(e => (e.Position, e.Radius)));
 
             if (places.Any())

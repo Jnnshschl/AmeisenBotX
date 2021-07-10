@@ -263,12 +263,12 @@ namespace AmeisenBotX.Core.Engines.Combat.Classes.Kamel
                         return;
                     }
 
-                    if (Bot.Target.GetType() == typeof(WowPlayer) && CustomCastSpell(disarmSpell, defensiveStanceSpell))
+                    if (Bot.Target.GetType() == typeof(IWowPlayer) && CustomCastSpell(disarmSpell, defensiveStanceSpell))
                     {
                         return;
                     }
 
-                    if (Bot.Target.GetType() == typeof(WowPlayer) && !Bot.Target.Auras.Any(e => Bot.Db.GetSpellName(e.SpellId) == "Hamstring") && CustomCastSpell(hamstringSpell))
+                    if (Bot.Target.GetType() == typeof(IWowPlayer) && !Bot.Target.Auras.Any(e => Bot.Db.GetSpellName(e.SpellId) == "Hamstring") && CustomCastSpell(hamstringSpell))
                     {
                         return;
                     }

@@ -65,7 +65,7 @@ namespace AmeisenBotX.Core.Engines.Quest
             {
                 // do i need to recover my hp
                 if (Bot.Player.HealthPercentage < Config.EatUntilPercent
-                    && Bot.GetNearEnemies<WowUnit>(Bot.Player.Position, 60.0f).Any())
+                    && Bot.GetNearEnemies<IWowUnit>(Bot.Player.Position, 60.0f).Any())
                 {
                     // wait or eat something
                     if (Bot.Character.HasItemTypeInBag<WowFood>() || Bot.Character.HasItemTypeInBag<WowRefreshment>())

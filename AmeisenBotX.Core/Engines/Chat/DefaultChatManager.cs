@@ -1,4 +1,4 @@
-﻿using AmeisenBotX.Core.Data.Objects;
+﻿using AmeisenBotX.Wow.Objects;
 using AmeisenBotX.Wow.Objects.Enums;
 using System;
 using System.Collections.Generic;
@@ -35,7 +35,7 @@ namespace AmeisenBotX.Core.Engines.Chat
                 return false;
             }
 
-            WowChatMessage chatMessage = new WowChatMessage(type, timestamp, args);
+            WowChatMessage chatMessage = new(type, timestamp, args);
             ChatMessages.Add(chatMessage);
 
             if (Config.ChatProtocols)

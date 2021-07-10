@@ -181,7 +181,7 @@ namespace AmeisenBotX.Core.Engines.Battleground.Jannis.Profiles
 
         private bool AmINearOwnFlagCarrier(CtfBlackboard blackboard)
         {
-            return Bot.GetNearEnemies<WowUnit>(blackboard.MyTeamFlagCarrier.Position, 48.0f).Any(e => !e.IsDead);
+            return Bot.GetNearEnemies<IWowUnit>(blackboard.MyTeamFlagCarrier.Position, 48.0f).Any(e => !e.IsDead);
         }
 
         private bool AmIOneOfTheClosestToOwnFlagCarrier(CtfBlackboard blackboard, int memberCount)
@@ -193,7 +193,7 @@ namespace AmeisenBotX.Core.Engines.Battleground.Jannis.Profiles
 
             // check whether i'm part of the closest x (memberCount) members to the flag carrier
             int index = Bot.Objects.Partymembers
-                            .OfType<WowPlayer>()
+                            .OfType<IWowPlayer>()
                             .Where(e => e.Guid != blackboard.MyTeamFlagCarrier.Guid)
                             .OrderBy(e => e.Position.GetDistance(Bot.Player.Position))
                             .Select((player, id) => new { Player = player, Index = id })
@@ -204,7 +204,7 @@ namespace AmeisenBotX.Core.Engines.Battleground.Jannis.Profiles
 
         private BehaviorTreeStatus AttackNearWeakestEnemy(CtfBlackboard blackboard)
         {
-            WowPlayer weakestPlayer = Bot.GetNearEnemies<WowPlayer>(Bot.Player.Position, 20.0f).OrderBy(e => e.Health).FirstOrDefault();
+            IWowPlayer weakestPlayer = Bot.GetNearEnemies<IWowPlayer>(Bot.Player.Position, 20.0f).OrderBy(e => e.Health).FirstOrDefault();
 
             if (weakestPlayer != null)
             {
@@ -239,7 +239,7 @@ namespace AmeisenBotX.Core.Engines.Battleground.Jannis.Profiles
             }
             else
             {
-                WowUnit nearEnemy = Bot.GetNearEnemies<WowUnit>(WsgDataset.OwnBasePosition, 16.0f).FirstOrDefault();
+                IWowUnit nearEnemy = Bot.GetNearEnemies<IWowUnit>(WsgDataset.OwnBasePosition, 16.0f).FirstOrDefault();
 
                 if (nearEnemy != null)
                 {
@@ -266,8 +266,8 @@ namespace AmeisenBotX.Core.Engines.Battleground.Jannis.Profiles
                 return false;
             }
 
-            int friends = Bot.GetNearFriends<WowPlayer>(Bot.Player.Position, 18.0f).Count();
-            int enemies = Bot.GetNearEnemies<WowPlayer>(Bot.Player.Position, 18.0f).Count();
+            int friends = Bot.GetNearFriends<IWowPlayer>(Bot.Player.Position, 18.0f).Count();
+            int enemies = Bot.GetNearEnemies<IWowPlayer>(Bot.Player.Position, 18.0f).Count();
 
             return enemies > 0 && friends >= enemies;
         }
@@ -277,9 +277,9 @@ namespace AmeisenBotX.Core.Engines.Battleground.Jannis.Profiles
             return blackboard.MyTeamFlagCarrier.Position.GetDistance(Bot.Player.Position) < 32.0;
         }
 
-        private BehaviorTreeStatus FleeFromComingEnemies(CtfBlackboard blackboard)
+        private BehaviorTreeStatus FleeFromComingEnemies()
         {
-            WowUnit nearestEnemy = Bot.GetNearEnemies<WowUnit>(Bot.Player.Position, 48.0f).OrderBy(e => e.Position.GetDistance(Bot.Player.Position)).FirstOrDefault();
+            IWowUnit nearestEnemy = Bot.GetNearEnemies<IWowUnit>(Bot.Player.Position, 48.0f).OrderBy(e => e.Position.GetDistance(Bot.Player.Position)).FirstOrDefault();
 
             if (nearestEnemy != null)
             {
@@ -306,7 +306,7 @@ namespace AmeisenBotX.Core.Engines.Battleground.Jannis.Profiles
         {
             if (Bot.Player.IsAlliance())
             {
-                WowGameobject obj = Bot.Objects.WowObjects.OfType<WowGameobject>()
+                IWowGameobject obj = Bot.Objects.WowObjects.OfType<IWowGameobject>()
                                     .Where(e => e.GameobjectType == WowGameobjectType.Door && e.DisplayId == 411)
                                     .FirstOrDefault();
 
@@ -314,7 +314,7 @@ namespace AmeisenBotX.Core.Engines.Battleground.Jannis.Profiles
             }
             else
             {
-                WowGameobject obj = Bot.Objects.WowObjects.OfType<WowGameobject>()
+                IWowGameobject obj = Bot.Objects.WowObjects.OfType<IWowGameobject>()
                                     .Where(e => e.GameobjectType == WowGameobjectType.Door && e.DisplayId == 850)
                                     .FirstOrDefault();
 
@@ -364,7 +364,7 @@ namespace AmeisenBotX.Core.Engines.Battleground.Jannis.Profiles
 
         private BehaviorTreeStatus MoveToNearestBuff(CtfBlackboard blackboard)
         {
-            WowGameobject buffObject = Bot.GetClosestGameobjectByDisplayId(Bot.Player.Position, new List<int>() { 5991, 5995, 5931 });
+            IWowGameobject buffObject = Bot.GetClosestGameobjectByDisplayId(Bot.Player.Position, new List<int>() { 5991, 5995, 5931 });
 
             if (buffObject != null
                 && buffObject.Position.GetDistance(Bot.Player.Position) > 3.0)
@@ -379,7 +379,7 @@ namespace AmeisenBotX.Core.Engines.Battleground.Jannis.Profiles
             return BehaviorTreeStatus.Ongoing;
         }
 
-        private BehaviorTreeStatus MoveToOwnFlagCarrierAndHelp(CtfBlackboard blackboard)
+        private BehaviorTreeStatus MoveToOwnFlagCarrierAndHelp()
         {
             if (JBgBlackboard.MyTeamFlagCarrier == null)
             {
@@ -394,7 +394,7 @@ namespace AmeisenBotX.Core.Engines.Battleground.Jannis.Profiles
             }
             else
             {
-                WowUnit nearEnemy = Bot.GetNearEnemies<WowUnit>(JBgBlackboard.MyTeamFlagCarrier.Position, 32.0f).FirstOrDefault();
+                IWowUnit nearEnemy = Bot.GetNearEnemies<IWowUnit>(JBgBlackboard.MyTeamFlagCarrier.Position, 32.0f).FirstOrDefault();
 
                 if (nearEnemy != null)
                 {
@@ -488,8 +488,8 @@ namespace AmeisenBotX.Core.Engines.Battleground.Jannis.Profiles
                             0f
                         );
 
-                        JBgBlackboard.MyTeamFlagCarrier = Bot.Objects.WowObjects.OfType<WowPlayer>().FirstOrDefault(e => e.HasBuffById(23333));
-                        JBgBlackboard.EnemyTeamFlagCarrier = Bot.Objects.WowObjects.OfType<WowPlayer>().FirstOrDefault(e => e.HasBuffById(23335));
+                        JBgBlackboard.MyTeamFlagCarrier = Bot.Objects.WowObjects.OfType<IWowPlayer>().FirstOrDefault(e => e.HasBuffById(23333));
+                        JBgBlackboard.EnemyTeamFlagCarrier = Bot.Objects.WowObjects.OfType<IWowPlayer>().FirstOrDefault(e => e.HasBuffById(23335));
                     }
                     else
                     {
@@ -518,12 +518,12 @@ namespace AmeisenBotX.Core.Engines.Battleground.Jannis.Profiles
                             0f
                         );
 
-                        JBgBlackboard.MyTeamFlagCarrier = Bot.Objects.WowObjects.OfType<WowPlayer>().FirstOrDefault(e => e.HasBuffById(23335));
-                        JBgBlackboard.EnemyTeamFlagCarrier = Bot.Objects.WowObjects.OfType<WowPlayer>().FirstOrDefault(e => e.HasBuffById(23333));
+                        JBgBlackboard.MyTeamFlagCarrier = Bot.Objects.WowObjects.OfType<IWowPlayer>().FirstOrDefault(e => e.HasBuffById(23335));
+                        JBgBlackboard.EnemyTeamFlagCarrier = Bot.Objects.WowObjects.OfType<IWowPlayer>().FirstOrDefault(e => e.HasBuffById(23333));
                     }
 
                     JBgBlackboard.NearFlags = Bot.Objects.WowObjects
-                                                 .OfType<WowGameobject>()
+                                                 .OfType<IWowGameobject>()
                                                  .Where(e => e.DisplayId == (int)WowGameobjectDisplayId.WsgAllianceFlag || e.DisplayId == (int)WowGameobjectDisplayId.WsgHordeFlag)
                                                  .ToList();
                 }
@@ -533,7 +533,7 @@ namespace AmeisenBotX.Core.Engines.Battleground.Jannis.Profiles
 
         private BehaviorTreeStatus UseNearestFlag(CtfBlackboard blackboard)
         {
-            WowGameobject nearestFlag = JBgBlackboard.NearFlags.OrderBy(e => e.Position.GetDistance(Bot.Player.Position)).FirstOrDefault();
+            IWowGameobject nearestFlag = JBgBlackboard.NearFlags.OrderBy(e => e.Position.GetDistance(Bot.Player.Position)).FirstOrDefault();
 
             if (nearestFlag != null)
             {

@@ -86,7 +86,7 @@ namespace AmeisenBotX.Core.Engines.Tactic.Bosses.Naxxramas10
 
         private bool DoDpsHeal(bool isMelee, out bool handlesMovement, out bool allowAttacking)
         {
-            WowUnit wowUnit = Bot.GetClosestQuestgiverByDisplayId(Bot.Player.Position, AnubRhekanDisplayId, false);
+            IWowUnit wowUnit = Bot.GetClosestQuestgiverByDisplayId(Bot.Player.Position, AnubRhekanDisplayId, false);
 
             if (wowUnit != null)
             {
@@ -162,7 +162,7 @@ namespace AmeisenBotX.Core.Engines.Tactic.Bosses.Naxxramas10
 
         private bool DoTank(out bool handlesMovement, out bool allowAttacking)
         {
-            WowUnit wowUnit = Bot.GetClosestQuestgiverByDisplayId(Bot.Player.Position, AnubRhekanDisplayId, false);
+            IWowUnit wowUnit = Bot.GetClosestQuestgiverByDisplayId(Bot.Player.Position, AnubRhekanDisplayId, false);
 
             if (wowUnit != null && wowUnit.TargetGuid == Bot.Wow.PlayerGuid)
             {

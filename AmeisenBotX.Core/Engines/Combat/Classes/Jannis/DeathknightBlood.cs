@@ -118,7 +118,7 @@ namespace AmeisenBotX.Core.Engines.Combat.Classes.Jannis
                     return;
                 }
 
-                int nearEnemies = Bot.GetNearEnemies<WowUnit>(Bot.Player.Position, 12.0f).Count();
+                int nearEnemies = Bot.GetNearEnemies<IWowUnit>(Bot.Player.Position, 12.0f).Count();
 
                 if ((Bot.Player.HealthPercentage < 70.0 && TryCastSpellDk(runeTapSpell, 0, false, false, true))
                     || (Bot.Player.HealthPercentage < 60.0 && (TryCastSpellDk(iceboundFortitudeSpell, 0, true) || TryCastSpellDk(antiMagicShellSpell, 0, true)))

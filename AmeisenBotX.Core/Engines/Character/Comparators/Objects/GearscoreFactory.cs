@@ -14,7 +14,7 @@ namespace AmeisenBotX.Core.Engines.Character.Comparators.Objects
 
         private Dictionary<string, double> StatMultiplicators { get; }
 
-        public double Calculate(IWowItem item)
+        public double Calculate(IWowInventoryItem item)
         {
             double score = 0;
 

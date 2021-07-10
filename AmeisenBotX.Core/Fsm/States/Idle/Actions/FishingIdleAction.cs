@@ -101,7 +101,7 @@ namespace AmeisenBotX.Core.Fsm.States.Idle.Actions
 
             if (!IsFishingRodEquipped())
             {
-                IWowItem fishingRod = Bot.Character.Inventory.Items.OfType<WowWeapon>()
+                IWowInventoryItem fishingRod = Bot.Character.Inventory.Items.OfType<WowWeapon>()
                     .FirstOrDefault(e => e.WeaponType == WowWeaponType.FISHING_POLES);
 
                 if (fishingRod != null)
@@ -110,7 +110,7 @@ namespace AmeisenBotX.Core.Fsm.States.Idle.Actions
                 }
             }
 
-            WowGameobject fishingBobber = Bot.Objects.WowObjects.OfType<WowGameobject>()
+            IWowGameobject fishingBobber = Bot.Objects.WowObjects.OfType<IWowGameobject>()
                 .FirstOrDefault(e => e.GameobjectType == WowGameobjectType.FishingBobber && e.CreatedBy == Bot.Wow.PlayerGuid);
 
             if (!Started)

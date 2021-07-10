@@ -27,7 +27,7 @@ namespace AmeisenBotX.Core.Engines.Character.Comparators
 
         private List<WowWeaponType> WeaponTypeBlacklist { get; }
 
-        public bool IsBetter(IWowItem current, IWowItem item)
+        public bool IsBetter(IWowInventoryItem current, IWowInventoryItem item)
         {
             if ((ArmorTypeBlacklist != null && item.GetType() == typeof(WowArmor) && ArmorTypeBlacklist.Contains(((WowArmor)item).ArmorType))
                 || (WeaponTypeBlacklist != null && item.GetType() == typeof(WowWeapon) && WeaponTypeBlacklist.Contains(((WowWeapon)item).WeaponType)))
@@ -40,7 +40,7 @@ namespace AmeisenBotX.Core.Engines.Character.Comparators
             return scoreCurrent < scoreNew;
         }
 
-        public bool IsBlacklistedItem(IWowItem item)
+        public bool IsBlacklistedItem(IWowInventoryItem item)
         {
             if (ArmorTypeBlacklist != null && string.Equals(item.Type, "Armor", StringComparison.OrdinalIgnoreCase) && ArmorTypeBlacklist.Contains(((WowArmor)item).ArmorType))
             {

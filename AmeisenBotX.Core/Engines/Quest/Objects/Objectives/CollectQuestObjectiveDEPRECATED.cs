@@ -42,7 +42,7 @@ namespace AmeisenBotX.Core.Engines.Quest.Objects.Objectives
         {
             if (Finished) { return; }
 
-            WowGameobject lootableObject = Bot.Objects.WowObjects.OfType<WowGameobject>()
+            IWowGameobject lootableObject = Bot.Objects.WowObjects.OfType<IWowGameobject>()
                 .Where(e => e.DisplayId == ObjectDisplayId)
                 .OrderBy(e => e.Position.GetDistance(Bot.Player.Position))
                 .FirstOrDefault();

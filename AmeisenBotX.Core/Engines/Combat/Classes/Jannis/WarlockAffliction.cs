@@ -119,7 +119,7 @@ namespace AmeisenBotX.Core.Engines.Combat.Classes.Jannis
 
                 if (Bot.Target != null)
                 {
-                    if (Bot.Target.GetType() == typeof(WowPlayer))
+                    if (Bot.Target.GetType() == typeof(IWowPlayer))
                     {
                         if (DateTime.UtcNow - LastFearAttempt > TimeSpan.FromSeconds(5)
                             && ((Bot.Player.Position.GetDistance(Bot.Target.Position) < 6.0f && TryCastSpell(howlOfTerrorSpell, 0, true))
@@ -138,7 +138,7 @@ namespace AmeisenBotX.Core.Engines.Combat.Classes.Jannis
                     }
                 }
 
-                if (Bot.GetNearEnemies<WowUnit>(Bot.Target.Position, 16.0f).Count() > 2
+                if (Bot.GetNearEnemies<IWowUnit>(Bot.Target.Position, 16.0f).Count() > 2
                     && !Bot.Target.Auras.Any(e => Bot.Db.GetSpellName(e.SpellId) == seedOfCorruptionSpell)
                     && TryCastSpell(seedOfCorruptionSpell, Bot.Wow.TargetGuid, true))
                 {

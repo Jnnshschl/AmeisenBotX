@@ -106,8 +106,8 @@ namespace AmeisenBotX.Core.Engines.Jobs
 
             if (SellActionsNeeded > 0)
             {
-                WowGameobject mailboxNode = Bot.Objects.WowObjects
-                    .OfType<WowGameobject>()
+                IWowGameobject mailboxNode = Bot.Objects.WowObjects
+                    .OfType<IWowGameobject>()
                     .Where(x => Enum.IsDefined(typeof(MailBox), x.DisplayId)
                             && x.Position.GetDistance(Bot.Player.Position) < 15)
                     .OrderBy(x => x.Position.GetDistance(Bot.Player.Position))
@@ -127,7 +127,7 @@ namespace AmeisenBotX.Core.Engines.Jobs
                             Bot.Wow.LuaDoString("MailFrameTab2:Click();");
 
                             int usedItems = 0;
-                            foreach (IWowItem item in Bot.Character.Inventory.Items)
+                            foreach (IWowInventoryItem item in Bot.Character.Inventory.Items)
                             {
                                 if (Config.ItemSellBlacklist.Contains(item.Name) || item.Name.Contains("Mining Pick", StringComparison.OrdinalIgnoreCase))
                                 {
@@ -168,8 +168,8 @@ namespace AmeisenBotX.Core.Engines.Jobs
                 // search for nodes
                 int miningSkill = Bot.Character.Skills.ContainsKey("Mining") ? Bot.Character.Skills["Mining"].Item1 : 0;
 
-                WowGameobject nearestNode = Bot.Objects.WowObjects
-                    .OfType<WowGameobject>()
+                IWowGameobject nearestNode = Bot.Objects.WowObjects
+                    .OfType<IWowGameobject>()
                     .Where(e => !NodeBlacklist.Contains(e.Guid)
                              && Enum.IsDefined(typeof(WowOreId), e.DisplayId)
                              && miningProfile.OreTypes.Contains((WowOreId)e.DisplayId)
@@ -225,7 +225,7 @@ namespace AmeisenBotX.Core.Engines.Jobs
             {
                 // move to the node
                 double distanceToNode = Bot.Player.Position.GetDistance(SelectedPosition);
-                WowGameobject node = Bot.GetWowObjectByGuid<WowGameobject>(SelectedGuid);
+                IWowGameobject node = Bot.GetWowObjectByGuid<IWowGameobject>(SelectedGuid);
 
                 if (distanceToNode < 3)
                 {

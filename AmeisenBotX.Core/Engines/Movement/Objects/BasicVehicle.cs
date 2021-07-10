@@ -26,7 +26,7 @@ namespace AmeisenBotX.Core.Engines.Movement.Objects
         {
             Vector3 acceleration = new(0, 0, 0);
 
-            acceleration += GetObjectForceAroundMe<WowObject>();
+            acceleration += GetObjectForceAroundMe<IWowObject>();
             acceleration += GetNearestBlacklistForce(12);
 
             acceleration.Limit(Bot.MovementSettings.MaxAcceleration);
@@ -193,7 +193,7 @@ namespace AmeisenBotX.Core.Engines.Movement.Objects
         public Vector3 Seperate(float multiplier)
         {
             Vector3 acceleration = new(0, 0, 0);
-            acceleration += GetObjectForceAroundMe<WowPlayer>(Bot.MovementSettings.SeperationDistance);
+            acceleration += GetObjectForceAroundMe<IWowPlayer>(Bot.MovementSettings.SeperationDistance);
 
             float maxAcceleration = Bot.MovementSettings.MaxAcceleration;
 
@@ -365,7 +365,7 @@ namespace AmeisenBotX.Core.Engines.Movement.Objects
             return force;
         }
 
-        private Vector3 GetObjectForceAroundMe<T>(float maxDistance = 3.0f) where T : WowObject
+        private Vector3 GetObjectForceAroundMe<T>(float maxDistance = 3.0f) where T : IWowObject
         {
             Vector3 force = new(0, 0, 0);
             Vector3 vehiclePosition = Bot.Player.Position;

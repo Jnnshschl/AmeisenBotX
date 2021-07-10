@@ -5,13 +5,12 @@ namespace AmeisenBotX.Core.Engines.Quest.Objects.Objectives
 {
     public class MoveVehicleToPositionQuestObjective : IQuestObjective
     {
-        public MoveVehicleToPositionQuestObjective(AmeisenBotInterfaces bot, Vector3 position, double distance, MovementAction movementAction = MovementAction.Move, bool forceDirectMove = false)
+        public MoveVehicleToPositionQuestObjective(AmeisenBotInterfaces bot, Vector3 position, double distance, MovementAction movementAction = MovementAction.Move)
         {
             Bot = bot;
             WantedPosition = position;
             Distance = distance;
             MovementAction = movementAction;
-            ForceDirectMove = forceDirectMove;
         }
 
         public bool Finished => Progress == 100.0;
@@ -21,8 +20,6 @@ namespace AmeisenBotX.Core.Engines.Quest.Objects.Objectives
         private AmeisenBotInterfaces Bot { get; }
 
         private double Distance { get; }
-
-        private bool ForceDirectMove { get; }
 
         private MovementAction MovementAction { get; }
 

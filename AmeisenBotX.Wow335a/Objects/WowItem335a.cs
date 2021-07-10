@@ -1,16 +1,17 @@
 ﻿using AmeisenBotX.Common.Offsets;
+using AmeisenBotX.Core.Data.Objects;
 using AmeisenBotX.Memory;
-using AmeisenBotX.Wow.Objects;
 using AmeisenBotX.Wow.Objects.Enums;
 using AmeisenBotX.Wow.Objects.SubStructs;
+using AmeisenBotX.Wow335a.Objects.Raw;
 using System;
 using System.Collections.Generic;
 
-namespace AmeisenBotX.Core.Data.Objects
+namespace AmeisenBotX.Wow335a.Objects
 {
-    public class WowItem : WowObject
+    public class WowItem335a : WowObject335a, IWowItem
     {
-        public WowItem(IntPtr baseAddress, WowObjectType type, IntPtr descriptorAddress) : base(baseAddress, type, descriptorAddress)
+        public WowItem335a(IntPtr baseAddress, IntPtr descriptorAddress) : base(baseAddress, descriptorAddress)
         {
         }
 
@@ -20,7 +21,7 @@ namespace AmeisenBotX.Core.Data.Objects
 
         public ulong Owner { get; set; }
 
-        public List<string> GetEnchantmentStrings()
+        public IEnumerable<string> GetEnchantmentStrings()
         {
             List<string> enchantments = new();
 

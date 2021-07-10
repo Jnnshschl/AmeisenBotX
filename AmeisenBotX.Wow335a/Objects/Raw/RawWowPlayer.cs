@@ -1,7 +1,7 @@
 ﻿using AmeisenBotX.Wow.Objects.SubStructs;
 using System.Runtime.InteropServices;
 
-namespace AmeisenBotX.Wow.Objects
+namespace AmeisenBotX.Wow335a.Objects.Raw
 {
     [StructLayout(LayoutKind.Sequential)]
     public unsafe struct RawWowPlayer

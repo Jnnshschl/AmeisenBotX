@@ -1,5 +1,6 @@
 ﻿using AmeisenBotX.Common.Math;
 using AmeisenBotX.Common.Offsets;
+using AmeisenBotX.Common.Utils;
 using AmeisenBotX.Core.Data.Objects;
 using AmeisenBotX.Core.Engines.Battleground;
 using AmeisenBotX.Core.Engines.Character;
@@ -52,7 +53,7 @@ namespace AmeisenBotX.Core
 
         public IJobEngine Jobs { get; set; }
 
-        public WowUnit LastTarget => Objects.LastTarget;
+        public IWowUnit LastTarget => Objects.LastTarget;
 
         public IMemoryApi Memory { get; set; }
 
@@ -66,9 +67,9 @@ namespace AmeisenBotX.Core
 
         public IPathfindingHandler PathfindingHandler { get; set; }
 
-        public WowUnit Pet => Objects.Pet;
+        public IWowUnit Pet => Objects.Pet;
 
-        public WowPlayer Player => Objects.Player;
+        public IWowPlayer Player => Objects.Player;
 
         public IQuestEngine Quest { get; set; }
 
@@ -76,47 +77,47 @@ namespace AmeisenBotX.Core
 
         public ITacticEngine Tactic { get; set; }
 
-        public WowUnit Target => Objects.Target;
+        public IWowUnit Target => Objects.Target;
 
         public IWowInterface Wow { get; set; }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public IEnumerable<WowDynobject> GetAoeSpells(Vector3 position, bool onlyEnemy = true, float extends = 2.0f)
+        public IEnumerable<IWowDynobject> GetAoeSpells(Vector3 position, bool onlyEnemy = true, float extends = 2.0f)
         {
-            return Objects.WowObjects.OfType<WowDynobject>()
+            return Objects.WowObjects.OfType<IWowDynobject>()
                 .Where(e => e.Position.GetDistance(position) < e.Radius + extends
-                         && (!onlyEnemy || Db.GetReaction(Player, GetWowObjectByGuid<WowUnit>(e.Caster)) == WowUnitReaction.Hostile));
+                         && (!onlyEnemy || Db.GetReaction(Player, GetWowObjectByGuid<IWowUnit>(e.Caster)) == WowUnitReaction.Hostile));
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public WowGameobject GetClosestGameobjectByDisplayId(Vector3 position, IEnumerable<int> displayIds)
+        public IWowGameobject GetClosestGameobjectByDisplayId(Vector3 position, IEnumerable<int> displayIds)
         {
-            return Objects.WowObjects.OfType<WowGameobject>()
+            return Objects.WowObjects.OfType<IWowGameobject>()
                 .Where(e => displayIds.Contains(e.DisplayId))
                 .OrderBy(e => e.Position.GetDistance(position))
                 .FirstOrDefault();
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public WowUnit GetClosestQuestgiverByDisplayId(Vector3 position, IEnumerable<int> displayIds, bool onlyQuestgivers = true)
+        public IWowUnit GetClosestQuestgiverByDisplayId(Vector3 position, IEnumerable<int> displayIds, bool onlyQuestgivers = true)
         {
-            return Objects.WowObjects.OfType<WowUnit>()
+            return Objects.WowObjects.OfType<IWowUnit>()
                 .Where(e => !e.IsDead && (!onlyQuestgivers || e.IsQuestgiver) && displayIds.Contains(e.DisplayId))
                 .OrderBy(e => e.Position.GetDistance(position))
                 .FirstOrDefault();
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public WowUnit GetClosestQuestgiverByNpcId(Vector3 position, IEnumerable<int> npcIds, bool onlyQuestgivers = true)
+        public IWowUnit GetClosestQuestgiverByNpcId(Vector3 position, IEnumerable<int> npcIds, bool onlyQuestgivers = true)
         {
-            return Objects.WowObjects.OfType<WowUnit>()
-                .Where(e => !e.IsDead && (!onlyQuestgivers || e.IsQuestgiver) && npcIds.Contains(WowGuid.ToNpcId(e.Guid)))
+            return Objects.WowObjects.OfType<IWowUnit>()
+                .Where(e => !e.IsDead && (!onlyQuestgivers || e.IsQuestgiver) && npcIds.Contains(BotUtils.GuidToNpcId(e.Guid)))
                 .OrderBy(e => e.Position.GetDistance(position))
                 .FirstOrDefault();
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public IEnumerable<T> GetEnemiesInCombatWithParty<T>(Vector3 position, float distance) where T : WowUnit
+        public IEnumerable<T> GetEnemiesInCombatWithParty<T>(Vector3 position, float distance) where T : IWowUnit
         {
             return GetNearEnemies<T>(position, distance)                                // is hostile
                 .Where(e => (e.IsInCombat && (e.IsTaggedByMe || !e.IsTaggedByOther))    // needs to be in combat and tagged by us or no one else
@@ -125,7 +126,7 @@ namespace AmeisenBotX.Core
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public IEnumerable<T> GetEnemiesInPath<T>(IEnumerable<Vector3> path, float distance) where T : WowUnit
+        public IEnumerable<T> GetEnemiesInPath<T>(IEnumerable<Vector3> path, float distance) where T : IWowUnit
         {
             foreach (Vector3 pathPosition in path)
             {
@@ -141,7 +142,7 @@ namespace AmeisenBotX.Core
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public IEnumerable<T> GetEnemiesTargetingPartymembers<T>(Vector3 position, float distance) where T : WowUnit
+        public IEnumerable<T> GetEnemiesTargetingPartymembers<T>(Vector3 position, float distance) where T : IWowUnit
         {
             return GetNearEnemies<T>(position, distance)                                // is hostile
                 .Where(e => e.IsInCombat                                                // is in combat
@@ -150,7 +151,7 @@ namespace AmeisenBotX.Core
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public IEnumerable<T> GetNearEnemies<T>(Vector3 position, float distance) where T : WowUnit
+        public IEnumerable<T> GetNearEnemies<T>(Vector3 position, float distance) where T : IWowUnit
         {
             return Objects.WowObjects.OfType<T>()
                 .Where(e => !e.IsDead && !e.IsNotAttackable                         // is alive and attackable
@@ -159,7 +160,7 @@ namespace AmeisenBotX.Core
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public IEnumerable<T> GetNearFriends<T>(Vector3 position, float distance) where T : WowUnit
+        public IEnumerable<T> GetNearFriends<T>(Vector3 position, float distance) where T : IWowUnit
         {
             return Objects.WowObjects.OfType<T>()
                 .Where(e => !e.IsDead && !e.IsNotAttackable                         // is alive and attackable
@@ -168,7 +169,7 @@ namespace AmeisenBotX.Core
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public IEnumerable<T> GetNearPartymembers<T>(Vector3 position, float distance) where T : WowUnit
+        public IEnumerable<T> GetNearPartymembers<T>(Vector3 position, float distance) where T : IWowUnit
         {
             return Objects.Partymembers.OfType<T>()
                 .Where(e => !e.IsDead && !e.IsNotAttackable                 // is alive and attackable
@@ -176,7 +177,7 @@ namespace AmeisenBotX.Core
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public T GetWowObjectByGuid<T>(ulong guid) where T : WowObject
+        public T GetWowObjectByGuid<T>(ulong guid) where T : IWowObject
         {
             return Objects.WowObjects.OfType<T>().FirstOrDefault(e => e.Guid == guid);
         }

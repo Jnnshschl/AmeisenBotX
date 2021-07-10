@@ -249,7 +249,7 @@ namespace AmeisenBotX.Core.Engines.Combat.Classes.Kamel
                         return;
                     }
 
-                    if (Bot.Target.GetType() == typeof(WowPlayer) && !Bot.Target.Auras.Any(e => Bot.Db.GetSpellName(e.SpellId) == "Hamstring") && CustomCastSpell(hamstringSpell))
+                    if (Bot.Target.GetType() == typeof(IWowPlayer) && !Bot.Target.Auras.Any(e => Bot.Db.GetSpellName(e.SpellId) == "Hamstring") && CustomCastSpell(hamstringSpell))
                     {
                         return;
                     }
@@ -267,7 +267,7 @@ namespace AmeisenBotX.Core.Engines.Combat.Classes.Kamel
                         }
                     }
 
-                    if ((Bot.Player.HealthPercentage <= 30) || (Bot.Target.GetType() == typeof(WowPlayer)) && CustomCastSpell(intimidatingShoutSpell))
+                    if ((Bot.Player.HealthPercentage <= 30) || (Bot.Target.GetType() == typeof(IWowPlayer)) && CustomCastSpell(intimidatingShoutSpell))
                     {
                         return;
                     }
@@ -277,7 +277,7 @@ namespace AmeisenBotX.Core.Engines.Combat.Classes.Kamel
                         return;
                     }
 
-                    if (Bot.Target.GetType() == typeof(WowPlayer) && CustomCastSpell(disarmSpell, defensiveStanceSpell))
+                    if (Bot.Target.GetType() == typeof(IWowPlayer) && CustomCastSpell(disarmSpell, defensiveStanceSpell))
                     {
                         return;
                     }
@@ -312,7 +312,7 @@ namespace AmeisenBotX.Core.Engines.Combat.Classes.Kamel
                         return;
                     }
 
-                    IEnumerable<WowUnit> unitsNearPlayer = Bot.GetNearEnemies<WowUnit>(Bot.Player.Position, 5);
+                    IEnumerable<IWowUnit> unitsNearPlayer = Bot.GetNearEnemies<IWowUnit>(Bot.Player.Position, 5);
 
                     if (unitsNearPlayer != null)
                     {

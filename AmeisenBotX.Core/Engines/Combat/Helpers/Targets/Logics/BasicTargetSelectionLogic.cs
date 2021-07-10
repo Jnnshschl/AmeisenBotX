@@ -24,19 +24,19 @@ namespace AmeisenBotX.Core.Engines.Combat.Helpers.Targets.Logics
             PriorityTargets = null;
         }
 
-        public abstract bool SelectTarget(out IEnumerable<WowUnit> wowUnit);
+        public abstract bool SelectTarget(out IEnumerable<IWowUnit> wowUnit);
 
-        protected bool IsBlacklisted(WowUnit wowUnit)
+        protected bool IsBlacklisted(IWowUnit wowUnit)
         {
             return BlacklistedTargets != null && BlacklistedTargets.Contains(wowUnit.DisplayId);
         }
 
-        protected bool IsPriorityTarget(WowUnit wowUnit)
+        protected bool IsPriorityTarget(IWowUnit wowUnit)
         {
             return PriorityTargets != null && PriorityTargets.Contains(wowUnit.DisplayId);
         }
 
-        protected bool IsValidUnit(WowUnit wowUnit)
+        protected bool IsValidUnit(IWowUnit wowUnit)
         {
             return !wowUnit.IsDead
                 && !wowUnit.IsNotAttackable

@@ -4,12 +4,12 @@ namespace AmeisenBotX.Core.Engines.Character.Comparators
 {
     public class ItemLevelComparator : IItemComparator
     {
-        public bool IsBetter(IWowItem current, IWowItem item)
+        public bool IsBetter(IWowInventoryItem current, IWowInventoryItem item)
         {
             return current == null || current.ItemLevel < item.ItemLevel;
         }
 
-        public bool IsBlacklistedItem(IWowItem item)
+        public bool IsBlacklistedItem(IWowInventoryItem item)
         {
             return false;
         }

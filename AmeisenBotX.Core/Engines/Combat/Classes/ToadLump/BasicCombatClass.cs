@@ -495,7 +495,7 @@ namespace AmeisenBotX.Core.Engines.Combat.Classes.ToadLump
 
         public void AttackTarget()
         {
-            WowUnit target = Bot.Target;
+            IWowUnit target = Bot.Target;
             if (target == null)
             {
                 return;
@@ -563,7 +563,7 @@ namespace AmeisenBotX.Core.Engines.Combat.Classes.ToadLump
             // --------------------------- >
 
             if (TargetAuraManager.Tick(Bot.Target.Auras)
-                || TargetInterruptManager.Tick(Bot.GetNearEnemies<WowUnit>(Bot.Player.Position, IsMelee ? 5.0f : 30.0f).ToList()))
+                || TargetInterruptManager.Tick(Bot.GetNearEnemies<IWowUnit>(Bot.Player.Position, IsMelee ? 5.0f : 30.0f).ToList()))
             {
                 return;
             }
@@ -573,7 +573,7 @@ namespace AmeisenBotX.Core.Engines.Combat.Classes.ToadLump
 
             if (Bot.Player.HealthPercentage < C["HealingItemHealthThreshold"])
             {
-                IWowItem healthItem = Bot.Character.Inventory.Items.FirstOrDefault(e => useableHealingItems.Contains(e.Id));
+                IWowInventoryItem healthItem = Bot.Character.Inventory.Items.FirstOrDefault(e => useableHealingItems.Contains(e.Id));
 
                 if (healthItem != null)
                 {
@@ -583,7 +583,7 @@ namespace AmeisenBotX.Core.Engines.Combat.Classes.ToadLump
 
             if (Bot.Player.ManaPercentage < C["HealingItemManaThreshold"])
             {
-                IWowItem manaItem = Bot.Character.Inventory.Items.FirstOrDefault(e => useableManaItems.Contains(e.Id));
+                IWowInventoryItem manaItem = Bot.Character.Inventory.Items.FirstOrDefault(e => useableManaItems.Contains(e.Id));
 
                 if (manaItem != null)
                 {
@@ -610,11 +610,6 @@ namespace AmeisenBotX.Core.Engines.Combat.Classes.ToadLump
             {
                 return;
             }
-        }
-
-        public bool IsTargetAttackable(WowUnit target)
-        {
-            return true;
         }
 
         public virtual void OutOfCombatExecute()
@@ -645,7 +640,7 @@ namespace AmeisenBotX.Core.Engines.Combat.Classes.ToadLump
 
                 if (itemId > 0)
                 {
-                    WowItem item = Bot.Objects.WowObjects.OfType<WowItem>().FirstOrDefault(e => e.EntryId == itemId);
+                    IWowItem item = Bot.Objects.WowObjects.OfType<IWowItem>().FirstOrDefault(e => e.EntryId == itemId);
 
                     if (item != null
                         && !item.GetEnchantmentStrings().Any(e => e.Contains(enchantmentName, StringComparison.OrdinalIgnoreCase))
@@ -667,13 +662,13 @@ namespace AmeisenBotX.Core.Engines.Combat.Classes.ToadLump
                 && !CooldownManager.IsSpellOnCooldown(spellName)
                 && spell.Costs < Bot.Player.Mana)
             {
-                IEnumerable<WowPlayer> groupPlayers = Bot.Objects.Partymembers
-                    .OfType<WowPlayer>()
+                IEnumerable<IWowPlayer> groupPlayers = Bot.Objects.Partymembers
+                    .OfType<IWowPlayer>()
                     .Where(e => e.IsDead);
 
                 if (groupPlayers.Any())
                 {
-                    WowPlayer player = groupPlayers.FirstOrDefault(e => Bot.Db.GetUnitName(e, out string name) && !RessurrectionTargets.ContainsKey(name) || RessurrectionTargets[name] < DateTime.Now);
+                    IWowPlayer player = groupPlayers.FirstOrDefault(e => Bot.Db.GetUnitName(e, out string name) && !RessurrectionTargets.ContainsKey(name) || RessurrectionTargets[name] < DateTime.Now);
 
                     if (player != null)
                     {
@@ -701,9 +696,9 @@ namespace AmeisenBotX.Core.Engines.Combat.Classes.ToadLump
 
         protected bool SelectTarget(ITargetProvider targetProvider)
         {
-            if (targetProvider.Get(out IEnumerable<WowUnit> targetToTarget))
+            if (targetProvider.Get(out IEnumerable<IWowUnit> targetToTarget))
             {
-                WowUnit closestUnit = targetToTarget.OrderBy(value => value.Position.GetDistance(Bot.Player.Position)).First();
+                IWowUnit closestUnit = targetToTarget.OrderBy(value => value.Position.GetDistance(Bot.Player.Position)).First();
                 ulong guid = closestUnit.Guid;
 
                 if (Bot.Player.TargetGuid != guid)
@@ -714,7 +709,7 @@ namespace AmeisenBotX.Core.Engines.Combat.Classes.ToadLump
             }
 
             return Bot.Target != null
-                && WowUnit.IsValidUnit(Bot.Target)
+                && IWowUnit.IsValidUnit(Bot.Target)
                 && !Bot.Target.IsDead;
         }
 
@@ -722,7 +717,7 @@ namespace AmeisenBotX.Core.Engines.Combat.Classes.ToadLump
         {
             if (TryCastSpell(spellName, guid, needsResource, currentResourceAmount, forceTargetSwitch))
             {
-                if (GetValidTarget(guid, out WowUnit target, out bool _))
+                if (GetValidTarget(guid, out IWowUnit target, out bool _))
                 {
                     Bot.Wow.WowClickOnTerrain(target.Position);
                     return true;
@@ -736,7 +731,7 @@ namespace AmeisenBotX.Core.Engines.Combat.Classes.ToadLump
         {
             if (TryCastSpellDk(spellName, guid, needsRuneenergy, needsBloodrune, needsFrostrune, needsUnholyrune, forceTargetSwitch))
             {
-                if (GetValidTarget(guid, out WowUnit target, out bool _))
+                if (GetValidTarget(guid, out IWowUnit target, out bool _))
                 {
                     Bot.Wow.WowClickOnTerrain(target.Position);
                     return true;
@@ -750,7 +745,7 @@ namespace AmeisenBotX.Core.Engines.Combat.Classes.ToadLump
         {
             if (!Bot.Character.SpellBook.IsSpellKnown(spellName) || ((guid != 0 && guid != Bot.Wow.PlayerGuid) && !Bot.Objects.IsTargetInLineOfSight)) { return false; }
 
-            if (GetValidTarget(guid, out WowUnit target, out bool needToSwitchTarget))
+            if (GetValidTarget(guid, out IWowUnit target, out bool needToSwitchTarget))
             {
                 if (currentResourceAmount == 0)
                 {
@@ -794,7 +789,7 @@ namespace AmeisenBotX.Core.Engines.Combat.Classes.ToadLump
         {
             if (!Bot.Character.SpellBook.IsSpellKnown(spellName) || ((guid != 0 && guid != Bot.Wow.PlayerGuid) && !Bot.Objects.IsTargetInLineOfSight)) { return false; }
 
-            if (GetValidTarget(guid, out WowUnit target, out bool needToSwitchTarget))
+            if (GetValidTarget(guid, out IWowUnit target, out bool needToSwitchTarget))
             {
                 bool isTargetMyself = guid == 0;
                 Spell spell = Bot.Character.SpellBook.GetSpellByName(spellName);
@@ -831,7 +826,7 @@ namespace AmeisenBotX.Core.Engines.Combat.Classes.ToadLump
         {
             if (!Bot.Character.SpellBook.IsSpellKnown(spellName) || ((guid != 0 && guid != Bot.Wow.PlayerGuid) && !Bot.Objects.IsTargetInLineOfSight)) { return false; }
 
-            if (GetValidTarget(guid, out WowUnit target, out bool needToSwitchTarget))
+            if (GetValidTarget(guid, out IWowUnit target, out bool needToSwitchTarget))
             {
                 bool isTargetMyself = guid == 0;
                 Spell spell = Bot.Character.SpellBook.GetSpellByName(spellName);
@@ -865,7 +860,7 @@ namespace AmeisenBotX.Core.Engines.Combat.Classes.ToadLump
         {
             if (!Bot.Character.SpellBook.IsSpellKnown(spellName) || ((guid != 0 && guid != Bot.Wow.PlayerGuid) && !Bot.Objects.IsTargetInLineOfSight)) { return false; }
 
-            if (GetValidTarget(guid, out WowUnit target, out bool needToSwitchTarget))
+            if (GetValidTarget(guid, out IWowUnit target, out bool needToSwitchTarget))
             {
                 if (currentResourceAmount == 0)
                 {
@@ -952,7 +947,7 @@ namespace AmeisenBotX.Core.Engines.Combat.Classes.ToadLump
             return false;
         }
 
-        private void CheckFacing(WowUnit target)
+        private void CheckFacing(IWowUnit target)
         {
             if (target == null || target.Guid == Bot.Wow.PlayerGuid)
             {
@@ -978,7 +973,7 @@ namespace AmeisenBotX.Core.Engines.Combat.Classes.ToadLump
             }
         }
 
-        private bool GetValidTarget(ulong guid, out WowUnit target, out bool needToSwitchTargets)
+        private bool GetValidTarget(ulong guid, out IWowUnit target, out bool needToSwitchTargets)
         {
             if (guid == 0)
             {
@@ -994,13 +989,13 @@ namespace AmeisenBotX.Core.Engines.Combat.Classes.ToadLump
             }
             else
             {
-                target = Bot.GetWowObjectByGuid<WowUnit>(guid);
+                target = Bot.GetWowObjectByGuid<IWowUnit>(guid);
                 needToSwitchTargets = true;
                 return target != null;
             }
         }
 
-        private bool IsInRange(Spell spell, WowUnit wowUnit)
+        private bool IsInRange(Spell spell, IWowUnit wowUnit)
         {
             if ((spell.MinRange == 0 && spell.MaxRange == 0) || spell.MaxRange == 0)
             {

@@ -1,6 +1,6 @@
 ﻿using Newtonsoft.Json;
 
-namespace AmeisenBotX.Core.Data.Objects
+namespace AmeisenBotX.Wow.Objects
 {
     public class WowMount
     {

@@ -30,7 +30,7 @@ namespace AmeisenBotX.Core.Fsm.States.Idle.Actions
 
         public int MinDuration => 25 * 1000;
 
-        private WowGameobject CurrentSeat { get; set; }
+        private IWowGameobject CurrentSeat { get; set; }
 
         private double MaxDistance { get; }
 
@@ -45,13 +45,13 @@ namespace AmeisenBotX.Core.Fsm.States.Idle.Actions
             // get the center from where to cal the distance, this is needed
             // to prevent going out of the follow trigger radius, which
             // would cause a suspicous loop of running around
-            Vector3 originPos = StateMachine.GetState<StateIdle>().IsUnitToFollowThere(out WowUnit unit, false) ? unit.Position : Bot.Player.Position;
+            Vector3 originPos = StateMachine.GetState<StateIdle>().IsUnitToFollowThere(out IWowUnit unit, false) ? unit.Position : Bot.Player.Position;
 
-            WowGameobject seat = Bot.Objects.WowObjects.OfType<WowGameobject>()
+            IWowGameobject seat = Bot.Objects.WowObjects.OfType<IWowGameobject>()
                 .OrderBy(e => e.Position.GetDistance(originPos))
                 .FirstOrDefault(e => e.GameobjectType == WowGameobjectType.Chair
                     // make sure no one sits on the chair besides ourself
-                    && !Bot.Objects.WowObjects.OfType<WowUnit>()
+                    && !Bot.Objects.WowObjects.OfType<IWowUnit>()
                         .Where(e => e.Guid != Bot.Wow.PlayerGuid)
                         .Any(x => e.Position.GetDistance(x.Position) < 0.6f)
                     && e.Position.GetDistance(originPos) < MaxDistance - 0.2f);

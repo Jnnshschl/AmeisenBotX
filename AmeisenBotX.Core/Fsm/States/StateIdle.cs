@@ -1,6 +1,5 @@
 ﻿using AmeisenBotX.Common.Math;
 using AmeisenBotX.Common.Utils;
-using AmeisenBotX.Core.Common;
 using AmeisenBotX.Core.Data.Objects;
 using AmeisenBotX.Core.Engines.Movement.Enums;
 using AmeisenBotX.Core.Fsm.Enums;
@@ -17,7 +16,7 @@ namespace AmeisenBotX.Core.Fsm.States
         public StateIdle(AmeisenBotFsm stateMachine, AmeisenBotConfig config, AmeisenBotInterfaces bot) : base(stateMachine, config, bot)
         {
             FirstStart = true;
-            IdleActionManager = new IdleActionManager(new List<IIdleAction>()
+            IdleActionManager = new(new List<IIdleAction>()
             {
                 new AuctionHouseIdleAction(bot),
                 new CheckMailsIdleAction(bot),
@@ -152,7 +151,7 @@ namespace AmeisenBotX.Core.Fsm.States
 
             // do i need to complete/get quests
             if (Config.AutoTalkToNearQuestgivers
-                && IsUnitToFollowThere(out WowUnit unitToFollow, true)
+                && IsUnitToFollowThere(out IWowUnit unitToFollow, true)
                 && unitToFollow != null
                 && unitToFollow.TargetGuid != 0)
             {
@@ -188,13 +187,13 @@ namespace AmeisenBotX.Core.Fsm.States
             }
         }
 
-        public bool IsUnitToFollowThere(out WowUnit playerToFollow, bool ignoreRange = false)
+        public bool IsUnitToFollowThere(out IWowUnit playerToFollow, bool ignoreRange = false)
         {
-            IEnumerable<WowPlayer> wowPlayers = Bot.Objects.WowObjects.OfType<WowPlayer>().Where(e => !e.IsDead);
+            IEnumerable<IWowPlayer> wowPlayers = Bot.Objects.WowObjects.OfType<IWowPlayer>().Where(e => !e.IsDead);
 
             if (wowPlayers.Any())
             {
-                WowUnit[] playersToTry =
+                IWowUnit[] playersToTry =
                 {
                     Config.FollowSpecificCharacter ? wowPlayers.FirstOrDefault(p => Bot.Db.GetUnitName(p, out string name) && name.Equals(Config.SpecificCharacterToFollow, StringComparison.OrdinalIgnoreCase)) : null,
                     Config.FollowGroupLeader ? Bot.Objects.Partyleader : null,
@@ -220,18 +219,9 @@ namespace AmeisenBotX.Core.Fsm.States
             Bot.Character.ItemSlotsToSkip.Clear();
         }
 
-        private void CheckForBattlegroundInvites()
+        private bool HandleAutoQuestMode(IWowUnit wowPlayer)
         {
-            if (Bot.Memory.Read(Bot.Offsets.BattlegroundStatus, out int bgStatus)
-                && bgStatus == 2)
-            {
-                Bot.Wow.LuaAcceptBattlegroundInvite();
-            }
-        }
-
-        private bool HandleAutoQuestMode(WowUnit wowPlayer)
-        {
-            WowUnit possibleQuestgiver = Bot.GetWowObjectByGuid<WowUnit>(wowPlayer.TargetGuid);
+            IWowUnit possibleQuestgiver = Bot.GetWowObjectByGuid<IWowUnit>(wowPlayer.TargetGuid);
 
             if (possibleQuestgiver != null && (possibleQuestgiver.IsQuestgiver || possibleQuestgiver.IsGossip))
             {
@@ -265,7 +255,7 @@ namespace AmeisenBotX.Core.Fsm.States
             return false;
         }
 
-        private bool ShouldIFollowPlayer(WowUnit playerToFollow)
+        private bool ShouldIFollowPlayer(IWowUnit playerToFollow)
         {
             if (playerToFollow != null)
             {

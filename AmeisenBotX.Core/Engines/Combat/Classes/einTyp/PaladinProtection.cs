@@ -39,8 +39,6 @@ namespace AmeisenBotX.Core.Engines.Combat.Classes.einTyp
 
         public bool HandlesMovement => true;
 
-        public bool HandlesTargetSelection => true;
-
         public bool IsMelee => true;
 
         public IItemComparator ItemComparator => new TankItemComparator();
@@ -119,7 +117,7 @@ namespace AmeisenBotX.Core.Engines.Combat.Classes.einTyp
 
         public void AttackTarget()
         {
-            WowUnit target = Bot.Target;
+            IWowUnit target = Bot.Target;
             if (target == null)
             {
                 return;
@@ -140,7 +138,7 @@ namespace AmeisenBotX.Core.Engines.Combat.Classes.einTyp
         public void Execute()
         {
             computeNewRoute = false;
-            WowUnit target = Bot.Target;
+            IWowUnit target = Bot.Target;
             if ((Bot.Wow.TargetGuid != 0 && target != null && !(target.IsDead || target.Health < 1)) || SearchNewTarget(ref target, false))
             {
                 bool targetDistanceChanged = false;
@@ -168,11 +166,6 @@ namespace AmeisenBotX.Core.Engines.Combat.Classes.einTyp
             Bot.Globals.ForceCombat = false;
         }
 
-        public bool IsTargetAttackable(WowUnit target)
-        {
-            return true;
-        }
-
         public void OutOfCombatExecute()
         {
             double distanceTraveled = Bot.Player.Position.GetDistance(LastPlayerPosition);
@@ -186,16 +179,16 @@ namespace AmeisenBotX.Core.Engines.Combat.Classes.einTyp
             if (distanceTraveled < 0.001)
             {
                 ulong leaderGuid = Bot.Objects.Partyleader.Guid;
-                WowUnit target = Bot.Target;
-                WowUnit leader = null;
+                IWowUnit target = Bot.Target;
+                IWowUnit leader = null;
                 if (leaderGuid != 0)
                 {
-                    leader = Bot.GetWowObjectByGuid<WowUnit>(leaderGuid);
+                    leader = Bot.GetWowObjectByGuid<IWowUnit>(leaderGuid);
                 }
 
                 if (leaderGuid != 0 && leaderGuid != Bot.Wow.PlayerGuid && leader != null && !(leader.IsDead || leader.Health < 1))
                 {
-                    Bot.Movement.SetMovementAction(Movement.Enums.MovementAction.Move, Bot.GetWowObjectByGuid<WowUnit>(leaderGuid).Position);
+                    Bot.Movement.SetMovementAction(Movement.Enums.MovementAction.Move, Bot.GetWowObjectByGuid<IWowUnit>(leaderGuid).Position);
                 }
                 else if ((Bot.Wow.TargetGuid != 0 && target != null && !(target.IsDead || target.Health < 1)) || SearchNewTarget(ref target, true))
                 {
@@ -231,7 +224,7 @@ namespace AmeisenBotX.Core.Engines.Combat.Classes.einTyp
             }
         }
 
-        private void HandleAttacking(WowUnit target)
+        private void HandleAttacking(IWowUnit target)
         {
             bool gcdWaiting = IsGCD();
             Bot.Wow.WowTargetGuid(target.Guid);
@@ -309,10 +302,10 @@ namespace AmeisenBotX.Core.Engines.Combat.Classes.einTyp
 
             // support members
             int lowHealth = 2147483647;
-            WowUnit lowMember = null;
+            IWowUnit lowMember = null;
             foreach (ulong memberGuid in Bot.Objects.PartymemberGuids)
             {
-                WowUnit member = Bot.GetWowObjectByGuid<WowUnit>(memberGuid);
+                IWowUnit member = Bot.GetWowObjectByGuid<IWowUnit>(memberGuid);
                 if (member != null && member.Health < lowHealth)
                 {
                     lowHealth = member.Health;
@@ -403,7 +396,7 @@ namespace AmeisenBotX.Core.Engines.Combat.Classes.einTyp
             }
         }
 
-        private void HandleMovement(WowUnit target)
+        private void HandleMovement(IWowUnit target)
         {
             if (target == null)
             {
@@ -431,26 +424,26 @@ namespace AmeisenBotX.Core.Engines.Combat.Classes.einTyp
             return DateTime.Now.Subtract(LastGCD).TotalSeconds < GCDTime;
         }
 
-        private bool SearchNewTarget(ref WowUnit target, bool grinding)
+        private bool SearchNewTarget(ref IWowUnit target, bool grinding)
         {
             if (Bot.Wow.TargetGuid != 0 && target != null && !(target.IsDead || target.Health < 1 || target.Auras.Any(e => Bot.Db.GetSpellName(e.SpellId).Contains("Spirit of Redem"))))
             {
                 return false;
             }
 
-            List<WowUnit> wowUnits = Bot.Objects.WowObjects.OfType<WowUnit>().Where(e => Bot.Db.GetReaction(Bot.Player, e) != WowUnitReaction.Friendly && Bot.Db.GetReaction(Bot.Player, e) != WowUnitReaction.Neutral).ToList();
+            List<IWowUnit> wowUnits = Bot.Objects.WowObjects.OfType<IWowUnit>().Where(e => Bot.Db.GetReaction(Bot.Player, e) != WowUnitReaction.Friendly && Bot.Db.GetReaction(Bot.Player, e) != WowUnitReaction.Neutral).ToList();
             bool newTargetFound = false;
             int areaToLookAt = grinding ? 100 : 50;
-            bool inCombat = (target == null || target.IsDead || target.Health < 1) ? false : target.IsInCombat;
+            bool inCombat = target != null && !target.IsDead && target.Health >= 1 && target.IsInCombat;
             int targetHealth = (target == null || target.IsDead || target.Health < 1) ? 2147483647 : target.Health;
             ulong memberGuid = (target == null || target.IsDead || target.Health < 1) ? 0 : target.TargetGuid;
-            WowUnit member = (target == null || target.IsDead || target.Health < 1) ? null : Bot.GetWowObjectByGuid<WowUnit>(memberGuid);
+            IWowUnit member = (target == null || target.IsDead || target.Health < 1) ? null : Bot.GetWowObjectByGuid<IWowUnit>(memberGuid);
             int memberHealth = member == null ? 2147483647 : member.Health;
             int targetCount = 0;
             multipleTargets = false;
-            foreach (WowUnit unit in wowUnits)
+            foreach (IWowUnit unit in wowUnits)
             {
-                if (WowUnit.IsValidUnit(unit) && unit != target && !(unit.IsDead || unit.Health < 1 || unit.Auras.Any(e => Bot.Db.GetSpellName(e.SpellId).Contains("Spirit of Redem"))))
+                if (IWowUnit.IsValidUnit(unit) && unit != target && !(unit.IsDead || unit.Health < 1 || unit.Auras.Any(e => Bot.Db.GetSpellName(e.SpellId).Contains("Spirit of Redem"))))
                 {
                     double tmpDistance = Bot.Player.Position.GetDistance(unit.Position);
                     if (tmpDistance < areaToLookAt)
@@ -463,7 +456,7 @@ namespace AmeisenBotX.Core.Engines.Combat.Classes.einTyp
 
                         if (unit.IsInCombat)
                         {
-                            member = Bot.GetWowObjectByGuid<WowUnit>(unit.TargetGuid);
+                            member = Bot.GetWowObjectByGuid<IWowUnit>(unit.TargetGuid);
                             if (member != null)
                             {
                                 compHealth = member.Health;

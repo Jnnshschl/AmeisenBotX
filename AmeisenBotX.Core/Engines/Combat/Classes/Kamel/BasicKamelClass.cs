@@ -48,7 +48,7 @@ namespace AmeisenBotX.Core.Engines.Combat.Classes.Kamel
 
         #endregion Priest
 
-        public readonly Dictionary<string, DateTime> spellCoolDown = new Dictionary<string, DateTime>();
+        public readonly Dictionary<string, DateTime> spellCoolDown = new();
 
         private readonly int[] useableHealingItems = new int[]
         {
@@ -74,7 +74,7 @@ namespace AmeisenBotX.Core.Engines.Combat.Classes.Kamel
             //Basic
             AutoAttackEvent = new(TimeSpan.FromSeconds(1));
             TargetSelectEvent = new(TimeSpan.FromSeconds(1));
-            revivePlayerEvent = new(TimeSpan.FromSeconds(4));
+            RevivePlayerEvent = new(TimeSpan.FromSeconds(4));
 
             //Race (Troll)
             spellCoolDown.Add(BerserkingSpell, DateTime.Now);
@@ -115,7 +115,7 @@ namespace AmeisenBotX.Core.Engines.Combat.Classes.Kamel
 
         public IEnumerable<int> PriorityTargetDisplayIds { get; set; }
 
-        public TimegatedEvent revivePlayerEvent { get; private set; }
+        public TimegatedEvent RevivePlayerEvent { get; private set; }
 
         public abstract WowRole Role { get; }
 
@@ -136,7 +136,7 @@ namespace AmeisenBotX.Core.Engines.Combat.Classes.Kamel
         //follow the target
         public void AttackTarget()
         {
-            WowUnit target = Bot.Target;
+            IWowUnit target = Bot.Target;
             if (target == null)
             {
                 return;
@@ -157,15 +157,15 @@ namespace AmeisenBotX.Core.Engines.Combat.Classes.Kamel
         //Change target if target to far away
         public void ChangeTargetToAttack()
         {
-            IEnumerable<WowPlayer> PlayerNearPlayer = Bot.GetNearEnemies<WowPlayer>(Bot.Player.Position, 15);
+            IEnumerable<IWowPlayer> PlayerNearPlayer = Bot.GetNearEnemies<IWowPlayer>(Bot.Player.Position, 15);
 
-            WowUnit target = Bot.Target;
+            IWowUnit target = Bot.Target;
             if (target == null)
             {
                 return;
             }
 
-            if (PlayerNearPlayer.Count() >= 1 && Bot.Objects.Target.HealthPercentage >= 60 && Bot.Player.Position.GetDistance(target.Position) >= 20)
+            if (PlayerNearPlayer.Any() && Bot.Objects.Target.HealthPercentage >= 60 && Bot.Player.Position.GetDistance(target.Position) >= 20)
             {
                 Bot.Wow.WowClearTarget();
                 return;
@@ -182,7 +182,7 @@ namespace AmeisenBotX.Core.Engines.Combat.Classes.Kamel
                 {
                     if (slot == WowEquipmentSlot.INVSLOT_MAINHAND)
                     {
-                        WowItem item = Bot.Objects.WowObjects.OfType<WowItem>().FirstOrDefault(e => e.EntryId == itemId);
+                        IWowItem item = Bot.Objects.WowObjects.OfType<IWowItem>().FirstOrDefault(e => e.EntryId == itemId);
 
                         if (item != null
                             && !item.GetEnchantmentStrings().Any(e => e.Contains(enchantmentName))
@@ -193,7 +193,7 @@ namespace AmeisenBotX.Core.Engines.Combat.Classes.Kamel
                     }
                     else if (slot == WowEquipmentSlot.INVSLOT_OFFHAND)
                     {
-                        WowItem item = Bot.Objects.WowObjects.OfType<WowItem>().LastOrDefault(e => e.EntryId == itemId);
+                        IWowItem item = Bot.Objects.WowObjects.OfType<IWowItem>().LastOrDefault(e => e.EntryId == itemId);
 
                         if (item != null
                             && !item.GetEnchantmentStrings().Any(e => e.Contains(enchantmentName))
@@ -217,7 +217,7 @@ namespace AmeisenBotX.Core.Engines.Combat.Classes.Kamel
                 {
                     Spell spell = Bot.Character.SpellBook.GetSpellByName(spellName);
 
-                    if ((Bot.Player.Mana >= spell.Costs && IsSpellReady(spellName)))
+                    if (Bot.Player.Mana >= spell.Costs && IsSpellReady(spellName))
                     {
                         double distance = Bot.Player.Position.GetDistance(Bot.Target.Position);
 
@@ -234,7 +234,7 @@ namespace AmeisenBotX.Core.Engines.Combat.Classes.Kamel
 
                     Spell spell = Bot.Character.SpellBook.GetSpellByName(spellName);
 
-                    if ((Bot.Player.Mana >= spell.Costs && IsSpellReady(spellName)))
+                    if (Bot.Player.Mana >= spell.Costs && IsSpellReady(spellName))
                     {
                         Bot.Wow.LuaCastSpell(spellName);
                         return true;
@@ -275,7 +275,7 @@ namespace AmeisenBotX.Core.Engines.Combat.Classes.Kamel
 
             if (Bot.Player.HealthPercentage < 20)
             {
-                IWowItem healthItem = Bot.Character.Inventory.Items.FirstOrDefault(e => useableHealingItems.Contains(e.Id));
+                IWowInventoryItem healthItem = Bot.Character.Inventory.Items.FirstOrDefault(e => useableHealingItems.Contains(e.Id));
 
                 if (healthItem != null)
                 {
@@ -285,7 +285,7 @@ namespace AmeisenBotX.Core.Engines.Combat.Classes.Kamel
 
             if (Bot.Player.ManaPercentage < 20)
             {
-                IWowItem manaItem = Bot.Character.Inventory.Items.FirstOrDefault(e => useableManaItems.Contains(e.Id));
+                IWowInventoryItem manaItem = Bot.Character.Inventory.Items.FirstOrDefault(e => useableManaItems.Contains(e.Id));
 
                 if (manaItem != null)
                 {
@@ -307,23 +307,18 @@ namespace AmeisenBotX.Core.Engines.Combat.Classes.Kamel
             return false;
         }
 
-        public bool IsTargetAttackable(WowUnit target)
-        {
-            return true;
-        }
-
         public abstract void OutOfCombatExecute();
 
-        public void revivePartyMember(string reviveSpellName)
+        public void RevivePartyMember(string reviveSpellName)
         {
-            List<WowUnit> partyMemberToHeal = new List<WowUnit>(Bot.Objects.Partymembers)
+            List<IWowUnit> partyMemberToHeal = new(Bot.Objects.Partymembers)
             {
                 Bot.Player
             };
 
             partyMemberToHeal = partyMemberToHeal.Where(e => e.IsDead).OrderBy(e => e.HealthPercentage).ToList();
 
-            if (revivePlayerEvent.Run() && partyMemberToHeal.Count > 0)
+            if (RevivePlayerEvent.Run() && partyMemberToHeal.Count > 0)
             {
                 Bot.Wow.WowTargetGuid(partyMemberToHeal.FirstOrDefault().Guid);
                 CustomCastSpellMana(reviveSpellName);
@@ -334,7 +329,7 @@ namespace AmeisenBotX.Core.Engines.Combat.Classes.Kamel
         {
             if (TargetSelectEvent.Run())
             {
-                WowUnit nearTarget = Bot.GetNearEnemies<WowUnit>(Bot.Player.Position, 50)
+                IWowUnit nearTarget = Bot.GetNearEnemies<IWowUnit>(Bot.Player.Position, 50)
                 .Where(e => !e.IsNotAttackable && (e.Type == WowObjectType.Player && (e.IsPvpFlagged && Bot.Db.GetReaction(e, Bot.Player) != WowUnitReaction.Friendly) || (e.IsInCombat)) || (e.IsInCombat && Bot.Db.GetUnitName(e, out string name) && name != "The Lich King" && !(Bot.Objects.MapId == WowMapId.DrakTharonKeep && e.CurrentlyChannelingSpellId == 47346)))
                 .OrderBy(e => e.Position.GetDistance(Bot.Player.Position))
                 .FirstOrDefault();//&& e.Type(Player)
@@ -359,7 +354,7 @@ namespace AmeisenBotX.Core.Engines.Combat.Classes.Kamel
         {
             if (TargetSelectEvent.Run())
             {
-                WowUnit nearTargetToTank = Bot.GetEnemiesTargetingPartymembers<WowUnit>(Bot.Player.Position, 60)
+                IWowUnit nearTargetToTank = Bot.GetEnemiesTargetingPartymembers<IWowUnit>(Bot.Player.Position, 60)
                 .Where(e => e.IsInCombat && !e.IsNotAttackable && e.Type != WowObjectType.Player && Bot.Db.GetUnitName(Bot.Target, out string name) && name != "The Lich King" && name != "Anub'Rekhan" && !(Bot.Objects.MapId == WowMapId.DrakTharonKeep && e.CurrentlyChannelingSpellId == 47346))
                 .OrderBy(e => e.Position.GetDistance(Bot.Player.Position))
                 .FirstOrDefault();
@@ -379,7 +374,7 @@ namespace AmeisenBotX.Core.Engines.Combat.Classes.Kamel
                 }
                 else
                 {
-                    WowUnit nearTarget = Bot.GetNearEnemies<WowUnit>(Bot.Player.Position, 80)
+                    IWowUnit nearTarget = Bot.GetNearEnemies<IWowUnit>(Bot.Player.Position, 80)
                     .Where(e => e.IsInCombat && !e.IsNotAttackable && e.Type == WowObjectType.Player)
                     .OrderBy(e => e.Position.GetDistance(Bot.Player.Position))
                     .FirstOrDefault();//&& e.Type(Player)
@@ -406,19 +401,14 @@ namespace AmeisenBotX.Core.Engines.Combat.Classes.Kamel
             return $"[{WowClass}] [{Role}] {Displayname} ({Author})";
         }
 
-        public bool totemItemCheck()
+        public bool TotemItemCheck()
         {
-            if (Bot.Character.Inventory.Items.Any(e => e.Name.Equals("Earth Totem", StringComparison.OrdinalIgnoreCase)) &&
-             Bot.Character.Inventory.Items.Any(e => e.Name.Equals("Air Totem", StringComparison.OrdinalIgnoreCase)) &&
-             Bot.Character.Inventory.Items.Any(e => e.Name.Equals("Water Totem", StringComparison.OrdinalIgnoreCase)) &&
-             Bot.Character.Inventory.Items.Any(e => e.Name.Equals("Fire Totem", StringComparison.OrdinalIgnoreCase)) ||
-             (Bot.Character.Equipment.Items.ContainsKey(WowEquipmentSlot.INVSLOT_RANGED) &&
-             Bot.Character.Equipment.Items[WowEquipmentSlot.INVSLOT_RANGED] != null))
-            {
-                return true;
-            }
-
-            return false;
+            return (Bot.Character.Inventory.Items.Any(e => e.Name.Equals("Earth Totem", StringComparison.OrdinalIgnoreCase)) &&
+                Bot.Character.Inventory.Items.Any(e => e.Name.Equals("Air Totem", StringComparison.OrdinalIgnoreCase)) &&
+                Bot.Character.Inventory.Items.Any(e => e.Name.Equals("Water Totem", StringComparison.OrdinalIgnoreCase)) &&
+                Bot.Character.Inventory.Items.Any(e => e.Name.Equals("Fire Totem", StringComparison.OrdinalIgnoreCase))) ||
+                (Bot.Character.Equipment.Items.ContainsKey(WowEquipmentSlot.INVSLOT_RANGED) &&
+                Bot.Character.Equipment.Items[WowEquipmentSlot.INVSLOT_RANGED] != null);
         }
     }
 }

@@ -47,6 +47,12 @@ namespace AmeisenBotX.Common.Utils
             return new string(FastRandomString().Where(c => c != '-' && (c < '0' || c > '9')).ToArray());
         }
 
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static int GuidToNpcId(ulong guid)
+        {
+            return (int)((guid >> 24) & 0x0000000000FFFFFF);
+        }
+
         public static bool IsValidJson(string strInput)
         {
             if (string.IsNullOrWhiteSpace(strInput))

@@ -27,7 +27,7 @@ namespace AmeisenBotX.Core.Fsm.States.Idle.Actions
 
         public int MinDuration => 0;
 
-        private IEnumerable<WowUnit> NearPartymembers { get; set; }
+        private IEnumerable<IWowUnit> NearPartymembers { get; set; }
 
         private Random Rnd { get; }
 
@@ -39,7 +39,7 @@ namespace AmeisenBotX.Core.Fsm.States.Idle.Actions
 
         public void Execute()
         {
-            WowUnit randomPartymember = NearPartymembers.ElementAt(Rnd.Next(0, NearPartymembers.Count()));
+            IWowUnit randomPartymember = NearPartymembers.ElementAt(Rnd.Next(0, NearPartymembers.Count()));
 
             if (randomPartymember != null)
             {

@@ -1,5 +1,4 @@
-﻿using AmeisenBotX.Core.Common;
-using AmeisenBotX.Core.Fsm.Enums;
+﻿using AmeisenBotX.Core.Fsm.Enums;
 using AmeisenBotX.Wow.Objects.Enums;
 
 namespace AmeisenBotX.Core.Fsm.States

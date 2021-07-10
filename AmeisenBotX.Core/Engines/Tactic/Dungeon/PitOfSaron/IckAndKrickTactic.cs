@@ -38,7 +38,7 @@ namespace AmeisenBotX.Core.Engines.Tactic.Dungeon.PitOfSaron
             preventMovement = false;
             allowAttacking = true;
 
-            WowUnit wowUnit = Bot.GetClosestQuestgiverByDisplayId(Bot.Player.Position, IckDisplayId, false);
+            IWowUnit wowUnit = Bot.GetClosestQuestgiverByDisplayId(Bot.Player.Position, IckDisplayId, false);
 
             if (wowUnit != null)
             {
@@ -56,7 +56,7 @@ namespace AmeisenBotX.Core.Engines.Tactic.Dungeon.PitOfSaron
                     return true;
                 }
 
-                WowUnit unitOrb = Bot.Objects.WowObjects.OfType<WowUnit>()
+                IWowUnit unitOrb = Bot.Objects.WowObjects.OfType<IWowUnit>()
                     .OrderBy(e => e.Position.GetDistance(Bot.Player.Position))
                     .FirstOrDefault(e => e.DisplayId == 11686 && e.HasBuffById(69017) && e.Position.GetDistance(Bot.Player.Position) < 3.0f);
 

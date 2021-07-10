@@ -160,7 +160,7 @@ namespace AmeisenBotX.Core.Engines.Combat.Classes.Jannis
 
         private bool NeedToHealSomeone()
         {
-            if (TargetProviderHeal.Get(out IEnumerable<WowUnit> unitsToHeal))
+            if (TargetProviderHeal.Get(out IEnumerable<IWowUnit> unitsToHeal))
             {
                 if (unitsToHeal.Count(e => e.HealthPercentage < 40.0) > 3
                     && TryCastSpell(tranquilitySpell, 0, true))
@@ -168,7 +168,7 @@ namespace AmeisenBotX.Core.Engines.Combat.Classes.Jannis
                     return true;
                 }
 
-                WowUnit target = unitsToHeal.First();
+                IWowUnit target = unitsToHeal.First();
 
                 if (target.HealthPercentage < 90.0
                     && target.HealthPercentage > 75.0

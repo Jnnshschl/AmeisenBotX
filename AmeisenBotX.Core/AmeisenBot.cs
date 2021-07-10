@@ -180,22 +180,6 @@ namespace AmeisenBotX.Core
         }
 
         /// <summary>
-        /// HookModule that does a traceline in front of the character
-        /// to detect small obstacles that can be jumped over.
-        /// </summary>
-        private void TraceLineJumpCheck(IHookModule s)
-        {
-            if (Config.MovementSettings.EnableTracelineJumpCheck && Bot.Player != null)
-            {
-                Vector3 playerPosition = Bot.Player.Position;
-                playerPosition.Z += Bot.MovementSettings.ObstacleCheckHeight;
-
-                Vector3 pos = BotUtils.MoveAhead(playerPosition, Bot.Player.Rotation, Bot.MovementSettings.ObstacleCheckDistance);
-                Bot.Memory.Write(s.GetDataPointer(), (1.0f, playerPosition, pos));
-            }
-        }
-
-        /// <summary>
         /// Fires when a custom BombatClass was compiled.
         /// </summary>
         public event Action<bool, string, string> OnCombatClassCompilationResult;
@@ -676,7 +660,7 @@ namespace AmeisenBotX.Core
                     item = ItemFactory.BuildSpecificItem(ItemFactory.ParseItem(itemJson));
                 }
 
-                if (Bot.Character.IsItemAnImprovement(item, out IWowItem itemToReplace))
+                if (Bot.Character.IsItemAnImprovement(item, out IWowInventoryItem itemToReplace))
                 {
                     AmeisenLogger.I.Log("WoWEvents", $"Would like to replace item {item?.Name} with {itemToReplace?.Name}, rolling need", LogLevel.Verbose);
 
@@ -1029,6 +1013,22 @@ namespace AmeisenBotX.Core
             // Misc Events
             Bot.Events.Subscribe("CHARACTER_POINTS_CHANGED", OnTalentPointsChange);
             // Bot.EventHookManager.Subscribe("COMBAT_LOG_EVENT_UNFILTERED", Bot.CombatLogParser.Parse);
+        }
+
+        /// <summary>
+        /// HookModule that does a traceline in front of the character
+        /// to detect small obstacles that can be jumped over.
+        /// </summary>
+        private void TraceLineJumpCheck(IHookModule s)
+        {
+            if (Config.MovementSettings.EnableTracelineJumpCheck && Bot.Player != null)
+            {
+                Vector3 playerPosition = Bot.Player.Position;
+                playerPosition.Z += Bot.MovementSettings.ObstacleCheckHeight;
+
+                Vector3 pos = BotUtils.MoveAhead(playerPosition, Bot.Player.Rotation, Bot.MovementSettings.ObstacleCheckDistance);
+                Bot.Memory.Write(s.GetDataPointer(), (1.0f, playerPosition, pos));
+            }
         }
     }
 }

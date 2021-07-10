@@ -70,7 +70,7 @@ namespace AmeisenBotX
                     buttonInventory.BorderBrush = new SolidColorBrush((Color)Application.Current.Resources["DarkBorder"]);
                     buttonSpells.BorderBrush = new SolidColorBrush((Color)Application.Current.Resources["DarkBorder"]);
 
-                    IWowItem[] equipmentItems = AmeisenBot.Bot.Character.Equipment.Items.Values.ToArray();
+                    IWowInventoryItem[] equipmentItems = AmeisenBot.Bot.Character.Equipment.Items.Values.ToArray();
 
                     for (int i = 0; i < equipmentItems.Length; ++i)
                     {
@@ -84,7 +84,7 @@ namespace AmeisenBotX
                     buttonInventory.BorderBrush = new SolidColorBrush((Color)Application.Current.Resources["DarkAccent1"]);
                     buttonSpells.BorderBrush = new SolidColorBrush((Color)Application.Current.Resources["DarkBorder"]);
 
-                    IWowItem[] inventoryItems = AmeisenBot.Bot.Character.Inventory.Items.ToArray();
+                    IWowInventoryItem[] inventoryItems = AmeisenBot.Bot.Character.Inventory.Items.ToArray();
 
                     for (int i = 0; i < inventoryItems.Length; ++i)
                     {

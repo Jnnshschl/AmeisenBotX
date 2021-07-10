@@ -41,11 +41,11 @@ namespace AmeisenBotX.Wow.Cache
 
         BasicCombatLogEntrySubject GetCombatLogSubject();
 
-        WowUnitReaction GetReaction(WowUnit a, WowUnit b);
+        WowUnitReaction GetReaction(IWowUnit a, IWowUnit b);
 
         string GetSpellName(int spellId);
 
-        bool GetUnitName(WowUnit unit, out string name);
+        bool GetUnitName(IWowUnit unit, out string name);
 
         void Save(string dbFile);
 

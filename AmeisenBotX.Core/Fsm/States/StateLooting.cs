@@ -42,11 +42,11 @@ namespace AmeisenBotX.Core.Fsm.States
             // add nearby Units to the loot List
             if (Config.LootUnits)
             {
-                IEnumerable<WowUnit> wowUnits = GetNearLootableUnits().OrderBy(e => e.DistanceTo(Bot.Player));
+                IEnumerable<IWowUnit> wowUnits = GetNearLootableUnits().OrderBy(e => e.DistanceTo(Bot.Player));
 
                 for (int i = 0; i < wowUnits.Count(); ++i)
                 {
-                    WowUnit lootableUnit = wowUnits.ElementAt(i);
+                    IWowUnit lootableUnit = wowUnits.ElementAt(i);
 
                     if (!UnitLootQueue.Contains(lootableUnit.Guid) && !UnitsAlreadyLootedList.Contains(lootableUnit.Guid))
                     {
@@ -61,7 +61,7 @@ namespace AmeisenBotX.Core.Fsm.States
             }
             else
             {
-                WowUnit selectedUnit = Bot.Objects.WowObjects.OfType<WowUnit>()
+                IWowUnit selectedUnit = Bot.Objects.WowObjects.OfType<IWowUnit>()
                     .Where(e => e.IsLootable)
                     .OrderBy(e => e.Position.GetDistance(Bot.Player.Position))
                     .FirstOrDefault(e => e.Guid == UnitLootQueue.Peek());
@@ -73,8 +73,8 @@ namespace AmeisenBotX.Core.Fsm.States
                     //     Bot.Player.Position, selectedUnit.Position);
                     // if (path != null)
                     // {
-                    //     IEnumerable<WowUnit> nearbyEnemies =
-                    //         Bot.ObjectManager.GetEnemiesInPath<WowUnit>(path, 10.0);
+                    //     IEnumerable<IWowUnit> nearbyEnemies =
+                    //         Bot.ObjectManager.GetEnemiesInPath<IWowUnit>(path, 10.0);
                     //     if (nearbyEnemies.Any())
                     //     {
                     //         var enemy = nearbyEnemies.FirstOrDefault();
@@ -106,15 +106,15 @@ namespace AmeisenBotX.Core.Fsm.States
         {
         }
 
-        internal IEnumerable<WowUnit> GetNearLootableUnits()
+        internal IEnumerable<IWowUnit> GetNearLootableUnits()
         {
-            return Bot.Objects.WowObjects.OfType<WowUnit>()
+            return Bot.Objects.WowObjects.OfType<IWowUnit>()
                 .Where(e => e.IsLootable
                     && !UnitsAlreadyLootedList.Contains(e.Guid)
                     && e.Position.GetDistance(Bot.Player.Position) < Config.LootUnitsRadius);
         }
 
-        private void Loot(WowUnit unit)
+        private void Loot(IWowUnit unit)
         {
             Bot.Wow.WowUnitRightClick(unit.BaseAddress);
 

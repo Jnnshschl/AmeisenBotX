@@ -1,21 +1,22 @@
 ﻿using AmeisenBotX.Common.Math;
 using AmeisenBotX.Common.Offsets;
+using AmeisenBotX.Core.Data.Objects;
 using AmeisenBotX.Memory;
-using AmeisenBotX.Wow.Objects;
 using AmeisenBotX.Wow.Objects.Enums;
 using AmeisenBotX.Wow.Objects.SubStructs;
+using AmeisenBotX.Wow335a.Objects.Raw;
 using System;
 using System.Collections.Generic;
 using System.Text;
 
-namespace AmeisenBotX.Core.Data.Objects
+namespace AmeisenBotX.Wow335a.Objects
 {
-    public class WowPlayer : WowUnit
+    public class WowPlayer335a : WowUnit335a, IWowPlayer
     {
         private VisibleItemEnchantment[] itemEnchantments;
         private QuestlogEntry[] questlogEntries;
 
-        public WowPlayer(IntPtr baseAddress, WowObjectType type, IntPtr descriptorAddress) : base(baseAddress, type, descriptorAddress)
+        public WowPlayer335a(IntPtr baseAddress, IntPtr descriptorAddress) : base(baseAddress, descriptorAddress)
         {
         }
 
@@ -33,30 +34,32 @@ namespace AmeisenBotX.Core.Data.Objects
 
         public IEnumerable<VisibleItemEnchantment> ItemEnchantments => itemEnchantments;
 
-        public int NextLevelXp { get; set; }
+        public int NextLevelXp => RawWowPlayer.NextLevelXp;
 
         public IEnumerable<QuestlogEntry> QuestlogEntries => questlogEntries;
 
-        public int Xp { get; set; }
+        public int Xp => RawWowPlayer.Xp;
 
-        public double XpPercentage { get; set; }
+        public double XpPercentage => BotMath.Percentage(Xp, NextLevelXp);
+
+        protected RawWowPlayer RawWowPlayer { get; private set; }
 
         public bool IsAlliance()
         {
-            return Race == WowRace.Draenei
-                || Race == WowRace.Human
-                || Race == WowRace.Dwarf
-                || Race == WowRace.Gnome
-                || Race == WowRace.Nightelf;
+            return Race is WowRace.Draenei
+                or WowRace.Human
+                or WowRace.Dwarf
+                or WowRace.Gnome
+                or WowRace.Nightelf;
         }
 
         public bool IsHorde()
         {
-            return Race == WowRace.Undead
-                || Race == WowRace.Orc
-                || Race == WowRace.Bloodelf
-                || Race == WowRace.Tauren
-                || Race == WowRace.Troll;
+            return Race is WowRace.Undead
+                or WowRace.Orc
+                or WowRace.Bloodelf
+                or WowRace.Tauren
+                or WowRace.Troll;
         }
 
         public override string ReadName(IMemoryApi memoryApi, IOffsetList offsetList)
@@ -103,63 +106,60 @@ namespace AmeisenBotX.Core.Data.Objects
         {
             base.Update(memoryApi, offsetList);
 
-            if (memoryApi.Read(DescriptorAddress + RawWowObject.EndOffset + RawWowUnit.EndOffset, out RawWowPlayer objPtr))
+            if (memoryApi.Read(DescriptorAddress + RawWowObject.EndOffset + RawWowUnit.EndOffset, out RawWowPlayer obj))
             {
-                Xp = objPtr.Xp;
-                NextLevelXp = objPtr.NextLevelXp;
-                XpPercentage = BotMath.Percentage(Xp, NextLevelXp);
-                // Name = ReadPlayerName(memoryApi, offsetList);
+                RawWowPlayer = obj;
 
                 questlogEntries = new QuestlogEntry[]
                 {
-                    objPtr.QuestlogEntry1,
-                    objPtr.QuestlogEntry2,
-                    objPtr.QuestlogEntry3,
-                    objPtr.QuestlogEntry4,
-                    objPtr.QuestlogEntry5,
-                    objPtr.QuestlogEntry6,
-                    objPtr.QuestlogEntry7,
-                    objPtr.QuestlogEntry8,
-                    objPtr.QuestlogEntry9,
-                    objPtr.QuestlogEntry10,
-                    objPtr.QuestlogEntry11,
-                    objPtr.QuestlogEntry12,
-                    objPtr.QuestlogEntry13,
-                    objPtr.QuestlogEntry14,
-                    objPtr.QuestlogEntry15,
-                    objPtr.QuestlogEntry16,
-                    objPtr.QuestlogEntry17,
-                    objPtr.QuestlogEntry18,
-                    objPtr.QuestlogEntry19,
-                    objPtr.QuestlogEntry20,
-                    objPtr.QuestlogEntry21,
-                    objPtr.QuestlogEntry22,
-                    objPtr.QuestlogEntry23,
-                    objPtr.QuestlogEntry24,
-                    objPtr.QuestlogEntry25,
+                    obj.QuestlogEntry1,
+                    obj.QuestlogEntry2,
+                    obj.QuestlogEntry3,
+                    obj.QuestlogEntry4,
+                    obj.QuestlogEntry5,
+                    obj.QuestlogEntry6,
+                    obj.QuestlogEntry7,
+                    obj.QuestlogEntry8,
+                    obj.QuestlogEntry9,
+                    obj.QuestlogEntry10,
+                    obj.QuestlogEntry11,
+                    obj.QuestlogEntry12,
+                    obj.QuestlogEntry13,
+                    obj.QuestlogEntry14,
+                    obj.QuestlogEntry15,
+                    obj.QuestlogEntry16,
+                    obj.QuestlogEntry17,
+                    obj.QuestlogEntry18,
+                    obj.QuestlogEntry19,
+                    obj.QuestlogEntry20,
+                    obj.QuestlogEntry21,
+                    obj.QuestlogEntry22,
+                    obj.QuestlogEntry23,
+                    obj.QuestlogEntry24,
+                    obj.QuestlogEntry25,
                 };
 
                 itemEnchantments = new VisibleItemEnchantment[]
                 {
-                    objPtr.VisibleItemEnchantment1,
-                    objPtr.VisibleItemEnchantment2,
-                    objPtr.VisibleItemEnchantment3,
-                    objPtr.VisibleItemEnchantment4,
-                    objPtr.VisibleItemEnchantment5,
-                    objPtr.VisibleItemEnchantment6,
-                    objPtr.VisibleItemEnchantment7,
-                    objPtr.VisibleItemEnchantment8,
-                    objPtr.VisibleItemEnchantment9,
-                    objPtr.VisibleItemEnchantment10,
-                    objPtr.VisibleItemEnchantment11,
-                    objPtr.VisibleItemEnchantment12,
-                    objPtr.VisibleItemEnchantment13,
-                    objPtr.VisibleItemEnchantment14,
-                    objPtr.VisibleItemEnchantment15,
-                    objPtr.VisibleItemEnchantment16,
-                    objPtr.VisibleItemEnchantment17,
-                    objPtr.VisibleItemEnchantment18,
-                    objPtr.VisibleItemEnchantment19,
+                    obj.VisibleItemEnchantment1,
+                    obj.VisibleItemEnchantment2,
+                    obj.VisibleItemEnchantment3,
+                    obj.VisibleItemEnchantment4,
+                    obj.VisibleItemEnchantment5,
+                    obj.VisibleItemEnchantment6,
+                    obj.VisibleItemEnchantment7,
+                    obj.VisibleItemEnchantment8,
+                    obj.VisibleItemEnchantment9,
+                    obj.VisibleItemEnchantment10,
+                    obj.VisibleItemEnchantment11,
+                    obj.VisibleItemEnchantment12,
+                    obj.VisibleItemEnchantment13,
+                    obj.VisibleItemEnchantment14,
+                    obj.VisibleItemEnchantment15,
+                    obj.VisibleItemEnchantment16,
+                    obj.VisibleItemEnchantment17,
+                    obj.VisibleItemEnchantment18,
+                    obj.VisibleItemEnchantment19,
                 };
             }
 

@@ -46,7 +46,7 @@ namespace AmeisenBotX.Core.Fsm.States
                 return;
             }
 
-            if (IsVendorNpcNear(out WowUnit selectedUnit))
+            if (IsVendorNpcNear(out IWowUnit selectedUnit))
             {
                 float distance = Bot.Player.Position.GetDistance(selectedUnit.Position);
 
@@ -66,10 +66,10 @@ namespace AmeisenBotX.Core.Fsm.States
             }
         }
 
-        public bool IsVendorNpcNear(out WowUnit unit)
+        public bool IsVendorNpcNear(out IWowUnit unit)
         {
-            unit = Bot.Objects.WowObjects.OfType<WowUnit>()
-                .Where(e => e.GetType() != typeof(WowPlayer)
+            unit = Bot.Objects.WowObjects.OfType<IWowUnit>()
+                .Where(e => e.GetType() != typeof(IWowPlayer)
                     && !e.IsDead
                     && e.IsVendor
                     && Bot.Db.GetReaction(Bot.Player, e) != WowUnitReaction.Hostile

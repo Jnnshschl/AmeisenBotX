@@ -13,7 +13,7 @@ namespace AmeisenBotX.Core.Engines.Battleground.Jannis
             UpdateAction = updateAction;
         }
 
-        public WowUnit EnemyTeamFlagCarrier { get; set; }
+        public IWowUnit EnemyTeamFlagCarrier { get; set; }
 
         public Vector3 EnemyTeamFlagPos { get; set; }
 
@@ -23,7 +23,7 @@ namespace AmeisenBotX.Core.Engines.Battleground.Jannis
 
         public int EnemyTeamScore { get; set; }
 
-        public WowUnit MyTeamFlagCarrier { get; set; }
+        public IWowUnit MyTeamFlagCarrier { get; set; }
 
         public Vector3 MyTeamFlagPos { get; set; }
 
@@ -33,7 +33,7 @@ namespace AmeisenBotX.Core.Engines.Battleground.Jannis
 
         public int MyTeamScore { get; set; }
 
-        public List<WowGameobject> NearFlags { get; set; }
+        public List<IWowGameobject> NearFlags { get; set; }
 
         private Action UpdateAction { get; }
 

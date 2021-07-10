@@ -117,7 +117,7 @@ namespace AmeisenBotX.Core.Engines.Combat.Classes.Jannis
                     {
                         if (HeroicStrikeEvent.Ready && !Bot.Player.Auras.Any(e => Bot.Db.GetSpellName(e.SpellId) == recklessnessSpell))
                         {
-                            if ((Bot.Player.Rage > 50 && Bot.GetNearEnemies<WowUnit>(Bot.Player.Position, 8.0f).Count() > 2 && TryCastSpellWarrior(cleaveSpell, berserkerStanceSpell, 0, true))
+                            if ((Bot.Player.Rage > 50 && Bot.GetNearEnemies<IWowUnit>(Bot.Player.Position, 8.0f).Count() > 2 && TryCastSpellWarrior(cleaveSpell, berserkerStanceSpell, 0, true))
                                 || (Bot.Player.Rage > 50 && TryCastSpellWarrior(heroicStrikeSpell, berserkerStanceSpell, Bot.Wow.TargetGuid, true)))
                             {
                                 HeroicStrikeEvent.Run();

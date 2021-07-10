@@ -1,36 +1,28 @@
 ﻿using AmeisenBotX.Common.Math;
 using AmeisenBotX.Common.Offsets;
 using AmeisenBotX.Memory;
-using AmeisenBotX.Wow.Objects;
 using AmeisenBotX.Wow.Objects.Enums;
 using System;
 
 namespace AmeisenBotX.Core.Data.Objects
 {
-    public class WowObject
+    public interface IWowObject
     {
-        public WowObject(IntPtr baseAddress, WowObjectType type, IntPtr descriptorAddress)
-        {
-            BaseAddress = baseAddress;
-            Type = type;
-            DescriptorAddress = descriptorAddress;
-        }
+        IntPtr BaseAddress { get; }
 
-        public IntPtr BaseAddress { get; private set; }
+        IntPtr DescriptorAddress { get; }
 
-        public IntPtr DescriptorAddress { get; set; }
+        int EntryId { get; }
 
-        public int EntryId { get; set; }
+        ulong Guid { get; }
 
-        public ulong Guid { get; set; }
+        Vector3 Position { get; }
 
-        public Vector3 Position { get; set; }
+        float Scale { get; }
 
-        public float Scale { get; set; }
+        WowObjectType Type { get; }
 
-        public WowObjectType Type { get; private set; }
-
-        public float DistanceTo(WowObject b)
+        public float DistanceTo(IWowObject b)
         {
             return Position.GetDistance(b.Position);
         }
@@ -60,7 +52,7 @@ namespace AmeisenBotX.Core.Data.Objects
             return Type == WowObjectType.Gameobject;
         }
 
-        public bool IsInRange(WowObject b, float range)
+        public bool IsInRange(IWowObject b, float range)
         {
             return DistanceTo(b) < range;
         }
@@ -80,19 +72,6 @@ namespace AmeisenBotX.Core.Data.Objects
             return Type == WowObjectType.Unit;
         }
 
-        public override string ToString()
-        {
-            return $"Object: {Guid}";
-        }
-
-        public virtual void Update(IMemoryApi memoryApi, IOffsetList offsetList)
-        {
-            if (memoryApi.Read(DescriptorAddress, out RawWowObject objPtr))
-            {
-                EntryId = objPtr.EntryId;
-                Guid = objPtr.Guid;
-                Scale = objPtr.Scale;
-            }
-        }
+        void Update(IMemoryApi memoryApi, IOffsetList offsetList);
     }
 }

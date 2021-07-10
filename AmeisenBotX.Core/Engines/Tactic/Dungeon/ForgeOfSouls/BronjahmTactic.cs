@@ -33,7 +33,7 @@ namespace AmeisenBotX.Core.Engines.Tactic.Dungeon.ForgeOfSouls
             preventMovement = false;
             allowAttacking = true;
 
-            WowUnit wowUnit = Bot.GetClosestQuestgiverByDisplayId(Bot.Player.Position, BronjahmDisplayId, false);
+            IWowUnit wowUnit = Bot.GetClosestQuestgiverByDisplayId(Bot.Player.Position, BronjahmDisplayId, false);
 
             if (wowUnit != null)
             {
@@ -61,7 +61,7 @@ namespace AmeisenBotX.Core.Engines.Tactic.Dungeon.ForgeOfSouls
 
                         // flee from the corrupted souls target
                         bool needToFlee = wowUnit.CurrentlyChannelingSpellId == 68839
-                            || Bot.Objects.WowObjects.OfType<WowUnit>().Any(e => e.DisplayId == 30233 && e.IsInCombat);
+                            || Bot.Objects.WowObjects.OfType<IWowUnit>().Any(e => e.DisplayId == 30233 && e.IsInCombat);
 
                         if (needToFlee)
                         {

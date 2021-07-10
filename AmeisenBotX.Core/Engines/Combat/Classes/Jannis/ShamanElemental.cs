@@ -4,7 +4,6 @@ using AmeisenBotX.Core.Engines.Character.Talents.Objects;
 using AmeisenBotX.Core.Fsm;
 using AmeisenBotX.Core.Fsm.Utils.Auras.Objects;
 using AmeisenBotX.Wow.Objects.Enums;
-using System;
 using System.Linq;
 
 namespace AmeisenBotX.Core.Engines.Combat.Classes.Jannis
@@ -83,8 +82,6 @@ namespace AmeisenBotX.Core.Engines.Combat.Classes.Jannis
 
         private bool HexedTarget { get; set; }
 
-        private DateTime LastDeadPartymembersCheck { get; set; }
-
         public override void Execute()
         {
             base.Execute();
@@ -118,7 +115,7 @@ namespace AmeisenBotX.Core.Engines.Combat.Classes.Jannis
                         return;
                     }
 
-                    if ((Bot.Objects.WowObjects.OfType<WowUnit>().Where(e => Bot.Target.Position.GetDistance(e.Position) < 16).Count() > 2 && TryCastSpell(chainLightningSpell, Bot.Wow.TargetGuid, true))
+                    if ((Bot.Objects.WowObjects.OfType<IWowUnit>().Where(e => Bot.Target.Position.GetDistance(e.Position) < 16).Count() > 2 && TryCastSpell(chainLightningSpell, Bot.Wow.TargetGuid, true))
                         || TryCastSpell(lightningBoltSpell, Bot.Wow.TargetGuid, true))
                     {
                         return;

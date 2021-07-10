@@ -70,7 +70,7 @@ namespace AmeisenBotX.Core.Fsm.States.Idle.Actions
                 {
                     Bot.Movement.StopMovement();
 
-                    WowGameobject mailbox = Bot.Objects.WowObjects.OfType<WowGameobject>()
+                    IWowGameobject mailbox = Bot.Objects.WowObjects.OfType<IWowGameobject>()
                         .FirstOrDefault(e => e.GameobjectType == WowGameobjectType.Mailbox && e.Position.GetDistance(CurrentMailbox) < 1.0f);
 
                     if (mailbox != null)

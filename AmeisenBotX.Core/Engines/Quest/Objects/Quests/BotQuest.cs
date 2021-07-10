@@ -12,7 +12,7 @@ using System.Threading;
 
 namespace AmeisenBotX.Core.Engines.Quest.Objects.Quests
 {
-    public delegate (WowObject, Vector3) BotQuestGetPosition();
+    public delegate (IWowObject, Vector3) BotQuestGetPosition();
 
     public class BotQuest : IBotQuest
     {
@@ -80,7 +80,7 @@ namespace AmeisenBotX.Core.Engines.Quest.Objects.Quests
         {
             if (!CheckedIfAccepted)
             {
-                if (Bot.Wow.LuaGetQuestLogIdByTitle(Name, out int _questLogId))
+                if (Bot.Wow.LuaGetQuestLogIdByTitle(Name, out _))
                 {
                     Accepted = true;
                 }
@@ -93,7 +93,7 @@ namespace AmeisenBotX.Core.Engines.Quest.Objects.Quests
                 return;
             }
 
-            (WowObject, Vector3) objectPositionCombo = GetStartObject();
+            (IWowObject, Vector3) objectPositionCombo = GetStartObject();
 
             if (objectPositionCombo.Item1 != null)
             {
@@ -114,7 +114,7 @@ namespace AmeisenBotX.Core.Engines.Quest.Objects.Quests
                         Bot.Wow.LuaAcceptQuest();
                         Thread.Sleep(250);
 
-                        if (Bot.Wow.LuaGetQuestLogIdByTitle(Name, out int _questLogId))
+                        if (Bot.Wow.LuaGetQuestLogIdByTitle(Name, out _))
                         {
                             Accepted = true;
                         }
@@ -140,7 +140,7 @@ namespace AmeisenBotX.Core.Engines.Quest.Objects.Quests
                 return true;
             }
 
-            (WowObject, Vector3) objectPositionCombo = GetEndObject();
+            (IWowObject, Vector3) objectPositionCombo = GetEndObject();
 
             if (objectPositionCombo.Item1 != null)
             {
@@ -186,14 +186,16 @@ namespace AmeisenBotX.Core.Engines.Quest.Objects.Quests
                                         if (item.Name == "0" || item.ItemLink == "0")
                                         {
                                             // get the item id and try again
-                                            itemJson = Bot.Wow.LuaGetItemJsonByNameOrLink(
+                                            itemJson = Bot.Wow.LuaGetItemJsonByNameOrLink
+                                            (
                                                 itemLink.Split(new string[] { "Hitem:" }, StringSplitOptions.RemoveEmptyEntries)[1]
-                                                    .Split(new string[] { ":" }, StringSplitOptions.RemoveEmptyEntries)[0]);
+                                                        .Split(new string[] { ":" }, StringSplitOptions.RemoveEmptyEntries)[0]
+                                            );
 
                                             item = ItemFactory.BuildSpecificItem(ItemFactory.ParseItem(itemJson));
                                         }
 
-                                        if (Bot.Character.IsItemAnImprovement(item, out IWowItem itemToReplace))
+                                        if (Bot.Character.IsItemAnImprovement(item, out _))
                                         {
                                             Bot.Wow.LuaGetQuestReward(i);
                                             Bot.Wow.LuaGetQuestReward(i);
@@ -240,13 +242,13 @@ namespace AmeisenBotX.Core.Engines.Quest.Objects.Quests
             Objectives.FirstOrDefault(e => !e.Finished)?.Execute();
         }
 
-        private void RightClickQuestgiver(WowObject obj)
+        private void RightClickQuestgiver(IWowObject obj)
         {
-            if (obj.GetType() == typeof(WowGameobject))
+            if (obj.GetType() == typeof(IWowGameobject))
             {
                 Bot.Wow.WowObjectRightClick(obj.BaseAddress);
             }
-            else if (obj.GetType() == typeof(WowUnit))
+            else if (obj.GetType() == typeof(IWowUnit))
             {
                 Bot.Wow.WowUnitRightClick(obj.BaseAddress);
             }

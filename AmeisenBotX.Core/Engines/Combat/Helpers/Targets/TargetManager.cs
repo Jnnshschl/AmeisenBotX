@@ -23,7 +23,7 @@ namespace AmeisenBotX.Core.Engines.Combat.Helpers.Targets
 
         private TimegatedEvent TargetSwitchEvent { get; set; }
 
-        public bool Get(out IEnumerable<WowUnit> possibleTargets)
+        public bool Get(out IEnumerable<IWowUnit> possibleTargets)
         {
             if (TargetSwitchEvent.Run() && TargetSelectionLogic.SelectTarget(out possibleTargets))
             {

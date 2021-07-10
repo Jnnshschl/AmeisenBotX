@@ -4,8 +4,8 @@ namespace AmeisenBotX.Core.Engines.Character.Comparators
 {
     public interface IItemComparator
     {
-        bool IsBetter(IWowItem current, IWowItem item);
+        bool IsBetter(IWowInventoryItem current, IWowInventoryItem item);
 
-        bool IsBlacklistedItem(IWowItem item);
+        bool IsBlacklistedItem(IWowInventoryItem item);
     }
 }

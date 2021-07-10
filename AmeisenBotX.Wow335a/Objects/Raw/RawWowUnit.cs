@@ -1,7 +1,7 @@
 ﻿using System.Collections.Specialized;
 using System.Runtime.InteropServices;
 
-namespace AmeisenBotX.Wow.Objects
+namespace AmeisenBotX.Wow335a.Objects.Raw
 {
     [StructLayout(LayoutKind.Sequential)]
     public unsafe struct RawWowUnit

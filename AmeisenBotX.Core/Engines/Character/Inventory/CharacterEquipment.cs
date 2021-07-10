@@ -13,7 +13,7 @@ namespace AmeisenBotX.Core.Engines.Character.Inventory
     public class CharacterEquipment
     {
         private readonly object queryLock = new();
-        private Dictionary<WowEquipmentSlot, IWowItem> items;
+        private Dictionary<WowEquipmentSlot, IWowInventoryItem> items;
 
         public CharacterEquipment(IWowInterface wowInterface)
         {
@@ -24,7 +24,7 @@ namespace AmeisenBotX.Core.Engines.Character.Inventory
 
         public double AverageItemLevel { get; private set; }
 
-        public Dictionary<WowEquipmentSlot, IWowItem> Items
+        public Dictionary<WowEquipmentSlot, IWowInventoryItem> Items
         {
             get
             {
@@ -53,7 +53,7 @@ namespace AmeisenBotX.Core.Engines.Character.Inventory
 
                 if (itemId > 0)
                 {
-                    WowItem item = Wow.ObjectProvider.WowObjects.OfType<WowItem>().FirstOrDefault(e => e.EntryId == itemId);
+                    IWowItem item = Wow.ObjectProvider.WowObjects.OfType<IWowItem>().FirstOrDefault(e => e.EntryId == itemId);
 
                     if (item != null && item.ItemEnchantments.Any(e => e.Id == enchantmentId))
                     {
@@ -91,7 +91,7 @@ namespace AmeisenBotX.Core.Engines.Character.Inventory
 
                         for (int i = 0; i < rawEquipment.Count; ++i)
                         {
-                            IWowItem item = ItemFactory.BuildSpecificItem(rawEquipment[i]);
+                            IWowInventoryItem item = ItemFactory.BuildSpecificItem(rawEquipment[i]);
                             Items.Add(item.EquipSlot, item);
                         }
                     }

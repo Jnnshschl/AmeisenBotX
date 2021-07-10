@@ -23,15 +23,15 @@ namespace AmeisenBotX.Core.Engines.Quest.Units.Unitives
 
         public bool Finished => Progress == 100.0;
 
-        public double Progress => WowUnit != null && WowUnit.Position.GetDistance(Bot.Player.Position) < Distance ? 100.0 : 0.0;
+        public double Progress => IWowUnit != null && IWowUnit.Position.GetDistance(Bot.Player.Position) < Distance ? 100.0 : 0.0;
 
         private AmeisenBotInterfaces Bot { get; }
 
         private double Distance { get; }
 
-        private List<int> UnitDisplayIds { get; }
+        private IWowUnit IWowUnit { get; set; }
 
-        private WowUnit WowUnit { get; set; }
+        private List<int> UnitDisplayIds { get; }
 
         public void Execute()
         {
@@ -42,13 +42,13 @@ namespace AmeisenBotX.Core.Engines.Quest.Units.Unitives
                 return;
             }
 
-            WowUnit = Bot.GetClosestQuestgiverByDisplayId(Bot.Player.Position, UnitDisplayIds);
+            IWowUnit = Bot.GetClosestQuestgiverByDisplayId(Bot.Player.Position, UnitDisplayIds);
 
-            if (WowUnit != null)
+            if (IWowUnit != null)
             {
-                if (WowUnit.Position.GetDistance2D(Bot.Player.Position) > Distance)
+                if (IWowUnit.Position.GetDistance2D(Bot.Player.Position) > Distance)
                 {
-                    Bot.Movement.SetMovementAction(MovementAction.Move, WowUnit.Position);
+                    Bot.Movement.SetMovementAction(MovementAction.Move, IWowUnit.Position);
                 }
             }
         }

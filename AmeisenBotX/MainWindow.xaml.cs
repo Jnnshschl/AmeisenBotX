@@ -10,6 +10,7 @@ using AmeisenBotX.Overlay;
 using AmeisenBotX.Overlay.Utils;
 using AmeisenBotX.StateConfig;
 using AmeisenBotX.Utils;
+using AmeisenBotX.Wow.Objects;
 using AmeisenBotX.Wow.Objects.Enums;
 using Newtonsoft.Json;
 using System;
@@ -260,7 +261,7 @@ namespace AmeisenBotX
             }
         }
 
-        private void OnObjectUpdateComplete(IEnumerable<WowObject> wowObjects)
+        private void OnObjectUpdateComplete(IEnumerable<IWowObject> wowObjects)
         {
             Dispatcher.InvokeAsync(() =>
             {
@@ -306,7 +307,7 @@ namespace AmeisenBotX
                 }
 
                 // Update the main view
-                WowPlayer player = AmeisenBot.Bot.Player;
+                IWowPlayer player = AmeisenBot.Bot.Player;
 
                 switch (player.Class)
                 {

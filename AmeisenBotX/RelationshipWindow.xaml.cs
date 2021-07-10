@@ -8,15 +8,7 @@ namespace AmeisenBotX
     {
         public RelationshipWindow(AmeisenBot ameisenBot)
         {
-            AmeisenBot = ameisenBot;
             InitializeComponent();
-        }
-
-        private AmeisenBot AmeisenBot { get; set; }
-
-        private void ButtonEquipment_Click(object sender, RoutedEventArgs e)
-        {
-            DisplayStuff();
         }
 
         private void ButtonExit_Click(object sender, RoutedEventArgs e)

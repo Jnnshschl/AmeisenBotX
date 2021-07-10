@@ -1,4 +1,4 @@
-﻿using AmeisenBotX.Core.Common;
+﻿using AmeisenBotX.Core;
 using AmeisenBotX.Core.Engines.Character.Inventory.Objects;
 using System.Windows;
 using System.Windows.Controls;
@@ -8,13 +8,13 @@ namespace AmeisenBotX.Views
 {
     public partial class ItemDisplay : UserControl
     {
-        public ItemDisplay(IWowItem wowItem)
+        public ItemDisplay(IWowInventoryItem wowItem)
         {
             WowItem = wowItem;
             InitializeComponent();
         }
 
-        private IWowItem WowItem { get; }
+        private IWowInventoryItem WowItem { get; }
 
         private void UserControl_Loaded(object sender, RoutedEventArgs e)
         {

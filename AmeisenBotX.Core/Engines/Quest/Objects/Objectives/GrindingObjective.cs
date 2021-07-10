@@ -25,11 +25,11 @@ namespace AmeisenBotX.Core.Engines.Quest.Objects.Objectives
 
         private AmeisenBotInterfaces Bot { get; }
 
+        private IWowUnit IWowUnit { get; set; }
+
         private SearchAreaEnsamble SearchAreas { get; }
 
         private int WantedLevel { get; }
-
-        private WowUnit WowUnit { get; set; }
 
         public void Execute()
         {
@@ -38,24 +38,24 @@ namespace AmeisenBotX.Core.Engines.Quest.Objects.Objectives
             if (!SearchAreas.IsPlayerNearSearchArea(Bot))
             {
                 Bot.Wow.WowClearTarget();
-                WowUnit = null;
+                IWowUnit = null;
             }
 
             if (!Bot.Player.IsInCombat)
             {
-                WowUnit = Bot.Objects.WowObjects
-                    .OfType<WowUnit>()
+                IWowUnit = Bot.Objects.WowObjects
+                    .OfType<IWowUnit>()
                     .Where(e => !e.IsDead && !e.IsNotAttackable && Bot.Db.GetReaction(Bot.Player, e) != WowUnitReaction.Friendly)
                     .OrderBy(e => e.Position.GetDistance(Bot.Player.Position))
                     .FirstOrDefault();
 
-                if (WowUnit != null)
+                if (IWowUnit != null)
                 {
-                    Bot.Wow.WowTargetGuid(WowUnit.Guid);
+                    Bot.Wow.WowTargetGuid(IWowUnit.Guid);
                 }
             }
 
-            if (WowUnit != null)
+            if (IWowUnit != null)
             {
                 SearchAreas.NotifyDetour();
                 Bot.CombatClass.AttackTarget();

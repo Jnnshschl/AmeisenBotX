@@ -17,7 +17,7 @@ namespace AmeisenBotX.Core.Engines.Character.Comparators
 
         private DefaultCharacterManager CharacterManager { get; }
 
-        public bool IsBetter(IWowItem current, IWowItem item)
+        public bool IsBetter(IWowInventoryItem current, IWowInventoryItem item)
         {
             if (!CharacterManager.IsAbleToUseItem(item))
             {
@@ -29,7 +29,7 @@ namespace AmeisenBotX.Core.Engines.Character.Comparators
             return scoreCurrent < scoreNew;
         }
 
-        public bool IsBlacklistedItem(IWowItem item)
+        public bool IsBlacklistedItem(IWowInventoryItem item)
         {
             return !CharacterManager.IsAbleToUseItem(item);
         }

@@ -24,7 +24,7 @@ namespace AmeisenBotX.Core.Fsm.CombatClasses.Shino
 
         public override void AttackTarget()
         {
-            WowUnit target = Bot.Target;
+            IWowUnit target = Bot.Target;
             if (target == null)
             {
                 return;
@@ -44,7 +44,7 @@ namespace AmeisenBotX.Core.Fsm.CombatClasses.Shino
             }
         }
 
-        public bool IsTargetAttackable(WowUnit target)
+        public bool IsTargetAttackable(IWowUnit target)
         {
             Spell openingSpell = GetOpeningSpell();
             float posOffset = 0.5f;
@@ -82,11 +82,11 @@ namespace AmeisenBotX.Core.Fsm.CombatClasses.Shino
 
         protected abstract Spell GetOpeningSpell();
 
-        protected bool SelectTarget(out WowUnit target)
+        protected bool SelectTarget(out IWowUnit target)
         {
-            WowUnit currentTarget = Bot.Target;
-            IEnumerable<WowUnit> nearAttackingEnemies = Bot
-                .GetEnemiesInCombatWithParty<WowUnit>(Bot.Player.Position, 64.0f)
+            IWowUnit currentTarget = Bot.Target;
+            IEnumerable<IWowUnit> nearAttackingEnemies = Bot
+                .GetEnemiesInCombatWithParty<IWowUnit>(Bot.Player.Position, 64.0f)
                 .Where(e => !e.IsDead && !e.IsNotAttackable)
                 .OrderBy(e => e.Auras.All(aura => Bot.Db.GetSpellName(aura.SpellId) != polymorphSpell));
 
@@ -96,7 +96,7 @@ namespace AmeisenBotX.Core.Fsm.CombatClasses.Shino
                    || (currentTarget.Auras.Any(e => Bot.Db.GetSpellName(e.SpellId) == polymorphSpell) &&
                        nearAttackingEnemies.Where(e => e.Auras.All(aura => Bot.Db.GetSpellName(aura.SpellId) != polymorphSpell)).Any(e => e.Guid != currentTarget.Guid))
                    || (!currentTarget.IsInCombat && nearAttackingEnemies.Any())
-                   || !WowUnit.IsValidUnit(Bot.Target)
+                   || !IWowUnit.IsValidUnit(Bot.Target)
                    || Bot.Db.GetReaction(Bot.Player, currentTarget) == WowUnitReaction.Friendly))
             {
                 currentTarget = null;
@@ -111,7 +111,7 @@ namespace AmeisenBotX.Core.Fsm.CombatClasses.Shino
 
             if (nearAttackingEnemies.Any())
             {
-                WowUnit potTarget = nearAttackingEnemies.FirstOrDefault();
+                IWowUnit potTarget = nearAttackingEnemies.FirstOrDefault();
                 target = potTarget;
                 Bot.Wow.WowTargetGuid(potTarget.Guid);
                 return true;

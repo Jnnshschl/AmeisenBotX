@@ -10,9 +10,9 @@ namespace AmeisenBotX.Core.Fsm.Routines
         public static void Run(AmeisenBotInterfaces bot, AmeisenBotConfig config)
         {
             // create a copy here to prevent updates while selling
-            foreach (IWowItem item in bot.Character.Inventory.Items.Where(e => e.Price > 0).ToList())
+            foreach (IWowInventoryItem item in bot.Character.Inventory.Items.Where(e => e.Price > 0).ToList())
             {
-                IWowItem itemToSell = item;
+                IWowInventoryItem itemToSell = item;
 
                 if (config.ItemSellBlacklist.Any(e => e.Equals(item.Name, StringComparison.OrdinalIgnoreCase))
                     || (!config.SellGrayItems && item.ItemQuality == WowItemQuality.Poor)
@@ -24,7 +24,7 @@ namespace AmeisenBotX.Core.Fsm.Routines
                     continue;
                 }
 
-                if (bot.Character.IsItemAnImprovement(item, out IWowItem itemToReplace))
+                if (bot.Character.IsItemAnImprovement(item, out IWowInventoryItem itemToReplace))
                 {
                     // equip item and sell the other after
                     itemToSell = itemToReplace;

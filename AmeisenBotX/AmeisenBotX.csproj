@@ -30,6 +30,7 @@
     <ProjectReference Include="..\AmeisenBotX.Logging\AmeisenBotX.Logging.csproj" />
     <ProjectReference Include="..\AmeisenBotX.Memory\AmeisenBotX.Memory.csproj" />
     <ProjectReference Include="..\AmeisenBotX.Overlay\AmeisenBotX.Overlay.csproj" />
+    <ProjectReference Include="..\AmeisenBotX.Wow\AmeisenBotX.Wow.csproj" />
   </ItemGroup>
 
   <ItemGroup>

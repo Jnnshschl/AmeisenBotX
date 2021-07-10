@@ -11,7 +11,7 @@ namespace AmeisenBotX.Core.Engines.Combat.Helpers.Targets.Logics
         {
         }
 
-        public override bool SelectTarget(out IEnumerable<WowUnit> possibleTargets)
+        public override bool SelectTarget(out IEnumerable<IWowUnit> possibleTargets)
         {
             possibleTargets = null;
 
@@ -32,13 +32,13 @@ namespace AmeisenBotX.Core.Engines.Combat.Helpers.Targets.Logics
                 }
             }
 
-            IEnumerable<WowUnit> unitsAroundMe = Bot.Objects.WowObjects
-                .OfType<WowUnit>()
+            IEnumerable<IWowUnit> unitsAroundMe = Bot.Objects.WowObjects
+                .OfType<IWowUnit>()
                 .Where(e => IsValidUnit(e))
                 .OrderByDescending(e => e.Type)
                 .ThenByDescending(e => e.MaxHealth);
 
-            IEnumerable<WowUnit> targetsINeedToTank = unitsAroundMe
+            IEnumerable<IWowUnit> targetsINeedToTank = unitsAroundMe
                 .Where(e => e.Type != WowObjectType.Player
                          && e.TargetGuid != Bot.Wow.PlayerGuid
                          && Bot.Objects.PartymemberGuids.Contains(e.TargetGuid));
@@ -52,13 +52,13 @@ namespace AmeisenBotX.Core.Engines.Combat.Helpers.Targets.Logics
             {
                 if (Bot.Objects.Partymembers.Any())
                 {
-                    Dictionary<WowUnit, int> targets = new();
+                    Dictionary<IWowUnit, int> targets = new();
 
-                    foreach (WowUnit unit in Bot.Objects.Partymembers)
+                    foreach (IWowUnit unit in Bot.Objects.Partymembers)
                     {
                         if (unit.TargetGuid > 0)
                         {
-                            WowUnit targetUnit = Bot.GetWowObjectByGuid<WowUnit>(unit.TargetGuid);
+                            IWowUnit targetUnit = Bot.GetWowObjectByGuid<IWowUnit>(unit.TargetGuid);
 
                             if (targetUnit != null && Bot.Db.GetReaction(targetUnit, Bot.Player) != WowUnitReaction.Friendly)
                             {

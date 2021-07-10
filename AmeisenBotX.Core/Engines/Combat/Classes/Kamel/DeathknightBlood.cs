@@ -33,8 +33,6 @@ namespace AmeisenBotX.Core.Engines.Combat.Classes.Kamel
 
         public bool HandlesMovement => false;
 
-        public bool HandlesTargetSelection => false;
-
         public bool IsMelee => true;
 
         public IItemComparator ItemComparator => null;
@@ -59,7 +57,7 @@ namespace AmeisenBotX.Core.Engines.Combat.Classes.Kamel
 
         public void AttackTarget()
         {
-            WowUnit target = Bot.Target;
+            IWowUnit target = Bot.Target;
             if (target == null)
             {
                 return;
@@ -80,7 +78,7 @@ namespace AmeisenBotX.Core.Engines.Combat.Classes.Kamel
         public void Execute()
         {
             ulong targetGuid = Bot.Wow.TargetGuid;
-            WowUnit target = Bot.Objects.WowObjects.OfType<WowUnit>().FirstOrDefault(t => t.Guid == targetGuid);
+            IWowUnit target = Bot.Objects.WowObjects.OfType<IWowUnit>().FirstOrDefault(t => t.Guid == targetGuid);
             if (target != null)
             {
                 // make sure we're auto attacking
@@ -93,18 +91,13 @@ namespace AmeisenBotX.Core.Engines.Combat.Classes.Kamel
             }
         }
 
-        public bool IsTargetAttackable(WowUnit target)
-        {
-            return true;
-        }
-
         public void OutOfCombatExecute()
         {
         }
 
-        private void HandleAttacking(WowUnit target)
+        private void HandleAttacking(IWowUnit target)
         {
-            if (TargetProvider.Get(out IEnumerable<WowUnit> targetToTarget))
+            if (TargetProvider.Get(out IEnumerable<IWowUnit> targetToTarget))
             {
                 ulong guid = targetToTarget.First().Guid;
 
@@ -116,7 +109,7 @@ namespace AmeisenBotX.Core.Engines.Combat.Classes.Kamel
 
             if (Bot.Objects.Target == null
                 || Bot.Objects.Target.IsDead
-                || !WowUnit.IsValidUnit(Bot.Objects.Target))
+                || !IWowUnit.IsValidUnit(Bot.Objects.Target))
             {
                 return;
             }
@@ -147,8 +140,8 @@ namespace AmeisenBotX.Core.Engines.Combat.Classes.Kamel
                 return;
             }
 
-            List<WowUnit> unitsNearPlayer = Bot.Objects.WowObjects
-                .OfType<WowUnit>()
+            List<IWowUnit> unitsNearPlayer = Bot.Objects.WowObjects
+                .OfType<IWowUnit>()
                 .Where(e => e.Position.GetDistance(Bot.Objects.Player.Position) <= 10)
                 .ToList();
 
@@ -161,8 +154,8 @@ namespace AmeisenBotX.Core.Engines.Combat.Classes.Kamel
                 return;
             }
 
-            List<WowUnit> unitsNearTarget = Bot.Objects.WowObjects
-                .OfType<WowUnit>()
+            List<IWowUnit> unitsNearTarget = Bot.Objects.WowObjects
+                .OfType<IWowUnit>()
                 .Where(e => e.Position.GetDistance(target.Position) <= 30)
                 .ToList();
 

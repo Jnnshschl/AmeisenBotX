@@ -1,17 +1,18 @@
 ﻿using AmeisenBotX.Common.Math;
 using AmeisenBotX.Common.Offsets;
+using AmeisenBotX.Core.Data.Objects;
 using AmeisenBotX.Memory;
-using AmeisenBotX.Wow.Objects;
 using AmeisenBotX.Wow.Objects.Enums;
+using AmeisenBotX.Wow335a.Objects.Raw;
 using System;
 using System.Collections.Specialized;
 using System.Globalization;
 
-namespace AmeisenBotX.Core.Data.Objects
+namespace AmeisenBotX.Wow335a.Objects
 {
-    public class WowGameobject : WowObject
+    public class WowGameobject335a : WowObject335a, IWowGameobject
     {
-        public WowGameobject(IntPtr baseAddress, WowObjectType type, IntPtr descriptorAddress) : base(baseAddress, type, descriptorAddress)
+        public WowGameobject335a(IntPtr baseAddress, IntPtr descriptorAddress) : base(baseAddress, descriptorAddress)
         {
         }
 

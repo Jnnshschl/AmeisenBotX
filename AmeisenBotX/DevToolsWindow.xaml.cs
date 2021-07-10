@@ -146,9 +146,9 @@ namespace AmeisenBotX
             {
                 listviewNearWowObjects.Items.Clear();
 
-                List<(WowObject, double)> wowObjects = new();
+                List<(IWowObject, double)> wowObjects = new();
 
-                foreach (WowObject x in AmeisenBot.Bot.Objects.WowObjects)
+                foreach (IWowObject x in AmeisenBot.Bot.Objects.WowObjects)
                 {
                     if (x == null)
                     {
@@ -158,7 +158,7 @@ namespace AmeisenBotX
                     wowObjects.Add((x, Math.Round(x.Position.GetDistance(AmeisenBot.Bot.Player.Position), 2)));
                 }
 
-                foreach ((WowObject, double) x in wowObjects.OrderBy(e => e.Item2))
+                foreach ((IWowObject, double) x in wowObjects.OrderBy(e => e.Item2))
                 {
                     listviewNearWowObjects.Items.Add(x);
                 }

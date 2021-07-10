@@ -28,7 +28,7 @@ namespace AmeisenBotX.Core.Engines.Quest.Objects.Objectives
         {
             if (Finished || Bot.Player.IsCasting) { return; }
 
-            IWowItem item = Bot.Character.Inventory.Items.FirstOrDefault(e => e.Id == ItemId);
+            IWowInventoryItem item = Bot.Character.Inventory.Items.FirstOrDefault(e => e.Id == ItemId);
 
             if (item != null)
             {

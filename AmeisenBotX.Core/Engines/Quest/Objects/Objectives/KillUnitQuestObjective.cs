@@ -32,9 +32,9 @@ namespace AmeisenBotX.Core.Engines.Quest.Objects.Objectives
 
         private KillUnitQuestObjectiveCondition Condition { get; }
 
-        private Dictionary<int, int> ObjectDisplayIds { get; }
+        private IWowUnit IWowUnit { get; set; }
 
-        private WowUnit WowUnit { get; set; }
+        private Dictionary<int, int> ObjectDisplayIds { get; }
 
         public void Execute()
         {
@@ -45,31 +45,31 @@ namespace AmeisenBotX.Core.Engines.Quest.Objects.Objectives
                 && !Bot.Target.IsNotAttackable
                 && Bot.Db.GetReaction(Bot.Player, Bot.Target) != WowUnitReaction.Friendly)
             {
-                WowUnit = Bot.Target;
+                IWowUnit = Bot.Target;
             }
             else
             {
                 Bot.Wow.WowClearTarget();
 
-                WowUnit = Bot.Objects.WowObjects
-                    .OfType<WowUnit>()
+                IWowUnit = Bot.Objects.WowObjects
+                    .OfType<IWowUnit>()
                     .Where(e => !e.IsDead && ObjectDisplayIds.Values.Contains(e.DisplayId))
                     .OrderBy(e => e.Position.GetDistance(Bot.Player.Position))
                     .OrderBy(e => ObjectDisplayIds.First(x => x.Value == e.DisplayId).Key)
                     .FirstOrDefault();
             }
 
-            if (WowUnit != null)
+            if (IWowUnit != null)
             {
-                if (WowUnit.Position.GetDistance(Bot.Player.Position) < 3.0)
+                if (IWowUnit.Position.GetDistance(Bot.Player.Position) < 3.0)
                 {
                     Bot.Wow.WowStopClickToMove();
                     Bot.Movement.Reset();
-                    Bot.Wow.WowUnitRightClick(WowUnit.BaseAddress);
+                    Bot.Wow.WowUnitRightClick(IWowUnit.BaseAddress);
                 }
                 else
                 {
-                    Bot.Movement.SetMovementAction(MovementAction.Move, WowUnit.Position);
+                    Bot.Movement.SetMovementAction(MovementAction.Move, IWowUnit.Position);
                 }
             }
         }

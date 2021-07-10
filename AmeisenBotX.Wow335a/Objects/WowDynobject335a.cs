@@ -1,16 +1,16 @@
 ﻿using AmeisenBotX.Common.Math;
 using AmeisenBotX.Common.Offsets;
+using AmeisenBotX.Core.Data.Objects;
 using AmeisenBotX.Memory;
-using AmeisenBotX.Wow.Objects;
-using AmeisenBotX.Wow.Objects.Enums;
+using AmeisenBotX.Wow335a.Objects.Raw;
 using System;
 
-namespace AmeisenBotX.Core.Data.Objects
+namespace AmeisenBotX.Wow335a.Objects
 {
     [Serializable]
-    public class WowDynobject : WowObject
+    public class WowDynobject335a : WowObject335a, IWowDynobject
     {
-        public WowDynobject(IntPtr baseAddress, WowObjectType type, IntPtr descriptorAddress) : base(baseAddress, type, descriptorAddress)
+        public WowDynobject335a(IntPtr baseAddress, IntPtr descriptorAddress) : base(baseAddress, descriptorAddress)
         {
         }
 

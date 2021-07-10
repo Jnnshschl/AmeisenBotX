@@ -64,12 +64,12 @@ namespace AmeisenBotX.Core.Fsm.States.Idle.Actions
 
         public void Execute()
         {
-            IEnumerable<WowPlayer> friendsAroundMe = Bot.GetNearFriends<WowPlayer>(Bot.Player.Position, 24.0f)
+            IEnumerable<IWowPlayer> friendsAroundMe = Bot.GetNearFriends<IWowPlayer>(Bot.Player.Position, 24.0f)
                 .Where(e => e.Guid != Bot.Wow.PlayerGuid && Bot.Objects.PartymemberGuids.Contains(e.Guid));
 
             if (friendsAroundMe.Any() && Rnd.NextDouble() > 0.5)
             {
-                WowPlayer player = friendsAroundMe.ElementAt(Rnd.Next(0, friendsAroundMe.Count()));
+                IWowPlayer player = friendsAroundMe.ElementAt(Rnd.Next(0, friendsAroundMe.Count()));
 
                 if (Bot.Wow.TargetGuid != player.Guid)
                 {

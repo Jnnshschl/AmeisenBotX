@@ -1,7 +1,7 @@
 ﻿using AmeisenBotX.Wow.Objects.Enums;
 using System.Collections.Generic;
 
-namespace AmeisenBotX.Core.Data.Objects
+namespace AmeisenBotX.Wow.Objects
 {
     public record WowChatMessage
     {

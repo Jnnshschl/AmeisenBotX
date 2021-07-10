@@ -179,7 +179,7 @@ namespace AmeisenBotX.Core.Engines.Combat.Classes.Jannis
                         TryCastSpell(beastialWrathSpell, Bot.Wow.TargetGuid, true);
                         TryCastSpell(rapidFireSpell, 0);
 
-                        if (Bot.GetNearEnemies<WowUnit>(Bot.Target.Position, 16.0f).Count() > 2
+                        if (Bot.GetNearEnemies<IWowUnit>(Bot.Target.Position, 16.0f).Count() > 2
                             && TryCastSpell(multiShotSpell, Bot.Wow.TargetGuid, true))
                         {
                             return;

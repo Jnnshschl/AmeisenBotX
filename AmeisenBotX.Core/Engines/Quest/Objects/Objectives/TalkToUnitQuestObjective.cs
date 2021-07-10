@@ -45,30 +45,30 @@ namespace AmeisenBotX.Core.Engines.Quest.Objects.Objectives
 
         private List<int> GossipIds { get; }
 
-        private TimegatedEvent TalkEvent { get; }
+        private IWowUnit IWowUnit { get; set; }
 
-        private WowUnit WowUnit { get; set; }
+        private TimegatedEvent TalkEvent { get; }
 
         public void Execute()
         {
             if (Finished || Bot.Player.IsCasting) { return; }
 
-            WowUnit = Bot.Objects.WowObjects
-                .OfType<WowUnit>()
+            IWowUnit = Bot.Objects.WowObjects
+                .OfType<IWowUnit>()
                 .Where(e => e.IsGossip && !e.IsDead && DisplayIds.Contains(e.DisplayId))
                 .OrderBy(e => e.Position.GetDistance(Bot.Player.Position))
                 .FirstOrDefault();
 
-            if (WowUnit != null)
+            if (IWowUnit != null)
             {
-                if (WowUnit.Position.GetDistance(Bot.Player.Position) < 3.0)
+                if (IWowUnit.Position.GetDistance(Bot.Player.Position) < 3.0)
                 {
                     if (TalkEvent.Run())
                     {
                         Bot.Wow.WowStopClickToMove();
                         Bot.Movement.Reset();
 
-                        Bot.Wow.WowUnitRightClick(WowUnit.BaseAddress);
+                        Bot.Wow.WowUnitRightClick(IWowUnit.BaseAddress);
 
                         ++Counter;
                         if (Counter > GossipIds.Count)
@@ -81,7 +81,7 @@ namespace AmeisenBotX.Core.Engines.Quest.Objects.Objectives
                 }
                 else
                 {
-                    Bot.Movement.SetMovementAction(MovementAction.Move, WowUnit.Position);
+                    Bot.Movement.SetMovementAction(MovementAction.Move, IWowUnit.Position);
                 }
             }
         }

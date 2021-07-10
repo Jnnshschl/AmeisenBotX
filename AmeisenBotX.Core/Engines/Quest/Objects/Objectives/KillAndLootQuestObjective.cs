@@ -1,4 +1,5 @@
 ﻿using AmeisenBotX.Common.Math;
+using AmeisenBotX.Common.Utils;
 using AmeisenBotX.Core.Data.Objects;
 using AmeisenBotX.Core.Engines.Movement.Enums;
 using AmeisenBotX.Core.Engines.Movement.Pathfinding.Objects;
@@ -41,7 +42,7 @@ namespace AmeisenBotX.Core.Engines.Quest.Objects.Objectives
                 int amount = Killed;
                 if (CollectQuestItem)
                 {
-                    Character.Inventory.Objects.IWowItem inventoryItem =
+                    Character.Inventory.Objects.IWowInventoryItem inventoryItem =
                         Bot.Character.Inventory.Items.Find(item => item.Id == QuestItemId);
                     if (inventoryItem != null)
                     {
@@ -65,6 +66,8 @@ namespace AmeisenBotX.Core.Engines.Quest.Objects.Objectives
 
         private Vector3 CurrentSpot { get; set; }
 
+        private IWowUnit IWowUnit { get; set; }
+
         private int Killed { get; set; }
 
         private DateTime LastUnitCheck { get; set; } = DateTime.UtcNow;
@@ -75,12 +78,10 @@ namespace AmeisenBotX.Core.Engines.Quest.Objects.Objectives
 
         private SearchAreaEnsamble SearchAreas { get; }
 
-        private WowUnit WowUnit { get; set; }
-
         public void CombatLogChanged(BasicCombatLogEntry entry)
         {
-            WowUnit wowUnit = Bot.GetWowObjectByGuid<WowUnit>(entry.DestinationGuid);
-            if (entry.Subtype == CombatLogEntrySubtype.KILL && NpcIds.Contains(WowGuid.ToNpcId(entry.DestinationGuid))
+            IWowUnit wowUnit = Bot.GetWowObjectByGuid<IWowUnit>(entry.DestinationGuid);
+            if (entry.Subtype == CombatLogEntrySubtype.KILL && NpcIds.Contains(BotUtils.GuidToNpcId(entry.DestinationGuid))
                                                             && wowUnit != null && wowUnit.IsTaggedByMe)
             {
                 ++Killed;
@@ -94,9 +95,9 @@ namespace AmeisenBotX.Core.Engines.Quest.Objects.Objectives
             if (!Bot.Player.IsInCombat && DateTime.UtcNow.Subtract(LastUnitCheck).TotalMilliseconds >= 1250.0)
             {
                 LastUnitCheck = DateTime.UtcNow;
-                WowUnit = Bot.Objects.WowObjects
-                    .OfType<WowUnit>()
-                    .Where(e => !e.IsDead && NpcIds.Contains(WowGuid.ToNpcId(e.Guid)) && !e.IsNotAttackable
+                IWowUnit = Bot.Objects.WowObjects
+                    .OfType<IWowUnit>()
+                    .Where(e => !e.IsDead && NpcIds.Contains(BotUtils.GuidToNpcId(e.Guid)) && !e.IsNotAttackable
                                 && Bot.Db.GetReaction(Bot.Player, e) != WowUnitReaction.Friendly)
                     .OrderBy(e => e.Position.GetDistance(Bot.Player.Position))
                     .Take(3)
@@ -104,29 +105,29 @@ namespace AmeisenBotX.Core.Engines.Quest.Objects.Objectives
                     .FirstOrDefault();
 
                 // Kill enemies in the path
-                if (WowUnit != null && Bot.Db.GetReaction(Bot.Player, WowUnit) == WowUnitReaction.Hostile)
+                if (IWowUnit != null && Bot.Db.GetReaction(Bot.Player, IWowUnit) == WowUnitReaction.Hostile)
                 {
                     IEnumerable<Vector3> path = Bot.PathfindingHandler.GetPath((int)Bot.Objects.MapId,
-                    Bot.Player.Position, WowUnit.Position);
+                    Bot.Player.Position, IWowUnit.Position);
 
                     if (path != null)
                     {
-                        IEnumerable<WowUnit> nearEnemies = Bot.GetEnemiesInPath<WowUnit>(path, 10.0f);
+                        IEnumerable<IWowUnit> nearEnemies = Bot.GetEnemiesInPath<IWowUnit>(path, 10.0f);
 
                         if (nearEnemies.Any())
                         {
-                            WowUnit = nearEnemies.FirstOrDefault();
+                            IWowUnit = nearEnemies.FirstOrDefault();
                         }
                     }
                 }
 
-                if (WowUnit != null)
+                if (IWowUnit != null)
                 {
-                    Bot.Wow.WowTargetGuid(WowUnit.Guid);
+                    Bot.Wow.WowTargetGuid(IWowUnit.Guid);
                 }
             }
 
-            if (WowUnit != null)
+            if (IWowUnit != null)
             {
                 SearchAreas.NotifyDetour();
                 Bot.CombatClass.AttackTarget();

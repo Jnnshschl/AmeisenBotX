@@ -16,7 +16,7 @@ namespace AmeisenBotX.Memory
         public StringBuilder AssemblyBuffer { get; }
 
         /// <summary>
-        /// NAtive handle for the main thread.
+        /// Native handle for the main thread.
         /// </summary>
         public IntPtr MainThreadHandle { get; }
 

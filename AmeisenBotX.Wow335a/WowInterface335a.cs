@@ -116,7 +116,7 @@ namespace AmeisenBotX.Wow335a
 
         public IObjectProvider ObjectProvider => ObjectManager;
 
-        public WowUnit Player => ObjectManager.Player;
+        public IWowPlayer Player => ObjectManager.Player;
 
         private EndSceneHook Hook { get; }
 

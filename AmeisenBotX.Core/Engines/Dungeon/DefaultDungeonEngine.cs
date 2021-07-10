@@ -181,7 +181,7 @@ namespace AmeisenBotX.Core.Engines.Dungeon
                 distance = distanceToStartRunning;
             }
 
-            int nearPlayers = Bot.GetNearPartymembers<WowPlayer>(Bot.Player.Position, distance).Count(e => !e.IsDead);
+            int nearPlayers = Bot.GetNearPartymembers<IWowPlayer>(Bot.Player.Position, distance).Count(e => !e.IsDead);
 
             if (nearPlayers >= Bot.Objects.Partymembers.Count() - 1)
             {

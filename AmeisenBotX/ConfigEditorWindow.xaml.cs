@@ -226,7 +226,7 @@ namespace AmeisenBotX
 
         private void ButtonOpenWowExe_Click(object sender, RoutedEventArgs e)
         {
-            OpenFileDialog openFileDialog = new OpenFileDialog
+            OpenFileDialog openFileDialog = new()
             {
                 Filter = "WoW Executeable|*.exe"
             };

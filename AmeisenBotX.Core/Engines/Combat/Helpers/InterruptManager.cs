@@ -12,15 +12,15 @@ namespace AmeisenBotX.Core.Engines.Combat.Helpers
             InterruptSpells = new();
         }
 
-        public delegate bool CastInterruptFunction(WowUnit target);
+        public delegate bool CastInterruptFunction(IWowUnit target);
 
         public SortedList<int, CastInterruptFunction> InterruptSpells { get; set; }
 
-        public bool Tick(IEnumerable<WowUnit> units)
+        public bool Tick(IEnumerable<IWowUnit> units)
         {
             if (InterruptSpells != null && InterruptSpells.Count > 0 && units != null && units.Any())
             {
-                WowUnit selectedUnit = units.FirstOrDefault(e => e != null && e.IsCasting);
+                IWowUnit selectedUnit = units.FirstOrDefault(e => e != null && e.IsCasting);
 
                 if (selectedUnit != null)
                 {

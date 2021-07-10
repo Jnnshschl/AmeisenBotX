@@ -11,8 +11,6 @@ namespace AmeisenBotX.Core.Engines.Battleground.KamelBG
 {
     internal class ArathiBasin : IBattlegroundEngine
     {
-        private bool IsCirclePath = true;
-
         public ArathiBasin(AmeisenBotInterfaces bot)
         {
             Bot = bot;
@@ -47,13 +45,13 @@ namespace AmeisenBotX.Core.Engines.Battleground.KamelBG
 
         private int CurrentNodeCounter { get; set; }
 
-        private bool faction { get; set; }
+        private bool Faction { get; set; }
 
         private string FactionFlagState { get; set; }
 
         public void Combat()
         {
-            WowPlayer weakestPlayer = Bot.GetNearEnemies<WowPlayer>(Bot.Player.Position, 30.0f).OrderBy(e => e.Health).FirstOrDefault();
+            IWowPlayer weakestPlayer = Bot.GetNearEnemies<IWowPlayer>(Bot.Player.Position, 30.0f).OrderBy(e => e.Health).FirstOrDefault();
 
             if (weakestPlayer != null)
             {
@@ -77,15 +75,15 @@ namespace AmeisenBotX.Core.Engines.Battleground.KamelBG
 
         public void Enter()
         {
-            Faction();
+            GetFaction();
         }
 
         public void Execute()
         {
             Combat();
 
-            WowGameobject FlagNode = Bot.Objects.WowObjects
-            .OfType<WowGameobject>()
+            IWowGameobject FlagNode = Bot.Objects.WowObjects
+            .OfType<IWowGameobject>()
             .Where(x => !FlagsNodelist.Contains((Flags)x.DisplayId)
                     && Enum.IsDefined(typeof(Flags), x.DisplayId)
                     && x.Position.GetDistance(Bot.Player.Position) < 15)
@@ -146,9 +144,9 @@ namespace AmeisenBotX.Core.Engines.Battleground.KamelBG
                     }
                     else if (FlagNode != null)
                     {
-                        IEnumerable<WowPlayer> enemiesNearFlag = Bot.GetNearEnemies<WowPlayer>(FlagNode.Position, 40);
-                        IEnumerable<WowPlayer> friendsNearFlag = Bot.GetNearFriends<WowPlayer>(FlagNode.Position, 40);
-                        IEnumerable<WowPlayer> friendsNearPlayer = Bot.GetNearFriends<WowPlayer>(Bot.Player.Position, 20);
+                        IEnumerable<IWowPlayer> enemiesNearFlag = Bot.GetNearEnemies<IWowPlayer>(FlagNode.Position, 40);
+                        IEnumerable<IWowPlayer> friendsNearFlag = Bot.GetNearFriends<IWowPlayer>(FlagNode.Position, 40);
+                        IEnumerable<IWowPlayer> friendsNearPlayer = Bot.GetNearFriends<IWowPlayer>(Bot.Player.Position, 20);
 
                         if (enemiesNearFlag != null)
                         {
@@ -175,18 +173,18 @@ namespace AmeisenBotX.Core.Engines.Battleground.KamelBG
             }
         }
 
-        public void Faction()
+        public void GetFaction()
         {
             if (Bot.Player.IsHorde())
             {
-                faction = true;
+                Faction = true;
                 FactionFlagState = "Alliance Controlled";
                 FlagsNodelist.Add(Flags.HordFlags);
                 FlagsNodelist.Add(Flags.HordFlagsAktivate);
             }
             else
             {
-                faction = false;
+                Faction = false;
                 FactionFlagState = "Hord Controlled";
                 FlagsNodelist.Add(Flags.AlliFlags);
                 FlagsNodelist.Add(Flags.AlliFlagsAktivate);

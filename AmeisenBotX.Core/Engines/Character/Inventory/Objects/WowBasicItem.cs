@@ -4,7 +4,7 @@ using System.Collections.Generic;
 
 namespace AmeisenBotX.Core.Engines.Character.Inventory.Objects
 {
-    public class WowBasicItem : IWowItem
+    public class WowBasicItem : IWowInventoryItem
     {
         public WowBasicItem()
         {

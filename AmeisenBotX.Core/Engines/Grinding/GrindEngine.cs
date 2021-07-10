@@ -73,7 +73,7 @@ namespace AmeisenBotX.Core.Engines.Grinding
 
             double distanceToSpot = GrindingSpot.Position.GetDistance(Bot.Player.Position);
 
-            IEnumerable<WowUnit> nearUnits = Bot.GetNearEnemies<WowUnit>(GrindingSpot.Position, GrindingSpot.Radius)
+            IEnumerable<IWowUnit> nearUnits = Bot.GetNearEnemies<IWowUnit>(GrindingSpot.Position, GrindingSpot.Radius)
                 .Where(e => e.Level >= GrindingSpot.MinLevel
                          && e.Level <= GrindingSpot.MaxLevel
                          && !Blacklist.Contains(e.Guid)
@@ -90,7 +90,7 @@ namespace AmeisenBotX.Core.Engines.Grinding
                 if (nearUnits != null && nearUnits.Any())
                 {
                     LookingForEnemiesSince = default;
-                    WowUnit nearestUnit = nearUnits.FirstOrDefault(e => e.Guid == TargetGuid);
+                    IWowUnit nearestUnit = nearUnits.FirstOrDefault(e => e.Guid == TargetGuid);
 
                     bool switchedTarget = false;
 

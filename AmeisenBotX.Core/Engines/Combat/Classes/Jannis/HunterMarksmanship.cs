@@ -112,7 +112,7 @@ namespace AmeisenBotX.Core.Engines.Combat.Classes.Jannis
             {
                 if (PetManager.Tick()) { return; }
 
-                WowUnit target = (WowUnit)Bot.Objects.WowObjects.FirstOrDefault(e => e != null && e.Guid == Bot.Wow.TargetGuid);
+                IWowUnit target = (IWowUnit)Bot.Objects.WowObjects.FirstOrDefault(e => e != null && e.Guid == Bot.Wow.TargetGuid);
 
                 if (target != null)
                 {
@@ -177,13 +177,13 @@ namespace AmeisenBotX.Core.Engines.Combat.Classes.Jannis
                         TryCastSpell(killCommandSpell, Bot.Wow.TargetGuid, true);
                         TryCastSpell(rapidFireSpell, Bot.Wow.TargetGuid);
 
-                        if (Bot.GetNearEnemies<WowUnit>(Bot.Target.Position, 16.0f).Count() > 2
+                        if (Bot.GetNearEnemies<IWowUnit>(Bot.Target.Position, 16.0f).Count() > 2
                             && TryCastSpell(multiShotSpell, Bot.Wow.TargetGuid, true))
                         {
                             return;
                         }
 
-                        if ((Bot.Objects.WowObjects.OfType<WowUnit>().Where(e => target.Position.GetDistance(e.Position) < 16).Count() > 2 && TryCastSpell(multiShotSpell, Bot.Wow.TargetGuid, true))
+                        if ((Bot.Objects.WowObjects.OfType<IWowUnit>().Where(e => target.Position.GetDistance(e.Position) < 16).Count() > 2 && TryCastSpell(multiShotSpell, Bot.Wow.TargetGuid, true))
                             || TryCastSpell(chimeraShotSpell, Bot.Wow.TargetGuid, true)
                             || TryCastSpell(aimedShotSpell, Bot.Wow.TargetGuid, true)
                             || TryCastSpell(arcaneShotSpell, Bot.Wow.TargetGuid, true)

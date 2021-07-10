@@ -3,7 +3,6 @@ using AmeisenBotX.Core.Engines.Character.Talents.Objects;
 using AmeisenBotX.Core.Fsm;
 using AmeisenBotX.Core.Fsm.Utils.Auras.Objects;
 using AmeisenBotX.Wow.Objects.Enums;
-using System;
 using System.Linq;
 
 namespace AmeisenBotX.Core.Engines.Combat.Classes.Jannis
@@ -81,8 +80,6 @@ namespace AmeisenBotX.Core.Engines.Combat.Classes.Jannis
         public override WowClass WowClass => WowClass.Shaman;
 
         private bool HexedTarget { get; set; }
-
-        private DateTime LastDeadPartymembersCheck { get; set; }
 
         public override void Execute()
         {

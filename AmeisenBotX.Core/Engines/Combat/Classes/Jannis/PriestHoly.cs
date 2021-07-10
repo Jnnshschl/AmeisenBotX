@@ -4,7 +4,6 @@ using AmeisenBotX.Core.Engines.Character.Talents.Objects;
 using AmeisenBotX.Core.Fsm;
 using AmeisenBotX.Core.Fsm.Utils.Auras.Objects;
 using AmeisenBotX.Wow.Objects.Enums;
-using System;
 using System.Collections.Generic;
 using System.Linq;
 
@@ -82,8 +81,6 @@ namespace AmeisenBotX.Core.Engines.Combat.Classes.Jannis
 
         public override WowClass WowClass => WowClass.Priest;
 
-        private DateTime LastDeadPartymembersCheck { get; set; }
-
         private Dictionary<int, string> SpellUsageHealDict { get; }
 
         public override void Execute()
@@ -130,9 +127,9 @@ namespace AmeisenBotX.Core.Engines.Combat.Classes.Jannis
 
         private bool NeedToHealSomeone()
         {
-            if (TargetProviderHeal.Get(out IEnumerable<WowUnit> unitsToHeal))
+            if (TargetProviderHeal.Get(out IEnumerable<IWowUnit> unitsToHeal))
             {
-                WowUnit target = unitsToHeal.First();
+                IWowUnit target = unitsToHeal.First();
 
                 if (unitsToHeal.Count() > 3
                     && target.HealthPercentage > 80.0

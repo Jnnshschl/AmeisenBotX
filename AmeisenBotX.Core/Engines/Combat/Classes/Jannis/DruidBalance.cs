@@ -131,7 +131,7 @@ namespace AmeisenBotX.Core.Engines.Combat.Classes.Jannis
                         && TryCastSpell(starfireSpell, Bot.Wow.TargetGuid, true))
                     || (SolarEclipse
                         && TryCastSpell(wrathSpell, Bot.Wow.TargetGuid, true))
-                    || (Bot.Objects.WowObjects.OfType<WowUnit>().Where(e => !e.IsInCombat && Bot.Player.Position.GetDistance(e.Position) < 35).Count() < 4
+                    || (Bot.Objects.WowObjects.OfType<IWowUnit>().Where(e => !e.IsInCombat && Bot.Player.Position.GetDistance(e.Position) < 35).Count() < 4
                         && TryCastSpell(starfallSpell, Bot.Wow.TargetGuid, true)))
                 {
                     return;

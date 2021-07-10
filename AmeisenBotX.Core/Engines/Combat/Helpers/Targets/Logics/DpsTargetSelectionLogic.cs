@@ -10,14 +10,14 @@ namespace AmeisenBotX.Core.Engines.Combat.Helpers.Targets.Logics
         {
         }
 
-        public override bool SelectTarget(out IEnumerable<WowUnit> possibleTargets)
+        public override bool SelectTarget(out IEnumerable<IWowUnit> possibleTargets)
         {
             possibleTargets = null;
 
             if (Bot.Wow.TargetGuid == 0 || Bot.Target == null)
             {
-                IEnumerable<WowUnit> priorityTargets = Bot.Objects.WowObjects
-                    .OfType<WowUnit>()
+                IEnumerable<IWowUnit> priorityTargets = Bot.Objects.WowObjects
+                    .OfType<IWowUnit>()
                     .Where(e => IsValidUnit(e) && IsPriorityTarget(e))
                     .OrderBy(e => e.DistanceTo(Bot.Player));
 
@@ -28,7 +28,7 @@ namespace AmeisenBotX.Core.Engines.Combat.Helpers.Targets.Logics
                 }
 
                 possibleTargets = Bot.Objects.WowObjects
-                    .OfType<WowUnit>()
+                    .OfType<IWowUnit>()
                     .Where(e => IsValidUnit(e))
                     .OrderByDescending(e => e.Type)
                     .ThenBy(e => e.DistanceTo(Bot.Player));

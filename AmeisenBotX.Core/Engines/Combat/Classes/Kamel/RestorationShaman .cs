@@ -94,9 +94,9 @@ namespace AmeisenBotX.Core.Engines.Combat.Classes.Kamel
             spellCoolDown.Add(CalloftheElementsSpell, DateTime.Now);
 
             //Time event
-            earthShieldEvent = new(TimeSpan.FromSeconds(7));
-            manaTideTotemEvent = new(TimeSpan.FromSeconds(12));
-            totemcastEvent = new(TimeSpan.FromSeconds(4));
+            EarthShieldEvent = new(TimeSpan.FromSeconds(7));
+            ManaTideTotemEvent = new(TimeSpan.FromSeconds(12));
+            TotemcastEvent = new(TimeSpan.FromSeconds(4));
         }
 
         public override string Author => "Lukas";
@@ -108,7 +108,7 @@ namespace AmeisenBotX.Core.Engines.Combat.Classes.Kamel
         public override string Displayname => "Shaman Restoration";
 
         //Time event
-        public TimegatedEvent earthShieldEvent { get; private set; }
+        public TimegatedEvent EarthShieldEvent { get; private set; }
 
         public override bool HandlesMovement => false;
 
@@ -116,7 +116,7 @@ namespace AmeisenBotX.Core.Engines.Combat.Classes.Kamel
 
         public override IItemComparator ItemComparator { get; set; } = new BasicSpiritComparator(new() { WowArmorType.SHIELDS }, new() { WowWeaponType.ONEHANDED_SWORDS, WowWeaponType.ONEHANDED_MACES, WowWeaponType.ONEHANDED_AXES });
 
-        public TimegatedEvent manaTideTotemEvent { get; private set; }
+        public TimegatedEvent ManaTideTotemEvent { get; private set; }
 
         public override WowRole Role => WowRole.Heal;
 
@@ -155,9 +155,9 @@ namespace AmeisenBotX.Core.Engines.Combat.Classes.Kamel
             },
         };
 
-        public bool targetIsInRange { get; set; }
+        public bool TargetIsInRange { get; set; }
 
-        public TimegatedEvent totemcastEvent { get; private set; }
+        public TimegatedEvent TotemcastEvent { get; private set; }
 
         public override bool UseAutoAttacks => false;
 
@@ -178,7 +178,7 @@ namespace AmeisenBotX.Core.Engines.Combat.Classes.Kamel
 
         public override void OutOfCombatExecute()
         {
-            revivePartyMember(ancestralSpiritSpell);
+            RevivePartyMember(ancestralSpiritSpell);
 
             if (CheckForWeaponEnchantment(WowEquipmentSlot.INVSLOT_MAINHAND, earthlivingBuff, earthlivingWeaponSpell))
             {
@@ -199,9 +199,9 @@ namespace AmeisenBotX.Core.Engines.Combat.Classes.Kamel
 
         private void StartHeal()
         {
-            // List<WowUnit> partyMemberToHeal = Bot.ObjectManager.Partymembers.Where(e => e.HealthPercentage <= 94 && !e.IsDead).OrderBy(e => e.HealthPercentage).ToList();//FirstOrDefault => tolist
+            // List<IWowUnit> partyMemberToHeal = Bot.ObjectManager.Partymembers.Where(e => e.HealthPercentage <= 94 && !e.IsDead).OrderBy(e => e.HealthPercentage).ToList();//FirstOrDefault => tolist
 
-            List<WowUnit> partyMemberToHeal = new List<WowUnit>(Bot.Objects.Partymembers)
+            List<IWowUnit> partyMemberToHeal = new(Bot.Objects.Partymembers)
             {
                 //healableUnits.AddRange(Bot.ObjectManager.PartyPets);
                 Bot.Player
@@ -218,8 +218,8 @@ namespace AmeisenBotX.Core.Engines.Combat.Classes.Kamel
 
                 if (Bot.Wow.TargetGuid != 0 && Bot.Target != null)
                 {
-                    targetIsInRange = Bot.Player.Position.GetDistance(Bot.GetWowObjectByGuid<WowUnit>(partyMemberToHeal.FirstOrDefault().Guid).Position) <= 30;
-                    if (targetIsInRange)
+                    TargetIsInRange = Bot.Player.Position.GetDistance(Bot.GetWowObjectByGuid<IWowUnit>(partyMemberToHeal.FirstOrDefault().Guid).Position) <= 30;
+                    if (TargetIsInRange)
                     {
                         if (!TargetInLineOfSight)
                         {
@@ -277,7 +277,7 @@ namespace AmeisenBotX.Core.Engines.Combat.Classes.Kamel
                             return;
                         }
 
-                        if (UseSpellOnlyInCombat && earthShieldEvent.Run() && !Bot.Target.Auras.Any(e => Bot.Db.GetSpellName(e.SpellId) == "Earth Shield") && !Bot.Target.Auras.Any(e => Bot.Db.GetSpellName(e.SpellId) == "Water Shield") && Bot.Target.HealthPercentage < 90 && CustomCastSpellMana(earthShieldSpell))
+                        if (UseSpellOnlyInCombat && EarthShieldEvent.Run() && !Bot.Target.Auras.Any(e => Bot.Db.GetSpellName(e.SpellId) == "Earth Shield") && !Bot.Target.Auras.Any(e => Bot.Db.GetSpellName(e.SpellId) == "Water Shield") && Bot.Target.HealthPercentage < 90 && CustomCastSpellMana(earthShieldSpell))
                         {
                             return;
                         }
@@ -288,7 +288,7 @@ namespace AmeisenBotX.Core.Engines.Combat.Classes.Kamel
                         }
                     }
 
-                    if (totemcastEvent.Run() && totemItemCheck())
+                    if (TotemcastEvent.Run() && TotemItemCheck())
                     {
                         if (Bot.Player.ManaPercentage <= 10 && CustomCastSpellMana(ManaTideTotemSpell))
                         {
@@ -299,9 +299,9 @@ namespace AmeisenBotX.Core.Engines.Combat.Classes.Kamel
             }
             else
             {
-                totemItemCheck();
+                TotemItemCheck();
 
-                if (totemcastEvent.Run() && totemItemCheck())
+                if (TotemcastEvent.Run() && TotemItemCheck())
                 {
                     if (Bot.Player.ManaPercentage >= 50
                         && !Bot.Player.Auras.Any(e => Bot.Db.GetSpellName(e.SpellId) == "Windfury Totem")
@@ -315,7 +315,7 @@ namespace AmeisenBotX.Core.Engines.Combat.Classes.Kamel
 
                 if (TargetSelectEvent.Run())
                 {
-                    WowUnit nearTarget = Bot.GetNearEnemies<WowUnit>(Bot.Player.Position, 30)
+                    IWowUnit nearTarget = Bot.GetNearEnemies<IWowUnit>(Bot.Player.Position, 30)
                     .Where(e => e.IsInCombat && !e.IsNotAttackable && e.IsCasting && Bot.Db.GetUnitName(Bot.Target, out string name) && name != "The Lich King" && !(Bot.Objects.MapId == WowMapId.DrakTharonKeep && e.CurrentlyChannelingSpellId == 47346))
                     .OrderBy(e => e.Position.GetDistance(Bot.Player.Position))
                     .FirstOrDefault();

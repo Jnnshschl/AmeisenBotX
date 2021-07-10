@@ -149,14 +149,12 @@ namespace AmeisenBotX.Core.Engines.Combat.Classes.Jannis
 
         private bool NeedToHealSomeone()
         {
-            if (TargetProviderHeal.Get(out IEnumerable<WowUnit> unitsToHeal))
+            if (TargetProviderHeal.Get(out IEnumerable<IWowUnit> unitsToHeal))
             {
-                WowUnit targetUnit = unitsToHeal.FirstOrDefault(e => !e.Auras.Any(e => Bot.Db.GetSpellName(e.SpellId) == beaconOfLightSpell));
+                IWowUnit targetUnit = unitsToHeal.FirstOrDefault(e => !e.Auras.Any(e => Bot.Db.GetSpellName(e.SpellId) == beaconOfLightSpell));
 
                 if (targetUnit == null)
                 {
-                    unitsToHeal.FirstOrDefault(e => e != null);
-
                     if (targetUnit == null)
                     {
                         return false;

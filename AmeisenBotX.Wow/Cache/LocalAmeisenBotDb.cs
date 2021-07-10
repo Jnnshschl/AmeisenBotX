@@ -28,7 +28,7 @@ namespace AmeisenBotX.Wow.Cache
             CombatLogSubject = new BasicCombatLogEntrySubject();
             Clear();
 
-            CleanupTimer = new Timer(CleanupTimerTick, null, 0, 6000);
+            Timer cleanupTimer = new(CleanupTimerTick, null, 0, 6000);
         }
 
         public LocalAmeisenBotDb(IMemoryApi memoryApi, IOffsetList offsetList, IWowInterface wowInterface)
@@ -37,10 +37,10 @@ namespace AmeisenBotX.Wow.Cache
             OffsetList = offsetList;
             Wow = wowInterface;
 
-            CombatLogSubject = new BasicCombatLogEntrySubject();
+            CombatLogSubject = new();
             Clear();
 
-            CleanupTimer = new Timer(CleanupTimerTick, null, 0, 6000);
+            Timer cleanupTimer = new(CleanupTimerTick, null, 0, 6000);
         }
 
         public ConcurrentDictionary<int, List<Vector3>> BlacklistNodes { get; private set; }
@@ -61,13 +61,11 @@ namespace AmeisenBotX.Wow.Cache
 
         public ConcurrentDictionary<int, string> SpellNames { get; private set; }
 
-        private Timer CleanupTimer { get; }
-
-        private IWowInterface Wow { get; set; }
-
         private IMemoryApi MemoryApi { get; set; }
 
         private IOffsetList OffsetList { get; set; }
+
+        private IWowInterface Wow { get; set; }
 
         public static LocalAmeisenBotDb FromJson(string dbFile, IMemoryApi memoryApi, IOffsetList offsetList, IWowInterface wowInterface)
         {
@@ -241,7 +239,7 @@ namespace AmeisenBotX.Wow.Cache
             return CombatLogSubject;
         }
 
-        public WowUnitReaction GetReaction(WowUnit a, WowUnit b)
+        public WowUnitReaction GetReaction(IWowUnit a, IWowUnit b)
         {
             if (Reactions.ContainsKey(a.FactionTemplate) && Reactions[a.FactionTemplate].ContainsKey(b.FactionTemplate))
             {
@@ -269,7 +267,7 @@ namespace AmeisenBotX.Wow.Cache
             }
         }
 
-        public bool GetUnitName(WowUnit unit, out string name)
+        public bool GetUnitName(IWowUnit unit, out string name)
         {
             if (Names.ContainsKey(unit.Guid))
             {

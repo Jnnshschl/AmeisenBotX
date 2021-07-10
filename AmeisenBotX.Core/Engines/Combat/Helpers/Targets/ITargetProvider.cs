@@ -9,6 +9,6 @@ namespace AmeisenBotX.Core.Engines.Combat.Helpers.Targets
 
         IEnumerable<int> PriorityTargets { get; set; }
 
-        bool Get(out IEnumerable<WowUnit> possibleTargets);
+        bool Get(out IEnumerable<IWowUnit> possibleTargets);
     }
 }

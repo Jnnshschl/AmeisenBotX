@@ -3,7 +3,7 @@ using System.Collections.Generic;
 
 namespace AmeisenBotX.Core.Engines.Character.Inventory.Objects
 {
-    public interface IWowItem
+    public interface IWowInventoryItem
     {
         int BagId { get; }
 

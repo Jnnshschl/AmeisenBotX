@@ -174,13 +174,13 @@ namespace AmeisenBotX.Core.Engines.Combat.Classes.Jannis
                         TryCastSpell(killCommandSpell, Bot.Wow.TargetGuid, true);
                         TryCastSpell(rapidFireSpell, 0);
 
-                        if (Bot.GetNearEnemies<WowUnit>(Bot.Target.Position, 16.0f).Count() > 2
+                        if (Bot.GetNearEnemies<IWowUnit>(Bot.Target.Position, 16.0f).Count() > 2
                             && TryCastSpell(multiShotSpell, Bot.Wow.TargetGuid, true))
                         {
                             return;
                         }
 
-                        if ((Bot.Objects.WowObjects.OfType<WowUnit>().Where(e => Bot.Target.Position.GetDistance(e.Position) < 16.0).Count() > 2 && TryCastSpell(multiShotSpell, Bot.Wow.TargetGuid, true))
+                        if ((Bot.Objects.WowObjects.OfType<IWowUnit>().Where(e => Bot.Target.Position.GetDistance(e.Position) < 16.0).Count() > 2 && TryCastSpell(multiShotSpell, Bot.Wow.TargetGuid, true))
                             || TryCastSpell(explosiveShotSpell, Bot.Wow.TargetGuid, true)
                             || TryCastSpell(aimedShotSpell, Bot.Wow.TargetGuid, true)
                             || TryCastSpell(steadyShotSpell, Bot.Wow.TargetGuid, true))

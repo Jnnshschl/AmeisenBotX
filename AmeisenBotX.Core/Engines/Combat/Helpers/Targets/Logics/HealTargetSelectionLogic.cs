@@ -10,9 +10,9 @@ namespace AmeisenBotX.Core.Engines.Combat.Helpers.Targets.Logics
         {
         }
 
-        public override bool SelectTarget(out IEnumerable<WowUnit> possibleTargets)
+        public override bool SelectTarget(out IEnumerable<IWowUnit> possibleTargets)
         {
-            List<WowUnit> healableUnits = new(Bot.Objects.Partymembers)
+            List<IWowUnit> healableUnits = new(Bot.Objects.Partymembers)
             {
                 Bot.Player
             };

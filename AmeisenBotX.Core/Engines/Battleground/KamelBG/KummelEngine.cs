@@ -19,9 +19,9 @@ namespace AmeisenBotX.Core.Engines.Battleground.KamelBG
 
         private Vector3 baseHord = new(916, 1434, 346);
 
-        private WowUnit FlagCarrier;
+        private IWowUnit FlagCarrier;
 
-        private WowObject FlagObject;
+        private IWowObject FlagObject;
 
         private int FlagState = 0;
 
@@ -42,8 +42,6 @@ namespace AmeisenBotX.Core.Engines.Battleground.KamelBG
         public string Author => "Kamel";
 
         public string Description => "...";
-
-        public bool IsCirclePath => true;
 
         public string Name => "Kummel Engine";
 
@@ -103,7 +101,7 @@ namespace AmeisenBotX.Core.Engines.Battleground.KamelBG
                     // own team has flag
                     if (hasFlag)
                     {
-                        WowObject ownFlag = GetFlagObject();
+                        IWowObject ownFlag = GetFlagObject();
                         if (ownFlag != null)
                         {
                             Bot.Movement.SetMovementAction(Movement.Enums.MovementAction.Move, ownFlag.Position);
@@ -114,7 +112,7 @@ namespace AmeisenBotX.Core.Engines.Battleground.KamelBG
                         }
                         else
                         {
-                            WowUnit enemyFlagCarrier = GetFlagCarrier();
+                            IWowUnit enemyFlagCarrier = GetFlagCarrier();
                             if (enemyFlagCarrier != null)
                             {
                                 Bot.Movement.SetMovementAction(Movement.Enums.MovementAction.Move, enemyFlagCarrier.Position);
@@ -171,9 +169,9 @@ namespace AmeisenBotX.Core.Engines.Battleground.KamelBG
         {
         }
 
-        private WowUnit GetFlagCarrier()
+        private IWowUnit GetFlagCarrier()
         {
-            List<WowUnit> flagCarrierList = Bot.Objects.WowObjects.OfType<WowUnit>().Where(e => e.Guid != Bot.Wow.PlayerGuid && e.Auras != null && e.Auras.Any(en => Bot.Db.GetSpellName(en.SpellId).Contains("Flag") || Bot.Db.GetSpellName(en.SpellId).Contains("flag"))).ToList();
+            List<IWowUnit> flagCarrierList = Bot.Objects.WowObjects.OfType<IWowUnit>().Where(e => e.Guid != Bot.Wow.PlayerGuid && e.Auras != null && e.Auras.Any(en => Bot.Db.GetSpellName(en.SpellId).Contains("Flag") || Bot.Db.GetSpellName(en.SpellId).Contains("flag"))).ToList();
             if (flagCarrierList.Count > 0)
             {
                 return flagCarrierList[0];
@@ -184,11 +182,11 @@ namespace AmeisenBotX.Core.Engines.Battleground.KamelBG
             }
         }
 
-        private WowObject GetFlagObject()
+        private IWowObject GetFlagObject()
         {
             WowGameobjectDisplayId targetFlag = hasFlag ? (Bot.Player.IsHorde() ? WowGameobjectDisplayId.WsgHordeFlag : WowGameobjectDisplayId.WsgAllianceFlag) : (Bot.Player.IsHorde() ? WowGameobjectDisplayId.WsgAllianceFlag : WowGameobjectDisplayId.WsgHordeFlag);
-            List<WowGameobject> flagObjectList = Bot.Objects.WowObjects
-                .OfType<WowGameobject>() // only WowGameobjects
+            List<IWowGameobject> flagObjectList = Bot.Objects.WowObjects
+                .OfType<IWowGameobject>() // only WowGameobjects
                 .Where(x => Enum.IsDefined(typeof(WowGameobjectDisplayId), x.DisplayId)
                          && targetFlag == (WowGameobjectDisplayId)x.DisplayId).ToList();
             if (flagObjectList.Count > 0)

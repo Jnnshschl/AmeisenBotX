@@ -46,11 +46,11 @@ namespace AmeisenBotX.Core.Engines.Battleground.KamelBG
 
         private int CurrentNodeCounter { get; set; }
 
-        private string factionFlagState { get; set; }
+        private string FactionFlagState { get; set; }
 
         public void Combat()
         {
-            WowPlayer weakestPlayer = Bot.GetNearEnemies<WowPlayer>(Bot.Player.Position, 30.0f).OrderBy(e => e.Health).FirstOrDefault();
+            IWowPlayer weakestPlayer = Bot.GetNearEnemies<IWowPlayer>(Bot.Player.Position, 30.0f).OrderBy(e => e.Health).FirstOrDefault();
 
             if (weakestPlayer != null)
             {
@@ -81,8 +81,8 @@ namespace AmeisenBotX.Core.Engines.Battleground.KamelBG
         {
             Combat();
 
-            WowGameobject FlagNode = Bot.Objects.WowObjects
-                .OfType<WowGameobject>()
+            IWowGameobject FlagNode = Bot.Objects.WowObjects
+                .OfType<IWowGameobject>()
                 .Where(x => Enum.IsDefined(typeof(Flags), x.DisplayId)
                         && x.Position.GetDistance(Bot.Player.Position) < 15)
                 .OrderBy(x => x.Position.GetDistance(Bot.Player.Position))
@@ -115,7 +115,7 @@ namespace AmeisenBotX.Core.Engines.Battleground.KamelBG
 
                     if (Bot.Player.HasBuffById(34976))
                     {
-                        if (AllBaseList[CurrentNodeCounter].Contains(factionFlagState))
+                        if (AllBaseList[CurrentNodeCounter].Contains(FactionFlagState))
                         {
                             Bot.Movement.SetMovementAction(MovementAction.Move, currentNode);
                         }
@@ -132,7 +132,7 @@ namespace AmeisenBotX.Core.Engines.Battleground.KamelBG
                     {
                         if (AllBaseList[CurrentNodeCounter].Contains("Uncontrolled")
                             || AllBaseList[CurrentNodeCounter].Contains("In Conflict")
-                            || AllBaseList[CurrentNodeCounter].Contains(factionFlagState))
+                            || AllBaseList[CurrentNodeCounter].Contains(FactionFlagState))
                         {
                             Bot.Movement.SetMovementAction(MovementAction.Move, currentNode);
                         }
@@ -146,7 +146,7 @@ namespace AmeisenBotX.Core.Engines.Battleground.KamelBG
                                 CurrentNodeCounter = 0;
                             }
                         }
-                        else if (factionFlagState != null && AllBaseList[CurrentNodeCounter].Contains(factionFlagState))
+                        else if (FactionFlagState != null && AllBaseList[CurrentNodeCounter].Contains(FactionFlagState))
                         {
                             ++CurrentNodeCounter;
                             if (CurrentNodeCounter >= PathBase.Count)
@@ -156,15 +156,15 @@ namespace AmeisenBotX.Core.Engines.Battleground.KamelBG
                         }
                         else if (FlagNode != null)
                         {
-                            IEnumerable<WowPlayer> enemiesNearFlag = Bot.GetNearEnemies<WowPlayer>(FlagNode.Position, 40);
-                            IEnumerable<WowPlayer> friendsNearFlag = Bot.GetNearFriends<WowPlayer>(FlagNode.Position, 40);
-                            IEnumerable<WowPlayer> friendsNearPlayer = Bot.GetNearFriends<WowPlayer>(Bot.Player.Position, 20);
+                            IEnumerable<IWowPlayer> enemiesNearFlag = Bot.GetNearEnemies<IWowPlayer>(FlagNode.Position, 40);
+                            IEnumerable<IWowPlayer> friendsNearFlag = Bot.GetNearFriends<IWowPlayer>(FlagNode.Position, 40);
+                            IEnumerable<IWowPlayer> friendsNearPlayer = Bot.GetNearFriends<IWowPlayer>(Bot.Player.Position, 20);
 
                             if (enemiesNearFlag != null)
                             {
                                 if (enemiesNearFlag.Count() >= 2)
                                 {
-                                    if (friendsNearFlag != null && (friendsNearFlag.Count() >= 1 || friendsNearPlayer.Count() >= 1))
+                                    if (friendsNearFlag != null && (friendsNearFlag.Any() || friendsNearPlayer.Any()))
                                     {
                                         Bot.Movement.SetMovementAction(MovementAction.Move, currentNode);
                                         return;
@@ -190,11 +190,11 @@ namespace AmeisenBotX.Core.Engines.Battleground.KamelBG
         {
             if (!Bot.Player.IsHorde())
             {
-                factionFlagState = "Alliance Controlled";
+                FactionFlagState = "Alliance Controlled";
             }
             else
             {
-                factionFlagState = "Hord Controlled";
+                FactionFlagState = "Hord Controlled";
             }
         }
 

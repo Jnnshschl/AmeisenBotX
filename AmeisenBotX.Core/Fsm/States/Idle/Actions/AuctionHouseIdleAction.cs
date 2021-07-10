@@ -69,7 +69,7 @@ namespace AmeisenBotX.Core.Fsm.States.Idle.Actions
                 {
                     Bot.Movement.StopMovement();
 
-                    WowUnit auctioneer = Bot.Objects.WowObjects.OfType<WowUnit>()
+                    IWowUnit auctioneer = Bot.Objects.WowObjects.OfType<IWowUnit>()
                         .FirstOrDefault(e => e.IsAuctioneer && e.Position.GetDistance(CurrentAuctioneer) < 1.0f);
 
                     if (auctioneer != null)

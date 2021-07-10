@@ -27,7 +27,7 @@ namespace AmeisenBotX.Core.Engines.Tactic.Bosses.TheObsidianDungeon
 
         private AmeisenBotInterfaces Bot { get; }
 
-        private WowGameobject NearestPortal => Bot.Objects.WowObjects.OfType<WowGameobject>().FirstOrDefault(e => e.DisplayId == 1327 && e.Position.GetDistance(Bot.Player.Position) < 80.0);
+        private IWowGameobject NearestPortal => Bot.Objects.WowObjects.OfType<IWowGameobject>().FirstOrDefault(e => e.DisplayId == 1327 && e.Position.GetDistance(Bot.Player.Position) < 80.0);
 
         private TimegatedEvent PortalClickEvent { get; }
 
@@ -35,8 +35,8 @@ namespace AmeisenBotX.Core.Engines.Tactic.Bosses.TheObsidianDungeon
         {
             if (role == WowRole.Dps)
             {
-                WowUnit wowUnit = Bot.GetClosestQuestgiverByDisplayId(Bot.Player.Position, DragonDisplayId, false);
-                WowGameobject portal = NearestPortal;
+                IWowUnit wowUnit = Bot.GetClosestQuestgiverByDisplayId(Bot.Player.Position, DragonDisplayId, false);
+                IWowGameobject portal = NearestPortal;
 
                 if (wowUnit != null)
                 {
@@ -66,7 +66,7 @@ namespace AmeisenBotX.Core.Engines.Tactic.Bosses.TheObsidianDungeon
             return false;
         }
 
-        private void UsePortal(WowGameobject portal)
+        private void UsePortal(IWowGameobject portal)
         {
             if (!Bot.Player.IsInRange(portal, 3.0f))
             {

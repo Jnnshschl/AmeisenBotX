@@ -22,7 +22,7 @@ namespace AmeisenBotX.Wow335a.Objects
         private readonly object queryLock = new();
 
         private readonly IntPtr[] wowObjectPointers;
-        private readonly WowObject[] wowObjects;
+        private readonly IWowObject[] wowObjects;
 
         public ObjectManager(IMemoryApi memoryApi, IOffsetList offsetList)
         {
@@ -30,16 +30,16 @@ namespace AmeisenBotX.Wow335a.Objects
             OffsetList = offsetList;
 
             wowObjectPointers = new IntPtr[MAX_OBJECT_COUNT];
-            wowObjects = new WowObject[MAX_OBJECT_COUNT];
+            wowObjects = new IWowObject[MAX_OBJECT_COUNT];
 
             PartymemberGuids = new List<ulong>();
             PartyPetGuids = new List<ulong>();
-            Partymembers = new List<WowUnit>();
-            PartyPets = new List<WowUnit>();
+            Partymembers = new List<WowUnit335a>();
+            PartyPets = new List<WowUnit335a>();
         }
 
         ///<inheritdoc cref="IObjectProvider.OnObjectUpdateComplete"/>
-        public event Action<IEnumerable<WowObject>> OnObjectUpdateComplete;
+        public event Action<IEnumerable<IWowObject>> OnObjectUpdateComplete;
 
         ///<inheritdoc cref="IObjectProvider.Camera"/>
         public RawCameraInfo Camera { get; private set; }
@@ -57,7 +57,7 @@ namespace AmeisenBotX.Wow335a.Objects
         public bool IsWorldLoaded { get; private set; }
 
         ///<inheritdoc cref="IObjectProvider.LastTarget"/>
-        public WowUnit LastTarget { get; private set; }
+        public IWowUnit LastTarget { get; private set; }
 
         ///<inheritdoc cref="IObjectProvider.LastTargetGuid"/>
         public ulong LastTargetGuid { get; private set; }
@@ -69,7 +69,7 @@ namespace AmeisenBotX.Wow335a.Objects
         public int ObjectCount { get; set; }
 
         ///<inheritdoc cref="IObjectProvider.Partyleader"/>
-        public WowUnit Partyleader { get; private set; }
+        public IWowUnit Partyleader { get; private set; }
 
         ///<inheritdoc cref="IObjectProvider.PartyleaderGuid"/>
         public ulong PartyleaderGuid { get; private set; }
@@ -78,22 +78,22 @@ namespace AmeisenBotX.Wow335a.Objects
         public IEnumerable<ulong> PartymemberGuids { get; private set; }
 
         ///<inheritdoc cref="IObjectProvider.Partymembers"/>
-        public IEnumerable<WowUnit> Partymembers { get; private set; }
+        public IEnumerable<IWowUnit> Partymembers { get; private set; }
 
         ///<inheritdoc cref="IObjectProvider.PartyPetGuids"/>
         public IEnumerable<ulong> PartyPetGuids { get; private set; }
 
         ///<inheritdoc cref="IObjectProvider.PartyPets"/>
-        public IEnumerable<WowUnit> PartyPets { get; private set; }
+        public IEnumerable<IWowUnit> PartyPets { get; private set; }
 
         ///<inheritdoc cref="IObjectProvider.Pet"/>
-        public WowUnit Pet { get; private set; }
+        public IWowUnit Pet { get; private set; }
 
         ///<inheritdoc cref="IObjectProvider.PetGuid"/>
         public ulong PetGuid { get; private set; }
 
         ///<inheritdoc cref="IObjectProvider.Player"/>
-        public WowPlayer Player { get; private set; }
+        public IWowPlayer Player { get; private set; }
 
         ///<inheritdoc cref="IObjectProvider.PlayerBase"/>
         public IntPtr PlayerBase { get; private set; }
@@ -102,16 +102,16 @@ namespace AmeisenBotX.Wow335a.Objects
         public ulong PlayerGuid { get; private set; }
 
         ///<inheritdoc cref="IObjectProvider.Target"/>
-        public WowUnit Target { get; private set; }
+        public IWowUnit Target { get; private set; }
 
         ///<inheritdoc cref="IObjectProvider.TargetGuid"/>
         public ulong TargetGuid { get; private set; }
 
         ///<inheritdoc cref="IObjectProvider.Vehicle"/>
-        public WowUnit Vehicle { get; private set; }
+        public IWowUnit Vehicle { get; private set; }
 
         ///<inheritdoc cref="IObjectProvider.WowObjects"/>
-        public IEnumerable<WowObject> WowObjects { get { lock (queryLock) { return wowObjects; } } }
+        public IEnumerable<IWowObject> WowObjects { get { lock (queryLock) { return wowObjects; } } }
 
         ///<inheritdoc cref="IObjectProvider.ZoneId"/>
         public int ZoneId { get; private set; }
@@ -127,20 +127,6 @@ namespace AmeisenBotX.Wow335a.Objects
         private IOffsetList OffsetList { get; }
 
         private bool PlayerGuidIsVehicle { get; set; }
-
-        /// <summary>
-        /// Process the pushed game info that we receive from the EndScene hook.
-        /// </summary>
-        /// <param name="gameInfo"></param>
-        internal void HookManagerOnGameInfoPush(GameInfo gameInfo)
-        {
-            if (Player != null)
-            {
-                Player.IsOutdoors = gameInfo.isOutdoors;
-            }
-
-            IsTargetInLineOfSight = gameInfo.isTargetInLineOfSight;
-        }
 
         ///<inheritdoc cref="IObjectProvider.RefreshIsWorldLoaded"/>
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -215,7 +201,7 @@ namespace AmeisenBotX.Wow335a.Objects
                 if (PlayerGuidIsVehicle)
                 {
                     // get the object with last known "good" guid
-                    WowPlayer lastKnownPlayer = wowObjects.OfType<WowPlayer>().FirstOrDefault(e => e.Guid == Player.Guid);
+                    WowPlayer335a lastKnownPlayer = wowObjects.OfType<WowPlayer335a>().FirstOrDefault(e => e.Guid == Player.Guid);
 
                     if (lastKnownPlayer != null)
                     {
@@ -229,14 +215,28 @@ namespace AmeisenBotX.Wow335a.Objects
                 if (PartyleaderGuid > 0)
                 {
                     PartymemberGuids = ReadPartymemberGuids();
-                    Partymembers = wowObjects.OfType<WowUnit>().Where(e => PartymemberGuids.Contains(e.Guid));
+                    Partymembers = wowObjects.OfType<WowUnit335a>().Where(e => PartymemberGuids.Contains(e.Guid));
 
                     PartyPetGuids = PartyPets.Select(e => e.Guid);
-                    PartyPets = wowObjects.OfType<WowUnit>().Where(e => PartymemberGuids.Contains(e.SummonedByGuid));
+                    PartyPets = wowObjects.OfType<WowUnit335a>().Where(e => PartymemberGuids.Contains(e.SummonedByGuid));
                 }
             }
 
             OnObjectUpdateComplete?.Invoke(wowObjects);
+        }
+
+        /// <summary>
+        /// Process the pushed game info that we receive from the EndScene hook.
+        /// </summary>
+        /// <param name="gameInfo"></param>
+        internal void HookManagerOnGameInfoPush(GameInfo gameInfo)
+        {
+            if (Player != null)
+            {
+                ((WowPlayer335a)Player).IsOutdoors = gameInfo.isOutdoors;
+            }
+
+            IsTargetInLineOfSight = gameInfo.isTargetInLineOfSight;
         }
 
         /// <summary>
@@ -252,16 +252,16 @@ namespace AmeisenBotX.Wow335a.Objects
                 && MemoryApi.Read(IntPtr.Add(ptr, (int)OffsetList.WowObjectType), out WowObjectType type)
                 && MemoryApi.Read(IntPtr.Add(ptr, (int)OffsetList.WowObjectDescriptor), out IntPtr descriptorAddress))
             {
-                WowObject obj = type switch
+                IWowObject obj = type switch
                 {
-                    WowObjectType.Container => new WowContainer(ptr, type, descriptorAddress),
-                    WowObjectType.Corpse => new WowCorpse(ptr, type, descriptorAddress),
-                    WowObjectType.Item => new WowItem(ptr, type, descriptorAddress),
-                    WowObjectType.Dynobject => new WowDynobject(ptr, type, descriptorAddress),
-                    WowObjectType.Gameobject => new WowGameobject(ptr, type, descriptorAddress),
-                    WowObjectType.Player => new WowPlayer(ptr, type, descriptorAddress),
-                    WowObjectType.Unit => new WowUnit(ptr, type, descriptorAddress),
-                    _ => new WowObject(ptr, type, descriptorAddress),
+                    WowObjectType.Container => new WowContainer335a(ptr, descriptorAddress),
+                    WowObjectType.Corpse => new WowCorpse335a(ptr, descriptorAddress),
+                    WowObjectType.Item => new WowItem335a(ptr, descriptorAddress),
+                    WowObjectType.Dynobject => new WowDynobject335a(ptr, descriptorAddress),
+                    WowObjectType.Gameobject => new WowGameobject335a(ptr, descriptorAddress),
+                    WowObjectType.Player => new WowPlayer335a(ptr, descriptorAddress),
+                    WowObjectType.Unit => new WowUnit335a(ptr, descriptorAddress),
+                    _ => new WowObject335a(ptr, descriptorAddress),
                 };
 
                 obj.Update(MemoryApi, OffsetList);
@@ -270,28 +270,28 @@ namespace AmeisenBotX.Wow335a.Objects
                 {
                     if (obj.Guid == PlayerGuid)
                     {
-                        PlayerGuidIsVehicle = obj.GetType() != typeof(WowPlayer);
+                        PlayerGuidIsVehicle = obj.GetType() != typeof(WowPlayer335a);
 
                         if (!PlayerGuidIsVehicle)
                         {
                             if (MemoryApi.Read(OffsetList.ComboPoints, out byte comboPoints))
                             {
-                                ((WowPlayer)obj).ComboPoints = comboPoints;
+                                ((WowPlayer335a)obj).ComboPoints = comboPoints;
                             }
 
-                            Player = (WowPlayer)obj;
+                            Player = (WowPlayer335a)obj;
                             Vehicle = null;
                         }
                         else
                         {
-                            Vehicle = (WowUnit)obj;
+                            Vehicle = (WowUnit335a)obj;
                         }
                     }
 
-                    if (obj.Guid == TargetGuid) { Target = (WowUnit)obj; }
-                    if (obj.Guid == PetGuid) { Pet = (WowUnit)obj; }
-                    if (obj.Guid == LastTargetGuid) { LastTarget = (WowUnit)obj; }
-                    if (obj.Guid == PartyleaderGuid) { Partyleader = (WowUnit)obj; }
+                    if (obj.Guid == TargetGuid) { Target = (WowUnit335a)obj; }
+                    if (obj.Guid == PetGuid) { Pet = (WowUnit335a)obj; }
+                    if (obj.Guid == LastTargetGuid) { LastTarget = (WowUnit335a)obj; }
+                    if (obj.Guid == PartyleaderGuid) { Partyleader = (WowUnit335a)obj; }
                 }
 
                 wowObjects[i] = obj;

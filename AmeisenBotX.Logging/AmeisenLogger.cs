@@ -13,7 +13,7 @@ namespace AmeisenBotX.Logging
 {
     public class AmeisenLogger
     {
-        private static readonly object padlock = new object();
+        private static readonly object padlock = new();
         private static AmeisenLogger instance;
         private int timerBusy;
 

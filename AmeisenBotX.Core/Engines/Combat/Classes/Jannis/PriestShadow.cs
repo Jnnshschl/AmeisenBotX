@@ -3,7 +3,6 @@ using AmeisenBotX.Core.Engines.Character.Talents.Objects;
 using AmeisenBotX.Core.Fsm;
 using AmeisenBotX.Core.Fsm.Utils.Auras.Objects;
 using AmeisenBotX.Wow.Objects.Enums;
-using System;
 
 namespace AmeisenBotX.Core.Engines.Combat.Classes.Jannis
 {
@@ -79,8 +78,6 @@ namespace AmeisenBotX.Core.Engines.Combat.Classes.Jannis
         public override bool WalkBehindEnemy => false;
 
         public override WowClass WowClass => WowClass.Priest;
-
-        private DateTime LastDeadPartymembersCheck { get; set; }
 
         public override void Execute()
         {

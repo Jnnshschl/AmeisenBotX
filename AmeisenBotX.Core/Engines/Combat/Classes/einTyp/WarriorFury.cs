@@ -44,8 +44,6 @@ namespace AmeisenBotX.Core.Engines.Combat.Classes.einTyp
 
         public bool HandlesMovement => true;
 
-        public bool HandlesTargetSelection => true;
-
         public bool IsMelee => true;
 
         public IItemComparator ItemComparator => new FuryItemComparator(Bot);
@@ -102,7 +100,7 @@ namespace AmeisenBotX.Core.Engines.Combat.Classes.einTyp
 
         public void AttackTarget()
         {
-            WowUnit target = Bot.Target;
+            IWowUnit target = Bot.Target;
             if (target == null)
             {
                 return;
@@ -123,7 +121,7 @@ namespace AmeisenBotX.Core.Engines.Combat.Classes.einTyp
         public void Execute()
         {
             computeNewRoute = false;
-            WowUnit target = Bot.Target;
+            IWowUnit target = Bot.Target;
             if ((Bot.Wow.TargetGuid != 0 && target != null && !(target.IsDead || target.Health < 1)) || SearchNewTarget(ref target, false))
             {
                 Dancing = false;
@@ -168,11 +166,6 @@ namespace AmeisenBotX.Core.Engines.Combat.Classes.einTyp
             }
         }
 
-        public bool IsTargetAttackable(WowUnit target)
-        {
-            return true;
-        }
-
         public void OutOfCombatExecute()
         {
             computeNewRoute = false;
@@ -185,16 +178,16 @@ namespace AmeisenBotX.Core.Engines.Combat.Classes.einTyp
             if (distanceTraveled < 0.001)
             {
                 ulong leaderGuid = Bot.Objects.Partyleader.Guid;
-                WowUnit target = Bot.Target;
-                WowUnit leader = null;
+                IWowUnit target = Bot.Target;
+                IWowUnit leader = null;
                 if (leaderGuid != 0)
                 {
-                    leader = Bot.GetWowObjectByGuid<WowUnit>(leaderGuid);
+                    leader = Bot.GetWowObjectByGuid<IWowUnit>(leaderGuid);
                 }
 
                 if (leaderGuid != 0 && leaderGuid != Bot.Wow.PlayerGuid && leader != null && !(leader.IsDead || leader.Health < 1))
                 {
-                    Bot.Movement.SetMovementAction(Movement.Enums.MovementAction.Move, Bot.GetWowObjectByGuid<WowUnit>(leaderGuid).Position);
+                    Bot.Movement.SetMovementAction(Movement.Enums.MovementAction.Move, Bot.GetWowObjectByGuid<IWowUnit>(leaderGuid).Position);
                 }
                 else if ((Bot.Wow.TargetGuid != 0 && target != null && !(target.IsDead || target.Health < 1)) || SearchNewTarget(ref target, true))
                 {
@@ -230,7 +223,7 @@ namespace AmeisenBotX.Core.Engines.Combat.Classes.einTyp
             }
         }
 
-        private void HandleAttacking(WowUnit target)
+        private void HandleAttacking(IWowUnit target)
         {
             Bot.Wow.WowTargetGuid(target.Guid);
             spells.CastNextSpell(distanceToTarget, target, multipleTargets);
@@ -240,7 +233,7 @@ namespace AmeisenBotX.Core.Engines.Combat.Classes.einTyp
             }
         }
 
-        private void HandleMovement(WowUnit target)
+        private void HandleMovement(IWowUnit target)
         {
             if (target == null)
             {
@@ -263,22 +256,22 @@ namespace AmeisenBotX.Core.Engines.Combat.Classes.einTyp
             }
         }
 
-        private bool SearchNewTarget(ref WowUnit target, bool grinding)
+        private bool SearchNewTarget(ref IWowUnit target, bool grinding)
         {
             if (Bot.Wow.TargetGuid != 0 && target != null && !(target.IsDead || target.Health < 1 || target.Auras.Any(e => Bot.Db.GetSpellName(e.SpellId).Contains("Spirit of Redem"))))
             {
                 return false;
             }
 
-            List<WowUnit> wowUnits = Bot.Objects.WowObjects.OfType<WowUnit>().Where(e => Bot.Db.GetReaction(Bot.Player, e) != WowUnitReaction.Friendly && Bot.Db.GetReaction(Bot.Player, e) != WowUnitReaction.Neutral).ToList();
+            List<IWowUnit> wowUnits = Bot.Objects.WowObjects.OfType<IWowUnit>().Where(e => Bot.Db.GetReaction(Bot.Player, e) != WowUnitReaction.Friendly && Bot.Db.GetReaction(Bot.Player, e) != WowUnitReaction.Neutral).ToList();
             bool newTargetFound = false;
             int targetHealth = (target == null || target.IsDead || target.Health < 1) ? 2147483647 : target.Health;
-            bool inCombat = target == null ? false : target.IsInCombat;
+            bool inCombat = target != null && target.IsInCombat;
             int targetCount = 0;
             multipleTargets = false;
-            foreach (WowUnit unit in wowUnits)
+            foreach (IWowUnit unit in wowUnits)
             {
-                if (WowUnit.IsValidUnit(unit) && unit != target && !(unit.IsDead || unit.Health < 1 || unit.Auras.Any(e => Bot.Db.GetSpellName(e.SpellId).Contains("Spirit of Redem"))))
+                if (IWowUnit.IsValidUnit(unit) && unit != target && !(unit.IsDead || unit.Health < 1 || unit.Auras.Any(e => Bot.Db.GetSpellName(e.SpellId).Contains("Spirit of Redem"))))
                 {
                     double tmpDistance = Bot.Player.Position.GetDistance(unit.Position);
                     if (tmpDistance < 100.0 || grinding)
@@ -342,7 +335,7 @@ namespace AmeisenBotX.Core.Engines.Combat.Classes.einTyp
 
             private readonly AmeisenBotInterfaces Bot;
 
-            private readonly Dictionary<string, DateTime> nextActionTime = new Dictionary<string, DateTime>()
+            private readonly Dictionary<string, DateTime> nextActionTime = new()
             {
                 { BattleShout, DateTime.Now },
                 { BattleStance, DateTime.Now },
@@ -385,9 +378,9 @@ namespace AmeisenBotX.Core.Engines.Combat.Classes.einTyp
 
             private DateTime NextStance { get; set; }
 
-            private WowPlayer Player { get; set; }
+            private IWowPlayer Player { get; set; }
 
-            public void CastNextSpell(double distanceToTarget, WowUnit target, bool multipleTargets)
+            public void CastNextSpell(double distanceToTarget, IWowUnit target, bool multipleTargets)
             {
                 if (!IsReady(NextCast) || !IsReady(NextGCDSpell))
                 {
@@ -595,7 +588,7 @@ namespace AmeisenBotX.Core.Engines.Combat.Classes.einTyp
                 IsInBerserkerStance = stance == BerserkerStance;
             }
 
-            private bool IsReady(DateTime nextAction)
+            private static bool IsReady(DateTime nextAction)
             {
                 return DateTime.Now > nextAction;
             }

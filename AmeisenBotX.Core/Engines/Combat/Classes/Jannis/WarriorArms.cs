@@ -116,7 +116,7 @@ namespace AmeisenBotX.Core.Engines.Combat.Classes.Jannis
                             return;
                         }
 
-                        if ((Bot.Objects.WowObjects.OfType<WowUnit>().Where(e => Bot.Target.Position.GetDistance(e.Position) < 8).Count() > 2 && TryCastSpell(bladestormSpell, 0, true))
+                        if ((Bot.Objects.WowObjects.OfType<IWowUnit>().Where(e => Bot.Target.Position.GetDistance(e.Position) < 8).Count() > 2 && TryCastSpell(bladestormSpell, 0, true))
                             || TryCastSpellWarrior(overpowerSpell, battleStanceSpell, Bot.Wow.TargetGuid, true)
                             || TryCastSpellWarrior(mortalStrikeSpell, battleStanceSpell, Bot.Wow.TargetGuid, true)
                             || (HeroicStrikeEvent.Run() && TryCastSpellWarrior(heroicStrikeSpell, battleStanceSpell, Bot.Wow.TargetGuid, true)))

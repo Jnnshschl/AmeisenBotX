@@ -11,7 +11,7 @@ namespace AmeisenBotX.Core.Engines.Character.Inventory
     public class CharacterInventory
     {
         private readonly object queryLock = new();
-        private List<IWowItem> items;
+        private List<IWowInventoryItem> items;
 
         public CharacterInventory(IWowInterface wowInterface)
         {
@@ -21,7 +21,7 @@ namespace AmeisenBotX.Core.Engines.Character.Inventory
 
         public int FreeBagSlots { get; private set; }
 
-        public List<IWowItem> Items
+        public List<IWowInventoryItem> Items
         {
             get
             {
