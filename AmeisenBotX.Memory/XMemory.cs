@@ -35,16 +35,16 @@ namespace AmeisenBotX.Memory
         ///<inheritdoc cref="IMemoryApi.MainThreadHandle"/>
         public IntPtr MainThreadHandle { get; private set; }
 
-        ///<inheritdoc cref="IMemoryApi.MainThreadHandle"/>
+        ///<inheritdoc cref="IMemoryApi.MemoryAllocations"/>
         public Dictionary<IntPtr, uint> MemoryAllocations { get; }
 
-        ///<inheritdoc cref="IMemoryApi.MainThreadHandle"/>
+        ///<inheritdoc cref="IMemoryApi.Process"/>
         public Process Process { get; private set; }
 
-        ///<inheritdoc cref="IMemoryApi.MainThreadHandle"/>
+        ///<inheritdoc cref="IMemoryApi.ProcessHandle"/>
         public IntPtr ProcessHandle { get; private set; }
 
-        ///<inheritdoc cref="IMemoryApi.MainThreadHandle"/>
+        ///<inheritdoc cref="IMemoryApi.RpmCallCount"/>
         public ulong RpmCallCount
         {
             get
@@ -58,7 +58,7 @@ namespace AmeisenBotX.Memory
             }
         }
 
-        ///<inheritdoc cref="IMemoryApi.MainThreadHandle"/>
+        ///<inheritdoc cref="IMemoryApi.WpmCallCount"/>
         public ulong WpmCallCount
         {
             get
@@ -72,7 +72,7 @@ namespace AmeisenBotX.Memory
             }
         }
 
-        ///<inheritdoc cref="IMemoryApi.MainThreadHandle"/>
+        ///<inheritdoc cref="IMemoryApi.AllocateMemory"/>
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public bool AllocateMemory(uint size, out IntPtr address)
         {
@@ -91,7 +91,7 @@ namespace AmeisenBotX.Memory
             }
         }
 
-        ///<inheritdoc cref="IMemoryApi.MainThreadHandle"/>
+        ///<inheritdoc cref="IMemoryApi.Dispose"/>
         public void Dispose()
         {
             GC.SuppressFinalize(this);
@@ -102,7 +102,7 @@ namespace AmeisenBotX.Memory
             FreeAllMemory();
         }
 
-        ///<inheritdoc cref="IMemoryApi.MainThreadHandle"/>
+        ///<inheritdoc cref="IMemoryApi.FocusWindow"/>
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public void FocusWindow(IntPtr windowHandle, Rect rect, bool resizeWindow = true)
         {
@@ -116,7 +116,7 @@ namespace AmeisenBotX.Memory
             }
         }
 
-        ///<inheritdoc cref="IMemoryApi.MainThreadHandle"/>
+        ///<inheritdoc cref="IMemoryApi.FreeAllMemory"/>
         public void FreeAllMemory()
         {
             List<IntPtr> memAllocs = MemoryAllocations.Keys.ToList();
@@ -129,7 +129,7 @@ namespace AmeisenBotX.Memory
             MemoryAllocations.Clear();
         }
 
-        ///<inheritdoc cref="IMemoryApi.MainThreadHandle"/>
+        ///<inheritdoc cref="IMemoryApi.FreeMemory"/>
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public bool FreeMemory(IntPtr address)
         {
@@ -146,7 +146,7 @@ namespace AmeisenBotX.Memory
             }
         }
 
-        ///<inheritdoc cref="IMemoryApi.MainThreadHandle"/>
+        ///<inheritdoc cref="IMemoryApi.GetClientSize"/>
         public Rect GetClientSize()
         {
             Rect rect = new();
@@ -154,14 +154,14 @@ namespace AmeisenBotX.Memory
             return rect;
         }
 
-        ///<inheritdoc cref="IMemoryApi.MainThreadHandle"/>
+        ///<inheritdoc cref="IMemoryApi.GetForegroundWindow"/>
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public IntPtr GetForegroundWindow()
         {
             return Win32Imports.GetForegroundWindow();
         }
 
-        ///<inheritdoc cref="IMemoryApi.MainThreadHandle"/>
+        ///<inheritdoc cref="IMemoryApi.GetWindowPosition"/>
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public Rect GetWindowPosition()
         {
@@ -170,7 +170,7 @@ namespace AmeisenBotX.Memory
             return rect;
         }
 
-        ///<inheritdoc cref="IMemoryApi.MainThreadHandle"/>
+        ///<inheritdoc cref="IMemoryApi.Init"/>
         public bool Init(Process process, IntPtr processHandle, IntPtr mainThreadHandle)
         {
             Process = process;
@@ -197,7 +197,7 @@ namespace AmeisenBotX.Memory
             return true;
         }
 
-        ///<inheritdoc cref="IMemoryApi.MainThreadHandle"/>
+        ///<inheritdoc cref="IMemoryApi.InjectAssembly"/>
         public bool InjectAssembly(IntPtr address, bool patchMemProtection = false)
         {
             lock (fasmLock)
@@ -238,14 +238,14 @@ namespace AmeisenBotX.Memory
             }
         }
 
-        ///<inheritdoc cref="IMemoryApi.MainThreadHandle"/>
+        ///<inheritdoc cref="IMemoryApi.MemoryProtect"/>
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public bool MemoryProtect(IntPtr address, uint size, MemoryProtectionFlags memoryProtection, out MemoryProtectionFlags oldMemoryProtection)
         {
             return VirtualProtectEx(ProcessHandle, address, size, memoryProtection, out oldMemoryProtection);
         }
 
-        ///<inheritdoc cref="IMemoryApi.MainThreadHandle"/>
+        ///<inheritdoc cref="IMemoryApi.PatchMemory"/>
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public void PatchMemory<T>(IntPtr address, T data) where T : unmanaged
         {
@@ -258,7 +258,7 @@ namespace AmeisenBotX.Memory
             }
         }
 
-        ///<inheritdoc cref="IMemoryApi.MainThreadHandle"/>
+        ///<inheritdoc cref="IMemoryApi.Read"/>
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public bool Read<T>(IntPtr address, out T value) where T : unmanaged
         {
@@ -277,7 +277,7 @@ namespace AmeisenBotX.Memory
             return false;
         }
 
-        ///<inheritdoc cref="IMemoryApi.MainThreadHandle"/>
+        ///<inheritdoc cref="IMemoryApi.ReadBytes"/>
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public bool ReadBytes(IntPtr address, int size, out byte[] bytes)
         {
@@ -296,7 +296,7 @@ namespace AmeisenBotX.Memory
             return false;
         }
 
-        ///<inheritdoc cref="IMemoryApi.MainThreadHandle"/>
+        ///<inheritdoc cref="IMemoryApi.ReadString"/>
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public bool ReadString(IntPtr address, Encoding encoding, out string value, int lenght = 128)
         {
@@ -320,27 +320,27 @@ namespace AmeisenBotX.Memory
             return false;
         }
 
-        ///<inheritdoc cref="IMemoryApi.MainThreadHandle"/>
+        ///<inheritdoc cref="IMemoryApi.ResizeParentWindow"/>
         public void ResizeParentWindow(int offsetX, int offsetY, int width, int height)
         {
             SetWindowPos(Process.MainWindowHandle, IntPtr.Zero, offsetX, offsetY, width, height, SWP_NOZORDER | SWP_NOACTIVATE);
         }
 
-        ///<inheritdoc cref="IMemoryApi.MainThreadHandle"/>
+        ///<inheritdoc cref="IMemoryApi.ResumeMainThread"/>
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public void ResumeMainThread()
         {
             NtResumeThread(MainThreadHandle, out _);
         }
 
-        ///<inheritdoc cref="IMemoryApi.MainThreadHandle"/>
+        ///<inheritdoc cref="IMemoryApi.SetForegroundWindow"/>
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public void SetForegroundWindow(IntPtr windowHandle)
         {
             Win32Imports.SetForegroundWindow(windowHandle);
         }
 
-        ///<inheritdoc cref="IMemoryApi.MainThreadHandle"/>
+        ///<inheritdoc cref="IMemoryApi.SetupAutoPosition"/>
         public void SetupAutoPosition(IntPtr mainWindowHandle, int offsetX, int offsetY, int width, int height)
         {
             if (Process.MainWindowHandle != IntPtr.Zero && mainWindowHandle != IntPtr.Zero)
@@ -354,7 +354,7 @@ namespace AmeisenBotX.Memory
             }
         }
 
-        ///<inheritdoc cref="IMemoryApi.MainThreadHandle"/>
+        ///<inheritdoc cref="IMemoryApi.SetWindowPosition"/>
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public void SetWindowPosition(IntPtr windowHandle, Rect rect, bool resizeWindow = true)
         {
@@ -368,7 +368,7 @@ namespace AmeisenBotX.Memory
             }
         }
 
-        ///<inheritdoc cref="IMemoryApi.MainThreadHandle"/>
+        ///<inheritdoc cref="IMemoryApi.StartProcessNoActivate"/>
         public Process StartProcessNoActivate(string processCmd, out IntPtr processHandle, out IntPtr threadHandle)
         {
             StartupInfo startupInfo = new()
@@ -392,21 +392,21 @@ namespace AmeisenBotX.Memory
             }
         }
 
-        ///<inheritdoc cref="IMemoryApi.MainThreadHandle"/>
+        ///<inheritdoc cref="IMemoryApi.SuspendMainThread"/>
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public void SuspendMainThread()
         {
             NtSuspendThread(MainThreadHandle, out _);
         }
 
-        ///<inheritdoc cref="IMemoryApi.MainThreadHandle"/>
+        ///<inheritdoc cref="IMemoryApi.Write"/>
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public bool Write<T>(IntPtr address, T value) where T : unmanaged
         {
             return WpmGateWay(address, &value, sizeof(T));
         }
 
-        ///<inheritdoc cref="IMemoryApi.MainThreadHandle"/>
+        ///<inheritdoc cref="IMemoryApi.WriteBytes"/>
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public bool WriteBytes(IntPtr address, byte[] bytes)
         {
@@ -416,7 +416,7 @@ namespace AmeisenBotX.Memory
             }
         }
 
-        ///<inheritdoc cref="IMemoryApi.MainThreadHandle"/>
+        ///<inheritdoc cref="IMemoryApi.ZeroMemory"/>
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public bool ZeroMemory(IntPtr address, int size)
         {
