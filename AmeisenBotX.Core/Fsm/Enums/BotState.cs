@@ -22,5 +22,6 @@
         Dungeon,
         Questing,
         Grinding,
+        StateTalkToQuestgivers,
     }
 }

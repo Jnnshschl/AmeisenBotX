@@ -32,8 +32,6 @@ namespace AmeisenBotX.Core.Fsm.States
             EatCheckEvent = new(TimeSpan.FromMilliseconds(2000));
             LootCheckEvent = new(TimeSpan.FromMilliseconds(2000));
             RepairCheckEvent = new(TimeSpan.FromMilliseconds(5000));
-            QuestgiverCheckEvent = new(TimeSpan.FromMilliseconds(2000));
-            QuestgiverRightClickEvent = new(TimeSpan.FromMilliseconds(3000));
             RefreshCharacterEvent = new(TimeSpan.FromMilliseconds(1000));
             IdleActionEvent = new(TimeSpan.FromMilliseconds(1000));
         }
@@ -49,10 +47,6 @@ namespace AmeisenBotX.Core.Fsm.States
         private TimegatedEvent IdleActionEvent { get; }
 
         private TimegatedEvent LootCheckEvent { get; }
-
-        private TimegatedEvent QuestgiverCheckEvent { get; }
-
-        private TimegatedEvent QuestgiverRightClickEvent { get; }
 
         private TimegatedEvent RefreshCharacterEvent { get; }
 
@@ -155,9 +149,11 @@ namespace AmeisenBotX.Core.Fsm.States
                 && unitToFollow != null
                 && unitToFollow.TargetGuid != 0)
             {
-                if (QuestgiverCheckEvent.Run()
-                    && HandleAutoQuestMode(unitToFollow))
+                IWowUnit target = Bot.GetWowObjectByGuid<IWowUnit>(unitToFollow.TargetGuid);
+
+                if (target != null && unitToFollow.DistanceTo(target) < 5.0f && (target.IsQuestgiver || target.IsGossip))
                 {
+                    StateMachine.SetState(BotState.StateTalkToQuestgivers);
                     return;
                 }
             }
@@ -217,42 +213,6 @@ namespace AmeisenBotX.Core.Fsm.States
         public override void Leave()
         {
             Bot.Character.ItemSlotsToSkip.Clear();
-        }
-
-        private bool HandleAutoQuestMode(IWowUnit wowPlayer)
-        {
-            IWowUnit possibleQuestgiver = Bot.GetWowObjectByGuid<IWowUnit>(wowPlayer.TargetGuid);
-
-            if (possibleQuestgiver != null && (possibleQuestgiver.IsQuestgiver || possibleQuestgiver.IsGossip))
-            {
-                double distance = Bot.Player.Position.GetDistance(possibleQuestgiver.Position);
-
-                if (distance > 32.0)
-                {
-                    return false;
-                }
-
-                if (distance > 4.0)
-                {
-                    Bot.Movement.SetMovementAction(MovementAction.Move, possibleQuestgiver.Position);
-                    return true;
-                }
-                else
-                {
-                    if (QuestgiverRightClickEvent.Run())
-                    {
-                        if (!BotMath.IsFacing(Bot.Player.Position, Bot.Player.Rotation, possibleQuestgiver.Position))
-                        {
-                            Bot.Wow.WowFacePosition(Bot.Player.BaseAddress, Bot.Player.Position, possibleQuestgiver.Position);
-                        }
-
-                        Bot.Wow.WowUnitRightClick(possibleQuestgiver.BaseAddress);
-                        return true;
-                    }
-                }
-            }
-
-            return false;
         }
 
         private bool ShouldIFollowPlayer(IWowUnit playerToFollow)

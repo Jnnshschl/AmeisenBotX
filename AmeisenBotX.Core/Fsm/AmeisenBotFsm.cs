@@ -10,8 +10,6 @@ using System.Linq;
 
 namespace AmeisenBotX.Core.Fsm
 {
-    public delegate void StateMachineOverride(BotState botState);
-
     public class AmeisenBotFsm
     {
         public AmeisenBotFsm(AmeisenBotConfig config, AmeisenBotInterfaces bot)
@@ -23,24 +21,25 @@ namespace AmeisenBotX.Core.Fsm
 
             States = new()
             {
-                { BotState.None, new StateNone(this, config, Bot) },
-                { BotState.Battleground, new StateBattleground(this, config, Bot) },
-                { BotState.Combat, new StateCombat(this, config, Bot) },
-                { BotState.Dead, new StateDead(this, config, Bot) },
-                { BotState.Dungeon, new StateDungeon(this, config, Bot) },
-                { BotState.Eating, new StateEating(this, config, Bot) },
-                { BotState.Following, new StateFollowing(this, config, Bot) },
-                { BotState.Ghost, new StateGhost(this, config, Bot) },
-                { BotState.Grinding, new StateGrinding(this, config, Bot) },
-                { BotState.Idle, new StateIdle(this, config, Bot) },
-                { BotState.Job, new StateJob(this, config, Bot) },
-                { BotState.LoadingScreen, new StateLoadingScreen(this, config, Bot) },
-                { BotState.Login, new StateLogin(this, config, Bot) },
-                { BotState.Looting, new StateLooting(this, config, Bot) },
-                { BotState.Questing, new StateQuesting(this, config, Bot) },
-                { BotState.Repairing, new StateRepairing(this, config, Bot) },
-                { BotState.Selling, new StateSelling(this, config, Bot) },
-                { BotState.StartWow, new StateStartWow(this, config, Bot) }
+                { BotState.None, new StateNone(this, Config, Bot) },
+                { BotState.Battleground, new StateBattleground(this, Config, Bot) },
+                { BotState.Combat, new StateCombat(this, Config, Bot) },
+                { BotState.Dead, new StateDead(this, Config, Bot) },
+                { BotState.Dungeon, new StateDungeon(this, Config, Bot) },
+                { BotState.Eating, new StateEating(this, Config, Bot) },
+                { BotState.Following, new StateFollowing(this, Config, Bot) },
+                { BotState.Ghost, new StateGhost(this, Config, Bot) },
+                { BotState.Grinding, new StateGrinding(this, Config, Bot) },
+                { BotState.Idle, new StateIdle(this, Config, Bot) },
+                { BotState.Job, new StateJob(this, Config, Bot) },
+                { BotState.LoadingScreen, new StateLoadingScreen(this, Config, Bot) },
+                { BotState.Login, new StateLogin(this, Config, Bot) },
+                { BotState.Looting, new StateLooting(this, Config, Bot) },
+                { BotState.Questing, new StateQuesting(this, Config, Bot) },
+                { BotState.Repairing, new StateRepairing(this, Config, Bot) },
+                { BotState.Selling, new StateSelling(this, Config, Bot) },
+                { BotState.StartWow, new StateStartWow(this, Config, Bot) },
+                { BotState.StateTalkToQuestgivers, new StateTalkToQuestgivers(this, Config, Bot) }
                 // add new state here
             };
 
@@ -64,7 +63,7 @@ namespace AmeisenBotX.Core.Fsm
         /// <summary>
         /// Will be fired when the current state was overridden. For example when we died.
         /// </summary>
-        public event StateMachineOverride OnStateOverride;
+        public event Action<BotState> OnStateOverride;
 
         /// <summary>
         /// Pair of the current state id and its corresponding class.

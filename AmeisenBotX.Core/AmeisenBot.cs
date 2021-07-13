@@ -751,6 +751,22 @@ namespace AmeisenBotX.Core
         private void OnStaticPopup(string s)
         {
             AmeisenLogger.I.Log("AmeisenBot", $"OnStaticPopup: {s}");
+
+            foreach(string popup in s.Split(';'))
+            {
+                string[] parts = popup.Split(':');
+
+                if (int.TryParse(parts[0], out int id))
+                {
+                    AmeisenLogger.I.Log("AmeisenBot", $"Static Popup => ID: {id} -> {parts[1]}");
+
+                    switch(parts[1].ToUpper())
+                    {
+                        default:
+                            break;
+                    }
+                }
+            }
         }
 
         private void OnSummonRequest(long timestamp, List<string> args)
