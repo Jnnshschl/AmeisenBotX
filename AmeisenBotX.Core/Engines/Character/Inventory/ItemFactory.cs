@@ -14,12 +14,7 @@ namespace AmeisenBotX.Core.Engines.Character.Inventory
 
         public static WowBasicItem BuildSpecificItem(WowBasicItem basicItem)
         {
-            if (basicItem == null)
-            {
-                return null;
-            }
-
-            return (basicItem.Type.ToUpper(CultureInfo.InvariantCulture)) switch
+            return basicItem?.Type.ToUpper(CultureInfo.InvariantCulture) switch
             {
                 "ARMOR" => new WowArmor(basicItem),
                 "CONSUMABLE" => new WowConsumable(basicItem),

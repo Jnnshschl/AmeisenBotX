@@ -15,6 +15,7 @@ using AmeisenBotX.Wow.Objects;
 using AmeisenBotX.Wow.Objects.Enums;
 using Newtonsoft.Json;
 using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
@@ -101,7 +102,7 @@ namespace AmeisenBotX.Core.Engines.Character
 
         public bool IsAbleToUseArmor(WowArmor item)
         {
-            return item != null && item.ArmorType switch
+            return item?.ArmorType switch
             {
                 WowArmorType.PLATE => Skills.Any(e => e.Key.Equals("Plate Mail", StringComparison.OrdinalIgnoreCase) || e.Key.Equals("Plattenpanzer", StringComparison.OrdinalIgnoreCase)),
                 WowArmorType.MAIL => Skills.Any(e => e.Key.Equals("Mail", StringComparison.OrdinalIgnoreCase) || e.Key.Equals("Panzer", StringComparison.OrdinalIgnoreCase)),
@@ -126,7 +127,7 @@ namespace AmeisenBotX.Core.Engines.Character
 
         public bool IsAbleToUseWeapon(WowWeapon item)
         {
-            return item != null && item.WeaponType switch
+            return item?.WeaponType switch
             {
                 WowWeaponType.BOWS => Skills.Any(e => e.Key.Equals("Bows", StringComparison.OrdinalIgnoreCase) || e.Key.Equals("Bogen", StringComparison.OrdinalIgnoreCase)),
                 WowWeaponType.CROSSBOWS => Skills.Any(e => e.Key.Equals("Crossbows", StringComparison.OrdinalIgnoreCase) || e.Key.Equals("Armbrüste", StringComparison.OrdinalIgnoreCase)),
@@ -232,7 +233,7 @@ namespace AmeisenBotX.Core.Engines.Character
 
         public void UpdateGear()
         {
-            System.Collections.IList list = Enum.GetValues(typeof(WowEquipmentSlot));
+            IList list = Enum.GetValues(typeof(WowEquipmentSlot));
 
             for (int i = 0; i < list.Count; ++i)
             {
@@ -410,11 +411,16 @@ namespace AmeisenBotX.Core.Engines.Character
 
         private void UpdateMounts()
         {
+            string mounts = Wow.LuaGetMounts();
+
             try
             {
-                Mounts = JsonConvert.DeserializeObject<List<WowMount>>(Wow.LuaGetMounts());
+                Mounts = JsonConvert.DeserializeObject<List<WowMount>>(mounts);
             }
-            catch { }
+            catch (Exception e)
+            {
+                AmeisenLogger.I.Log("CharacterManager", $"Failed to parse Mounts JSON:\n{mounts}\n{e}", LogLevel.Error);
+            }
         }
 
         private void UpdateSkills()

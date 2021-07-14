@@ -217,6 +217,15 @@ namespace AmeisenBotX.Wow335a.Objects
                     PartymemberGuids = ReadPartymemberGuids();
                     Partymembers = wowObjects.OfType<WowUnit335a>().Where(e => PartymemberGuids.Contains(e.Guid));
 
+                    Vector3 pos = new();
+
+                    foreach (Vector3 vec in Partymembers.Select(e => e.Position))
+                    {
+                        pos += vec;
+                    }
+
+                    CenterPartyPosition = pos / Partymembers.Count();
+
                     PartyPetGuids = PartyPets.Select(e => e.Guid);
                     PartyPets = wowObjects.OfType<WowUnit335a>().Where(e => PartymemberGuids.Contains(e.SummonedByGuid));
                 }

@@ -184,19 +184,11 @@ namespace AmeisenBotX.Core.Fsm.States
         public override void Leave()
         {
             PlayerToFollowGuid = 0L;
-        }
 
-        private bool IsInFollowRange(IWowPlayer playerToFollow)
-        {
-            if (playerToFollow == null || playerToFollow.IsDead || playerToFollow.IsGhost)
-            {
-                return false;
-            }
+            Bot.Movement.StopMovement();
 
-            Vector3 pos = Config.FollowPositionDynamic ? playerToFollow.Position + Offset : playerToFollow.Position;
-            float distance = Bot.Player.DistanceTo(pos);
-
-            return distance > Config.MinFollowDistance && distance < Config.MaxFollowDistance;
+            // Random rnd = new();
+            // Bot.Wow.WowFacePosition(Bot.Player.BaseAddress, Bot.Player.Position, Bot.Wow.ObjectProvider.CenterPartyPosition + ((float)rnd.NextDouble() - 0.5f) * (MathF.PI / 4.0f));
         }
 
         private bool ShouldIFollowPlayer(IWowUnit playerToFollow)

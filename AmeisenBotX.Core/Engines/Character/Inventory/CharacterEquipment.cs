@@ -5,6 +5,7 @@ using AmeisenBotX.Logging.Enums;
 using AmeisenBotX.Wow;
 using AmeisenBotX.Wow.Objects.Enums;
 using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 
@@ -33,7 +34,6 @@ namespace AmeisenBotX.Core.Engines.Character.Inventory
                     return items;
                 }
             }
-
             set
             {
                 lock (queryLock)
@@ -47,18 +47,13 @@ namespace AmeisenBotX.Core.Engines.Character.Inventory
 
         public bool HasEnchantment(WowEquipmentSlot slot, int enchantmentId)
         {
-            if (Items.ContainsKey(slot))
+            if (Items.ContainsKey(slot) && Items[slot].Id > 0)
             {
-                int itemId = Items[slot].Id;
+                IWowItem item = Wow.ObjectProvider.WowObjects.OfType<IWowItem>().FirstOrDefault(e => e.EntryId == Items[slot].Id);
 
-                if (itemId > 0)
+                if (item != null && item.ItemEnchantments.Any(e => e.Id == enchantmentId))
                 {
-                    IWowItem item = Wow.ObjectProvider.WowObjects.OfType<IWowItem>().FirstOrDefault(e => e.EntryId == itemId);
-
-                    if (item != null && item.ItemEnchantments.Any(e => e.Id == enchantmentId))
-                    {
-                        return true;
-                    }
+                    return true;
                 }
             }
 
@@ -110,11 +105,12 @@ namespace AmeisenBotX.Core.Engines.Character.Inventory
             double itemLevel = 0.0;
             int count = 0;
 
-            System.Collections.IList enumValues = Enum.GetValues(typeof(WowEquipmentSlot));
+            IList enumValues = Enum.GetValues(typeof(WowEquipmentSlot));
 
             for (int i = 0; i < enumValues.Count; ++i)
             {
                 WowEquipmentSlot slot = (WowEquipmentSlot)enumValues[i];
+
                 if (slot == WowEquipmentSlot.CONTAINER_BAG_1
                     || slot == WowEquipmentSlot.CONTAINER_BAG_2
                     || slot == WowEquipmentSlot.CONTAINER_BAG_3
@@ -127,7 +123,11 @@ namespace AmeisenBotX.Core.Engines.Character.Inventory
                     continue;
                 }
 
-                if (Items.ContainsKey(slot)) { itemLevel += Items[slot].ItemLevel; }
+                if (Items.ContainsKey(slot)) 
+                { 
+                    itemLevel += Items[slot].ItemLevel; 
+                }
+
                 ++count;
             }
 

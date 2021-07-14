@@ -30,7 +30,6 @@ namespace AmeisenBotX.Core.Engines.Character.Inventory
                     return items;
                 }
             }
-
             set
             {
                 lock (queryLock)

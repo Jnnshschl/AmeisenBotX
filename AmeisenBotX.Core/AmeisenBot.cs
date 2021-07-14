@@ -685,12 +685,10 @@ namespace AmeisenBotX.Core
 
         private void OnPartyInvitation(long timestamp, List<string> args)
         {
-            if (Config.OnlyFriendsMode && (args.Count < 1 || !Config.Friends.Split(',').Any(e => e.Equals(args[0], StringComparison.OrdinalIgnoreCase))))
+            if (!Config.OnlyFriendsMode || (args.Count >= 1 && Config.Friends.Split(',').Any(e => e.Equals(args[0], StringComparison.OrdinalIgnoreCase))))
             {
-                return;
+                Bot.Wow.LuaAcceptPartyInvite();
             }
-
-            Bot.Wow.LuaAcceptPartyInvite();
         }
 
         private void OnPvpQueueShow(long timestamp, List<string> args)
