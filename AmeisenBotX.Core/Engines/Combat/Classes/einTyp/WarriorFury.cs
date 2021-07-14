@@ -565,6 +565,11 @@ namespace AmeisenBotX.Core.Engines.Combat.Classes.einTyp
                 nextActionTime[HeroicStrike].AddSeconds(-3.6);
             }
 
+            private static bool IsReady(DateTime nextAction)
+            {
+                return DateTime.Now > nextAction;
+            }
+
             private void CastSpell(string spell, ref int rage, int rageCosts, double cooldown, bool gcd)
             {
                 Bot.Wow.LuaCastSpell(spell);
@@ -586,11 +591,6 @@ namespace AmeisenBotX.Core.Engines.Combat.Classes.einTyp
                 rage = UpdateRage();
                 NextStance = DateTime.Now.AddSeconds(1);
                 IsInBerserkerStance = stance == BerserkerStance;
-            }
-
-            private static bool IsReady(DateTime nextAction)
-            {
-                return DateTime.Now > nextAction;
             }
 
             private bool IsReady(string spell)

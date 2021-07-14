@@ -752,7 +752,7 @@ namespace AmeisenBotX.Core
         {
             AmeisenLogger.I.Log("AmeisenBot", $"OnStaticPopup: {s}");
 
-            foreach(string popup in s.Split(';'))
+            foreach (string popup in s.Split(';'))
             {
                 string[] parts = popup.Split(':');
 
@@ -760,7 +760,7 @@ namespace AmeisenBotX.Core
                 {
                     AmeisenLogger.I.Log("AmeisenBot", $"Static Popup => ID: {id} -> {parts[1]}");
 
-                    switch(parts[1].ToUpper())
+                    switch (parts[1].ToUpper())
                     {
                         default:
                             break;

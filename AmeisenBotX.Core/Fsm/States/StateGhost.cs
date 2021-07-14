@@ -22,7 +22,7 @@ namespace AmeisenBotX.Core.Fsm.States
             new PitOfSaronDeathRoute()
         };
 
-        private ulong playerToFollowGuid = 0;
+        private IWowUnit playerToFollow = null;
 
         public StateGhost(AmeisenBotFsm stateMachine, AmeisenBotConfig config, AmeisenBotInterfaces bot) : base(stateMachine, config, bot)
         {
@@ -35,7 +35,7 @@ namespace AmeisenBotX.Core.Fsm.States
                     new Leaf(RunToDungeonProfileEntry),
                     new Selector
                     (
-                        () => IsUnitToFollowNear(out playerToFollowGuid),
+                        () => StateMachine.GetState<StateFollowing>().IsUnitToFollowThere(out playerToFollow),
                         new Leaf(FollowNearestUnit),
                         new Leaf(RunToCorpsePositionAndSearchForPortals)
                     )
@@ -79,7 +79,7 @@ namespace AmeisenBotX.Core.Fsm.States
 
         private IEnumerable<IWowGameobject> NearPortals { get; set; }
 
-        private IWowPlayer PlayerToFollow => Bot.GetWowObjectByGuid<IWowPlayer>(playerToFollowGuid);
+        private IWowUnit PlayerToFollow => playerToFollow;
 
         private bool SearchedStaticRoutes { get; set; }
 
@@ -91,7 +91,7 @@ namespace AmeisenBotX.Core.Fsm.States
 
         public override void Execute()
         {
-            if (Bot.Player.Health > 1)
+            if (!Bot.Player.IsGhost)
             {
                 StateMachine.SetState(BotState.Idle);
                 return;
@@ -112,7 +112,6 @@ namespace AmeisenBotX.Core.Fsm.States
 
         public override void Leave()
         {
-            // Bot.Player.IsGhost = false;
             SearchedStaticRoutes = false;
             StaticRoute = null;
         }
@@ -176,65 +175,6 @@ namespace AmeisenBotX.Core.Fsm.States
                 // we should be in the dungeon now
                 return BehaviorTreeStatus.Ongoing;
             }
-        }
-
-        /// <summary>
-        /// Check whether the unit is out of range based on the config entries "MinFollowDistance" and "MaxFollowDistance".
-        /// </summary>
-        /// <param name="player">Player to check</param>
-        /// <returns></returns>
-        private bool IsUnitOutOfRange(IWowPlayer player)
-        {
-            double distance = player.Position.GetDistance(Bot.Player.Position);
-            return distance < Config.MinFollowDistance || distance > Config.MaxFollowDistance;
-        }
-
-        /// <summary>
-        /// This method tries to find anyone that we can follow based on the config entries set.
-        /// </summary>
-        /// <param name="guid">Guid of the found entity</param>
-        /// <returns>True when a valid unit has been found, false if not</returns>
-        private bool IsUnitToFollowNear(out ulong guid)
-        {
-            IEnumerable<IWowPlayer> wowPlayers = Bot.Objects.WowObjects.OfType<IWowPlayer>();
-            guid = 0;
-
-            if (wowPlayers.Any())
-            {
-                if (Config.FollowSpecificCharacter)
-                {
-                    IWowPlayer specificPlayer = wowPlayers.FirstOrDefault(p => Bot.Db.GetUnitName(p, out string name) && name == Config.SpecificCharacterToFollow && !IsUnitOutOfRange(p));
-
-                    if (specificPlayer != null)
-                    {
-                        guid = specificPlayer.Guid;
-                    }
-                }
-
-                // check the group/raid leader
-                if (guid == 0 && Config.FollowGroupLeader)
-                {
-                    IWowPlayer groupLeader = wowPlayers.FirstOrDefault(p => Bot.Db.GetUnitName(p, out string name) && name == Config.SpecificCharacterToFollow && !IsUnitOutOfRange(p));
-
-                    if (groupLeader != null)
-                    {
-                        guid = groupLeader.Guid;
-                    }
-                }
-
-                // check the group members
-                if (guid == 0 && Config.FollowGroupMembers)
-                {
-                    IWowPlayer groupMember = wowPlayers.FirstOrDefault(p => Bot.Db.GetUnitName(p, out string name) && name == Config.SpecificCharacterToFollow && !IsUnitOutOfRange(p));
-
-                    if (groupMember != null)
-                    {
-                        guid = groupMember.Guid;
-                    }
-                }
-            }
-
-            return guid != 0;
         }
 
         private BehaviorTreeStatus RunToAndExecute(Vector3 position, Action action, double distance = 20.0)

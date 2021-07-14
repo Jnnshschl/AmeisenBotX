@@ -67,6 +67,7 @@ namespace AmeisenBotX.Core.Fsm.States
 
         public override void Leave()
         {
+            StateMachine.WowCrashed = false;
         }
 
         private void ChangeRealmlist()

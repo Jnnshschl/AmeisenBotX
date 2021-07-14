@@ -36,53 +36,17 @@ namespace AmeisenBotX.Core.Fsm.States
 
         public override void Enter()
         {
-            PlayerToFollowGuid = 0;
-
-            // TODO: make this crap less redundant
-            // check the specific character
-            IEnumerable<IWowPlayer> wowPlayers = Bot.Objects.WowObjects.OfType<IWowPlayer>();
-
-            if (wowPlayers.Any())
+            if (IsUnitToFollowThere(out IWowUnit player))
             {
-                if (Config.FollowSpecificCharacter)
-                {
-                    IWowPlayer player = SkipIfOutOfRange(wowPlayers.FirstOrDefault(p => Bot.Db.GetUnitName(p, out string name) && name == Config.SpecificCharacterToFollow));
-
-                    if (player != null)
-                    {
-                        PlayerToFollowGuid = player.Guid;
-                    }
-                }
-
-                // check the group/raid leader
-                if (PlayerToFollow == null && Config.FollowGroupLeader)
-                {
-                    IWowPlayer player = SkipIfOutOfRange(wowPlayers.FirstOrDefault(p => p.Guid == Bot.Objects.Partyleader.Guid));
-
-                    if (player != null)
-                    {
-                        PlayerToFollowGuid = player.Guid;
-                    }
-                }
-
-                // check the group members
-                if (PlayerToFollow == null && Config.FollowGroupMembers)
-                {
-                    IWowPlayer player = SkipIfOutOfRange(wowPlayers.FirstOrDefault(p => Bot.Objects.PartymemberGuids.Contains(p.Guid)));
-
-                    if (player != null)
-                    {
-                        PlayerToFollowGuid = player.Guid;
-                    }
-                }
+                PlayerToFollowGuid = player.Guid;
             }
-
-            if (PlayerToFollow == null)
+            else
             {
                 StateMachine.SetState(BotState.Idle);
                 return;
             }
-            else if (Config.FollowPositionDynamic && OffsetCheckEvent.Run())
+
+            if (Config.FollowPositionDynamic && OffsetCheckEvent.Run())
             {
                 // Vector3 rndPos = Bot.PathfindingHandler.GetRandomPointAround((int)Bot.ObjectManager.MapId, PlayerToFollow.Position, Config.MinFollowDistance * 0.2f);
                 // Offset = PlayerToFollow.Position - rndPos;
@@ -92,34 +56,33 @@ namespace AmeisenBotX.Core.Fsm.States
                 {
                     X = ((float)rnd.NextDouble() * (Config.MinFollowDistance * 2)) - Config.MinFollowDistance,
                     Y = ((float)rnd.NextDouble() * (Config.MinFollowDistance * 2)) - Config.MinFollowDistance,
-                    Z = 0f
+                    Z = 0.0f
                 };
             }
         }
 
         public override void Execute()
         {
-            // dont follow when casting, or player is dead/ghost
-            if (Bot.Player.IsCasting
-                || (PlayerToFollow != null
-                && (PlayerToFollow.IsDead
-                || PlayerToFollow.Health == 1)))
+            // dont follow when we are casting something
+            if (Bot.Player.IsCasting)
             {
                 return;
             }
 
-            if (PlayerToFollow == null)
+            IWowPlayer playerToFollow = PlayerToFollow;
+
+            // our player is gone, try to follow into portals
+            if (playerToFollow == null)
             {
-                // handle nearby portals, if our groupleader enters a portal, we follow
                 IWowGameobject nearestPortal = Bot.Objects.WowObjects
                     .OfType<IWowGameobject>()
                     .Where(e => e.DisplayId == (int)WowGameobjectDisplayId.UtgardeKeepDungeonPortalNormal
                              || e.DisplayId == (int)WowGameobjectDisplayId.UtgardeKeepDungeonPortalHeroic)
-                    .FirstOrDefault(e => e.Position.GetDistance(Bot.Player.Position) < 12.0);
+                    .FirstOrDefault(e => e.Position.GetDistance(Bot.Player.Position) < 12.0f);
 
                 if (nearestPortal != null)
                 {
-                    Bot.Movement.SetMovementAction(MovementAction.DirectMove, BotUtils.MoveAhead(Bot.Player.Position, nearestPortal.Position, 6f));
+                    Bot.Movement.SetMovementAction(MovementAction.DirectMove, BotUtils.MoveAhead(Bot.Player.Position, nearestPortal.Position, 6.0f));
                 }
                 else
                 {
@@ -129,8 +92,8 @@ namespace AmeisenBotX.Core.Fsm.States
                 return;
             }
 
-            Vector3 posToGoTo = Config.FollowPositionDynamic ? PlayerToFollow.Position + Offset : PlayerToFollow.Position;
-            double distance = Bot.Player.DistanceTo(posToGoTo);
+            Vector3 posToGoTo = Config.FollowPositionDynamic ? playerToFollow.Position + Offset : playerToFollow.Position;
+            float distance = Bot.Player.DistanceTo(posToGoTo);
 
             if (distance < Config.MinFollowDistance)
             {
@@ -140,20 +103,16 @@ namespace AmeisenBotX.Core.Fsm.States
 
             if (Config.UseMountsInParty
                 && Bot.Character.Mounts?.Count > 0
-                && PlayerToFollow != null
-                && PlayerToFollow.IsMounted && !Bot.Player.IsMounted)
+                && playerToFollow.IsMounted
+                && !Bot.Player.IsMounted)
             {
                 if (CastMountEvent.Run())
                 {
-                    IEnumerable<WowMount> filteredMounts;
+                    IEnumerable<WowMount> filteredMounts = Bot.Character.Mounts;
 
                     if (Config.UseOnlySpecificMounts)
                     {
-                        filteredMounts = Bot.Character.Mounts.Where(e => Config.Mounts.Split(",", StringSplitOptions.RemoveEmptyEntries).Contains(e.Name));
-                    }
-                    else
-                    {
-                        filteredMounts = Bot.Character.Mounts;
+                        filteredMounts = filteredMounts.Where(e => Config.Mounts.Split(',', StringSplitOptions.RemoveEmptyEntries).Contains(e.Name));
                     }
 
                     if (filteredMounts != null && filteredMounts.Any())
@@ -171,7 +130,7 @@ namespace AmeisenBotX.Core.Fsm.States
             float zDiff = posToGoTo.Z - Bot.Player.Position.Z;
 
             // it goes more down than forward
-            if (zDiff < -16.0)
+            if (zDiff < -16.0f)
             {
                 if (LosCheckEvent.Run())
                 {
@@ -195,11 +154,52 @@ namespace AmeisenBotX.Core.Fsm.States
             Bot.Movement.SetMovementAction(MovementAction.Follow, posToGoTo);
         }
 
-        public override void Leave()
+        public bool IsUnitToFollowThere(out IWowUnit playerToFollow, bool ignoreRange = false)
         {
+            IEnumerable<IWowPlayer> wowPlayers = Bot.Objects.WowObjects.OfType<IWowPlayer>().Where(e => !e.IsDead);
+
+            if (wowPlayers.Any())
+            {
+                IWowUnit[] playersToTry =
+                {
+                    Config.FollowSpecificCharacter ? wowPlayers.FirstOrDefault(p => Bot.Db.GetUnitName(p, out string name) && name.Equals(Config.SpecificCharacterToFollow, StringComparison.OrdinalIgnoreCase)) : null,
+                    Config.FollowGroupLeader ? Bot.Objects.Partyleader : null,
+                    Config.FollowGroupMembers ? Bot.Objects.Partymembers.FirstOrDefault() : null
+                };
+
+                for (int i = 0; i < playersToTry.Length; ++i)
+                {
+                    if (playersToTry[i] != null && (ignoreRange || ShouldIFollowPlayer(playersToTry[i])))
+                    {
+                        playerToFollow = playersToTry[i];
+                        return true;
+                    }
+                }
+            }
+
+            playerToFollow = null;
+            return false;
         }
 
-        private IWowPlayer SkipIfOutOfRange(IWowPlayer playerToFollow)
+        public override void Leave()
+        {
+            PlayerToFollowGuid = 0L;
+        }
+
+        private bool IsInFollowRange(IWowPlayer playerToFollow)
+        {
+            if (playerToFollow == null || playerToFollow.IsDead || playerToFollow.IsGhost)
+            {
+                return false;
+            }
+
+            Vector3 pos = Config.FollowPositionDynamic ? playerToFollow.Position + Offset : playerToFollow.Position;
+            float distance = Bot.Player.DistanceTo(pos);
+
+            return distance > Config.MinFollowDistance && distance < Config.MaxFollowDistance;
+        }
+
+        private bool ShouldIFollowPlayer(IWowUnit playerToFollow)
         {
             if (playerToFollow != null)
             {
@@ -210,15 +210,15 @@ namespace AmeisenBotX.Core.Fsm.States
                     pos += StateMachine.GetState<StateFollowing>().Offset;
                 }
 
-                double distance = Bot.Player.DistanceTo(pos);
+                double distance = pos.GetDistance(Bot.Player.Position);
 
-                if (playerToFollow.IsDead || playerToFollow.IsGhost || distance < Config.MinFollowDistance || distance > Config.MaxFollowDistance)
+                if (distance > Config.MinFollowDistance && distance < Config.MaxFollowDistance)
                 {
-                    playerToFollow = null;
+                    return true;
                 }
             }
 
-            return playerToFollow;
+            return false;
         }
     }
 }

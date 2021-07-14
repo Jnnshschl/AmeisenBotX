@@ -71,7 +71,7 @@ namespace AmeisenBotX.Core.Fsm.States
                                 Bot.Globals.ForceCombat = false;
                             }
 
-                            if (StateMachine.GetState<StateIdle>().IsUnitToFollowThere(out IWowUnit player))
+                            if (StateMachine.GetState<StateFollowing>().IsUnitToFollowThere(out IWowUnit player))
                             {
                                 Bot.Movement.SetMovementAction(MovementAction.Follow, player.Position);
                             }

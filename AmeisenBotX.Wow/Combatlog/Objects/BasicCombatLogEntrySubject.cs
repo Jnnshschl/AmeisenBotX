@@ -5,8 +5,8 @@ namespace AmeisenBotX.Wow.Combatlog.Objects
 {
     public class BasicCombatLogEntrySubject : ISubjectBasicCombatLogEntry
     {
-        private BasicCombatLogEntry _Entry = null;
         private readonly HashSet<IObserverBasicCombatLogEntry> _Observers = new();
+        private BasicCombatLogEntry _Entry = null;
 
         public void Next(BasicCombatLogEntry entry)
         {

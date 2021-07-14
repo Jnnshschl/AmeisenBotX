@@ -1,5 +1,4 @@
-﻿using AmeisenBotX.Common.Math;
-using AmeisenBotX.Common.Utils;
+﻿using AmeisenBotX.Common.Utils;
 using AmeisenBotX.Core.Data.Objects;
 using AmeisenBotX.Core.Engines.Movement.Enums;
 using AmeisenBotX.Core.Fsm.Enums;
@@ -86,9 +85,6 @@ namespace AmeisenBotX.Core.Fsm.States
 
         public override void Execute()
         {
-            // Bot.MovementEngine.SetMovementAction(MovementAction.Moving, new Vector3(-4918, -940, 501));
-            // return;
-
             // do we need to loot stuff
             if (LootCheckEvent.Run()
                 && Bot.Character.Inventory.FreeBagSlots > 0
@@ -145,8 +141,7 @@ namespace AmeisenBotX.Core.Fsm.States
 
             // do i need to complete/get quests
             if (Config.AutoTalkToNearQuestgivers
-                && IsUnitToFollowThere(out IWowUnit unitToFollow, true)
-                && unitToFollow != null
+                && StateMachine.GetState<StateFollowing>().IsUnitToFollowThere(out IWowUnit unitToFollow, true)
                 && unitToFollow.TargetGuid != 0)
             {
                 IWowUnit target = Bot.GetWowObjectByGuid<IWowUnit>(unitToFollow.TargetGuid);
@@ -159,7 +154,7 @@ namespace AmeisenBotX.Core.Fsm.States
             }
 
             // do i need to follow someone
-            if ((!Config.Autopilot || Bot.Objects.MapId.IsDungeonMap()) && IsUnitToFollowThere(out _))
+            if ((!Config.Autopilot || Bot.Objects.MapId.IsDungeonMap()) && StateMachine.GetState<StateFollowing>().IsUnitToFollowThere(out _))
             {
                 StateMachine.SetState(BotState.Following);
                 return;
@@ -175,6 +170,7 @@ namespace AmeisenBotX.Core.Fsm.States
                 && StateMachine.StateOverride != BotState.None)
             {
                 StateMachine.SetState(StateMachine.StateOverride);
+                return;
             }
 
             if (Config.IdleActions && IdleActionEvent.Run())
@@ -183,58 +179,9 @@ namespace AmeisenBotX.Core.Fsm.States
             }
         }
 
-        public bool IsUnitToFollowThere(out IWowUnit playerToFollow, bool ignoreRange = false)
-        {
-            IEnumerable<IWowPlayer> wowPlayers = Bot.Objects.WowObjects.OfType<IWowPlayer>().Where(e => !e.IsDead);
-
-            if (wowPlayers.Any())
-            {
-                IWowUnit[] playersToTry =
-                {
-                    Config.FollowSpecificCharacter ? wowPlayers.FirstOrDefault(p => Bot.Db.GetUnitName(p, out string name) && name.Equals(Config.SpecificCharacterToFollow, StringComparison.OrdinalIgnoreCase)) : null,
-                    Config.FollowGroupLeader ? Bot.Objects.Partyleader : null,
-                    Config.FollowGroupMembers ? Bot.Objects.Partymembers.FirstOrDefault() : null
-                };
-
-                for (int i = 0; i < playersToTry.Length; ++i)
-                {
-                    if (playersToTry[i] != null && (ignoreRange || ShouldIFollowPlayer(playersToTry[i])))
-                    {
-                        playerToFollow = playersToTry[i];
-                        return true;
-                    }
-                }
-            }
-
-            playerToFollow = null;
-            return false;
-        }
-
         public override void Leave()
         {
             Bot.Character.ItemSlotsToSkip.Clear();
-        }
-
-        private bool ShouldIFollowPlayer(IWowUnit playerToFollow)
-        {
-            if (playerToFollow != null)
-            {
-                Vector3 pos = playerToFollow.Position;
-
-                if (Config.FollowPositionDynamic)
-                {
-                    pos += StateMachine.GetState<StateFollowing>().Offset;
-                }
-
-                double distance = pos.GetDistance(Bot.Player.Position);
-
-                if (distance > Config.MinFollowDistance && distance < Config.MaxFollowDistance)
-                {
-                    return true;
-                }
-            }
-
-            return false;
         }
     }
 }

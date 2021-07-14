@@ -121,7 +121,7 @@ namespace AmeisenBotX.Core.Fsm
                 // make sure we dont go afk
                 AntiAfkEvent.Run();
 
-                if (CurrentState.Key != BotState.Login && Bot.Objects != null)
+                if (CurrentState.Key != BotState.Login && Bot.Player != null)
                 {
                     if (!Bot.Objects.IsWorldLoaded)
                     {
@@ -134,45 +134,42 @@ namespace AmeisenBotX.Core.Fsm
                     }
                     else
                     {
-                        if (Bot.Player != null)
+                        Bot.Movement.Execute();
+
+                        // handle event subbing
+                        Bot.Events.Tick();
+
+                        // auto disable rendering when not in focus
+                        if (Config.AutoDisableRender && RenderSwitchEvent.Run())
                         {
-                            Bot.Movement.Execute();
+                            IntPtr foregroundWindow = Bot.Memory.GetForegroundWindow();
+                            Bot.Wow.WowSetRenderState(foregroundWindow == Bot.Memory.Process.MainWindowHandle);
+                        }
 
-                            // handle event subbing
-                            Bot.Events.Tick();
-
-                            // auto disable rendering when not in focus
-                            if (Config.AutoDisableRender && RenderSwitchEvent.Run())
+                        // override states, for example when we die, we need to revive
+                        // there is no way we can be a ghost or stay in combat
+                        if (Bot.Player.IsDead)
+                        {
+                            if (SetState(BotState.Dead, true))
                             {
-                                IntPtr foregroundWindow = Bot.Memory.GetForegroundWindow();
-                                Bot.Wow.WowSetRenderState(foregroundWindow == Bot.Memory.Process.MainWindowHandle);
+                                OnStateOverride?.Invoke(CurrentState.Key);
                             }
-
-                            // override states, for example when we die, we need to revive
-                            // there is no way we can be a ghost or stay in combat
-                            if (Bot.Player.IsDead)
+                        }
+                        else if (Bot.Player.IsGhost)
+                        {
+                            if (SetState(BotState.Ghost, true))
                             {
-                                if (SetState(BotState.Dead, true))
-                                {
-                                    OnStateOverride?.Invoke(CurrentState.Key);
-                                }
+                                OnStateOverride?.Invoke(CurrentState.Key);
                             }
-                            else if (Bot.Player.IsGhost)
+                        }
+                        else if (!Bot.Globals.IgnoreCombat
+                                && !(Config.IgnoreCombatWhileMounted && Bot.Player.IsMounted)
+                                && (Bot.Globals.ForceCombat || Bot.Player.IsInCombat || GetState<StateCombat>().IsAnyPartymemberInCombat()
+                                || Bot.GetEnemiesInCombatWithParty<IWowUnit>(Bot.Player.Position, 100.0f).Any()))
+                        {
+                            if (SetState(BotState.Combat, true))
                             {
-                                if (SetState(BotState.Ghost, true))
-                                {
-                                    OnStateOverride?.Invoke(CurrentState.Key);
-                                }
-                            }
-                            else if (!Bot.Globals.IgnoreCombat
-                                    && !(Config.IgnoreCombatWhileMounted && Bot.Player.IsMounted)
-                                    && (Bot.Globals.ForceCombat || Bot.Player.IsInCombat || GetState<StateCombat>().IsAnyPartymemberInCombat()
-                                    || Bot.GetEnemiesInCombatWithParty<IWowUnit>(Bot.Player.Position, 100.0f).Any()))
-                            {
-                                if (SetState(BotState.Combat, true))
-                                {
-                                    OnStateOverride?.Invoke(CurrentState.Key);
-                                }
+                                OnStateOverride?.Invoke(CurrentState.Key);
                             }
                         }
                     }

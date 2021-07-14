@@ -579,6 +579,11 @@ namespace AmeisenBotX.Core.Engines.Combat.Classes.einTyp
                 nextActionTime[Garrote] = DateTime.Now;
             }
 
+            private static bool IsReady(DateTime nextAction)
+            {
+                return DateTime.Now > nextAction;
+            }
+
             private void CastSpell(string spell, ref int rage, int rageCosts, double cooldown, bool gcd)
             {
                 Bot.Wow.LuaCastSpell(spell);
@@ -598,11 +603,6 @@ namespace AmeisenBotX.Core.Engines.Combat.Classes.einTyp
             {
                 List<string> buffs = Bot.Player.Auras.Select(e => Bot.Db.GetSpellName(e.SpellId)).ToList();
                 return buffs.Any(e => e.Contains("tealth"));
-            }
-
-            private static bool IsReady(DateTime nextAction)
-            {
-                return DateTime.Now > nextAction;
             }
 
             private bool IsReady(string spell)

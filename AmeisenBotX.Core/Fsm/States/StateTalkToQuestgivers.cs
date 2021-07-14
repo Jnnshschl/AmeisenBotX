@@ -26,8 +26,7 @@ namespace AmeisenBotX.Core.Fsm.States
         public override void Execute()
         {
             if (!Config.AutoTalkToNearQuestgivers
-                || !StateMachine.GetState<StateIdle>().IsUnitToFollowThere(out IWowUnit unitToFollow, true)
-                || unitToFollow == null
+                || !StateMachine.GetState<StateFollowing>().IsUnitToFollowThere(out IWowUnit unitToFollow, true)
                 || unitToFollow.TargetGuid == 0)
             {
                 StateMachine.SetState(BotState.Idle);
