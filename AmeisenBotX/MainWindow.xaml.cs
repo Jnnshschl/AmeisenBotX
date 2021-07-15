@@ -134,7 +134,11 @@ namespace AmeisenBotX
             {
                 if (File.Exists(configPath))
                 {
-                    config = JsonSerializer.Deserialize<AmeisenBotConfig>(File.ReadAllText(configPath), new() { AllowTrailingCommas = true, NumberHandling = JsonNumberHandling.AllowReadingFromString });
+                    // convert old configs to new format
+                    string configData = File.ReadAllText(configPath);
+                    configData = configData.Replace(".0,", "");
+
+                    config = JsonSerializer.Deserialize<AmeisenBotConfig>(configData, new() { AllowTrailingCommas = true, NumberHandling = JsonNumberHandling.AllowReadingFromString });
                 }
                 else
                 {
