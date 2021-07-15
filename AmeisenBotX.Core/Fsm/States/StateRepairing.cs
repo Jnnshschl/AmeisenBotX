@@ -26,7 +26,7 @@ namespace AmeisenBotX.Core.Fsm.States
 
         public override void Enter()
         {
-            Bot.Events.Subscribe("MERCHANT_SHOW", OnMerchantShow);
+            Bot.Wow.Events.Subscribe("MERCHANT_SHOW", OnMerchantShow);
         }
 
         public override void Execute()
@@ -80,7 +80,7 @@ namespace AmeisenBotX.Core.Fsm.States
 
         public override void Leave()
         {
-            Bot.Events.Unsubscribe("MERCHANT_SHOW", OnMerchantShow);
+            Bot.Wow.Events.Unsubscribe("MERCHANT_SHOW", OnMerchantShow);
         }
 
         internal bool NeedToRepair()

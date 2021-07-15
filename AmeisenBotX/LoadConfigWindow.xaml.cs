@@ -1,6 +1,7 @@
-﻿using Newtonsoft.Json;
-using System;
+﻿using System;
 using System.IO;
+using System.Text.Json;
+using System.Text.Json.Serialization;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
@@ -53,7 +54,7 @@ namespace AmeisenBotX
                         Directory.CreateDirectory(Path.GetDirectoryName(ConfigToLoad));
                     }
 
-                    File.WriteAllText(ConfigToLoad, JsonConvert.SerializeObject(configEditor.Config, Formatting.Indented));
+                    File.WriteAllText(ConfigToLoad, JsonSerializer.Serialize(configEditor.Config, new() { AllowTrailingCommas = true, NumberHandling = JsonNumberHandling.AllowReadingFromString }));
                 }
             }
             else

@@ -1,6 +1,7 @@
 ﻿using AmeisenBotX.Wow.Objects.Enums;
-using Newtonsoft.Json;
+using System.Text.Json;
 using System.Collections.Generic;
+using System.Text.Json.Serialization;
 
 namespace AmeisenBotX.Core.Engines.Character.Inventory.Objects
 {
@@ -35,58 +36,58 @@ namespace AmeisenBotX.Core.Engines.Character.Inventory.Objects
             }
         }
 
-        [JsonProperty("bagid")]
+        [JsonPropertyName("bagid")]
         public int BagId { get; set; }
 
-        [JsonProperty("bagslot")]
+        [JsonPropertyName("bagslot")]
         public int BagSlot { get; set; }
 
-        [JsonProperty("count")]
+        [JsonPropertyName("count")]
         public int Count { get; set; }
 
-        [JsonProperty("curDurability")]
+        [JsonPropertyName("curDurability")]
         public int Durability { get; set; }
 
-        [JsonProperty("equiplocation")]
+        [JsonPropertyName("equiplocation")]
         public string EquipLocation { get; set; }
 
-        [JsonProperty("equipslot")]
-        public WowEquipmentSlot EquipSlot { get; set; } = WowEquipmentSlot.NOT_EQUIPABLE;
+        [JsonPropertyName("equipslot")]
+        public int EquipSlot { get; set; } = -1;
 
-        [JsonProperty("id")]
+        [JsonPropertyName("id")]
         public int Id { get; set; }
 
-        [JsonProperty("level")]
+        [JsonPropertyName("level")]
         public int ItemLevel { get; set; }
 
-        [JsonProperty("link")]
+        [JsonPropertyName("link")]
         public string ItemLink { get; set; }
 
-        [JsonProperty("quality")]
-        public WowItemQuality ItemQuality { get; set; }
+        [JsonPropertyName("quality")]
+        public int ItemQuality { get; set; }
 
-        [JsonProperty("maxDurability")]
+        [JsonPropertyName("maxDurability")]
         public int MaxDurability { get; set; }
 
-        [JsonProperty("maxStack")]
+        [JsonPropertyName("maxStack")]
         public int MaxStack { get; set; }
 
-        [JsonProperty("name")]
+        [JsonPropertyName("name")]
         public string Name { get; set; }
 
-        [JsonProperty("sellprice")]
+        [JsonPropertyName("sellprice")]
         public int Price { get; set; }
 
-        [JsonProperty("minLevel")]
+        [JsonPropertyName("minLevel")]
         public int RequiredLevel { get; set; }
 
-        [JsonProperty("stats")]
-        public Dictionary<string, string> Stats { get; set; } = new();
+        [JsonPropertyName("stats")]
+        public Dictionary<string, string> Stats { get; set; }
 
-        [JsonProperty("subtype")]
+        [JsonPropertyName("subtype")]
         public string Subtype { get; set; }
 
-        [JsonProperty("type")]
+        [JsonPropertyName("type")]
         public string Type { get; set; }
 
         public override string ToString()

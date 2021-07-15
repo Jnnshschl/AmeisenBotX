@@ -1,14 +1,14 @@
 ﻿using AmeisenBotX.Core.Engines.Movement.Settings;
 using AmeisenBotX.Memory.Win32;
-using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
+using System.Text.Json.Serialization;
 
 namespace AmeisenBotX.Core
 {
     public class AmeisenBotConfig
     {
-        public double AntiAfkMs { get; set; } = 1000;
+        public int AntiAfkMs { get; set; } = 1000;
 
         public bool AutoAcceptQuests { get; set; } = true;
 
@@ -17,8 +17,6 @@ namespace AmeisenBotX.Core
         public bool AutocloseWow { get; set; } = true;
 
         public bool AutoDisableRender { get; set; } = false;
-
-        public bool AutoDismount { get; set; } = true;
 
         public bool AutoDodgeAoeSpells { get; set; } = false;
 
@@ -52,8 +50,6 @@ namespace AmeisenBotX.Core
 
         public string BuiltInCombatClassName { get; set; } = string.Empty;
 
-        public bool CachePointsOfInterest { get; set; } = true;
-
         public int CharacterSlot { get; set; } = 0;
 
         public bool ChatProtocols { get; set; } = false;
@@ -68,7 +64,7 @@ namespace AmeisenBotX.Core
 
         public double EatUntilPercent { get; set; } = 75;
 
-        public double EventPullMs { get; set; } = 500;
+        public int EventPullMs { get; set; } = 500;
 
         public bool FollowGroupLeader { get; set; } = false;
 
@@ -80,21 +76,15 @@ namespace AmeisenBotX.Core
 
         public string Friends { get; set; } = string.Empty;
 
-        public double GhostCheckMs { get; set; } = 5000;
-
-        public double GhostResurrectThreshold { get; set; } = 24;
+        public float GhostResurrectThreshold { get; set; } = 24.0f;
 
         public string GrindingProfile { get; set; } = string.Empty;
 
         public bool IdleActions { get; set; } = false;
 
-        public int IdleActionsMaxCooldown { get; set; } = 12000;
-
-        public int IdleActionsMinCooldown { get; set; } = 3000;
-
         public bool IgnoreCombatWhileMounted { get; set; } = true;
 
-        public double ItemRepairThreshold { get; set; } = 25;
+        public double ItemRepairThreshold { get; set; } = 25.0;
 
         public List<string> ItemSellBlacklist { get; set; }
 
@@ -110,7 +100,7 @@ namespace AmeisenBotX.Core
 
         public bool LootUnits { get; set; } = true;
 
-        public double LootUnitsRadius { get; set; } = 20.0;
+        public float LootUnitsRadius { get; set; } = 20.0f;
 
         public bool MapRenderCurrentPath { get; set; } = true;
 
@@ -140,7 +130,7 @@ namespace AmeisenBotX.Core
 
         public int MaxFpsCombat { get; set; } = 60;
 
-        public double MerchantNpcSearchRadius { get; set; } = 50;
+        public float MerchantNpcSearchRadius { get; set; } = 50.0f;
 
         public int MinFollowDistance { get; set; } = 6;
 
@@ -158,7 +148,7 @@ namespace AmeisenBotX.Core
 
         public string Password { get; set; } = string.Empty;
 
-        [JsonIgnore]
+        [JsonIgnore()]
         public string Path { get; set; } = string.Empty;
 
         public string PathToWowExe { get; set; } = string.Empty;
@@ -187,13 +177,9 @@ namespace AmeisenBotX.Core
 
         public string Realmlist { get; set; } = "127.0.0.1";
 
-        public int RelaxActionCooldownMax { get; set; } = 5;
-
-        public int RelaxActionCooldownMin { get; set; } = 2;
-
         public bool ReleaseSpirit { get; set; } = false;
 
-        public double RepairNpcSearchRadius { get; set; } = 50;
+        public float RepairNpcSearchRadius { get; set; } = 50-0f;
 
         public bool SaveBotWindowPosition { get; set; } = false;
 
@@ -211,11 +197,11 @@ namespace AmeisenBotX.Core
 
         public string SpecificCharacterToFollow { get; set; } = string.Empty;
 
-        public double StateMachineTickMs { get; set; } = 10;
+        public int StateMachineTickMs { get; set; } = 10;
 
         public bool StayCloseToGroupInCombat { get; set; } = false;
 
-        public double SupportRange { get; set; } = 64.0;
+        public float SupportRange { get; set; } = 64.0f;
 
         public bool UseBuiltInCombatClass { get; set; } = true;
 
@@ -228,5 +214,7 @@ namespace AmeisenBotX.Core
         public string Username { get; set; } = string.Empty;
 
         public Rect WowWindowRect { get; set; } = new Rect() { Left = -1, Top = -1, Right = -1, Bottom = -1 };
+
+        public bool CachePointsOfInterest { get; set; } = true;
     }
 }

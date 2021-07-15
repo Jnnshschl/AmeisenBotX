@@ -48,9 +48,9 @@ namespace AmeisenBotX.Core.Engines.Quest
 
             if (!UpdatedCompletedQuests)
             {
-                if (Bot.Events.Events.All(e => e.Key != "QUEST_QUERY_COMPLETE"))
+                if (Bot.Wow.Events.Events.All(e => e.Key != "QUEST_QUERY_COMPLETE"))
                 {
-                    Bot.Events.Subscribe("QUEST_QUERY_COMPLETE", OnGetQuestsCompleted);
+                    Bot.Wow.Events.Subscribe("QUEST_QUERY_COMPLETE", OnGetQuestsCompleted);
                 }
 
                 if (QueryCompletedQuestsEvent.Run())

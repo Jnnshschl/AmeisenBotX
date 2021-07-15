@@ -58,6 +58,12 @@ namespace AmeisenBotX.Memory
         /// </summary>
         public new void Dispose();
 
+        /// <summary>
+        /// Brings a window to the users focus.
+        /// </summary>
+        /// <param name="windowHandle">Window Handle</param>
+        /// <param name="rect">Position of the window</param>
+        /// <param name="resizeWindow">True when you want to resize the window, false if not</param>
         public void FocusWindow(IntPtr windowHandle, Rect rect, bool resizeWindow = true);
 
         /// <summary>

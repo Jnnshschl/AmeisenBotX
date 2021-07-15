@@ -1,5 +1,6 @@
 ﻿using AmeisenBotX.Core;
 using AmeisenBotX.Core.Engines.Character.Inventory.Objects;
+using AmeisenBotX.Wow.Objects.Enums;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Media;
@@ -38,7 +39,7 @@ namespace AmeisenBotX.Views
 
             labelItemType.Content = $"{WowItem.Type} - {WowItem.Subtype} - iLvl {WowItem.ItemLevel} - {WowItem.Durability}/{WowItem.MaxDurability}";
 
-            labelItemName.Foreground = new SolidColorBrush((Color)ColorConverter.ConvertFromString(WowItem.ItemQuality.GetColor()));
+            labelItemName.Foreground = new SolidColorBrush((Color)ColorConverter.ConvertFromString(((WowItemQuality)WowItem.ItemQuality).GetColor()));
         }
     }
 }

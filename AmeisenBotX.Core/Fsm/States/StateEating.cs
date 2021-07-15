@@ -129,8 +129,8 @@ namespace AmeisenBotX.Core.Fsm.States
         internal bool NeedToEat()
         {
             return Bot.Objects.Partyleader != null
-                && ((Bot.Objects.Partyleader.Guid == 0 || Bot.Player.Position.GetDistance(Bot.Objects.CenterPartyPosition) < 30.0f)
-                    && (Bot.Player.HealthPercentage < Config.EatUntilPercent
+                && (((Bot.Objects.Partyleader.Guid == 0 || Bot.Player.Position.GetDistance(Bot.Objects.CenterPartyPosition) < 30.0f)
+                    && Bot.Player.HealthPercentage < Config.EatUntilPercent
                              && Bot.Player.HealthPercentage < 95.0
                              && Bot.Player.ManaPercentage < Config.DrinkUntilPercent
                              && Bot.Player.ManaPercentage < 95.0

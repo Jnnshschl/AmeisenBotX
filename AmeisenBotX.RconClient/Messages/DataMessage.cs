@@ -1,67 +1,67 @@
-﻿using Newtonsoft.Json;
+﻿using System.Text.Json.Serialization;
 
 namespace AmeisenBotX.RconClient.Messages
 {
     public class DataMessage
     {
-        [JsonProperty("bagslotsfree")]
+        [JsonPropertyName("bagslotsfree")]
         public int BagSlotsFree { get; set; }
 
-        [JsonProperty("combatclass")]
+        [JsonPropertyName("combatclass")]
         public string CombatClass { get; set; }
 
-        [JsonProperty("currentprofile")]
+        [JsonPropertyName("currentprofile")]
         public string CurrentProfile { get; set; }
 
-        [JsonProperty("energy")]
+        [JsonPropertyName("energy")]
         public int Energy { get; set; }
 
-        [JsonProperty("exp")]
+        [JsonPropertyName("exp")]
         public int Exp { get; set; }
 
-        [JsonProperty("guid")]
+        [JsonPropertyName("guid")]
         public string Guid { get; set; }
 
-        [JsonProperty("health")]
+        [JsonPropertyName("health")]
         public int Health { get; set; }
 
-        [JsonProperty("itemlevel")]
+        [JsonPropertyName("itemlevel")]
         public int ItemLevel { get; set; }
 
-        [JsonProperty("level")]
+        [JsonPropertyName("level")]
         public int Level { get; set; }
 
-        [JsonProperty("mapname")]
+        [JsonPropertyName("mapname")]
         public string MapName { get; set; }
 
-        [JsonProperty("maxenergy")]
+        [JsonPropertyName("maxenergy")]
         public int MaxEnergy { get; set; }
 
-        [JsonProperty("maxexp")]
+        [JsonPropertyName("maxexp")]
         public int MaxExp { get; set; }
 
-        [JsonProperty("maxhealth")]
+        [JsonPropertyName("maxhealth")]
         public int MaxHealth { get; set; }
 
-        [JsonProperty("money")]
+        [JsonPropertyName("money")]
         public int Money { get; set; }
 
-        [JsonProperty("posx")]
+        [JsonPropertyName("posx")]
         public float PosX { get; set; }
 
-        [JsonProperty("posy")]
+        [JsonPropertyName("posy")]
         public float PosY { get; set; }
 
-        [JsonProperty("posz")]
+        [JsonPropertyName("posz")]
         public float PosZ { get; set; }
 
-        [JsonProperty("state")]
+        [JsonPropertyName("state")]
         public string State { get; set; }
 
-        [JsonProperty("subzonename")]
+        [JsonPropertyName("subzonename")]
         public string SubZoneName { get; set; }
 
-        [JsonProperty("zonename")]
+        [JsonPropertyName("zonename")]
         public string ZoneName { get; set; }
     }
 }

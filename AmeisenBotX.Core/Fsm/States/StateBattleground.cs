@@ -20,14 +20,14 @@ namespace AmeisenBotX.Core.Fsm.States
                 return;
             }
 
-            if (Bot.Memory.Read(Bot.Offsets.BattlegroundStatus, out int bgStatus)
+            if (Bot.Memory.Read(Bot.Wow.Offsets.BattlegroundStatus, out int bgStatus)
                 && bgStatus == 0)
             {
                 StateMachine.SetState(BotState.Idle);
                 return;
             }
 
-            if (Bot.Memory.Read(Bot.Offsets.BattlegroundFinished, out int bgFinished)
+            if (Bot.Memory.Read(Bot.Wow.Offsets.BattlegroundFinished, out int bgFinished)
                 && bgFinished == 1)
             {
                 Bot.Wow.LuaLeaveBattleground();

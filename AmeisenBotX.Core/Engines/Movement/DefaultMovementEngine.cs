@@ -25,7 +25,7 @@ namespace AmeisenBotX.Core.Engines.Movement
             PathQueue = new();
             PlacesToAvoidList = new();
 
-            PlayerVehicle = new(bot);
+            PlayerVehicle = new(bot, config);
         }
 
         public float CurrentSpeed { get; private set; }
@@ -259,7 +259,7 @@ namespace AmeisenBotX.Core.Engines.Movement
                         IsUnstucking = true;
 
                         // get position behind us
-                        Vector3 positionBehind = BotUtils.MoveAhead(Bot.Player.Position, Bot.Player.Rotation, -Bot.MovementSettings.UnstuckDistance);
+                        Vector3 positionBehind = BotUtils.MoveAhead(Bot.Player.Position, Bot.Player.Rotation, -Config.MovementSettings.UnstuckDistance);
                         UnstuckTarget = Bot.PathfindingHandler.GetRandomPointAround((int)Bot.Objects.MapId, positionBehind, 5.0f);
 
                         Reset();

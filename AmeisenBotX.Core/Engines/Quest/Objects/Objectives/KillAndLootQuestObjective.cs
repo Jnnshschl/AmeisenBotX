@@ -12,7 +12,7 @@ using System.Linq;
 
 namespace AmeisenBotX.Core.Engines.Quest.Objects.Objectives
 {
-    public class KillAndLootQuestObjective : IQuestObjective, IObserverBasicCombatLogEntry
+    public class KillAndLootQuestObjective : IQuestObjective
     {
         public KillAndLootQuestObjective(AmeisenBotInterfaces bot, List<int> npcIds, int collectOrKillAmount, int questItemId, List<List<Vector3>> areas)
         {
@@ -22,10 +22,12 @@ namespace AmeisenBotX.Core.Engines.Quest.Objects.Objectives
             QuestItemId = questItemId;
             SearchAreas = new SearchAreaEnsamble(areas);
 
-            if (!CollectQuestItem)
-            {
-                bot.Db.GetCombatLogSubject().Register(this);
-            }
+            Bot.CombatLog.OnPartyKill += OnPartyKill;
+        }
+
+        ~KillAndLootQuestObjective()
+        {
+            Bot.CombatLog.OnPartyKill -= OnPartyKill;
         }
 
         public bool Finished => Math.Abs(Progress - 100.0f) < 0.00001;
@@ -78,11 +80,13 @@ namespace AmeisenBotX.Core.Engines.Quest.Objects.Objectives
 
         private SearchAreaEnsamble SearchAreas { get; }
 
-        public void CombatLogChanged(BasicCombatLogEntry entry)
+        public void OnPartyKill(ulong sourceGuid, ulong npcGuid)
         {
-            IWowUnit wowUnit = Bot.GetWowObjectByGuid<IWowUnit>(entry.DestinationGuid);
-            if (entry.Subtype == CombatLogEntrySubtype.KILL && NpcIds.Contains(BotUtils.GuidToNpcId(entry.DestinationGuid))
-                                                            && wowUnit != null && wowUnit.IsTaggedByMe)
+            IWowUnit wowUnit = Bot.GetWowObjectByGuid<IWowUnit>(npcGuid);
+
+            if (wowUnit != null
+                && (Bot.Player.Guid == sourceGuid || Bot.Objects.PartymemberGuids.Contains(sourceGuid))
+                && NpcIds.Contains(BotUtils.GuidToNpcId(npcGuid)))
             {
                 ++Killed;
             }

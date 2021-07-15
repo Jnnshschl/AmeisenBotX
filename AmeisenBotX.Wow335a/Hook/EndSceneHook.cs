@@ -7,13 +7,13 @@ using AmeisenBotX.Logging;
 using AmeisenBotX.Logging.Enums;
 using AmeisenBotX.Memory;
 using AmeisenBotX.Wow335a.Objects;
-using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
 using System.Globalization;
 using System.Linq;
 using System.Runtime.CompilerServices;
 using System.Text;
+using System.Text.Json;
 using System.Threading;
 using System.Threading.Tasks;
 
@@ -1485,7 +1485,7 @@ namespace AmeisenBotX.Wow335a.Hook
                 if (Memory.Read(GameInfoAddress, out GameInfo gameInfo))
                 {
                     OnGameInfoPush?.Invoke(gameInfo);
-                    AmeisenLogger.I.Log("GameInfo", $"Pushing GameInfo Update: {JsonConvert.SerializeObject(gameInfo)}");
+                    // AmeisenLogger.I.Log("GameInfo", $"Pushing GameInfo Update: {JsonSerializer.Serialize(gameInfo, new() { IncludeFields = true })}");
                 }
 
                 Memory.Write(GameInfoExecutedAddress, 0);

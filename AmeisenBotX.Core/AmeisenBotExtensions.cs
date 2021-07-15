@@ -34,20 +34,15 @@ namespace AmeisenBotX.Core
 
         public static bool IsCapitalCityZone(this WowZoneId zone, bool isAlliance)
         {
-            if (isAlliance)
-            {
-                return zone is WowZoneId.StormwindCity
+            return isAlliance
+                ? zone is WowZoneId.StormwindCity
                     or WowZoneId.Ironforge
                     or WowZoneId.Teldrassil
-                    or WowZoneId.TheExodar;
-            }
-            else
-            {
-                return zone is WowZoneId.Orgrimmar
+                    or WowZoneId.TheExodar
+                : zone is WowZoneId.Orgrimmar
                     or WowZoneId.Undercity
                     or WowZoneId.ThunderBluff
                     or WowZoneId.SilvermoonCity;
-            }
         }
 
         public static bool IsDungeonMap(this WowMapId map)

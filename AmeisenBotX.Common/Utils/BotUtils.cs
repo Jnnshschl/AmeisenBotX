@@ -1,5 +1,4 @@
 ﻿using AmeisenBotX.Common.Math;
-using Newtonsoft.Json.Linq;
 using System;
 using System.IO;
 using System.Linq;
@@ -15,7 +14,7 @@ namespace AmeisenBotX.Common.Utils
         private const uint WM_KEYUP = 0x101;
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static string BigValueToString(double value)
+        public static string BigValueToString(float value)
         {
             if (value >= 100000000)
             {
@@ -44,36 +43,13 @@ namespace AmeisenBotX.Common.Utils
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static string FastRandomStringOnlyLetters()
         {
-            return new string(FastRandomString().Where(c => c != '-' && (c < '0' || c > '9')).ToArray());
+            return new string(FastRandomString().Where(c => c is not '-' and (< '0' or > '9')).ToArray());
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static int GuidToNpcId(ulong guid)
         {
             return (int)((guid >> 24) & 0x0000000000FFFFFF);
-        }
-
-        public static bool IsValidJson(string strInput)
-        {
-            if (string.IsNullOrWhiteSpace(strInput))
-            {
-                return false;
-            }
-
-            strInput = strInput.Trim();
-
-            if ((strInput.StartsWith("{") && strInput.EndsWith("}"))
-                || (strInput.StartsWith("[") && strInput.EndsWith("]")))
-            {
-                try
-                {
-                    JToken obj = JToken.Parse(strInput);
-                    return true;
-                }
-                catch { }
-            }
-
-            return false;
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -85,7 +61,7 @@ namespace AmeisenBotX.Common.Utils
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static Vector3 MoveAhead(Vector3 targetPosition, float rotation, float offset)
         {
-            return BotMath.CalculatePositionAround(targetPosition, rotation, 0f, offset);
+            return BotMath.CalculatePositionAround(targetPosition, rotation, 0.0f, offset);
         }
 
         /// <summary>

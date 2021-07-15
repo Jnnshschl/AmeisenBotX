@@ -13,8 +13,6 @@ namespace AmeisenBotX.Wow.Cache
     {
         IReadOnlyDictionary<int, List<Vector3>> AllBlacklistNodes();
 
-        IReadOnlyDictionary<CombatLogEntryType, Dictionary<CombatLogEntrySubtype, List<(DateTime, BasicCombatLogEntry)>>> AllCombatLogEntries();
-
         IReadOnlyDictionary<WowMapId, Dictionary<WowHerbId, List<Vector3>>> AllHerbNodes();
 
         IReadOnlyDictionary<ulong, string> AllNames();
@@ -27,19 +25,13 @@ namespace AmeisenBotX.Wow.Cache
 
         IReadOnlyDictionary<int, string> AllSpellNames();
 
-        void CacheCombatLogEntry(KeyValuePair<CombatLogEntryType, CombatLogEntrySubtype> key, BasicCombatLogEntry entry);
-
         void CacheHerb(WowMapId mapId, WowHerbId displayId, Vector3 position);
 
         void CacheOre(WowMapId mapId, WowOreId displayId, Vector3 position);
 
         void CachePoi(WowMapId mapId, PoiType poiType, Vector3 position);
 
-        void CacheSpellName(int spellId, string name);
-
         void Clear();
-
-        BasicCombatLogEntrySubject GetCombatLogSubject();
 
         WowUnitReaction GetReaction(IWowUnit a, IWowUnit b);
 

@@ -1,6 +1,5 @@
 ﻿using AmeisenBotX.Common.Enums;
 using AmeisenBotX.Common.Math;
-using AmeisenBotX.Common.Offsets;
 using AmeisenBotX.Common.Utils;
 using AmeisenBotX.Core.Engines.Character.Comparators;
 using AmeisenBotX.Core.Engines.Character.Inventory;
@@ -13,22 +12,22 @@ using AmeisenBotX.Memory;
 using AmeisenBotX.Wow;
 using AmeisenBotX.Wow.Objects;
 using AmeisenBotX.Wow.Objects.Enums;
-using Newtonsoft.Json;
 using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
+using System.Text.Json;
+using System.Text.Json.Serialization;
 using System.Threading.Tasks;
 
 namespace AmeisenBotX.Core.Engines.Character
 {
     public class DefaultCharacterManager : ICharacterManager
     {
-        public DefaultCharacterManager(IWowInterface wowInterface, IMemoryApi memoryApi, IOffsetList offsetList)
+        public DefaultCharacterManager(IWowInterface wowInterface, IMemoryApi memoryApi)
         {
             Wow = wowInterface;
             MemoryApi = memoryApi;
-            Offsets = offsetList;
 
             Inventory = new(Wow);
             Equipment = new(Wow);
@@ -60,13 +59,11 @@ namespace AmeisenBotX.Core.Engines.Character
 
         private IMemoryApi MemoryApi { get; }
 
-        private IOffsetList Offsets { get; }
-
         private IWowInterface Wow { get; }
 
         public void AntiAfk()
         {
-            MemoryApi.Write(Offsets.TickCount, Environment.TickCount);
+            MemoryApi.Write(Wow.Offsets.TickCount, Environment.TickCount);
         }
 
         public void ClickToMove(Vector3 pos, ulong guid, WowClickToMoveType clickToMoveType = WowClickToMoveType.Move, float turnSpeed = 20.9f, float distance = 0.5f)
@@ -78,16 +75,16 @@ namespace AmeisenBotX.Core.Engines.Character
                 return;
             }
 
-            MemoryApi.Write(Offsets.ClickToMoveTurnSpeed, turnSpeed);
-            MemoryApi.Write(Offsets.ClickToMoveDistance, distance);
+            MemoryApi.Write(Wow.Offsets.ClickToMoveTurnSpeed, turnSpeed);
+            MemoryApi.Write(Wow.Offsets.ClickToMoveDistance, distance);
 
             if (guid > 0)
             {
-                MemoryApi.Write(Offsets.ClickToMoveGuid, guid);
+                MemoryApi.Write(Wow.Offsets.ClickToMoveGuid, guid);
             }
 
-            MemoryApi.Write(Offsets.ClickToMoveAction, clickToMoveType);
-            MemoryApi.Write(Offsets.ClickToMoveX, pos);
+            MemoryApi.Write(Wow.Offsets.ClickToMoveAction, clickToMoveType);
+            MemoryApi.Write(Wow.Offsets.ClickToMoveX, pos);
         }
 
         public Dictionary<int, int> GetConsumeables()
@@ -415,7 +412,7 @@ namespace AmeisenBotX.Core.Engines.Character
 
             try
             {
-                Mounts = JsonConvert.DeserializeObject<List<WowMount>>(mounts);
+                Mounts = JsonSerializer.Deserialize<List<WowMount>>(mounts, new() { AllowTrailingCommas = true, NumberHandling = JsonNumberHandling.AllowReadingFromString });
             }
             catch (Exception e)
             {

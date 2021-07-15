@@ -23,7 +23,7 @@ namespace AmeisenBotX.Core.Engines.Character.Inventory
             Items = new();
         }
 
-        public double AverageItemLevel { get; private set; }
+        public float AverageItemLevel { get; private set; }
 
         public Dictionary<WowEquipmentSlot, IWowInventoryItem> Items
         {
@@ -69,11 +69,6 @@ namespace AmeisenBotX.Core.Engines.Character.Inventory
                 return;
             }
 
-            if (resultJson.Length > 1 && resultJson.Substring(resultJson.Length - 2, 2).Equals(",]", StringComparison.OrdinalIgnoreCase))
-            {
-                resultJson = resultJson.Remove(resultJson.Length - 2);
-            }
-
             try
             {
                 List<WowBasicItem> rawEquipment = ItemFactory.ParseItemList(resultJson);
@@ -87,7 +82,7 @@ namespace AmeisenBotX.Core.Engines.Character.Inventory
                         for (int i = 0; i < rawEquipment.Count; ++i)
                         {
                             IWowInventoryItem item = ItemFactory.BuildSpecificItem(rawEquipment[i]);
-                            Items.Add(item.EquipSlot, item);
+                            Items.Add((WowEquipmentSlot)item.EquipSlot, item);
                         }
                     }
                 }
@@ -100,9 +95,9 @@ namespace AmeisenBotX.Core.Engines.Character.Inventory
             }
         }
 
-        private double GetAverageItemLevel()
+        private float GetAverageItemLevel()
         {
-            double itemLevel = 0.0;
+            float itemLevel = 0.0f;
             int count = 0;
 
             IList enumValues = Enum.GetValues(typeof(WowEquipmentSlot));
@@ -111,21 +106,21 @@ namespace AmeisenBotX.Core.Engines.Character.Inventory
             {
                 WowEquipmentSlot slot = (WowEquipmentSlot)enumValues[i];
 
-                if (slot == WowEquipmentSlot.CONTAINER_BAG_1
-                    || slot == WowEquipmentSlot.CONTAINER_BAG_2
-                    || slot == WowEquipmentSlot.CONTAINER_BAG_3
-                    || slot == WowEquipmentSlot.CONTAINER_BAG_4
-                    || slot == WowEquipmentSlot.INVSLOT_OFFHAND
-                    || slot == WowEquipmentSlot.INVSLOT_TABARD
-                    || slot == WowEquipmentSlot.INVSLOT_AMMO
-                    || slot == WowEquipmentSlot.NOT_EQUIPABLE)
+                if (slot is WowEquipmentSlot.CONTAINER_BAG_1
+                    or WowEquipmentSlot.CONTAINER_BAG_2
+                    or WowEquipmentSlot.CONTAINER_BAG_3
+                    or WowEquipmentSlot.CONTAINER_BAG_4
+                    or WowEquipmentSlot.INVSLOT_OFFHAND
+                    or WowEquipmentSlot.INVSLOT_TABARD
+                    or WowEquipmentSlot.INVSLOT_AMMO
+                    or WowEquipmentSlot.NOT_EQUIPABLE)
                 {
                     continue;
                 }
 
-                if (Items.ContainsKey(slot)) 
-                { 
-                    itemLevel += Items[slot].ItemLevel; 
+                if (Items.ContainsKey(slot))
+                {
+                    itemLevel += Items[slot].ItemLevel;
                 }
 
                 ++count;

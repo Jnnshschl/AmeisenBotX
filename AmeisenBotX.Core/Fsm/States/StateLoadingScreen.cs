@@ -23,7 +23,7 @@ namespace AmeisenBotX.Core.Fsm.States
                 AmeisenLogger.I.Log("LoadingScreen", "WowProcess exited");
                 StateMachine.SetState(BotState.None);
             }
-            else if (Bot.Memory.ReadString(Bot.Offsets.GameState, Encoding.ASCII, out string glueFrame)
+            else if (Bot.Memory.ReadString(Bot.Wow.Offsets.GameState, Encoding.ASCII, out string glueFrame)
                     && glueFrame.Equals("login", StringComparison.OrdinalIgnoreCase))
             {
                 AmeisenLogger.I.Log("LoadingScreen", "Returned to login screen");

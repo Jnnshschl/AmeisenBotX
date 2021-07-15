@@ -589,18 +589,7 @@
                                 <SolidColorBrush Color="{DynamicResource DarkForeground}" />
                             </Label.Foreground>
                         </Label>
-                        <CheckBox x:Name="checkboxTracelineJumpCheck" Content="Traceline Jump-Check" HorizontalAlignment="Left" Margin="472,234,0,0" VerticalAlignment="Top" TabIndex="15" Style="{DynamicResource CheckBoxStyleDark}" FontFamily="Bahnschrift Light" VerticalContentAlignment="Bottom" Width="181">
-                            <CheckBox.Foreground>
-                                <SolidColorBrush Color="{DynamicResource DarkForeground}" />
-                            </CheckBox.Foreground>
-                            <CheckBox.BorderBrush>
-                                <SolidColorBrush Color="{DynamicResource DarkBorder}" />
-                            </CheckBox.BorderBrush>
-                            <CheckBox.Background>
-                                <SolidColorBrush Color="{DynamicResource DarkBackground}" />
-                            </CheckBox.Background>
-                        </CheckBox>
-                        <CheckBox x:Name="checkboxDistanceMovedJumpCheck" Content="Distance Moved Jump-Check" HorizontalAlignment="Left" Margin="472,255,0,0" VerticalAlignment="Top" TabIndex="15" Style="{DynamicResource CheckBoxStyleDark}" FontFamily="Bahnschrift Light" VerticalContentAlignment="Bottom" Width="181">
+                        <CheckBox x:Name="checkboxDistanceMovedJumpCheck" Content="Distance Moved Jump-Check" HorizontalAlignment="Left" Margin="472,234,0,0" VerticalAlignment="Top" TabIndex="15" Style="{DynamicResource CheckBoxStyleDark}" FontFamily="Bahnschrift Light" VerticalContentAlignment="Bottom" Width="181">
                             <CheckBox.Foreground>
                                 <SolidColorBrush Color="{DynamicResource DarkForeground}" />
                             </CheckBox.Foreground>

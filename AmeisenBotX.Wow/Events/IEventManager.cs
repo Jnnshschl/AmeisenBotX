@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 
-namespace AmeisenBotX.Core.Engines.Event
+namespace AmeisenBotX.Wow.Events
 {
     public interface IEventManager
     {
@@ -9,16 +9,6 @@ namespace AmeisenBotX.Core.Engines.Event
         /// Contains all the subscribed events and functions.
         /// </summary>
         Dictionary<string, List<Action<long, List<string>>>> Events { get; }
-
-        /// <summary>
-        /// The current wow event frame name.
-        /// </summary>
-        string FrameName { get; set; }
-
-        /// <summary>
-        /// Whether we should fire events or not.
-        /// </summary>
-        bool IsActive { get; }
 
         /// <summary>
         /// Pending subscribe actions.
@@ -29,12 +19,6 @@ namespace AmeisenBotX.Core.Engines.Event
         /// Pending unsubscribe actions.
         /// </summary>
         Queue<(string, Action<long, List<string>>)> UnsubscribeQueue { get; }
-
-        /// <summary>
-        /// Call this with the new event string received from the hook module.
-        /// </summary>
-        /// <param name="eventJson">JSON events string</param>
-        void OnEventPush(string eventJson);
 
         /// <summary>
         /// Initializes the event hookand sets it to active.

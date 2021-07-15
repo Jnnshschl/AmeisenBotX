@@ -1,20 +1,20 @@
 ﻿using AmeisenBotX.Core.Engines.Character.Inventory.Objects;
-using Newtonsoft.Json;
+using System;
 using System.Collections.Generic;
 using System.Globalization;
+using System.Text.Json;
+using System.Text.Json.Serialization;
 
 namespace AmeisenBotX.Core.Engines.Character.Inventory
 {
     public static class ItemFactory
     {
-        private static readonly JsonSerializerSettings JsonSerializerSettings = new()
-        {
-            Error = (sender, errorArgs) => errorArgs.ErrorContext.Handled = true
-        };
-
         public static WowBasicItem BuildSpecificItem(WowBasicItem basicItem)
         {
-            return basicItem?.Type.ToUpper(CultureInfo.InvariantCulture) switch
+            if (basicItem == null) { throw new ArgumentNullException(nameof(basicItem), "basicItem cannot be null"); }
+            if (basicItem.Type == null) { return basicItem; }
+
+            return basicItem.Type.ToUpper(CultureInfo.InvariantCulture) switch
             {
                 "ARMOR" => new WowArmor(basicItem),
                 "CONSUMABLE" => new WowConsumable(basicItem),
@@ -36,12 +36,12 @@ namespace AmeisenBotX.Core.Engines.Character.Inventory
 
         public static WowBasicItem ParseItem(string json)
         {
-            return JsonConvert.DeserializeObject<WowBasicItem>(json, JsonSerializerSettings);
+            return JsonSerializer.Deserialize<WowBasicItem>(json, new() { AllowTrailingCommas = true, NumberHandling = JsonNumberHandling.AllowReadingFromString });
         }
 
         public static List<WowBasicItem> ParseItemList(string json)
         {
-            return JsonConvert.DeserializeObject<List<WowBasicItem>>(json, JsonSerializerSettings);
+            return JsonSerializer.Deserialize<List<WowBasicItem>>(json, new() { AllowTrailingCommas = true, NumberHandling = JsonNumberHandling.AllowReadingFromString });
         }
     }
 }

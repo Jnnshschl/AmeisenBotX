@@ -3,29 +3,68 @@ using AmeisenBotX.Logging.Enums;
 using AmeisenBotX.Wow.Cache;
 using AmeisenBotX.Wow.Combatlog.Enums;
 using AmeisenBotX.Wow.Combatlog.Objects;
-using Newtonsoft.Json;
+using System;
 using System.Collections.Generic;
+using System.Text.Json;
 
 namespace AmeisenBotX.Wow.Combatlog
 {
     public class DefaultCombatLogParser : ICombatLogParser
     {
-        public DefaultCombatLogParser(IAmeisenBotDb db)
+        public DefaultCombatLogParser()
         {
-            Db = db;
         }
 
-        private IAmeisenBotDb Db { get; }
+        public event Action<ulong, ulong> OnPartyKill;
+
+        public event Action<ulong> OnUnitDied;
+
+        public event Action<ulong, ulong, int> OnDamage;
 
         public void Parse(long timestamp, List<string> args)
         {
-            AmeisenLogger.I.Log("CombatLogParser", $"[{timestamp}] Parsing CombatLog: {JsonConvert.SerializeObject(args)}", LogLevel.Verbose);
+            AmeisenLogger.I.Log("CombatLogParser", $"[{timestamp}] Parsing CombatLog: {JsonSerializer.Serialize(args)}", LogLevel.Verbose);
 
-            if (BasicCombatLogEntry.TryParse(args, out BasicCombatLogEntry basicCombatLogEntry))
+            if (BasicCombatLogEntry.TryParse(args, out BasicCombatLogEntry entry))
             {
-                KeyValuePair<CombatLogEntryType, CombatLogEntrySubtype> key = new(basicCombatLogEntry.Type, basicCombatLogEntry.Subtype);
-                Db.CacheCombatLogEntry(key, basicCombatLogEntry);
-                Db.GetCombatLogSubject().Next(basicCombatLogEntry);
+                switch (entry.Type)
+                {
+                    case CombatLogEntryType.PARTY:
+                        switch (entry.Subtype)
+                        {
+                            case CombatLogEntrySubtype.KILL:
+                                AmeisenLogger.I.Log("CombatLogParser", $"OnPartyKill({entry.SourceGuid}, {entry.DestinationGuid})");
+                                OnPartyKill?.Invoke(entry.SourceGuid, entry.DestinationGuid);
+                                break;
+                        }
+                        break;
+
+                    case CombatLogEntryType.UNIT:
+                        switch (entry.Subtype)
+                        {
+                            case CombatLogEntrySubtype.DIED:
+                                AmeisenLogger.I.Log("CombatLogParser", $"OnUnitDied({entry.SourceGuid})");
+                                OnUnitDied?.Invoke(entry.SourceGuid);
+                                break;
+                        }
+                        break;
+                }
+
+
+                switch (entry.Subtype)
+                {
+                    case CombatLogEntrySubtype.DAMAGE:
+                        if (int.TryParse(entry.Args[(int)CombatLogField.Damage], out int damage))
+                        {
+                            AmeisenLogger.I.Log("CombatLogParser", $"OnDamage({entry.SourceGuid}, {entry.DestinationGuid}, {entry.Args[(int)CombatLogField.Damage]})");
+                            OnDamage?.Invoke(entry.SourceGuid, entry.DestinationGuid, damage);
+                        }
+                        break;
+                }
+            }
+            else
+            {
+                AmeisenLogger.I.Log("CombatLogParser", $"Parsing failed", LogLevel.Verbose);
             }
         }
     }

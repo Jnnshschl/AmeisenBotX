@@ -2,10 +2,11 @@
 using AmeisenBotX.Logging;
 using AmeisenBotX.Logging.Enums;
 using AmeisenBotX.Wow;
-using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Text.Json;
+using System.Text.Json.Serialization;
 
 namespace AmeisenBotX.Core.Engines.Character.Spells
 {
@@ -16,18 +17,11 @@ namespace AmeisenBotX.Core.Engines.Character.Spells
             Wow = wowInterface;
 
             Spells = new();
-
-            JsonSerializerSettings = new()
-            {
-                Error = (sender, errorArgs) => errorArgs.ErrorContext.Handled = true
-            };
         }
 
         public delegate void SpellBookUpdate();
 
         public event SpellBookUpdate OnSpellBookUpdate;
-
-        public JsonSerializerSettings JsonSerializerSettings { get; }
 
         public List<Spell> Spells { get; private set; }
 
@@ -49,7 +43,7 @@ namespace AmeisenBotX.Core.Engines.Character.Spells
 
             try
             {
-                Spells = JsonConvert.DeserializeObject<List<Spell>>(rawSpells, JsonSerializerSettings)
+                Spells = JsonSerializer.Deserialize<List<Spell>>(rawSpells, new() { AllowTrailingCommas = true, NumberHandling = JsonNumberHandling.AllowReadingFromString })
                     .OrderBy(e => e.Name)
                     .ThenByDescending(e => e.Rank)
                     .ToList();

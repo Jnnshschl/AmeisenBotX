@@ -1,13 +1,13 @@
-﻿using Newtonsoft.Json;
+﻿using System.Text.Json.Serialization;
 
 namespace AmeisenBotX.RconClient.Messages
 {
     public class ImageMessage
     {
-        [JsonProperty("guid")]
+        [JsonPropertyName("guid")]
         public string Guid { get; set; }
 
-        [JsonProperty("image")]
+        [JsonPropertyName("image")]
         public string Image { get; set; }
     }
 }

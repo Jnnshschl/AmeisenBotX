@@ -740,7 +740,7 @@ namespace AmeisenBotX.Core.Engines.Combat.Classes.Jannis
                     if (Bot.Player.TargetGuid != guid)
                     {
                         Bot.Wow.WowTargetGuid(guid);
-                        Bot.Objects.Player.Update(Bot.Memory, Bot.Offsets);
+                        Bot.Objects.Player.Update(Bot.Memory, Bot.Wow.Offsets);
                     }
                 }
             }

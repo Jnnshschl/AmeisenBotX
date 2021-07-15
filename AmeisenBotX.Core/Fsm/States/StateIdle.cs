@@ -59,10 +59,7 @@ namespace AmeisenBotX.Core.Fsm.States
                 {
                     FirstStart = false;
 
-                    if (!Bot.Events.IsActive)
-                    {
-                        Bot.Events.Start();
-                    }
+                    Bot.Wow.Events.Start();
 
                     Bot.Wow.LuaDoString($"SetCVar(\"maxfps\", {Config.MaxFps});SetCVar(\"maxfpsbk\", {Config.MaxFps})");
                     Bot.Wow.WowEnableClickToMove();
@@ -103,7 +100,7 @@ namespace AmeisenBotX.Core.Fsm.States
             }
 
             // we are on a battleground
-            if (Bot.Memory.Read(Bot.Offsets.BattlegroundStatus, out int bgStatus)
+            if (Bot.Memory.Read(Bot.Wow.Offsets.BattlegroundStatus, out int bgStatus)
                 && bgStatus == 3
                 && !Config.BattlegroundUsePartyMode)
             {
@@ -166,8 +163,8 @@ namespace AmeisenBotX.Core.Fsm.States
                 Bot.CombatClass.OutOfCombatExecute();
             }
 
-            if (StateMachine.StateOverride != BotState.Idle
-                && StateMachine.StateOverride != BotState.None)
+            if (StateMachine.StateOverride is not BotState.Idle
+                and not BotState.None)
             {
                 StateMachine.SetState(StateMachine.StateOverride);
                 return;

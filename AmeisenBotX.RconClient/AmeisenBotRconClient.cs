@@ -1,10 +1,11 @@
 ﻿using AmeisenBotX.RconClient.Enums;
 using AmeisenBotX.RconClient.Messages;
-using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
 using System.Net.Http;
 using System.Text;
+using System.Text.Json;
+using System.Text.Json.Serialization;
 
 namespace AmeisenBotX.RconClient
 {
@@ -73,7 +74,7 @@ namespace AmeisenBotX.RconClient
 
         public bool KeepAlive()
         {
-            using StringContent content = new(JsonConvert.SerializeObject(new KeepAliveMessage() { Guid = Guid }), Encoding.UTF8, "application/json");
+            using StringContent content = new(JsonSerializer.Serialize(new KeepAliveMessage() { Guid = Guid }), Encoding.UTF8, "application/json");
             HttpResponseMessage dataResponse = HttpClient.PostAsync(KeepaliveEnpoint, content).Result;
 
             if (dataResponse.IsSuccessStatusCode)
@@ -93,7 +94,7 @@ namespace AmeisenBotX.RconClient
 
             if (dataResponse.IsSuccessStatusCode)
             {
-                PendingActions = JsonConvert.DeserializeObject<List<ActionType>>(dataResponse.Content.ReadAsStringAsync().Result);
+                PendingActions = JsonSerializer.Deserialize<List<ActionType>>(dataResponse.Content.ReadAsStringAsync().Result, new() { AllowTrailingCommas = true, NumberHandling = JsonNumberHandling.AllowReadingFromString });
                 return true;
             }
             else
@@ -105,7 +106,7 @@ namespace AmeisenBotX.RconClient
 
         public bool Register()
         {
-            using StringContent content = new(JsonConvert.SerializeObject(RegisterMessage), Encoding.UTF8, "application/json");
+            using StringContent content = new(JsonSerializer.Serialize(RegisterMessage), Encoding.UTF8, "application/json");
             HttpResponseMessage registerResponse = HttpClient.PostAsync(RegisterEnpoint, content).Result;
 
             NeedToRegister = false;
@@ -129,7 +130,7 @@ namespace AmeisenBotX.RconClient
 
             dataMessage.Guid = Guid;
 
-            using StringContent content = new(JsonConvert.SerializeObject(dataMessage), Encoding.UTF8, "application/json");
+            using StringContent content = new(JsonSerializer.Serialize(dataMessage), Encoding.UTF8, "application/json");
             HttpResponseMessage dataResponse = HttpClient.PostAsync(DataEnpoint, content).Result;
 
             if (dataResponse.IsSuccessStatusCode)
@@ -145,7 +146,7 @@ namespace AmeisenBotX.RconClient
 
         public bool SendImage(string image)
         {
-            using StringContent content = new(JsonConvert.SerializeObject(new ImageMessage() { Guid = Guid, Image = image }), Encoding.UTF8, "application/json");
+            using StringContent content = new(JsonSerializer.Serialize(new ImageMessage() { Guid = Guid, Image = image }), Encoding.UTF8, "application/json");
             HttpResponseMessage dataResponse = HttpClient.PostAsync(ImageEnpoint, content).Result;
 
             if (dataResponse.IsSuccessStatusCode)

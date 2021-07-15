@@ -32,8 +32,8 @@ namespace AmeisenBotX.Core.Engines.Character.Comparators
                 return true;
             }
 
-            double currentRating = GetRating(current, current.EquipSlot);
-            double newItemRating = GetRating(item, current.EquipSlot);
+            double currentRating = GetRating(current, (WowEquipmentSlot)current.EquipSlot);
+            double newItemRating = GetRating(item, (WowEquipmentSlot)current.EquipSlot);
             return currentRating < newItemRating;
         }
 

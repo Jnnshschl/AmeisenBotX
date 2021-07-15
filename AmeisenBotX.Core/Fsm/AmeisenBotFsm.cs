@@ -111,7 +111,7 @@ namespace AmeisenBotX.Core.Fsm
                     GetState<StateIdle>().FirstStart = true;
 
                     Bot.Movement.Reset();
-                    Bot.Events.Stop();
+                    Bot.Wow.Events.Stop();
                     return;
                 }
 
@@ -137,7 +137,7 @@ namespace AmeisenBotX.Core.Fsm
                         Bot.Movement.Execute();
 
                         // handle event subbing
-                        Bot.Events.Tick();
+                        Bot.Wow.Events.Tick();
 
                         // auto disable rendering when not in focus
                         if (Config.AutoDisableRender && RenderSwitchEvent.Run())

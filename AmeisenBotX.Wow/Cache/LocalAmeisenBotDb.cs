@@ -1,5 +1,4 @@
 ﻿using AmeisenBotX.Common.Math;
-using AmeisenBotX.Common.Offsets;
 using AmeisenBotX.Core.Data.Objects;
 using AmeisenBotX.Logging;
 using AmeisenBotX.Logging.Enums;
@@ -8,12 +7,13 @@ using AmeisenBotX.Wow.Cache.Enums;
 using AmeisenBotX.Wow.Combatlog.Enums;
 using AmeisenBotX.Wow.Combatlog.Objects;
 using AmeisenBotX.Wow.Objects.Enums;
-using Newtonsoft.Json;
 using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Text.Json;
+using System.Text.Json.Serialization;
 using System.Threading;
 
 namespace AmeisenBotX.Wow.Cache
@@ -21,53 +21,40 @@ namespace AmeisenBotX.Wow.Cache
     public class LocalAmeisenBotDb : IAmeisenBotDb
     {
         /// <summary>
-        /// Constructor for the from JSON method, you need to set GetUnitReactionFunc manually
+        /// Constructor for the "FromJson" method
         /// </summary>
         public LocalAmeisenBotDb()
         {
-            CombatLogSubject = new BasicCombatLogEntrySubject();
             Clear();
-
-            Timer cleanupTimer = new(CleanupTimerTick, null, 0, 6000);
         }
 
-        public LocalAmeisenBotDb(IMemoryApi memoryApi, IOffsetList offsetList, IWowInterface wowInterface)
+        public LocalAmeisenBotDb(IWowInterface wowInterface, IMemoryApi memoryApi)
         {
             MemoryApi = memoryApi;
-            OffsetList = offsetList;
             Wow = wowInterface;
 
-            CombatLogSubject = new();
             Clear();
-
-            Timer cleanupTimer = new(CleanupTimerTick, null, 0, 6000);
         }
 
-        public ConcurrentDictionary<int, List<Vector3>> BlacklistNodes { get; private set; }
+        public ConcurrentDictionary<int, List<Vector3>> BlacklistNodes { get; set; }
 
-        public ConcurrentDictionary<CombatLogEntryType, Dictionary<CombatLogEntrySubtype, List<(DateTime, BasicCombatLogEntry)>>> CombatLogEntries { get; private set; }
+        public ConcurrentDictionary<WowMapId, Dictionary<WowHerbId, List<Vector3>>> HerbNodes { get; set; }
 
-        public BasicCombatLogEntrySubject CombatLogSubject { get; }
+        public ConcurrentDictionary<ulong, string> Names { get; set; }
 
-        public ConcurrentDictionary<WowMapId, Dictionary<WowHerbId, List<Vector3>>> HerbNodes { get; private set; }
+        public ConcurrentDictionary<WowMapId, Dictionary<WowOreId, List<Vector3>>> OreNodes { get; set; }
 
-        public ConcurrentDictionary<ulong, string> Names { get; private set; }
+        public ConcurrentDictionary<WowMapId, Dictionary<PoiType, List<Vector3>>> PointsOfInterest { get; set; }
 
-        public ConcurrentDictionary<WowMapId, Dictionary<WowOreId, List<Vector3>>> OreNodes { get; private set; }
+        public ConcurrentDictionary<int, Dictionary<int, WowUnitReaction>> Reactions { get; set; }
 
-        public ConcurrentDictionary<WowMapId, Dictionary<PoiType, List<Vector3>>> PointsOfInterest { get; private set; }
-
-        public ConcurrentDictionary<int, Dictionary<int, WowUnitReaction>> Reactions { get; private set; }
-
-        public ConcurrentDictionary<int, string> SpellNames { get; private set; }
+        public ConcurrentDictionary<int, string> SpellNames { get; set; }
 
         private IMemoryApi MemoryApi { get; set; }
 
-        private IOffsetList OffsetList { get; set; }
-
         private IWowInterface Wow { get; set; }
 
-        public static LocalAmeisenBotDb FromJson(string dbFile, IMemoryApi memoryApi, IOffsetList offsetList, IWowInterface wowInterface)
+        public static LocalAmeisenBotDb FromJson(string dbFile, IWowInterface wowInterface, IMemoryApi memoryApi)
         {
             if (!Directory.Exists(Path.GetDirectoryName(dbFile)))
             {
@@ -79,9 +66,8 @@ namespace AmeisenBotX.Wow.Cache
 
                 try
                 {
-                    LocalAmeisenBotDb db = JsonConvert.DeserializeObject<LocalAmeisenBotDb>(File.ReadAllText(dbFile));
+                    LocalAmeisenBotDb db = JsonSerializer.Deserialize<LocalAmeisenBotDb>(File.ReadAllText(dbFile), new() { AllowTrailingCommas = true, NumberHandling = JsonNumberHandling.AllowReadingFromString });
                     db.MemoryApi = memoryApi;
-                    db.OffsetList = offsetList;
                     db.Wow = wowInterface;
                     return db;
                 }
@@ -91,17 +77,12 @@ namespace AmeisenBotX.Wow.Cache
                 }
             }
 
-            return new(memoryApi, offsetList, wowInterface);
+            return new(wowInterface, memoryApi);
         }
 
         public IReadOnlyDictionary<int, List<Vector3>> AllBlacklistNodes()
         {
             return BlacklistNodes;
-        }
-
-        public IReadOnlyDictionary<CombatLogEntryType, Dictionary<CombatLogEntrySubtype, List<(DateTime, BasicCombatLogEntry)>>> AllCombatLogEntries()
-        {
-            return CombatLogEntries;
         }
 
         public IReadOnlyDictionary<WowMapId, Dictionary<WowHerbId, List<Vector3>>> AllHerbNodes()
@@ -132,22 +113,6 @@ namespace AmeisenBotX.Wow.Cache
         public IReadOnlyDictionary<int, string> AllSpellNames()
         {
             return SpellNames;
-        }
-
-        public void CacheCombatLogEntry(KeyValuePair<CombatLogEntryType, CombatLogEntrySubtype> key, BasicCombatLogEntry entry)
-        {
-            if (!CombatLogEntries.ContainsKey(key.Key))
-            {
-                CombatLogEntries.TryAdd(key.Key, new Dictionary<CombatLogEntrySubtype, List<(DateTime, BasicCombatLogEntry)>>() { { key.Value, new List<(DateTime, BasicCombatLogEntry)>() } });
-            }
-            else if (!CombatLogEntries[key.Key].ContainsKey(key.Value))
-            {
-                CombatLogEntries[key.Key].Add(key.Value, new List<(DateTime, BasicCombatLogEntry)>() { (DateTime.UtcNow, entry) });
-            }
-            else
-            {
-                CombatLogEntries[key.Key][key.Value].Add((DateTime.UtcNow, entry));
-            }
         }
 
         public void CacheHerb(WowMapId mapId, WowHerbId displayId, Vector3 position)
@@ -214,29 +179,15 @@ namespace AmeisenBotX.Wow.Cache
             }
         }
 
-        public void CacheSpellName(int spellId, string name)
-        {
-            if (!SpellNames.ContainsKey(spellId))
-            {
-                SpellNames.TryAdd(spellId, name);
-            }
-        }
-
         public void Clear()
         {
             Names = new();
             Reactions = new();
             SpellNames = new();
-            CombatLogEntries = new();
             BlacklistNodes = new();
             PointsOfInterest = new();
             OreNodes = new();
             HerbNodes = new();
-        }
-
-        public BasicCombatLogEntrySubject GetCombatLogSubject()
-        {
-            return CombatLogSubject;
         }
 
         public WowUnitReaction GetReaction(IWowUnit a, IWowUnit b)
@@ -262,8 +213,14 @@ namespace AmeisenBotX.Wow.Cache
             else
             {
                 string name = Wow.LuaGetSpellNameById(spellId);
-                CacheSpellName(spellId, name);
-                return name;
+
+                if (!string.IsNullOrWhiteSpace(name))
+                {
+                    SpellNames.TryAdd(spellId, name);
+                    return name;
+                }
+
+                return "unk";
             }
         }
 
@@ -276,9 +233,16 @@ namespace AmeisenBotX.Wow.Cache
             }
             else
             {
-                name = unit.ReadName(MemoryApi, OffsetList);
-                Names.TryAdd(unit.Guid, name);
-                return true;
+                name = unit.ReadName(MemoryApi, Wow.Offsets);
+
+                if (!string.IsNullOrWhiteSpace(name))
+                {
+                    Names.TryAdd(unit.Guid, name);
+                    return true;
+                }
+
+                name = "unk";
+                return false;
             }
         }
 
@@ -291,7 +255,7 @@ namespace AmeisenBotX.Wow.Cache
 
             try
             {
-                File.WriteAllText(dbFile, JsonConvert.SerializeObject(this));
+                File.WriteAllText(dbFile, JsonSerializer.Serialize(this, new() { WriteIndented = true }));
             }
             catch
             {
@@ -324,22 +288,6 @@ namespace AmeisenBotX.Wow.Cache
 
             nodes = null;
             return false;
-        }
-
-        private void CleanupTimerTick(object state)
-        {
-            if (CombatLogEntries != null && CombatLogEntries.Any())
-            {
-                DateTime ts = DateTime.UtcNow - TimeSpan.FromMinutes(6);
-
-                foreach (Dictionary<CombatLogEntrySubtype, List<(DateTime, BasicCombatLogEntry)>> e in CombatLogEntries.Values)
-                {
-                    foreach (List<(DateTime, BasicCombatLogEntry)> x in e.Values)
-                    {
-                        x.RemoveAll(y => y.Item1 < ts);
-                    }
-                }
-            }
         }
     }
 }

@@ -1,30 +1,27 @@
-﻿using AmeisenBotX.Core.Engines.Event.Objects;
-using AmeisenBotX.Logging;
+﻿using AmeisenBotX.Logging;
 using AmeisenBotX.Logging.Enums;
 using AmeisenBotX.Wow;
-using Newtonsoft.Json;
+using AmeisenBotX.Wow.Events;
+using AmeisenBotX.Wow335a.Events.Objects;
 using System;
 using System.Collections.Generic;
 using System.Text;
+using System.Text.Json;
+using System.Text.Json.Serialization;
 
-namespace AmeisenBotX.Core.Engines.Event
+namespace AmeisenBotX.Wow335a.Events
 {
     /// <summary>
     /// This class is an interface to wow's ingame event system.
     /// </summary>
-    public class DefaultEventManager : IEventManager
+    public class SimpleEventManager : IEventManager
     {
-        public DefaultEventManager(IWowInterface wowInterface, string frameName)
+        public SimpleEventManager(Func<string, bool> luaDoString, string frameName)
         {
-            Wow = wowInterface;
+            LuaDoString = luaDoString;
             FrameName = frameName;
 
             Setup();
-
-            JsonSerializerSettings = new()
-            {
-                Error = (sender, errorArgs) => errorArgs.ErrorContext.Handled = true
-            };
         }
 
         ///<inheritdoc cref="IEventManager.Events"/>
@@ -42,11 +39,9 @@ namespace AmeisenBotX.Core.Engines.Event
         ///<inheritdoc cref="IEventManager.UnsubscribeQueue"/>
         public Queue<(string, Action<long, List<string>>)> UnsubscribeQueue { get; private set; }
 
-        private JsonSerializerSettings JsonSerializerSettings { get; }
-
         private Queue<string> PendingLuaToExecute { get; set; }
 
-        private IWowInterface Wow { get; }
+        private Func<string, bool> LuaDoString { get; }
 
         ///<inheritdoc cref="IEventManager.OnEventPush(string)"/>
         public void OnEventPush(string eventJson)
@@ -54,7 +49,7 @@ namespace AmeisenBotX.Core.Engines.Event
             if (eventJson.Length > 2)
             {
                 AmeisenLogger.I.Log("WoWEvents", $"Firing events: {eventJson}", LogLevel.Verbose);
-                List<WowEvent> events = JsonConvert.DeserializeObject<List<WowEvent>>(eventJson, JsonSerializerSettings);
+                List<WowEvent> events = JsonSerializer.Deserialize<List<WowEvent>>(eventJson, new() { AllowTrailingCommas = true, NumberHandling = JsonNumberHandling.AllowReadingFromString });
 
                 if (events != null && events.Count > 0)
                 {
@@ -93,11 +88,7 @@ namespace AmeisenBotX.Core.Engines.Event
                 Setup();
 
                 IsActive = false;
-
-                if (Wow.IsReady)
-                {
-                    Wow.LuaDoString($"{FrameName}:UnregisterAllEvents();{FrameName}:SetScript(\"OnEvent\", nil);");
-                }
+                LuaDoString($"{FrameName}:UnregisterAllEvents();{FrameName}:SetScript(\"OnEvent\", nil);");
             }
         }
 
@@ -115,7 +106,7 @@ namespace AmeisenBotX.Core.Engines.Event
             HandleUnsubEventQueue();
 
             if (PendingLuaToExecute.Count > 0
-                && Wow.LuaDoString(PendingLuaToExecute.Peek()))
+                && LuaDoString(PendingLuaToExecute.Peek()))
             {
                 PendingLuaToExecute.Dequeue();
             }

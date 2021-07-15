@@ -4,10 +4,10 @@ using AmeisenBotX.Core;
 using AmeisenBotX.Core.Data.Objects;
 using AmeisenBotX.Wow.Cache.Enums;
 using AmeisenBotX.Wow.Objects.Enums;
-using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Text.Json;
 using System.Windows;
 using System.Windows.Input;
 
@@ -31,12 +31,12 @@ namespace AmeisenBotX
 
         private void ButtonEventSubscribe_Click(object sender, RoutedEventArgs e)
         {
-            AmeisenBot.Bot.Events.Subscribe(textboxEventName.Text, OnWowEventFired);
+            AmeisenBot.Bot.Wow.Events.Subscribe(textboxEventName.Text, OnWowEventFired);
         }
 
         private void ButtonEventUnsubscribe_Click(object sender, RoutedEventArgs e)
         {
-            AmeisenBot.Bot.Events.Unsubscribe(textboxEventName.Text, OnWowEventFired);
+            AmeisenBot.Bot.Wow.Events.Unsubscribe(textboxEventName.Text, OnWowEventFired);
         }
 
         private void ButtonExit_Click(object sender, RoutedEventArgs e)
@@ -70,7 +70,7 @@ namespace AmeisenBotX
         {
             Dispatcher.Invoke(() =>
             {
-                textboxEventResult.AppendText($"{timestamp} - {JsonConvert.SerializeObject(args)}\n");
+                textboxEventResult.AppendText($"{timestamp} - {JsonSerializer.Serialize(args)}\n");
             });
         }
 
@@ -84,7 +84,7 @@ namespace AmeisenBotX
                 {
                     foreach (KeyValuePair<PoiType, List<Vector3>> typePair in mapIdPair.Value.OrderBy(e => e.Key))
                     {
-                        listviewCachePoi.Items.Add($"{mapIdPair.Key} {typePair.Key}: {JsonConvert.SerializeObject(typePair.Value)}");
+                        listviewCachePoi.Items.Add($"{mapIdPair.Key} {typePair.Key}: {JsonSerializer.Serialize(typePair.Value)}");
                     }
                 }
             }
@@ -96,7 +96,7 @@ namespace AmeisenBotX
                 {
                     foreach (KeyValuePair<WowOreId, List<Vector3>> typePair in mapIdPair.Value.OrderBy(e => e.Key))
                     {
-                        listviewCacheOre.Items.Add($"{mapIdPair.Key} {typePair.Key}: {JsonConvert.SerializeObject(typePair.Value)}");
+                        listviewCacheOre.Items.Add($"{mapIdPair.Key} {typePair.Key}: {JsonSerializer.Serialize(typePair.Value)}");
                     }
                 }
             }
@@ -108,7 +108,7 @@ namespace AmeisenBotX
                 {
                     foreach (KeyValuePair<WowHerbId, List<Vector3>> typePair in mapIdPair.Value.OrderBy(e => e.Key))
                     {
-                        listviewCacheHerb.Items.Add($"{mapIdPair.Key} {typePair.Key}: {JsonConvert.SerializeObject(typePair.Value)}");
+                        listviewCacheHerb.Items.Add($"{mapIdPair.Key} {typePair.Key}: {JsonSerializer.Serialize(typePair.Value)}");
                     }
                 }
             }

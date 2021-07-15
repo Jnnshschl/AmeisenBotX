@@ -25,25 +25,29 @@ namespace AmeisenBotX.Core.Fsm.States
 
         public override void Execute()
         {
-            if (!Config.AutoTalkToNearQuestgivers
-                || !StateMachine.GetState<StateFollowing>().IsUnitToFollowThere(out IWowUnit unitToFollow, true)
-                || unitToFollow.TargetGuid == 0)
+            if (Config.AutoTalkToNearQuestgivers)
             {
-                StateMachine.SetState(BotState.Idle);
-                return;
-            }
+                if (StateMachine.GetState<StateFollowing>().IsUnitToFollowThere(out IWowUnit unitToFollow, true)
+                    && unitToFollow.TargetGuid != 0)
+                {
+                    IWowUnit target = Bot.GetWowObjectByGuid<IWowUnit>(unitToFollow.TargetGuid);
 
-            IWowUnit target = Bot.GetWowObjectByGuid<IWowUnit>(unitToFollow.TargetGuid);
+                    if (target == null || unitToFollow.DistanceTo(target) >= 5.0f || !(target.IsQuestgiver || target.IsGossip))
+                    {
+                        StateMachine.SetState(BotState.Idle);
+                        return;
+                    }
 
-            if (target == null || unitToFollow.DistanceTo(target) >= 5.0f || !(target.IsQuestgiver || target.IsGossip))
-            {
-                StateMachine.SetState(BotState.Idle);
-                return;
-            }
-
-            if (QuestgiverCheckEvent.Run())
-            {
-                HandleAutoQuestMode(target);
+                    if (QuestgiverCheckEvent.Run())
+                    {
+                        HandleAutoQuestMode(target);
+                    }
+                }
+                else
+                {
+                    StateMachine.SetState(BotState.Idle);
+                    return;
+                }
             }
         }
 
@@ -53,9 +57,7 @@ namespace AmeisenBotX.Core.Fsm.States
 
         private void HandleAutoQuestMode(IWowUnit possibleQuestgiver)
         {
-            float distance = Bot.Player.Position.GetDistance(possibleQuestgiver.Position);
-
-            if (distance > 4.0f)
+            if (Bot.Player.Position.GetDistance(possibleQuestgiver.Position) > 4.0f)
             {
                 Bot.Movement.SetMovementAction(MovementAction.Move, possibleQuestgiver.Position);
             }

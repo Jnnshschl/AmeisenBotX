@@ -102,7 +102,7 @@ namespace AmeisenBotX.Core.Fsm.States
                 .Where(e => e.DisplayId == (int)WowGameobjectDisplayId.UtgardeKeepDungeonPortalNormal
                          || e.DisplayId == (int)WowGameobjectDisplayId.UtgardeKeepDungeonPortalHeroic);
 
-            if (Bot.Memory.Read(Bot.Offsets.CorpsePosition, out Vector3 corpsePosition))
+            if (Bot.Memory.Read(Bot.Wow.Offsets.CorpsePosition, out Vector3 corpsePosition))
             {
                 CorpsePosition = corpsePosition;
             }

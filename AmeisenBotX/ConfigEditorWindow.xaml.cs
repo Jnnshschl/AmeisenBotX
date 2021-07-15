@@ -164,7 +164,6 @@ namespace AmeisenBotX
                 Config.Username = textboxUsername.Text;
 
                 Config.MovementSettings.EnableDistanceMovedJumpCheck = checkboxDistanceMovedJumpCheck.IsChecked.GetValueOrDefault(false);
-                Config.MovementSettings.EnableTracelineJumpCheck = checkboxTracelineJumpCheck.IsChecked.GetValueOrDefault(false);
                 Config.MovementSettings.MaxAcceleration = (float)sliderMaxAccelerationNormal.Value / 100.0f;
                 Config.MovementSettings.MaxAccelerationCombat = (float)sliderMaxAccelerationCombat.Value / 100.0f;
                 Config.MovementSettings.MaxSteering = (float)sliderMaxSteeringNormal.Value / 100.0f;
@@ -438,7 +437,6 @@ namespace AmeisenBotX
             textboxWowPath.Text = Config.PathToWowExe;
 
             checkboxDistanceMovedJumpCheck.IsChecked = Config.MovementSettings.EnableDistanceMovedJumpCheck;
-            checkboxTracelineJumpCheck.IsChecked = Config.MovementSettings.EnableTracelineJumpCheck;
             sliderMaxAccelerationCombat.Value = Config.MovementSettings.MaxAccelerationCombat * 100.0f;
             sliderMaxAccelerationNormal.Value = Config.MovementSettings.MaxAcceleration * 100.0f;
             sliderMaxSteeringCombat.Value = Config.MovementSettings.MaxSteeringCombat * 100.0f;

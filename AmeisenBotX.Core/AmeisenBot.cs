@@ -1,5 +1,6 @@
 ﻿using AmeisenBotX.Common.Math;
 using AmeisenBotX.Common.Utils;
+using AmeisenBotX.Core.Data.Objects;
 using AmeisenBotX.Core.Engines.Battleground;
 using AmeisenBotX.Core.Engines.Battleground.einTyp;
 using AmeisenBotX.Core.Engines.Battleground.Jannis;
@@ -10,7 +11,6 @@ using AmeisenBotX.Core.Engines.Character.Inventory.Objects;
 using AmeisenBotX.Core.Engines.Chat;
 using AmeisenBotX.Core.Engines.Combat.Classes;
 using AmeisenBotX.Core.Engines.Dungeon;
-using AmeisenBotX.Core.Engines.Event;
 using AmeisenBotX.Core.Engines.Grinding;
 using AmeisenBotX.Core.Engines.Grinding.Profiles;
 using AmeisenBotX.Core.Engines.Grinding.Profiles.Profiles.Alliance.Group;
@@ -18,7 +18,7 @@ using AmeisenBotX.Core.Engines.Jobs;
 using AmeisenBotX.Core.Engines.Jobs.Profiles;
 using AmeisenBotX.Core.Engines.Jobs.Profiles.Gathering;
 using AmeisenBotX.Core.Engines.Jobs.Profiles.Gathering.Jannis;
-using AmeisenBotX.Core.Engines.Movement.AMovementEngine;
+using AmeisenBotX.Core.Engines.Movement;
 using AmeisenBotX.Core.Engines.Movement.Pathfinding;
 using AmeisenBotX.Core.Engines.Quest;
 using AmeisenBotX.Core.Engines.Quest.Profiles;
@@ -28,7 +28,6 @@ using AmeisenBotX.Core.Engines.Tactic;
 using AmeisenBotX.Core.Fsm;
 using AmeisenBotX.Core.Fsm.Enums;
 using AmeisenBotX.Core.Fsm.States;
-using AmeisenBotX.Core.Hook.Modules;
 using AmeisenBotX.Logging;
 using AmeisenBotX.Logging.Enums;
 using AmeisenBotX.Memory;
@@ -36,10 +35,10 @@ using AmeisenBotX.Memory.Win32;
 using AmeisenBotX.RconClient.Enums;
 using AmeisenBotX.RconClient.Messages;
 using AmeisenBotX.Wow.Cache;
+using AmeisenBotX.Wow.Cache.Enums;
 using AmeisenBotX.Wow.Combatlog;
 using AmeisenBotX.Wow.Objects.Enums;
 using AmeisenBotX.Wow335a;
-using AmeisenBotX.Wow335a.Offsets;
 using Microsoft.CSharp;
 using System;
 using System.CodeDom.Compiler;
@@ -84,11 +83,10 @@ namespace AmeisenBotX.Core
 
             if (logfilePath == "DEFAULT") { logfilePath = Path.Combine(DataFolder, "log/"); }
 
-            AmeisenLogger.I.ChangeLogFolder(logfilePath);
-            AmeisenLogger.I.ActiveLogLevel = initialLogLevel;
-
             if (Directory.Exists(logfilePath))
             {
+                AmeisenLogger.I.ChangeLogFolder(logfilePath);
+                AmeisenLogger.I.ActiveLogLevel = initialLogLevel;
                 AmeisenLogger.I.Start();
             }
 
@@ -105,29 +103,28 @@ namespace AmeisenBotX.Core
             Bot.Chat = new DefaultChatManager(Config, DataFolder);
             Bot.Tactic = new DefaultTacticEngine();
 
-            // name of the frame used to capture wows events
-            string eventHookFrameName = BotUtils.FastRandomStringOnlyLetters();
-
             // load the wow specific interface based on file version (build number)
             Bot.Wow = FileVersionInfo.GetVersionInfo(config.PathToWowExe).FilePrivatePart switch
             {
-                12340 => new WowInterface335a(Bot.Memory, Bot.Offsets = new OffsetList335a(), new List<IHookModule> { new TracelineJumpHookModule(null, TraceLineJumpCheck, Bot.Memory, Bot.Offsets) }, eventHookFrameName),
+                12340 => new WowInterface335a(Bot.Memory),
                 _ => throw new ArgumentException("Unsupported wow version", nameof(config)),
             };
+
+            AmeisenLogger.I.Log("AmeisenBot", $"Using OffsetList: {Bot.Wow.Offsets.GetType().Name}", LogLevel.Master);
 
             Bot.Wow.OnStaticPopup += OnStaticPopup;
             Bot.Wow.OnBattlegroundStatus += OnBattlegroundStatusChanged;
 
-            Bot.Events = new DefaultEventManager(Bot.Wow, eventHookFrameName);
-            Bot.Wow.OnEventPush += Bot.Events.OnEventPush;
-
-            Bot.Character = new DefaultCharacterManager(Bot.Wow, Bot.Memory, Bot.Offsets);
+            Bot.Character = new DefaultCharacterManager(Bot.Wow, Bot.Memory);
 
             string dbPath = Path.Combine(DataFolder, "db.json");
             AmeisenLogger.I.Log("AmeisenBot", $"Loading DB from: {dbPath}", LogLevel.Master);
-            Bot.Db = LocalAmeisenBotDb.FromJson(dbPath, Bot.Memory, Bot.Offsets, Bot.Wow);
+            Bot.Db = LocalAmeisenBotDb.FromJson(dbPath, Bot.Wow, Bot.Memory);
 
-            Bot.CombatLog = new DefaultCombatLogParser(Bot.Db);
+            PoiCacheEvent = new TimegatedEvent(TimeSpan.FromSeconds(2));
+            Bot.Objects.OnObjectUpdateComplete += OnObjectUpdateComplete;
+
+            Bot.CombatLog = new DefaultCombatLogParser();
 
             // setup all instances that use the whole Bot class last
             Bot.Dungeon = new DefaultDungeonEngine(Bot);
@@ -136,11 +133,8 @@ namespace AmeisenBotX.Core
             Bot.Grinding = new DefaultGrindingEngine(Bot, Config, StateMachine);
 
             Bot.PathfindingHandler = new NavmeshServerPathfindingHandler(Config.NavmeshServerIp, Config.NameshServerPort);
-            Bot.MovementSettings = Config.MovementSettings;
             Bot.Movement = new DefaultMovementEngine(Bot, Config);
             // wow interface setup done
-
-            AmeisenLogger.I.Log("AmeisenBot", $"Using OffsetList: {Bot.Offsets.GetType()}", LogLevel.Master);
 
             StateMachine = new(Config, Bot);
             StateMachine.GetState<StateStartWow>().OnWoWStarted += () =>
@@ -264,6 +258,8 @@ namespace AmeisenBotX.Core
 
         private bool NeedToSetupRconClient { get; set; }
 
+        private TimegatedEvent PoiCacheEvent { get; }
+
         private Timer RconClientTimer { get; set; }
 
         private TimegatedEvent RconScreenshotEvent { get; }
@@ -291,7 +287,7 @@ namespace AmeisenBotX.Core
                 RconClientTimer.Dispose();
             }
 
-            Bot.Events.Stop();
+            Bot.Wow.Events.Stop();
 
             if (Config.AutocloseWow || Config.AutoPositionWow)
             {
@@ -332,9 +328,9 @@ namespace AmeisenBotX.Core
             AmeisenLogger.I.Log("AmeisenBot", "Pausing", LogLevel.Debug);
             IsRunning = false;
 
-            if (StateMachine.CurrentState.Key != BotState.StartWow
-                && StateMachine.CurrentState.Key != BotState.Login
-                && StateMachine.CurrentState.Key != BotState.LoadingScreen)
+            if (StateMachine.CurrentState.Key is not BotState.StartWow
+                and not BotState.Login
+                and not BotState.LoadingScreen)
             {
                 StateMachine.SetState(BotState.Idle);
             }
@@ -408,13 +404,12 @@ namespace AmeisenBotX.Core
 
             if (results.Errors.HasErrors)
             {
+                CompilerErrorCollection errors = results.Errors;
                 StringBuilder sb = new();
-                CompilerErrorCollection list = results.Errors;
 
-                for (int i = 0; i < list.Count; ++i)
+                for (int i = 0; i < errors.Count; ++i)
                 {
-                    CompilerError error = list[i];
-                    sb.AppendLine($"Error {error.ErrorNumber} Line: {error.Line}: {error.ErrorText}");
+                    sb.AppendLine($"Error {errors[i].ErrorNumber} Line: {errors[i].Line}: {errors[i].ErrorText}");
                 }
 
                 throw new(sb.ToString());
@@ -683,6 +678,62 @@ namespace AmeisenBotX.Core
             Bot.Wow.LuaLootEveryThing();
         }
 
+        private void OnObjectUpdateComplete(IEnumerable<IWowObject> wowObjects)
+        {
+            if (Config.CachePointsOfInterest && PoiCacheEvent.Run())
+            {
+                IEnumerable<IWowGameobject> wowGameobjects = wowObjects.OfType<IWowGameobject>();
+                IEnumerable<IWowUnit> wowUnits = wowObjects.OfType<IWowUnit>();
+
+                // Remember Ore/Herb positions for farming
+                foreach (IWowGameobject gameobject in wowGameobjects.Where(e => Enum.IsDefined(typeof(WowOreId), e.DisplayId)))
+                {
+                    Bot.Db.CacheOre(Bot.Objects.MapId, (WowOreId)gameobject.DisplayId, gameobject.Position);
+                }
+
+                foreach (IWowGameobject gameobject in wowGameobjects.Where(e => Enum.IsDefined(typeof(WowHerbId), e.DisplayId)))
+                {
+                    Bot.Db.CacheHerb(Bot.Objects.MapId, (WowHerbId)gameobject.DisplayId, gameobject.Position);
+                }
+
+                // Remember Mailboxes
+                foreach (IWowGameobject gameobject in wowGameobjects.Where(e => e.GameobjectType == WowGameobjectType.Mailbox))
+                {
+                    Bot.Db.CachePoi(Bot.Objects.MapId, PoiType.Mailbox, gameobject.Position);
+                }
+
+                // Remember Auctioneers
+                foreach (IWowUnit unit in wowUnits.Where(e => e.IsAuctioneer))
+                {
+                    Bot.Db.CachePoi(Bot.Objects.MapId, PoiType.Auctioneer, unit.Position);
+                }
+
+                // Remember Fishingspots and places where people fished at
+                foreach (IWowGameobject gameobject in wowGameobjects.Where(e => e.GameobjectType is WowGameobjectType.FishingHole or WowGameobjectType.FishingBobber))
+                {
+                    IWowUnit originUnit = wowObjects.OfType<IWowUnit>().FirstOrDefault(e => e.Guid == gameobject.CreatedBy);
+
+                    // dont cache positions too close to eachother
+                    if (originUnit != null && !Bot.Db.TryGetPointsOfInterest(Bot.Objects.MapId, PoiType.FishingSpot, originUnit.Position, 5.0f, out IEnumerable<Vector3> pois))
+                    {
+                        Bot.Db.CachePoi(Bot.Objects.MapId, PoiType.FishingSpot, originUnit.Position);
+                    }
+                }
+
+                // Remember Vendors
+                foreach (IWowUnit unit in wowUnits.Where(e => e.IsVendor))
+                {
+                    Bot.Db.CachePoi(Bot.Objects.MapId, PoiType.Vendor, unit.Position);
+                }
+
+                // Remember Repair Vendors
+                foreach (IWowUnit unit in wowUnits.Where(e => e.IsRepairVendor))
+                {
+                    Bot.Db.CachePoi(Bot.Objects.MapId, PoiType.Repair, unit.Position);
+                }
+            }
+        }
+
         private void OnPartyInvitation(long timestamp, List<string> args)
         {
             if (!Config.OnlyFriendsMode || (args.Count >= 1 && Config.Friends.Split(',').Any(e => e.Equals(args[0], StringComparison.OrdinalIgnoreCase))))
@@ -828,11 +879,11 @@ namespace AmeisenBotX.Core
                             {
                                 BagSlotsFree = 0,
                                 CombatClass = Bot.CombatClass != null ? Bot.CombatClass.Role.ToString() : "NoCombatClass",
-                                CurrentProfile = "",
+                                CurrentProfile = string.Empty,
                                 Energy = currentResource,
                                 Exp = Bot.Player.Xp,
                                 Health = Bot.Player.Health,
-                                ItemLevel = (int)Math.Round(Bot.Character.Equipment.AverageItemLevel),
+                                ItemLevel = (int)MathF.Round(Bot.Character.Equipment.AverageItemLevel),
                                 Level = Bot.Player.Level,
                                 MapName = Bot.Objects.MapId.ToString(),
                                 MaxEnergy = maxResource,
@@ -849,8 +900,7 @@ namespace AmeisenBotX.Core
 
                             if (Config.RconSendScreenshots && RconScreenshotEvent.Run())
                             {
-                                Rect rc = new();
-                                Bot.Memory.GetClientSize();
+                                Rect rc = Bot.Memory.GetClientSize();
                                 Bitmap bmp = new(rc.Right - rc.Left, rc.Bottom - rc.Top, PixelFormat.Format32bppArgb);
 
                                 using (Graphics g = Graphics.FromImage(bmp))
@@ -960,89 +1010,73 @@ namespace AmeisenBotX.Core
             EquipmentUpdateEvent = new(TimeSpan.FromSeconds(1));
 
             // Request Events
-            Bot.Events.Subscribe("PARTY_INVITE_REQUEST", OnPartyInvitation);
-            Bot.Events.Subscribe("RESURRECT_REQUEST", OnResurrectRequest);
-            Bot.Events.Subscribe("CONFIRM_SUMMON", OnSummonRequest);
-            Bot.Events.Subscribe("READY_CHECK", OnReadyCheck);
+            Bot.Wow.Events.Subscribe("PARTY_INVITE_REQUEST", OnPartyInvitation);
+            Bot.Wow.Events.Subscribe("RESURRECT_REQUEST", OnResurrectRequest);
+            Bot.Wow.Events.Subscribe("CONFIRM_SUMMON", OnSummonRequest);
+            Bot.Wow.Events.Subscribe("READY_CHECK", OnReadyCheck);
 
             // Loot/Item Events
-            Bot.Events.Subscribe("LOOT_OPENED", OnLootWindowOpened);
-            Bot.Events.Subscribe("LOOT_BIND_CONFIRM", OnConfirmBindOnPickup);
-            Bot.Events.Subscribe("AUTOEQUIP_BIND_CONFIRM", OnConfirmBindOnPickup);
-            Bot.Events.Subscribe("CONFIRM_LOOT_ROLL", OnConfirmLootRoll);
-            Bot.Events.Subscribe("START_LOOT_ROLL", OnLootRollStarted);
-            Bot.Events.Subscribe("BAG_UPDATE", OnBagChanged);
-            Bot.Events.Subscribe("PLAYER_EQUIPMENT_CHANGED", OnEquipmentChanged);
+            Bot.Wow.Events.Subscribe("LOOT_OPENED", OnLootWindowOpened);
+            Bot.Wow.Events.Subscribe("LOOT_BIND_CONFIRM", OnConfirmBindOnPickup);
+            Bot.Wow.Events.Subscribe("AUTOEQUIP_BIND_CONFIRM", OnConfirmBindOnPickup);
+            Bot.Wow.Events.Subscribe("CONFIRM_LOOT_ROLL", OnConfirmLootRoll);
+            Bot.Wow.Events.Subscribe("START_LOOT_ROLL", OnLootRollStarted);
+            Bot.Wow.Events.Subscribe("BAG_UPDATE", OnBagChanged);
+            Bot.Wow.Events.Subscribe("PLAYER_EQUIPMENT_CHANGED", OnEquipmentChanged);
             // Bot.EventHookManager.Subscribe("DELETE_ITEM_CONFIRM", OnConfirmDeleteItem);
 
             // Merchant Events
             // Bot.EventHookManager.Subscribe("MERCHANT_SHOW", OnMerchantShow);
 
             // PvP Events
-            Bot.Events.Subscribe("UPDATE_BATTLEFIELD_STATUS", OnPvpQueueShow);
-            Bot.Events.Subscribe("PVPQUEUE_ANYWHERE_SHOW", OnPvpQueueShow);
+            Bot.Wow.Events.Subscribe("UPDATE_BATTLEFIELD_STATUS", OnPvpQueueShow);
+            Bot.Wow.Events.Subscribe("PVPQUEUE_ANYWHERE_SHOW", OnPvpQueueShow);
 
             // Dungeon Events
-            Bot.Events.Subscribe("LFG_ROLE_CHECK_SHOW", OnLfgRoleCheckShow);
-            Bot.Events.Subscribe("LFG_PROPOSAL_SHOW", OnLfgProposalShow);
+            Bot.Wow.Events.Subscribe("LFG_ROLE_CHECK_SHOW", OnLfgRoleCheckShow);
+            Bot.Wow.Events.Subscribe("LFG_PROPOSAL_SHOW", OnLfgProposalShow);
 
             // Quest Events
-            Bot.Events.Subscribe("QUEST_DETAIL", OnShowQuestFrame);
-            Bot.Events.Subscribe("QUEST_ACCEPT_CONFIRM", OnQuestAcceptConfirm);
-            Bot.Events.Subscribe("QUEST_GREETING", OnQuestGreeting);
-            Bot.Events.Subscribe("QUEST_COMPLETE", OnQuestProgress);
-            Bot.Events.Subscribe("QUEST_PROGRESS", OnQuestProgress);
-            Bot.Events.Subscribe("GOSSIP_SHOW", OnQuestGreeting);
+            Bot.Wow.Events.Subscribe("QUEST_DETAIL", OnShowQuestFrame);
+            Bot.Wow.Events.Subscribe("QUEST_ACCEPT_CONFIRM", OnQuestAcceptConfirm);
+            Bot.Wow.Events.Subscribe("QUEST_GREETING", OnQuestGreeting);
+            Bot.Wow.Events.Subscribe("QUEST_COMPLETE", OnQuestProgress);
+            Bot.Wow.Events.Subscribe("QUEST_PROGRESS", OnQuestProgress);
+            Bot.Wow.Events.Subscribe("GOSSIP_SHOW", OnQuestGreeting);
 
             // Trading Events
-            Bot.Events.Subscribe("TRADE_ACCEPT_UPDATE", OnTradeAcceptUpdate);
+            Bot.Wow.Events.Subscribe("TRADE_ACCEPT_UPDATE", OnTradeAcceptUpdate);
 
             // Chat Events
-            Bot.Events.Subscribe("CHAT_MSG_ADDON", (t, a) => Bot.Chat.TryParseMessage(WowChat.ADDON, t, a));
-            Bot.Events.Subscribe("CHAT_MSG_CHANNEL", (t, a) => Bot.Chat.TryParseMessage(WowChat.CHANNEL, t, a));
-            Bot.Events.Subscribe("CHAT_MSG_EMOTE", (t, a) => Bot.Chat.TryParseMessage(WowChat.EMOTE, t, a));
-            Bot.Events.Subscribe("CHAT_MSG_FILTERED", (t, a) => Bot.Chat.TryParseMessage(WowChat.FILTERED, t, a));
-            Bot.Events.Subscribe("CHAT_MSG_GUILD", (t, a) => Bot.Chat.TryParseMessage(WowChat.GUILD, t, a));
-            Bot.Events.Subscribe("CHAT_MSG_GUILD_ACHIEVEMENT", (t, a) => Bot.Chat.TryParseMessage(WowChat.GUILD_ACHIEVEMENT, t, a));
-            Bot.Events.Subscribe("CHAT_MSG_IGNORED", (t, a) => Bot.Chat.TryParseMessage(WowChat.IGNORED, t, a));
-            Bot.Events.Subscribe("CHAT_MSG_MONSTER_EMOTE", (t, a) => Bot.Chat.TryParseMessage(WowChat.MONSTER_EMOTE, t, a));
-            Bot.Events.Subscribe("CHAT_MSG_MONSTER_PARTY", (t, a) => Bot.Chat.TryParseMessage(WowChat.MONSTER_PARTY, t, a));
-            Bot.Events.Subscribe("CHAT_MSG_MONSTER_SAY", (t, a) => Bot.Chat.TryParseMessage(WowChat.MONSTER_SAY, t, a));
-            Bot.Events.Subscribe("CHAT_MSG_MONSTER_WHISPER", (t, a) => Bot.Chat.TryParseMessage(WowChat.MONSTER_WHISPER, t, a));
-            Bot.Events.Subscribe("CHAT_MSG_MONSTER_YELL", (t, a) => Bot.Chat.TryParseMessage(WowChat.MONSTER_YELL, t, a));
-            Bot.Events.Subscribe("CHAT_MSG_OFFICER", (t, a) => Bot.Chat.TryParseMessage(WowChat.OFFICER, t, a));
-            Bot.Events.Subscribe("CHAT_MSG_PARTY", (t, a) => Bot.Chat.TryParseMessage(WowChat.PARTY, t, a));
-            Bot.Events.Subscribe("CHAT_MSG_PARTY_LEADER", (t, a) => Bot.Chat.TryParseMessage(WowChat.PARTY_LEADER, t, a));
-            Bot.Events.Subscribe("CHAT_MSG_RAID", (t, a) => Bot.Chat.TryParseMessage(WowChat.RAID, t, a));
-            Bot.Events.Subscribe("CHAT_MSG_RAID_BOSS_EMOTE", (t, a) => Bot.Chat.TryParseMessage(WowChat.RAID_BOSS_EMOTE, t, a));
-            Bot.Events.Subscribe("CHAT_MSG_RAID_BOSS_WHISPER", (t, a) => Bot.Chat.TryParseMessage(WowChat.RAID_BOSS_WHISPER, t, a));
-            Bot.Events.Subscribe("CHAT_MSG_RAID_LEADER", (t, a) => Bot.Chat.TryParseMessage(WowChat.RAID_LEADER, t, a));
-            Bot.Events.Subscribe("CHAT_MSG_RAID_WARNING", (t, a) => Bot.Chat.TryParseMessage(WowChat.RAID_WARNING, t, a));
-            Bot.Events.Subscribe("CHAT_MSG_SAY", (t, a) => Bot.Chat.TryParseMessage(WowChat.SAY, t, a));
-            Bot.Events.Subscribe("CHAT_MSG_SYSTEM", (t, a) => Bot.Chat.TryParseMessage(WowChat.SYSTEM, t, a));
-            Bot.Events.Subscribe("CHAT_MSG_TEXT_EMOTE", (t, a) => Bot.Chat.TryParseMessage(WowChat.TEXT_EMOTE, t, a));
-            Bot.Events.Subscribe("CHAT_MSG_WHISPER", (t, a) => Bot.Chat.TryParseMessage(WowChat.WHISPER, t, a));
-            Bot.Events.Subscribe("CHAT_MSG_YELL", (t, a) => Bot.Chat.TryParseMessage(WowChat.YELL, t, a));
+            Bot.Wow.Events.Subscribe("CHAT_MSG_ADDON", (t, a) => Bot.Chat.TryParseMessage(WowChat.ADDON, t, a));
+            Bot.Wow.Events.Subscribe("CHAT_MSG_CHANNEL", (t, a) => Bot.Chat.TryParseMessage(WowChat.CHANNEL, t, a));
+            Bot.Wow.Events.Subscribe("CHAT_MSG_EMOTE", (t, a) => Bot.Chat.TryParseMessage(WowChat.EMOTE, t, a));
+            Bot.Wow.Events.Subscribe("CHAT_MSG_FILTERED", (t, a) => Bot.Chat.TryParseMessage(WowChat.FILTERED, t, a));
+            Bot.Wow.Events.Subscribe("CHAT_MSG_GUILD", (t, a) => Bot.Chat.TryParseMessage(WowChat.GUILD, t, a));
+            Bot.Wow.Events.Subscribe("CHAT_MSG_GUILD_ACHIEVEMENT", (t, a) => Bot.Chat.TryParseMessage(WowChat.GUILD_ACHIEVEMENT, t, a));
+            Bot.Wow.Events.Subscribe("CHAT_MSG_IGNORED", (t, a) => Bot.Chat.TryParseMessage(WowChat.IGNORED, t, a));
+            Bot.Wow.Events.Subscribe("CHAT_MSG_MONSTER_EMOTE", (t, a) => Bot.Chat.TryParseMessage(WowChat.MONSTER_EMOTE, t, a));
+            Bot.Wow.Events.Subscribe("CHAT_MSG_MONSTER_PARTY", (t, a) => Bot.Chat.TryParseMessage(WowChat.MONSTER_PARTY, t, a));
+            Bot.Wow.Events.Subscribe("CHAT_MSG_MONSTER_SAY", (t, a) => Bot.Chat.TryParseMessage(WowChat.MONSTER_SAY, t, a));
+            Bot.Wow.Events.Subscribe("CHAT_MSG_MONSTER_WHISPER", (t, a) => Bot.Chat.TryParseMessage(WowChat.MONSTER_WHISPER, t, a));
+            Bot.Wow.Events.Subscribe("CHAT_MSG_MONSTER_YELL", (t, a) => Bot.Chat.TryParseMessage(WowChat.MONSTER_YELL, t, a));
+            Bot.Wow.Events.Subscribe("CHAT_MSG_OFFICER", (t, a) => Bot.Chat.TryParseMessage(WowChat.OFFICER, t, a));
+            Bot.Wow.Events.Subscribe("CHAT_MSG_PARTY", (t, a) => Bot.Chat.TryParseMessage(WowChat.PARTY, t, a));
+            Bot.Wow.Events.Subscribe("CHAT_MSG_PARTY_LEADER", (t, a) => Bot.Chat.TryParseMessage(WowChat.PARTY_LEADER, t, a));
+            Bot.Wow.Events.Subscribe("CHAT_MSG_RAID", (t, a) => Bot.Chat.TryParseMessage(WowChat.RAID, t, a));
+            Bot.Wow.Events.Subscribe("CHAT_MSG_RAID_BOSS_EMOTE", (t, a) => Bot.Chat.TryParseMessage(WowChat.RAID_BOSS_EMOTE, t, a));
+            Bot.Wow.Events.Subscribe("CHAT_MSG_RAID_BOSS_WHISPER", (t, a) => Bot.Chat.TryParseMessage(WowChat.RAID_BOSS_WHISPER, t, a));
+            Bot.Wow.Events.Subscribe("CHAT_MSG_RAID_LEADER", (t, a) => Bot.Chat.TryParseMessage(WowChat.RAID_LEADER, t, a));
+            Bot.Wow.Events.Subscribe("CHAT_MSG_RAID_WARNING", (t, a) => Bot.Chat.TryParseMessage(WowChat.RAID_WARNING, t, a));
+            Bot.Wow.Events.Subscribe("CHAT_MSG_SAY", (t, a) => Bot.Chat.TryParseMessage(WowChat.SAY, t, a));
+            Bot.Wow.Events.Subscribe("CHAT_MSG_SYSTEM", (t, a) => Bot.Chat.TryParseMessage(WowChat.SYSTEM, t, a));
+            Bot.Wow.Events.Subscribe("CHAT_MSG_TEXT_EMOTE", (t, a) => Bot.Chat.TryParseMessage(WowChat.TEXT_EMOTE, t, a));
+            Bot.Wow.Events.Subscribe("CHAT_MSG_WHISPER", (t, a) => Bot.Chat.TryParseMessage(WowChat.WHISPER, t, a));
+            Bot.Wow.Events.Subscribe("CHAT_MSG_YELL", (t, a) => Bot.Chat.TryParseMessage(WowChat.YELL, t, a));
 
             // Misc Events
-            Bot.Events.Subscribe("CHARACTER_POINTS_CHANGED", OnTalentPointsChange);
-            // Bot.EventHookManager.Subscribe("COMBAT_LOG_EVENT_UNFILTERED", Bot.CombatLogParser.Parse);
-        }
-
-        /// <summary>
-        /// HookModule that does a traceline in front of the character
-        /// to detect small obstacles that can be jumped over.
-        /// </summary>
-        private void TraceLineJumpCheck(IHookModule s)
-        {
-            if (Config.MovementSettings.EnableTracelineJumpCheck && Bot.Player != null)
-            {
-                Vector3 playerPosition = Bot.Player.Position;
-                playerPosition.Z += Bot.MovementSettings.ObstacleCheckHeight;
-
-                Vector3 pos = BotUtils.MoveAhead(playerPosition, Bot.Player.Rotation, Bot.MovementSettings.ObstacleCheckDistance);
-                Bot.Memory.Write(s.GetDataPointer(), (1.0f, playerPosition, pos));
-            }
+            Bot.Wow.Events.Subscribe("CHARACTER_POINTS_CHANGED", OnTalentPointsChange);
+            Bot.Wow.Events.Subscribe("COMBAT_LOG_EVENT_UNFILTERED", Bot.CombatLog.Parse);
         }
     }
 }

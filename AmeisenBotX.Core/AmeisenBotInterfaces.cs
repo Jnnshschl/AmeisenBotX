@@ -7,7 +7,6 @@ using AmeisenBotX.Core.Engines.Character;
 using AmeisenBotX.Core.Engines.Chat;
 using AmeisenBotX.Core.Engines.Combat.Classes;
 using AmeisenBotX.Core.Engines.Dungeon;
-using AmeisenBotX.Core.Engines.Event;
 using AmeisenBotX.Core.Engines.Grinding;
 using AmeisenBotX.Core.Engines.Jobs;
 using AmeisenBotX.Core.Engines.Movement;
@@ -20,6 +19,7 @@ using AmeisenBotX.RconClient;
 using AmeisenBotX.Wow;
 using AmeisenBotX.Wow.Cache;
 using AmeisenBotX.Wow.Combatlog;
+using AmeisenBotX.Wow.Events;
 using AmeisenBotX.Wow.Objects;
 using AmeisenBotX.Wow.Objects.Enums;
 using System;
@@ -45,8 +45,6 @@ namespace AmeisenBotX.Core
 
         public IDungeonEngine Dungeon { get; set; }
 
-        public IEventManager Events { get; set; }
-
         public AmeisenBotGlobals Globals { get; set; }
 
         public IGrindingEngine Grinding { get; set; }
@@ -59,11 +57,7 @@ namespace AmeisenBotX.Core
 
         public IMovementEngine Movement { get; set; }
 
-        public MovementSettings MovementSettings { get; set; }
-
         public IObjectProvider Objects => Wow.ObjectProvider;
-
-        public IOffsetList Offsets { get; set; }
 
         public IPathfindingHandler PathfindingHandler { get; set; }
 

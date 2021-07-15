@@ -1,32 +1,32 @@
-﻿using Newtonsoft.Json;
+﻿using System.Text.Json.Serialization;
 using System.Text.RegularExpressions;
 
 namespace AmeisenBotX.Core.Engines.Character.Spells.Objects
 {
     public class Spell
     {
-        [JsonProperty("castTime")]
+        [JsonPropertyName("castTime")]
         public int CastTime { get; set; }
 
-        [JsonProperty("costs")]
+        [JsonPropertyName("costs")]
         public int Costs { get; set; }
 
-        [JsonProperty("maxRange")]
+        [JsonPropertyName("maxRange")]
         public int MaxRange { get; set; }
 
-        [JsonProperty("minRange")]
+        [JsonPropertyName("minRange")]
         public int MinRange { get; set; }
 
-        [JsonProperty("name")]
+        [JsonPropertyName("name")]
         public string Name { get; set; }
 
-        [JsonProperty("rank")]
+        [JsonPropertyName("rank")]
         public string Rank { get; set; }
 
-        [JsonProperty("spellbookId")]
+        [JsonPropertyName("spellbookId")]
         public int SpellbookId { get; set; }
 
-        [JsonProperty("spellBookName")]
+        [JsonPropertyName("spellBookName")]
         public string SpellbookName { get; set; }
 
         public bool TryGetRank(out int rank)

@@ -9,9 +9,10 @@ namespace AmeisenBotX.Core.Engines.Movement.Objects
 {
     public class BasicVehicle
     {
-        public BasicVehicle(AmeisenBotInterfaces bot)
+        public BasicVehicle(AmeisenBotInterfaces bot, AmeisenBotConfig config)
         {
             Bot = bot;
+            Config = config;
         }
 
         public delegate void MoveCharacter(Vector3 positionToGoTo);
@@ -22,6 +23,8 @@ namespace AmeisenBotX.Core.Engines.Movement.Objects
 
         private AmeisenBotInterfaces Bot { get; }
 
+        private AmeisenBotConfig Config { get; }
+
         public Vector3 AvoidObstacles(float multiplier)
         {
             Vector3 acceleration = new(0, 0, 0);
@@ -29,7 +32,7 @@ namespace AmeisenBotX.Core.Engines.Movement.Objects
             acceleration += GetObjectForceAroundMe<IWowObject>();
             acceleration += GetNearestBlacklistForce(12);
 
-            acceleration.Limit(Bot.MovementSettings.MaxAcceleration);
+            acceleration.Limit(Config.MovementSettings.MaxAcceleration);
             acceleration.Multiply(multiplier);
 
             return acceleration;
@@ -50,7 +53,7 @@ namespace AmeisenBotX.Core.Engines.Movement.Objects
             desired -= position;
             desired.Normalize2D(desired.GetMagnitude2D());
 
-            float maxVelocity = Bot.MovementSettings.MaxVelocity;
+            float maxVelocity = Config.MovementSettings.MaxVelocity;
 
             if (Bot.Player.IsMounted)
             {
@@ -77,7 +80,7 @@ namespace AmeisenBotX.Core.Engines.Movement.Objects
             if (Bot.Player.IsInCombat
                 || Bot.Globals.ForceCombat)
             {
-                float maxSteeringCombat = Bot.MovementSettings.MaxSteeringCombat;
+                float maxSteeringCombat = Config.MovementSettings.MaxSteeringCombat;
 
                 if (Bot.Player.IsMounted)
                 {
@@ -88,7 +91,7 @@ namespace AmeisenBotX.Core.Engines.Movement.Objects
             }
             else
             {
-                float maxSteering = Bot.MovementSettings.MaxSteering;
+                float maxSteering = Config.MovementSettings.MaxSteering;
 
                 if (Bot.Player.IsMounted)
                 {
@@ -104,7 +107,7 @@ namespace AmeisenBotX.Core.Engines.Movement.Objects
             if (Bot.Player.IsInCombat
                 || Bot.Globals.ForceCombat)
             {
-                float maxAcceleration = Bot.MovementSettings.MaxAccelerationCombat;
+                float maxAcceleration = Config.MovementSettings.MaxAccelerationCombat;
 
                 if (Bot.Player.IsMounted)
                 {
@@ -115,7 +118,7 @@ namespace AmeisenBotX.Core.Engines.Movement.Objects
             }
             else
             {
-                float maxAcceleration = Bot.MovementSettings.MaxAcceleration;
+                float maxAcceleration = Config.MovementSettings.MaxAcceleration;
 
                 if (Bot.Player.IsMounted)
                 {
@@ -149,7 +152,7 @@ namespace AmeisenBotX.Core.Engines.Movement.Objects
             desired -= currentPosition;
             desired.Normalize2D(desired.GetMagnitude2D());
 
-            float maxVelocity = Bot.MovementSettings.MaxVelocity;
+            float maxVelocity = Config.MovementSettings.MaxVelocity;
 
             if (Bot.Player.IsMounted)
             {
@@ -178,7 +181,7 @@ namespace AmeisenBotX.Core.Engines.Movement.Objects
             Vector3 acceleration = new(0, 0, 0);
             acceleration += steering;
 
-            float maxAcceleration = Bot.Player.IsInCombat ? Bot.MovementSettings.MaxAccelerationCombat : Bot.MovementSettings.MaxAcceleration;
+            float maxAcceleration = Bot.Player.IsInCombat ? Config.MovementSettings.MaxAccelerationCombat : Config.MovementSettings.MaxAcceleration;
 
             if (Bot.Player.IsMounted)
             {
@@ -193,9 +196,9 @@ namespace AmeisenBotX.Core.Engines.Movement.Objects
         public Vector3 Seperate(float multiplier)
         {
             Vector3 acceleration = new(0, 0, 0);
-            acceleration += GetObjectForceAroundMe<IWowPlayer>(Bot.MovementSettings.SeperationDistance);
+            acceleration += GetObjectForceAroundMe<IWowPlayer>(Config.MovementSettings.SeperationDistance);
 
-            float maxAcceleration = Bot.MovementSettings.MaxAcceleration;
+            float maxAcceleration = Config.MovementSettings.MaxAcceleration;
 
             if (Bot.Player.IsMounted)
             {
@@ -233,7 +236,7 @@ namespace AmeisenBotX.Core.Engines.Movement.Objects
                 Velocity = new(Velocity.X, Velocity.Y, 0f);
             }
 
-            float maxVelocity = Bot.MovementSettings.MaxVelocity;
+            float maxVelocity = Config.MovementSettings.MaxVelocity;
 
             if (Bot.Player.IsMounted)
             {
@@ -344,6 +347,12 @@ namespace AmeisenBotX.Core.Engines.Movement.Objects
 
                 case MovementAction.Unstuck:
                     forces.Add(Unstuck(1f));
+                    break;
+
+                case MovementAction.None:
+                    break;
+
+                case MovementAction.DirectMove:
                     break;
 
                 default:

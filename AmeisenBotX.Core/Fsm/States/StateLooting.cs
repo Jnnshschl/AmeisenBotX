@@ -121,7 +121,7 @@ namespace AmeisenBotX.Core.Fsm.States
             // if AutoLoot is enabled, the unit will be dequeued after it is looted because it will no longer be IsLootable
             // there is no need to handle the dequeing here
             if (Bot.Wow.LuaAutoLootEnabled()
-                  && Bot.Memory.Read(Bot.Offsets.LootWindowOpen, out byte lootOpen)
+                  && Bot.Memory.Read(Bot.Wow.Offsets.LootWindowOpen, out byte lootOpen)
                   && lootOpen > 0)
             {
                 Bot.Wow.LuaLootEveryThing();

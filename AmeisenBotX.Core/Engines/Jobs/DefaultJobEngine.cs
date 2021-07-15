@@ -239,7 +239,7 @@ namespace AmeisenBotX.Core.Engines.Jobs
 
                     if (MiningEvent.Run()) // limit the executions
                     {
-                        if (Bot.Memory.Read(Bot.Offsets.LootWindowOpen, out byte lootOpen)
+                        if (Bot.Memory.Read(Bot.Wow.Offsets.LootWindowOpen, out byte lootOpen)
                             && lootOpen > 0)
                         {
                             Bot.Wow.LuaLootEveryThing();

@@ -5,10 +5,13 @@ using AmeisenBotX.Core.Data.Objects;
 using AmeisenBotX.Core.Hook.Modules;
 using AmeisenBotX.Memory;
 using AmeisenBotX.Wow;
+using AmeisenBotX.Wow.Events;
 using AmeisenBotX.Wow.Objects;
 using AmeisenBotX.Wow.Objects.Enums;
+using AmeisenBotX.Wow335a.Events;
 using AmeisenBotX.Wow335a.Hook;
 using AmeisenBotX.Wow335a.Objects;
+using AmeisenBotX.Wow335a.Offsets;
 using System;
 using System.Collections.Generic;
 using System.Text;
@@ -20,22 +23,28 @@ namespace AmeisenBotX.Wow335a
     /// </summary>
     public class WowInterface335a : IWowInterface
     {
-        public WowInterface335a(IMemoryApi memoryApi, IOffsetList offsetList, List<IHookModule> hookModules, string eventHookFrameName)
+        public WowInterface335a(IMemoryApi memoryApi)
         {
-            HookModules = hookModules;
+            OffsetList = new();
+            HookModules = new();
 
             // lua variable names for the event hook
             string handlerName = BotUtils.FastRandomStringOnlyLetters();
             string tableName = BotUtils.FastRandomStringOnlyLetters();
             string eventHookOutput = BotUtils.FastRandomStringOnlyLetters();
 
+            // name of the frame used to capture wows events
+            string eventHookFrameName = BotUtils.FastRandomStringOnlyLetters();
+
+            EventManager = new(LuaDoString, eventHookFrameName);
+
             // module to process wows events.
-            hookModules.Add(new RunLuaHookModule
+            HookModules.Add(new RunLuaHookModule
             (
-                (x) => { if (memoryApi.ReadString(x, Encoding.UTF8, out string s, 8192) && !string.IsNullOrWhiteSpace(s)) { OnEventPush?.Invoke(s); } },
+                (x) => { if (memoryApi.ReadString(x, Encoding.UTF8, out string s, 1024 * 16) && !string.IsNullOrWhiteSpace(s)) { EventManager.OnEventPush(s); } },
                 null,
                 memoryApi,
-                offsetList,
+                Offsets,
                 $"{eventHookOutput}='['function {handlerName}(self,a,...)table.insert({tableName},{{time(),a,{{...}}}})end if {eventHookFrameName}==nil then {tableName}={{}}{eventHookFrameName}=CreateFrame(\"FRAME\"){eventHookFrameName}:SetScript(\"OnEvent\",{handlerName})else for b,c in pairs({tableName})do {eventHookOutput}={eventHookOutput}..'{{'for d,e in pairs(c)do if type(e)==\"table\"then {eventHookOutput}={eventHookOutput}..'\"args\": ['for f,g in pairs(e)do {eventHookOutput}={eventHookOutput}..'\"'..g..'\"'if f<=table.getn(e)then {eventHookOutput}={eventHookOutput}..','end end {eventHookOutput}={eventHookOutput}..']}}'if b<table.getn({tableName})then {eventHookOutput}={eventHookOutput}..','end else if type(e)==\"string\"then {eventHookOutput}={eventHookOutput}..'\"event\": \"'..e..'\",'else {eventHookOutput}={eventHookOutput}..'\"time\": \"'..e..'\",'end end end end end {eventHookOutput}={eventHookOutput}..']'{tableName}={{}}",
                 eventHookOutput
             ));
@@ -44,14 +53,14 @@ namespace AmeisenBotX.Wow335a
             string oldPoupString = string.Empty;
 
             // module that monitors the STATIC_POPUP windows.
-            hookModules.Add(new RunLuaHookModule
+            HookModules.Add(new RunLuaHookModule
             (
                 (x) =>
                 {
-                    if (memoryApi.ReadString(x, Encoding.UTF8, out string s, 128)
+                    if (memoryApi.ReadString(x, Encoding.UTF8, out string s, 512)
                         && !string.IsNullOrWhiteSpace(s))
                     {
-                        if (!oldPoupString.Equals(s))
+                        if (!oldPoupString.Equals(s, StringComparison.Ordinal))
                         {
                             OnStaticPopup?.Invoke(s);
                             oldPoupString = s;
@@ -64,7 +73,7 @@ namespace AmeisenBotX.Wow335a
                 },
                 null,
                 memoryApi,
-                offsetList,
+                Offsets,
                 $"{staticPopupsVarName}=\"\"for b=1,STATICPOPUP_NUMDIALOGS do local c=_G[\"StaticPopup\"..b]if c:IsShown()then {staticPopupsVarName}={staticPopupsVarName}..b..\":\"..c.which..\"; \"end end",
                 staticPopupsVarName
             ));
@@ -73,14 +82,14 @@ namespace AmeisenBotX.Wow335a
             string oldBattlegroundStatus = string.Empty;
 
             // module to monitor the battleground (and queue) status.
-            hookModules.Add(new RunLuaHookModule
+            HookModules.Add(new RunLuaHookModule
             (
                 (x) =>
                 {
-                    if (memoryApi.ReadString(x, Encoding.UTF8, out string s, 128)
+                    if (memoryApi.ReadString(x, Encoding.UTF8, out string s, 512)
                         && !string.IsNullOrWhiteSpace(s))
                     {
-                        if (!oldBattlegroundStatus.Equals(s))
+                        if (!oldBattlegroundStatus.Equals(s, StringComparison.Ordinal))
                         {
                             OnBattlegroundStatus?.Invoke(s);
                             oldBattlegroundStatus = s;
@@ -93,20 +102,37 @@ namespace AmeisenBotX.Wow335a
                 },
                 null,
                 memoryApi,
-                offsetList,
+                Offsets,
                 $"{battlegroundStatusVarName}=\"\"for b=1,MAX_BATTLEFIELD_QUEUES do local c,d,e,f,g,h=GetBattlefieldStatus(b)local i=GetBattlefieldTimeWaited(b)/1000;{battlegroundStatusVarName}={battlegroundStatusVarName}..b..\":\"..tostring(c or\"unknown\")..\":\"..tostring(d or\"unknown\")..\":\"..tostring(e or\"unknown\")..\":\"..tostring(f or\"unknown\")..\":\"..tostring(g or\"unknown\")..\":\"..tostring(h or\"unknown\")..\":\"..tostring(i or\"unknown\")..\";\"end",
                 battlegroundStatusVarName
             ));
 
-            ObjectManager = new(memoryApi, offsetList);
+            // module to detect small obstacles that we can jump over
+            HookModules.Add(new TracelineJumpHookModule
+            (
+                null,
+                (x) =>
+                {
+                    if (Player != null)
+                    {
+                        Vector3 playerPosition = Player.Position;
+                        playerPosition.Z += 1.3f;
 
-            Hook = new(memoryApi, offsetList, ObjectManager);
+                        Vector3 pos = BotUtils.MoveAhead(playerPosition, Player.Rotation, 0.25f);
+                        memoryApi.Write(x.GetDataPointer(), (1.0f, playerPosition, pos));
+                    }
+                },
+                memoryApi,
+                Offsets
+            ));
+
+            ObjectManager = new(memoryApi, Offsets);
+
+            Hook = new(memoryApi, Offsets, ObjectManager);
             Hook.OnGameInfoPush += ObjectManager.HookManagerOnGameInfoPush;
         }
 
         public event Action<string> OnBattlegroundStatus;
-
-        public event Action<string> OnEventPush;
 
         public event Action<string> OnStaticPopup;
 
@@ -116,6 +142,10 @@ namespace AmeisenBotX.Wow335a
 
         public IObjectProvider ObjectProvider => ObjectManager;
 
+        public IEventManager Events => EventManager;
+
+        public IOffsetList Offsets => OffsetList;
+
         public IWowPlayer Player => ObjectManager.Player;
 
         private EndSceneHook Hook { get; }
@@ -123,6 +153,10 @@ namespace AmeisenBotX.Wow335a
         private List<IHookModule> HookModules { get; }
 
         private ObjectManager ObjectManager { get; }
+
+        private SimpleEventManager EventManager { get; }
+
+        private OffsetList335a OffsetList { get; }
 
         public void Dispose()
         {

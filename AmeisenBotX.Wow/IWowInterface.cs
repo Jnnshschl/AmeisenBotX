@@ -1,5 +1,7 @@
 ﻿using AmeisenBotX.Common.Math;
+using AmeisenBotX.Common.Offsets;
 using AmeisenBotX.Core.Data.Objects;
+using AmeisenBotX.Wow.Events;
 using AmeisenBotX.Wow.Objects;
 using AmeisenBotX.Wow.Objects.Enums;
 using System;
@@ -16,12 +18,6 @@ namespace AmeisenBotX.Wow
         /// Gets fired when the battleground state changes.
         /// </summary>
         event Action<string> OnBattlegroundStatus;
-
-        /// <summary>
-        /// Gets fired when new events are read from wow.
-        /// Format: JSON array of wow events.
-        /// </summary>
-        event Action<string> OnEventPush;
 
         /// <summary>
         /// Gets fired when a new static popup appears ingame.
@@ -47,9 +43,19 @@ namespace AmeisenBotX.Wow
         public ulong LastTargetGuid => ObjectProvider.LastTarget != null ? ObjectProvider.LastTarget.Guid : 0ul;
 
         /// <summary>
-        /// Use this to interact with wow's objects, units, players and more.
+        /// Use this to interact with wowobjects, units, players and more.
         /// </summary>
         IObjectProvider ObjectProvider { get; }
+
+        /// <summary>
+        /// Use this to interact with the wow event system.
+        /// </summary>
+        IEventManager Events { get; }
+
+        /// <summary>
+        /// Use this to interact with the wow event system.
+        /// </summary>
+        IOffsetList Offsets { get; }
 
         /// <summary>
         /// Shortcut to all wow objects.

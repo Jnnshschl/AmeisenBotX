@@ -52,22 +52,6 @@ namespace AmeisenBotX.Test
         }
 
         [TestMethod]
-        public void IsValidJsonTest()
-        {
-            string valid = "{ \"test\":\"lool\" }";
-            string invalid = "{ \"test\":\"lool\"";
-
-            string validA = "[{ \"test\":\"lool\" }]";
-            string invalidA = "[{ \"test\":\"lool\"";
-
-            Assert.IsTrue(BotUtils.IsValidJson(valid));
-            Assert.IsFalse(BotUtils.IsValidJson(invalid));
-
-            Assert.IsTrue(BotUtils.IsValidJson(validA));
-            Assert.IsFalse(BotUtils.IsValidJson(invalidA));
-        }
-
-        [TestMethod]
         public void ObfuscateLuaTest()
         {
             string x = BotUtils.FastRandomString();

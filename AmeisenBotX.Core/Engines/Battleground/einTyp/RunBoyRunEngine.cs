@@ -26,10 +26,10 @@ namespace AmeisenBotX.Core.Engines.Battleground.einTyp
         public RunBoyRunEngine(AmeisenBotInterfaces bot)
         {
             Bot = bot;
-            bot.Events.Subscribe("CHAT_MSG_BG_SYSTEM_ALLIANCE", OnFlagAlliance);
-            bot.Events.Subscribe("CHAT_MSG_BG_SYSTEM_HORDE", OnFlagAlliance);
-            bot.Events.Subscribe("CHAT_MSG_BG_SYSTEM_NEUTRAL", OnFlagAlliance);
-            bot.Events.Subscribe("UPDATE_BATTLEFIELD_SCORE", OnFlagAlliance);
+            bot.Wow.Events.Subscribe("CHAT_MSG_BG_SYSTEM_ALLIANCE", OnFlagAlliance);
+            bot.Wow.Events.Subscribe("CHAT_MSG_BG_SYSTEM_HORDE", OnFlagAlliance);
+            bot.Wow.Events.Subscribe("CHAT_MSG_BG_SYSTEM_NEUTRAL", OnFlagAlliance);
+            bot.Wow.Events.Subscribe("UPDATE_BATTLEFIELD_SCORE", OnFlagAlliance);
         }
 
         public string Author => "einTyp";

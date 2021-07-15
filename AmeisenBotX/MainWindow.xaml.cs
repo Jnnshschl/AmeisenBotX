@@ -12,12 +12,13 @@ using AmeisenBotX.StateConfig;
 using AmeisenBotX.Utils;
 using AmeisenBotX.Wow.Objects;
 using AmeisenBotX.Wow.Objects.Enums;
-using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
 using System.Globalization;
 using System.IO;
 using System.Linq;
+using System.Text.Json;
+using System.Text.Json.Serialization;
 using System.Windows;
 using System.Windows.Input;
 using System.Windows.Interop;
@@ -133,7 +134,7 @@ namespace AmeisenBotX
             {
                 if (File.Exists(configPath))
                 {
-                    config = JsonConvert.DeserializeObject<AmeisenBotConfig>(File.ReadAllText(configPath));
+                    config = JsonSerializer.Deserialize<AmeisenBotConfig>(File.ReadAllText(configPath), new() { AllowTrailingCommas = true, NumberHandling = JsonNumberHandling.AllowReadingFromString });
                 }
                 else
                 {
@@ -161,7 +162,7 @@ namespace AmeisenBotX
             if (configWindow.SaveConfig)
             {
                 AmeisenBot.ReloadConfig(configWindow.Config);
-                File.WriteAllText(AmeisenBot.Config.Path, JsonConvert.SerializeObject(configWindow.Config, Formatting.Indented));
+                File.WriteAllText(AmeisenBot.Config.Path, JsonSerializer.Serialize(configWindow.Config, new() { WriteIndented = true }));
             }
         }
 
@@ -429,7 +430,7 @@ namespace AmeisenBotX
                 && !string.IsNullOrWhiteSpace(AmeisenBot.Config.Path)
                 && Directory.Exists(AmeisenBot.DataFolder))
             {
-                File.WriteAllText(AmeisenBot.Config.Path, JsonConvert.SerializeObject(AmeisenBot.Config, Formatting.Indented));
+                File.WriteAllText(AmeisenBot.Config.Path, JsonSerializer.Serialize(AmeisenBot.Config, new() { WriteIndented = true }));
             }
         }
 

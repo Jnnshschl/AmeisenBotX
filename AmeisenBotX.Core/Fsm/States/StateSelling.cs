@@ -26,7 +26,7 @@ namespace AmeisenBotX.Core.Fsm.States
 
         public override void Enter()
         {
-            Bot.Events.Subscribe("MERCHANT_SHOW", OnMerchantShow);
+            Bot.Wow.Events.Subscribe("MERCHANT_SHOW", OnMerchantShow);
         }
 
         public override void Execute()
@@ -82,7 +82,7 @@ namespace AmeisenBotX.Core.Fsm.States
 
         public override void Leave()
         {
-            Bot.Events.Unsubscribe("MERCHANT_SHOW", OnMerchantShow);
+            Bot.Wow.Events.Unsubscribe("MERCHANT_SHOW", OnMerchantShow);
 
             Bot.Wow.WowClearTarget();
             Bot.Wow.LuaClickUiElement("MerchantFrameCloseButton");
@@ -92,11 +92,11 @@ namespace AmeisenBotX.Core.Fsm.States
         {
             return Bot.Character.Inventory.FreeBagSlots < Config.BagSlotsToGoSell
                 && Bot.Character.Inventory.Items.Where(e => !Config.ItemSellBlacklist.Contains(e.Name)
-                    && ((Config.SellGrayItems && e.ItemQuality == WowItemQuality.Poor)
-                        || (Config.SellWhiteItems && e.ItemQuality == WowItemQuality.Common)
-                        || (Config.SellGreenItems && e.ItemQuality == WowItemQuality.Uncommon)
-                        || (Config.SellBlueItems && e.ItemQuality == WowItemQuality.Rare)
-                        || (Config.SellPurpleItems && e.ItemQuality == WowItemQuality.Epic)))
+                    && ((Config.SellGrayItems && e.ItemQuality == (int)WowItemQuality.Poor)
+                        || (Config.SellWhiteItems && e.ItemQuality == (int)WowItemQuality.Common)
+                        || (Config.SellGreenItems && e.ItemQuality == (int)WowItemQuality.Uncommon)
+                        || (Config.SellBlueItems && e.ItemQuality == (int)WowItemQuality.Rare)
+                        || (Config.SellPurpleItems && e.ItemQuality == (int)WowItemQuality.Epic)))
                    .Any(e => e.Price > 0)
                 && IsVendorNpcNear(out _);
         }

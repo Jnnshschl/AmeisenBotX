@@ -1,19 +1,19 @@
-﻿using Newtonsoft.Json;
+﻿using System.Text.Json.Serialization;
 
 namespace AmeisenBotX.Wow.Objects
 {
     public class WowMount
     {
-        [JsonProperty("index")]
+        [JsonPropertyName("index")]
         public int Index { get; set; }
 
-        [JsonProperty("mountId")]
+        [JsonPropertyName("mountId")]
         public int MountId { get; set; }
 
-        [JsonProperty("name")]
+        [JsonPropertyName("name")]
         public string Name { get; set; }
 
-        [JsonProperty("spellId")]
+        [JsonPropertyName("spellId")]
         public int SpellId { get; set; }
     }
 }

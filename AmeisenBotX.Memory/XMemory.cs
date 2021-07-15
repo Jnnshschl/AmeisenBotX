@@ -3,6 +3,7 @@ using AmeisenBotX.Memory.Win32;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
+using System.IO;
 using System.Linq;
 using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
@@ -27,6 +28,11 @@ namespace AmeisenBotX.Memory
         {
             MemoryAllocations = new();
             AssemblyBuffer = new();
+
+            if (!File.Exists("FASM.dll"))
+            {
+                throw new FileNotFoundException("The mandatory \"FASM.dll\" could not be found on your system, download it from the Flat Assembler forum!");
+            }
         }
 
         ///<inheritdoc cref="IMemoryApi.AssemblyBuffer"/>
@@ -202,8 +208,7 @@ namespace AmeisenBotX.Memory
         {
             lock (fasmLock)
             {
-                AssemblyBuffer.Insert(0, $"org 0x{address:X08}\n");
-                AssemblyBuffer.Insert(0, $"use32\n");
+                AssemblyBuffer.Insert(0, $"use32\norg 0x{address:X08}\n");
 
                 fixed (byte* pBytes = stackalloc byte[FASM_MEMORY_SIZE])
                 {
