@@ -1,6 +1,4 @@
-﻿using AmeisenBotX.Wow.Objects.Enums;
-using System.Text.Json;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Text.Json.Serialization;
 
 namespace AmeisenBotX.Core.Engines.Character.Inventory.Objects

@@ -26,6 +26,11 @@ namespace AmeisenBotX.Wow
         event Action<string> OnStaticPopup;
 
         /// <summary>
+        /// Use this to interact with the wow event system.
+        /// </summary>
+        IEventManager Events { get; }
+
+        /// <summary>
         /// Used for the HookCall display in the bots main window.
         /// Use this to display cost intensive calls to the user.
         /// The name Hookcall originates from EndScene hook calls.
@@ -48,19 +53,14 @@ namespace AmeisenBotX.Wow
         IObjectProvider ObjectProvider { get; }
 
         /// <summary>
-        /// Use this to interact with the wow event system.
+        /// Shortcut to all wow objects.
         /// </summary>
-        IEventManager Events { get; }
+        IEnumerable<IWowObject> Objects => ObjectProvider.WowObjects;
 
         /// <summary>
         /// Use this to interact with the wow event system.
         /// </summary>
         IOffsetList Offsets { get; }
-
-        /// <summary>
-        /// Shortcut to all wow objects.
-        /// </summary>
-        IEnumerable<IWowObject> Objects => ObjectProvider.WowObjects;
 
         /// <summary>
         /// Shortcut to get the current partyleaders guid.

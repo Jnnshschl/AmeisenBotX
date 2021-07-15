@@ -3,8 +3,6 @@ using AmeisenBotX.Common.Utils;
 using AmeisenBotX.Core.Data.Objects;
 using AmeisenBotX.Core.Engines.Movement.Enums;
 using AmeisenBotX.Core.Engines.Movement.Pathfinding.Objects;
-using AmeisenBotX.Wow.Combatlog.Enums;
-using AmeisenBotX.Wow.Combatlog.Objects;
 using AmeisenBotX.Wow.Objects.Enums;
 using System;
 using System.Collections.Generic;
@@ -80,18 +78,6 @@ namespace AmeisenBotX.Core.Engines.Quest.Objects.Objectives
 
         private SearchAreaEnsamble SearchAreas { get; }
 
-        public void OnPartyKill(ulong sourceGuid, ulong npcGuid)
-        {
-            IWowUnit wowUnit = Bot.GetWowObjectByGuid<IWowUnit>(npcGuid);
-
-            if (wowUnit != null
-                && (Bot.Player.Guid == sourceGuid || Bot.Objects.PartymemberGuids.Contains(sourceGuid))
-                && NpcIds.Contains(BotUtils.GuidToNpcId(npcGuid)))
-            {
-                ++Killed;
-            }
-        }
-
         public void Execute()
         {
             if (Finished || Bot.Player.IsCasting) { return; }
@@ -140,6 +126,18 @@ namespace AmeisenBotX.Core.Engines.Quest.Objects.Objectives
             {
                 CurrentSpot = SearchAreas.GetNextPosition(Bot);
                 Bot.Movement.SetMovementAction(MovementAction.Move, CurrentSpot);
+            }
+        }
+
+        public void OnPartyKill(ulong sourceGuid, ulong npcGuid)
+        {
+            IWowUnit wowUnit = Bot.GetWowObjectByGuid<IWowUnit>(npcGuid);
+
+            if (wowUnit != null
+                && (Bot.Player.Guid == sourceGuid || Bot.Objects.PartymemberGuids.Contains(sourceGuid))
+                && NpcIds.Contains(BotUtils.GuidToNpcId(npcGuid)))
+            {
+                ++Killed;
             }
         }
     }

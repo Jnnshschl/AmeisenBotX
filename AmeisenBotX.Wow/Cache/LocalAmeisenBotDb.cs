@@ -4,8 +4,6 @@ using AmeisenBotX.Logging;
 using AmeisenBotX.Logging.Enums;
 using AmeisenBotX.Memory;
 using AmeisenBotX.Wow.Cache.Enums;
-using AmeisenBotX.Wow.Combatlog.Enums;
-using AmeisenBotX.Wow.Combatlog.Objects;
 using AmeisenBotX.Wow.Objects.Enums;
 using System;
 using System.Collections.Concurrent;
@@ -14,7 +12,6 @@ using System.IO;
 using System.Linq;
 using System.Text.Json;
 using System.Text.Json.Serialization;
-using System.Threading;
 
 namespace AmeisenBotX.Wow.Cache
 {

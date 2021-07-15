@@ -136,25 +136,25 @@ namespace AmeisenBotX.Wow335a
 
         public event Action<string> OnStaticPopup;
 
+        public IEventManager Events => EventManager;
+
         public ulong HookCallCount => Hook.HookCallCount;
 
         public bool IsReady => Hook.IsWoWHooked;
 
         public IObjectProvider ObjectProvider => ObjectManager;
 
-        public IEventManager Events => EventManager;
-
         public IOffsetList Offsets => OffsetList;
 
         public IWowPlayer Player => ObjectManager.Player;
+
+        private SimpleEventManager EventManager { get; }
 
         private EndSceneHook Hook { get; }
 
         private List<IHookModule> HookModules { get; }
 
         private ObjectManager ObjectManager { get; }
-
-        private SimpleEventManager EventManager { get; }
 
         private OffsetList335a OffsetList { get; }
 

@@ -1,6 +1,5 @@
 ﻿using AmeisenBotX.Logging;
 using AmeisenBotX.Logging.Enums;
-using AmeisenBotX.Wow;
 using AmeisenBotX.Wow.Events;
 using AmeisenBotX.Wow335a.Events.Objects;
 using System;
@@ -39,9 +38,9 @@ namespace AmeisenBotX.Wow335a.Events
         ///<inheritdoc cref="IEventManager.UnsubscribeQueue"/>
         public Queue<(string, Action<long, List<string>>)> UnsubscribeQueue { get; private set; }
 
-        private Queue<string> PendingLuaToExecute { get; set; }
-
         private Func<string, bool> LuaDoString { get; }
+
+        private Queue<string> PendingLuaToExecute { get; set; }
 
         ///<inheritdoc cref="IEventManager.OnEventPush(string)"/>
         public void OnEventPush(string eventJson)

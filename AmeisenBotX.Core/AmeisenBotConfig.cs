@@ -50,6 +50,8 @@ namespace AmeisenBotX.Core
 
         public string BuiltInCombatClassName { get; set; } = string.Empty;
 
+        public bool CachePointsOfInterest { get; set; } = true;
+
         public int CharacterSlot { get; set; } = 0;
 
         public bool ChatProtocols { get; set; } = false;
@@ -179,7 +181,7 @@ namespace AmeisenBotX.Core
 
         public bool ReleaseSpirit { get; set; } = false;
 
-        public float RepairNpcSearchRadius { get; set; } = 50-0f;
+        public float RepairNpcSearchRadius { get; set; } = 50 - 0f;
 
         public bool SaveBotWindowPosition { get; set; } = false;
 
@@ -214,7 +216,5 @@ namespace AmeisenBotX.Core
         public string Username { get; set; } = string.Empty;
 
         public Rect WowWindowRect { get; set; } = new Rect() { Left = -1, Top = -1, Right = -1, Bottom = -1 };
-
-        public bool CachePointsOfInterest { get; set; } = true;
     }
 }

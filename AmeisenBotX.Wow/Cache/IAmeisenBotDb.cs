@@ -1,10 +1,7 @@
 ﻿using AmeisenBotX.Common.Math;
 using AmeisenBotX.Core.Data.Objects;
 using AmeisenBotX.Wow.Cache.Enums;
-using AmeisenBotX.Wow.Combatlog.Enums;
-using AmeisenBotX.Wow.Combatlog.Objects;
 using AmeisenBotX.Wow.Objects.Enums;
-using System;
 using System.Collections.Generic;
 
 namespace AmeisenBotX.Wow.Cache

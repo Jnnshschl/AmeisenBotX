@@ -1,6 +1,5 @@
 ﻿using AmeisenBotX.Logging;
 using AmeisenBotX.Logging.Enums;
-using AmeisenBotX.Wow.Cache;
 using AmeisenBotX.Wow.Combatlog.Enums;
 using AmeisenBotX.Wow.Combatlog.Objects;
 using System;
@@ -15,11 +14,11 @@ namespace AmeisenBotX.Wow.Combatlog
         {
         }
 
+        public event Action<ulong, ulong, int> OnDamage;
+
         public event Action<ulong, ulong> OnPartyKill;
 
         public event Action<ulong> OnUnitDied;
-
-        public event Action<ulong, ulong, int> OnDamage;
 
         public void Parse(long timestamp, List<string> args)
         {
@@ -49,7 +48,6 @@ namespace AmeisenBotX.Wow.Combatlog
                         }
                         break;
                 }
-
 
                 switch (entry.Subtype)
                 {

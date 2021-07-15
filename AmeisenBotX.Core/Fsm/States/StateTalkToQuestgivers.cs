@@ -9,15 +9,15 @@ namespace AmeisenBotX.Core.Fsm.States
 {
     public class StateTalkToQuestgivers : BasicState
     {
-        private TimegatedEvent QuestgiverCheckEvent { get; }
-
-        private TimegatedEvent QuestgiverRightClickEvent { get; }
-
         public StateTalkToQuestgivers(AmeisenBotFsm stateMachine, AmeisenBotConfig config, AmeisenBotInterfaces bot) : base(stateMachine, config, bot)
         {
             QuestgiverCheckEvent = new(TimeSpan.FromMilliseconds(250));
             QuestgiverRightClickEvent = new(TimeSpan.FromMilliseconds(250));
         }
+
+        private TimegatedEvent QuestgiverCheckEvent { get; }
+
+        private TimegatedEvent QuestgiverRightClickEvent { get; }
 
         public override void Enter()
         {
