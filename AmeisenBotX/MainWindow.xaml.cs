@@ -136,7 +136,7 @@ namespace AmeisenBotX
                 {
                     // convert old configs to new format
                     string configData = File.ReadAllText(configPath);
-                    configData = configData.Replace(".0,", "");
+                    configData = configData.Replace(".0,", ",");
 
                     config = JsonSerializer.Deserialize<AmeisenBotConfig>(configData, new() { AllowTrailingCommas = true, NumberHandling = JsonNumberHandling.AllowReadingFromString });
                 }
