@@ -41,7 +41,7 @@ namespace AmeisenBotX.Wow335a
             // module to process wows events.
             HookModules.Add(new RunLuaHookModule
             (
-                (x) => { if (memoryApi.ReadString(x, Encoding.UTF8, out string s, 1024 * 16) && !string.IsNullOrWhiteSpace(s)) { EventManager.OnEventPush(s); } },
+                (x) => { if (memoryApi.ReadString(x, Encoding.UTF8, out string s) && !string.IsNullOrWhiteSpace(s)) { EventManager.OnEventPush(s); } },
                 null,
                 memoryApi,
                 Offsets,
@@ -57,7 +57,7 @@ namespace AmeisenBotX.Wow335a
             (
                 (x) =>
                 {
-                    if (memoryApi.ReadString(x, Encoding.UTF8, out string s, 512)
+                    if (memoryApi.ReadString(x, Encoding.UTF8, out string s)
                         && !string.IsNullOrWhiteSpace(s))
                     {
                         if (!oldPoupString.Equals(s, StringComparison.Ordinal))
@@ -86,7 +86,7 @@ namespace AmeisenBotX.Wow335a
             (
                 (x) =>
                 {
-                    if (memoryApi.ReadString(x, Encoding.UTF8, out string s, 512)
+                    if (memoryApi.ReadString(x, Encoding.UTF8, out string s)
                         && !string.IsNullOrWhiteSpace(s))
                     {
                         if (!oldBattlegroundStatus.Equals(s, StringComparison.Ordinal))

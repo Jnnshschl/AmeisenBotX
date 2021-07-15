@@ -19,6 +19,7 @@ namespace AmeisenBotX.Wow335a.Objects
 
         public WowPlayer335a(IntPtr baseAddress, IntPtr descriptorAddress) : base(baseAddress, descriptorAddress)
         {
+            Type = WowObjectType.Player;
         }
 
         public int ComboPoints { get; set; }

@@ -303,26 +303,34 @@ namespace AmeisenBotX.Memory
 
         ///<inheritdoc cref="IMemoryApi.ReadString"/>
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public bool ReadString(IntPtr address, Encoding encoding, out string value, int lenght = 128)
+        public bool ReadString(IntPtr address, Encoding encoding, out string value, int bufferSize = 512)
         {
-            fixed (byte* pBuffer = stackalloc byte[lenght])
-            {
-                if (RpmGateWay(address, pBuffer, lenght))
-                {
-                    int i = 0;
+            StringBuilder sb = new();
 
-                    while (i < lenght && pBuffer[i] != 0)
+            fixed (byte* pBuffer = stackalloc byte[bufferSize])
+            {
+                int i;
+
+                do
+                {
+                    if (!RpmGateWay(address, pBuffer, bufferSize))
                     {
-                        ++i;
+                        value = string.Empty;
+                        return false;
                     }
 
-                    value = encoding.GetString(pBuffer, i);
-                    return true;
-                }
-            }
+                    i = 0;
 
-            value = string.Empty;
-            return false;
+                    while (i < bufferSize && pBuffer[i] != 0) { ++i; }
+
+                    address += i;
+
+                    sb.Append(encoding.GetString(pBuffer, i));
+                } while (i == bufferSize);
+
+                value = sb.ToString();
+                return true;
+            }
         }
 
         ///<inheritdoc cref="IMemoryApi.ResizeParentWindow"/>

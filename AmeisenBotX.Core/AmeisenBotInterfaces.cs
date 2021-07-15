@@ -12,6 +12,7 @@ using AmeisenBotX.Core.Engines.Movement;
 using AmeisenBotX.Core.Engines.Movement.Pathfinding;
 using AmeisenBotX.Core.Engines.Quest;
 using AmeisenBotX.Core.Engines.Tactic;
+using AmeisenBotX.Learning;
 using AmeisenBotX.Memory;
 using AmeisenBotX.RconClient;
 using AmeisenBotX.Wow;
@@ -36,7 +37,7 @@ namespace AmeisenBotX.Core
 
         public ICombatClass CombatClass { get; set; }
 
-        public ICombatLogParser CombatLog { get; set; }
+        public ICombatlogParser CombatLog { get; set; }
 
         public IAmeisenBotDb Db { get; set; }
 
@@ -69,6 +70,8 @@ namespace AmeisenBotX.Core
         public ITacticEngine Tactic { get; set; }
 
         public IWowUnit Target => Objects.Target;
+
+        public AmeisenBotLearner Learner { get; set; }
 
         public IWowInterface Wow { get; set; }
 

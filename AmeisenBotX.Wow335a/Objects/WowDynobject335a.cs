@@ -2,6 +2,7 @@
 using AmeisenBotX.Common.Offsets;
 using AmeisenBotX.Core.Data.Objects;
 using AmeisenBotX.Memory;
+using AmeisenBotX.Wow.Objects.Enums;
 using AmeisenBotX.Wow335a.Objects.Descriptors;
 using System;
 
@@ -12,6 +13,7 @@ namespace AmeisenBotX.Wow335a.Objects
     {
         public WowDynobject335a(IntPtr baseAddress, IntPtr descriptorAddress) : base(baseAddress, descriptorAddress)
         {
+            Type = WowObjectType.Dynobject;
         }
 
         public ulong Caster { get; set; }

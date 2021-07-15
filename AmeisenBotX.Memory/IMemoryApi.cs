@@ -157,9 +157,9 @@ namespace AmeisenBotX.Memory
         /// <param name="address">Address to read from</param>
         /// <param name="encoding">Encoding to use</param>
         /// <param name="value">String</param>
-        /// <param name="maxLenght">Max lenght of the string</param>
+        /// <param name="bufferSize">Max bytes to read per cycle</param>
         /// <returns>True if reading was successful, false if not</returns>
-        public bool ReadString(IntPtr address, Encoding encoding, out string value, int maxLenght = 128);
+        public bool ReadString(IntPtr address, Encoding encoding, out string value, int bufferSize = 512);
 
         /// <summary>
         /// Modifies the position of our parent window. See SetupAutoPosition() for more information.

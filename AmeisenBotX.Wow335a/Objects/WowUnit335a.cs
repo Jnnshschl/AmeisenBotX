@@ -18,6 +18,7 @@ namespace AmeisenBotX.Wow335a.Objects
     {
         public WowUnit335a(IntPtr baseAddress, IntPtr descriptorAddress) : base(baseAddress, descriptorAddress)
         {
+            Type = WowObjectType.Unit;
         }
 
         public int AuraCount { get; set; }
@@ -64,6 +65,14 @@ namespace AmeisenBotX.Wow335a.Objects
 
         public int MaxRuneenergy => RawWowUnit.MaxPower7 / 10;
 
+        public int MaxSecondary => Class switch
+        {
+            WowClass.Warrior => MaxRage,
+            WowClass.Rogue => MaxEnergy,
+            WowClass.Deathknight => MaxRuneenergy,
+            _ => MaxMana,
+        };
+
         public BitVector32 NpcFlags => RawWowUnit.NpcFlags;
 
         public WowPowertype PowerType => (WowPowertype)RawWowUnit.PowerType;
@@ -79,6 +88,22 @@ namespace AmeisenBotX.Wow335a.Objects
         public int Runeenergy => RawWowUnit.Power7 / 10;
 
         public double RuneenergyPercentage => BotMath.Percentage(Runeenergy, MaxRuneenergy);
+
+        public int Secondary => Class switch
+        {
+            WowClass.Warrior => Rage,
+            WowClass.Rogue => Energy,
+            WowClass.Deathknight => Runeenergy,
+            _ => Mana,
+        };
+
+        public double SecondaryPercentage => Class switch
+        {
+            WowClass.Warrior => RagePercentage,
+            WowClass.Rogue => EnergyPercentage,
+            WowClass.Deathknight => RuneenergyPercentage,
+            _ => ManaPercentage,
+        };
 
         public ulong SummonedByGuid => RawWowUnit.SummonedBy;
 

@@ -14,6 +14,7 @@ namespace AmeisenBotX.Wow335a.Objects
     {
         public WowItem335a(IntPtr baseAddress, IntPtr descriptorAddress) : base(baseAddress, descriptorAddress)
         {
+            Type = WowObjectType.Item;
         }
 
         public int Count { get; set; }

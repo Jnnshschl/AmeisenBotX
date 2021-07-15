@@ -6,7 +6,7 @@ using System.Globalization;
 namespace AmeisenBotX.Wow.Combatlog.Objects
 {
     [Serializable]
-    public record BasicCombatLogEntry
+    public record BasicCombatlogEntry
     {
         public List<string> Args { get; set; }
 
@@ -20,17 +20,17 @@ namespace AmeisenBotX.Wow.Combatlog.Objects
 
         public string SourceName { get; set; }
 
-        public CombatLogEntrySubtype Subtype { get; set; }
+        public CombatlogEntrySubtype Subtype { get; set; }
 
         public int TargetFlags { get; set; }
 
         public DateTime Timestamp { get; set; }
 
-        public CombatLogEntryType Type { get; set; }
+        public CombatlogEntryType Type { get; set; }
 
-        public static bool TryParse(List<string> eventArgs, out BasicCombatLogEntry basicCombatLogEntry)
+        public static bool TryParse(List<string> eventArgs, out BasicCombatlogEntry basicCombatLogEntry)
         {
-            basicCombatLogEntry = new BasicCombatLogEntry();
+            basicCombatLogEntry = new BasicCombatlogEntry();
 
             if (eventArgs != null && eventArgs.Count < 8)
             {
@@ -39,7 +39,7 @@ namespace AmeisenBotX.Wow.Combatlog.Objects
 
             basicCombatLogEntry.Args = eventArgs;
 
-            if (double.TryParse(eventArgs[(int)CombatLogField.Timestamp].Replace(".", ""), NumberStyles.Any, CultureInfo.InvariantCulture, out double millis))
+            if (double.TryParse(eventArgs[(int)CombatlogField.Timestamp].Replace(".", ""), NumberStyles.Any, CultureInfo.InvariantCulture, out double millis))
             {
                 basicCombatLogEntry.Timestamp = DateTimeOffset.FromUnixTimeMilliseconds((long)millis).LocalDateTime;
             }
@@ -48,7 +48,7 @@ namespace AmeisenBotX.Wow.Combatlog.Objects
                 return false;
             }
 
-            string[] splitted = eventArgs[(int)CombatLogField.Type]
+            string[] splitted = eventArgs[(int)CombatlogField.Type]
                 .Replace("SPELL_BUILDING", "SPELLBUILDING")
                 .Replace("SPELL_PERIODIC", "SPELLPERIODIC")
                 .Split(new char[] { '_' }, 2);
@@ -58,8 +58,8 @@ namespace AmeisenBotX.Wow.Combatlog.Objects
                 return false;
             }
 
-            if (Enum.TryParse(splitted[0], out CombatLogEntryType type)
-                && Enum.TryParse(splitted[1], out CombatLogEntrySubtype subtype))
+            if (Enum.TryParse(splitted[0], out CombatlogEntryType type)
+                && Enum.TryParse(splitted[1], out CombatlogEntrySubtype subtype))
             {
                 basicCombatLogEntry.Type = type;
                 basicCombatLogEntry.Subtype = subtype;
@@ -69,7 +69,7 @@ namespace AmeisenBotX.Wow.Combatlog.Objects
                 return false;
             }
 
-            if (ulong.TryParse(eventArgs[(int)CombatLogField.Source].Replace("0x", ""), NumberStyles.HexNumber, CultureInfo.CurrentCulture, out ulong sourceGuid))
+            if (ulong.TryParse(eventArgs[(int)CombatlogField.Source].Replace("0x", ""), NumberStyles.HexNumber, CultureInfo.CurrentCulture, out ulong sourceGuid))
             {
                 basicCombatLogEntry.SourceGuid = sourceGuid;
             }
@@ -77,9 +77,9 @@ namespace AmeisenBotX.Wow.Combatlog.Objects
             {
                 return false;
             }
-            basicCombatLogEntry.SourceName = eventArgs[(int)CombatLogField.SourceName];
+            basicCombatLogEntry.SourceName = eventArgs[(int)CombatlogField.SourceName];
 
-            if (int.TryParse(eventArgs[(int)CombatLogField.Flags], out int flags))
+            if (int.TryParse(eventArgs[(int)CombatlogField.Flags], out int flags))
             {
                 basicCombatLogEntry.Flags = flags;
             }
@@ -88,7 +88,7 @@ namespace AmeisenBotX.Wow.Combatlog.Objects
                 return false;
             }
 
-            if (ulong.TryParse(eventArgs[(int)CombatLogField.DestinationGuid].Replace("0x", ""), NumberStyles.HexNumber, CultureInfo.CurrentCulture, out ulong destGuid))
+            if (ulong.TryParse(eventArgs[(int)CombatlogField.DestinationGuid].Replace("0x", ""), NumberStyles.HexNumber, CultureInfo.CurrentCulture, out ulong destGuid))
             {
                 basicCombatLogEntry.DestinationGuid = destGuid;
             }
@@ -97,9 +97,9 @@ namespace AmeisenBotX.Wow.Combatlog.Objects
                 return false;
             }
 
-            basicCombatLogEntry.DestinationName = eventArgs[(int)CombatLogField.DestinationName];
+            basicCombatLogEntry.DestinationName = eventArgs[(int)CombatlogField.DestinationName];
 
-            if (int.TryParse(eventArgs[(int)CombatLogField.TargetFlags], out int targetFlags))
+            if (int.TryParse(eventArgs[(int)CombatlogField.TargetFlags], out int targetFlags))
             {
                 basicCombatLogEntry.TargetFlags = targetFlags;
             }

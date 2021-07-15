@@ -17,14 +17,15 @@ namespace AmeisenBotX.Logging
         private static AmeisenLogger instance;
         private int timerBusy;
 
-        private AmeisenLogger(bool deleteOldLogs = true)
+        private AmeisenLogger(bool deleteOldLogs = false)
         {
             LogBuilder = new();
+            StringBuilder = new();
 
             LogFileWriter = new(1000);
             LogFileWriter.Elapsed += LogFileWriterTick;
 
-            Enabled = true;
+            Enabled = false;
             ActiveLogLevel = LogLevel.Debug;
 
             // default log path
@@ -42,7 +43,7 @@ namespace AmeisenBotX.Logging
             {
                 lock (padlock)
                 {
-                    instance ??= new();
+                    instance ??= new(true);
                     return instance;
                 }
             }
@@ -59,6 +60,8 @@ namespace AmeisenBotX.Logging
         private ConcurrentQueue<LogEntry> LogBuilder { get; }
 
         private Timer LogFileWriter { get; set; }
+
+        private StringBuilder StringBuilder { get; }
 
         public void ChangeLogFolder(string logFolderPath, bool createFolder = true, bool deleteOldLogs = true)
         {
@@ -133,14 +136,13 @@ namespace AmeisenBotX.Logging
 
             try
             {
-                StringBuilder sb = new();
-
                 while (!LogBuilder.IsEmpty && LogBuilder.TryDequeue(out LogEntry logEntry))
                 {
-                    sb.AppendLine(logEntry.ToString());
+                    StringBuilder.AppendLine(logEntry.ToString());
                 }
 
-                File.AppendAllText(LogFilePath, sb.ToString());
+                File.AppendAllText(LogFilePath, StringBuilder.ToString());
+                StringBuilder.Clear();
             }
             finally
             {

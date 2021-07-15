@@ -28,6 +28,8 @@ using AmeisenBotX.Core.Engines.Tactic;
 using AmeisenBotX.Core.Fsm;
 using AmeisenBotX.Core.Fsm.Enums;
 using AmeisenBotX.Core.Fsm.States;
+using AmeisenBotX.Learning;
+using AmeisenBotX.Learning.Sessions.Combat;
 using AmeisenBotX.Logging;
 using AmeisenBotX.Logging.Enums;
 using AmeisenBotX.Memory;
@@ -121,10 +123,18 @@ namespace AmeisenBotX.Core
             AmeisenLogger.I.Log("AmeisenBot", $"Loading DB from: {dbPath}", LogLevel.Master);
             Bot.Db = LocalAmeisenBotDb.FromJson(dbPath, Bot.Wow, Bot.Memory);
 
+
+            string learnerPath = Path.Combine(DataFolder, "learner.json");
+            AmeisenLogger.I.Log("AmeisenBot", $"Loading Learner from: {learnerPath}", LogLevel.Master);
+            Bot.Learner = AmeisenBotLearner.FromFile(learnerPath);
+
+            SpellUsageCombatSession spellUsageCombatSession = new();
+            Bot.Learner.SpellUsageCombatSessions.Add(spellUsageCombatSession);
+
             PoiCacheEvent = new TimegatedEvent(TimeSpan.FromSeconds(2));
             Bot.Objects.OnObjectUpdateComplete += OnObjectUpdateComplete;
 
-            Bot.CombatLog = new DefaultCombatLogParser();
+            Bot.CombatLog = new DefaultCombatlogParser();
 
             // setup all instances that use the whole Bot class last
             Bot.Dungeon = new DefaultDungeonEngine(Bot);
@@ -171,6 +181,87 @@ namespace AmeisenBotX.Core
                 RconScreenshotEvent = new(TimeSpan.FromMilliseconds(Config.RconScreenshotInterval));
                 SetupRconClient();
             }
+
+            // data collection setup
+            Bot.CombatLog.OnDamage += (ulong src, ulong dst, int spellId, int damage, int overDamage) =>
+            {
+                IWowUnit srcUnit = Bot.GetWowObjectByGuid<IWowUnit>(src);
+                IWowUnit dstUnit = Bot.GetWowObjectByGuid<IWowUnit>(dst);
+
+                if (srcUnit != null && dstUnit != null)
+                {
+                    bool srcIsPlayer = srcUnit.Type == WowObjectType.Player;
+                    bool dstIsPlayer = dstUnit.Type == WowObjectType.Player;
+
+                    spellUsageCombatSession.AddData
+                    (
+                        srcIsPlayer,
+                        dstIsPlayer,
+                        srcIsPlayer ? srcUnit.Guid : (ulong)BotUtils.GuidToNpcId(dstUnit.Guid),
+                        dstIsPlayer ? dstUnit.Guid : (ulong)BotUtils.GuidToNpcId(dstUnit.Guid),
+                        true,
+                        (int)srcUnit.Race,
+                        (int)srcUnit.Class,
+                        (int)srcUnit.PowerType,
+                        (int)dstUnit.Race,
+                        (int)dstUnit.Class,
+                        (int)dstUnit.PowerType,
+                        srcUnit.Health,
+                        dstUnit.Health,
+                        srcUnit.Secondary,
+                        dstUnit.Secondary,
+                        srcUnit.MaxHealth,
+                        dstUnit.MaxHealth,
+                        srcUnit.MaxSecondary,
+                        dstUnit.MaxSecondary,
+                        srcUnit.Level,
+                        dstUnit.Level,
+                        spellId,
+                        damage,
+                        overDamage
+                    );
+                }
+            };
+
+            Bot.CombatLog.OnHeal += (ulong src, ulong dst, int spellId, int healing, int overHeal) =>
+            {
+                IWowUnit srcUnit = Bot.GetWowObjectByGuid<IWowUnit>(src);
+                IWowUnit dstUnit = Bot.GetWowObjectByGuid<IWowUnit>(dst);
+
+                if (srcUnit != null && dstUnit != null)
+                {
+                    bool srcIsPlayer = srcUnit.Type == WowObjectType.Player;
+                    bool dstIsPlayer = dstUnit.Type == WowObjectType.Player;
+
+                    spellUsageCombatSession.AddData
+                    (
+                        srcIsPlayer,
+                        dstIsPlayer,
+                        srcIsPlayer ? srcUnit.Guid : (ulong)BotUtils.GuidToNpcId(dstUnit.Guid),
+                        dstIsPlayer ? dstUnit.Guid : (ulong)BotUtils.GuidToNpcId(dstUnit.Guid),
+                        false,
+                        (int)srcUnit.Race,
+                        (int)srcUnit.Class,
+                        (int)srcUnit.PowerType,
+                        (int)dstUnit.Race,
+                        (int)dstUnit.Class,
+                        (int)dstUnit.PowerType,
+                        srcUnit.Health,
+                        dstUnit.Health,
+                        srcUnit.Secondary,
+                        dstUnit.Secondary,
+                        srcUnit.MaxHealth,
+                        dstUnit.MaxHealth,
+                        srcUnit.MaxSecondary,
+                        dstUnit.MaxSecondary,
+                        srcUnit.Level,
+                        dstUnit.Level,
+                        spellId,
+                        healing,
+                        overHeal
+                    );
+                }
+            };
         }
 
         /// <summary>
@@ -315,6 +406,7 @@ namespace AmeisenBotX.Core
             Bot.Memory.Dispose();
 
             Bot.Db.Save(Path.Combine(DataFolder, "db.json"));
+            Bot.Learner.Save(Path.Combine(DataFolder, "learner.json"));
 
             AmeisenLogger.I.Log("AmeisenBot", $"Exiting AmeisenBot", LogLevel.Debug);
             AmeisenLogger.I.Stop();

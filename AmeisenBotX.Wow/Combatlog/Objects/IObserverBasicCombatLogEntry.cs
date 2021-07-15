@@ -1,7 +1,7 @@
 ﻿namespace AmeisenBotX.Wow.Combatlog.Objects
 {
-    public interface IObserverBasicCombatLogEntry
+    public interface IObserverBasicCombatlogEntry
     {
-        void CombatLogChanged(BasicCombatLogEntry entry);
+        void CombatLogChanged(BasicCombatlogEntry entry);
     }
 }

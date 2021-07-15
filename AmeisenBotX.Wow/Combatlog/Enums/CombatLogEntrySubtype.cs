@@ -1,6 +1,6 @@
 ﻿namespace AmeisenBotX.Wow.Combatlog.Enums
 {
-    public enum CombatLogEntrySubtype
+    public enum CombatlogEntrySubtype
     {
         ABSORBED,
         APPLIED,

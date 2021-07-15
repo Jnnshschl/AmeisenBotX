@@ -161,6 +161,8 @@ namespace AmeisenBotX.Core.Data.Objects
 
         int MaxRuneenergy { get; }
 
+        int MaxSecondary { get; }
+
         BitVector32 NpcFlags { get; }
 
         WowPowertype PowerType { get; }
@@ -176,6 +178,10 @@ namespace AmeisenBotX.Core.Data.Objects
         int Runeenergy { get; }
 
         double RuneenergyPercentage { get; }
+
+        int Secondary { get; }
+
+        double SecondaryPercentage { get; }
 
         ulong SummonedByGuid { get; }
 

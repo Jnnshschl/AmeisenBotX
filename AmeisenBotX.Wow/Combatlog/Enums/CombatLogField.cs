@@ -1,6 +1,6 @@
 ﻿namespace AmeisenBotX.Wow.Combatlog.Enums
 {
-    public enum CombatLogField
+    public enum CombatlogField
     {
         Timestamp = 0,
         Type = 1,
@@ -10,6 +10,9 @@
         DestinationGuid = 5,
         DestinationName = 6,
         TargetFlags = 7,
-        Damage = 8
+        SwingDamageAmount = 8,
+        SpellSpellId = 8,
+        SpellAmount = 11,
+        SpellAmountOver = 12
     }
 }

@@ -252,7 +252,7 @@ namespace AmeisenBotX.Wow.Cache
 
             try
             {
-                File.WriteAllText(dbFile, JsonSerializer.Serialize(this, new() { WriteIndented = true }));
+                File.WriteAllText(dbFile, JsonSerializer.Serialize(this));
             }
             catch
             {

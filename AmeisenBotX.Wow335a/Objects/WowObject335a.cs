@@ -15,6 +15,7 @@ namespace AmeisenBotX.Wow335a.Objects
         {
             BaseAddress = baseAddress;
             DescriptorAddress = descriptorAddress;
+            Type = WowObjectType.None;
         }
 
         public IntPtr BaseAddress { get; }
@@ -29,7 +30,7 @@ namespace AmeisenBotX.Wow335a.Objects
 
         public float Scale => RawObject.Scale;
 
-        public WowObjectType Type => (WowObjectType)RawObject.Type;
+        public WowObjectType Type { get; protected set; }
 
         protected WowObjectDescriptor RawObject { get; private set; }
 

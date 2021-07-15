@@ -15,6 +15,7 @@ namespace AmeisenBotX.Wow335a.Objects
     {
         public WowGameobject335a(IntPtr baseAddress, IntPtr descriptorAddress) : base(baseAddress, descriptorAddress)
         {
+            Type = WowObjectType.Gameobject;
         }
 
         public byte Bytes0 { get; set; }

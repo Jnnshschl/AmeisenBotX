@@ -1,11 +1,11 @@
 ﻿namespace AmeisenBotX.Wow.Combatlog.Objects
 {
-    public interface ISubjectBasicCombatLogEntry
+    public interface ISubjectBasicCombatlogEntry
     {
         void Notify();
 
-        void Register(IObserverBasicCombatLogEntry observer);
+        void Register(IObserverBasicCombatlogEntry observer);
 
-        void Unregister(IObserverBasicCombatLogEntry observer);
+        void Unregister(IObserverBasicCombatlogEntry observer);
     }
 }

@@ -47,23 +47,31 @@ namespace AmeisenBotX.Wow335a.Events
         {
             if (eventJson.Length > 2)
             {
-                AmeisenLogger.I.Log("WoWEvents", $"Firing events: {eventJson}", LogLevel.Verbose);
-                List<WowEvent> events = JsonSerializer.Deserialize<List<WowEvent>>(eventJson, new() { AllowTrailingCommas = true, NumberHandling = JsonNumberHandling.AllowReadingFromString });
-
-                if (events != null && events.Count > 0)
+                try
                 {
-                    foreach (WowEvent x in events)
-                    {
-                        if (x.Name != null && Events.ContainsKey(x.Name))
-                        {
-                            List<Action<long, List<string>>> actions = Events[x.Name];
+                    List<WowEvent> events = JsonSerializer.Deserialize<List<WowEvent>>(eventJson, new() { AllowTrailingCommas = true, NumberHandling = JsonNumberHandling.AllowReadingFromString });
 
-                            for (int i = 0; i < actions.Count; ++i)
+                    if (events != null && events.Count > 0)
+                    {
+                        AmeisenLogger.I.Log("WoWEvents", $"Firing events: {eventJson}", LogLevel.Verbose);
+
+                        foreach (WowEvent x in events)
+                        {
+                            if (x.Name != null && Events.ContainsKey(x.Name))
                             {
-                                actions[i](x.Timestamp, x.Arguments);
+                                List<Action<long, List<string>>> actions = Events[x.Name];
+
+                                for (int i = 0; i < actions.Count; ++i)
+                                {
+                                    actions[i](x.Timestamp, x.Arguments);
+                                }
                             }
                         }
                     }
+                }
+                catch (Exception e)
+                {
+                    AmeisenLogger.I.Log("WoWEvents", $"Failed parsing events: {eventJson}\n{e}", LogLevel.Error);
                 }
             }
         }

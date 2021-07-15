@@ -1,6 +1,6 @@
 ﻿namespace AmeisenBotX.Wow.Combatlog.Enums
 {
-    public enum CombatLogEntryType
+    public enum CombatlogEntryType
     {
         APPLIED,
         DAMAGE,
