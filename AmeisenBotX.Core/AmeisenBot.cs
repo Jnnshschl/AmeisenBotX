@@ -123,13 +123,9 @@ namespace AmeisenBotX.Core
             AmeisenLogger.I.Log("AmeisenBot", $"Loading DB from: {dbPath}", LogLevel.Master);
             Bot.Db = LocalAmeisenBotDb.FromJson(dbPath, Bot.Wow, Bot.Memory);
 
-
             string learnerPath = Path.Combine(DataFolder, "learner.json");
             AmeisenLogger.I.Log("AmeisenBot", $"Loading Learner from: {learnerPath}", LogLevel.Master);
             Bot.Learner = AmeisenBotLearner.FromFile(learnerPath);
-
-            SpellUsageCombatSession spellUsageCombatSession = new();
-            Bot.Learner.SpellUsageCombatSessions.Add(spellUsageCombatSession);
 
             PoiCacheEvent = new TimegatedEvent(TimeSpan.FromSeconds(2));
             Bot.Objects.OnObjectUpdateComplete += OnObjectUpdateComplete;
@@ -182,86 +178,34 @@ namespace AmeisenBotX.Core
                 SetupRconClient();
             }
 
-            // data collection setup
-            Bot.CombatLog.OnDamage += (ulong src, ulong dst, int spellId, int damage, int overDamage) =>
+            if (Config.LearningDataCollectionEnabled)
             {
-                IWowUnit srcUnit = Bot.GetWowObjectByGuid<IWowUnit>(src);
-                IWowUnit dstUnit = Bot.GetWowObjectByGuid<IWowUnit>(dst);
+                // data collection setup
+                SpellUsageCombatSession spellUsageCombatSession = new();
+                Bot.Learner.SpellUsageCombatSessions.Add(spellUsageCombatSession);
 
-                if (srcUnit != null && dstUnit != null)
+                Bot.CombatLog.OnDamage += (ulong src, ulong dst, int spellId, int damage, int overDamage) =>
                 {
-                    bool srcIsPlayer = srcUnit.Type == WowObjectType.Player;
-                    bool dstIsPlayer = dstUnit.Type == WowObjectType.Player;
+                    IWowUnit srcUnit = Bot.GetWowObjectByGuid<IWowUnit>(src);
+                    IWowUnit dstUnit = Bot.GetWowObjectByGuid<IWowUnit>(dst);
 
-                    spellUsageCombatSession.AddData
-                    (
-                        srcIsPlayer,
-                        dstIsPlayer,
-                        srcIsPlayer ? srcUnit.Guid : (ulong)BotUtils.GuidToNpcId(dstUnit.Guid),
-                        dstIsPlayer ? dstUnit.Guid : (ulong)BotUtils.GuidToNpcId(dstUnit.Guid),
-                        true,
-                        (int)srcUnit.Race,
-                        (int)srcUnit.Class,
-                        (int)srcUnit.PowerType,
-                        (int)dstUnit.Race,
-                        (int)dstUnit.Class,
-                        (int)dstUnit.PowerType,
-                        srcUnit.Health,
-                        dstUnit.Health,
-                        srcUnit.Secondary,
-                        dstUnit.Secondary,
-                        srcUnit.MaxHealth,
-                        dstUnit.MaxHealth,
-                        srcUnit.MaxSecondary,
-                        dstUnit.MaxSecondary,
-                        srcUnit.Level,
-                        dstUnit.Level,
-                        spellId,
-                        damage,
-                        overDamage
-                    );
-                }
-            };
+                    if (srcUnit != null && dstUnit != null)
+                    {
+                        LogSpellUsage(spellUsageCombatSession, true, spellId, damage, overDamage, srcUnit, dstUnit);
+                    }
+                };
 
-            Bot.CombatLog.OnHeal += (ulong src, ulong dst, int spellId, int healing, int overHeal) =>
-            {
-                IWowUnit srcUnit = Bot.GetWowObjectByGuid<IWowUnit>(src);
-                IWowUnit dstUnit = Bot.GetWowObjectByGuid<IWowUnit>(dst);
-
-                if (srcUnit != null && dstUnit != null)
+                Bot.CombatLog.OnHeal += (ulong src, ulong dst, int spellId, int healing, int overHeal) =>
                 {
-                    bool srcIsPlayer = srcUnit.Type == WowObjectType.Player;
-                    bool dstIsPlayer = dstUnit.Type == WowObjectType.Player;
+                    IWowUnit srcUnit = Bot.GetWowObjectByGuid<IWowUnit>(src);
+                    IWowUnit dstUnit = Bot.GetWowObjectByGuid<IWowUnit>(dst);
 
-                    spellUsageCombatSession.AddData
-                    (
-                        srcIsPlayer,
-                        dstIsPlayer,
-                        srcIsPlayer ? srcUnit.Guid : (ulong)BotUtils.GuidToNpcId(dstUnit.Guid),
-                        dstIsPlayer ? dstUnit.Guid : (ulong)BotUtils.GuidToNpcId(dstUnit.Guid),
-                        false,
-                        (int)srcUnit.Race,
-                        (int)srcUnit.Class,
-                        (int)srcUnit.PowerType,
-                        (int)dstUnit.Race,
-                        (int)dstUnit.Class,
-                        (int)dstUnit.PowerType,
-                        srcUnit.Health,
-                        dstUnit.Health,
-                        srcUnit.Secondary,
-                        dstUnit.Secondary,
-                        srcUnit.MaxHealth,
-                        dstUnit.MaxHealth,
-                        srcUnit.MaxSecondary,
-                        dstUnit.MaxSecondary,
-                        srcUnit.Level,
-                        dstUnit.Level,
-                        spellId,
-                        healing,
-                        overHeal
-                    );
-                }
-            };
+                    if (srcUnit != null && dstUnit != null)
+                    {
+                        LogSpellUsage(spellUsageCombatSession, false, spellId, healing, overHeal, srcUnit, dstUnit);
+                    }
+                };
+            }
         }
 
         /// <summary>
@@ -476,6 +420,40 @@ namespace AmeisenBotX.Core
         {
             AmeisenLogger.I.Log("AmeisenBot", $"Loading {typeof(T).Name,-24} {profileName}", LogLevel.Verbose);
             return profiles.FirstOrDefault(e => e.ToString().Equals(profileName, StringComparison.OrdinalIgnoreCase));
+        }
+
+        private static void LogSpellUsage(SpellUsageCombatSession spellUsageCombatSession, bool isDamage, int spellId, int amount, int over, IWowUnit srcUnit, IWowUnit dstUnit)
+        {
+            bool srcIsPlayer = srcUnit.Type == WowObjectType.Player;
+            bool dstIsPlayer = dstUnit.Type == WowObjectType.Player;
+
+            spellUsageCombatSession.AddData
+            (
+                srcIsPlayer,
+                dstIsPlayer,
+                srcIsPlayer ? srcUnit.Guid : (ulong)BotUtils.GuidToNpcId(srcUnit.Guid),
+                dstIsPlayer ? dstUnit.Guid : (ulong)BotUtils.GuidToNpcId(dstUnit.Guid),
+                isDamage,
+                (int)srcUnit.Race,
+                (int)srcUnit.Class,
+                (int)srcUnit.PowerType,
+                (int)dstUnit.Race,
+                (int)dstUnit.Class,
+                (int)dstUnit.PowerType,
+                srcUnit.Health,
+                dstUnit.Health,
+                srcUnit.Secondary,
+                dstUnit.Secondary,
+                srcUnit.MaxHealth,
+                dstUnit.MaxHealth,
+                srcUnit.MaxSecondary,
+                dstUnit.MaxSecondary,
+                srcUnit.Level,
+                dstUnit.Level,
+                spellId,
+                amount,
+                over
+            );
         }
 
         private ICombatClass CompileCustomCombatClass()

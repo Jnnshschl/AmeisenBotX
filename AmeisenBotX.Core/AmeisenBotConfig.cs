@@ -98,6 +98,8 @@ namespace AmeisenBotX.Core
 
         public string JobProfile { get; set; } = string.Empty;
 
+        public bool LearningDataCollectionEnabled { get; set; } = false;
+
         public bool LootOnlyMoneyAndQuestitems { get; set; } = false;
 
         public bool LootUnits { get; set; } = true;
