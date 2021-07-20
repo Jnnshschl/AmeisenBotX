@@ -43,13 +43,13 @@ namespace AmeisenBotX.Core
 
         public IDungeonEngine Dungeon { get; set; }
 
-        public AmeisenBotGlobals Globals { get; set; }
-
         public IGrindingEngine Grinding { get; set; }
 
         public IJobEngine Jobs { get; set; }
 
         public IWowUnit LastTarget => Objects.LastTarget;
+
+        public AmeisenBotLearner Learner { get; set; }
 
         public IMemoryApi Memory { get; set; }
 
@@ -70,8 +70,6 @@ namespace AmeisenBotX.Core
         public ITacticEngine Tactic { get; set; }
 
         public IWowUnit Target => Objects.Target;
-
-        public AmeisenBotLearner Learner { get; set; }
 
         public IWowInterface Wow { get; set; }
 

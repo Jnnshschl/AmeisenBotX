@@ -1,14 +1,18 @@
 ﻿using AmeisenBotX.Core.Engines.Battleground.Jannis.Profiles;
+using AmeisenBotX.Core.Fsm;
 using AmeisenBotX.Wow.Objects.Enums;
 
 namespace AmeisenBotX.Core.Engines.Battleground.Jannis
 {
     public class UniversalBattlegroundEngine : IBattlegroundEngine
     {
-        public UniversalBattlegroundEngine(AmeisenBotInterfaces bot)
+        public UniversalBattlegroundEngine(AmeisenBotInterfaces bot, AmeisenBotFsm stateMachine)
         {
             Bot = bot;
+            StateMachine = stateMachine;
         }
+
+        private AmeisenBotFsm StateMachine { get; }
 
         public string Author => "Jannis";
 
@@ -46,7 +50,7 @@ namespace AmeisenBotX.Core.Engines.Battleground.Jannis
             switch (Bot.Objects.MapId)
             {
                 case WowMapId.WarsongGulch:
-                    Profile = new WarsongGulchProfile(Bot);
+                    Profile = new WarsongGulchProfile(Bot, StateMachine);
                     return true;
 
                 default:

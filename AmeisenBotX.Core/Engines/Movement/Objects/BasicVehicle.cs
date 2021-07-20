@@ -1,6 +1,8 @@
 ﻿using AmeisenBotX.Common.Math;
 using AmeisenBotX.Core.Data.Objects;
 using AmeisenBotX.Core.Engines.Movement.Enums;
+using AmeisenBotX.Core.Fsm;
+using AmeisenBotX.Core.Fsm.States;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -9,10 +11,11 @@ namespace AmeisenBotX.Core.Engines.Movement.Objects
 {
     public class BasicVehicle
     {
-        public BasicVehicle(AmeisenBotInterfaces bot, AmeisenBotConfig config)
+        public BasicVehicle(AmeisenBotInterfaces bot, AmeisenBotConfig config, AmeisenBotFsm stateMachine)
         {
             Bot = bot;
             Config = config;
+            StateMachine = stateMachine;
         }
 
         public delegate void MoveCharacter(Vector3 positionToGoTo);
@@ -24,6 +27,8 @@ namespace AmeisenBotX.Core.Engines.Movement.Objects
         private AmeisenBotInterfaces Bot { get; }
 
         private AmeisenBotConfig Config { get; }
+
+        private AmeisenBotFsm StateMachine { get; }
 
         public Vector3 AvoidObstacles(float multiplier)
         {
@@ -78,7 +83,7 @@ namespace AmeisenBotX.Core.Engines.Movement.Objects
             steering -= Velocity;
 
             if (Bot.Player.IsInCombat
-                || Bot.Globals.ForceCombat)
+                || StateMachine.GetState<StateCombat>().Mode == CombatMode.Force)
             {
                 float maxSteeringCombat = Config.MovementSettings.MaxSteeringCombat;
 
@@ -105,7 +110,7 @@ namespace AmeisenBotX.Core.Engines.Movement.Objects
             acceleration += steering;
 
             if (Bot.Player.IsInCombat
-                || Bot.Globals.ForceCombat)
+                || StateMachine.GetState<StateCombat>().Mode == CombatMode.Force)
             {
                 float maxAcceleration = Config.MovementSettings.MaxAccelerationCombat;
 

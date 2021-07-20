@@ -4,6 +4,8 @@ using AmeisenBotX.Core.Engines.Quest.Objects;
 using AmeisenBotX.Core.Engines.Quest.Objects.Objectives;
 using AmeisenBotX.Core.Engines.Quest.Objects.Quests;
 using AmeisenBotX.Core.Engines.Quest.Units.Unitives;
+using AmeisenBotX.Core.Fsm;
+using AmeisenBotX.Core.Fsm.States;
 using AmeisenBotX.Wow.Objects.Enums;
 using System.Collections.Generic;
 using System.Linq;
@@ -12,7 +14,7 @@ namespace AmeisenBotX.Core.Engines.Quest.Profiles.StartAreas
 {
     public class DeathknightStartAreaQuestProfile : IQuestProfile
     {
-        public DeathknightStartAreaQuestProfile(AmeisenBotInterfaces bot)
+        public DeathknightStartAreaQuestProfile(AmeisenBotInterfaces bot, AmeisenBotFsm stateMachine)
         {
             Quests = new Queue<List<IBotQuest>>();
 
@@ -228,7 +230,7 @@ namespace AmeisenBotX.Core.Engines.Quest.Profiles.StartAreas
                         () => (bot.GetClosestQuestgiverByDisplayId(bot.Player.Position, new List<int> { 16416 }), new Vector3(2340, -5687, 154)),
                         new List<IQuestObjective>()
                         {
-                            new BotActionQuestObjective(() => bot.Globals.IgnoreCombat = true),
+                            new BotActionQuestObjective(() => stateMachine.GetState<StateCombat>().Mode = CombatMode.NotAllowed),
                             new QuestObjectiveChain(new List<IQuestObjective>()
                             {
                                 new MoveToPositionQuestObjective(bot, new Vector3(2243, -5834, 101), 48.0),
@@ -238,7 +240,7 @@ namespace AmeisenBotX.Core.Engines.Quest.Profiles.StartAreas
                                 new MoveToUnitQuestObjective(bot, 16416, 16.0),
                                 new CastVehicleSpellQuestObjective(bot, 52264, () => bot.Objects.Player.QuestlogEntries.FirstOrDefault(e => e.Id == 12680).Finished == 1)
                             }),
-                            new BotActionQuestObjective(() => bot.Globals.IgnoreCombat = false)
+                            new BotActionQuestObjective(() => stateMachine.GetState<StateCombat>().Mode = CombatMode.Allowed)
                         }
                     ),
                     new BotQuest

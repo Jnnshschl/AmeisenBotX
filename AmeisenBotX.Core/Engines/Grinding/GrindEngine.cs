@@ -6,6 +6,7 @@ using AmeisenBotX.Core.Engines.Grinding.Profiles;
 using AmeisenBotX.Core.Engines.Movement.Enums;
 using AmeisenBotX.Core.Fsm;
 using AmeisenBotX.Core.Fsm.Enums;
+using AmeisenBotX.Core.Fsm.States;
 using AmeisenBotX.Wow.Cache.Enums;
 using System;
 using System.Collections.Generic;
@@ -109,7 +110,7 @@ namespace AmeisenBotX.Core.Engines.Grinding
                     if (nearestUnit.Position.GetDistance(Bot.Player.Position) < 20.0f && TargetInLos)
                     {
                         Bot.Wow.WowTargetGuid(nearestUnit.Guid);
-                        Bot.Globals.ForceCombat = true;
+                        StateMachine.GetState<StateCombat>().Mode = CombatMode.Force;
                     }
                     else
                     {

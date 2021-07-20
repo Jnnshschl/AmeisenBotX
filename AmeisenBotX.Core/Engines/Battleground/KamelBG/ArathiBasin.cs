@@ -3,6 +3,8 @@ using AmeisenBotX.Common.Utils;
 using AmeisenBotX.Core.Data.Objects;
 using AmeisenBotX.Core.Engines.Battleground.KamelBG.Enums;
 using AmeisenBotX.Core.Engines.Movement.Enums;
+using AmeisenBotX.Core.Fsm;
+using AmeisenBotX.Core.Fsm.States;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -11,9 +13,10 @@ namespace AmeisenBotX.Core.Engines.Battleground.KamelBG
 {
     internal class ArathiBasin : IBattlegroundEngine
     {
-        public ArathiBasin(AmeisenBotInterfaces bot)
+        public ArathiBasin(AmeisenBotInterfaces bot, AmeisenBotFsm stateMachine)
         {
             Bot = bot;
+            StateMachine = stateMachine;
 
             CaptureFlagEvent = new(TimeSpan.FromSeconds(1));
             CombatEvent = new(TimeSpan.FromSeconds(2));
@@ -36,6 +39,8 @@ namespace AmeisenBotX.Core.Engines.Battleground.KamelBG
             new(852, 1151, 11),     // LumberMill
             new(1166, 1203, -56)    // Stable
         };
+
+        public AmeisenBotFsm StateMachine { get; }
 
         private AmeisenBotInterfaces Bot { get; }
 
@@ -64,7 +69,7 @@ namespace AmeisenBotX.Core.Engines.Battleground.KamelBG
                 }
                 else if (CombatEvent.Run())
                 {
-                    Bot.Globals.ForceCombat = true;
+                    StateMachine.GetState<StateCombat>().Mode = CombatMode.Force;
                     Bot.Wow.WowTargetGuid(weakestPlayer.Guid);
                 }
             }

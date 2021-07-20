@@ -5,6 +5,8 @@ using AmeisenBotX.Common.Math;
 using AmeisenBotX.Common.Utils;
 using AmeisenBotX.Core.Data.Objects;
 using AmeisenBotX.Core.Engines.Movement.Enums;
+using AmeisenBotX.Core.Fsm;
+using AmeisenBotX.Core.Fsm.States;
 using AmeisenBotX.Wow.Objects.Enums;
 using System;
 using System.Collections.Generic;
@@ -18,9 +20,10 @@ namespace AmeisenBotX.Core.Engines.Battleground.Jannis.Profiles
 {
     public class WarsongGulchProfile : IBattlegroundProfile
     {
-        public WarsongGulchProfile(AmeisenBotInterfaces bot)
+        public WarsongGulchProfile(AmeisenBotInterfaces bot, AmeisenBotFsm stateMachine)
         {
             Bot = bot;
+            StateMachine = stateMachine;
 
             ActionEvent = new(TimeSpan.FromMilliseconds(500));
             LosCheckEvent = new(TimeSpan.FromMilliseconds(1000));
@@ -161,6 +164,8 @@ namespace AmeisenBotX.Core.Engines.Battleground.Jannis.Profiles
 
         private TimegatedEvent LosCheckEvent { get; }
 
+        private AmeisenBotFsm StateMachine { get; }
+
         private IWsgDataset WsgDataset { get; set; }
 
         public void Execute()
@@ -218,7 +223,7 @@ namespace AmeisenBotX.Core.Engines.Battleground.Jannis.Profiles
                 }
                 else if (ActionEvent.Run())
                 {
-                    Bot.Globals.ForceCombat = true;
+                    StateMachine.GetState<StateCombat>().Mode = CombatMode.Force;
                     Bot.Wow.WowTargetGuid(weakestPlayer.Guid);
                 }
             }
@@ -252,7 +257,7 @@ namespace AmeisenBotX.Core.Engines.Battleground.Jannis.Profiles
                     }
                     else if (ActionEvent.Run())
                     {
-                        Bot.Globals.ForceCombat = true;
+                        StateMachine.GetState<StateCombat>().Mode = CombatMode.Force;
                         Bot.Wow.WowTargetGuid(nearEnemy.Guid);
                     }
                 }
@@ -327,7 +332,7 @@ namespace AmeisenBotX.Core.Engines.Battleground.Jannis.Profiles
         {
             if (JBgBlackboard.EnemyTeamFlagCarrier == null)
             {
-                Bot.Globals.ForceCombat = false;
+                StateMachine.GetState<StateCombat>().Mode = CombatMode.Allowed;
                 return BehaviorTreeStatus.Success;
             }
 
@@ -340,7 +345,7 @@ namespace AmeisenBotX.Core.Engines.Battleground.Jannis.Profiles
             }
             else if (ActionEvent.Run())
             {
-                Bot.Globals.ForceCombat = true;
+                StateMachine.GetState<StateCombat>().Mode = CombatMode.Force;
                 Bot.Wow.WowTargetGuid(JBgBlackboard.EnemyTeamFlagCarrier.Guid);
             }
 
@@ -408,7 +413,7 @@ namespace AmeisenBotX.Core.Engines.Battleground.Jannis.Profiles
                     }
                     else if (ActionEvent.Run())
                     {
-                        Bot.Globals.ForceCombat = true;
+                        StateMachine.GetState<StateCombat>().Mode = CombatMode.Force;
                         Bot.Wow.WowTargetGuid(nearEnemy.Guid);
                     }
                 }

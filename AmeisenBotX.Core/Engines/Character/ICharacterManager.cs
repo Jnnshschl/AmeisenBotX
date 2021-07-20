@@ -30,8 +30,6 @@ namespace AmeisenBotX.Core.Engines.Character
 
         TalentManager TalentManager { get; }
 
-        void AntiAfk();
-
         void ClickToMove(Vector3 pos, ulong guid, WowClickToMoveType clickToMoveType = WowClickToMoveType.Move, float turnSpeed = 20.9f, float distance = 0.5f);
 
         bool HasItemTypeInBag<T>(bool needsToBeUseable = false);

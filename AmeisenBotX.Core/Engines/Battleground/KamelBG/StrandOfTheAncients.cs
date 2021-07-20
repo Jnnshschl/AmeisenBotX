@@ -3,6 +3,8 @@ using AmeisenBotX.Common.Utils;
 using AmeisenBotX.Core.Data.Objects;
 using AmeisenBotX.Core.Engines.Battleground.KamelBG.Enums;
 using AmeisenBotX.Core.Engines.Movement.Enums;
+using AmeisenBotX.Core.Fsm;
+using AmeisenBotX.Core.Fsm.States;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -11,9 +13,10 @@ namespace AmeisenBotX.Core.Engines.Battleground.KamelBG
 {
     internal class StrandOfTheAncients : IBattlegroundEngine
     {
-        public StrandOfTheAncients(AmeisenBotInterfaces bot)
+        public StrandOfTheAncients(AmeisenBotInterfaces bot, AmeisenBotFsm stateMachine)
         {
             Bot = bot;
+            StateMachine = stateMachine;
 
             CombatEvent = new(TimeSpan.FromSeconds(2));
         }
@@ -33,6 +36,8 @@ namespace AmeisenBotX.Core.Engines.Battleground.KamelBG
 
         private TimegatedEvent CombatEvent { get; }
 
+        private AmeisenBotFsm StateMachine { get; }
+
         public void Combat()
         {
             IWowPlayer weakestPlayer = Bot.GetNearEnemies<IWowPlayer>(Bot.Player.Position, 30.0f).OrderBy(e => e.Health).FirstOrDefault();
@@ -48,7 +53,7 @@ namespace AmeisenBotX.Core.Engines.Battleground.KamelBG
                 }
                 else if (CombatEvent.Run())
                 {
-                    Bot.Globals.ForceCombat = true;
+                    StateMachine.GetState<StateCombat>().Mode = CombatMode.Force;
                     Bot.Wow.WowTargetGuid(weakestPlayer.Guid);
                 }
             }

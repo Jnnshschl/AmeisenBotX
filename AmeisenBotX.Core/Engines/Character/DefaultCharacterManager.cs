@@ -61,11 +61,6 @@ namespace AmeisenBotX.Core.Engines.Character
 
         private IWowInterface Wow { get; }
 
-        public void AntiAfk()
-        {
-            MemoryApi.Write(Wow.Offsets.TickCount, Environment.TickCount);
-        }
-
         public void ClickToMove(Vector3 pos, ulong guid, WowClickToMoveType clickToMoveType = WowClickToMoveType.Move, float turnSpeed = 20.9f, float distance = 0.5f)
         {
             if (float.IsInfinity(pos.X) || float.IsNaN(pos.X) || MathF.Abs(pos.X) > 17066.6656

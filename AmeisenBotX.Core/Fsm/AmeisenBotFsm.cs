@@ -4,6 +4,7 @@ using AmeisenBotX.Core.Fsm.Enums;
 using AmeisenBotX.Core.Fsm.States;
 using AmeisenBotX.Logging;
 using AmeisenBotX.Logging.Enums;
+using AmeisenBotX.Memory;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -43,7 +44,7 @@ namespace AmeisenBotX.Core.Fsm
                 // add new state here
             };
 
-            AntiAfkEvent = new(TimeSpan.FromMilliseconds(Config.AntiAfkMs), Bot.Character.AntiAfk);
+            AntiAfkEvent = new(TimeSpan.FromMilliseconds(Config.AntiAfkMs), () => { bot.Memory.Write(bot.Wow.Offsets.TickCount, Environment.TickCount); });
             RenderSwitchEvent = new(TimeSpan.FromSeconds(1));
 
             CurrentState = States.First();
@@ -162,9 +163,9 @@ namespace AmeisenBotX.Core.Fsm
                                 OnStateOverride?.Invoke(CurrentState.Key);
                             }
                         }
-                        else if (!Bot.Globals.IgnoreCombat
+                        else if (GetState<StateCombat>().Mode != CombatMode.NotAllowed
                                 && !(Config.IgnoreCombatWhileMounted && Bot.Player.IsMounted)
-                                && (Bot.Globals.ForceCombat || Bot.Player.IsInCombat || GetState<StateCombat>().IsAnyPartymemberInCombat()
+                                && (GetState<StateCombat>().Mode == CombatMode.Force || Bot.Player.IsInCombat || GetState<StateCombat>().IsAnyPartymemberInCombat()
                                 || Bot.GetEnemiesInCombatWithParty<IWowUnit>(Bot.Player.Position, 100.0f).Any()))
                         {
                             if (SetState(BotState.Combat, true))

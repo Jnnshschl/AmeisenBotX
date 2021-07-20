@@ -83,9 +83,12 @@ namespace AmeisenBotX.Core
             DataFolder = Path.GetDirectoryName(config.Path);
             AccountName = Path.GetFileName(DataFolder);
 
-            if (logfilePath == "DEFAULT") { logfilePath = Path.Combine(DataFolder, "log/"); }
+            if (logfilePath == "DEFAULT")
+            {
+                logfilePath = Path.Combine(DataFolder, "log/");
+            }
 
-            if (Directory.Exists(logfilePath))
+            if (!string.IsNullOrWhiteSpace(logfilePath) && Directory.Exists(logfilePath))
             {
                 AmeisenLogger.I.ChangeLogFolder(logfilePath);
                 AmeisenLogger.I.ActiveLogLevel = initialLogLevel;
@@ -100,8 +103,17 @@ namespace AmeisenBotX.Core
 
             // start initializing the wow interface
             Bot = new();
-            Bot.Globals = new();
             Bot.Memory = new XMemory();
+
+            StateMachine = new(Config, Bot);
+            StateMachine.GetState<StateStartWow>().OnWoWStarted += () =>
+            {
+                if (Config.SaveWowWindowPosition)
+                {
+                    LoadWowWindowPosition();
+                }
+            };
+
             Bot.Chat = new DefaultChatManager(Config, DataFolder);
             Bot.Tactic = new DefaultTacticEngine();
 
@@ -112,10 +124,10 @@ namespace AmeisenBotX.Core
                 _ => throw new ArgumentException("Unsupported wow version", nameof(config)),
             };
 
-            AmeisenLogger.I.Log("AmeisenBot", $"Using OffsetList: {Bot.Wow.Offsets.GetType().Name}", LogLevel.Master);
-
             Bot.Wow.OnStaticPopup += OnStaticPopup;
             Bot.Wow.OnBattlegroundStatus += OnBattlegroundStatusChanged;
+
+            AmeisenLogger.I.Log("AmeisenBot", $"Using OffsetList: {Bot.Wow.Offsets.GetType().Name}", LogLevel.Master);
 
             Bot.Character = new DefaultCharacterManager(Bot.Wow, Bot.Memory);
 
@@ -139,17 +151,8 @@ namespace AmeisenBotX.Core
             Bot.Grinding = new DefaultGrindingEngine(Bot, Config, StateMachine);
 
             Bot.PathfindingHandler = new NavmeshServerPathfindingHandler(Config.NavmeshServerIp, Config.NameshServerPort);
-            Bot.Movement = new DefaultMovementEngine(Bot, Config);
+            Bot.Movement = new DefaultMovementEngine(Bot, Config, StateMachine);
             // wow interface setup done
-
-            StateMachine = new(Config, Bot);
-            StateMachine.GetState<StateStartWow>().OnWoWStarted += () =>
-            {
-                if (Config.SaveWowWindowPosition)
-                {
-                    LoadWowWindowPosition();
-                }
-            };
 
             AmeisenLogger.I.Log("AmeisenBot", "Finished setting up Bot", LogLevel.Verbose);
 
@@ -493,11 +496,11 @@ namespace AmeisenBotX.Core
             // add battleground engines here
             BattlegroundEngines = new List<IBattlegroundEngine>()
             {
-                new UniversalBattlegroundEngine(Bot),
-                new ArathiBasin(Bot),
-                new StrandOfTheAncients(Bot),
-                new EyeOfTheStorm(Bot),
-                new RunBoyRunEngine(Bot)
+                new UniversalBattlegroundEngine(Bot, StateMachine),
+                new ArathiBasin(Bot, StateMachine),
+                new StrandOfTheAncients(Bot, StateMachine),
+                new EyeOfTheStorm(Bot, StateMachine),
+                new RunBoyRunEngine(Bot, StateMachine)
             };
         }
 
@@ -542,10 +545,10 @@ namespace AmeisenBotX.Core
                 new Engines.Combat.Classes.Kamel.WarriorFury(Bot),
                 new Engines.Combat.Classes.Kamel.WarriorArms(Bot),
                 new Engines.Combat.Classes.Kamel.RogueAssassination(Bot),
-                new Engines.Combat.Classes.einTyp.PaladinProtection(Bot),
-                new Engines.Combat.Classes.einTyp.RogueAssassination(Bot),
-                new Engines.Combat.Classes.einTyp.WarriorArms(Bot),
-                new Engines.Combat.Classes.einTyp.WarriorFury(Bot),
+                new Engines.Combat.Classes.einTyp.PaladinProtection(Bot, StateMachine),
+                new Engines.Combat.Classes.einTyp.RogueAssassination(Bot, StateMachine),
+                new Engines.Combat.Classes.einTyp.WarriorArms(Bot, StateMachine),
+                new Engines.Combat.Classes.einTyp.WarriorFury(Bot, StateMachine),
                 new Engines.Combat.Classes.ToadLump.Rogue(Bot, StateMachine),
                 new Engines.Combat.Classes.Shino.PriestShadow(Bot, StateMachine),
                 new Engines.Combat.Classes.Shino.MageFrost(Bot, StateMachine),
@@ -577,7 +580,7 @@ namespace AmeisenBotX.Core
             // add quest profiles here
             QuestProfiles = new List<IQuestProfile>()
             {
-                new DeathknightStartAreaQuestProfile(Bot),
+                new DeathknightStartAreaQuestProfile(Bot, StateMachine),
                 new X5Horde1To80Profile(Bot),
                 new Horde1To60GrinderProfile(Bot)
             };

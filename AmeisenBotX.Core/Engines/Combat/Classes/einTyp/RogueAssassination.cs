@@ -3,6 +3,8 @@ using AmeisenBotX.Core.Data.Objects;
 using AmeisenBotX.Core.Engines.Character.Comparators;
 using AmeisenBotX.Core.Engines.Character.Talents.Objects;
 using AmeisenBotX.Core.Engines.Movement.Enums;
+using AmeisenBotX.Core.Fsm;
+using AmeisenBotX.Core.Fsm.States;
 using AmeisenBotX.Wow.Objects.Enums;
 using System;
 using System.Collections.Generic;
@@ -31,9 +33,11 @@ namespace AmeisenBotX.Core.Engines.Combat.Classes.einTyp
 
         private bool wasInStealth = false;
 
-        public RogueAssassination(AmeisenBotInterfaces bot)
+        public RogueAssassination(AmeisenBotInterfaces bot, AmeisenBotFsm stateMachine)
         {
             Bot = bot;
+            StateMachine = stateMachine;
+
             spells = new RogueAssassinSpells(bot);
         }
 
@@ -110,6 +114,8 @@ namespace AmeisenBotX.Core.Engines.Combat.Classes.einTyp
 
         private float LastTargetRotation { get; set; }
 
+        private AmeisenBotFsm StateMachine { get; }
+
         public void AttackTarget()
         {
             IWowUnit target = Bot.Target;
@@ -175,7 +181,7 @@ namespace AmeisenBotX.Core.Engines.Combat.Classes.einTyp
                     Bot.Wow.WowClearTarget();
                     Bot.Wow.LuaSendChatMessage(standingEmotes[new Random().Next(standingEmotes.Length)]);
                     Dancing = true;
-                    Bot.Globals.ForceCombat = false;
+                    StateMachine.GetState<StateCombat>().Mode = CombatMode.Allowed;
                 }
                 else
                 {
@@ -218,7 +224,7 @@ namespace AmeisenBotX.Core.Engines.Combat.Classes.einTyp
 
                     Dancing = false;
                     HandleMovement(target);
-                    Bot.Globals.ForceCombat = true;
+                    StateMachine.GetState<StateCombat>().Mode = CombatMode.Force;
                     HandleAttacking(target);
                 }
                 else if (!Dancing || standing)

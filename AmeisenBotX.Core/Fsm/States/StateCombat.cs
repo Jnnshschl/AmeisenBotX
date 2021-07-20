@@ -14,6 +14,13 @@ using System.Linq;
 
 namespace AmeisenBotX.Core.Fsm.States
 {
+    internal enum CombatMode
+    {
+        Allowed,
+        NotAllowed,
+        Force
+    }
+
     internal class StateCombat : BasicState
     {
         public StateCombat(AmeisenBotFsm stateMachine, AmeisenBotConfig config, AmeisenBotInterfaces bot) : base(stateMachine, config, bot)
@@ -21,7 +28,9 @@ namespace AmeisenBotX.Core.Fsm.States
             FacingCheck = new(TimeSpan.FromMilliseconds(100));
         }
 
-        public float DistanceToKeep => Bot.CombatClass == null || Bot.CombatClass.IsMelee ? GetMeeleRange() : 28f;
+        public float DistanceToKeep => Bot.CombatClass == null || Bot.CombatClass.IsMelee ? GetMeeleRange() : 28.0f;
+
+        public CombatMode Mode { get; set; }
 
         private TimegatedEvent FacingCheck { get; set; }
 
@@ -39,8 +48,8 @@ namespace AmeisenBotX.Core.Fsm.States
 
         public override void Execute()
         {
-            if (!(Bot.Globals.ForceCombat
-                || Bot.Player.IsInCombat
+            if (StateMachine.GetState<StateCombat>().Mode != CombatMode.Allowed
+                || !(Bot.Player.IsInCombat
                 || IsAnyPartymemberInCombat()
                 || Bot.GetEnemiesInCombatWithParty<IWowUnit>(Bot.Player.Position, 100.0f).Any()))
             {
@@ -66,9 +75,9 @@ namespace AmeisenBotX.Core.Fsm.States
                     {
                         if (Bot.Wow.TargetGuid == 0 || Bot.Target == null)
                         {
-                            if (Bot.Globals.ForceCombat)
+                            if (StateMachine.GetState<StateCombat>().Mode == CombatMode.Force)
                             {
-                                Bot.Globals.ForceCombat = false;
+                                StateMachine.GetState<StateCombat>().Mode = CombatMode.Allowed;
                             }
 
                             if (StateMachine.GetState<StateFollowing>().IsUnitToFollowThere(out IWowUnit player))
