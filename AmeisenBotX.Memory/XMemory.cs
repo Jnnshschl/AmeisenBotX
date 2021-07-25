@@ -30,8 +30,6 @@ namespace AmeisenBotX.Memory
 
         public XMemory()
         {
-            AssemblyBuffer = new();
-
             if (!File.Exists("FASM.dll"))
             {
                 throw new FileNotFoundException("The mandatory \"FASM.dll\" could not be found on your system, download it from the Flat Assembler forum!");
@@ -219,9 +217,9 @@ namespace AmeisenBotX.Memory
                 return false;
             }
 
-            // reserve initial pool
             AllocationPools = new();
 
+            // reserve initial pool
             if (INITIAL_POOL_SIZE > 0)
             {
                 IntPtr initialPoolAddress = VirtualAllocEx(ProcessHandle, IntPtr.Zero, (uint)INITIAL_POOL_SIZE, AllocationTypes.Commit, MemoryProtectionFlags.ExecuteReadWrite);
@@ -233,6 +231,8 @@ namespace AmeisenBotX.Memory
 
                 AllocationPools.Add(new(initialPoolAddress, INITIAL_POOL_SIZE));
             }
+
+            AssemblyBuffer = new();
 
             return true;
         }

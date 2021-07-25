@@ -4,7 +4,7 @@ using System.Linq;
 
 namespace AmeisenBotX.Memory.Structs
 {
-    public class AllocationPool
+    public struct AllocationPool
     {
         public AllocationPool(IntPtr address, int size)
         {
