@@ -14,9 +14,12 @@ namespace AmeisenBotX.Memory
 {
     public unsafe class XMemory : IMemoryApi
     {
+        // FASM configuration, if you encounter fasm error, try to increase the values
         private const int FASM_MEMORY_SIZE = 8192;
         private const int FASM_PASSES = 100;
-        private const int INITIAL_POOL_SIZE = 16384;
+
+        // initial memory pool size, set to 0 to disable the pooling system
+        private const int INITIAL_POOL_SIZE = 1024 * 16;
 
         // lock needs to be static as FASM isn't thread safe
         private static readonly object fasmLock = new();
@@ -219,14 +222,17 @@ namespace AmeisenBotX.Memory
             // reserve initial pool
             AllocationPools = new();
 
-            IntPtr initialPoolAddress = VirtualAllocEx(ProcessHandle, IntPtr.Zero, (uint)INITIAL_POOL_SIZE, AllocationTypes.Commit, MemoryProtectionFlags.ExecuteReadWrite);
-
-            if (initialPoolAddress == IntPtr.Zero)
+            if (INITIAL_POOL_SIZE > 0)
             {
-                return false;
-            }
+                IntPtr initialPoolAddress = VirtualAllocEx(ProcessHandle, IntPtr.Zero, (uint)INITIAL_POOL_SIZE, AllocationTypes.Commit, MemoryProtectionFlags.ExecuteReadWrite);
 
-            AllocationPools.Add(new(initialPoolAddress, INITIAL_POOL_SIZE));
+                if (initialPoolAddress == IntPtr.Zero)
+                {
+                    return false;
+                }
+
+                AllocationPools.Add(new(initialPoolAddress, INITIAL_POOL_SIZE));
+            }
 
             return true;
         }

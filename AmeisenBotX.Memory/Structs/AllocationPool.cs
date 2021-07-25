@@ -20,6 +20,11 @@ namespace AmeisenBotX.Memory.Structs
 
         public int Size { get; }
 
+        /// <summary>
+        /// Free a memory block in the pool
+        /// </summary>
+        /// <param name="address">Allocation address</param>
+        /// <returns>True, when the block has been found and freed, false if not</returns>
         public bool Free(IntPtr address)
         {
             int addressInt = address.ToInt32();
@@ -35,6 +40,12 @@ namespace AmeisenBotX.Memory.Structs
             return false;
         }
 
+        /// <summary>
+        /// Try to reserve a memory block in the pool
+        /// </summary>
+        /// <param name="size">Size of the wanted block</param>
+        /// <param name="address">Address of the memory allocation</param>
+        /// <returns>True when a block could be reserved, false if not</returns>
         public bool Reserve(int size, out IntPtr address)
         {
             if (GetNextFreeBlock(size, out int offset))
@@ -64,7 +75,10 @@ namespace AmeisenBotX.Memory.Structs
                         KeyValuePair<int, int> allocation = Allocations.ElementAt(i);
                         int allocationEnd = allocation.Key + allocation.Value;
 
-                        int memoryLeft = i + 1 < Allocations.Count ? Allocations.ElementAt(i + 1).Key - allocationEnd : Size - allocationEnd;
+                        // when there is a next element, used it as the limiter, if not use the whole remaining space
+                        int memoryLeft = i + 1 < Allocations.Count 
+                            ? Allocations.ElementAt(i + 1).Key - allocationEnd 
+                            : Size - allocationEnd;
 
                         if (memoryLeft >= size)
                         {
