@@ -492,14 +492,13 @@ namespace AmeisenBotX.Wow335a.Hook
 
             if (!string.IsNullOrWhiteSpace(command))
             {
-                byte[] bytes = Encoding.UTF8.GetBytes(command);
+                byte[] bytes = Encoding.UTF8.GetBytes(command + "\0");
 
-                if (Memory.AllocateMemory((uint)bytes.Length + 1, out IntPtr memAlloc))
+                if (Memory.AllocateMemory((uint)bytes.Length, out IntPtr memAlloc))
                 {
-                    if (memAlloc != IntPtr.Zero)
+                    try
                     {
                         Memory.WriteBytes(memAlloc, bytes);
-                        Memory.Write<byte>(memAlloc + (bytes.Length + 1), 0);
 
                         string[] asm = new string[]
                         {
@@ -511,9 +510,11 @@ namespace AmeisenBotX.Wow335a.Hook
                             "RET",
                         };
 
-                        bool status = InjectAndExecute(asm, false, out _);
+                        return InjectAndExecute(asm, false, out _);
+                    }
+                    finally
+                    {
                         Memory.FreeMemory(memAlloc);
-                        return status;
                     }
                 }
             }
@@ -1141,46 +1142,45 @@ namespace AmeisenBotX.Wow335a.Hook
             if (!string.IsNullOrWhiteSpace(command)
                 && !string.IsNullOrWhiteSpace(variable))
             {
-                byte[] commandBytes = Encoding.UTF8.GetBytes(command);
-                byte[] variableBytes = Encoding.UTF8.GetBytes(variable);
+                byte[] commandBytes = Encoding.UTF8.GetBytes(command + "\0");
+                byte[] variableBytes = Encoding.UTF8.GetBytes(variable + "\0");
 
-                if (Memory.AllocateMemory((uint)commandBytes.Length + (uint)variableBytes.Length + 2, out IntPtr memAllocCmdVar))
+                if (Memory.AllocateMemory((uint)commandBytes.Length + (uint)variableBytes.Length, out IntPtr memAllocCmdVar))
                 {
-                    int varOffset = commandBytes.Length + 1;
-                    byte[] bytesToWrite = new byte[commandBytes.Length + (uint)variableBytes.Length + 2];
-
-                    Array.Copy(commandBytes, bytesToWrite, commandBytes.Length);
-                    Array.Copy(variableBytes, 0, bytesToWrite, varOffset, variableBytes.Length);
-
-                    Memory.WriteBytes(memAllocCmdVar, bytesToWrite);
-
-                    string[] asm = new string[]
+                    try
                     {
-                        "PUSH 0",
-                        $"PUSH {memAllocCmdVar}",
-                        $"PUSH {memAllocCmdVar}",
-                        $"CALL {OffsetList.FunctionLuaDoString}",
-                        "ADD ESP, 0xC",
-                        $"CALL {OffsetList.FunctionGetActivePlayerObject}",
-                        "MOV ECX, EAX",
-                        "PUSH -1",
-                        $"PUSH {memAllocCmdVar + varOffset}",
-                        $"CALL {OffsetList.FunctionGetLocalizedText}",
-                        "RET",
-                    };
+                        byte[] bytesToWrite = new byte[commandBytes.Length + variableBytes.Length];
 
-                    if (InjectAndExecute(asm, true, out byte[] bytes))
-                    {
-                        if (bytes != null)
+                        Array.Copy(commandBytes, bytesToWrite, commandBytes.Length);
+                        Array.Copy(variableBytes, 0, bytesToWrite, commandBytes.Length, variableBytes.Length);
+
+                        Memory.WriteBytes(memAllocCmdVar, bytesToWrite);
+
+                        string[] asm = new string[]
                         {
-                            result = Encoding.UTF8.GetString(bytes);
+                            "PUSH 0",
+                            $"PUSH {memAllocCmdVar}",
+                            $"PUSH {memAllocCmdVar}",
+                            $"CALL {OffsetList.FunctionLuaDoString}",
+                            "ADD ESP, 0xC",
+                            $"CALL {OffsetList.FunctionGetActivePlayerObject}",
+                            "MOV ECX, EAX",
+                            "PUSH -1",
+                            $"PUSH {memAllocCmdVar + commandBytes.Length}",
+                            $"CALL {OffsetList.FunctionGetLocalizedText}",
+                            "RET",
+                        };
 
-                            Memory.FreeMemory(memAllocCmdVar);
-                            return true;
+                        if (InjectAndExecute(asm, true, out IntPtr returnAddress)
+                            && Memory.ReadString(returnAddress, Encoding.UTF8, out result))
+                        {
+                            return !string.IsNullOrWhiteSpace(result);
                         }
                     }
-
-                    Memory.FreeMemory(memAllocCmdVar);
+                    finally
+                    {
+                        Memory.FreeMemory(memAllocCmdVar);
+                    }
                 }
             }
 
@@ -1199,15 +1199,14 @@ namespace AmeisenBotX.Wow335a.Hook
 
             if (!string.IsNullOrWhiteSpace(variable))
             {
-                byte[] variableBytes = Encoding.UTF8.GetBytes(variable);
+                byte[] variableBytes = Encoding.UTF8.GetBytes(variable + "\0");
 
-                if (Memory.AllocateMemory((uint)variableBytes.Length + 1, out IntPtr memAlloc))
+                if (Memory.AllocateMemory((uint)variableBytes.Length, out IntPtr memAlloc))
                 {
-                    Memory.WriteBytes(memAlloc, variableBytes);
-                    Memory.Write<byte>(memAlloc + (variableBytes.Length + 1), 0);
-
-                    if (memAlloc != IntPtr.Zero)
+                    try
                     {
+                        Memory.WriteBytes(memAlloc, variableBytes);
+
                         string[] asm = new string[]
                         {
                             $"CALL {OffsetList.FunctionGetActivePlayerObject}",
@@ -1218,12 +1217,15 @@ namespace AmeisenBotX.Wow335a.Hook
                             "RET",
                         };
 
-                        if (InjectAndExecute(asm, true, out byte[] bytes))
+                        if (InjectAndExecute(asm, true, out IntPtr returnAddress)
+                            && Memory.ReadString(returnAddress, Encoding.UTF8, out result))
                         {
-                            result = Encoding.UTF8.GetString(bytes);
-                            Memory.FreeMemory(memAlloc);
-                            return true;
+                            return !string.IsNullOrWhiteSpace(result);
                         }
+                    }
+                    finally
+                    {
+                        Memory.FreeMemory(memAlloc);
                     }
                 }
             }
@@ -1259,8 +1261,8 @@ namespace AmeisenBotX.Wow335a.Hook
         {
             AmeisenLogger.I.Log("HookManager", $"Getting Reaction of {a} and {b}", LogLevel.Verbose);
 
-            byte[] returnBytes = WowCallObjectFunction(a, OffsetList.FunctionUnitGetReaction, new() { b }, true);
-            return returnBytes?.Length > 0 ? BitConverter.ToInt32(returnBytes, 0) : 2;
+            IntPtr returnBytes = WowCallObjectFunction(a, OffsetList.FunctionUnitGetReaction, new() { b }, true);
+            return returnBytes != IntPtr.Zero && Memory.Read(returnBytes, out int v) ? v : 2;
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -1277,7 +1279,7 @@ namespace AmeisenBotX.Wow335a.Hook
         {
             start.Z += heightAdjust;
             end.Z += heightAdjust;
-            return WowTraceLine(start, end, out _) == 0;
+            return WowTraceLine(start, end, out _);
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -1362,7 +1364,7 @@ namespace AmeisenBotX.Wow335a.Hook
             InjectAndExecute(asm, false, out _);
         }
 
-        public byte WowTraceLine(Vector3 start, Vector3 end, out Vector3 result, uint flags = 0x120171)
+        public bool WowTraceLine(Vector3 start, Vector3 end, out Vector3 result, uint flags = 0x120171)
         {
             if (Memory.AllocateMemory(40, out IntPtr tracelineCodecave))
             {
@@ -1388,12 +1390,11 @@ namespace AmeisenBotX.Wow335a.Hook
                         "RET",
                     };
 
-                    if (InjectAndExecute(asm, true, out byte[] bytes)
-                        && bytes != null && bytes.Length > 0
-                        && Memory.Read(resultPointer, out result))
+                    if (InjectAndExecute(asm, true, out IntPtr returnAddress)
+                        && Memory.Read(returnAddress, out result))
                     {
                         Memory.FreeMemory(tracelineCodecave);
-                        return bytes[0];
+                        return result.X != 0.0f && result.Y != 0.0f && result.Z != 0.0f;
                     }
 
                     Memory.FreeMemory(tracelineCodecave);
@@ -1401,7 +1402,7 @@ namespace AmeisenBotX.Wow335a.Hook
             }
 
             result = Vector3.Zero;
-            return 0;
+            return false;
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -1511,91 +1512,67 @@ namespace AmeisenBotX.Wow335a.Hook
             }
         }
 
-        private bool InjectAndExecute(string[] asm, bool readReturnBytes, out byte[] bytes)
+        private bool InjectAndExecute(string[] asm, bool returns, out IntPtr returnAddress)
         {
+            returnAddress = IntPtr.Zero;
+
             if (!IsWoWHooked || Memory.Process.HasExited)
             {
-                bytes = null;
                 return false;
             }
 
-            List<byte> returnBytes = readReturnBytes ? new() : null;
-
             lock (hookLock)
             {
-                // zero our memory
-                if (Memory.ZeroMemory(CExecution, MEM_ALLOC_EXECUTION_SIZE))
+                bool frozenMainThread = false;
+
+                try
                 {
-                    bool frozenMainThread = false;
-
-                    try
+                    // add all lines
+                    for (int i = 0; i < asm.Length; ++i)
                     {
-                        // add all lines
-                        for (int i = 0; i < asm.Length; ++i)
-                        {
-                            Memory.AssemblyBuffer.AppendLine(asm[i]);
-                        }
+                        Memory.AssemblyBuffer.AppendLine(asm[i]);
+                    }
 
-                        // inject it
-                        Memory.SuspendMainThread();
-                        frozenMainThread = true;
-                        Memory.InjectAssembly(CExecution);
+                    // inject it
+                    Memory.SuspendMainThread();
+                    frozenMainThread = true;
+                    Memory.InjectAssembly(CExecution);
 
-                        // now there is code to be executed
-                        Memory.Write(IntShouldExecute, 1);
+                    // now there is code to be executed
+                    Memory.Write(IntShouldExecute, 1);
+                    Memory.ResumeMainThread();
+                    frozenMainThread = false;
+
+                    // wait for the code to be executed
+                    while (Memory.Read(IntShouldExecute, out int codeToBeExecuted)
+                           && codeToBeExecuted > 0)
+                    {
+                        Thread.Sleep(1);
+                    }
+
+                    // if we want to read the return value do it otherwise we're done
+                    if (returns && Memory.Read(ReturnValueAddress, out IntPtr retAddress))
+                    {
+                        returnAddress = retAddress;
+                    }
+                }
+                catch
+                {
+                    // now there is no more code to be executed
+                    Memory.Write(IntShouldExecute, 0);
+                    ++hookCalls;
+                    return false;
+                }
+                finally
+                {
+                    if (frozenMainThread)
+                    {
                         Memory.ResumeMainThread();
-                        frozenMainThread = false;
-
-                        // wait for the code to be executed
-                        while (Memory.Read(IntShouldExecute, out int codeToBeExecuted)
-                               && codeToBeExecuted > 0)
-                        {
-                            Thread.Sleep(1);
-                        }
-
-                        // if we want to read the return value do it otherwise we're done
-                        if (readReturnBytes)
-                        {
-                            Memory.Read(ReturnValueAddress, out uint dwAddress);
-                            IntPtr addrPointer = new(dwAddress);
-
-                            // read all parameter-bytes until we the buffer is 0
-                            Memory.Read(addrPointer, out byte buffer);
-
-                            if (buffer != 0)
-                            {
-                                do
-                                {
-                                    returnBytes.Add(buffer);
-                                    addrPointer += 1;
-                                } while (Memory.Read(addrPointer, out buffer) && buffer != 0);
-                            }
-                            else
-                            {
-                                returnBytes.AddRange(BitConverter.GetBytes(dwAddress));
-                            }
-                        }
-                    }
-                    catch
-                    {
-                        // now there is no more code to be executed
-                        Memory.Write(IntShouldExecute, 0);
-
-                        bytes = null;
-                        return false;
-                    }
-                    finally
-                    {
-                        if (frozenMainThread)
-                        {
-                            Memory.ResumeMainThread();
-                        }
                     }
                 }
             }
 
             ++hookCalls;
-            bytes = readReturnBytes ? returnBytes.ToArray() : null;
             return true;
         }
 
@@ -1711,7 +1688,7 @@ namespace AmeisenBotX.Wow335a.Hook
             return true;
         }
 
-        private byte[] WowCallObjectFunction(IntPtr objectBaseAddress, IntPtr functionAddress, List<object> args = null, bool readReturnBytes = false)
+        private IntPtr WowCallObjectFunction(IntPtr objectBaseAddress, IntPtr functionAddress, List<object> args = null, bool readReturnBytes = false)
         {
             List<string> asm = new() { $"MOV ECX, {objectBaseAddress}" };
 
@@ -1727,7 +1704,7 @@ namespace AmeisenBotX.Wow335a.Hook
             asm.Add($"CALL {functionAddress}");
             asm.Add("RET");
 
-            return InjectAndExecute(asm.ToArray(), readReturnBytes, out byte[] bytes) ? bytes : null;
+            return InjectAndExecute(asm.ToArray(), readReturnBytes, out IntPtr returnAddress) ? returnAddress : IntPtr.Zero;
         }
     }
 }

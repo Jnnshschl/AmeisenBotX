@@ -16,6 +16,7 @@ namespace AmeisenBotX.Memory
     {
         private const int FASM_MEMORY_SIZE = 8192;
         private const int FASM_PASSES = 100;
+        private const int INITIAL_POOL_SIZE = 16384;
 
         // lock needs to be static as FASM isn't thread safe
         private static readonly object fasmLock = new();
@@ -26,7 +27,6 @@ namespace AmeisenBotX.Memory
 
         public XMemory()
         {
-            MemoryAllocations = new();
             AssemblyBuffer = new();
 
             if (!File.Exists("FASM.dll"))
@@ -42,7 +42,7 @@ namespace AmeisenBotX.Memory
         public IntPtr MainThreadHandle { get; private set; }
 
         ///<inheritdoc cref="IMemoryApi.MemoryAllocations"/>
-        public Dictionary<IntPtr, uint> MemoryAllocations { get; }
+        public Dictionary<IntPtr, uint> MemoryAllocations => AllocationPools.ToDictionary(e => e.Address, e => (uint)e.Size);
 
         ///<inheritdoc cref="IMemoryApi.Process"/>
         public Process Process { get; private set; }
@@ -78,18 +78,32 @@ namespace AmeisenBotX.Memory
             }
         }
 
+        private List<AllocationPool> AllocationPools { get; set; }
+
         ///<inheritdoc cref="IMemoryApi.AllocateMemory"/>
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public bool AllocateMemory(uint size, out IntPtr address)
         {
             lock (allocLock)
             {
-                address = VirtualAllocEx(ProcessHandle, IntPtr.Zero, size, AllocationTypes.Commit, MemoryProtectionFlags.ExecuteReadWrite);
-
-                if (address != IntPtr.Zero)
+                for (int i = 0; i < AllocationPools.Count; ++i)
                 {
-                    MemoryAllocations.Add(address, size);
-                    return true;
+                    if (AllocationPools[i].Reserve((int)size, out address))
+                    {
+                        return true;
+                    }
+                }
+
+                // we need a new pool
+                int newPoolSize = Math.Max((int)size, INITIAL_POOL_SIZE);
+                IntPtr newPoolAddress = VirtualAllocEx(ProcessHandle, IntPtr.Zero, (uint)newPoolSize, AllocationTypes.Commit, MemoryProtectionFlags.ExecuteReadWrite);
+
+                if (newPoolAddress != IntPtr.Zero)
+                {
+                    AllocationPool pool = new(newPoolAddress, newPoolSize);
+                    AllocationPools.Add(pool);
+
+                    return pool.Reserve((int)size, out address);
                 }
 
                 address = IntPtr.Zero;
@@ -125,14 +139,15 @@ namespace AmeisenBotX.Memory
         ///<inheritdoc cref="IMemoryApi.FreeAllMemory"/>
         public void FreeAllMemory()
         {
-            List<IntPtr> memAllocs = MemoryAllocations.Keys.ToList();
-
-            for (int i = 0; i < memAllocs.Count; ++i)
+            lock (allocLock)
             {
-                FreeMemory(memAllocs[i]);
-            }
+                for (int i = 0; i < AllocationPools.Count; ++i)
+                {
+                    VirtualFreeEx(ProcessHandle, AllocationPools[i].Address, 0, AllocationTypes.Release);
+                }
 
-            MemoryAllocations.Clear();
+                AllocationPools.Clear();
+            }
         }
 
         ///<inheritdoc cref="IMemoryApi.FreeMemory"/>
@@ -141,11 +156,12 @@ namespace AmeisenBotX.Memory
         {
             lock (allocLock)
             {
-                if (MemoryAllocations.ContainsKey(address)
-                    && VirtualFreeEx(ProcessHandle, address, 0, AllocationTypes.Release))
+                for (int i = 0; i < AllocationPools.Count; ++i)
                 {
-                    MemoryAllocations.Remove(address);
-                    return true;
+                    if (AllocationPools[i].Free(address))
+                    {
+                        return true;
+                    }
                 }
 
                 return false;
@@ -199,6 +215,18 @@ namespace AmeisenBotX.Memory
             {
                 return false;
             }
+
+            // reserve initial pool
+            AllocationPools = new();
+
+            IntPtr initialPoolAddress = VirtualAllocEx(ProcessHandle, IntPtr.Zero, (uint)INITIAL_POOL_SIZE, AllocationTypes.Commit, MemoryProtectionFlags.ExecuteReadWrite);
+
+            if (initialPoolAddress == IntPtr.Zero)
+            {
+                return false;
+            }
+
+            AllocationPools.Add(new(initialPoolAddress, INITIAL_POOL_SIZE));
 
             return true;
         }
