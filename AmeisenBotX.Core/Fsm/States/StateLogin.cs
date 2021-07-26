@@ -23,11 +23,6 @@ namespace AmeisenBotX.Core.Fsm.States
                 {
                     AmeisenLogger.I.Log("StateLogin", "EndsceneHook failed", LogLevel.Error);
                 }
-
-                if (Config.AutoSetUlowGfxSettings)
-                {
-                    SetUlowGfxSettings();
-                }
             }
 
             Bot.Wow.SetWorldLoadedCheck(true);
@@ -51,11 +46,6 @@ namespace AmeisenBotX.Core.Fsm.States
 
         public override void Leave()
         {
-        }
-
-        private void SetUlowGfxSettings()
-        {
-            Bot.Wow.LuaDoString("SetCVar(\"gxcolorbits\",\"16\");SetCVar(\"gxdepthbits\",\"16\");SetCVar(\"skycloudlod\",\"0\");SetCVar(\"particledensity\",\"0.3\");SetCVar(\"lod\",\"0\");SetCVar(\"mapshadows\",\"0\");SetCVar(\"maxlights\",\"0\");SetCVar(\"specular\",\"0\");SetCVar(\"waterlod\",\"0\");SetCVar(\"basemip\",\"1\");SetCVar(\"shadowlevel\",\"1\")");
         }
     }
 }

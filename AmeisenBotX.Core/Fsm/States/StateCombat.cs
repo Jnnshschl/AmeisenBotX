@@ -48,10 +48,11 @@ namespace AmeisenBotX.Core.Fsm.States
 
         public override void Execute()
         {
-            if (StateMachine.GetState<StateCombat>().Mode != CombatMode.Allowed
+            if (StateMachine.StateOverride != BotState.Combat
+                && (StateMachine.GetState<StateCombat>().Mode != CombatMode.Allowed
                 || !(Bot.Player.IsInCombat
                 || IsAnyPartymemberInCombat()
-                || Bot.GetEnemiesInCombatWithParty<IWowUnit>(Bot.Player.Position, 100.0f).Any()))
+                || Bot.GetEnemiesInCombatWithParty<IWowUnit>(Bot.Player.Position, 100.0f).Any())))
             {
                 StateMachine.SetState(BotState.Idle);
                 return;

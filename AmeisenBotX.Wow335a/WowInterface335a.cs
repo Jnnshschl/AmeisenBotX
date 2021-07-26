@@ -564,7 +564,7 @@ namespace AmeisenBotX.Wow335a
         {
             start.Z += heightAdjust;
             end.Z += heightAdjust;
-            return Hook.TraceLine(start, end, out _);
+            return Hook.TraceLine(start, end);
         }
 
         public bool IsRuneReady(int runeId)

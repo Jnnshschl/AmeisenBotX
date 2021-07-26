@@ -15,7 +15,7 @@ namespace AmeisenBotX.Learning
             SpellUsageCombatSessions = new();
         }
 
-        public static AmeisenBotLearner FromFile(string filename)
+        public static AmeisenBotLearner FromJson(string filename)
         {
             if (File.Exists(filename))
             {

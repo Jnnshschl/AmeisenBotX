@@ -20,7 +20,7 @@ namespace AmeisenBotX.Memory
         private const int FASM_PASSES = 100;
 
         // initial memory pool size, set to 0 to disable the pooling system
-        private const int INITIAL_POOL_SIZE = 1024 * 16;
+        private const int INITIAL_POOL_SIZE = 1024 * 0;
 
         // lock needs to be static as FASM isn't thread safe
         private static readonly object fasmLock = new();
@@ -159,6 +159,12 @@ namespace AmeisenBotX.Memory
                 {
                     if (AllocationPools[i].Free(address))
                     {
+                        if (AllocationPools[i].Allocations.Count == 0)
+                        {
+                            VirtualFreeEx(ProcessHandle, AllocationPools[i].Address, 0, AllocationTypes.Release);
+                            AllocationPools.RemoveAt(i);
+                        }
+
                         return true;
                     }
                 }

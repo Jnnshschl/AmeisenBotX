@@ -13,6 +13,6 @@ namespace AmeisenBotX.Core.Hook.Structs
     internal struct GameInfo
     {
         public bool isOutdoors;
-        public bool isTargetInLineOfSight;
+        public int isTargetInLineOfSight;
     }
 }

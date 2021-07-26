@@ -137,7 +137,7 @@ namespace AmeisenBotX.Core
 
             string learnerPath = Path.Combine(DataFolder, "learner.json");
             AmeisenLogger.I.Log("AmeisenBot", $"Loading Learner from: {learnerPath}", LogLevel.Master);
-            Bot.Learner = AmeisenBotLearner.FromFile(learnerPath);
+            Bot.Learner = AmeisenBotLearner.FromJson(learnerPath);
 
             PoiCacheEvent = new TimegatedEvent(TimeSpan.FromSeconds(2));
             Bot.Objects.OnObjectUpdateComplete += OnObjectUpdateComplete;
@@ -192,7 +192,7 @@ namespace AmeisenBotX.Core
                     IWowUnit srcUnit = Bot.GetWowObjectByGuid<IWowUnit>(src);
                     IWowUnit dstUnit = Bot.GetWowObjectByGuid<IWowUnit>(dst);
 
-                    if (srcUnit != null && dstUnit != null)
+                    if (srcUnit != null && dstUnit != null && spellId > 0)
                     {
                         LogSpellUsage(spellUsageCombatSession, true, spellId, damage, overDamage, srcUnit, dstUnit);
                     }
@@ -203,7 +203,7 @@ namespace AmeisenBotX.Core
                     IWowUnit srcUnit = Bot.GetWowObjectByGuid<IWowUnit>(src);
                     IWowUnit dstUnit = Bot.GetWowObjectByGuid<IWowUnit>(dst);
 
-                    if (srcUnit != null && dstUnit != null)
+                    if (srcUnit != null && dstUnit != null && spellId > 0)
                     {
                         LogSpellUsage(spellUsageCombatSession, false, spellId, healing, overHeal, srcUnit, dstUnit);
                     }

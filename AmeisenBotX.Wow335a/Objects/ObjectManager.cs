@@ -2,6 +2,7 @@
 using AmeisenBotX.Common.Offsets;
 using AmeisenBotX.Core.Data.Objects;
 using AmeisenBotX.Core.Hook.Structs;
+using AmeisenBotX.Logging;
 using AmeisenBotX.Memory;
 using AmeisenBotX.Wow.Objects;
 using AmeisenBotX.Wow.Objects.Enums;
@@ -245,7 +246,8 @@ namespace AmeisenBotX.Wow335a.Objects
                 ((WowPlayer335a)Player).IsOutdoors = gameInfo.isOutdoors;
             }
 
-            IsTargetInLineOfSight = gameInfo.isTargetInLineOfSight;
+            IsTargetInLineOfSight = TargetGuid == PlayerGuid || (gameInfo.isTargetInLineOfSight & 0xFF) == 0;
+            // AmeisenLogger.I.Log("GameInfo", $"IsTargetInLineOfSight: {IsTargetInLineOfSight}");
         }
 
         /// <summary>

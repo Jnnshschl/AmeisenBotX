@@ -13,6 +13,7 @@ using System.Globalization;
 using System.Linq;
 using System.Runtime.CompilerServices;
 using System.Text;
+using System.Text.Json;
 using System.Threading;
 using System.Threading.Tasks;
 
@@ -282,10 +283,10 @@ namespace AmeisenBotX.Wow335a.Hook
             assemblyBuffer.Add($"CALL {OffsetList.FunctionGetActivePlayerObject}");
             assemblyBuffer.Add("MOV ECX, EAX");
             assemblyBuffer.Add($"CALL {OffsetList.FunctionIsOutdoors}");
-            assemblyBuffer.Add($"MOV DWORD [{GameInfoAddress}], EAX");
+            assemblyBuffer.Add($"MOV BYTE [{GameInfoAddress}], AL");
 
             // isTargetInLineOfSight
-            assemblyBuffer.Add($"MOV BYTE [{GameInfoAddress + 1}], 0");
+            assemblyBuffer.Add($"MOV DWORD [{GameInfoAddress.ToInt32() + 1}], 0");
 
             assemblyBuffer.Add($"TEST DWORD [{GameInfoExecuteLosCheckAddress}], 1");
             assemblyBuffer.Add("JE @loscheck");
@@ -304,8 +305,7 @@ namespace AmeisenBotX.Wow335a.Hook
             assemblyBuffer.Add($"CALL {OffsetList.FunctionTraceline}");
             assemblyBuffer.Add("ADD ESP, 0x18");
 
-            assemblyBuffer.Add("XOR AL, 1");
-            assemblyBuffer.Add($"MOV BYTE [{GameInfoAddress + 1}], AL");
+            assemblyBuffer.Add($"MOV DWORD [{GameInfoAddress.ToInt32() + 1}], EAX");
 
             assemblyBuffer.Add($"MOV DWORD [{GameInfoExecuteLosCheckAddress}], 0");
             assemblyBuffer.Add("@loscheck:");
@@ -499,7 +499,7 @@ namespace AmeisenBotX.Wow335a.Hook
             }, false, out _);
         }
 
-        public bool TraceLine(Vector3 start, Vector3 end, out Vector3 result, uint flags = 0x120171)
+        public bool TraceLine(Vector3 start, Vector3 end, uint flags = 0x120171)
         {
             if (Memory.AllocateMemory(40, out IntPtr tracelineCodecave))
             {
@@ -512,31 +512,33 @@ namespace AmeisenBotX.Wow335a.Hook
 
                 if (Memory.Write(distancePointer, tracelineCombo))
                 {
-                    string[] asm = new string[]
+                    try
                     {
-                        "PUSH 0",
-                        $"PUSH {flags}",
-                        $"PUSH {distancePointer}",
-                        $"PUSH {resultPointer}",
-                        $"PUSH {endPointer}",
-                        $"PUSH {startPointer}",
-                        $"CALL {OffsetList.FunctionTraceline}",
-                        "ADD ESP, 0x18",
-                        "RET",
-                    };
+                        string[] asm = new string[]
+                        {
+                            "PUSH 0",
+                            $"PUSH {flags}",
+                            $"PUSH {distancePointer}",
+                            $"PUSH {resultPointer}",
+                            $"PUSH {endPointer}",
+                            $"PUSH {startPointer}",
+                            $"CALL {OffsetList.FunctionTraceline}",
+                            "ADD ESP, 0x18",
+                            "RET",
+                        };
 
-                    if (InjectAndExecute(asm, true, out IntPtr returnAddress)
-                        && Memory.Read(returnAddress, out result))
+                        if (InjectAndExecute(asm, true, out IntPtr returnAddress))
+                        {
+                            return returnAddress != IntPtr.Zero && (returnAddress.ToInt32() & 0xFF) == 0;
+                        }
+                    }
+                    finally
                     {
                         Memory.FreeMemory(tracelineCodecave);
-                        return result.X != 0.0f && result.Y != 0.0f && result.Z != 0.0f;
                     }
-
-                    Memory.FreeMemory(tracelineCodecave);
                 }
             }
 
-            result = Vector3.Zero;
             return false;
         }
 

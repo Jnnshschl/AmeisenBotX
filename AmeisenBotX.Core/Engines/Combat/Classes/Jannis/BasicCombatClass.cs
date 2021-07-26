@@ -514,7 +514,7 @@ namespace AmeisenBotX.Core.Engines.Combat.Classes.Jannis
                 return;
             }
 
-            if (Bot.Player.Position.GetDistance(target.Position) <= 3.0)
+            if (Bot.Player.Position.GetDistance(target.Position) <= 3.0f)
             {
                 Bot.Wow.StopClickToMove();
                 Bot.Movement.Reset();
