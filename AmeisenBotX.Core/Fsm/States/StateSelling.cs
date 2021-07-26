@@ -84,8 +84,8 @@ namespace AmeisenBotX.Core.Fsm.States
         {
             Bot.Wow.Events.Unsubscribe("MERCHANT_SHOW", OnMerchantShow);
 
-            Bot.Wow.WowClearTarget();
-            Bot.Wow.LuaClickUiElement("MerchantFrameCloseButton");
+            Bot.Wow.ClearTarget();
+            Bot.Wow.ClickUiElement("MerchantFrameCloseButton");
         }
 
         internal bool NeedToSell()
@@ -107,7 +107,7 @@ namespace AmeisenBotX.Core.Fsm.States
             {
                 if (Config.AutoRepair && Bot.Target.IsRepairVendor)
                 {
-                    Bot.Wow.LuaRepairAllItems();
+                    Bot.Wow.RepairAllItems();
                 }
 
                 if (Config.AutoSell)

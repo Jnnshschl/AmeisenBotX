@@ -39,7 +39,7 @@ namespace AmeisenBotX.Core.Engines.Character.Spells
 
         public void Update()
         {
-            string rawSpells = Wow.LuaGetSpells();
+            string rawSpells = Wow.GetSpells();
 
             try
             {

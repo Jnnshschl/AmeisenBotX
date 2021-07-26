@@ -503,9 +503,9 @@ namespace AmeisenBotX.Core.Engines.Combat.Classes.ToadLump
 
             if (Bot.Player.Position.GetDistance(target.Position) <= 3.0)
             {
-                Bot.Wow.WowStopClickToMove();
+                Bot.Wow.StopClickToMove();
                 Bot.Movement.Reset();
-                Bot.Wow.WowUnitRightClick(target.BaseAddress);
+                Bot.Wow.InteractWithUnit(target.BaseAddress);
             }
             else
             {
@@ -519,7 +519,7 @@ namespace AmeisenBotX.Core.Engines.Combat.Classes.ToadLump
             {
                 if (!Bot.Objects.IsTargetInLineOfSight)
                 {
-                    Bot.Wow.LuaSpellStopCasting();
+                    Bot.Wow.StopCasting();
                 }
 
                 return;
@@ -555,7 +555,7 @@ namespace AmeisenBotX.Core.Engines.Combat.Classes.ToadLump
                     && !Bot.Player.IsAutoAttacking
                     && Bot.Player.IsInMeleeRange(Bot.Target))
                 {
-                    Bot.Wow.LuaStartAutoAttack();
+                    Bot.Wow.StartAutoAttack();
                 }
             }
 
@@ -577,7 +577,7 @@ namespace AmeisenBotX.Core.Engines.Combat.Classes.ToadLump
 
                 if (healthItem != null)
                 {
-                    Bot.Wow.LuaUseItemByName(healthItem.Name);
+                    Bot.Wow.UseItemByName(healthItem.Name);
                 }
             }
 
@@ -587,7 +587,7 @@ namespace AmeisenBotX.Core.Engines.Combat.Classes.ToadLump
 
                 if (manaItem != null)
                 {
-                    Bot.Wow.LuaUseItemByName(manaItem.Name);
+                    Bot.Wow.UseItemByName(manaItem.Name);
                 }
             }
 
@@ -703,7 +703,7 @@ namespace AmeisenBotX.Core.Engines.Combat.Classes.ToadLump
 
                 if (Bot.Player.TargetGuid != guid)
                 {
-                    Bot.Wow.WowTargetGuid(guid);
+                    Bot.Wow.ChangeTarget(guid);
                     Bot.Objects.Player.Update(Bot.Memory, Bot.Wow.Offsets);
                 }
             }
@@ -719,7 +719,7 @@ namespace AmeisenBotX.Core.Engines.Combat.Classes.ToadLump
             {
                 if (GetValidTarget(guid, out IWowUnit target, out bool _))
                 {
-                    Bot.Wow.WowClickOnTerrain(target.Position);
+                    Bot.Wow.ClickOnTerrain(target.Position);
                     return true;
                 }
             }
@@ -733,7 +733,7 @@ namespace AmeisenBotX.Core.Engines.Combat.Classes.ToadLump
             {
                 if (GetValidTarget(guid, out IWowUnit target, out bool _))
                 {
-                    Bot.Wow.WowClickOnTerrain(target.Position);
+                    Bot.Wow.ClickOnTerrain(target.Position);
                     return true;
                 }
             }
@@ -768,7 +768,7 @@ namespace AmeisenBotX.Core.Engines.Combat.Classes.ToadLump
                 {
                     if (!isTargetMyself && (needToSwitchTarget || forceTargetSwitch))
                     {
-                        Bot.Wow.WowTargetGuid(guid);
+                        Bot.Wow.ChangeTarget(guid);
                     }
 
                     if (spell.CastTime > 0)
@@ -793,7 +793,7 @@ namespace AmeisenBotX.Core.Engines.Combat.Classes.ToadLump
             {
                 bool isTargetMyself = guid == 0;
                 Spell spell = Bot.Character.SpellBook.GetSpellByName(spellName);
-                Dictionary<int, int> runes = Bot.Wow.WowGetRunesReady();
+                Dictionary<int, int> runes = Bot.Wow.GetRunesReady();
 
                 if (spell != null
                     && !CooldownManager.IsSpellOnCooldown(spellName)
@@ -805,7 +805,7 @@ namespace AmeisenBotX.Core.Engines.Combat.Classes.ToadLump
                 {
                     if (!isTargetMyself && (needToSwitchTarget || forceTargetSwitch))
                     {
-                        Bot.Wow.WowTargetGuid(guid);
+                        Bot.Wow.ChangeTarget(guid);
                     }
 
                     if (spell.CastTime > 0)
@@ -839,7 +839,7 @@ namespace AmeisenBotX.Core.Engines.Combat.Classes.ToadLump
                 {
                     if (!isTargetMyself && (needToSwitchTarget || forceTargetSwitch))
                     {
-                        Bot.Wow.WowTargetGuid(guid);
+                        Bot.Wow.ChangeTarget(guid);
                     }
 
                     if (spell.CastTime > 0)
@@ -884,7 +884,7 @@ namespace AmeisenBotX.Core.Engines.Combat.Classes.ToadLump
 
                     if (!isTargetMyself && (needToSwitchTarget || forceTargetSwitch))
                     {
-                        Bot.Wow.WowTargetGuid(guid);
+                        Bot.Wow.ChangeTarget(guid);
                     }
 
                     if (spell.CastTime > 0)
@@ -904,7 +904,7 @@ namespace AmeisenBotX.Core.Engines.Combat.Classes.ToadLump
         private bool CastSpell(string spellName, bool castOnSelf)
         {
             // spits out stuff like this "1;300" (1 or 0 whether the cast was successful or not);(the cooldown in ms)
-            if (Bot.Wow.WowExecuteLuaAndRead(BotUtils.ObfuscateLua($"{{v:3}},{{v:4}}=GetSpellCooldown(\"{spellName}\"){{v:2}}=({{v:3}}+{{v:4}}-GetTime())*1000;if {{v:2}}<=0 then {{v:2}}=0;CastSpellByName(\"{spellName}\"{(castOnSelf ? ", \"player\"" : string.Empty)}){{v:5}},{{v:6}}=GetSpellCooldown(\"{spellName}\"){{v:1}}=({{v:5}}+{{v:6}}-GetTime())*1000;{{v:0}}=\"1;\"..{{v:1}} else {{v:0}}=\"0;\"..{{v:2}} end"), out string result))
+            if (Bot.Wow.ExecuteLuaAndRead(BotUtils.ObfuscateLua($"{{v:3}},{{v:4}}=GetSpellCooldown(\"{spellName}\"){{v:2}}=({{v:3}}+{{v:4}}-GetTime())*1000;if {{v:2}}<=0 then {{v:2}}=0;CastSpellByName(\"{spellName}\"{(castOnSelf ? ", \"player\"" : string.Empty)}){{v:5}},{{v:6}}=GetSpellCooldown(\"{spellName}\"){{v:1}}=({{v:5}}+{{v:6}}-GetTime())*1000;{{v:0}}=\"1;\"..{{v:1}} else {{v:0}}=\"0;\"..{{v:2}} end"), out string result))
             {
                 if (result.Length < 3)
                 {
@@ -969,7 +969,7 @@ namespace AmeisenBotX.Core.Engines.Combat.Classes.ToadLump
 
             if (angleDiff > 1.0)
             {
-                Bot.Wow.WowFacePosition(Bot.Player.BaseAddress, Bot.Player.Position, target.Position);
+                Bot.Wow.FacePosition(Bot.Player.BaseAddress, Bot.Player.Position, target.Position);
             }
         }
 

@@ -48,7 +48,7 @@ namespace AmeisenBotX.Core.Engines.Character.Inventory
                 return;
             }
 
-            Wow.LuaDeleteInventoryItemByName(name);
+            Wow.DeleteItemByName(name);
         }
 
         public bool HasItemByName(string name, StringComparison stringComparison = StringComparison.OrdinalIgnoreCase)
@@ -58,8 +58,8 @@ namespace AmeisenBotX.Core.Engines.Character.Inventory
 
         public void Update()
         {
-            FreeBagSlots = Wow.LuaGetFreeBagSlotCount();
-            string resultJson = Wow.LuaGetInventoryItems();
+            FreeBagSlots = Wow.GetFreeBagSlotCount();
+            string resultJson = Wow.GetInventoryItems();
 
             try
             {

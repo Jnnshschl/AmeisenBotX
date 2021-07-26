@@ -75,7 +75,7 @@ namespace AmeisenBotX.Core.Engines.Battleground.KamelBG
                     else
                     {
                         FlagState = 0;
-                        Bot.Wow.LuaSendChatMessage("/y The flag just lies around! Let's take it!");
+                        Bot.Wow.SendChatMessage("/y The flag just lies around! Let's take it!");
                     }
                 }
                 else
@@ -84,11 +84,11 @@ namespace AmeisenBotX.Core.Engines.Battleground.KamelBG
                     if (hasFlag || Bot.Db.GetReaction(Bot.Player, FlagCarrier) == WowUnitReaction.Friendly || Bot.Db.GetReaction(Bot.Player, FlagCarrier) == WowUnitReaction.Neutral)
                     {
                         FlagState |= OWN_TEAM_FLAG;
-                        Bot.Wow.LuaSendChatMessage("/y We got it!");
+                        Bot.Wow.SendChatMessage("/y We got it!");
                     }
                     else
                     {
-                        Bot.Wow.LuaSendChatMessage("/y They've got the flag!");
+                        Bot.Wow.SendChatMessage("/y They've got the flag!");
                     }
                 }
             }
@@ -107,7 +107,7 @@ namespace AmeisenBotX.Core.Engines.Battleground.KamelBG
                             Bot.Movement.SetMovementAction(Movement.Enums.MovementAction.Move, ownFlag.Position);
                             if (Bot.Player.Position.GetDistance(ownFlag.Position) < 3.5f)
                             {
-                                Bot.Wow.WowObjectRightClick(FlagObject.BaseAddress);
+                                Bot.Wow.InteractWithObject(FlagObject.BaseAddress);
                             }
                         }
                         else
@@ -156,7 +156,7 @@ namespace AmeisenBotX.Core.Engines.Battleground.KamelBG
                 Bot.Movement.SetMovementAction(Movement.Enums.MovementAction.Move, FlagObject.Position);
                 if (Bot.Player.Position.GetDistance(FlagObject.Position) < 3.5f) // limit the executions
                 {
-                    Bot.Wow.WowObjectRightClick(FlagObject.BaseAddress);
+                    Bot.Wow.InteractWithObject(FlagObject.BaseAddress);
                 }
             }
             else if (startPosition != default)

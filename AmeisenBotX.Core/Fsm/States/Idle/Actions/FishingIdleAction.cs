@@ -86,7 +86,7 @@ namespace AmeisenBotX.Core.Fsm.States.Idle.Actions
                     Bot.Movement.SetMovementAction(MovementAction.Move, CurrentSpot);
                     return;
                 }
-                else if (Bot.Wow.WowIsClickToMoveActive())
+                else if (Bot.Wow.IsClickToMoveActive())
                 {
                     Bot.Movement.StopMovement();
                     return;
@@ -94,7 +94,7 @@ namespace AmeisenBotX.Core.Fsm.States.Idle.Actions
 
                 if (!BotMath.IsFacing(Bot.Player.Position, Bot.Player.Rotation, CurrentSpot))
                 {
-                    Bot.Wow.WowFacePosition(Bot.Player.BaseAddress, Bot.Player.Position, CurrentSpot);
+                    Bot.Wow.FacePosition(Bot.Player.BaseAddress, Bot.Player.Position, CurrentSpot);
                     return;
                 }
             }
@@ -106,7 +106,7 @@ namespace AmeisenBotX.Core.Fsm.States.Idle.Actions
 
                 if (fishingRod != null)
                 {
-                    Bot.Wow.LuaEquipItem(fishingRod.Name);
+                    Bot.Wow.EquipItem(fishingRod.Name);
                 }
             }
 
@@ -130,12 +130,12 @@ namespace AmeisenBotX.Core.Fsm.States.Idle.Actions
 
             if (!Bot.Player.IsCasting || fishingBobber == null)
             {
-                Bot.Wow.LuaCastSpell("Fishing");
+                Bot.Wow.CastSpell("Fishing");
             }
             else if (fishingBobber.Flags[(int)WowGameobjectFlags.DoesNotDespawn])
             {
-                Bot.Wow.WowObjectRightClick(fishingBobber.BaseAddress);
-                Bot.Wow.LuaLootEveryThing();
+                Bot.Wow.InteractWithObject(fishingBobber.BaseAddress);
+                Bot.Wow.LootEveryThing();
             }
         }
 

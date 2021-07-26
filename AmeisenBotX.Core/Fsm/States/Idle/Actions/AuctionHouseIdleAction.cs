@@ -74,8 +74,8 @@ namespace AmeisenBotX.Core.Fsm.States.Idle.Actions
 
                     if (auctioneer != null)
                     {
-                        Bot.Wow.WowFacePosition(Bot.Player.BaseAddress, Bot.Player.Position, auctioneer.Position);
-                        Bot.Wow.WowUnitRightClick(auctioneer.BaseAddress);
+                        Bot.Wow.FacePosition(Bot.Player.BaseAddress, Bot.Player.Position, auctioneer.Position);
+                        Bot.Wow.InteractWithUnit(auctioneer.BaseAddress);
                     }
 
                     TalkedToAuctioneer = true;

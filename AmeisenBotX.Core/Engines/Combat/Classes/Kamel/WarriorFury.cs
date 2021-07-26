@@ -194,12 +194,12 @@ namespace AmeisenBotX.Core.Engines.Combat.Classes.Kamel
                         {
                             if (!Bot.Player.Auras.Any(e => Bot.Db.GetSpellName(e.SpellId) == stance))
                             {
-                                Bot.Wow.LuaCastSpell(stance);
+                                Bot.Wow.CastSpell(stance);
                                 return true;
                             }
                             else
                             {
-                                Bot.Wow.LuaCastSpell(spellName);
+                                Bot.Wow.CastSpell(spellName);
                                 return true;
                             }
                         }
@@ -218,7 +218,7 @@ namespace AmeisenBotX.Core.Engines.Combat.Classes.Kamel
 
                 if (Bot.Db.GetReaction(Bot.Player, Bot.Target) == WowUnitReaction.Friendly)
                 {
-                    Bot.Wow.WowClearTarget();
+                    Bot.Wow.ClearTarget();
                     return;
                 }
 
@@ -226,7 +226,7 @@ namespace AmeisenBotX.Core.Engines.Combat.Classes.Kamel
                 {
                     if (!Bot.Player.IsAutoAttacking && AutoAttackEvent.Run())
                     {
-                        Bot.Wow.LuaStartAutoAttack();
+                        Bot.Wow.StartAutoAttack();
                     }
 
                     if (CustomCastSpell(bloodrageSpell))
@@ -353,7 +353,7 @@ namespace AmeisenBotX.Core.Engines.Combat.Classes.Kamel
                     {
                         if (Bot.Movement.Status != Movement.Enums.MovementAction.None)
                         {
-                            Bot.Wow.WowStopClickToMove();
+                            Bot.Wow.StopClickToMove();
                             Bot.Movement.Reset();
                         }
 

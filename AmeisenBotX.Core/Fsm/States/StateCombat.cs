@@ -99,7 +99,7 @@ namespace AmeisenBotX.Core.Fsm.States
                     {
                         if (!Bot.Player.IsAutoAttacking)
                         {
-                            Bot.Wow.LuaStartAutoAttack();
+                            Bot.Wow.StartAutoAttack();
                         }
                     }
                     else
@@ -164,10 +164,10 @@ namespace AmeisenBotX.Core.Fsm.States
                 && target != null
                 && target.Guid != Bot.Wow.PlayerGuid
                 && FacingCheck.Run()
-                && !Bot.Wow.WowIsClickToMoveActive()
+                && !Bot.Wow.IsClickToMoveActive()
                 && !BotMath.IsFacing(Bot.Player.Position, Bot.Player.Rotation, target.Position))
             {
-                Bot.Wow.WowFacePosition(Bot.Player.BaseAddress, Bot.Player.Position, target.Position);
+                Bot.Wow.FacePosition(Bot.Player.BaseAddress, Bot.Player.Position, target.Position);
             }
 
             // do we need to move

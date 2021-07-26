@@ -68,8 +68,8 @@ namespace AmeisenBotX.Core.Engines.Quest.Objects.Objectives
                     if (RightClickEvent.Run())
                     {
                         Bot.Movement.Reset();
-                        Bot.Wow.WowStopClickToMove();
-                        Bot.Wow.WowObjectRightClick(lootableObject.BaseAddress);
+                        Bot.Wow.StopClickToMove();
+                        Bot.Wow.InteractWithObject(lootableObject.BaseAddress);
                     }
                 }
             }

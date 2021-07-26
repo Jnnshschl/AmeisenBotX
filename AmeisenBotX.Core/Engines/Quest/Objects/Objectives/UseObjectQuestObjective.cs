@@ -59,10 +59,10 @@ namespace AmeisenBotX.Core.Engines.Quest.Objects.Objectives
                 {
                     if (UseEvent.Run())
                     {
-                        Bot.Wow.WowStopClickToMove();
+                        Bot.Wow.StopClickToMove();
                         Bot.Movement.Reset();
 
-                        Bot.Wow.WowObjectRightClick(IWowGameobject.BaseAddress);
+                        Bot.Wow.InteractWithObject(IWowGameobject.BaseAddress);
                     }
                 }
                 else

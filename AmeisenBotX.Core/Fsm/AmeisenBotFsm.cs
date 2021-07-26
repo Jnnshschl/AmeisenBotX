@@ -144,7 +144,7 @@ namespace AmeisenBotX.Core.Fsm
                         if (Config.AutoDisableRender && RenderSwitchEvent.Run())
                         {
                             IntPtr foregroundWindow = Bot.Memory.GetForegroundWindow();
-                            Bot.Wow.WowSetRenderState(foregroundWindow == Bot.Memory.Process.MainWindowHandle);
+                            Bot.Wow.SetRenderState(foregroundWindow == Bot.Memory.Process.MainWindowHandle);
                         }
 
                         // override states, for example when we die, we need to revive

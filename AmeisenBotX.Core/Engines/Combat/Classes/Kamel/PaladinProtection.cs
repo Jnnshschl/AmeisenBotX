@@ -175,7 +175,7 @@ namespace AmeisenBotX.Core.Engines.Combat.Classes.Kamel
                     {
                         if (Bot.Wow.TargetGuid != CastBuff.FirstOrDefault().Guid)
                         {
-                            Bot.Wow.WowTargetGuid(CastBuff.FirstOrDefault().Guid);
+                            Bot.Wow.ChangeTarget(CastBuff.FirstOrDefault().Guid);
                         }
                     }
                     if (Bot.Wow.TargetGuid != 0 && Bot.Target != null)
@@ -218,7 +218,7 @@ namespace AmeisenBotX.Core.Engines.Combat.Classes.Kamel
                     {
                         if ((spell.MinRange == 0 && spell.MaxRange == 0) || (spell.MinRange <= distance && spell.MaxRange >= distance))
                         {
-                            Bot.Wow.LuaCastSpell(spellName);
+                            Bot.Wow.CastSpell(spellName);
                             return true;
                         }
                     }
@@ -241,7 +241,7 @@ namespace AmeisenBotX.Core.Engines.Combat.Classes.Kamel
 
                 if (Bot.Db.GetReaction(Bot.Player, Bot.Target) == WowUnitReaction.Friendly)
                 {
-                    Bot.Wow.WowClearTarget();
+                    Bot.Wow.ClearTarget();
                     return;
                 }
 
@@ -249,7 +249,7 @@ namespace AmeisenBotX.Core.Engines.Combat.Classes.Kamel
                 {
                     if (!Bot.Player.IsAutoAttacking && AutoAttackEvent.Run())
                     {
-                        Bot.Wow.LuaStartAutoAttack();
+                        Bot.Wow.StartAutoAttack();
                     }
 
                     if ((Bot.Player.IsConfused || Bot.Player.IsSilenced || Bot.Player.IsDazed) && CustomCastSpell(EveryManforHimselfSpell))

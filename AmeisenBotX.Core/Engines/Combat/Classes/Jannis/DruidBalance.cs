@@ -139,7 +139,7 @@ namespace AmeisenBotX.Core.Engines.Combat.Classes.Jannis
 
                 if (TryCastSpell(forceOfNatureSpell, 0, true))
                 {
-                    Bot.Wow.WowClickOnTerrain(Bot.Player.Position);
+                    Bot.Wow.ClickOnTerrain(Bot.Player.Position);
                 }
             }
         }

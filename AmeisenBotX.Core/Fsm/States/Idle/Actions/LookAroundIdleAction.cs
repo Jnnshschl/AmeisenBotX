@@ -34,7 +34,7 @@ namespace AmeisenBotX.Core.Fsm.States.Idle.Actions
         public void Execute()
         {
             float modificationFactor = ((float)Rnd.NextDouble() - 0.5f) / ((float)Rnd.NextDouble() * 5.0f);
-            Bot.Wow.WowSetFacing(Bot.Player.BaseAddress, Bot.Player.Rotation + modificationFactor);
+            Bot.Wow.SetFacing(Bot.Player.BaseAddress, Bot.Player.Rotation + modificationFactor);
         }
     }
 }

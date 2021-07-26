@@ -199,7 +199,7 @@ namespace AmeisenBotX.Core.Engines.Dungeon
         {
             if (ExitDungeonEvent.Run())
             {
-                if (Bot.Wow.LuaIsInLfgGroup())
+                if (Bot.Wow.IsInLfgGroup())
                 {
                     Bot.Wow.LuaDoString("LFGTeleport(true);");
                 }

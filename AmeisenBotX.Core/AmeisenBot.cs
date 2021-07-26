@@ -674,12 +674,12 @@ namespace AmeisenBotX.Core
 
         private void OnConfirmBindOnPickup(long timestamp, List<string> args)
         {
-            Bot.Wow.LuaCofirmStaticPopup();
+            Bot.Wow.CofirmStaticPopup();
         }
 
         private void OnConfirmLootRoll(long timestamp, List<string> args)
         {
-            Bot.Wow.LuaCofirmLootRoll();
+            Bot.Wow.CofirmLootRoll();
         }
 
         private void OnEquipmentChanged(long timestamp, List<string> args)
@@ -694,7 +694,7 @@ namespace AmeisenBotX.Core
         {
             if (Config.AutojoinLfg)
             {
-                Bot.Wow.LuaClickUiElement("LFDDungeonReadyDialogEnterDungeonButton");
+                Bot.Wow.ClickUiElement("LFDDungeonReadyDialogEnterDungeonButton");
             }
         }
 
@@ -702,7 +702,7 @@ namespace AmeisenBotX.Core
         {
             if (Config.AutojoinLfg)
             {
-                Bot.Wow.LuaSetLfgRole(Bot.CombatClass != null ? Bot.CombatClass.Role : WowRole.Dps);
+                Bot.Wow.SetLfgRole(Bot.CombatClass != null ? Bot.CombatClass.Role : WowRole.Dps);
             }
         }
 
@@ -710,15 +710,15 @@ namespace AmeisenBotX.Core
         {
             if (int.TryParse(args[0], out int rollId))
             {
-                string itemLink = Bot.Wow.LuaGetLootRollItemLink(rollId);
-                string itemJson = Bot.Wow.LuaGetItemJsonByNameOrLink(itemLink);
+                string itemLink = Bot.Wow.GetLootRollItemLink(rollId);
+                string itemJson = Bot.Wow.GetItemByNameOrLink(itemLink);
 
                 WowBasicItem item = ItemFactory.BuildSpecificItem(ItemFactory.ParseItem(itemJson));
 
                 if (item.Name == "0" || item.ItemLink == "0")
                 {
                     // get the item id and try again
-                    itemJson = Bot.Wow.LuaGetItemJsonByNameOrLink
+                    itemJson = Bot.Wow.GetItemByNameOrLink
                     (
                         itemLink
                             .Split(new string[] { "Hitem:" }, StringSplitOptions.RemoveEmptyEntries)[1]
@@ -732,23 +732,23 @@ namespace AmeisenBotX.Core
                 {
                     AmeisenLogger.I.Log("WoWEvents", $"Would like to replace item {item?.Name} with {itemToReplace?.Name}, rolling need", LogLevel.Verbose);
 
-                    Bot.Wow.LuaRollOnLoot(rollId, WowRollType.Need);
+                    Bot.Wow.RollOnLoot(rollId, WowRollType.Need);
                     return;
                 }
             }
 
-            Bot.Wow.LuaRollOnLoot(rollId, WowRollType.Pass);
+            Bot.Wow.RollOnLoot(rollId, WowRollType.Pass);
         }
 
         private void OnLootWindowOpened(long timestamp, List<string> args)
         {
             if (Config.LootOnlyMoneyAndQuestitems)
             {
-                Bot.Wow.LuaLootMoneyAndQuestItems();
+                Bot.Wow.LootMoneyAndQuestItems();
                 return;
             }
 
-            Bot.Wow.LuaLootEveryThing();
+            Bot.Wow.LootEveryThing();
         }
 
         private void OnObjectUpdateComplete(IEnumerable<IWowObject> wowObjects)
@@ -811,7 +811,7 @@ namespace AmeisenBotX.Core
         {
             if (!Config.OnlyFriendsMode || (args.Count >= 1 && Config.Friends.Split(',').Any(e => e.Equals(args[0], StringComparison.OrdinalIgnoreCase))))
             {
-                Bot.Wow.LuaAcceptPartyInvite();
+                Bot.Wow.AcceptPartyInvite();
             }
         }
 
@@ -821,7 +821,7 @@ namespace AmeisenBotX.Core
             {
                 if (args.Count == 1 && args[0] == "1")
                 {
-                    Bot.Wow.LuaAcceptBattlegroundInvite();
+                    Bot.Wow.AcceptBattlegroundInvite();
                 }
             }
         }
@@ -840,7 +840,7 @@ namespace AmeisenBotX.Core
                 && StateMachine.CurrentState.Key != BotState.Selling
                 && StateMachine.CurrentState.Key != BotState.Repairing)
             {
-                Bot.Wow.LuaAcceptQuests();
+                Bot.Wow.AcceptQuests();
             }
         }
 
@@ -848,18 +848,18 @@ namespace AmeisenBotX.Core
         {
             if (Config.AutoAcceptQuests && StateMachine.CurrentState.Key != BotState.Questing)
             {
-                Bot.Wow.LuaClickUiElement("QuestFrameCompleteQuestButton");
+                Bot.Wow.ClickUiElement("QuestFrameCompleteQuestButton");
             }
         }
 
         private void OnReadyCheck(long timestamp, List<string> args)
         {
-            Bot.Wow.LuaCofirmReadyCheck(true);
+            Bot.Wow.CofirmReadyCheck(true);
         }
 
         private void OnResurrectRequest(long timestamp, List<string> args)
         {
-            Bot.Wow.LuaAcceptResurrect();
+            Bot.Wow.AcceptResurrect();
         }
 
         private void OnShowQuestFrame(long timestamp, List<string> args)
@@ -893,7 +893,7 @@ namespace AmeisenBotX.Core
 
         private void OnSummonRequest(long timestamp, List<string> args)
         {
-            Bot.Wow.LuaAcceptSummon();
+            Bot.Wow.AcceptSummon();
         }
 
         private void OnTalentPointsChange(long timestamp, List<string> args)
@@ -902,7 +902,7 @@ namespace AmeisenBotX.Core
             {
                 TalentUpdateRunning = true;
                 Bot.Character.TalentManager.Update();
-                Bot.Character.TalentManager.SelectTalents(Bot.CombatClass.Talents, Bot.Wow.LuaGetUnspentTalentPoints());
+                Bot.Character.TalentManager.SelectTalents(Bot.CombatClass.Talents, Bot.Wow.GetUnspentTalentPoints());
                 TalentUpdateRunning = false;
             }
         }

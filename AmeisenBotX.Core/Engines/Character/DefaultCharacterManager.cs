@@ -16,8 +16,6 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text.Json;
-using System.Text.Json.Serialization;
 using System.Threading.Tasks;
 
 namespace AmeisenBotX.Core.Engines.Character
@@ -49,7 +47,7 @@ namespace AmeisenBotX.Core.Engines.Character
 
         public int Money { get; private set; }
 
-        public List<WowMount> Mounts { get; private set; }
+        public IEnumerable<WowMount> Mounts { get; private set; }
 
         public Dictionary<string, (int, int)> Skills { get; private set; }
 
@@ -194,16 +192,14 @@ namespace AmeisenBotX.Core.Engines.Character
         {
             AmeisenLogger.I.Log("CharacterManager", $"Updating full character", LogLevel.Verbose);
 
-            Parallel.Invoke
-            (
-                () => Inventory.Update(),
-                () => Equipment.Update(),
-                () => SpellBook.Update(),
-                () => TalentManager.Update(),
-                () => UpdateSkills(),
-                () => UpdateMoney(),
-                () => UpdateMounts()
-            );
+            Inventory.Update();
+            Equipment.Update();
+            SpellBook.Update();
+            TalentManager.Update();
+
+            Mounts = Wow.GetMounts();
+            Skills = Wow.GetSkills();
+            Money = Wow.GetMoney();
         }
 
         public void UpdateBags()
@@ -216,7 +212,7 @@ namespace AmeisenBotX.Core.Engines.Character
                 {
                     if (Equipment.Items.All(keyPair => keyPair.Key != (WowEquipmentSlot)i))
                     {
-                        Wow.LuaEquipItem(container.First().Name);
+                        Wow.EquipItem(container.First().Name);
                         break;
                     }
                 }
@@ -256,7 +252,7 @@ namespace AmeisenBotX.Core.Engines.Character
                             if (IsItemAnImprovement(item, out IWowInventoryItem itemToReplace))
                             {
                                 AmeisenLogger.I.Log("Equipment", $"Replacing \"{itemToReplace}\" with \"{item}\"", LogLevel.Verbose);
-                                Wow.LuaEquipItem(item.Name/*, itemToReplace.Name*/);
+                                Wow.EquipItem(item.Name/*, itemToReplace.Name*/);
                                 Equipment.Update();
                                 break;
                             }
@@ -270,7 +266,7 @@ namespace AmeisenBotX.Core.Engines.Character
                             || (string.Equals(itemToEquip.Type, "Weapon", StringComparison.OrdinalIgnoreCase) && IsAbleToUseWeapon((WowWeapon)itemToEquip)))
                         {
                             AmeisenLogger.I.Log("Equipment", $"Equipping \"{itemToEquip}\"", LogLevel.Verbose);
-                            Wow.LuaEquipItem(itemToEquip.Name);
+                            Wow.EquipItem(itemToEquip.Name);
                             Equipment.Update();
                         }
                     }
@@ -391,33 +387,6 @@ namespace AmeisenBotX.Core.Engines.Character
             TryAddItem(WowEquipmentSlot.INVSLOT_OFFHAND, matchedItems);
 
             expectedItemCount = 2;
-        }
-
-        private void UpdateMoney()
-        {
-            if (int.TryParse(Wow.LuaGetMoney(), out int money))
-            {
-                Money = money;
-            }
-        }
-
-        private void UpdateMounts()
-        {
-            string mounts = Wow.LuaGetMounts();
-
-            try
-            {
-                Mounts = JsonSerializer.Deserialize<List<WowMount>>(mounts, new() { AllowTrailingCommas = true, NumberHandling = JsonNumberHandling.AllowReadingFromString });
-            }
-            catch (Exception e)
-            {
-                AmeisenLogger.I.Log("CharacterManager", $"Failed to parse Mounts JSON:\n{mounts}\n{e}", LogLevel.Error);
-            }
-        }
-
-        private void UpdateSkills()
-        {
-            Skills = Wow.LuaGetSkills();
         }
     }
 }

@@ -200,7 +200,7 @@ namespace AmeisenBotX.Core.Fsm.States
             }
             else
             {
-                Bot.Wow.LuaRetrieveCorpse();
+                Bot.Wow.RetrieveCorpse();
                 return BehaviorTreeStatus.Success;
             }
         }

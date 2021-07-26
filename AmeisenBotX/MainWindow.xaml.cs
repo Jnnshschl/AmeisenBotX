@@ -254,7 +254,7 @@ namespace AmeisenBotX
         private void ButtonToggleRendering_Click(object sender, RoutedEventArgs e)
         {
             RenderState = !RenderState;
-            AmeisenBot.Bot.Wow.WowSetRenderState(RenderState);
+            AmeisenBot.Bot.Wow.SetRenderState(RenderState);
         }
 
         private void ComboboxStateOverride_SelectionChanged(object sender, System.Windows.Controls.SelectionChangedEventArgs e)

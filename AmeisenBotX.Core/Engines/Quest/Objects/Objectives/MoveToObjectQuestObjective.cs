@@ -37,7 +37,7 @@ namespace AmeisenBotX.Core.Engines.Quest.Objects.Objectives
             if (Finished)
             {
                 Bot.Movement.Reset();
-                Bot.Wow.WowStopClickToMove();
+                Bot.Wow.StopClickToMove();
                 return;
             }
 

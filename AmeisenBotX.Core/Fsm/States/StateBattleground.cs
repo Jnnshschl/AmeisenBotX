@@ -30,7 +30,7 @@ namespace AmeisenBotX.Core.Fsm.States
             if (Bot.Memory.Read(Bot.Wow.Offsets.BattlegroundFinished, out int bgFinished)
                 && bgFinished == 1)
             {
-                Bot.Wow.LuaLeaveBattleground();
+                Bot.Wow.LeaveBattleground();
                 return;
             }
 

@@ -22,7 +22,7 @@ namespace AmeisenBotX.Core.Engines.Character
 
         int Money { get; }
 
-        List<WowMount> Mounts { get; }
+        IEnumerable<WowMount> Mounts { get; }
 
         Dictionary<string, (int, int)> Skills { get; }
 

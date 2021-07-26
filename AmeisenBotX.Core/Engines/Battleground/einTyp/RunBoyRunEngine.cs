@@ -90,7 +90,7 @@ namespace AmeisenBotX.Core.Engines.Battleground.einTyp
                     if (IsAtPosition(ownFlag.Position))
                     {
                         // own flag reached, save it!
-                        Bot.Wow.WowObjectRightClick(ownFlag.BaseAddress);
+                        Bot.Wow.InteractWithObject(ownFlag.BaseAddress);
                         hasStateChanged = true;
                     }
                 }
@@ -113,7 +113,7 @@ namespace AmeisenBotX.Core.Engines.Battleground.einTyp
                             BotUtils.MoveAhead(enemyFlagCarrier.Position, enemyFlagCarrier.Rotation, ((float)Bot.Player.Position.GetDistance2D(enemyFlagCarrier.Position)) / 2f));
                         if (IsInCombatReach(enemyFlagCarrier.Position))
                         {
-                            Bot.Wow.WowTargetGuid(enemyFlagCarrier.Guid);
+                            Bot.Wow.ChangeTarget(enemyFlagCarrier.Guid);
                         }
 
                         if (IsEnemyClose())
@@ -164,7 +164,7 @@ namespace AmeisenBotX.Core.Engines.Battleground.einTyp
                                 BotUtils.MoveAhead(enemyFlagCarrier.Position, enemyFlagCarrier.Rotation, ((float)Bot.Player.Position.GetDistance2D(enemyFlagCarrier.Position)) / 2f));
                             if (Bot.CombatClass.Role != WowRole.Heal && IsInCombatReach(enemyFlagCarrier.Position))
                             {
-                                Bot.Wow.WowTargetGuid(enemyFlagCarrier.Guid);
+                                Bot.Wow.ChangeTarget(enemyFlagCarrier.Guid);
                             }
 
                             if (IsEnemyClose())
@@ -237,7 +237,7 @@ namespace AmeisenBotX.Core.Engines.Battleground.einTyp
                         {
                             // flag reached, save it!
                             hasStateChanged = true;
-                            Bot.Wow.WowObjectRightClick(enemyFlag.BaseAddress);
+                            Bot.Wow.InteractWithObject(enemyFlag.BaseAddress);
                         }
                     }
                     else
@@ -256,7 +256,7 @@ namespace AmeisenBotX.Core.Engines.Battleground.einTyp
                             BotUtils.MoveAhead(enemyFlagCarrier.Position, enemyFlagCarrier.Rotation, ((float)Bot.Player.Position.GetDistance2D(enemyFlagCarrier.Position)) / 2f));
                         if (Bot.CombatClass.Role != WowRole.Heal && IsInCombatReach(enemyFlagCarrier.Position))
                         {
-                            Bot.Wow.WowTargetGuid(enemyFlagCarrier.Guid);
+                            Bot.Wow.ChangeTarget(enemyFlagCarrier.Guid);
                         }
 
                         if (IsEnemyClose())
@@ -281,7 +281,7 @@ namespace AmeisenBotX.Core.Engines.Battleground.einTyp
                     {
                         // flag reached, save it!
                         hasStateChanged = true;
-                        Bot.Wow.WowObjectRightClick(enemyFlag.BaseAddress);
+                        Bot.Wow.InteractWithObject(enemyFlag.BaseAddress);
                     }
                 }
                 else

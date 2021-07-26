@@ -10,12 +10,6 @@ namespace AmeisenBotX.Memory
     public interface IMemoryApi : IDisposable
     {
         /// <summary>
-        /// Stringbuilder to inject assembly into the process.
-        /// Buffer assembly instructions here and call FasmInject to inject it.
-        /// </summary>
-        public StringBuilder AssemblyBuffer { get; }
-
-        /// <summary>
         /// Native handle for the main thread.
         /// </summary>
         public IntPtr MainThreadHandle { get; }
@@ -110,10 +104,11 @@ namespace AmeisenBotX.Memory
         /// <summary>
         /// Injects the current Fasm buffer and clears it.
         /// </summary>
+        /// <param name="asm">Assembly to inject</param>
         /// <param name="address">Address where the fasm will be injected</param>
         /// <param name="patchMemProtection">Whether we need to patch memory protection or nor. Useful when memory is write protected.</param>
         /// <returns>True when the injection was successful</returns>
-        public bool InjectAssembly(IntPtr address, bool patchMemProtection = false);
+        public bool InjectAssembly(IEnumerable<string> asm, IntPtr address, bool patchMemProtection = false);
 
         /// <summary>
         /// Change the memory protection of an area.

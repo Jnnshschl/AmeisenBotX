@@ -1,6 +1,7 @@
 ﻿using AmeisenBotX.Common.Offsets;
 using AmeisenBotX.Memory;
 using System;
+using System.Collections.Generic;
 using System.Text;
 
 namespace AmeisenBotX.Core.Hook.Modules
@@ -30,7 +31,7 @@ namespace AmeisenBotX.Core.Hook.Modules
             return DataAddress;
         }
 
-        protected override bool PrepareAsm()
+        protected override bool PrepareAsm(out IEnumerable<string> assembly)
         {
             byte[] luaJumpBytes = Encoding.ASCII.GetBytes("JumpOrAscendStart();AscendStop()");
 
@@ -49,37 +50,35 @@ namespace AmeisenBotX.Core.Hook.Modules
                 IntPtr endPointer = IntPtr.Add(startPointer, 0xC);
                 IntPtr resultPointer = IntPtr.Add(endPointer, 0xC);
 
-                MemoryApi.AssemblyBuffer.Clear();
-
-                MemoryApi.AssemblyBuffer.AppendLine("X:");
-                MemoryApi.AssemblyBuffer.AppendLine($"TEST DWORD [{ExecuteAddress}], 1");
-                MemoryApi.AssemblyBuffer.AppendLine("JE @out");
-
-                MemoryApi.AssemblyBuffer.AppendLine("PUSH 0");
-                MemoryApi.AssemblyBuffer.AppendLine("PUSH 0x120171");
-                MemoryApi.AssemblyBuffer.AppendLine($"PUSH {distancePointer}");
-                MemoryApi.AssemblyBuffer.AppendLine($"PUSH {resultPointer}");
-                MemoryApi.AssemblyBuffer.AppendLine($"PUSH {endPointer}");
-                MemoryApi.AssemblyBuffer.AppendLine($"PUSH {startPointer}");
-                MemoryApi.AssemblyBuffer.AppendLine($"CALL {OffsetList.FunctionTraceline}");
-                MemoryApi.AssemblyBuffer.AppendLine("ADD ESP, 0x18");
-
-                MemoryApi.AssemblyBuffer.AppendLine("TEST AL, 1");
-                MemoryApi.AssemblyBuffer.AppendLine("JE @out");
-
-                MemoryApi.AssemblyBuffer.AppendLine("PUSH 0");
-                MemoryApi.AssemblyBuffer.AppendLine($"PUSH {CommandAddress}");
-                MemoryApi.AssemblyBuffer.AppendLine($"PUSH {CommandAddress}");
-                MemoryApi.AssemblyBuffer.AppendLine($"CALL {OffsetList.FunctionLuaDoString}");
-                MemoryApi.AssemblyBuffer.AppendLine("ADD ESP, 0xC");
-
-                MemoryApi.AssemblyBuffer.AppendLine($"MOV DWORD [{ExecuteAddress}], 0");
-                MemoryApi.AssemblyBuffer.AppendLine("@out:");
-                MemoryApi.AssemblyBuffer.AppendLine("RET");
+                assembly = new List<string>()
+                {
+                    "X:",
+                    $"TEST DWORD [{ExecuteAddress}], 1",
+                    "JE @out",
+                    "PUSH 0",
+                    "PUSH 0x120171",
+                    $"PUSH {distancePointer}",
+                    $"PUSH {resultPointer}",
+                    $"PUSH {endPointer}",
+                    $"PUSH {startPointer}",
+                    $"CALL {OffsetList.FunctionTraceline}",
+                    "ADD ESP, 0x18",
+                    "TEST AL, 1",
+                    "JE @out",
+                    "PUSH 0",
+                    $"PUSH {CommandAddress}",
+                    $"PUSH {CommandAddress}",
+                    $"CALL {OffsetList.FunctionLuaDoString}",
+                    "ADD ESP, 0xC",
+                    $"MOV DWORD [{ExecuteAddress}], 0",
+                    "@out:",
+                    "RET"
+                };
 
                 return true;
             }
 
+            assembly = Array.Empty<string>();
             return false;
         }
     }

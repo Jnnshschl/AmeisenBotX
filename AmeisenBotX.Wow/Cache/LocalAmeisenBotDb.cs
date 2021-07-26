@@ -195,7 +195,7 @@ namespace AmeisenBotX.Wow.Cache
             }
             else
             {
-                WowUnitReaction reaction = Wow.WowGetReaction(a.BaseAddress, b.BaseAddress);
+                WowUnitReaction reaction = Wow.GetReaction(a.BaseAddress, b.BaseAddress);
                 CacheReaction(a.FactionTemplate, b.FactionTemplate, reaction);
                 return reaction;
             }
@@ -209,7 +209,7 @@ namespace AmeisenBotX.Wow.Cache
             }
             else
             {
-                string name = Wow.LuaGetSpellNameById(spellId);
+                string name = Wow.GetSpellNameById(spellId);
 
                 if (!string.IsNullOrWhiteSpace(name))
                 {

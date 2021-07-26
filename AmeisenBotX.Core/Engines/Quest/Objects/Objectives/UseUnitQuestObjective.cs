@@ -47,11 +47,11 @@ namespace AmeisenBotX.Core.Engines.Quest.Objects.Objectives
             {
                 if (IWowUnit.Position.GetDistance(Bot.Player.Position) < 3.0)
                 {
-                    Bot.Wow.WowStopClickToMove();
+                    Bot.Wow.StopClickToMove();
                     Bot.Movement.Reset();
                 }
 
-                Bot.Wow.WowUnitRightClick(IWowUnit.BaseAddress);
+                Bot.Wow.InteractWithUnit(IWowUnit.BaseAddress);
             }
         }
     }

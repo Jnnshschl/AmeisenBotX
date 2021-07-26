@@ -130,9 +130,9 @@ namespace AmeisenBotX.Core.Engines.Combat.Classes.einTyp
 
             if (Bot.Player.Position.GetDistance(target.Position) <= 3.0)
             {
-                Bot.Wow.WowStopClickToMove();
+                Bot.Wow.StopClickToMove();
                 Bot.Movement.Reset();
-                Bot.Wow.WowUnitRightClick(target.BaseAddress);
+                Bot.Wow.InteractWithUnit(target.BaseAddress);
             }
             else
             {
@@ -212,8 +212,8 @@ namespace AmeisenBotX.Core.Engines.Combat.Classes.einTyp
                 else if (!Dancing || standing)
                 {
                     standing = false;
-                    Bot.Wow.WowClearTarget();
-                    Bot.Wow.LuaSendChatMessage(standingEmotes[new Random().Next(standingEmotes.Length)]);
+                    Bot.Wow.ClearTarget();
+                    Bot.Wow.SendChatMessage(standingEmotes[new Random().Next(standingEmotes.Length)]);
                     Dancing = true;
                 }
             }
@@ -222,8 +222,8 @@ namespace AmeisenBotX.Core.Engines.Combat.Classes.einTyp
                 if (!Dancing || !standing)
                 {
                     standing = true;
-                    Bot.Wow.WowClearTarget();
-                    Bot.Wow.LuaSendChatMessage(runningEmotes[new Random().Next(runningEmotes.Length)]);
+                    Bot.Wow.ClearTarget();
+                    Bot.Wow.SendChatMessage(runningEmotes[new Random().Next(runningEmotes.Length)]);
                     Dancing = true;
                 }
             }
@@ -232,7 +232,7 @@ namespace AmeisenBotX.Core.Engines.Combat.Classes.einTyp
         private void HandleAttacking(IWowUnit target)
         {
             bool gcdWaiting = IsGCD();
-            Bot.Wow.WowTargetGuid(target.Guid);
+            Bot.Wow.ChangeTarget(target.Guid);
             bool targetAimed = true;
             double playerMana = Bot.Player.Mana;
             double targetHealthPercent = target.HealthPercentage;
@@ -242,24 +242,24 @@ namespace AmeisenBotX.Core.Engines.Combat.Classes.einTyp
             // buffs
             if (!buffs.Any(e => e.Contains("evotion")))
             {
-                Bot.Wow.LuaCastSpell("Devotion Aura");
+                Bot.Wow.CastSpell("Devotion Aura");
             }
 
             if (!gcdWaiting && !buffs.Any(e => e.Contains("ury")))
             {
-                Bot.Wow.LuaCastSpell("Righteous Fury");
+                Bot.Wow.CastSpell("Righteous Fury");
                 SetGCD(1.5);
                 return;
             }
 
             if (!buffs.Any(e => e.Contains("ighteousness")))
             {
-                Bot.Wow.LuaCastSpell("Seal of Righteousness");
+                Bot.Wow.CastSpell("Seal of Righteousness");
             }
 
             if (!gcdWaiting && playerHealthPercent > 50 && DateTime.Now.Subtract(LastSacrifice).TotalSeconds > 120)
             {
-                Bot.Wow.LuaCastSpell("Divine Sacrifice");
+                Bot.Wow.CastSpell("Divine Sacrifice");
                 LastSacrifice = DateTime.Now;
                 SetGCD(1.5);
                 return;
@@ -270,9 +270,9 @@ namespace AmeisenBotX.Core.Engines.Combat.Classes.einTyp
             {
                 if (DateTime.Now.Subtract(LastAvenger).TotalSeconds > 30 && playerMana >= 1027)
                 {
-                    Bot.Wow.LuaCastSpell("Avenger's Shield");
+                    Bot.Wow.CastSpell("Avenger's Shield");
                     LastAvenger = DateTime.Now;
-                    Bot.Wow.LuaSendChatMessage("/s and i'm like.. bam!");
+                    Bot.Wow.SendChatMessage("/s and i'm like.. bam!");
                     playerMana -= 1027;
                     SetGCD(1.5);
                     return;
@@ -285,9 +285,9 @@ namespace AmeisenBotX.Core.Engines.Combat.Classes.einTyp
                 {
                     if (multipleTargets && DateTime.Now.Subtract(LastConsecration).TotalSeconds > 8 && playerMana >= 869)
                     {
-                        Bot.Wow.LuaCastSpell("Consecration");
+                        Bot.Wow.CastSpell("Consecration");
                         LastConsecration = DateTime.Now;
-                        Bot.Wow.LuaSendChatMessage("/s MOVE BITCH!!!!!11");
+                        Bot.Wow.SendChatMessage("/s MOVE BITCH!!!!!11");
                         playerMana -= 869;
                         SetGCD(1.5);
                         return;
@@ -295,9 +295,9 @@ namespace AmeisenBotX.Core.Engines.Combat.Classes.einTyp
 
                     if (DateTime.Now.Subtract(LastHammer).TotalSeconds > 60 && playerMana >= 117)
                     {
-                        Bot.Wow.LuaCastSpell("Hammer of Justice");
+                        Bot.Wow.CastSpell("Hammer of Justice");
                         LastHammer = DateTime.Now;
-                        Bot.Wow.LuaSendChatMessage("/s STOP! hammertime!");
+                        Bot.Wow.SendChatMessage("/s STOP! hammertime!");
                         playerMana -= 117;
                         SetGCD(1.5);
                         return;
@@ -324,9 +324,9 @@ namespace AmeisenBotX.Core.Engines.Combat.Classes.einTyp
                 {
                     if (playerMana >= 276)
                     {
-                        Bot.Wow.WowTargetGuid(lowMember.Guid);
+                        Bot.Wow.ChangeTarget(lowMember.Guid);
                         targetAimed = false;
-                        Bot.Wow.LuaCastSpell("Blessing of Sanctuary");
+                        Bot.Wow.CastSpell("Blessing of Sanctuary");
                         playerMana -= 276;
                         SetGCD(1.5);
                         return;
@@ -334,9 +334,9 @@ namespace AmeisenBotX.Core.Engines.Combat.Classes.einTyp
 
                     if (playerMana >= 236)
                     {
-                        Bot.Wow.WowTargetGuid(lowMember.Guid);
+                        Bot.Wow.ChangeTarget(lowMember.Guid);
                         targetAimed = false;
-                        Bot.Wow.LuaCastSpell("Hand of Freedom");
+                        Bot.Wow.CastSpell("Hand of Freedom");
                         playerMana -= 236;
                         SetGCD(1.5);
                         return;
@@ -347,9 +347,9 @@ namespace AmeisenBotX.Core.Engines.Combat.Classes.einTyp
                 {
                     if (!gcdWaiting && DateTime.Now.Subtract(LastDivineShield).TotalSeconds > 240 && lowMember.HealthPercentage < 20 && playerMana >= 117)
                     {
-                        Bot.Wow.WowTargetGuid(lowMember.Guid);
+                        Bot.Wow.ChangeTarget(lowMember.Guid);
                         targetAimed = false;
-                        Bot.Wow.LuaCastSpell("Divine Shield");
+                        Bot.Wow.CastSpell("Divine Shield");
                         LastDivineShield = DateTime.Now;
                         playerMana -= 117;
                         SetGCD(1.5);
@@ -357,9 +357,9 @@ namespace AmeisenBotX.Core.Engines.Combat.Classes.einTyp
                     }
                     else if (lowMember.HealthPercentage < 50 && DateTime.Now.Subtract(LastProtection).TotalSeconds > 120 && playerMana >= 117)
                     {
-                        Bot.Wow.WowTargetGuid(lowMember.Guid);
+                        Bot.Wow.ChangeTarget(lowMember.Guid);
                         targetAimed = false;
-                        Bot.Wow.LuaCastSpell("Divine Protection");
+                        Bot.Wow.CastSpell("Divine Protection");
                         LastProtection = DateTime.Now;
                         playerMana -= 117;
                     }
@@ -369,9 +369,9 @@ namespace AmeisenBotX.Core.Engines.Combat.Classes.einTyp
             // self-casts
             if (!gcdWaiting && DateTime.Now.Subtract(LastHolyShield).TotalSeconds > 8 && playerMana >= 395)
             {
-                Bot.Wow.WowClearTarget();
+                Bot.Wow.ClearTarget();
                 targetAimed = false;
-                Bot.Wow.LuaCastSpell("Holy Shield");
+                Bot.Wow.CastSpell("Holy Shield");
                 LastHolyShield = DateTime.Now;
                 playerMana -= 395;
                 SetGCD(1.5);
@@ -380,9 +380,9 @@ namespace AmeisenBotX.Core.Engines.Combat.Classes.einTyp
 
             if (!gcdWaiting && DateTime.Now.Subtract(LastWisdom).TotalSeconds > 600 && playerMana >= 197)
             {
-                Bot.Wow.WowClearTarget();
+                Bot.Wow.ClearTarget();
                 targetAimed = false;
-                Bot.Wow.LuaCastSpell("Blessing of Wisdom");
+                Bot.Wow.CastSpell("Blessing of Wisdom");
                 LastWisdom = DateTime.Now;
                 playerMana -= 197;
                 SetGCD(1.5);
@@ -392,12 +392,12 @@ namespace AmeisenBotX.Core.Engines.Combat.Classes.einTyp
             // back to attack
             if (!targetAimed)
             {
-                Bot.Wow.WowTargetGuid(target.Guid);
+                Bot.Wow.ChangeTarget(target.Guid);
             }
 
             if (!Bot.Player.IsAutoAttacking)
             {
-                Bot.Wow.LuaStartAutoAttack();
+                Bot.Wow.StartAutoAttack();
             }
         }
 
@@ -417,7 +417,7 @@ namespace AmeisenBotX.Core.Engines.Combat.Classes.einTyp
             {
                 if (!BotMath.IsFacing(LastPlayerPosition, Bot.Player.Rotation, LastTargetPosition, 0.5f))
                 {
-                    Bot.Wow.WowFacePosition(Bot.Player.BaseAddress, Bot.Player.Position, target.Position);
+                    Bot.Wow.FacePosition(Bot.Player.BaseAddress, Bot.Player.Position, target.Position);
                 }
 
                 Bot.Movement.SetMovementAction(Movement.Enums.MovementAction.Move, target.Position, target.Rotation);
@@ -468,7 +468,7 @@ namespace AmeisenBotX.Core.Engines.Combat.Classes.einTyp
                             }
                         }
 
-                        if (((unit.IsInCombat && (compHealth < memberHealth || (compHealth == memberHealth && targetHealth < unit.Health))) || (!inCombat && grinding && (target == null || target.IsDead) && unit.Health < targetHealth)) && Bot.Wow.WowIsInLineOfSight(Bot.Player.Position, unit.Position))
+                        if (((unit.IsInCombat && (compHealth < memberHealth || (compHealth == memberHealth && targetHealth < unit.Health))) || (!inCombat && grinding && (target == null || target.IsDead) && unit.Health < targetHealth)) && Bot.Wow.IsInLineOfSight(Bot.Player.Position, unit.Position))
                         {
                             target = unit;
                             newTargetFound = true;
@@ -482,13 +482,13 @@ namespace AmeisenBotX.Core.Engines.Combat.Classes.einTyp
 
             if (target == null || target.IsDead || target.Health < 1 || target.Auras.Any(e => Bot.Db.GetSpellName(e.SpellId).Contains("Spirit of Redem")))
             {
-                Bot.Wow.WowClearTarget();
+                Bot.Wow.ClearTarget();
                 newTargetFound = false;
                 target = null;
             }
             else if (newTargetFound)
             {
-                Bot.Wow.WowTargetGuid(target.Guid);
+                Bot.Wow.ChangeTarget(target.Guid);
             }
 
             if (targetCount > 1)

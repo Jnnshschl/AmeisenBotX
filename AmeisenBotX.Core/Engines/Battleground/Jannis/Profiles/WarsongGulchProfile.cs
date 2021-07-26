@@ -224,7 +224,7 @@ namespace AmeisenBotX.Core.Engines.Battleground.Jannis.Profiles
                 else if (ActionEvent.Run())
                 {
                     StateMachine.GetState<StateCombat>().Mode = CombatMode.Force;
-                    Bot.Wow.WowTargetGuid(weakestPlayer.Guid);
+                    Bot.Wow.ChangeTarget(weakestPlayer.Guid);
                 }
             }
             else
@@ -258,7 +258,7 @@ namespace AmeisenBotX.Core.Engines.Battleground.Jannis.Profiles
                     else if (ActionEvent.Run())
                     {
                         StateMachine.GetState<StateCombat>().Mode = CombatMode.Force;
-                        Bot.Wow.WowTargetGuid(nearEnemy.Guid);
+                        Bot.Wow.ChangeTarget(nearEnemy.Guid);
                     }
                 }
             }
@@ -346,7 +346,7 @@ namespace AmeisenBotX.Core.Engines.Battleground.Jannis.Profiles
             else if (ActionEvent.Run())
             {
                 StateMachine.GetState<StateCombat>().Mode = CombatMode.Force;
-                Bot.Wow.WowTargetGuid(JBgBlackboard.EnemyTeamFlagCarrier.Guid);
+                Bot.Wow.ChangeTarget(JBgBlackboard.EnemyTeamFlagCarrier.Guid);
             }
 
             return BehaviorTreeStatus.Ongoing;
@@ -414,7 +414,7 @@ namespace AmeisenBotX.Core.Engines.Battleground.Jannis.Profiles
                     else if (ActionEvent.Run())
                     {
                         StateMachine.GetState<StateCombat>().Mode = CombatMode.Force;
-                        Bot.Wow.WowTargetGuid(nearEnemy.Guid);
+                        Bot.Wow.ChangeTarget(nearEnemy.Guid);
                     }
                 }
             }
@@ -432,7 +432,7 @@ namespace AmeisenBotX.Core.Engines.Battleground.Jannis.Profiles
 
                 if (LosCheckEvent.Run())
                 {
-                    if (Bot.Wow.WowIsInLineOfSight(Bot.Player.Position, position, 2.0f))
+                    if (Bot.Wow.IsInLineOfSight(Bot.Player.Position, position, 2.0f))
                     {
                         InLos = true;
                     }
@@ -463,7 +463,7 @@ namespace AmeisenBotX.Core.Engines.Battleground.Jannis.Profiles
         {
             try
             {
-                if (Bot.Wow.WowExecuteLuaAndRead(BotUtils.ObfuscateLua($"{{v:0}}=\"{{\"_,stateA,textA,_,_,_,_,_,_,_,_,_=GetWorldStateUIInfo(2)_,stateH,textH,_,_,_,_,_,_,_,_,_=GetWorldStateUIInfo(3)flagXA,flagYA=GetBattlefieldFlagPosition(1)flagXH,flagYH=GetBattlefieldFlagPosition(2){{v:0}}={{v:0}}..\"\\\"allianceState\\\" : \\\"\"..stateA..\"\\\",\"{{v:0}}={{v:0}}..\"\\\"allianceText\\\" : \\\"\"..textA..\"\\\",\"{{v:0}}={{v:0}}..\"\\\"hordeState\\\" : \\\"\"..stateH..\"\\\",\"{{v:0}}={{v:0}}..\"\\\"hordeText\\\" : \\\"\"..textH..\"\\\",\"{{v:0}}={{v:0}}..\"\\\"allianceFlagX\\\" : \\\"\"..flagXA..\"\\\",\"{{v:0}}={{v:0}}..\"\\\"allianceFlagY\\\" : \\\"\"..flagYA..\"\\\",\"{{v:0}}={{v:0}}..\"\\\"hordeFlagX\\\" : \\\"\"..flagXH..\"\\\",\"{{v:0}}={{v:0}}..\"\\\"hordeFlagY\\\" : \\\"\"..flagYH..\"\\\"\"{{v:0}}={{v:0}}..\"}}\""), out string result))
+                if (Bot.Wow.ExecuteLuaAndRead(BotUtils.ObfuscateLua($"{{v:0}}=\"{{\"_,stateA,textA,_,_,_,_,_,_,_,_,_=GetWorldStateUIInfo(2)_,stateH,textH,_,_,_,_,_,_,_,_,_=GetWorldStateUIInfo(3)flagXA,flagYA=GetBattlefieldFlagPosition(1)flagXH,flagYH=GetBattlefieldFlagPosition(2){{v:0}}={{v:0}}..\"\\\"allianceState\\\" : \\\"\"..stateA..\"\\\",\"{{v:0}}={{v:0}}..\"\\\"allianceText\\\" : \\\"\"..textA..\"\\\",\"{{v:0}}={{v:0}}..\"\\\"hordeState\\\" : \\\"\"..stateH..\"\\\",\"{{v:0}}={{v:0}}..\"\\\"hordeText\\\" : \\\"\"..textH..\"\\\",\"{{v:0}}={{v:0}}..\"\\\"allianceFlagX\\\" : \\\"\"..flagXA..\"\\\",\"{{v:0}}={{v:0}}..\"\\\"allianceFlagY\\\" : \\\"\"..flagYA..\"\\\",\"{{v:0}}={{v:0}}..\"\\\"hordeFlagX\\\" : \\\"\"..flagXH..\"\\\",\"{{v:0}}={{v:0}}..\"\\\"hordeFlagY\\\" : \\\"\"..flagYH..\"\\\"\"{{v:0}}={{v:0}}..\"}}\""), out string result))
                 {
                     dynamic bgState = JsonSerializer.Deserialize<dynamic>(result, new() { AllowTrailingCommas = true, NumberHandling = JsonNumberHandling.AllowReadingFromString });
 
@@ -551,7 +551,7 @@ namespace AmeisenBotX.Core.Engines.Battleground.Jannis.Profiles
                 }
                 else if (ActionEvent.Run())
                 {
-                    Bot.Wow.WowObjectRightClick(nearestFlag.BaseAddress);
+                    Bot.Wow.InteractWithObject(nearestFlag.BaseAddress);
                 }
             }
             else

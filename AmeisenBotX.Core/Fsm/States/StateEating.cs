@@ -102,7 +102,7 @@ namespace AmeisenBotX.Core.Fsm.States
                 }
 
                 string itemName = Bot.Character.Inventory.Items.First(e => Enum.IsDefined(t, e.Id)).Name;
-                Bot.Wow.LuaUseItemByName(itemName);
+                Bot.Wow.UseItemByName(itemName);
                 Bot.Movement.StopMovement();
 
                 if (t == typeof(WowRefreshment))

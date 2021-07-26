@@ -53,13 +53,13 @@ namespace AmeisenBotX.Core.Fsm.States.Idle.Actions
 
             if (nearCampfire != null && !SatDown)
             {
-                Bot.Wow.WowFacePosition(Bot.Player.BaseAddress, Bot.Player.Position, nearCampfire.Position);
-                Bot.Wow.LuaSendChatMessage(Rnd.Next(0, 2) == 1 ? "/sit" : "/sleep");
+                Bot.Wow.FacePosition(Bot.Player.BaseAddress, Bot.Player.Position, nearCampfire.Position);
+                Bot.Wow.SendChatMessage(Rnd.Next(0, 2) == 1 ? "/sit" : "/sleep");
                 SatDown = true;
             }
             else if (!PlacedCampfire)
             {
-                Bot.Wow.LuaCastSpell("Basic Campfire");
+                Bot.Wow.CastSpell("Basic Campfire");
                 PlacedCampfire = true;
             }
         }

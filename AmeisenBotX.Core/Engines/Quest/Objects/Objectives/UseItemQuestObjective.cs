@@ -33,8 +33,8 @@ namespace AmeisenBotX.Core.Engines.Quest.Objects.Objectives
             if (item != null)
             {
                 Bot.Movement.Reset();
-                Bot.Wow.WowStopClickToMove();
-                Bot.Wow.LuaUseContainerItem(item.BagId, item.BagSlot);
+                Bot.Wow.StopClickToMove();
+                Bot.Wow.UseContainerItem(item.BagId, item.BagSlot);
             }
         }
     }

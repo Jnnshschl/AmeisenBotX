@@ -90,7 +90,7 @@ namespace AmeisenBotX.Core.Engines.Combat.Classes.Kamel
 
                 if (Bot.Db.GetReaction(Bot.Player, Bot.Target) == WowUnitReaction.Friendly)
                 {
-                    Bot.Wow.WowClearTarget();
+                    Bot.Wow.ClearTarget();
                     return;
                 }
 
@@ -98,7 +98,7 @@ namespace AmeisenBotX.Core.Engines.Combat.Classes.Kamel
                 {
                     if (!Bot.Player.IsAutoAttacking && AutoAttackEvent.Run())
                     {
-                        Bot.Wow.LuaStartAutoAttack();
+                        Bot.Wow.StartAutoAttack();
                     }
                 }
             }

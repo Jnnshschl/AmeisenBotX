@@ -213,7 +213,7 @@ namespace AmeisenBotX.Core.Engines.Combat.Classes.Kamel
             {
                 if (Bot.Wow.TargetGuid != partyMemberToHeal.FirstOrDefault().Guid)
                 {
-                    Bot.Wow.WowTargetGuid(partyMemberToHeal.FirstOrDefault().Guid);
+                    Bot.Wow.ChangeTarget(partyMemberToHeal.FirstOrDefault().Guid);
                 }
 
                 if (Bot.Wow.TargetGuid != 0 && Bot.Target != null)
@@ -227,7 +227,7 @@ namespace AmeisenBotX.Core.Engines.Combat.Classes.Kamel
                         }
                         if (Bot.Movement.Status != Movement.Enums.MovementAction.None)
                         {
-                            Bot.Wow.WowStopClickToMove();
+                            Bot.Wow.StopClickToMove();
                             Bot.Movement.Reset();
                         }
 
@@ -322,7 +322,7 @@ namespace AmeisenBotX.Core.Engines.Combat.Classes.Kamel
 
                     if (Bot.Wow.TargetGuid != 0 && Bot.Target != null && nearTarget != null)
                     {
-                        Bot.Wow.WowTargetGuid(nearTarget.Guid);
+                        Bot.Wow.ChangeTarget(nearTarget.Guid);
 
                         if (!TargetInLineOfSight)
                         {
@@ -330,7 +330,7 @@ namespace AmeisenBotX.Core.Engines.Combat.Classes.Kamel
                         }
                         if (Bot.Movement.Status != Movement.Enums.MovementAction.None)
                         {
-                            Bot.Wow.WowStopClickToMove();
+                            Bot.Wow.StopClickToMove();
                             Bot.Movement.Reset();
                         }
                         if (UseSpellOnlyInCombat && Bot.Target.IsCasting && CustomCastSpellMana(windShearSpell))

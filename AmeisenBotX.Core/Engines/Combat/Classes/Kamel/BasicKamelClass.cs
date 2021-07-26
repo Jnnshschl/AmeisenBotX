@@ -144,9 +144,9 @@ namespace AmeisenBotX.Core.Engines.Combat.Classes.Kamel
 
             if (Bot.Player.Position.GetDistance(target.Position) <= 3.0)
             {
-                Bot.Wow.WowStopClickToMove();
+                Bot.Wow.StopClickToMove();
                 Bot.Movement.Reset();
-                Bot.Wow.WowUnitRightClick(target.BaseAddress);
+                Bot.Wow.InteractWithUnit(target.BaseAddress);
             }
             else
             {
@@ -167,7 +167,7 @@ namespace AmeisenBotX.Core.Engines.Combat.Classes.Kamel
 
             if (PlayerNearPlayer.Any() && Bot.Objects.Target.HealthPercentage >= 60 && Bot.Player.Position.GetDistance(target.Position) >= 20)
             {
-                Bot.Wow.WowClearTarget();
+                Bot.Wow.ClearTarget();
                 return;
             }
         }
@@ -223,20 +223,20 @@ namespace AmeisenBotX.Core.Engines.Combat.Classes.Kamel
 
                         if ((spell.MinRange == 0 && spell.MaxRange == 0) || (spell.MinRange <= distance && spell.MaxRange >= distance))
                         {
-                            Bot.Wow.LuaCastSpell(spellName);
+                            Bot.Wow.CastSpell(spellName);
                             return true;
                         }
                     }
                 }
                 else
                 {
-                    Bot.Wow.WowTargetGuid(Bot.Wow.PlayerGuid);
+                    Bot.Wow.ChangeTarget(Bot.Wow.PlayerGuid);
 
                     Spell spell = Bot.Character.SpellBook.GetSpellByName(spellName);
 
                     if (Bot.Player.Mana >= spell.Costs && IsSpellReady(spellName))
                     {
-                        Bot.Wow.LuaCastSpell(spellName);
+                        Bot.Wow.CastSpell(spellName);
                         return true;
                     }
                 }
@@ -257,7 +257,7 @@ namespace AmeisenBotX.Core.Engines.Combat.Classes.Kamel
             {
                 if (IsSpellReady(EveryManforHimselfSpell))
                 {
-                    Bot.Wow.LuaCastSpell(EveryManforHimselfSpell);
+                    Bot.Wow.CastSpell(EveryManforHimselfSpell);
                 }
             }
 
@@ -266,7 +266,7 @@ namespace AmeisenBotX.Core.Engines.Combat.Classes.Kamel
             {
                 if (IsSpellReady(StoneformSpell))
                 {
-                    Bot.Wow.LuaCastSpell(StoneformSpell);
+                    Bot.Wow.CastSpell(StoneformSpell);
                 }
             }
 
@@ -279,7 +279,7 @@ namespace AmeisenBotX.Core.Engines.Combat.Classes.Kamel
 
                 if (healthItem != null)
                 {
-                    Bot.Wow.LuaUseItemByName(healthItem.Name);
+                    Bot.Wow.UseItemByName(healthItem.Name);
                 }
             }
 
@@ -289,7 +289,7 @@ namespace AmeisenBotX.Core.Engines.Combat.Classes.Kamel
 
                 if (manaItem != null)
                 {
-                    Bot.Wow.LuaUseItemByName(manaItem.Name);
+                    Bot.Wow.UseItemByName(manaItem.Name);
                 }
             }
         }
@@ -300,7 +300,7 @@ namespace AmeisenBotX.Core.Engines.Combat.Classes.Kamel
         {
             if (DateTime.Now > spellCoolDown[spellName])
             {
-                spellCoolDown[spellName] = DateTime.Now + TimeSpan.FromMilliseconds(Bot.Wow.LuaGetSpellCooldown(spellName));
+                spellCoolDown[spellName] = DateTime.Now + TimeSpan.FromMilliseconds(Bot.Wow.GetSpellCooldown(spellName));
                 return true;
             }
 
@@ -320,7 +320,7 @@ namespace AmeisenBotX.Core.Engines.Combat.Classes.Kamel
 
             if (RevivePlayerEvent.Run() && partyMemberToHeal.Count > 0)
             {
-                Bot.Wow.WowTargetGuid(partyMemberToHeal.FirstOrDefault().Guid);
+                Bot.Wow.ChangeTarget(partyMemberToHeal.FirstOrDefault().Guid);
                 CustomCastSpellMana(reviveSpellName);
             }
         }
@@ -336,7 +336,7 @@ namespace AmeisenBotX.Core.Engines.Combat.Classes.Kamel
 
                 if (nearTarget != null)
                 {
-                    Bot.Wow.WowTargetGuid(nearTarget.Guid);
+                    Bot.Wow.ChangeTarget(nearTarget.Guid);
 
                     if (!TargetInLineOfSight)
                     {
@@ -361,7 +361,7 @@ namespace AmeisenBotX.Core.Engines.Combat.Classes.Kamel
 
                 if (nearTargetToTank != null)
                 {
-                    Bot.Wow.WowTargetGuid(nearTargetToTank.Guid);
+                    Bot.Wow.ChangeTarget(nearTargetToTank.Guid);
 
                     if (!TargetInLineOfSight)
                     {
@@ -381,7 +381,7 @@ namespace AmeisenBotX.Core.Engines.Combat.Classes.Kamel
 
                     if (nearTarget != null)
                     {
-                        Bot.Wow.WowTargetGuid(nearTarget.Guid);
+                        Bot.Wow.ChangeTarget(nearTarget.Guid);
 
                         if (!TargetInLineOfSight)
                         {

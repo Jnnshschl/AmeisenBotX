@@ -26,8 +26,8 @@
             if (Finished || Bot.Player.IsCasting) { return; }
 
             Bot.Movement.Reset();
-            Bot.Wow.WowStopClickToMove();
-            Bot.Wow.LuaCastSpellById(SpellId);
+            Bot.Wow.StopClickToMove();
+            Bot.Wow.CastSpellById(SpellId);
         }
     }
 }

@@ -113,7 +113,7 @@ namespace AmeisenBotX.Core.Engines.Quest.Objects.Objectives
 
                 if (IWowUnit != null)
                 {
-                    Bot.Wow.WowTargetGuid(IWowUnit.Guid);
+                    Bot.Wow.ChangeTarget(IWowUnit.Guid);
                 }
             }
 

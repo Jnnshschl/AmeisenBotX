@@ -83,7 +83,7 @@ namespace AmeisenBotX.Core.Engines.Grinding
 
             if (Bot.Player.IsInCombat && Bot.Player.IsMounted)
             {
-                Bot.Wow.LuaDismissCompanion();
+                Bot.Wow.DismissCompanion("MOUNT");
             }
 
             if (distanceToSpot < GrindingSpot.Radius)
@@ -104,12 +104,12 @@ namespace AmeisenBotX.Core.Engines.Grinding
 
                     if (TargetInLosEvent.Run() || switchedTarget)
                     {
-                        TargetInLos = Bot.Wow.WowIsInLineOfSight(Bot.Player.Position, nearestUnit.Position);
+                        TargetInLos = Bot.Wow.IsInLineOfSight(Bot.Player.Position, nearestUnit.Position);
                     }
 
                     if (nearestUnit.Position.GetDistance(Bot.Player.Position) < 20.0f && TargetInLos)
                     {
-                        Bot.Wow.WowTargetGuid(nearestUnit.Guid);
+                        Bot.Wow.ChangeTarget(nearestUnit.Guid);
                         StateMachine.GetState<StateCombat>().Mode = CombatMode.Force;
                     }
                     else

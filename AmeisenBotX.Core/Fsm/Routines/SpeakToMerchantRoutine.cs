@@ -15,40 +15,40 @@ namespace AmeisenBotX.Core.Fsm.Routines
 
             if (bot.Wow.TargetGuid != selectedUnit.Guid)
             {
-                bot.Wow.WowTargetGuid(selectedUnit.Guid);
+                bot.Wow.ChangeTarget(selectedUnit.Guid);
                 return false;
             }
 
             if (!BotMath.IsFacing(bot.Objects.Player.Position, bot.Objects.Player.Rotation, selectedUnit.Position))
             {
-                bot.Wow.WowFacePosition(bot.Objects.Player.BaseAddress, bot.Player.Position, selectedUnit.Position);
+                bot.Wow.FacePosition(bot.Objects.Player.BaseAddress, bot.Player.Position, selectedUnit.Position);
             }
 
             if (selectedUnit.IsGossip)
             {
-                if (bot.Wow.LuaUiIsVisible("GossipFrame"))
+                if (bot.Wow.UiIsVisible("GossipFrame"))
                 {
-                    string[] gossipTypes = bot.Wow.LuaGetGossipTypes();
+                    string[] gossipTypes = bot.Wow.GetGossipTypes();
 
                     for (int i = 0; i < gossipTypes.Length; ++i)
                     {
                         if (gossipTypes[i].Equals("vendor", StringComparison.OrdinalIgnoreCase)
                             || gossipTypes[i].Equals("repair", StringComparison.OrdinalIgnoreCase))
                         {
-                            bot.Wow.LuaSelectGossipOption(i + 1);
+                            bot.Wow.SelectGossipOption(i + 1);
                         }
                     }
                 }
 
-                if (!bot.Wow.LuaUiIsVisible("MerchantFrame"))
+                if (!bot.Wow.UiIsVisible("MerchantFrame"))
                 {
                     return false;
                 }
             }
 
-            if (!bot.Wow.LuaUiIsVisible("GossipFrame", "MerchantFrame"))
+            if (!bot.Wow.UiIsVisible("GossipFrame", "MerchantFrame"))
             {
-                bot.Wow.WowUnitRightClick(selectedUnit.BaseAddress);
+                bot.Wow.InteractWithUnit(selectedUnit.BaseAddress);
                 return false;
             }
 

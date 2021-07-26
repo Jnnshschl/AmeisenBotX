@@ -65,10 +65,10 @@ namespace AmeisenBotX.Core.Fsm.States
             {
                 if (!BotMath.IsFacing(Bot.Player.Position, Bot.Player.Rotation, possibleQuestgiver.Position))
                 {
-                    Bot.Wow.WowFacePosition(Bot.Player.BaseAddress, Bot.Player.Position, possibleQuestgiver.Position);
+                    Bot.Wow.FacePosition(Bot.Player.BaseAddress, Bot.Player.Position, possibleQuestgiver.Position);
                 }
 
-                Bot.Wow.WowUnitRightClick(possibleQuestgiver.BaseAddress);
+                Bot.Wow.InteractWithUnit(possibleQuestgiver.BaseAddress);
                 Bot.Movement.StopMovement();
             }
         }

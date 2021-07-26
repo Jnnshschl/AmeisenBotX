@@ -65,9 +65,9 @@ namespace AmeisenBotX.Core.Engines.Combat.Classes.Kamel
 
             if (Bot.Player.Position.GetDistance(target.Position) <= 3.0)
             {
-                Bot.Wow.WowStopClickToMove();
+                Bot.Wow.StopClickToMove();
                 Bot.Movement.Reset();
-                Bot.Wow.WowUnitRightClick(target.BaseAddress);
+                Bot.Wow.InteractWithUnit(target.BaseAddress);
             }
             else
             {
@@ -84,7 +84,7 @@ namespace AmeisenBotX.Core.Engines.Combat.Classes.Kamel
                 // make sure we're auto attacking
                 if (!Bot.Objects.Player.IsAutoAttacking)
                 {
-                    Bot.Wow.LuaStartAutoAttack();
+                    Bot.Wow.StartAutoAttack();
                 }
 
                 HandleAttacking(target);
@@ -103,7 +103,7 @@ namespace AmeisenBotX.Core.Engines.Combat.Classes.Kamel
 
                 if (Bot.Objects.Player.TargetGuid != guid)
                 {
-                    Bot.Wow.WowTargetGuid(guid);
+                    Bot.Wow.ChangeTarget(guid);
                 }
             }
 
@@ -118,25 +118,25 @@ namespace AmeisenBotX.Core.Engines.Combat.Classes.Kamel
             double distanceToTarget = Bot.Objects.Player.Position.GetDistance(target.Position);
             double targetHealthPercent = (target.Health / (double)target.MaxHealth) * 100;
             double playerHealthPercent = (Bot.Objects.Player.Health / (double)Bot.Objects.Player.MaxHealth) * 100.0;
-            (string, int) targetCastingInfo = Bot.Wow.LuaGetUnitCastingInfo(WowLuaUnit.Target);
+            (string, int) targetCastingInfo = Bot.Wow.GetUnitCastingInfo(WowLuaUnit.Target);
             //List<string> myBuffs = Bot.NewBot.GetBuffs(WowLuaUnit.Player.ToString());
             //myBuffs.Any(e => e.Equals("Chains of Ice"))
 
-            if (Bot.Wow.LuaGetSpellCooldown("Death Grip") <= 0 && distanceToTarget <= 30)
+            if (Bot.Wow.GetSpellCooldown("Death Grip") <= 0 && distanceToTarget <= 30)
             {
-                Bot.Wow.LuaCastSpell("Death Grip");
+                Bot.Wow.CastSpell("Death Grip");
                 return;
             }
             if (target.IsFleeing && distanceToTarget <= 30)
             {
-                Bot.Wow.LuaCastSpell("Chains of Ice");
+                Bot.Wow.CastSpell("Chains of Ice");
                 return;
             }
 
-            if (Bot.Wow.LuaGetSpellCooldown("Army of the Dead") <= 0 &&
+            if (Bot.Wow.GetSpellCooldown("Army of the Dead") <= 0 &&
                 IsOneOfAllRunesReady())
             {
-                Bot.Wow.LuaCastSpell("Army of the Dead");
+                Bot.Wow.CastSpell("Army of the Dead");
                 return;
             }
 
@@ -146,11 +146,11 @@ namespace AmeisenBotX.Core.Engines.Combat.Classes.Kamel
                 .ToList();
 
             if (unitsNearPlayer.Count > 2 &&
-                Bot.Wow.LuaGetSpellCooldown("Blood Boil") <= 0 &&
-                Bot.Wow.WowIsRuneReady(0) ||
-                Bot.Wow.WowIsRuneReady(1))
+                Bot.Wow.GetSpellCooldown("Blood Boil") <= 0 &&
+                Bot.Wow.IsRuneReady(0) ||
+                Bot.Wow.IsRuneReady(1))
             {
-                Bot.Wow.LuaCastSpell("Blood Boil");
+                Bot.Wow.CastSpell("Blood Boil");
                 return;
             }
 
@@ -160,31 +160,31 @@ namespace AmeisenBotX.Core.Engines.Combat.Classes.Kamel
                 .ToList();
 
             if (unitsNearTarget.Count > 2 &&
-                Bot.Wow.LuaGetSpellCooldown("Death and Decay") <= 0 &&
+                Bot.Wow.GetSpellCooldown("Death and Decay") <= 0 &&
                 IsOneOfAllRunesReady())
             {
-                Bot.Wow.LuaCastSpell("Death and Decay");
-                Bot.Wow.WowClickOnTerrain(target.Position);
+                Bot.Wow.CastSpell("Death and Decay");
+                Bot.Wow.ClickOnTerrain(target.Position);
                 return;
             }
 
-            if (Bot.Wow.LuaGetSpellCooldown("Icy Touch") <= 0 &&
-                Bot.Wow.WowIsRuneReady(2) ||
-                Bot.Wow.WowIsRuneReady(3))
+            if (Bot.Wow.GetSpellCooldown("Icy Touch") <= 0 &&
+                Bot.Wow.IsRuneReady(2) ||
+                Bot.Wow.IsRuneReady(3))
             {
-                Bot.Wow.LuaCastSpell("Icy Touch");
+                Bot.Wow.CastSpell("Icy Touch");
                 return;
             }
         }
 
         private bool IsOneOfAllRunesReady()
         {
-            return Bot.Wow.WowIsRuneReady(0)
-                       || Bot.Wow.WowIsRuneReady(1)
-                       && Bot.Wow.WowIsRuneReady(2)
-                       || Bot.Wow.WowIsRuneReady(3)
-                       && Bot.Wow.WowIsRuneReady(4)
-                       || Bot.Wow.WowIsRuneReady(5);
+            return Bot.Wow.IsRuneReady(0)
+                       || Bot.Wow.IsRuneReady(1)
+                       && Bot.Wow.IsRuneReady(2)
+                       || Bot.Wow.IsRuneReady(3)
+                       && Bot.Wow.IsRuneReady(4)
+                       || Bot.Wow.IsRuneReady(5);
         }
     }
 }

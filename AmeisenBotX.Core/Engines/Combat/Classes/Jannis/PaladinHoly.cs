@@ -126,7 +126,7 @@ namespace AmeisenBotX.Core.Engines.Combat.Classes.Jannis
                     && Bot.Target.Position.GetDistance(Bot.Player.Position) < 3.5
                     && EventAutoAttack.Run())
                 {
-                    Bot.Wow.LuaStartAutoAttack();
+                    Bot.Wow.StartAutoAttack();
                     return;
                 }
                 else

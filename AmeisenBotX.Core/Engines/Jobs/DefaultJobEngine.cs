@@ -123,7 +123,7 @@ namespace AmeisenBotX.Core.Engines.Jobs
 
                         if (MailSentEvent.Run())
                         {
-                            Bot.Wow.WowObjectRightClick(mailboxNode.BaseAddress);
+                            Bot.Wow.InteractWithObject(mailboxNode.BaseAddress);
                             Bot.Wow.LuaDoString("MailFrameTab2:Click();");
 
                             int usedItems = 0;
@@ -134,7 +134,7 @@ namespace AmeisenBotX.Core.Engines.Jobs
                                     continue;
                                 }
 
-                                Bot.Wow.LuaUseContainerItem(item.BagId, item.BagSlot);
+                                Bot.Wow.UseContainerItem(item.BagId, item.BagSlot);
                                 ++usedItems;
                             }
 
@@ -231,7 +231,7 @@ namespace AmeisenBotX.Core.Engines.Jobs
                 {
                     if (Bot.Player.IsMounted)
                     {
-                        Bot.Wow.LuaDismissCompanion();
+                        Bot.Wow.DismissCompanion("MOUNT");
                         return;
                     }
 
@@ -242,11 +242,11 @@ namespace AmeisenBotX.Core.Engines.Jobs
                         if (Bot.Memory.Read(Bot.Wow.Offsets.LootWindowOpen, out byte lootOpen)
                             && lootOpen > 0)
                         {
-                            Bot.Wow.LuaLootEveryThing();
+                            Bot.Wow.LootEveryThing();
                         }
                         else
                         {
-                            Bot.Wow.WowObjectRightClick(node.BaseAddress);
+                            Bot.Wow.InteractWithObject(node.BaseAddress);
                         }
                     }
 

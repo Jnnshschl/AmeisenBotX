@@ -33,7 +33,7 @@ namespace AmeisenBotX.Core.Fsm.States
 
                 if (Config.ReleaseSpirit || Bot.Objects.MapId.IsBattlegroundMap())
                 {
-                    Bot.Wow.LuaRepopMe();
+                    Bot.Wow.RepopMe();
                 }
             }
             else if (Bot.Player.IsGhost)

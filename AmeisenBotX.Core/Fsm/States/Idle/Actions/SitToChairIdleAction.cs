@@ -76,7 +76,7 @@ namespace AmeisenBotX.Core.Fsm.States.Idle.Actions
                 else
                 {
                     Bot.Movement.StopMovement();
-                    Bot.Wow.WowObjectRightClick(CurrentSeat.BaseAddress);
+                    Bot.Wow.InteractWithObject(CurrentSeat.BaseAddress);
 
                     SatDown = true;
                 }

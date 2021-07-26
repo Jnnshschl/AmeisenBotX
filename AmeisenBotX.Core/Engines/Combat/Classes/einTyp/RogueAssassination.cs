@@ -126,9 +126,9 @@ namespace AmeisenBotX.Core.Engines.Combat.Classes.einTyp
 
             if (Bot.Player.Position.GetDistance(target.Position) <= 3.0)
             {
-                Bot.Wow.WowStopClickToMove();
+                Bot.Wow.StopClickToMove();
                 Bot.Movement.Reset();
-                Bot.Wow.WowUnitRightClick(target.BaseAddress);
+                Bot.Wow.InteractWithUnit(target.BaseAddress);
             }
             else
             {
@@ -178,14 +178,14 @@ namespace AmeisenBotX.Core.Engines.Combat.Classes.einTyp
             {
                 if (distanceTraveled < 0.001)
                 {
-                    Bot.Wow.WowClearTarget();
-                    Bot.Wow.LuaSendChatMessage(standingEmotes[new Random().Next(standingEmotes.Length)]);
+                    Bot.Wow.ClearTarget();
+                    Bot.Wow.SendChatMessage(standingEmotes[new Random().Next(standingEmotes.Length)]);
                     Dancing = true;
                     StateMachine.GetState<StateCombat>().Mode = CombatMode.Allowed;
                 }
                 else
                 {
-                    Bot.Wow.WowClearTarget();
+                    Bot.Wow.ClearTarget();
                     Dancing = true;
                 }
             }
@@ -197,7 +197,7 @@ namespace AmeisenBotX.Core.Engines.Combat.Classes.einTyp
             List<string> buffs = Bot.Player.Auras.Select(e => Bot.Db.GetSpellName(e.SpellId)).ToList();
             if (!buffs.Any(e => e.Contains("tealth")))
             {
-                Bot.Wow.LuaCastSpell("Stealth");
+                Bot.Wow.CastSpell("Stealth");
                 spells.ResetAfterTargetDeath();
             }
 
@@ -230,8 +230,8 @@ namespace AmeisenBotX.Core.Engines.Combat.Classes.einTyp
                 else if (!Dancing || standing)
                 {
                     standing = false;
-                    Bot.Wow.WowClearTarget();
-                    Bot.Wow.LuaSendChatMessage(standingEmotes[new Random().Next(standingEmotes.Length)]);
+                    Bot.Wow.ClearTarget();
+                    Bot.Wow.SendChatMessage(standingEmotes[new Random().Next(standingEmotes.Length)]);
                     Dancing = true;
                 }
             }
@@ -240,7 +240,7 @@ namespace AmeisenBotX.Core.Engines.Combat.Classes.einTyp
                 if (!Dancing || !standing)
                 {
                     standing = true;
-                    Bot.Wow.WowClearTarget();
+                    Bot.Wow.ClearTarget();
                     Dancing = true;
                 }
             }
@@ -248,7 +248,7 @@ namespace AmeisenBotX.Core.Engines.Combat.Classes.einTyp
 
         private void HandleAttacking(IWowUnit target)
         {
-            Bot.Wow.WowTargetGuid(target.Guid);
+            Bot.Wow.ChangeTarget(target.Guid);
             spells.CastNextSpell(distanceToTarget, target);
             if (target.IsDead || target.Health < 1)
             {
@@ -302,7 +302,7 @@ namespace AmeisenBotX.Core.Engines.Combat.Classes.einTyp
                     isAttackingFromBehind = true;
                     if (!BotMath.IsFacing(LastPlayerPosition, Bot.Player.Rotation, LastTargetPosition, 0.5f))
                     {
-                        Bot.Wow.WowFacePosition(Bot.Player.BaseAddress, Bot.Player.Position, target.Position);
+                        Bot.Wow.FacePosition(Bot.Player.BaseAddress, Bot.Player.Position, target.Position);
                     }
 
                     Bot.Movement.SetMovementAction(Movement.Enums.MovementAction.Move, LastTargetPosition, LastTargetRotation);
@@ -335,7 +335,7 @@ namespace AmeisenBotX.Core.Engines.Combat.Classes.einTyp
                             targetCount++;
                         }
 
-                        if (((unit.IsInCombat && unit.Health > targetHealth) || (!inCombat && grinding && unit.Health > targetHealth)) && Bot.Wow.WowIsInLineOfSight(Bot.Player.Position, unit.Position))
+                        if (((unit.IsInCombat && unit.Health > targetHealth) || (!inCombat && grinding && unit.Health > targetHealth)) && Bot.Wow.IsInLineOfSight(Bot.Player.Position, unit.Position))
                         {
                             target = unit;
                             targetHealth = unit.Health;
@@ -348,14 +348,14 @@ namespace AmeisenBotX.Core.Engines.Combat.Classes.einTyp
 
             if (target == null || target.IsDead || target.Health < 1 || target.Auras.Any(e => Bot.Db.GetSpellName(e.SpellId).Contains("Spirit of Redem")))
             {
-                Bot.Wow.WowClearTarget();
+                Bot.Wow.ClearTarget();
                 newTargetFound = false;
                 target = null;
             }
 
             if (newTargetFound)
             {
-                Bot.Wow.WowTargetGuid(target.Guid);
+                Bot.Wow.ChangeTarget(target.Guid);
                 spells.ResetAfterTargetDeath();
             }
 
@@ -433,7 +433,7 @@ namespace AmeisenBotX.Core.Engines.Combat.Classes.einTyp
 
                 if (!Bot.Player.IsAutoAttacking && !IsInStealth())
                 {
-                    Bot.Wow.LuaStartAutoAttack();
+                    Bot.Wow.StartAutoAttack();
                 }
 
                 Player = Bot.Player;
@@ -447,12 +447,12 @@ namespace AmeisenBotX.Core.Engines.Combat.Classes.einTyp
                 }
                 else if (lowHealth && !askedForHelp)
                 {
-                    Bot.Wow.LuaSendChatMessage("/helpme");
+                    Bot.Wow.SendChatMessage("/helpme");
                     askedForHelp = true;
                 }
                 else if (mediumHealth && !askedForHeal)
                 {
-                    Bot.Wow.LuaSendChatMessage("/healme");
+                    Bot.Wow.SendChatMessage("/healme");
                     askedForHeal = true;
                 }
 
@@ -468,7 +468,7 @@ namespace AmeisenBotX.Core.Engines.Combat.Classes.einTyp
                         if (IsReady(Vanish))
                         {
                             CastSpell(Vanish, ref energy, 0, 180, false);
-                            Bot.Wow.WowClearTarget();
+                            Bot.Wow.ClearTarget();
                             return;
                         }
                     }
@@ -513,7 +513,7 @@ namespace AmeisenBotX.Core.Engines.Combat.Classes.einTyp
                             }
                             else
                             {
-                                if (Bot.Wow.LuaGetUnitCastingInfo(WowLuaUnit.Target).Item2 > 0 && energy > 25 && IsReady(Kick))
+                                if (Bot.Wow.GetUnitCastingInfo(WowLuaUnit.Target).Item2 > 0 && energy > 25 && IsReady(Kick))
                                 {
                                     CastSpell(Kick, ref energy, 25, 10, true);
                                 }
@@ -592,7 +592,7 @@ namespace AmeisenBotX.Core.Engines.Combat.Classes.einTyp
 
             private void CastSpell(string spell, ref int rage, int rageCosts, double cooldown, bool gcd)
             {
-                Bot.Wow.LuaCastSpell(spell);
+                Bot.Wow.CastSpell(spell);
                 rage -= rageCosts;
                 if (cooldown > 0)
                 {
@@ -620,7 +620,7 @@ namespace AmeisenBotX.Core.Engines.Combat.Classes.einTyp
                     result &= !nextActionTime.TryGetValue(spell, out DateTime NextSpellAvailable) || IsReady(NextSpellAvailable);
                 }
 
-                result &= Bot.Wow.LuaGetSpellCooldown(spell) <= 0 && Bot.Wow.LuaGetUnitCastingInfo(WowLuaUnit.Player).Item2 <= 0;
+                result &= Bot.Wow.GetSpellCooldown(spell) <= 0 && Bot.Wow.GetUnitCastingInfo(WowLuaUnit.Player).Item2 <= 0;
                 return result;
             }
 

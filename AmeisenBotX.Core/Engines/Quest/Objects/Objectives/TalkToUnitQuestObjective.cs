@@ -65,10 +65,10 @@ namespace AmeisenBotX.Core.Engines.Quest.Objects.Objectives
                 {
                     if (TalkEvent.Run())
                     {
-                        Bot.Wow.WowStopClickToMove();
+                        Bot.Wow.StopClickToMove();
                         Bot.Movement.Reset();
 
-                        Bot.Wow.WowUnitRightClick(IWowUnit.BaseAddress);
+                        Bot.Wow.InteractWithUnit(IWowUnit.BaseAddress);
 
                         ++Counter;
                         if (Counter > GossipIds.Count)
@@ -76,7 +76,7 @@ namespace AmeisenBotX.Core.Engines.Quest.Objects.Objectives
                             Counter = 1;
                         }
 
-                        Bot.Wow.LuaSelectGossipOption(GossipIds[Counter - 1]);
+                        Bot.Wow.SelectGossipOption(GossipIds[Counter - 1]);
                     }
                 }
                 else

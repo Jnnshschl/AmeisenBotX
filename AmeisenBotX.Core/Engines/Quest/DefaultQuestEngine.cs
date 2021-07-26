@@ -55,7 +55,7 @@ namespace AmeisenBotX.Core.Engines.Quest
 
                 if (QueryCompletedQuestsEvent.Run())
                 {
-                    Bot.Wow.LuaQueryQuestsCompleted();
+                    Bot.Wow.QueryQuestsCompleted();
                 }
 
                 return;
@@ -80,7 +80,7 @@ namespace AmeisenBotX.Core.Engines.Quest
                 // drop all quest that are not selected
                 if (Bot.Player.QuestlogEntries.Count() == 25 && DateTime.UtcNow.Subtract(LastAbandonQuestTime).TotalSeconds > 30)
                 {
-                    Bot.Wow.LuaAbandonQuestsNotIn(selectedQuests.Select(q => q.Name));
+                    Bot.Wow.AbandonQuestsNotIn(selectedQuests.Select(q => q.Name));
                     LastAbandonQuestTime = DateTime.UtcNow;
                 }
 
@@ -140,7 +140,7 @@ namespace AmeisenBotX.Core.Engines.Quest
         private void OnGetQuestsCompleted(long timestamp, List<string> args)
         {
             Bot.Quest.CompletedQuests.Clear();
-            Bot.Quest.CompletedQuests.AddRange(Bot.Wow.LuaGetCompletedQuests());
+            Bot.Quest.CompletedQuests.AddRange(Bot.Wow.GetCompletedQuests());
 
             Bot.Quest.UpdatedCompletedQuests = true;
         }

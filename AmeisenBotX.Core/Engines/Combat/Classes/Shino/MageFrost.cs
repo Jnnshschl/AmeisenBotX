@@ -129,10 +129,10 @@ namespace AmeisenBotX.Core.Engines.Combat.Classes.Shino
                             .Where(e => e.Guid != Bot.Wow.TargetGuid)
                             .OrderBy(e => e.Position.GetDistance(Bot.Player.Position))
                             .FirstOrDefault();
-                        Bot.Wow.WowTargetGuid(targetInDistance.Guid);
+                        Bot.Wow.ChangeTarget(targetInDistance.Guid);
                         if (TryCastSpell(polymorphSpell, targetInDistance.Guid, true))
                         {
-                            Bot.Wow.WowTargetGuid(target.Guid);
+                            Bot.Wow.ChangeTarget(target.Guid);
                             LastSheep = DateTime.Now;
                             return;
                         }

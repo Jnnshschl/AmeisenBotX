@@ -1,5 +1,6 @@
 ﻿using AmeisenBotX.Memory;
 using System;
+using System.Collections.Generic;
 
 namespace AmeisenBotX.Core.Hook.Modules
 {
@@ -32,11 +33,11 @@ namespace AmeisenBotX.Core.Hook.Modules
 
         public virtual bool Inject()
         {
-            if (PrepareAsm()
+            if (PrepareAsm(out IEnumerable<string> assembly)
                 && MemoryApi.AllocateMemory(AllocSize, out IntPtr address))
             {
                 AsmAddress = address;
-                return MemoryApi.InjectAssembly(address);
+                return MemoryApi.InjectAssembly(assembly, address);
             }
             else
             {
@@ -44,6 +45,6 @@ namespace AmeisenBotX.Core.Hook.Modules
             }
         }
 
-        protected abstract bool PrepareAsm();
+        protected abstract bool PrepareAsm(out IEnumerable<string> assembly);
     }
 }

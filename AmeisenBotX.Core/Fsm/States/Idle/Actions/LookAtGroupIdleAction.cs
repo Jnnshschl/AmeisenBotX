@@ -43,7 +43,7 @@ namespace AmeisenBotX.Core.Fsm.States.Idle.Actions
 
             if (randomPartymember != null)
             {
-                Bot.Wow.WowFacePosition(Bot.Player.BaseAddress, Bot.Player.Position, randomPartymember.Position * ((float)Rnd.NextDouble() / 10.0f));
+                Bot.Wow.FacePosition(Bot.Player.BaseAddress, Bot.Player.Position, randomPartymember.Position * ((float)Rnd.NextDouble() / 10.0f));
             }
         }
     }

@@ -33,7 +33,7 @@ namespace AmeisenBotX.Core.Fsm.CombatClasses.Shino
             if (IsTargetAttackable(target))
             {
                 Spell openingSpell = GetOpeningSpell();
-                Bot.Wow.WowStopClickToMove();
+                Bot.Wow.StopClickToMove();
                 Bot.Movement.StopMovement();
                 Bot.Movement.Reset();
                 TryCastSpell(openingSpell.Name, target.Guid, openingSpell.Costs > 0);
@@ -60,11 +60,11 @@ namespace AmeisenBotX.Core.Fsm.CombatClasses.Shino
 
             return IsInRange(openingSpell, target)
                     && DateTime.Now.Subtract(LastFailedOpener).TotalSeconds > 3
-                    && Bot.Wow.WowIsInLineOfSight(currentPos, target.Position)
-                    && Bot.Wow.WowIsInLineOfSight(posXLeft, target.Position)
-                    && Bot.Wow.WowIsInLineOfSight(posXRight, target.Position)
-                    && Bot.Wow.WowIsInLineOfSight(posYRight, target.Position)
-                    && Bot.Wow.WowIsInLineOfSight(posYLeft, target.Position);
+                    && Bot.Wow.IsInLineOfSight(currentPos, target.Position)
+                    && Bot.Wow.IsInLineOfSight(posXLeft, target.Position)
+                    && Bot.Wow.IsInLineOfSight(posXRight, target.Position)
+                    && Bot.Wow.IsInLineOfSight(posYRight, target.Position)
+                    && Bot.Wow.IsInLineOfSight(posYLeft, target.Position);
         }
 
         public void OnUIErrorMessage(string message)
@@ -113,7 +113,7 @@ namespace AmeisenBotX.Core.Fsm.CombatClasses.Shino
             {
                 IWowUnit potTarget = nearAttackingEnemies.FirstOrDefault();
                 target = potTarget;
-                Bot.Wow.WowTargetGuid(potTarget.Guid);
+                Bot.Wow.ChangeTarget(potTarget.Guid);
                 return true;
             }
 

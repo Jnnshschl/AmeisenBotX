@@ -62,7 +62,7 @@ namespace AmeisenBotX.Core.Engines.Character.Inventory
 
         public void Update()
         {
-            string resultJson = Wow.LuaGetEquipmentItems();
+            string resultJson = Wow.GetEquipmentItems();
 
             if (string.IsNullOrWhiteSpace(resultJson))
             {

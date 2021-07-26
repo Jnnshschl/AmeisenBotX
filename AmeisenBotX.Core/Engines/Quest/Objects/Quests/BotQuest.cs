@@ -80,7 +80,7 @@ namespace AmeisenBotX.Core.Engines.Quest.Objects.Quests
         {
             if (!CheckedIfAccepted)
             {
-                if (Bot.Wow.LuaGetQuestLogIdByTitle(Name, out _))
+                if (Bot.Wow.GetQuestLogIdByTitle(Name, out _))
                 {
                     Accepted = true;
                 }
@@ -109,12 +109,12 @@ namespace AmeisenBotX.Core.Engines.Quest.Objects.Quests
                     }
                     else
                     {
-                        Bot.Wow.LuaSelectQuestByNameOrGossipId(Name, GossipId, true);
+                        Bot.Wow.SelectQuestByNameOrGossipId(Name, GossipId, true);
                         Thread.Sleep(1000);
-                        Bot.Wow.LuaAcceptQuest();
+                        Bot.Wow.AcceptQuest();
                         Thread.Sleep(250);
 
-                        if (Bot.Wow.LuaGetQuestLogIdByTitle(Name, out _))
+                        if (Bot.Wow.GetQuestLogIdByTitle(Name, out _))
                         {
                             Accepted = true;
                         }
@@ -158,24 +158,24 @@ namespace AmeisenBotX.Core.Engines.Quest.Objects.Quests
                     }
                     else if (ActionEvent.Run())
                     {
-                        Bot.Wow.LuaSelectQuestByNameOrGossipId(Name, GossipId, false);
+                        Bot.Wow.SelectQuestByNameOrGossipId(Name, GossipId, false);
                         Thread.Sleep(1000);
-                        Bot.Wow.LuaCompleteQuest();
+                        Bot.Wow.CompleteQuest();
                         Thread.Sleep(1000);
 
                         bool selectedReward = false;
                         // TODO: This only works for the english locale!
-                        if (Bot.Wow.LuaGetQuestLogIdByTitle(Name, out int questLogId))
+                        if (Bot.Wow.GetQuestLogIdByTitle(Name, out int questLogId))
                         {
-                            Bot.Wow.LuaSelectQuestLogEntry(questLogId);
+                            Bot.Wow.SelectQuestLogEntry(questLogId);
 
-                            if (Bot.Wow.LuaGetNumQuestLogChoices(out int numChoices))
+                            if (Bot.Wow.GetNumQuestLogChoices(out int numChoices))
                             {
                                 for (int i = 1; i <= numChoices; ++i)
                                 {
-                                    if (Bot.Wow.LuaGetQuestLogChoiceItemLink(i, out string itemLink))
+                                    if (Bot.Wow.GetQuestLogChoiceItemLink(i, out string itemLink))
                                     {
-                                        string itemJson = Bot.Wow.LuaGetItemJsonByNameOrLink(itemLink);
+                                        string itemJson = Bot.Wow.GetItemByNameOrLink(itemLink);
                                         WowBasicItem item = ItemFactory.BuildSpecificItem(ItemFactory.ParseItem(itemJson));
 
                                         if (item == null)
@@ -186,7 +186,7 @@ namespace AmeisenBotX.Core.Engines.Quest.Objects.Quests
                                         if (item.Name == "0" || item.ItemLink == "0")
                                         {
                                             // get the item id and try again
-                                            itemJson = Bot.Wow.LuaGetItemJsonByNameOrLink
+                                            itemJson = Bot.Wow.GetItemByNameOrLink
                                             (
                                                 itemLink.Split(new string[] { "Hitem:" }, StringSplitOptions.RemoveEmptyEntries)[1]
                                                         .Split(new string[] { ":" }, StringSplitOptions.RemoveEmptyEntries)[0]
@@ -197,9 +197,9 @@ namespace AmeisenBotX.Core.Engines.Quest.Objects.Quests
 
                                         if (Bot.Character.IsItemAnImprovement(item, out _))
                                         {
-                                            Bot.Wow.LuaGetQuestReward(i);
-                                            Bot.Wow.LuaGetQuestReward(i);
-                                            Bot.Wow.LuaGetQuestReward(i);
+                                            Bot.Wow.SelectQuestReward(i);
+                                            Bot.Wow.SelectQuestReward(i);
+                                            Bot.Wow.SelectQuestReward(i);
                                             selectedReward = true;
                                             break;
                                         }
@@ -214,7 +214,7 @@ namespace AmeisenBotX.Core.Engines.Quest.Objects.Quests
 
                         if (!selectedReward)
                         {
-                            Bot.Wow.LuaGetQuestReward(1);
+                            Bot.Wow.SelectQuestReward(1);
                         }
 
                         Thread.Sleep(250);
@@ -246,11 +246,11 @@ namespace AmeisenBotX.Core.Engines.Quest.Objects.Quests
         {
             if (obj.GetType() == typeof(IWowGameobject))
             {
-                Bot.Wow.WowObjectRightClick(obj.BaseAddress);
+                Bot.Wow.InteractWithObject(obj.BaseAddress);
             }
             else if (obj.GetType() == typeof(IWowUnit))
             {
-                Bot.Wow.WowUnitRightClick(obj.BaseAddress);
+                Bot.Wow.InteractWithUnit(obj.BaseAddress);
             }
         }
     }

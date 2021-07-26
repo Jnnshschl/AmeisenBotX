@@ -30,19 +30,19 @@ namespace AmeisenBotX.Core.Engines.Quest.Objects.Objectives
         {
             if (Finished || Bot.Player.IsCasting)
             {
-                Bot.Wow.LuaClickUiElement("TradeSkillFrameCloseButton");
+                Bot.Wow.ClickUiElement("TradeSkillFrameCloseButton");
                 return;
             }
 
             if (EnchantEvent.Run())
             {
                 Bot.Movement.Reset();
-                Bot.Wow.WowStopClickToMove();
+                Bot.Wow.StopClickToMove();
 
-                Bot.Wow.LuaCastSpell("Runeforging");
-                Bot.Wow.LuaClickUiElement("TradeSkillCreateButton");
-                Bot.Wow.LuaUseInventoryItem(WowEquipmentSlot.INVSLOT_MAINHAND);
-                Bot.Wow.LuaClickUiElement("StaticPopup1Button1");
+                Bot.Wow.CastSpell("Runeforging");
+                Bot.Wow.ClickUiElement("TradeSkillCreateButton");
+                Bot.Wow.UseInventoryItem(WowEquipmentSlot.INVSLOT_MAINHAND);
+                Bot.Wow.ClickUiElement("StaticPopup1Button1");
             }
         }
     }

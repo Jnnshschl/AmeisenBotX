@@ -37,7 +37,7 @@ namespace AmeisenBotX.Core.Engines.Combat.Helpers.Targets.Logics
             }
             else if (!IsValidUnit(Bot.Target))
             {
-                Bot.Wow.WowClearTarget();
+                Bot.Wow.ClearTarget();
                 return true;
             }
 

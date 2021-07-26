@@ -37,7 +37,7 @@ namespace AmeisenBotX.Core.Engines.Quest.Objects.Objectives
 
             if (!SearchAreas.IsPlayerNearSearchArea(Bot))
             {
-                Bot.Wow.WowClearTarget();
+                Bot.Wow.ClearTarget();
                 IWowUnit = null;
             }
 
@@ -51,7 +51,7 @@ namespace AmeisenBotX.Core.Engines.Quest.Objects.Objectives
 
                 if (IWowUnit != null)
                 {
-                    Bot.Wow.WowTargetGuid(IWowUnit.Guid);
+                    Bot.Wow.ChangeTarget(IWowUnit.Guid);
                 }
             }
 

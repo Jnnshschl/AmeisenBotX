@@ -54,7 +54,7 @@ namespace AmeisenBotX.Core.Engines.Battleground.KamelBG
                 else if (CombatEvent.Run())
                 {
                     StateMachine.GetState<StateCombat>().Mode = CombatMode.Force;
-                    Bot.Wow.WowTargetGuid(weakestPlayer.Guid);
+                    Bot.Wow.ChangeTarget(weakestPlayer.Guid);
                 }
             }
             else
@@ -87,7 +87,7 @@ namespace AmeisenBotX.Core.Engines.Battleground.KamelBG
                     {
                         Bot.Movement.StopMovement();
 
-                        Bot.Wow.WowObjectRightClick(VehicleNode.BaseAddress);
+                        Bot.Wow.InteractWithObject(VehicleNode.BaseAddress);
                     }
                 }
             }

@@ -94,7 +94,7 @@ namespace AmeisenBotX.Core.Fsm.States
         {
             if (Config.AutoRepair && Bot.Target.IsRepairVendor)
             {
-                Bot.Wow.LuaRepairAllItems();
+                Bot.Wow.RepairAllItems();
             }
 
             if (Config.AutoSell)

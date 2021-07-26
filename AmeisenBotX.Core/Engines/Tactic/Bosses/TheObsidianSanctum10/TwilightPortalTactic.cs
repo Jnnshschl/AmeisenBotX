@@ -74,7 +74,7 @@ namespace AmeisenBotX.Core.Engines.Tactic.Bosses.TheObsidianDungeon
             }
             else if (PortalClickEvent.Run())
             {
-                Bot.Wow.WowObjectRightClick(portal.BaseAddress);
+                Bot.Wow.InteractWithObject(portal.BaseAddress);
             }
         }
     }

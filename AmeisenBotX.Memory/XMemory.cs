@@ -16,6 +16,7 @@ namespace AmeisenBotX.Memory
     {
         // FASM configuration, if you encounter fasm error, try to increase the values
         private const int FASM_MEMORY_SIZE = 8192;
+
         private const int FASM_PASSES = 100;
 
         // initial memory pool size, set to 0 to disable the pooling system
@@ -35,9 +36,6 @@ namespace AmeisenBotX.Memory
                 throw new FileNotFoundException("The mandatory \"FASM.dll\" could not be found on your system, download it from the Flat Assembler forum!");
             }
         }
-
-        ///<inheritdoc cref="IMemoryApi.AssemblyBuffer"/>
-        public StringBuilder AssemblyBuffer { get; private set; }
 
         ///<inheritdoc cref="IMemoryApi.MainThreadHandle"/>
         public IntPtr MainThreadHandle { get; private set; }
@@ -232,21 +230,17 @@ namespace AmeisenBotX.Memory
                 AllocationPools.Add(new(initialPoolAddress, INITIAL_POOL_SIZE));
             }
 
-            AssemblyBuffer = new();
-
             return true;
         }
 
         ///<inheritdoc cref="IMemoryApi.InjectAssembly"/>
-        public bool InjectAssembly(IntPtr address, bool patchMemProtection = false)
+        public bool InjectAssembly(IEnumerable<string> asm, IntPtr address, bool patchMemProtection = false)
         {
             lock (fasmLock)
             {
-                AssemblyBuffer.Insert(0, $"use32\norg 0x{address:X08}\n");
-
                 fixed (byte* pBytes = stackalloc byte[FASM_MEMORY_SIZE])
                 {
-                    if (FasmAssemble(AssemblyBuffer.ToString(), pBytes, FASM_MEMORY_SIZE, FASM_PASSES, IntPtr.Zero) == 0)
+                    if (FasmAssemble($"use32\norg 0x{address:X08}\n{string.Join('\n', asm)}", pBytes, FASM_MEMORY_SIZE, FASM_PASSES, IntPtr.Zero) == 0)
                     {
                         FasmStateOk state = *(FasmStateOk*)pBytes;
 
@@ -256,22 +250,17 @@ namespace AmeisenBotX.Memory
                             {
                                 bool status = !NtWriteVirtualMemory(ProcessHandle, address, (void*)state.OutputData, (int)state.OutputLength, out _);
                                 MemoryProtect(address, state.OutputLength, oldMemoryProtection, out _);
-
-                                AssemblyBuffer.Clear();
                                 return status;
                             }
                         }
                         else
                         {
-                            AssemblyBuffer.Clear();
                             return !NtWriteVirtualMemory(ProcessHandle, address, (void*)state.OutputData, (int)state.OutputLength, out _);
                         }
                     }
 
                     // use this to read the error
-                    FasmStateError stateError = *(FasmStateError*)pBytes;
-
-                    AssemblyBuffer.Clear();
+                    // FasmStateError stateError = *(FasmStateError*)pBytes;
                     return false;
                 }
             }

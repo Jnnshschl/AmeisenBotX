@@ -28,14 +28,14 @@ namespace AmeisenBotX.Core.Fsm.Routines
                 {
                     // equip item and sell the other after
                     itemToSell = itemToReplace;
-                    bot.Wow.LuaEquipItem(item.Name/*, itemToReplace*/);
+                    bot.Wow.EquipItem(item.Name/*, itemToReplace*/);
                 }
 
                 if (itemToSell != null
                     && (bot.Objects.Player.Class != WowClass.Hunter || itemToSell.GetType() != typeof(WowProjectile)))
                 {
-                    bot.Wow.LuaUseContainerItem(itemToSell.BagId, itemToSell.BagSlot);
-                    bot.Wow.LuaCofirmStaticPopup();
+                    bot.Wow.UseContainerItem(itemToSell.BagId, itemToSell.BagSlot);
+                    bot.Wow.CofirmStaticPopup();
                 }
             }
         }

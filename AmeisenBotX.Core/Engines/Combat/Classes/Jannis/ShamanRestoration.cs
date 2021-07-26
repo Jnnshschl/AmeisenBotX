@@ -122,7 +122,7 @@ namespace AmeisenBotX.Core.Engines.Combat.Classes.Jannis
         {
             if (TargetProviderHeal.Get(out IEnumerable<IWowUnit> unitsToHeal))
             {
-                Bot.Wow.WowTargetGuid(unitsToHeal.First().Guid);
+                Bot.Wow.ChangeTarget(unitsToHeal.First().Guid);
 
                 if (Bot.Target != null)
                 {

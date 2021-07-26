@@ -89,7 +89,7 @@ namespace AmeisenBotX.Core.Fsm.States
                     if (LastOpenLootTry.Run()
                         && Bot.Player.Position.GetDistance(selectedUnit.Position) < MaxLootDistance)
                     {
-                        Bot.Wow.WowStopClickToMove();
+                        Bot.Wow.StopClickToMove();
                         Loot(selectedUnit);
                         ++LootTryCount;
                     }
@@ -116,15 +116,15 @@ namespace AmeisenBotX.Core.Fsm.States
 
         private void Loot(IWowUnit unit)
         {
-            Bot.Wow.WowUnitRightClick(unit.BaseAddress);
+            Bot.Wow.InteractWithUnit(unit.BaseAddress);
 
             // if AutoLoot is enabled, the unit will be dequeued after it is looted because it will no longer be IsLootable
             // there is no need to handle the dequeing here
-            if (Bot.Wow.LuaAutoLootEnabled()
+            if (Bot.Wow.IsAutoLootEnabled()
                   && Bot.Memory.Read(Bot.Wow.Offsets.LootWindowOpen, out byte lootOpen)
                   && lootOpen > 0)
             {
-                Bot.Wow.LuaLootEveryThing();
+                Bot.Wow.LootEveryThing();
                 UnitsAlreadyLootedList.Add(UnitLootQueue.Dequeue());
             }
         }

@@ -1,6 +1,7 @@
 ﻿using AmeisenBotX.Common.Offsets;
 using AmeisenBotX.Memory;
 using System;
+using System.Collections.Generic;
 using System.Text;
 
 namespace AmeisenBotX.Core.Hook.Modules
@@ -41,7 +42,7 @@ namespace AmeisenBotX.Core.Hook.Modules
             return IntPtr.Zero;
         }
 
-        protected override bool PrepareAsm()
+        protected override bool PrepareAsm(out IEnumerable<string> assembly)
         {
             byte[] luaBytes = Encoding.ASCII.GetBytes(Lua);
             byte[] luaVarBytes = Encoding.ASCII.GetBytes(VarName);
@@ -57,28 +58,27 @@ namespace AmeisenBotX.Core.Hook.Modules
                 MemoryApi.WriteBytes(CommandAddress, luaBytes);
                 MemoryApi.WriteBytes(VarAddress, luaVarBytes);
 
-                MemoryApi.AssemblyBuffer.Clear();
-
-                MemoryApi.AssemblyBuffer.AppendLine("X:");
-
-                MemoryApi.AssemblyBuffer.AppendLine("PUSH 0");
-                MemoryApi.AssemblyBuffer.AppendLine($"PUSH {CommandAddress}");
-                MemoryApi.AssemblyBuffer.AppendLine($"PUSH {CommandAddress}");
-                MemoryApi.AssemblyBuffer.AppendLine($"CALL {OffsetList.FunctionLuaDoString}");
-                MemoryApi.AssemblyBuffer.AppendLine("ADD ESP, 0xC");
-
-                MemoryApi.AssemblyBuffer.AppendLine($"CALL {OffsetList.FunctionGetActivePlayerObject}");
-                MemoryApi.AssemblyBuffer.AppendLine("MOV ECX, EAX");
-                MemoryApi.AssemblyBuffer.AppendLine("PUSH -1");
-                MemoryApi.AssemblyBuffer.AppendLine($"PUSH {VarAddress}");
-                MemoryApi.AssemblyBuffer.AppendLine($"CALL {OffsetList.FunctionGetLocalizedText}");
-                MemoryApi.AssemblyBuffer.AppendLine($"MOV DWORD [{ReturnAddress}], EAX");
-
-                MemoryApi.AssemblyBuffer.AppendLine($"RET");
+                assembly = new List<string>()
+                {
+                    "X:",
+                    "PUSH 0",
+                    $"PUSH {CommandAddress}",
+                    $"PUSH {CommandAddress}",
+                    $"CALL {OffsetList.FunctionLuaDoString}",
+                    "ADD ESP, 0xC",
+                    $"CALL {OffsetList.FunctionGetActivePlayerObject}",
+                    "MOV ECX, EAX",
+                    "PUSH -1",
+                    $"PUSH {VarAddress}",
+                    $"CALL {OffsetList.FunctionGetLocalizedText}",
+                    $"MOV DWORD [{ReturnAddress}], EAX",
+                    $"RET"
+                };
 
                 return true;
             }
 
+            assembly = Array.Empty<string>();
             return false;
         }
     }

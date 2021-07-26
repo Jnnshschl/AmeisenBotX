@@ -202,7 +202,7 @@ namespace AmeisenBotX.Core.Engines.Movement
         public void StopMovement()
         {
             Reset();
-            Bot.Wow.WowStopClickToMove();
+            Bot.Wow.StopClickToMove();
         }
 
         private static Vector3 GetPositionOutsideOfAoeSpells(Vector3 targetPosition, IEnumerable<(Vector3 position, float radius)> aoeSpells)
@@ -292,7 +292,7 @@ namespace AmeisenBotX.Core.Engines.Movement
             {
                 WowMount mount = filteredMounts.ElementAt(new Random().Next(0, filteredMounts.Count()));
                 PreventMovement(TimeSpan.FromSeconds(1));
-                Bot.Wow.LuaCallCompanion(mount.Index);
+                Bot.Wow.CallCompanion(mount.Index, "MOUNT");
             }
         }
 

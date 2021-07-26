@@ -54,8 +54,8 @@ namespace AmeisenBotX.Core.Fsm.States
                 Random rnd = new();
                 Offset = new()
                 {
-                    X = ((float)rnd.NextDouble() * (Config.MinFollowDistance * 2)) - Config.MinFollowDistance,
-                    Y = ((float)rnd.NextDouble() * (Config.MinFollowDistance * 2)) - Config.MinFollowDistance,
+                    X = ((float)rnd.NextDouble() * (float)(Config.MinFollowDistance * 2)) - Config.MinFollowDistance,
+                    Y = ((float)rnd.NextDouble() * (float)(Config.MinFollowDistance * 2)) - Config.MinFollowDistance,
                     Z = 0.0f
                 };
             }
@@ -102,7 +102,7 @@ namespace AmeisenBotX.Core.Fsm.States
             }
 
             if (Config.UseMountsInParty
-                && Bot.Character.Mounts?.Count > 0
+                && Bot.Character.Mounts.Any()
                 && playerToFollow.IsMounted
                 && !Bot.Player.IsMounted)
             {
@@ -119,7 +119,7 @@ namespace AmeisenBotX.Core.Fsm.States
                     {
                         WowMount mount = filteredMounts.ElementAt(new Random().Next(0, filteredMounts.Count()));
                         Bot.Movement.StopMovement();
-                        Bot.Wow.LuaCallCompanion(mount.Index);
+                        Bot.Wow.CallCompanion(mount.Index, "MOUNT");
                     }
                 }
 
@@ -134,7 +134,7 @@ namespace AmeisenBotX.Core.Fsm.States
             {
                 if (LosCheckEvent.Run())
                 {
-                    if (Bot.Wow.WowIsInLineOfSight(Bot.Player.Position, posToGoTo, 2.0f))
+                    if (Bot.Wow.IsInLineOfSight(Bot.Player.Position, posToGoTo, 2.0f))
                     {
                         InLos = true;
                     }

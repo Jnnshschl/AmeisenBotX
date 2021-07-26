@@ -73,15 +73,15 @@ namespace AmeisenBotX.Core.Fsm.States.Idle.Actions
 
                 if (Bot.Wow.TargetGuid != player.Guid)
                 {
-                    Bot.Wow.WowTargetGuid(player.Guid);
-                    Bot.Wow.WowFacePosition(Bot.Player.BaseAddress, Bot.Player.Position, player.Position);
+                    Bot.Wow.ChangeTarget(player.Guid);
+                    Bot.Wow.FacePosition(Bot.Player.BaseAddress, Bot.Player.Position, player.Position);
                 }
 
-                Bot.Wow.LuaSendChatMessage($"/{EmotesWithInteraction[Rnd.Next(0, EmotesWithInteraction.Count)]}");
+                Bot.Wow.SendChatMessage($"/{EmotesWithInteraction[Rnd.Next(0, EmotesWithInteraction.Count)]}");
             }
             else
             {
-                Bot.Wow.LuaSendChatMessage($"/{Emotes[Rnd.Next(0, Emotes.Count)]}");
+                Bot.Wow.SendChatMessage($"/{Emotes[Rnd.Next(0, Emotes.Count)]}");
             }
         }
     }

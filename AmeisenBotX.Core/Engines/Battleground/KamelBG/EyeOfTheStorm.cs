@@ -69,7 +69,7 @@ namespace AmeisenBotX.Core.Engines.Battleground.KamelBG
                 else if (CombatEvent.Run())
                 {
                     StateMachine.GetState<StateCombat>().Mode = CombatMode.Force;
-                    Bot.Wow.WowTargetGuid(weakestPlayer.Guid);
+                    Bot.Wow.ChangeTarget(weakestPlayer.Guid);
                 }
             }
             else
@@ -103,7 +103,7 @@ namespace AmeisenBotX.Core.Engines.Battleground.KamelBG
 
                     if (CaptureFlagEvent.Run())
                     {
-                        Bot.Wow.WowObjectRightClick(FlagNode.BaseAddress);
+                        Bot.Wow.InteractWithObject(FlagNode.BaseAddress);
                     }
                 }
                 else
@@ -113,7 +113,7 @@ namespace AmeisenBotX.Core.Engines.Battleground.KamelBG
             }
             else
             {
-                if (Bot.Wow.WowExecuteLuaAndRead(BotUtils.ObfuscateLua("{v:0}=\"\" for i = 1, GetNumMapLandmarks(), 1 do base, status = GetMapLandmarkInfo(i) {v:0}= {v:0}..base..\":\"..status..\";\" end"), out string result))
+                if (Bot.Wow.ExecuteLuaAndRead(BotUtils.ObfuscateLua("{v:0}=\"\" for i = 1, GetNumMapLandmarks(), 1 do base, status = GetMapLandmarkInfo(i) {v:0}= {v:0}..base..\":\"..status..\";\" end"), out string result))
                 {
                     Vector3 currentNode = PathBase[CurrentNodeCounter];
                     string[] AllBaseList = result.Split(';');
