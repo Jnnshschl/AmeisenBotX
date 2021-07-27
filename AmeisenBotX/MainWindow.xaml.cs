@@ -500,7 +500,7 @@ namespace AmeisenBotX
             // HookCall label
             labelHookCallCount.Content = AmeisenBot.Bot.Wow.HookCallCount.ToString(CultureInfo.InvariantCulture).PadLeft(2);
 
-            if (AmeisenBot.Bot.Wow.HookCallCount <= (AmeisenBot.Bot.Player.IsInCombat ? (ulong)AmeisenBot.Config.MaxFpsCombat : (ulong)AmeisenBot.Config.MaxFps))
+            if (AmeisenBot.Bot.Wow.HookCallCount <= (AmeisenBot.Bot.Player.IsInCombat ? AmeisenBot.Config.MaxFpsCombat : AmeisenBot.Config.MaxFps))
             {
                 labelHookCallCount.Foreground = CurrentTickTimeGoodBrush;
             }

@@ -8,12 +8,12 @@ namespace AmeisenBotX.Learning
 {
     public class AmeisenBotLearner
     {
-        public List<SpellUsageCombatSession> SpellUsageCombatSessions { get; set; }
-
         public AmeisenBotLearner()
         {
             SpellUsageCombatSessions = new();
         }
+
+        public List<SpellUsageCombatSession> SpellUsageCombatSessions { get; set; }
 
         public static AmeisenBotLearner FromJson(string filename)
         {

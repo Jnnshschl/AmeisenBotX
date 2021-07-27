@@ -13,7 +13,6 @@ using System.Globalization;
 using System.Linq;
 using System.Runtime.CompilerServices;
 using System.Text;
-using System.Text.Json;
 using System.Threading;
 using System.Threading.Tasks;
 
@@ -26,7 +25,7 @@ namespace AmeisenBotX.Wow335a.Hook
         private const int MEM_ALLOC_ROUTINE_SIZE = 128;
         private readonly object hookLock = new();
 
-        private ulong hookCalls;
+        private int hookCalls;
 
         public EndSceneHook(IMemoryApi memoryApi, IOffsetList offsetList, ObjectManager objectManager)
         {
@@ -38,20 +37,20 @@ namespace AmeisenBotX.Wow335a.Hook
 
         internal event Action<GameInfo> OnGameInfoPush;
 
-        public ulong HookCallCount
+        public int HookCallCount
         {
             get
             {
                 unchecked
                 {
-                    ulong val = hookCalls;
+                    int val = hookCalls;
                     hookCalls = 0;
                     return val;
                 }
             }
         }
 
-        public bool IsWoWHooked => Memory.Read(WowEndSceneAddress, out byte c) && c == 0xE9;
+        public bool IsWoWHooked => WowEndSceneAddress != IntPtr.Zero && Memory.Read(WowEndSceneAddress, out byte c) && c == 0xE9;
 
         /// <summary>
         /// Codecave that hold the code, the bot want's to execute.
@@ -99,11 +98,6 @@ namespace AmeisenBotX.Wow335a.Hook
         /// to perform the LOS check.
         /// </summary>
         private IntPtr GameInfoLosCheckDataAddress { get; set; }
-
-        /// <summary>
-        /// Timer used to poll the gamedata returned by wow.
-        /// </summary>
-        private Timer GameInfoTimer { get; set; }
 
         /// <summary>
         /// The currently loaded hookmodules
@@ -164,6 +158,12 @@ namespace AmeisenBotX.Wow335a.Hook
             Memory.Write(OverrideWorldCheckAddress, status ? 1 : 0);
         }
 
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public bool CallObjectFunction(IntPtr objectBaseAddress, IntPtr functionAddress, List<object> args = null)
+        {
+            return CallObjectFunction(objectBaseAddress, functionAddress, args, false, out _);
+        }
+
         /// <summary>
         /// Use this to call a thiscall function of a wowobject
         /// </summary>
@@ -175,6 +175,10 @@ namespace AmeisenBotX.Wow335a.Hook
         /// <returns>True if everything went right, false if not</returns>
         public bool CallObjectFunction(IntPtr objectBaseAddress, IntPtr functionAddress, List<object> args, bool readReturnBytes, out IntPtr returnAddress)
         {
+#if DEBUG
+            if (objectBaseAddress == IntPtr.Zero) { throw new ArgumentOutOfRangeException(nameof(objectBaseAddress), "objectBaseAddress is an invalid pointer"); }
+            if (functionAddress == IntPtr.Zero) { throw new ArgumentOutOfRangeException(nameof(functionAddress), "functionAddress is an invalid pointer"); }
+#endif
             List<string> asm = new() { $"MOV ECX, {objectBaseAddress}" };
 
             if (args != null)
@@ -208,8 +212,16 @@ namespace AmeisenBotX.Wow335a.Hook
 
             do
             {
-                WowEndSceneAddress = GetEndScene();
-                AmeisenLogger.I.Log("HookManager", $"Endscene is at: 0x{WowEndSceneAddress.ToInt32():X}", LogLevel.Verbose);
+                try
+                {
+                    WowEndSceneAddress = GetEndScene();
+                    AmeisenLogger.I.Log("HookManager", $"Endscene is at: 0x{WowEndSceneAddress.ToInt32():X}", LogLevel.Verbose);
+                }
+                catch
+                {
+                    // ignored, as we expect it to fail here atleast once cause wows startup takes some time
+                    //AmeisenLogger.I.Log("HookManager", "Failed to read EndScene Address...", LogLevel.Verbose);
+                }
 
                 if (WowEndSceneAddress == IntPtr.Zero)
                 {
@@ -306,16 +318,21 @@ namespace AmeisenBotX.Wow335a.Hook
             assemblyBuffer.Add("ADD ESP, 0x18");
 
             assemblyBuffer.Add($"MOV DWORD [{GameInfoAddress.ToInt32() + 1}], EAX");
-
             assemblyBuffer.Add($"MOV DWORD [{GameInfoExecuteLosCheckAddress}], 0");
+
             assemblyBuffer.Add("@loscheck:");
 
-            foreach (IHookModule module in hookModules)
+            if (hookModules != null)
             {
-                assemblyBuffer.Add($"CALL {module.AsmAddress}");
+                foreach (IHookModule module in hookModules)
+                {
+                    assemblyBuffer.Add($"CALL {module.AsmAddress}");
+                    AmeisenLogger.I.Log("HookManager", $"Loading module: {module.GetType().Name}", LogLevel.Verbose);
+                }
             }
 
             assemblyBuffer.Add($"MOV DWORD [{GameInfoExecutedAddress}], 1");
+
             assemblyBuffer.Add("@skpgi:");
             assemblyBuffer.Add($"MOV DWORD [{GameInfoExecuteAddress}], 0");
             // ----------------
@@ -375,9 +392,6 @@ namespace AmeisenBotX.Wow335a.Hook
 
             Memory.ResumeMainThread();
 
-            // try to update the GameInfo struct every 100ms
-            GameInfoTimer = new((_) => GameInfoTimerTick(), null, 0, 100);
-
             AmeisenLogger.I.Log("HookManager", "EndsceneHook successful", LogLevel.Verbose);
             return IsWoWHooked;
         }
@@ -385,12 +399,12 @@ namespace AmeisenBotX.Wow335a.Hook
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public void LuaAbandonQuestsNotIn(IEnumerable<string> questNames)
         {
-            if (WowExecuteLuaAndRead(BotUtils.ObfuscateLua($"{{v:0}}=GetNumQuestLogEntries()"), out string r1)
+            if (ExecuteLuaAndRead(BotUtils.ObfuscateLua($"{{v:0}}=GetNumQuestLogEntries()"), out string r1)
                 && int.TryParse(r1, out int numQuestLogEntries))
             {
                 for (int i = 1; i <= numQuestLogEntries; i++)
                 {
-                    if (WowExecuteLuaAndRead(BotUtils.ObfuscateLua($"{{v:0}}=GetQuestLogTitle({i})"), out string questLogTitle) && !questNames.Contains(questLogTitle))
+                    if (ExecuteLuaAndRead(BotUtils.ObfuscateLua($"{{v:0}}=GetQuestLogTitle({i})"), out string questLogTitle) && !questNames.Contains(questLogTitle))
                     {
                         LuaDoString($"SelectQuestLogEntry({i});SetAbandonQuest();AbandonQuest()");
                         break;
@@ -401,25 +415,29 @@ namespace AmeisenBotX.Wow335a.Hook
 
         public bool LuaDoString(string command)
         {
+#if DEBUG
+            if (string.IsNullOrWhiteSpace(command)) { throw new ArgumentOutOfRangeException(nameof(command), "command is empty"); }
+#endif
+            AmeisenLogger.I.Log("335aHook", $"LuaDoString: {command}", LogLevel.Verbose);
+
             byte[] bytes = Encoding.UTF8.GetBytes(command + "\0");
 
             if (Memory.AllocateMemory((uint)bytes.Length, out IntPtr memAlloc))
             {
                 try
                 {
-                    Memory.WriteBytes(memAlloc, bytes);
-
-                    string[] asm = new string[]
+                    if (Memory.WriteBytes(memAlloc, bytes))
                     {
-                        "PUSH 0",
-                        $"PUSH {memAlloc}",
-                        $"PUSH {memAlloc}",
-                        $"CALL {OffsetList.FunctionLuaDoString}",
-                        "ADD ESP, 0xC",
-                        "RET",
-                    };
-
-                    return InjectAndExecute(asm, false, out _);
+                        return InjectAndExecute(new string[]
+                        {
+                            "PUSH 0",
+                            $"PUSH {memAlloc}",
+                            $"PUSH {memAlloc}",
+                            $"CALL {OffsetList.FunctionLuaDoString}",
+                            "ADD ESP, 0xC",
+                            "RET",
+                        });
+                    }
                 }
                 finally
                 {
@@ -433,7 +451,7 @@ namespace AmeisenBotX.Wow335a.Hook
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public void ObjectRightClick(IntPtr objectBase)
         {
-            CallObjectFunction(objectBase, OffsetList.FunctionGameobjectOnRightClick, null, false, out _);
+            CallObjectFunction(objectBase, OffsetList.FunctionGameobjectOnRightClick);
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -443,7 +461,7 @@ namespace AmeisenBotX.Wow335a.Hook
             {
                 angle.ToString(CultureInfo.InvariantCulture).Replace(',', '.'),
                 Environment.TickCount
-            }, false, out _);
+            });
         }
 
         public void SetRenderState(bool renderingEnabled)
@@ -496,23 +514,23 @@ namespace AmeisenBotX.Wow335a.Hook
                 $"CALL {OffsetList.FunctionSetTarget}",
                 "ADD ESP, 0x8",
                 "RET"
-            }, false, out _);
+            });
         }
 
         public bool TraceLine(Vector3 start, Vector3 end, uint flags = 0x120171)
         {
             if (Memory.AllocateMemory(40, out IntPtr tracelineCodecave))
             {
-                (float, Vector3, Vector3) tracelineCombo = (1.0f, start, end);
-
-                IntPtr distancePointer = tracelineCodecave;
-                IntPtr startPointer = IntPtr.Add(distancePointer, 0x4);
-                IntPtr endPointer = IntPtr.Add(startPointer, 0xC);
-                IntPtr resultPointer = IntPtr.Add(endPointer, 0xC);
-
-                if (Memory.Write(distancePointer, tracelineCombo))
+                try
                 {
-                    try
+                    (float, Vector3, Vector3) tracelineCombo = (1.0f, start, end);
+
+                    IntPtr distancePointer = tracelineCodecave;
+                    IntPtr startPointer = IntPtr.Add(distancePointer, 0x4);
+                    IntPtr endPointer = IntPtr.Add(startPointer, 0xC);
+                    IntPtr resultPointer = IntPtr.Add(endPointer, 0xC);
+
+                    if (Memory.Write(distancePointer, tracelineCombo))
                     {
                         string[] asm = new string[]
                         {
@@ -532,10 +550,10 @@ namespace AmeisenBotX.Wow335a.Hook
                             return returnAddress != IntPtr.Zero && (returnAddress.ToInt32() & 0xFF) == 0;
                         }
                     }
-                    finally
-                    {
-                        Memory.FreeMemory(tracelineCodecave);
-                    }
+                }
+                finally
+                {
+                    Memory.FreeMemory(tracelineCodecave);
                 }
             }
 
@@ -544,61 +562,69 @@ namespace AmeisenBotX.Wow335a.Hook
 
         public void Unhook()
         {
-            if (!IsWoWHooked)
+            if (IsWoWHooked)
             {
-                return;
-            }
+                lock (hookLock)
+                {
+                    AmeisenLogger.I.Log("HookManager", "Disposing EndScene hook", LogLevel.Verbose);
 
-            AmeisenLogger.I.Log("HookManager", "Disposing EndScene hook", LogLevel.Verbose);
-            GameInfoTimer.Dispose();
-
-            lock (hookLock)
-            {
-                Memory.SuspendMainThread();
-                Memory.WriteBytes(WowEndSceneAddress, OriginalEndsceneBytes);
-                Memory.ResumeMainThread();
-
-                Memory.FreeAllMemory();
+                    Memory.SuspendMainThread();
+                    Memory.WriteBytes(WowEndSceneAddress, OriginalEndsceneBytes);
+                    Memory.ResumeMainThread();
+                    Memory.FreeAllMemory();
+                }
             }
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public void UnitRightClick(IntPtr unitBase)
+        public void InteractWithUnit(IntPtr unitBase)
         {
-            CallObjectFunction(unitBase, OffsetList.FunctionUnitOnRightClick, null, false, out _);
+            CallObjectFunction(unitBase, OffsetList.FunctionUnitOnRightClick);
         }
 
-        public void WowClickOnTerrain(Vector3 position)
-        {
-            if (Memory.AllocateMemory(20, out IntPtr codeCaveVector3))
-            {
-                Memory.Write<ulong>(codeCaveVector3, 0);
-                Memory.Write(IntPtr.Add(codeCaveVector3, 0x8), position);
-
-                string[] asm = new string[]
-                {
-                    $"PUSH {codeCaveVector3}",
-                    $"CALL {OffsetList.FunctionHandleTerrainClick}",
-                    "ADD ESP, 0x4",
-                    "RET",
-                };
-
-                InjectAndExecute(asm, false, out _);
-                Memory.FreeMemory(codeCaveVector3);
-            }
-        }
-
-        public void WowClickToMove(IntPtr playerBase, Vector3 position)
+        public void ClickOnTerrain(Vector3 position)
         {
             if (Memory.AllocateMemory(12, out IntPtr codeCaveVector3))
             {
-                Memory.Write(codeCaveVector3, position);
-                CallObjectFunction(playerBase, OffsetList.FunctionPlayerClickToMove, new() { codeCaveVector3 }, false, out _);
-                Memory.FreeMemory(codeCaveVector3);
+                try
+                {
+                    if (Memory.Write(IntPtr.Add(codeCaveVector3, 0x8), position))
+                    {
+                        InjectAndExecute(new string[]
+                        {
+                            $"PUSH 0",
+                            $"CALL {OffsetList.FunctionHandleTerrainClick}",
+                            "ADD ESP, 0x4",
+                            "RET",
+                        });
+                    }
+                }
+                finally
+                {
+                    Memory.FreeMemory(codeCaveVector3);
+                }
             }
         }
 
-        public void WowEnableClickToMove()
+        public void ClickToMove(IntPtr playerBase, Vector3 position)
+        {
+            if (Memory.AllocateMemory(12, out IntPtr codeCaveVector3))
+            {
+                try
+                {
+                    if (Memory.Write(codeCaveVector3, position))
+                    {
+                        CallObjectFunction(playerBase, OffsetList.FunctionPlayerClickToMove, new() { codeCaveVector3 });
+                    }
+                }
+                finally
+                {
+                    Memory.FreeMemory(codeCaveVector3);
+                }
+            }
+        }
+
+        public void EnableClickToMove()
         {
             if (Memory.Read(OffsetList.ClickToMovePointer, out IntPtr ctmPointer)
                 && Memory.Read(IntPtr.Add(ctmPointer, (int)OffsetList.ClickToMoveEnabled), out int ctmEnabled)
@@ -609,13 +635,19 @@ namespace AmeisenBotX.Wow335a.Hook
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public bool WowExecuteLuaAndRead((string, string) cmdVarTuple, out string result)
+        public bool ExecuteLuaAndRead((string, string) cmdVarTuple, out string result)
         {
-            return WowExecuteLuaAndRead(cmdVarTuple.Item1, cmdVarTuple.Item2, out result);
+            return ExecuteLuaAndRead(cmdVarTuple.Item1, cmdVarTuple.Item2, out result);
         }
 
-        public bool WowExecuteLuaAndRead(string command, string variable, out string result)
+        public bool ExecuteLuaAndRead(string command, string variable, out string result)
         {
+#if DEBUG
+            if (string.IsNullOrWhiteSpace(command)) { throw new ArgumentOutOfRangeException(nameof(command), "command is empty"); }
+            if (string.IsNullOrWhiteSpace(variable)) { throw new ArgumentOutOfRangeException(nameof(variable), "variable is empty"); }
+#endif
+            AmeisenLogger.I.Log("335aHook", $"WowExecuteLuaAndRead: {command}", LogLevel.Verbose);
+
             byte[] commandBytes = Encoding.UTF8.GetBytes(command + "\0");
             byte[] variableBytes = Encoding.UTF8.GetBytes(variable + "\0");
 
@@ -662,13 +694,16 @@ namespace AmeisenBotX.Wow335a.Hook
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public void WowFacePosition(IntPtr playerBase, Vector3 playerPosition, Vector3 positionToFace)
+        public void FacePosition(IntPtr playerBase, Vector3 playerPosition, Vector3 positionToFace)
         {
             SetFacing(playerBase, BotMath.GetFacingAngle(playerPosition, positionToFace));
         }
 
-        public bool WowGetLocalizedText(string variable, out string result)
+        public bool GetLocalizedText(string variable, out string result)
         {
+#if DEBUG
+            if (string.IsNullOrWhiteSpace(variable)) { throw new ArgumentOutOfRangeException(nameof(variable), "variable is empty"); }
+#endif
             if (!string.IsNullOrWhiteSpace(variable))
             {
                 byte[] variableBytes = Encoding.UTF8.GetBytes(variable + "\0");
@@ -707,8 +742,12 @@ namespace AmeisenBotX.Wow335a.Hook
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public int WowGetUnitReaction(IntPtr a, IntPtr b)
+        public int GetUnitReaction(IntPtr a, IntPtr b)
         {
+#if DEBUG
+            if (a == IntPtr.Zero) { throw new ArgumentOutOfRangeException(nameof(a), "a is no valid pointer"); }
+            if (b == IntPtr.Zero) { throw new ArgumentOutOfRangeException(nameof(b), "b is no valid pointer"); }
+#endif
             return CallObjectFunction(a, OffsetList.FunctionUnitGetReaction, new() { b }, true, out IntPtr ret)
                 && ret != IntPtr.Zero ? ret.ToInt32() : 2;
         }
@@ -799,7 +838,7 @@ namespace AmeisenBotX.Wow335a.Hook
                 && opcode != 0xC3)
             {
                 SaveOriginalFunctionBytes(address);
-                Memory.PatchMemory<byte>(address, 0xC3);
+                Memory.PatchMemory(address, (byte)0xC3);
             }
         }
 
@@ -814,7 +853,7 @@ namespace AmeisenBotX.Wow335a.Hook
             }
         }
 
-        private void GameInfoTimerTick()
+        public void GameInfoTick()
         {
             if (Memory.Read(GameInfoExecuteAddress, out int executeStatus)
                 && executeStatus == 1)
@@ -877,44 +916,59 @@ namespace AmeisenBotX.Wow335a.Hook
             }
         }
 
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        private bool InjectAndExecute(IEnumerable<string> asm)
+        {
+            return InjectAndExecute(asm, false, out _);
+        }
+
         private bool InjectAndExecute(IEnumerable<string> asm, bool returns, out IntPtr returnAddress)
         {
-            if (IsWoWHooked && !Memory.Process.HasExited)
+            if (!IsWoWHooked)
             {
-                lock (hookLock)
+                returnAddress = IntPtr.Zero;
+                return false;
+            }
+
+            lock (hookLock)
+            {
+                ++hookCalls;
+
+                try
                 {
-                    try
+                    // Memory.SuspendMainThread();
+                    //
+                    // try
+                    // {
+                    Memory.InjectAssembly(asm, CExecution);
+                    Memory.Write(IntShouldExecute, 1);
+                    // }
+                    // finally
+                    // {
+                    //     Memory.ResumeMainThread();
+                    // }
+
+                    // wait for the code to be executed
+                    while (Memory.Read(IntShouldExecute, out int c) && c == 1)
                     {
-                        // Memory.SuspendMainThread();
-                        //
-                        // try
-                        // {
-                        Memory.InjectAssembly(asm, CExecution);
-                        Memory.Write(IntShouldExecute, 1);
-                        // }
-                        // finally
-                        // {
-                        //     Memory.ResumeMainThread();
-                        // }
+                        Thread.Sleep(1);
+                    }
 
-                        // wait for the code to be executed
-                        while (Memory.Read(IntShouldExecute, out int c) && c == 1)
-                        {
-                            Thread.Sleep(1);
-                        }
-
-                        // if we want to read the return value do it otherwise we're done
-                        if (!returns || !Memory.Read(ReturnValueAddress, out returnAddress))
-                        {
-                            returnAddress = IntPtr.Zero;
-                        }
-
+                    // if we want to read the return value do it otherwise we're done
+                    if (!returns)
+                    {
+                        returnAddress = IntPtr.Zero;
                         return true;
                     }
-                    catch
+                    else
                     {
-                        Memory.Write(IntShouldExecute, 0);
+                        return Memory.Read(ReturnValueAddress, out returnAddress) && returnAddress != IntPtr.Zero;
                     }
+                }
+                catch (Exception ex)
+                {
+                    AmeisenLogger.I.Log("Hook", $"Failed to InjectAndExecute:\n{ex}");
+                    Memory.Write(IntShouldExecute, 0);
                 }
             }
 

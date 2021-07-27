@@ -4,7 +4,6 @@ using AmeisenBotX.Core.Fsm.Enums;
 using AmeisenBotX.Core.Fsm.States;
 using AmeisenBotX.Logging;
 using AmeisenBotX.Logging.Enums;
-using AmeisenBotX.Memory;
 using System;
 using System.Collections.Generic;
 using System.Linq;

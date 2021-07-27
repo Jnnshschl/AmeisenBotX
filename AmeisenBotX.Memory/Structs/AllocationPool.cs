@@ -25,7 +25,7 @@ namespace AmeisenBotX.Memory.Structs
         /// </summary>
         /// <param name="address">Allocation address</param>
         /// <returns>True, when the block has been found and freed, false if not</returns>
-        public bool Free(IntPtr address)
+        public bool Free(IntPtr address, out int size)
         {
             int addressInt = address.ToInt32();
             int baseAddressInt = Address.ToInt32();
@@ -33,10 +33,15 @@ namespace AmeisenBotX.Memory.Structs
             if (addressInt >= baseAddressInt
                 && addressInt < baseAddressInt + Size)
             {
-                Allocations.Remove(addressInt - baseAddressInt);
+                int relAddress = addressInt - baseAddressInt;
+
+                size = Allocations[relAddress];
+                Allocations.Remove(relAddress);
+
                 return true;
             }
 
+            size = 0;
             return false;
         }
 
@@ -76,8 +81,8 @@ namespace AmeisenBotX.Memory.Structs
                         int allocationEnd = allocation.Key + allocation.Value;
 
                         // when there is a next element, used it as the limiter, if not use the whole remaining space
-                        int memoryLeft = i + 1 < Allocations.Count 
-                            ? Allocations.ElementAt(i + 1).Key - allocationEnd 
+                        int memoryLeft = i + 1 < Allocations.Count
+                            ? Allocations.ElementAt(i + 1).Key - allocationEnd
                             : Size - allocationEnd;
 
                         if (memoryLeft >= size)

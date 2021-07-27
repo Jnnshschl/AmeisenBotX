@@ -111,6 +111,14 @@ namespace AmeisenBotX.Memory
         public bool InjectAssembly(IEnumerable<string> asm, IntPtr address, bool patchMemProtection = false);
 
         /// <summary>
+        /// Change and area of memory, by unprotecting it temporarily.
+        /// </summary>
+        /// <typeparam name="T"></typeparam>
+        /// <param name="address">Address to apply the patch</param>
+        /// <param name="data">Data of the patch</param>
+        void PatchMemory<T>(IntPtr address, T data) where T : unmanaged;
+
+        /// <summary>
         /// Change the memory protection of an area.
         /// </summary>
         /// <param name="address">Address to change</param>
@@ -118,15 +126,7 @@ namespace AmeisenBotX.Memory
         /// <param name="memoryProtection">New Protection</param>
         /// <param name="oldMemoryProtection">Old protection</param>
         /// <returns>True if it was successful, false if not</returns>
-        public bool MemoryProtect(IntPtr address, uint size, MemoryProtectionFlags memoryProtection, out MemoryProtectionFlags oldMemoryProtection);
-
-        /// <summary>
-        /// Change and area of memory, by unprotecting it temporarily.
-        /// </summary>
-        /// <typeparam name="T"></typeparam>
-        /// <param name="address">Address to apply the patch</param>
-        /// <param name="data">Data of the patch</param>
-        void PatchMemory<T>(IntPtr address, T data) where T : unmanaged;
+        public bool ProtectMemory(IntPtr address, uint size, MemoryProtectionFlags memoryProtection, out MemoryProtectionFlags oldMemoryProtection);
 
         /// <summary>
         /// Read an unmanaged type from the processes memory.

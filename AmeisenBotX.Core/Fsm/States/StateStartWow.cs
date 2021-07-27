@@ -16,8 +16,11 @@ namespace AmeisenBotX.Core.Fsm.States
 
         public event Action OnWoWStarted;
 
+        private bool Initialized { get; set; }
+
         public override void Enter()
         {
+            Initialized = false;
             AmeisenLogger.I.Log("StartWow", "Setting TOS and EULA to 1 in config");
             CheckTosAndEula();
 
@@ -30,7 +33,7 @@ namespace AmeisenBotX.Core.Fsm.States
 
         public override void Execute()
         {
-            if (File.Exists(Config.PathToWowExe))
+            if (!Initialized && File.Exists(Config.PathToWowExe))
             {
                 if (Bot.Memory.Process == null || Bot.Memory.Process.HasExited)
                 {
@@ -40,27 +43,25 @@ namespace AmeisenBotX.Core.Fsm.States
                     AmeisenLogger.I.Log("StartWow", "Waiting for input idle");
                     p.WaitForInputIdle();
 
-                    try
+                    AmeisenLogger.I.Log("StartWow", $"Attaching XMemory to {p.ProcessName} ({p.Id})");
+
+                    if (Bot.Memory.Init(p, processHandle, mainThreadHandle))
                     {
-                        AmeisenLogger.I.Log("StartWow", $"Attaching XMemory to {p.ProcessName}:{p.Id}");
-
-                        if (Bot.Memory.Init(p, processHandle, mainThreadHandle))
+                        try
                         {
-                            try
-                            {
-                                OnWoWStarted?.Invoke();
-                            }
-                            catch (Exception ex) { AmeisenLogger.I.Log("StartWow", $"Error at OnWoWStarted:\n{ex}"); }
+                            OnWoWStarted?.Invoke();
+                        }
+                        catch (Exception ex) { AmeisenLogger.I.Log("StartWow", $"Error at OnWoWStarted:\n{ex}"); }
 
-                            AmeisenLogger.I.Log("StartWow", $"Switching to login state...");
-                            StateMachine.SetState(BotState.Login);
-                        }
-                        else
-                        {
-                            AmeisenLogger.I.Log("StartWow", $"Attaching XMemory failed...");
-                        }
+                        AmeisenLogger.I.Log("StartWow", $"Switching to login state...");
+                        StateMachine.SetState(BotState.Login);
+                        Initialized = true;
                     }
-                    catch (Exception e) { AmeisenLogger.I.Log("StartWow", $"Attaching XMemory failed:\n{e}"); }
+                    else
+                    {
+                        AmeisenLogger.I.Log("StartWow", $"Attaching XMemory failed...");
+                        p.Kill();
+                    }
                 }
             }
         }

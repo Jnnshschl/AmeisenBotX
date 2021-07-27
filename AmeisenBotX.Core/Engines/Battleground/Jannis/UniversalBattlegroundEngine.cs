@@ -12,8 +12,6 @@ namespace AmeisenBotX.Core.Engines.Battleground.Jannis
             StateMachine = stateMachine;
         }
 
-        private AmeisenBotFsm StateMachine { get; }
-
         public string Author => "Jannis";
 
         public string Description => "Working battlegrounds:\n - Warsong Gulch";
@@ -23,6 +21,8 @@ namespace AmeisenBotX.Core.Engines.Battleground.Jannis
         public IBattlegroundProfile Profile { get; set; }
 
         private AmeisenBotInterfaces Bot { get; }
+
+        private AmeisenBotFsm StateMachine { get; }
 
         public void Enter()
         {

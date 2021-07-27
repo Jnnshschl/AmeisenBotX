@@ -2,12 +2,10 @@
 using AmeisenBotX.Common.Offsets;
 using AmeisenBotX.Core.Data.Objects;
 using AmeisenBotX.Core.Hook.Structs;
-using AmeisenBotX.Logging;
 using AmeisenBotX.Memory;
 using AmeisenBotX.Wow.Objects;
 using AmeisenBotX.Wow.Objects.Enums;
 using System;
-using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Linq;
 using System.Runtime.CompilerServices;
@@ -112,7 +110,7 @@ namespace AmeisenBotX.Wow335a.Objects
         public IWowUnit Vehicle { get; private set; }
 
         ///<inheritdoc cref="IObjectProvider.WowObjects"/>
-        public IEnumerable<IWowObject> WowObjects { get { lock (queryLock) { return wowObjects; } } }
+        public IEnumerable<IWowObject> WowObjects { get; private set; }
 
         ///<inheritdoc cref="IObjectProvider.ZoneId"/>
         public int ZoneId { get; private set; }
@@ -145,12 +143,12 @@ namespace AmeisenBotX.Wow335a.Objects
         ///<inheritdoc cref="IObjectProvider.UpdateWowObjects"/>
         public void UpdateWowObjects()
         {
-            IsWorldLoaded = UpdateGlobalVar<int>(OffsetList.IsWorldLoaded) == 1;
-
-            if (!IsWorldLoaded) { return; }
-
             lock (queryLock)
             {
+                IsWorldLoaded = UpdateGlobalVar<int>(OffsetList.IsWorldLoaded) == 1;
+
+                if (!IsWorldLoaded) { return; }
+
                 PlayerGuid = UpdateGlobalVar<ulong>(OffsetList.PlayerGuid);
                 TargetGuid = UpdateGlobalVar<ulong>(OffsetList.TargetGuid);
                 LastTargetGuid = UpdateGlobalVar<ulong>(OffsetList.LastTargetGuid);
@@ -188,6 +186,7 @@ namespace AmeisenBotX.Wow335a.Objects
                 MemoryApi.Read(IntPtr.Add(currentObjectManager, (int)OffsetList.FirstObject), out IntPtr activeObjectBaseAddress);
 
                 int c = 0;
+                Array.Clear(wowObjects, 0, MAX_OBJECT_COUNT);
                 Array.Clear(wowObjectPointers, 0, MAX_OBJECT_COUNT);
 
                 for (; (int)activeObjectBaseAddress > 0 && c < MAX_OBJECT_COUNT; ++c)
@@ -230,9 +229,11 @@ namespace AmeisenBotX.Wow335a.Objects
                     PartyPetGuids = PartyPets.Select(e => e.Guid);
                     PartyPets = wowObjects.OfType<WowUnit335a>().Where(e => PartymemberGuids.Contains(e.SummonedByGuid));
                 }
-            }
 
-            OnObjectUpdateComplete?.Invoke(wowObjects);
+                WowObjects = new ArraySegment<IWowObject>(wowObjects, 0, ObjectCount);
+
+                OnObjectUpdateComplete?.Invoke(WowObjects);
+            }
         }
 
         /// <summary>
@@ -246,7 +247,7 @@ namespace AmeisenBotX.Wow335a.Objects
                 ((WowPlayer335a)Player).IsOutdoors = gameInfo.isOutdoors;
             }
 
-            IsTargetInLineOfSight = TargetGuid == PlayerGuid || (gameInfo.isTargetInLineOfSight & 0xFF) == 0;
+            IsTargetInLineOfSight = TargetGuid == 0 || TargetGuid == PlayerGuid || (gameInfo.losCheckResult & 0xFF) == 0;
             // AmeisenLogger.I.Log("GameInfo", $"IsTargetInLineOfSight: {IsTargetInLineOfSight}");
         }
 
@@ -272,33 +273,37 @@ namespace AmeisenBotX.Wow335a.Objects
                     WowObjectType.Gameobject => new WowGameobject335a(ptr, descriptorAddress),
                     WowObjectType.Player => new WowPlayer335a(ptr, descriptorAddress),
                     WowObjectType.Unit => new WowUnit335a(ptr, descriptorAddress),
-                    _ => new WowObject335a(ptr, descriptorAddress),
+                    WowObjectType.None => new WowObject335a(ptr, descriptorAddress),
+                    _ => null,
                 };
 
-                wowObjects[i].Update(MemoryApi, OffsetList);
-
-                if (type is WowObjectType.Unit or WowObjectType.Player)
+                if (wowObjects[i] != null)
                 {
-                    if (wowObjects[i].Guid == PlayerGuid)
+                    wowObjects[i].Update(MemoryApi, OffsetList);
+
+                    if (type is WowObjectType.Unit or WowObjectType.Player)
                     {
-                        PlayerGuidIsVehicle = wowObjects[i].GetType() != typeof(WowPlayer335a);
+                        if (wowObjects[i].Guid == PlayerGuid)
+                        {
+                            PlayerGuidIsVehicle = wowObjects[i] is not WowPlayer335a;
 
-                        if (!PlayerGuidIsVehicle)
-                        {
-                            Player = (WowPlayer335a)wowObjects[i];
-                            Vehicle = null;
+                            if (!PlayerGuidIsVehicle)
+                            {
+                                Player = (WowPlayer335a)wowObjects[i];
+                                Vehicle = null;
+                            }
+                            else
+                            {
+                                // player stays the old object
+                                Vehicle = (WowUnit335a)wowObjects[i];
+                            }
                         }
-                        else
-                        {
-                            // player stays the old object
-                            Vehicle = (WowUnit335a)wowObjects[i];
-                        }
+
+                        if (wowObjects[i].Guid == TargetGuid) { Target = (WowUnit335a)wowObjects[i]; }
+                        if (wowObjects[i].Guid == LastTargetGuid) { LastTarget = (WowUnit335a)wowObjects[i]; }
+                        if (wowObjects[i].Guid == PartyleaderGuid) { Partyleader = (WowUnit335a)wowObjects[i]; }
+                        if (wowObjects[i].Guid == PetGuid) { Pet = (WowUnit335a)wowObjects[i]; }
                     }
-
-                    if (wowObjects[i].Guid == TargetGuid) { Target = (WowUnit335a)wowObjects[i]; }
-                    if (wowObjects[i].Guid == LastTargetGuid) { LastTarget = (WowUnit335a)wowObjects[i]; }
-                    if (wowObjects[i].Guid == PartyleaderGuid) { Partyleader = (WowUnit335a)wowObjects[i]; }
-                    if (wowObjects[i].Guid == PetGuid) { Pet = (WowUnit335a)wowObjects[i]; }
                 }
             }
         }
@@ -334,18 +339,13 @@ namespace AmeisenBotX.Wow335a.Objects
                 && raidLeader != 0
                 && MemoryApi.Read(OffsetList.RaidGroupStart, out RawRaidStruct raidStruct))
             {
-                IEnumerable<IntPtr> raidPointers = raidStruct.GetPointers();
-                ConcurrentBag<ulong> guids = new();
-
-                foreach (IntPtr raidPointer in raidPointers)
+                foreach (IntPtr raidPointer in raidStruct.GetPointers())
                 {
-                    if (MemoryApi.Read(raidPointer, out ulong guid) && guid != 0)
+                    if (MemoryApi.Read(raidPointer, out ulong guid))
                     {
-                        guids.Add(guid);
+                        partymemberGuids.Add(guid);
                     }
                 }
-
-                partymemberGuids.AddRange(guids);
             }
 
             return partymemberGuids.Where(e => e != 0).Distinct();
@@ -354,13 +354,13 @@ namespace AmeisenBotX.Wow335a.Objects
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         private T UpdateGlobalVar<T>(IntPtr address) where T : unmanaged
         {
-            return MemoryApi.Read(address, out T v) ? v : default;
+            return address != IntPtr.Zero && MemoryApi.Read(address, out T v) ? v : default;
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         private string UpdateGlobalVarString(IntPtr address, int maxLenght = 128)
         {
-            return MemoryApi.ReadString(address, Encoding.UTF8, out string v, maxLenght) ? v : string.Empty;
+            return address != IntPtr.Zero && MemoryApi.ReadString(address, Encoding.UTF8, out string v, maxLenght) ? v : string.Empty;
         }
     }
 }

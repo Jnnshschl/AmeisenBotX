@@ -329,23 +329,30 @@ namespace AmeisenBotX.Core
 
             if (Config.AutocloseWow || Config.AutoPositionWow)
             {
-                Bot.Wow.LuaDoString("ForceQuit()");
-
-                // wait 5 sec for wow to exit, otherwise we kill it
-                TimeSpan timeToWait = TimeSpan.FromSeconds(5);
-                DateTime exited = DateTime.UtcNow;
-
-                while (!Bot.Memory.Process.HasExited)
+                if (Bot.Wow.IsReady)
                 {
-                    if (DateTime.UtcNow - exited > timeToWait)
+                    Bot.Wow.LuaDoString("ForceQuit()");
+
+                    // wait 3 sec for wow to exit, otherwise we kill it
+                    TimeSpan timeToWait = TimeSpan.FromSeconds(3);
+                    DateTime exited = DateTime.UtcNow;
+
+                    while (!Bot.Memory.Process.HasExited)
                     {
-                        Bot.Memory.Process.Kill();
-                        break;
+                        if (DateTime.UtcNow - exited > timeToWait)
+                        {
+                            Bot.Memory.Process.Kill();
+                            break;
+                        }
+                        else
+                        {
+                            Task.Delay(50).Wait();
+                        }
                     }
-                    else
-                    {
-                        Task.Delay(50).Wait();
-                    }
+                }
+                else
+                {
+                    Bot.Memory.Process.Kill();
                 }
             }
 
@@ -382,7 +389,7 @@ namespace AmeisenBotX.Core
         public void ReloadConfig(AmeisenBotConfig newConfig)
         {
             Config = newConfig;
-            StateMachineTimer = new(StateMachineTimerTick, null, 0, (int)Config.StateMachineTickMs);
+            StateMachineTimer = new(StateMachineTimerTick, null, 0, Config.StateMachineTickMs);
             LoadProfiles();
         }
 
@@ -412,7 +419,7 @@ namespace AmeisenBotX.Core
 
             SubscribeToWowEvents();
 
-            StateMachineTimer = new(StateMachineTimerTick, null, 0, (int)Config.StateMachineTickMs);
+            StateMachineTimer = new(StateMachineTimerTick, null, 0, Config.StateMachineTickMs);
             stateMachineTimerBusy = 0;
             IsRunning = true;
 

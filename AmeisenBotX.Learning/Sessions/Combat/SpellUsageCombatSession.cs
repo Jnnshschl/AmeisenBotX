@@ -65,6 +65,11 @@ namespace AmeisenBotX.Learning.Sessions.Combat
     /// </summary>
     public class SpellUsageCombatSession
     {
+        public SpellUsageCombatSession()
+        {
+            Datasets = new();
+        }
+
         public List<SpellUsageCombatSessionDataset> Datasets { get; set; }
 
         [JsonIgnore()]
@@ -72,11 +77,6 @@ namespace AmeisenBotX.Learning.Sessions.Combat
 
         [JsonIgnore()]
         public DateTime StartTime => Datasets.FirstOrDefault().Timestamp;
-
-        public SpellUsageCombatSession()
-        {
-            Datasets = new();
-        }
 
         public void AddData
         (

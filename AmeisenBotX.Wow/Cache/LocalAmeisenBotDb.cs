@@ -203,6 +203,8 @@ namespace AmeisenBotX.Wow.Cache
 
         public string GetSpellName(int spellId)
         {
+            if (spellId <= 0) { return string.Empty; }
+
             if (SpellNames.ContainsKey(spellId))
             {
                 return SpellNames[spellId];

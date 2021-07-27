@@ -1,0 +1,8 @@
+{
+  "profiles": {
+    "AmeisenBotX.Memory": {
+      "commandName": "Project",
+      "nativeDebugging": true
+    }
+  }
+}

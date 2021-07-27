@@ -41,7 +41,7 @@ namespace AmeisenBotX.Wow335a.Objects
 
         public virtual void Update(IMemoryApi memoryApi, IOffsetList offsetList)
         {
-            if (memoryApi.Read(DescriptorAddress, out WowObjectDescriptor obj))
+            if (DescriptorAddress != IntPtr.Zero && memoryApi.Read(DescriptorAddress, out WowObjectDescriptor obj))
             {
                 RawObject = obj;
             }

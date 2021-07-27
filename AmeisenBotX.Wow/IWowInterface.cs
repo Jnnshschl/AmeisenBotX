@@ -35,7 +35,7 @@ namespace AmeisenBotX.Wow
         /// Use this to display cost intensive calls to the user.
         /// The name Hookcall originates from EndScene hook calls.
         /// </summary>
-        ulong HookCallCount { get; }
+        int HookCallCount { get; }
 
         /// <summary>
         /// Get the status of the wow interface, true if its useable, false if not.

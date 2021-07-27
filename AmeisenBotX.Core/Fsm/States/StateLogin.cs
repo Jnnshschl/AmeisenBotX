@@ -3,6 +3,7 @@ using AmeisenBotX.Core.Fsm.Enums;
 using AmeisenBotX.Logging;
 using AmeisenBotX.Logging.Enums;
 using System;
+using System.Threading.Tasks;
 
 namespace AmeisenBotX.Core.Fsm.States
 {
@@ -17,15 +18,20 @@ namespace AmeisenBotX.Core.Fsm.States
 
         public override void Enter()
         {
-            if (!Bot.Wow.IsReady)
+            int c = 0;
+
+            while (!Bot.Wow.IsReady && c < 100)
             {
                 if (!Bot.Wow.Setup())
                 {
-                    AmeisenLogger.I.Log("StateLogin", "EndsceneHook failed", LogLevel.Error);
+                    AmeisenLogger.I.Log("StateLogin", $"EndsceneHook failed: {c}", LogLevel.Error);
+                    Task.Delay(50).Wait();
+                    c++;
                 }
             }
 
             Bot.Wow.SetWorldLoadedCheck(true);
+            AmeisenLogger.I.Log("StateLogin", $"Setup done...");
         }
 
         public override void Execute()

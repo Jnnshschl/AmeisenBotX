@@ -48,7 +48,15 @@ namespace AmeisenBotX.Wow335a
             // module to process wows events.
             HookModules.Add(new RunLuaHookModule
             (
-                (x) => { if (memoryApi.ReadString(x, Encoding.UTF8, out string s) && !string.IsNullOrWhiteSpace(s)) { EventManager.OnEventPush(s); } },
+                (x) =>
+                {
+                    if (x != IntPtr.Zero
+                        && memoryApi.ReadString(x, Encoding.UTF8, out string s)
+                        && !string.IsNullOrWhiteSpace(s))
+                    {
+                        EventManager.OnEventPush(s);
+                    }
+                },
                 null,
                 memoryApi,
                 Offsets,
@@ -64,7 +72,8 @@ namespace AmeisenBotX.Wow335a
             (
                 (x) =>
                 {
-                    if (memoryApi.ReadString(x, Encoding.UTF8, out string s)
+                    if (x != IntPtr.Zero
+                        && memoryApi.ReadString(x, Encoding.UTF8, out string s)
                         && !string.IsNullOrWhiteSpace(s))
                     {
                         if (!oldPoupString.Equals(s, StringComparison.Ordinal))
@@ -93,7 +102,8 @@ namespace AmeisenBotX.Wow335a
             (
                 (x) =>
                 {
-                    if (memoryApi.ReadString(x, Encoding.UTF8, out string s)
+                    if (x != IntPtr.Zero
+                        && memoryApi.ReadString(x, Encoding.UTF8, out string s)
                         && !string.IsNullOrWhiteSpace(s))
                     {
                         if (!oldBattlegroundStatus.Equals(s, StringComparison.Ordinal))
@@ -120,13 +130,15 @@ namespace AmeisenBotX.Wow335a
                 null,
                 (x) =>
                 {
-                    if (Player != null)
+                    IntPtr dataPtr = x.GetDataPointer();
+
+                    if (dataPtr != IntPtr.Zero && Player != null)
                     {
                         Vector3 playerPosition = Player.Position;
                         playerPosition.Z += 1.3f;
 
                         Vector3 pos = BotUtils.MoveAhead(playerPosition, Player.Rotation, 0.25f);
-                        memoryApi.Write(x.GetDataPointer(), (1.0f, playerPosition, pos));
+                        memoryApi.Write(dataPtr, (1.0f, playerPosition, pos));
                     }
                 },
                 memoryApi,
@@ -145,7 +157,7 @@ namespace AmeisenBotX.Wow335a
 
         public IEventManager Events => EventManager;
 
-        public ulong HookCallCount => Hook.HookCallCount;
+        public int HookCallCount => Hook.HookCallCount;
 
         public bool IsReady => Hook.IsWoWHooked;
 
@@ -229,7 +241,7 @@ namespace AmeisenBotX.Wow335a
 
         public void ClickOnTerrain(Vector3 position)
         {
-            Hook.WowClickOnTerrain(position);
+            Hook.ClickOnTerrain(position);
         }
 
         public void ClickUiElement(string elementName)
@@ -274,7 +286,7 @@ namespace AmeisenBotX.Wow335a
 
         public void EnableClickToMove()
         {
-            Hook.WowEnableClickToMove();
+            Hook.EnableClickToMove();
         }
 
         public void EquipItem(string newItem, int itemSlot = -1)
@@ -293,12 +305,12 @@ namespace AmeisenBotX.Wow335a
 
         public bool ExecuteLuaAndRead((string, string) p, out string result)
         {
-            return Hook.WowExecuteLuaAndRead(p, out result);
+            return Hook.ExecuteLuaAndRead(p, out result);
         }
 
         public void FacePosition(IntPtr playerBase, Vector3 playerPosition, Vector3 position)
         {
-            Hook.WowFacePosition(playerBase, playerPosition, position);
+            Hook.FacePosition(playerBase, playerPosition, position);
         }
 
         public IEnumerable<int> GetCompletedQuests()
@@ -419,7 +431,7 @@ namespace AmeisenBotX.Wow335a
 
         public WowUnitReaction GetReaction(IntPtr a, IntPtr b)
         {
-            return (WowUnitReaction)Hook.WowGetUnitReaction(a, b);
+            return (WowUnitReaction)Hook.GetUnitReaction(a, b);
         }
 
         public Dictionary<int, int> GetRunesReady()
@@ -537,7 +549,7 @@ namespace AmeisenBotX.Wow335a
 
         public void InteractWithUnit(IntPtr unitBase)
         {
-            Hook.UnitRightClick(unitBase);
+            Hook.InteractWithUnit(unitBase);
         }
 
         public bool IsAutoLootEnabled()
@@ -862,6 +874,8 @@ namespace AmeisenBotX.Wow335a
             {
                 ObjectManager.UpdateWowObjects();
             }
+
+            Hook.GameInfoTick();
         }
 
         public bool UiIsVisible(params string[] uiElements)
