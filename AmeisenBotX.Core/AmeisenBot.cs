@@ -150,7 +150,7 @@ namespace AmeisenBotX.Core
             Bot.Quest = new DefaultQuestEngine(Bot, Config, StateMachine);
             Bot.Grinding = new DefaultGrindingEngine(Bot, Config, StateMachine);
 
-            Bot.PathfindingHandler = new NavmeshServerPathfindingHandler(Config.NavmeshServerIp, Config.NameshServerPort);
+            Bot.PathfindingHandler = new AmeisenNavigationHandler(Config.NavmeshServerIp, Config.NameshServerPort);
             Bot.Movement = new DefaultMovementEngine(Bot, Config, StateMachine);
             // wow interface setup done
 
@@ -355,6 +355,8 @@ namespace AmeisenBotX.Core
                     Bot.Memory.Process.Kill();
                 }
             }
+
+            Bot.PathfindingHandler.Stop();
 
             Bot.Wow.Dispose();
             Bot.Memory.Dispose();

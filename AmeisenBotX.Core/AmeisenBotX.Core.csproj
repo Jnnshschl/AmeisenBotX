@@ -21,6 +21,7 @@
   </ItemGroup>
 
   <ItemGroup>
+    <PackageReference Include="AnTCP.Client" Version="1.0.0" />
     <PackageReference Include="System.CodeDom" Version="5.0.0" />
     <PackageReference Include="System.Drawing.Common" Version="5.0.2" />
   </ItemGroup>
@@ -33,6 +34,12 @@
     <ProjectReference Include="..\AmeisenBotX.Memory\AmeisenBotX.Memory.csproj" />
     <ProjectReference Include="..\AmeisenBotX.RconClient\AmeisenBotX.RconClient.csproj" />
     <ProjectReference Include="..\AmeisenBotX.Wow335a\AmeisenBotX.Wow335a.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Reference Include="AnTCP.Client">
+      <HintPath>..\dep\AnTCP.Client.dll</HintPath>
+    </Reference>
   </ItemGroup>
 
 </Project>

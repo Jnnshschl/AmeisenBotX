@@ -91,7 +91,7 @@ namespace AmeisenBotX.Core.Engines.Quest.Objects.Objectives
                                 && Bot.Db.GetReaction(Bot.Player, e) != WowUnitReaction.Friendly)
                     .OrderBy(e => e.Position.GetDistance(Bot.Player.Position))
                     .Take(3)
-                    .OrderBy(e => Bot.PathfindingHandler.GetPathDistance((int)Bot.Objects.MapId, Bot.Player.Position, e.Position))
+                    .OrderBy(e => Bot.Player.DistanceTo(e))
                     .FirstOrDefault();
 
                 // Kill enemies in the path
