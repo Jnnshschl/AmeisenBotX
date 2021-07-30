@@ -30,7 +30,7 @@ namespace AmeisenBotX.Core.Engines.Movement.Pathfinding
         {
             try
             {
-                return Client.IsConnected ? Client.Send((byte)EMessageType.PATH, (mapId, start, end)).AsArray<Vector3>() : Array.Empty<Vector3>();
+                return Client.IsConnected ? Client.Send((byte)EMessageType.PATH, (mapId, start, end, 2)).AsArray<Vector3>() : Array.Empty<Vector3>();
             }
             catch
             {
