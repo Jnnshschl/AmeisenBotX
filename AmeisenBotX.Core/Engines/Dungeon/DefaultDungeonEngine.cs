@@ -21,8 +21,6 @@ namespace AmeisenBotX.Core.Engines.Dungeon
 {
     public class DefaultDungeonEngine : IDungeonEngine
     {
-        private AmeisenBotConfig Config { get; }
-
         public DefaultDungeonEngine(AmeisenBotInterfaces bot, AmeisenBotConfig config)
         {
             Bot = bot;
@@ -94,14 +92,17 @@ namespace AmeisenBotX.Core.Engines.Dungeon
 
         private AmeisenBotInterfaces Bot { get; }
 
+        private AmeisenBotConfig Config { get; }
+
         private Queue<DungeonNode> CurrentNodes { get; set; }
 
         private Vector3 DeathPosition { get; set; }
 
         private TimegatedEvent ExitDungeonEvent { get; set; }
-        private TimegatedEvent InteractionEvent { get; set; }
 
         private bool IDied { get; set; }
+
+        private TimegatedEvent InteractionEvent { get; set; }
 
         private bool IsWaitingForGroup { get; set; }
 

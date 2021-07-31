@@ -230,8 +230,7 @@ namespace AmeisenBotX.Wow335a.Objects
                     PartyPets = wowObjects.OfType<WowUnit335a>().Where(e => PartymemberGuids.Contains(e.SummonedByGuid));
                 }
 
-                WowObjects = new ArraySegment<IWowObject>(wowObjects, 0, ObjectCount);
-
+                WowObjects = wowObjects[0..ObjectCount];
                 OnObjectUpdateComplete?.Invoke(WowObjects);
             }
         }

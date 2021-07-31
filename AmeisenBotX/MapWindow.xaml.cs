@@ -450,7 +450,6 @@ namespace AmeisenBotX
         private void RenderHerbs(int halfWidth, int halfHeight, Graphics graphics, float scale, Vector3 playerPosition, float playerRotation)
         {
             IEnumerable<IWowGameobject> herbNodes = AmeisenBot.Bot.Objects.WowObjects
-                .ToList()
                 .OfType<IWowGameobject>()
                 .Where(e => Enum.IsDefined(typeof(WowHerbId), e.DisplayId));
 
@@ -464,15 +463,13 @@ namespace AmeisenBotX
 
         private void RenderOres(int halfWidth, int halfHeight, Graphics graphics, float scale, Vector3 playerPosition, float playerRotation)
         {
-            List<IWowGameobject> oreNodes = AmeisenBot.Bot.Objects.WowObjects
-                .ToList()
+            IEnumerable<IWowGameobject> oreNodes = AmeisenBot.Bot.Objects.WowObjects
                 .OfType<IWowGameobject>()
-                .Where(e => Enum.IsDefined(typeof(WowOreId), e.DisplayId))
-                .ToList();
+                .Where(e => Enum.IsDefined(typeof(WowOreId), e.DisplayId));
 
-            for (int i = 0; i < oreNodes.Count; ++i)
+            for (int i = 0; i < oreNodes.Count(); ++i)
             {
-                IWowGameobject gameobject = oreNodes[i];
+                IWowGameobject gameobject = oreNodes.ElementAt(i);
                 Point positionOnMap = GetRelativePosition(playerPosition, gameobject.Position, playerRotation, halfWidth, halfHeight, scale);
                 RenderGameobject(positionOnMap.X, positionOnMap.Y, ((WowOreId)gameobject.DisplayId).ToString(), OreBrush, TextBrush, TextFont, graphics);
             }
@@ -480,13 +477,12 @@ namespace AmeisenBotX
 
         private void RenderUnits(int halfWidth, int halfHeight, Graphics graphics, float scale, Vector3 playerPosition, float playerRotation)
         {
-            List<IWowUnit> wowUnits = AmeisenBot.Bot.Objects.WowObjects
-                .OfType<IWowUnit>()
-                .ToList();
+            IEnumerable<IWowUnit> wowUnits = AmeisenBot.Bot.Objects.WowObjects
+                .OfType<IWowUnit>();
 
-            for (int i = 0; i < wowUnits.Count; ++i)
+            for (int i = 0; i < wowUnits.Count(); ++i)
             {
-                IWowUnit unit = wowUnits[i];
+                IWowUnit unit = wowUnits.ElementAt(i);
 
                 Brush selectedBrush = unit.IsDead ? DeadBrush : AmeisenBot.Bot.Db.GetReaction(AmeisenBot.Bot.Player, unit) switch
                 {
