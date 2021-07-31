@@ -32,6 +32,4 @@ See https://ameisenbotx.de/showthread.php?tid=2 for a list of all the things the
 
 # Screenshots
 
-![Main Window](https://raw.githubusercontent.com/Jnnshschl/AmeisenBotX/master/images/mainWindow.PNG "Main Window")
-
-![Config Window](https://raw.githubusercontent.com/Jnnshschl/AmeisenBotX/master/images/configWindow.PNG "Config Window")
+![Main Window](https://raw.githubusercontent.com/Jnnshschl/AmeisenBotX/master/images/mainWindow.png "Main Window")
