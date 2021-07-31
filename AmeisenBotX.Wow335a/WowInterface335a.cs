@@ -765,11 +765,11 @@ namespace AmeisenBotX.Wow335a
             if (rollType == WowRollType.Need)
             {
                 // first we need to check whether we can roll a need on this, otherwise the bot might not roll at all
-                LuaDoString($"_,_,_,_,_,canNeed=GetLootRollItemInfo({rollId});if canNeed then RollOnLoot({rollId}, {rollType}) else RollOnLoot({rollId}, 2) end");
+                LuaDoString($"_,_,_,_,_,canNeed=GetLootRollItemInfo({rollId});if canNeed then RollOnLoot({rollId}, {(int)rollType}) else RollOnLoot({rollId}, 2) end");
             }
             else
             {
-                LuaDoString($"RollOnLoot({rollId}, {rollType})");
+                LuaDoString($"RollOnLoot({rollId}, {(int)rollType})");
             }
         }
 
