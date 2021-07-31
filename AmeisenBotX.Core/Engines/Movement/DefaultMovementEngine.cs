@@ -145,7 +145,14 @@ namespace AmeisenBotX.Core.Engines.Movement
             if (path != null && path.Any())
             {
                 Vector3 lastNode = path.LastOrDefault();
-                return lastNode != default && lastNode.GetDistance(position) < maxDistance;
+
+                if (lastNode == default)
+                {
+                    return false;
+                }
+
+                double distance = lastNode.GetDistance(position);
+                return distance < maxDistance;
             }
 
             return false;

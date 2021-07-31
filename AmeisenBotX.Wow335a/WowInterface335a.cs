@@ -42,7 +42,6 @@ namespace AmeisenBotX.Wow335a
 
             // name of the frame used to capture wows events
             string eventHookFrameName = BotUtils.FastRandomStringOnlyLetters();
-
             EventManager = new(LuaDoString, eventHookFrameName);
 
             // module to process wows events.
@@ -589,7 +588,7 @@ namespace AmeisenBotX.Wow335a
             ClickUiElement("WorldStateScoreFrameLeaveButton");
         }
 
-        public void LootEveryThing()
+        public void LootEverything()
         {
             LuaDoString(BotUtils.ObfuscateLua("{v:0}=GetNumLootItems()for a={v:0},1,-1 do LootSlot(a)ConfirmLootSlot(a)end").Item1);
         }

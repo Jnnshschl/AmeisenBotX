@@ -12,6 +12,8 @@ namespace AmeisenBotX.Core.Engines.Jobs.Profiles
 
         string Description { get; }
 
+        Vector3 DungeonExit { get; }
+
         DungeonFactionType FactionType { get; }
 
         int GroupSize { get; }

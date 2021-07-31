@@ -214,7 +214,7 @@ namespace AmeisenBotX.Wow
 
         void LeaveBattleground();
 
-        void LootEveryThing();
+        void LootEverything();
 
         void LootMoneyAndQuestItems();
 

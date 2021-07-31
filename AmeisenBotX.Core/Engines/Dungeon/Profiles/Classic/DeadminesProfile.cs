@@ -15,6 +15,8 @@ namespace AmeisenBotX.Core.Engines.Dungeon.Profiles.Classic
 
         public string Description { get; } = "Profile for the Dungeon in Westfall, made for Level 15 to 18.";
 
+        public Vector3 DungeonExit { get; } = new(-15, -392, 63);
+
         public DungeonFactionType FactionType { get; } = DungeonFactionType.Neutral;
 
         public int GroupSize { get; } = 5;

@@ -145,7 +145,7 @@ namespace AmeisenBotX.Core
             Bot.CombatLog = new DefaultCombatlogParser();
 
             // setup all instances that use the whole Bot class last
-            Bot.Dungeon = new DefaultDungeonEngine(Bot);
+            Bot.Dungeon = new DefaultDungeonEngine(Bot, Config);
             Bot.Jobs = new DefaultJobEngine(Bot, Config);
             Bot.Quest = new DefaultQuestEngine(Bot, Config, StateMachine);
             Bot.Grinding = new DefaultGrindingEngine(Bot, Config, StateMachine);
@@ -757,7 +757,7 @@ namespace AmeisenBotX.Core
                 return;
             }
 
-            Bot.Wow.LootEveryThing();
+            Bot.Wow.LootEverything();
         }
 
         private void OnObjectUpdateComplete(IEnumerable<IWowObject> wowObjects)

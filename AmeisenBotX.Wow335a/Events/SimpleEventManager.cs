@@ -147,7 +147,12 @@ namespace AmeisenBotX.Wow335a.Events
                     }
                 }
 
-                PendingLuaToExecute.Enqueue(sb.ToString());
+                string lua = sb.ToString();
+
+                if (!string.IsNullOrWhiteSpace(lua))
+                {
+                    PendingLuaToExecute.Enqueue(lua);
+                }
             }
         }
 
@@ -172,7 +177,12 @@ namespace AmeisenBotX.Wow335a.Events
                     }
                 }
 
-                PendingLuaToExecute.Enqueue(sb.ToString());
+                string lua = sb.ToString();
+
+                if (!string.IsNullOrWhiteSpace(lua))
+                {
+                    PendingLuaToExecute.Enqueue(lua);
+                }
             }
         }
 

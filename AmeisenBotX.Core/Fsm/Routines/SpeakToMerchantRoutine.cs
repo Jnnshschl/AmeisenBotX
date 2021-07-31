@@ -19,9 +19,15 @@ namespace AmeisenBotX.Core.Fsm.Routines
                 return false;
             }
 
-            if (!BotMath.IsFacing(bot.Objects.Player.Position, bot.Objects.Player.Rotation, selectedUnit.Position))
+            if (!BotMath.IsFacing(bot.Objects.Player.Position, bot.Objects.Player.Rotation, selectedUnit.Position, 0.5f))
             {
                 bot.Wow.FacePosition(bot.Objects.Player.BaseAddress, bot.Player.Position, selectedUnit.Position);
+            }
+
+            if (!bot.Wow.UiIsVisible("GossipFrame", "MerchantFrame"))
+            {
+                bot.Wow.InteractWithUnit(selectedUnit.BaseAddress);
+                return false;
             }
 
             if (selectedUnit.IsGossip)
@@ -44,12 +50,6 @@ namespace AmeisenBotX.Core.Fsm.Routines
                 {
                     return false;
                 }
-            }
-
-            if (!bot.Wow.UiIsVisible("GossipFrame", "MerchantFrame"))
-            {
-                bot.Wow.InteractWithUnit(selectedUnit.BaseAddress);
-                return false;
             }
 
             return true;

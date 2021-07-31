@@ -10,16 +10,16 @@ namespace AmeisenBotX.Core.Fsm.States
 {
     public class StateLooting : BasicState
     {
-        private const float MaxLootDistance = 5.0f;
-
         public StateLooting(AmeisenBotFsm stateMachine, AmeisenBotConfig config, AmeisenBotInterfaces bot) : base(stateMachine, config, bot)
         {
             UnitLootQueue = new();
             UnitsAlreadyLootedList = new();
-            LastOpenLootTry = new(TimeSpan.FromSeconds(1));
+            LastOpenLootTry = new(TimeSpan.FromMilliseconds(1000));
         }
 
         public List<ulong> UnitsAlreadyLootedList { get; private set; }
+
+        private ulong LastGuid { get; set; }
 
         private TimegatedEvent LastOpenLootTry { get; set; }
 
@@ -29,7 +29,16 @@ namespace AmeisenBotX.Core.Fsm.States
 
         public override void Enter()
         {
+            LastGuid = 0;
             Bot.Movement.Reset();
+
+            foreach (IWowUnit unit in GetNearLootableUnits().OrderBy(e => e.DistanceTo(Bot.Player)))
+            {
+                if (!UnitLootQueue.Contains(unit.Guid) && !UnitsAlreadyLootedList.Contains(unit.Guid))
+                {
+                    UnitLootQueue.Enqueue(unit.Guid);
+                }
+            }
         }
 
         public override void Execute()
@@ -39,65 +48,54 @@ namespace AmeisenBotX.Core.Fsm.States
                 return;
             }
 
-            // add nearby Units to the loot List
-            if (Config.LootUnits)
-            {
-                IEnumerable<IWowUnit> wowUnits = GetNearLootableUnits().OrderBy(e => e.DistanceTo(Bot.Player));
-
-                for (int i = 0; i < wowUnits.Count(); ++i)
-                {
-                    IWowUnit lootableUnit = wowUnits.ElementAt(i);
-
-                    if (!UnitLootQueue.Contains(lootableUnit.Guid) && !UnitsAlreadyLootedList.Contains(lootableUnit.Guid))
-                    {
-                        UnitLootQueue.Enqueue(lootableUnit.Guid);
-                    }
-                }
-            }
-
             if (UnitLootQueue.Count == 0)
             {
                 StateMachine.SetState(BotState.Idle);
             }
             else
             {
-                IWowUnit selectedUnit = Bot.Objects.WowObjects.OfType<IWowUnit>()
-                    .Where(e => e.IsLootable)
-                    .OrderBy(e => e.Position.GetDistance(Bot.Player.Position))
-                    .FirstOrDefault(e => e.Guid == UnitLootQueue.Peek());
+                ulong guidToLoot = UnitLootQueue.Peek();
 
-                if (selectedUnit != null && LootTryCount < 3)
+                if (guidToLoot != LastGuid)
                 {
-                    // If enemies are nearby kill them first
-                    // var path = Bot.PathfindingHandler.GetPath((int)Bot.ObjectManager.MapId,
-                    //     Bot.Player.Position, selectedUnit.Position);
-                    // if (path != null)
-                    // {
-                    //     IEnumerable<IWowUnit> nearbyEnemies =
-                    //         Bot.ObjectManager.GetEnemiesInPath<IWowUnit>(path, 10.0);
-                    //     if (nearbyEnemies.Any())
-                    //     {
-                    //         var enemy = nearbyEnemies.FirstOrDefault();
-                    //         Bot.NewBot.WowTargetGuid(enemy.Guid);
-                    //         Bot.CombatClass.AttackTarget();
-                    //         return;
-                    //     }
-                    // }
+                    LootTryCount = 0;
+                }
 
-                    Bot.Movement.SetMovementAction(MovementAction.Move, selectedUnit.Position);
+                IWowUnit selectedUnit = Bot.GetWowObjectByGuid<IWowUnit>(guidToLoot);
 
-                    if (LastOpenLootTry.Run()
-                        && Bot.Player.Position.GetDistance(selectedUnit.Position) < MaxLootDistance)
+                if (selectedUnit == null || !selectedUnit.IsLootable)
+                {
+                    UnitsAlreadyLootedList.Add(UnitLootQueue.Dequeue());
+                    return;
+                }
+
+                if (LootTryCount < 3)
+                {
+                    if (Bot.Player.DistanceTo(selectedUnit) > 5.0f)
                     {
-                        Bot.Wow.StopClickToMove();
-                        Loot(selectedUnit);
+                        Bot.Movement.SetMovementAction(MovementAction.Move, selectedUnit.Position);
+                    }
+                    else if (LastOpenLootTry.Run())
+                    {
+                        if (Bot.Memory.Read(Bot.Wow.Offsets.LootWindowOpen, out byte lootOpen)
+                            && lootOpen > 0)
+                        {
+                            Bot.Wow.LootEverything();
+                            UnitsAlreadyLootedList.Add(UnitLootQueue.Dequeue());
+                            Bot.Wow.ClickUiElement("LootCloseButton");
+                        }
+                        else
+                        {
+                            Bot.Wow.StopClickToMove();
+                            Bot.Wow.InteractWithUnit(selectedUnit.BaseAddress);
+                        }
+
                         ++LootTryCount;
                     }
                 }
                 else if (UnitLootQueue.Count > 0)
                 {
-                    LootTryCount = 0;
-                    UnitLootQueue.Dequeue();
+                    UnitsAlreadyLootedList.Add(UnitLootQueue.Dequeue());
                 }
             }
         }
@@ -112,21 +110,6 @@ namespace AmeisenBotX.Core.Fsm.States
                 .Where(e => e.IsLootable
                     && !UnitsAlreadyLootedList.Contains(e.Guid)
                     && e.Position.GetDistance(Bot.Player.Position) < Config.LootUnitsRadius);
-        }
-
-        private void Loot(IWowUnit unit)
-        {
-            Bot.Wow.InteractWithUnit(unit.BaseAddress);
-
-            // if AutoLoot is enabled, the unit will be dequeued after it is looted because it will no longer be IsLootable
-            // there is no need to handle the dequeing here
-            if (Bot.Wow.IsAutoLootEnabled()
-                  && Bot.Memory.Read(Bot.Wow.Offsets.LootWindowOpen, out byte lootOpen)
-                  && lootOpen > 0)
-            {
-                Bot.Wow.LootEveryThing();
-                UnitsAlreadyLootedList.Add(UnitLootQueue.Dequeue());
-            }
         }
     }
 }

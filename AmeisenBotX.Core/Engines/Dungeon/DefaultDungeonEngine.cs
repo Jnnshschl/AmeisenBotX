@@ -4,6 +4,8 @@ using AmeisenBotX.BehaviorTree.Objects;
 using AmeisenBotX.Common.Math;
 using AmeisenBotX.Common.Utils;
 using AmeisenBotX.Core.Data.Objects;
+using AmeisenBotX.Core.Engines.Character.Inventory.Objects;
+using AmeisenBotX.Core.Engines.Dungeon.Enums;
 using AmeisenBotX.Core.Engines.Dungeon.Objects;
 using AmeisenBotX.Core.Engines.Dungeon.Profiles.Classic;
 using AmeisenBotX.Core.Engines.Dungeon.Profiles.TBC;
@@ -19,12 +21,16 @@ namespace AmeisenBotX.Core.Engines.Dungeon
 {
     public class DefaultDungeonEngine : IDungeonEngine
     {
-        public DefaultDungeonEngine(AmeisenBotInterfaces bot)
+        private AmeisenBotConfig Config { get; }
+
+        public DefaultDungeonEngine(AmeisenBotInterfaces bot, AmeisenBotConfig config)
         {
             Bot = bot;
+            Config = config;
 
             CurrentNodes = new();
             ExitDungeonEvent = new(TimeSpan.FromMilliseconds(1000));
+            InteractionEvent = new(TimeSpan.FromMilliseconds(1000));
 
             RootSelector = new
             (
@@ -47,7 +53,7 @@ namespace AmeisenBotX.Core.Engines.Dungeon
                     new Selector
                     (
                         "AmITheLeader",
-                        () => Bot.Objects.Partyleader.Guid == Bot.Wow.PlayerGuid || !Bot.Objects.PartymemberGuids.Any(),
+                        () => Bot.Objects.Partyleader == null || Bot.Objects.Partyleader.Guid == Bot.Wow.PlayerGuid || !Bot.Objects.PartymemberGuids.Any(),
                         new Selector
                         (
                             "AreAllPlayersPresent",
@@ -93,6 +99,7 @@ namespace AmeisenBotX.Core.Engines.Dungeon
         private Vector3 DeathPosition { get; set; }
 
         private TimegatedEvent ExitDungeonEvent { get; set; }
+        private TimegatedEvent InteractionEvent { get; set; }
 
         private bool IDied { get; set; }
 
@@ -214,14 +221,98 @@ namespace AmeisenBotX.Core.Engines.Dungeon
 
         private BehaviorTreeStatus FollowNodePath()
         {
-            BehaviorTreeStatus status = MoveToPosition(CurrentNodes.Peek().Position, 5.0);
-
-            if (status == BehaviorTreeStatus.Success)
+            if (CurrentNodes.Any())
             {
-                CurrentNodes.Dequeue();
-            }
+                if (Bot.Player.IsCasting)
+                {
+                    return BehaviorTreeStatus.Ongoing;
+                }
 
-            return status;
+                DungeonNode node = CurrentNodes.Peek();
+
+                if (node.Position.GetDistance(Bot.Player.Position) < 4.0f)
+                {
+                    if (node.Type == DungeonNodeType.Use
+                        || node.Type == DungeonNodeType.Door)
+                    {
+                        IWowGameobject nearestGameobject = Bot.Objects.WowObjects.OfType<IWowGameobject>()
+                            .OrderBy(e => e.Position.GetDistance(node.Position))
+                            .FirstOrDefault();
+
+                        if (nearestGameobject.Position.GetDistance(node.Position) < 5.0f && nearestGameobject != null && nearestGameobject.Bytes0 != 0)
+                        {
+                            if (InteractionEvent.Run())
+                            {
+                                Bot.Movement.Reset();
+                                Bot.Wow.StopClickToMove();
+
+                                Bot.Wow.InteractWithObject(nearestGameobject.BaseAddress);
+                            }
+
+                            return BehaviorTreeStatus.Ongoing;
+                        }
+                    }
+                    else if (node.Type == DungeonNodeType.Jump)
+                    {
+                        Bot.Character.Jump();
+                    }
+                    else if (node.Type == DungeonNodeType.Collect)
+                    {
+                        if (!Bot.Character.Inventory.HasItemByName(node.Extra))
+                        {
+                            IWowGameobject nearestGameobject = Bot.Objects.WowObjects.OfType<IWowGameobject>()
+                                .OrderBy(e => e.Position.GetDistance(node.Position))
+                                .FirstOrDefault();
+
+                            if (nearestGameobject.Position.GetDistance(node.Position) < 5.0f)
+                            {
+                                if (Bot.Character.Inventory.FreeBagSlots == 0)
+                                {
+                                    // delete the most worthless item
+                                    IWowInventoryItem itemToDelete = Bot.Character.Inventory.Items
+                                        .Where(e => !Config.ItemSellBlacklist.Contains(e.Name))
+                                        .OrderBy(e => e.ItemQuality).ThenBy(e => e.Price)
+                                        .FirstOrDefault();
+
+                                    if (itemToDelete != null)
+                                    {
+                                        Bot.Wow.DeleteItemByName(itemToDelete.Name);
+                                    }
+                                }
+
+                                if (nearestGameobject != null && nearestGameobject.Bytes0 != 0)
+                                {
+                                    if (InteractionEvent.Run())
+                                    {
+                                        Bot.Movement.Reset();
+                                        Bot.Wow.StopClickToMove();
+
+                                        Bot.Wow.InteractWithObject(nearestGameobject.BaseAddress);
+                                        Bot.Wow.LootEverything();
+                                    }
+
+                                    return BehaviorTreeStatus.Ongoing;
+                                }
+                            }
+
+                            return BehaviorTreeStatus.Ongoing;
+                        }
+                    }
+                }
+
+                BehaviorTreeStatus status = MoveToPosition(node.Position, 3.0f);
+
+                if (status == BehaviorTreeStatus.Success)
+                {
+                    CurrentNodes.Dequeue();
+                }
+
+                return status;
+            }
+            else
+            {
+                return MoveToPosition(Profile.DungeonExit, 2.5f);
+            }
         }
 
         private void LoadProfile(IDungeonProfile profile)
@@ -239,9 +330,9 @@ namespace AmeisenBotX.Core.Engines.Dungeon
             Bot.CombatClass.PriorityTargetDisplayIds = profile.PriorityUnits;
         }
 
-        private BehaviorTreeStatus MoveToPosition(Vector3 position, double minDistance = 2.5, MovementAction movementAction = MovementAction.Move)
+        private BehaviorTreeStatus MoveToPosition(Vector3 position, float minDistance = 2.5f, MovementAction movementAction = MovementAction.Move)
         {
-            double distance = Bot.Player.Position.GetDistance(position);
+            float distance = Bot.Player.Position.GetDistance(position);
 
             if (distance > minDistance)
             {

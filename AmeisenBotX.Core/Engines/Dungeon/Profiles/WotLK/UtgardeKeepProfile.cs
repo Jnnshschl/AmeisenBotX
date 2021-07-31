@@ -13,6 +13,8 @@ namespace AmeisenBotX.Core.Engines.Dungeon.Profiles.WotLK
 
         public string Description { get; } = "Profile for the Dungeon in the Howling Fjord, made for Level 68 to 80.";
 
+        public Vector3 DungeonExit { get; } = new(148, -87, 13);
+
         public DungeonFactionType FactionType { get; } = DungeonFactionType.Neutral;
 
         public int GroupSize { get; } = 5;

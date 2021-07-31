@@ -135,7 +135,7 @@ namespace AmeisenBotX.Core.Fsm.States.Idle.Actions
             else if (fishingBobber.Flags[(int)WowGameobjectFlags.DoesNotDespawn])
             {
                 Bot.Wow.InteractWithObject(fishingBobber.BaseAddress);
-                Bot.Wow.LootEveryThing();
+                Bot.Wow.LootEverything();
             }
         }
 

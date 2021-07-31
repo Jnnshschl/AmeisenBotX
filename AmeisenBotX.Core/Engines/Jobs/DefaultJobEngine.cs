@@ -242,7 +242,7 @@ namespace AmeisenBotX.Core.Engines.Jobs
                         if (Bot.Memory.Read(Bot.Wow.Offsets.LootWindowOpen, out byte lootOpen)
                             && lootOpen > 0)
                         {
-                            Bot.Wow.LootEveryThing();
+                            Bot.Wow.LootEverything();
                         }
                         else
                         {

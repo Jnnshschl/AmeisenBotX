@@ -13,6 +13,8 @@ namespace AmeisenBotX.Core.Engines.Dungeon.Profiles.Classic
 
         public string Description { get; } = "Profile for the Dungeon in The Barrens, made for Level 17 to 24.";
 
+        public Vector3 DungeonExit { get; } = new(-167, 134, -73);
+
         public DungeonFactionType FactionType { get; } = DungeonFactionType.Neutral;
 
         public int GroupSize { get; } = 5;

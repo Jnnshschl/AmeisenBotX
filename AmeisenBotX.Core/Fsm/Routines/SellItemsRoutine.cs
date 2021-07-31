@@ -9,8 +9,8 @@ namespace AmeisenBotX.Core.Fsm.Routines
     {
         public static void Run(AmeisenBotInterfaces bot, AmeisenBotConfig config)
         {
-            // create a copy here to prevent updates while selling
-            foreach (IWowInventoryItem item in bot.Character.Inventory.Items.Where(e => e.Price > 0).ToList())
+            // create a copy of items here to prevent updates while selling
+            foreach (IWowInventoryItem item in bot.Character.Inventory.Items.Where(e => e != null && e.Price > 0).ToList())
             {
                 IWowInventoryItem itemToSell = item;
 
@@ -24,15 +24,14 @@ namespace AmeisenBotX.Core.Fsm.Routines
                     continue;
                 }
 
-                if (bot.Character.IsItemAnImprovement(item, out IWowInventoryItem itemToReplace))
+                if (bot.Character.IsItemAnImprovement(itemToSell, out IWowInventoryItem itemToReplace))
                 {
                     // equip item and sell the other after
                     itemToSell = itemToReplace;
-                    bot.Wow.EquipItem(item.Name/*, itemToReplace*/);
+                    bot.Wow.EquipItem(item.Name, itemToReplace.EquipSlot);
                 }
 
-                if (itemToSell != null
-                    && (bot.Objects.Player.Class != WowClass.Hunter || itemToSell.GetType() != typeof(WowProjectile)))
+                if (bot.Objects.Player.Class != WowClass.Hunter || itemToSell.GetType() != typeof(WowProjectile))
                 {
                     bot.Wow.UseContainerItem(itemToSell.BagId, itemToSell.BagSlot);
                     bot.Wow.CofirmStaticPopup();

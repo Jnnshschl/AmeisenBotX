@@ -13,6 +13,8 @@ namespace AmeisenBotX.Core.Engines.Dungeon.Profiles.Classic
 
         public string Description { get; } = "Profile for the Dungeon in Stormwind, made for Level 24 to 31.";
 
+        public Vector3 DungeonExit { get; } = new(45, 1, -16);
+
         public DungeonFactionType FactionType { get; } = DungeonFactionType.Neutral;
 
         public int GroupSize { get; } = 5;

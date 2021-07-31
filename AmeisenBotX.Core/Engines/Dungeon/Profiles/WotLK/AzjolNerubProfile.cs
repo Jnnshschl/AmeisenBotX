@@ -13,6 +13,8 @@ namespace AmeisenBotX.Core.Engines.Dungeon.Profiles.WotLK
 
         public string Description { get; } = "Profile for the Dungeon in Dragonblight, made for Level 70 to 80.";
 
+        public Vector3 DungeonExit { get; } = new(406, 800, 832);
+
         public DungeonFactionType FactionType { get; } = DungeonFactionType.Neutral;
 
         public int GroupSize { get; } = 5;

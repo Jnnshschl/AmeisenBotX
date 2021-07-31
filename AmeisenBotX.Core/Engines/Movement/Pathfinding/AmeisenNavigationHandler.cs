@@ -1,9 +1,5 @@
 ﻿using AmeisenBotX.Common.Math;
-using AmeisenBotX.Common.Utils;
 using AmeisenBotX.Core.Engines.Movement.Pathfinding.Enums;
-using AmeisenBotX.Core.Engines.Movement.Pathfinding.Objects;
-using AmeisenBotX.Logging;
-using AmeisenBotX.Logging.Enums;
 using AnTCP.Client;
 using System;
 using System.Collections.Generic;
@@ -13,18 +9,18 @@ namespace AmeisenBotX.Core.Engines.Movement.Pathfinding
 {
     public class AmeisenNavigationHandler : IPathfindingHandler
     {
-        private AnTcpClient Client { get; }
-
-        private Thread ConnectionWatchdog { get; }
-
-        private bool ShouldExit { get; set; }
-
         public AmeisenNavigationHandler(string ip, int port)
         {
             Client = new(ip, port);
             ConnectionWatchdog = new(ObserverConnection);
             ConnectionWatchdog.Start();
         }
+
+        private AnTcpClient Client { get; }
+
+        private Thread ConnectionWatchdog { get; }
+
+        private bool ShouldExit { get; set; }
 
         public IEnumerable<Vector3> GetPath(int mapId, Vector3 start, Vector3 end)
         {
@@ -74,6 +70,12 @@ namespace AmeisenBotX.Core.Engines.Movement.Pathfinding
             }
         }
 
+        public void Stop()
+        {
+            ShouldExit = true;
+            ConnectionWatchdog.Join();
+        }
+
         private void ObserverConnection()
         {
             while (!ShouldExit)
@@ -92,12 +94,6 @@ namespace AmeisenBotX.Core.Engines.Movement.Pathfinding
 
                 Thread.Sleep(1000);
             }
-        }
-
-        public void Stop()
-        {
-            ShouldExit = true;
-            ConnectionWatchdog.Join();
         }
     }
 }

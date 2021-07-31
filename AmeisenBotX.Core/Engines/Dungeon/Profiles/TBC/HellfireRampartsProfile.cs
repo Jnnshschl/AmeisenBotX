@@ -13,6 +13,8 @@ namespace AmeisenBotX.Core.Engines.Dungeon.Profiles.TBC
 
         public string Description { get; } = "Profile for the Dungeon in Outland, made for Level 58 to 62.";
 
+        public Vector3 DungeonExit { get; } = new(-1357, -1634, 68);
+
         public DungeonFactionType FactionType { get; } = DungeonFactionType.Neutral;
 
         public int GroupSize { get; } = 5;

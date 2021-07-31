@@ -13,6 +13,8 @@ namespace AmeisenBotX.Core.Engines.Dungeon.Profiles.WotLK
 
         public string Description { get; } = "Profile for the Dungeon in Icecrown, made for Level 80.";
 
+        public Vector3 DungeonExit { get; } = new(425, 212, 529);
+
         public DungeonFactionType FactionType { get; } = DungeonFactionType.Neutral;
 
         public int GroupSize { get; } = 5;
