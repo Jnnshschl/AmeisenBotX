@@ -499,7 +499,7 @@ namespace AmeisenBotX
                 {
                     if (AmeisenBot.Config.MapRenderPlayers)
                     {
-                        string playerName = AmeisenBot.Config.MapRenderPlayerNames && AmeisenBot.Bot.Db.GetUnitName(AmeisenBot.Bot.Target, out string name) ? name : string.Empty;
+                        string playerName = AmeisenBot.Config.MapRenderPlayerNames && AmeisenBot.Bot.Db.GetUnitName(unit, out string name) ? name : string.Empty;
                         string playerExtra = AmeisenBot.Config.MapRenderPlayerExtra ? $"<{unit.Level} {unit.Race} {unit.Class}>" : string.Empty;
 
                         RenderUnit(positionOnMap.X, positionOnMap.Y, playerName, playerExtra, selectedBrush, WowColorsDrawing.GetClassPrimaryBrush(unit.Class), TextFont, SubTextFont, SubTextBrush, graphics, 7);
@@ -509,7 +509,7 @@ namespace AmeisenBotX
                 {
                     if (AmeisenBot.Config.MapRenderUnits)
                     {
-                        string unitName = AmeisenBot.Config.MapRenderUnitNames && AmeisenBot.Bot.Db.GetUnitName(AmeisenBot.Bot.Target, out string name) ? name : string.Empty;
+                        string unitName = AmeisenBot.Config.MapRenderUnitNames && AmeisenBot.Bot.Db.GetUnitName(unit, out string name) ? name : string.Empty;
                         string unitExtra = AmeisenBot.Config.MapRenderPlayerExtra ? $"<{unit.Level}>" : string.Empty;
 
                         RenderUnit(positionOnMap.X, positionOnMap.Y, unitName, unitExtra, selectedBrush, TextBrush, TextFont, SubTextFont, SubTextBrush, graphics);
