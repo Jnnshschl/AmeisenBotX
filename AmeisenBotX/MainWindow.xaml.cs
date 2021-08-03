@@ -4,6 +4,7 @@ using AmeisenBotX.Core;
 using AmeisenBotX.Core.Data.Objects;
 using AmeisenBotX.Core.Fsm.Enums;
 using AmeisenBotX.Core.Fsm.States;
+using AmeisenBotX.Core.Keyboard;
 using AmeisenBotX.Logging;
 using AmeisenBotX.Logging.Enums;
 using AmeisenBotX.Overlay;
@@ -28,10 +29,17 @@ namespace AmeisenBotX
 {
     public partial class MainWindow : Window
     {
+        #region Constructor
+
+        /// <summary>
+        /// Creates a new instance of the class.
+        /// </summary>
         public MainWindow()
         {
-            InitializeComponent();
+            // Initialize
+            this.InitializeComponent();
 
+            // Configure
             CurrentTickTimeBadBrush = new SolidColorBrush(Color.FromRgb(255, 0, 80));
             CurrentTickTimeGoodBrush = new SolidColorBrush(Color.FromRgb(160, 255, 0));
             DarkForegroundBrush = new SolidColorBrush((Color)FindResource("DarkForeground"));
@@ -48,7 +56,9 @@ namespace AmeisenBotX
             NotificationEvent = new(TimeSpan.FromSeconds(1));
 
             RenderState = true;
-        }
+        } 
+
+        #endregion
 
         public bool IsAutoPositionSetup { get; private set; }
 
@@ -192,14 +202,23 @@ namespace AmeisenBotX
 
         private void ButtonStartPause_Click(object sender, RoutedEventArgs e)
         {
+            // Call
+            this.StartPause();
+        }
+
+        private void StartPause()
+        {
+            // Is running?
             if (AmeisenBot.IsRunning)
             {
+                // Set pause
                 AmeisenBot.Pause();
                 buttonStartPause.Content = "▶";
                 buttonStartPause.Foreground = TextAccentBrush;
             }
             else
             {
+                // Set resume
                 AmeisenBot.Resume();
                 buttonStartPause.Content = "||";
                 buttonStartPause.Foreground = DarkForegroundBrush;
@@ -654,6 +673,19 @@ namespace AmeisenBotX
                     Close();
                 }
             }
+
+            // Subscribe
+            this.AmeisenBot.Bot.Keyboard.OnPressed += args =>
+            {
+                if (args.Alt.Contains(VirtualKeyStates.VK_LALT) && args.Key == Keys.X)
+                {
+                    // Call
+                    this.StartPause();
+
+                    // Set as handled
+                    args.Handled = true;
+                }
+            };
         }
 
         private void Window_MouseLeftButtonDown(object sender, MouseButtonEventArgs e)
