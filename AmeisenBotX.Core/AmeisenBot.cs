@@ -28,6 +28,7 @@ using AmeisenBotX.Core.Engines.Tactic;
 using AmeisenBotX.Core.Fsm;
 using AmeisenBotX.Core.Fsm.Enums;
 using AmeisenBotX.Core.Fsm.States;
+using AmeisenBotX.Core.Keyboard;
 using AmeisenBotX.Learning;
 using AmeisenBotX.Learning.Sessions.Combat;
 using AmeisenBotX.Logging;
@@ -113,6 +114,12 @@ namespace AmeisenBotX.Core
                     LoadWowWindowPosition();
                 }
             };
+
+            // Setup keyboard hook
+            Bot.Keyboard = new KeyboardHook();
+
+            // Enable keyboard hook
+            Bot.Keyboard.Enable();
 
             Bot.Chat = new DefaultChatManager(Config, DataFolder);
             Bot.Tactic = new DefaultTacticEngine();

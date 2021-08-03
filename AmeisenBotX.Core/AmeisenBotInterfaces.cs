@@ -12,6 +12,7 @@ using AmeisenBotX.Core.Engines.Movement;
 using AmeisenBotX.Core.Engines.Movement.Pathfinding;
 using AmeisenBotX.Core.Engines.Quest;
 using AmeisenBotX.Core.Engines.Tactic;
+using AmeisenBotX.Core.Keyboard;
 using AmeisenBotX.Learning;
 using AmeisenBotX.Memory;
 using AmeisenBotX.RconClient;
@@ -66,6 +67,8 @@ namespace AmeisenBotX.Core
         public IQuestEngine Quest { get; set; }
 
         public AmeisenBotRconClient Rcon { get; set; }
+
+        public KeyboardHook Keyboard { get; set; }
 
         public ITacticEngine Tactic { get; set; }
 
