@@ -1,6 +1,4 @@
-﻿using AmeisenBotX.Memory;
-
-using System;
+﻿using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.ComponentModel;
@@ -26,7 +24,6 @@ namespace AmeisenBotX.Core.Keyboard
         /// <summary>
         /// Creates a new instance of the class.
         /// </summary>
-        /// <param name="memory">A <see cref="IMemoryApi"/> instance.</param>
         public KeyboardHook()
         {
             // Set
