@@ -681,9 +681,6 @@ namespace AmeisenBotX
                 {
                     // Call
                     this.StartPause();
-
-                    // Set as handled
-                    args.Handled = true;
                 }
             };
         }
