@@ -1,6 +1,7 @@
 ﻿using AmeisenBotX.Common.Math;
 using AmeisenBotX.Common.Offsets;
 using AmeisenBotX.Common.Utils;
+using AmeisenBotX.Core.Data.Objects;
 using AmeisenBotX.Core.Hook.Modules;
 using AmeisenBotX.Core.Hook.Structs;
 using AmeisenBotX.Logging;
@@ -584,15 +585,15 @@ namespace AmeisenBotX.Wow335a.Hook
 
         public void ClickOnTerrain(Vector3 position)
         {
-            if (Memory.AllocateMemory(12, out IntPtr codeCaveVector3))
+            if (Memory.AllocateMemory(20, out IntPtr codeCaveVector3))
             {
                 try
                 {
-                    if (Memory.Write(IntPtr.Add(codeCaveVector3, 0x8), position))
+                    if (Memory.Write(IntPtr.Add(codeCaveVector3, 8), position))
                     {
                         InjectAndExecute(new string[]
                         {
-                            $"PUSH 0",
+                            $"PUSH {codeCaveVector3.ToInt32()}",
                             $"CALL {OffsetList.FunctionHandleTerrainClick}",
                             "ADD ESP, 0x4",
                             "RET",
