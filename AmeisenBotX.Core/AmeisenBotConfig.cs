@@ -1,5 +1,6 @@
 ﻿using AmeisenBotX.Core.Engines.Movement.Settings;
 using AmeisenBotX.Memory.Win32;
+
 using System;
 using System.Collections.Generic;
 using System.Text.Json.Serialization;
@@ -97,6 +98,8 @@ namespace AmeisenBotX.Core
         public string JobEngineMailText { get; set; } = string.Empty;
 
         public string JobProfile { get; set; } = string.Empty;
+
+        public KeyBindingSettings KeyBindingSettings { get; set; } = new KeyBindingSettings();
 
         public bool LearningDataCollectionEnabled { get; set; } = false;
 

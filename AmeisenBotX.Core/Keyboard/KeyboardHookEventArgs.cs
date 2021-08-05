@@ -24,14 +24,14 @@ namespace AmeisenBotX.Core.Keyboard
 
             // Store
             this._key = this.AltKeyList.Contains(this._key) ? Keys.None : key;
-            this._alts = this.GetPressedAltKeys((VirtualKeyStates.VK_LALT, Keys.LMenu),
-                                                                (VirtualKeyStates.VK_RALT, Keys.RMenu),
-                                                                (VirtualKeyStates.VK_LCONTROL, Keys.LControlKey),
-                                                                (VirtualKeyStates.VK_RCONTROL, Keys.RControlKey),
-                                                                (VirtualKeyStates.VK_LSHIFT, Keys.LShiftKey),
-                                                                (VirtualKeyStates.VK_RSHIFT, Keys.RShiftKey),
-                                                                (VirtualKeyStates.VK_LWIN, Keys.LWin),
-                                                                (VirtualKeyStates.VK_RWIN, Keys.RWin));
+            this._alts = this.GetPressedAltKeys((VirtualKeyStates.LALT, Keys.LMenu),
+                                                                (VirtualKeyStates.RALT, Keys.RMenu),
+                                                                (VirtualKeyStates.LCONTROL, Keys.LControlKey),
+                                                                (VirtualKeyStates.RCONTROL, Keys.RControlKey),
+                                                                (VirtualKeyStates.LSHIFT, Keys.LShiftKey),
+                                                                (VirtualKeyStates.RSHIFT, Keys.RShiftKey),
+                                                                (VirtualKeyStates.LWIN, Keys.LWin),
+                                                                (VirtualKeyStates.RWIN, Keys.RWin));
         }
 
         #endregion
@@ -127,14 +127,15 @@ namespace AmeisenBotX.Core.Keyboard
 
     public enum VirtualKeyStates
     {
-        VK_LWIN = 0x5B,
-        VK_RWIN = 0x5C,
-        VK_LSHIFT = 0xA0,
-        VK_RSHIFT = 0xA1,
-        VK_LCONTROL = 0xA2,
-        VK_RCONTROL = 0xA3,
-        VK_LALT = 0xA4, //aka VK_LMENU
-        VK_RALT = 0xA5 //aka VK_RMENU
+        NONE = 0x0,
+        LWIN = 0x5B,
+        RWIN = 0x5C,
+        LSHIFT = 0xA0,
+        RSHIFT = 0xA1,
+        LCONTROL = 0xA2,
+        RCONTROL = 0xA3,
+        LALT = 0xA4, //aka VK_LMENU
+        RALT = 0xA5 //aka VK_RMENU
     }
 
     /// <summary>

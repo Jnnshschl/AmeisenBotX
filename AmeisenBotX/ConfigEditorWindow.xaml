@@ -1269,6 +1269,127 @@
                                 <SolidColorBrush Color="{DynamicResource DarkBackground}" />
                             </CheckBox.Background>
                         </CheckBox>
+                        
+                        <Grid
+                            Margin="471,56,0,0"
+                            VerticalAlignment="Top" 
+                            HorizontalAlignment="Left"
+                            >
+                            <Grid.Resources>
+                                <Style TargetType="ComboBox">
+                                    <Setter Property="FontFamily" Value="Bahnschrift Light" />
+                                </Style>
+                                <Style TargetType="Label">
+                                    <Setter Property="FontFamily" Value="Bahnschrift Light" />
+                                </Style>
+                            </Grid.Resources>
+
+                            <StackPanel
+                                Orientation="Vertical"
+                                Width="180"
+                                Grid.ColumnSpan="3"
+                                Grid.IsSharedSizeScope="True"
+                                >
+
+                                <Label 
+                                    Content="Start/Stop Binding"
+                                    BorderBrush="{DynamicResource Button.MouseOver.Border}"
+                                    BorderThickness="0,0,0,1"
+                                    Padding="0,5,5,5"
+                                    Margin="0 0 0 5"
+                                    >
+                                    <Label.Foreground>
+                                        <SolidColorBrush Color="{DynamicResource DarkForeground}" />
+                                    </Label.Foreground>
+                                </Label>
+
+                                <Grid>
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="Auto" SharedSizeGroup="LabelSharedGroup" />
+                                        <ColumnDefinition Width="5" SharedSizeGroup="SpacerSharedGroiup" />
+                                        <ColumnDefinition Width="100" SharedSizeGroup="ValueSharedGroup" />
+                                    </Grid.ColumnDefinitions>
+                                    <Label
+                                        Grid.Column="0"
+                                        Content="Alt:"
+                                        Target="{Binding ElementName=comboboxStartStopBotBindingAltKey}"
+                                        >
+                                        <Label.Foreground>
+                                            <SolidColorBrush Color="{DynamicResource DarkForeground}" />
+                                        </Label.Foreground>
+                                    </Label>
+
+                                    <ComboBox
+                                        Grid.Column="2"
+                                        x:Name="comboboxStartStopBotBindingAltKey"
+                                        Style="{DynamicResource ComboBoxStyleDark}"
+                                        VerticalAlignment="Top"
+                                        SelectedValuePath="Content"
+                                        >
+                                        <ComboBoxItem>RALT</ComboBoxItem>
+                                        <ComboBoxItem>LALT</ComboBoxItem>
+                                        <ComboBoxItem>LSHIFT</ComboBoxItem>
+                                        <ComboBoxItem>RSHIFT</ComboBoxItem>
+                                        <ComboBoxItem>LCONTROL</ComboBoxItem>
+                                        <ComboBoxItem>RCONTROL</ComboBoxItem>
+                                    </ComboBox>
+                                </Grid>
+
+                                <Grid>
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition SharedSizeGroup="LabelSharedGroup" />
+                                        <ColumnDefinition SharedSizeGroup="SpacerSharedGroiup" />
+                                        <ColumnDefinition SharedSizeGroup="ValueSharedGroup" />
+                                    </Grid.ColumnDefinitions>
+                                    <Label
+                                        Grid.Column="0"
+                                        Content="Key:"
+                                        Target="{Binding ElementName=comboboxStartStopBotBindingKey}"
+                                        >
+                                        <Label.Foreground>
+                                            <SolidColorBrush Color="{DynamicResource DarkForeground}" />
+                                        </Label.Foreground>
+                                    </Label>
+
+                                    <ComboBox
+                                        Grid.Column="2"
+                                        x:Name="comboboxStartStopBotBindingKey"
+                                        Style="{DynamicResource ComboBoxStyleDark}"
+                                        VerticalAlignment="Top"
+                                        SelectedValuePath="Content"
+                                        >
+                                        <ComboBoxItem>A</ComboBoxItem>
+                                        <ComboBoxItem>B</ComboBoxItem>
+                                        <ComboBoxItem>C</ComboBoxItem>
+                                        <ComboBoxItem>D</ComboBoxItem>
+                                        <ComboBoxItem>E</ComboBoxItem>
+                                        <ComboBoxItem>F</ComboBoxItem>
+                                        <ComboBoxItem>G</ComboBoxItem>
+                                        <ComboBoxItem>H</ComboBoxItem>
+                                        <ComboBoxItem>I</ComboBoxItem>
+                                        <ComboBoxItem>J</ComboBoxItem>
+                                        <ComboBoxItem>K</ComboBoxItem>
+                                        <ComboBoxItem>L</ComboBoxItem>
+                                        <ComboBoxItem>M</ComboBoxItem>
+                                        <ComboBoxItem>N</ComboBoxItem>
+                                        <ComboBoxItem>O</ComboBoxItem>
+                                        <ComboBoxItem>P</ComboBoxItem>
+                                        <ComboBoxItem>Q</ComboBoxItem>
+                                        <ComboBoxItem>R</ComboBoxItem>
+                                        <ComboBoxItem>S</ComboBoxItem>
+                                        <ComboBoxItem>T</ComboBoxItem>
+                                        <ComboBoxItem>U</ComboBoxItem>
+                                        <ComboBoxItem>V</ComboBoxItem>
+                                        <ComboBoxItem>W</ComboBoxItem>
+                                        <ComboBoxItem>X</ComboBoxItem>
+                                        <ComboBoxItem>Y</ComboBoxItem>
+                                        <ComboBoxItem>Z</ComboBoxItem>
+                                    </ComboBox>
+                                </Grid>
+
+                            </StackPanel>
+                        </Grid>
+                        
                         <Label x:Name="labelAutologin_Copy" Content="Bot Ticks" HorizontalAlignment="Left" VerticalAlignment="Top" FontFamily="Bahnschrift Light" Margin="4,80,0,0" BorderBrush="{DynamicResource Button.MouseOver.Border}" BorderThickness="0,0,0,1" Width="180" Padding="0,5,5,5">
                             <Label.Foreground>
                                 <SolidColorBrush Color="{DynamicResource DarkForeground}" />

@@ -677,7 +677,9 @@ namespace AmeisenBotX
             // Subscribe
             this.AmeisenBot.Bot.Keyboard.OnPressed += args =>
             {
-                if (args.Alt.Contains(VirtualKeyStates.VK_LALT) && args.Key == Keys.X)
+                if ((args.Alt.Count == 1 )
+                    && args.Alt.Contains(AmeisenBot.Config.KeyBindingSettings.StartStopBot.Item1)
+                    && args.Key == AmeisenBot.Config.KeyBindingSettings.StartStopBot.Item2)
                 {
                     // Call
                     this.StartPause();

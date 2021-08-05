@@ -1,7 +1,10 @@
 ﻿using AmeisenBotX.Core;
 using AmeisenBotX.Core.Engines.Battleground;
+using AmeisenBotX.Core.Keyboard;
 using AmeisenBotX.Views;
+
 using Microsoft.Win32;
+
 using System;
 using System.Collections.Generic;
 using System.Globalization;
@@ -17,24 +20,36 @@ namespace AmeisenBotX
 {
     public partial class ConfigEditorWindow : Window
     {
-        private readonly SolidColorBrush errorBorderBrush;
-        private readonly SolidColorBrush normalBorderBrush;
+        private readonly SolidColorBrush _errorBorderBrush;
+        private readonly SolidColorBrush _normalBorderBrush;
 
+        #region Constructor
+
+        /// <summary>
+        /// Creates a new instance of the class.
+        /// </summary>
+        /// <param name="dataDir">The data directory path.</param>
+        /// <param name="ameisenBot">A <see cref="AmeisenBot"/> instance.</param>
+        /// <param name="initialConfig">A <see cref="AmeisenBotConfig"/> instance (Optional).</param>
+        /// <param name="initialConfigName">A initial config name(Optional).</param>
         public ConfigEditorWindow(string dataDir, AmeisenBot ameisenBot, AmeisenBotConfig initialConfig = null, string initialConfigName = "")
         {
-            InitializeComponent();
+            // Initial
+            this.InitializeComponent();
 
-            DataDir = dataDir;
-            NewConfig = initialConfig == null;
-            Config = initialConfig ?? new();
-            AmeisenBot = ameisenBot;
-            ConfigName = initialConfigName;
+            // Configure
+            this.DataDir = dataDir;
+            this.NewConfig = initialConfig == null;
+            this.Config = initialConfig ?? new();
+            this.AmeisenBot = ameisenBot;
+            this.ConfigName = initialConfigName;
+            this.SaveConfig = this.NewConfig;
 
-            SaveConfig = NewConfig;
-
-            normalBorderBrush = new((Color)FindResource("DarkBorder"));
-            errorBorderBrush = new((Color)FindResource("DarkError"));
+            this._normalBorderBrush = new((Color)FindResource("DarkBorder"));
+            this._errorBorderBrush = new((Color)FindResource("DarkError"));
         }
+
+        #endregion
 
         public AmeisenBot AmeisenBot { get; private set; }
 
@@ -172,6 +187,9 @@ namespace AmeisenBotX
                 Config.MovementSettings.MaxSteeringCombat = (float)sliderMaxSteeringCombat.Value / 100.0f;
                 Config.MovementSettings.SeperationDistance = (float)sliderPlayerSeperationDistance.Value;
                 Config.MovementSettings.WaypointCheckThreshold = (float)sliderWaypointThreshold.Value;
+
+                // Key binding settings
+                Config.KeyBindingSettings.StartStopBot = ((VirtualKeyStates)Enum.Parse(typeof(VirtualKeyStates), comboboxStartStopBotBindingAltKey.SelectedValue.ToString()), (Keys)Enum.Parse(typeof(Keys), comboboxStartStopBotBindingKey.SelectedValue.ToString()));
 
                 SaveConfig = true;
                 Close();
@@ -446,6 +464,10 @@ namespace AmeisenBotX
             sliderWaypointThreshold.Value = Config.MovementSettings.WaypointCheckThreshold;
             sliderWaypointThresholdMount.Value = Config.MovementSettings.WaypointCheckThresholdMounted;
 
+            // Load keybinding settings
+            comboboxStartStopBotBindingAltKey.SelectedValue = Config.KeyBindingSettings.StartStopBot.Item1.ToString();
+            comboboxStartStopBotBindingKey.SelectedValue = Config.KeyBindingSettings.StartStopBot.Item2.ToString();
+
             ChangedSomething = false;
         }
 
@@ -632,22 +654,22 @@ namespace AmeisenBotX
             {
                 if (textboxUsername.Text.Length == 0)
                 {
-                    textboxUsername.BorderBrush = errorBorderBrush;
+                    textboxUsername.BorderBrush = _errorBorderBrush;
                     failed = true;
                 }
                 else
                 {
-                    textboxUsername.BorderBrush = normalBorderBrush;
+                    textboxUsername.BorderBrush = _normalBorderBrush;
                 }
 
                 if (textboxPassword.Password.Length == 0)
                 {
-                    textboxPassword.BorderBrush = errorBorderBrush;
+                    textboxPassword.BorderBrush = _errorBorderBrush;
                     failed = true;
                 }
                 else
                 {
-                    textboxPassword.BorderBrush = normalBorderBrush;
+                    textboxPassword.BorderBrush = _normalBorderBrush;
                 }
 
                 if (textboxCharacterSlot.Text.Length == 0
@@ -655,12 +677,12 @@ namespace AmeisenBotX
                     || charslot < 0
                     || charslot > 9)
                 {
-                    textboxCharacterSlot.BorderBrush = errorBorderBrush;
+                    textboxCharacterSlot.BorderBrush = _errorBorderBrush;
                     failed = true;
                 }
                 else
                 {
-                    textboxCharacterSlot.BorderBrush = normalBorderBrush;
+                    textboxCharacterSlot.BorderBrush = _normalBorderBrush;
                 }
             }
 
@@ -673,12 +695,12 @@ namespace AmeisenBotX
             {
                 if (textboxWowPath.Text.Length == 0)
                 {
-                    textboxConfigName.BorderBrush = errorBorderBrush;
+                    textboxConfigName.BorderBrush = _errorBorderBrush;
                     failed = true;
                 }
                 else
                 {
-                    textboxConfigName.BorderBrush = normalBorderBrush;
+                    textboxConfigName.BorderBrush = _normalBorderBrush;
                 }
             }
 
@@ -692,12 +714,12 @@ namespace AmeisenBotX
             if (textboxConfigName.Text.Length == 0
                 || regex.IsMatch(textboxConfigName.Text))
             {
-                textboxConfigName.BorderBrush = errorBorderBrush;
+                textboxConfigName.BorderBrush = _errorBorderBrush;
                 failed = true;
             }
             else
             {
-                textboxConfigName.BorderBrush = normalBorderBrush;
+                textboxConfigName.BorderBrush = _normalBorderBrush;
             }
 
             return failed;
@@ -719,12 +741,12 @@ namespace AmeisenBotX
             if (textboxNavmeshServerIp.Text.Length == 0
                 || !IPAddress.TryParse(textboxNavmeshServerIp.Text, out IPAddress _))
             {
-                textboxNavmeshServerIp.BorderBrush = errorBorderBrush;
+                textboxNavmeshServerIp.BorderBrush = _errorBorderBrush;
                 failed = true;
             }
             else
             {
-                textboxNavmeshServerIp.BorderBrush = normalBorderBrush;
+                textboxNavmeshServerIp.BorderBrush = _normalBorderBrush;
             }
 
             if (textboxNavmeshServerPort.Text.Length == 0
@@ -732,12 +754,12 @@ namespace AmeisenBotX
                 || port < 0
                 || port > ushort.MaxValue)
             {
-                textboxNavmeshServerPort.BorderBrush = errorBorderBrush;
+                textboxNavmeshServerPort.BorderBrush = _errorBorderBrush;
                 failed = true;
             }
             else
             {
-                textboxNavmeshServerPort.BorderBrush = normalBorderBrush;
+                textboxNavmeshServerPort.BorderBrush = _normalBorderBrush;
             }
 
             return failed;
@@ -749,12 +771,12 @@ namespace AmeisenBotX
             {
                 if (textboxFollowSpecificCharacterName.Text.Length == 0)
                 {
-                    textboxFollowSpecificCharacterName.BorderBrush = errorBorderBrush;
+                    textboxFollowSpecificCharacterName.BorderBrush = _errorBorderBrush;
                     failed = true;
                 }
                 else
                 {
-                    textboxFollowSpecificCharacterName.BorderBrush = normalBorderBrush;
+                    textboxFollowSpecificCharacterName.BorderBrush = _normalBorderBrush;
                 }
             }
 
