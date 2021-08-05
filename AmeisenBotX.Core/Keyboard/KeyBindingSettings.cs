@@ -6,14 +6,14 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace AmeisenBotX.Core.Engines.Movement.Settings
+namespace AmeisenBotX.Core.Keyboard
 {
     public class KeyBindingSettings
     {
         #region Public
 
         /// <summary>
-        /// Key bindings for starting or stopping the bot.
+        /// Key binding for starting or stopping the bot.
         /// </summary>
         public (VirtualKeyStates, Keys) StartStopBot { get; set; } = (VirtualKeyStates.LALT, Keys.X);
 
