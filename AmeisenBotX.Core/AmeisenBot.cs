@@ -696,11 +696,6 @@ namespace AmeisenBotX.Core
             Bot.Wow.CofirmStaticPopup();
         }
 
-        private void OnConfirmLootRoll(long timestamp, List<string> args)
-        {
-            Bot.Wow.CofirmLootRoll();
-        }
-
         private void OnEquipmentChanged(long timestamp, List<string> args)
         {
             if (EquipmentUpdateEvent.Run())
@@ -903,8 +898,18 @@ namespace AmeisenBotX.Core
 
                     switch (parts[1].ToUpper())
                     {
+                        case "AUTOEQUIP_BIND":
+                        case "BFMGR_INVITED_TO_ENTER":
+                        case "CONFIRM_BATTLEFIELD_ENTRY":
                         case "CONFIRM_LOOT_ROLL":
+                        case "EQUIP_BIND":
+                        case "LOOT_BIND":
+                        case "USE_BIND":
                             Bot.Wow.ClickUiElement($"StaticPopup{parts[0]}Button1");
+                            break;
+
+                        case "TOO_MANY_LUA_ERRORS":
+                            Bot.Wow.ClickUiElement($"StaticPopup{parts[0]}Button2");
                             break;
 
                         default:
@@ -1114,8 +1119,6 @@ namespace AmeisenBotX.Core
             // Loot/Item Events
             Bot.Wow.Events.Subscribe("LOOT_OPENED", OnLootWindowOpened);
             Bot.Wow.Events.Subscribe("LOOT_BIND_CONFIRM", OnConfirmBindOnPickup);
-            Bot.Wow.Events.Subscribe("AUTOEQUIP_BIND_CONFIRM", OnConfirmBindOnPickup);
-            Bot.Wow.Events.Subscribe("CONFIRM_LOOT_ROLL", OnConfirmLootRoll);
             Bot.Wow.Events.Subscribe("START_LOOT_ROLL", OnLootRollStarted);
             Bot.Wow.Events.Subscribe("BAG_UPDATE", OnBagChanged);
             Bot.Wow.Events.Subscribe("PLAYER_EQUIPMENT_CHANGED", OnEquipmentChanged);
