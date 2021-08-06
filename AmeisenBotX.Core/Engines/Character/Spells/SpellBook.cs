@@ -37,6 +37,12 @@ namespace AmeisenBotX.Core.Engines.Character.Spells
             return Spells != null && Spells.Any(e => string.Equals(e.Name, spellname, StringComparison.OrdinalIgnoreCase));
         }
 
+        public bool TryGetSpellByName(string spellname, out Spell spell)
+        {
+            spell = GetSpellByName(spellname);
+            return spell != null;
+        }
+
         public void Update()
         {
             string rawSpells = Wow.GetSpells();

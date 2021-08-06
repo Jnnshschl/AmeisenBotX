@@ -4,7 +4,6 @@ using AmeisenBotX.Core;
 using AmeisenBotX.Core.Data.Objects;
 using AmeisenBotX.Core.Fsm.Enums;
 using AmeisenBotX.Core.Fsm.States;
-using AmeisenBotX.Core.Keyboard;
 using AmeisenBotX.Logging;
 using AmeisenBotX.Logging.Enums;
 using AmeisenBotX.Overlay;
@@ -56,9 +55,9 @@ namespace AmeisenBotX
             NotificationEvent = new(TimeSpan.FromSeconds(1));
 
             RenderState = true;
-        } 
+        }
 
-        #endregion
+        #endregion Constructor
 
         public bool IsAutoPositionSetup { get; private set; }
 
@@ -204,25 +203,6 @@ namespace AmeisenBotX
         {
             // Call
             this.StartPause();
-        }
-
-        private void StartPause()
-        {
-            // Is running?
-            if (AmeisenBot.IsRunning)
-            {
-                // Set pause
-                AmeisenBot.Pause();
-                buttonStartPause.Content = "▶";
-                buttonStartPause.Foreground = TextAccentBrush;
-            }
-            else
-            {
-                // Set resume
-                AmeisenBot.Resume();
-                buttonStartPause.Content = "||";
-                buttonStartPause.Foreground = DarkForegroundBrush;
-            }
         }
 
         private void ButtonStateConfig_Click(object sender, RoutedEventArgs e)
@@ -457,6 +437,25 @@ namespace AmeisenBotX
             }
         }
 
+        private void StartPause()
+        {
+            // Is running?
+            if (AmeisenBot.IsRunning)
+            {
+                // Set pause
+                AmeisenBot.Pause();
+                buttonStartPause.Content = "▶";
+                buttonStartPause.Foreground = TextAccentBrush;
+            }
+            else
+            {
+                // Set resume
+                AmeisenBot.Resume();
+                buttonStartPause.Content = "||";
+                buttonStartPause.Foreground = DarkForegroundBrush;
+            }
+        }
+
         private void UpdateBotInfo(int maxSecondary, int secondary, Brush primaryBrush, Brush secondaryBrush)
         {
             // Generic labels
@@ -674,17 +673,19 @@ namespace AmeisenBotX
                 }
             }
 
-            // Subscribe
-            this.AmeisenBot.Bot.Keyboard.OnPressed += args =>
+            // Subscribe to keyboard event
+            if (AmeisenBot?.Bot?.Keyboard != null)
             {
-                if ((args.Alt.Count == 1 )
-                    && args.Alt.Contains(AmeisenBot.Config.KeyBindingSettings.StartStopBot.Item1)
-                    && args.Key == AmeisenBot.Config.KeyBindingSettings.StartStopBot.Item2)
+                AmeisenBot.Bot.Keyboard.OnPressed += (args) =>
                 {
-                    // Call
-                    this.StartPause();
-                }
-            };
+                    if (args.Alts.Count == 1
+                        && args.Alts.Contains(AmeisenBot.Config.KeyBindingSettings.StartStopBot.Item1)
+                        && args.Key == AmeisenBot.Config.KeyBindingSettings.StartStopBot.Item2)
+                    {
+                        StartPause();
+                    }
+                };
+            }
         }
 
         private void Window_MouseLeftButtonDown(object sender, MouseButtonEventArgs e)

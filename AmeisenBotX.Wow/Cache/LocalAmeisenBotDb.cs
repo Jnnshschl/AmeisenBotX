@@ -219,6 +219,7 @@ namespace AmeisenBotX.Wow.Cache
                     return name;
                 }
 
+                SpellNames.TryAdd(spellId, "unk");
                 return "unk";
             }
         }

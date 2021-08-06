@@ -426,6 +426,8 @@ namespace AmeisenBotX.Core.Engines.Combat.Classes.Jannis
                 { "ManaItemThreshold", 30.0 }
             };
 
+            SpellAbortFunctions = new();
+
             CooldownManager = new(Bot.Character.SpellBook.Spells);
             RessurrectionTargets = new();
 
@@ -469,7 +471,7 @@ namespace AmeisenBotX.Core.Engines.Combat.Classes.Jannis
 
         public abstract bool IsMelee { get; }
 
-        public bool IsWanding { get; private set; } = false;
+        public bool IsWanding { get; private set; }
 
         public abstract IItemComparator ItemComparator { get; set; }
 
@@ -503,6 +505,8 @@ namespace AmeisenBotX.Core.Engines.Combat.Classes.Jannis
 
         protected DateTime LastSpellCast { get; private set; }
 
+        protected List<Func<bool>> SpellAbortFunctions { get; }
+
         private AmeisenBotFsm StateMachine { get; }
 
         public virtual void AttackTarget()
@@ -530,7 +534,7 @@ namespace AmeisenBotX.Core.Engines.Combat.Classes.Jannis
         {
             if (Bot.Player.IsCasting)
             {
-                if (!Bot.Objects.IsTargetInLineOfSight)
+                if (!Bot.Objects.IsTargetInLineOfSight || SpellAbortFunctions.Any(e => e()))
                 {
                     Bot.Wow.StopCasting();
                 }
@@ -638,6 +642,16 @@ namespace AmeisenBotX.Core.Engines.Combat.Classes.Jannis
 
         public virtual void OutOfCombatExecute()
         {
+            if (Bot.Player.IsCasting)
+            {
+                if (!Bot.Objects.IsTargetInLineOfSight || SpellAbortFunctions.Any(e => e()))
+                {
+                    Bot.Wow.StopCasting();
+                }
+
+                return;
+            }
+
             if ((Bot.Player.Auras.Any(e => Bot.Db.GetSpellName(e.SpellId) == "Food") && Bot.Player.HealthPercentage < 100.0)
                 || (Bot.Player.Auras.Any(e => Bot.Db.GetSpellName(e.SpellId) == "Drink") && Bot.Player.ManaPercentage < 100.0))
             {

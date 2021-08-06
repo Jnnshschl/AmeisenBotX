@@ -1,7 +1,6 @@
 ﻿using AmeisenBotX.Common.Math;
 using AmeisenBotX.Common.Offsets;
 using AmeisenBotX.Common.Utils;
-using AmeisenBotX.Core.Data.Objects;
 using AmeisenBotX.Core.Hook.Modules;
 using AmeisenBotX.Core.Hook.Structs;
 using AmeisenBotX.Logging;

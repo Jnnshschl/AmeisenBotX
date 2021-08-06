@@ -1,13 +1,7 @@
 ﻿using System;
-using System.Collections.Concurrent;
-using System.Collections.Generic;
 using System.ComponentModel;
 using System.Diagnostics;
-using System.Linq;
 using System.Runtime.InteropServices;
-using System.Text;
-using System.Threading.Tasks;
-using System.Windows.Input;
 
 namespace AmeisenBotX.Core.Keyboard
 {
@@ -16,77 +10,6 @@ namespace AmeisenBotX.Core.Keyboard
     /// </summary>
     public class KeyboardHook : IDisposable
     {
-        private LowLevelKeyboardProc _hookProc;
-        private IntPtr _hookPtr;
-
-        #region Constructor
-
-        /// <summary>
-        /// Creates a new instance of the class.
-        /// </summary>
-        public KeyboardHook()
-        {
-            // Set
-            this._hookProc = this.LowLevelKeyboardCallback;
-        }
-
-        #endregion
-
-        #region Public
-
-        /// <summary>
-        /// Disables the keyboard hook.
-        /// </summary>
-        public void Disable()
-        {
-            if (this._hookPtr == IntPtr.Zero)
-            {
-                // Skip
-                return;
-            }
-
-            // Un-hook
-            KeyboardHook.UnhookWindowsHookEx(hHook: this._hookPtr);
-        }
-
-        /// <summary>
-        /// <see cref="IDisposable.Dispose"/>
-        /// </summary>
-        public void Dispose()
-        {
-            // Disable
-            this.Disable();
-        }
-
-        /// <summary>
-        /// Enables the keyboard hook.
-        /// </summary>
-        public void Enable()
-        {
-            if (this._hookPtr != IntPtr.Zero)
-            {
-                // Skip
-                return;
-            }
-
-            // Create hook
-            this._hookPtr = KeyboardHook.SetWindowsHookEx(idHook: HookType.WhKeyboardLl,
-                                                                                        lpfn: this._hookProc,
-                                                                                        hMod: KeyboardHook.GetModuleHandle(lpModuleName: Process.GetCurrentProcess().MainModule.ModuleName),
-                                                                                        dwThreadId: 0);
-
-            // Invalid?
-            if (this._hookPtr == IntPtr.Zero)
-            {
-                // Throw
-                throw new Win32Exception(Marshal.GetLastWin32Error());
-            }
-        }
-
-        public delegate void KeyDownEventDelegate(KeyboardHookEventArgs e);
-
-        public delegate void KeyUpEventDelegate(KeyboardHookEventArgs e);
-
         /// <summary>
         /// Gets called if a key is pressed.
         /// </summary>
@@ -97,73 +20,19 @@ namespace AmeisenBotX.Core.Keyboard
         /// </summary>
         public KeyUpEventDelegate OnReleased;
 
-        #endregion
-
-        #region Private
-
-        private int LowLevelKeyboardCallback(int nCode, IntPtr wParam, ref LowLevelKeyboardInputEvent lParam)
-        {
-            int result = 0;
-            bool handled = false;
-
-            int wParamValue = wParam.ToInt32();
-            if (Enum.IsDefined(typeof(KeyboardState), wParamValue))
-            {
-                // Get state
-                KeyboardState keyboardState = (KeyboardState)wParamValue;
-
-                // Key down?
-                if (keyboardState == KeyboardState.KeyDown
-                    || keyboardState == KeyboardState.SysKeyDown)
-                {
-                    // Create new event args
-                    KeyboardHookEventArgs keyboardHookEventArgs = new KeyboardHookEventArgs(keyboardInput: lParam);
-
-                    // Signal
-                    this.OnPressed?.Invoke(keyboardHookEventArgs);
-
-                    // Set
-                    handled = keyboardHookEventArgs.Handled;
-                }
-
-                // Key up?
-                if (keyboardState == KeyboardState.KeyUp
-                    || keyboardState == KeyboardState.SysKeyUp)
-                {
-                    // Create new event args
-                    KeyboardHookEventArgs keyboardHookEventArgs = new KeyboardHookEventArgs(keyboardInput: lParam);
-
-                    // Signal
-                    this.OnReleased?.Invoke(new KeyboardHookEventArgs(keyboardInput: lParam));
-
-                    // Set
-                    handled = keyboardHookEventArgs.Handled;
-                }
-            }
-
-            if (handled)
-            {
-                // Return
-                return 1;
-            }
-
-            // Return
-            return KeyboardHook.CallNextHookEx(hHook: IntPtr.Zero,
-                                                                    nCode: nCode,
-                                                                    wParam: wParam,
-                                                                    lParam: ref lParam);
-        }
-
         /// <summary>
-        /// Holds the keyboard states
+        /// Creates a new instance of the class.
         /// </summary>
-        private enum KeyboardState
+        public KeyboardHook()
         {
-            KeyDown = 0x0100,
-            KeyUp = 0x0101,
-            SysKeyDown = 0x0104,
-            SysKeyUp = 0x0105
+            KeyboardProc = LowLevelKeyboardCallback;
         }
+
+        public delegate void KeyDownEventDelegate(KeyboardHookEventArgs e);
+
+        public delegate void KeyUpEventDelegate(KeyboardHookEventArgs e);
+
+        private delegate int LowLevelKeyboardProc(int nCode, IntPtr wParam, ref LowLevelKeyboardInputEvent lParam);
 
         private enum HookType
         {
@@ -184,12 +53,90 @@ namespace AmeisenBotX.Core.Keyboard
             WhMouseLl = 14
         }
 
-        #endregion
+        /// <summary>
+        /// Holds the keyboard states
+        /// </summary>
+        private enum KeyboardState
+        {
+            KeyDown = 0x0100,
+            KeyUp = 0x0101,
+            SysKeyDown = 0x0104,
+            SysKeyUp = 0x0105
+        }
 
-        #region Win32
+        private IntPtr HookPtr { get; set; }
 
-        private delegate int LowLevelKeyboardProc(int nCode, IntPtr wParam, ref LowLevelKeyboardInputEvent lParam);
+        private LowLevelKeyboardProc KeyboardProc { get; }
 
+        /// <summary>
+        /// Disables the keyboard hook.
+        /// </summary>
+        public void Disable()
+        {
+            if (HookPtr == IntPtr.Zero)
+            {
+                return;
+            }
+
+            UnhookWindowsHookEx(hHook: HookPtr);
+        }
+
+        /// <summary>
+        /// <see cref="IDisposable.Dispose"/>
+        /// </summary>
+        public void Dispose()
+        {
+            Disable();
+        }
+
+        /// <summary>
+        /// Enables the keyboard hook.
+        /// </summary>
+        public void Enable()
+        {
+            if (HookPtr != IntPtr.Zero)
+            {
+                return;
+            }
+
+            HookPtr = SetWindowsHookEx
+            (
+                HookType.WhKeyboardLl,
+                KeyboardProc,
+                GetModuleHandle(Process.GetCurrentProcess().MainModule.ModuleName),
+                0
+            );
+
+            if (HookPtr == IntPtr.Zero)
+            {
+                throw new Win32Exception(Marshal.GetLastWin32Error());
+            }
+        }
+
+        /// <summary>
+        ///     Passes the hook information to the next hook procedure in the current hook chain. A hook procedure can call this
+        ///     function either before or after processing the hook information.
+        /// </summary>
+        /// <param name="hhk">This parameter is ignored.</param>
+        /// <param name="nCode">
+        ///     The hook code passed to the current hook procedure. The next hook procedure uses this code to
+        ///     determine how to process the hook information.
+        /// </param>
+        /// <param name="wParam">
+        ///     The wParam value passed to the current hook procedure. The meaning of this parameter depends on
+        ///     the type of hook associated with the current hook chain.
+        /// </param>
+        /// <param name="lParam">
+        ///     The lParam value passed to the current hook procedure. The meaning of this parameter depends on
+        ///     the type of hook associated with the current hook chain.
+        /// </param>
+        /// <returns>
+        ///     This value is returned by the next hook procedure in the chain. The current hook procedure must also return
+        ///     this value. The meaning of the return value depends on the hook type. For more information, see the descriptions of
+        ///     the individual hook procedures.
+        /// </returns>
+        [DllImport("user32.dll")]
+        private static extern int CallNextHookEx(IntPtr hHook, int nCode, IntPtr wParam, ref LowLevelKeyboardInputEvent lParam);
 
         [DllImport("kernel32.dll", CharSet = CharSet.Auto, SetLastError = true)]
         private static extern IntPtr GetModuleHandle(string lpModuleName);
@@ -230,31 +177,38 @@ namespace AmeisenBotX.Core.Keyboard
         [DllImport("user32.dll")]
         private static extern int UnhookWindowsHookEx(IntPtr hHook);
 
-        /// <summary>
-        ///     Passes the hook information to the next hook procedure in the current hook chain. A hook procedure can call this
-        ///     function either before or after processing the hook information.
-        /// </summary>
-        /// <param name="hhk">This parameter is ignored.</param>
-        /// <param name="nCode">
-        ///     The hook code passed to the current hook procedure. The next hook procedure uses this code to
-        ///     determine how to process the hook information.
-        /// </param>
-        /// <param name="wParam">
-        ///     The wParam value passed to the current hook procedure. The meaning of this parameter depends on
-        ///     the type of hook associated with the current hook chain.
-        /// </param>
-        /// <param name="lParam">
-        ///     The lParam value passed to the current hook procedure. The meaning of this parameter depends on
-        ///     the type of hook associated with the current hook chain.
-        /// </param>
-        /// <returns>
-        ///     This value is returned by the next hook procedure in the chain. The current hook procedure must also return
-        ///     this value. The meaning of the return value depends on the hook type. For more information, see the descriptions of
-        ///     the individual hook procedures.
-        /// </returns>
-        [DllImport("user32.dll")]
-        private static extern int CallNextHookEx(IntPtr hHook, int nCode, IntPtr wParam, ref LowLevelKeyboardInputEvent lParam);
+        private int LowLevelKeyboardCallback(int nCode, IntPtr wParam, ref LowLevelKeyboardInputEvent lParam)
+        {
+            bool handled = false;
+            int wParamValue = wParam.ToInt32();
 
-        #endregion
+            if (Enum.IsDefined(typeof(KeyboardState), wParamValue))
+            {
+                KeyboardState keyboardState = (KeyboardState)wParamValue;
+
+                if (keyboardState == KeyboardState.KeyDown
+                    || keyboardState == KeyboardState.SysKeyDown)
+                {
+                    KeyboardHookEventArgs keyboardHookEventArgs = new(keyboardInput: lParam);
+                    OnPressed?.Invoke(keyboardHookEventArgs);
+                    handled = keyboardHookEventArgs.Handled;
+                }
+
+                if (keyboardState == KeyboardState.KeyUp
+                    || keyboardState == KeyboardState.SysKeyUp)
+                {
+                    KeyboardHookEventArgs keyboardHookEventArgs = new(keyboardInput: lParam);
+                    OnReleased?.Invoke(new KeyboardHookEventArgs(keyboardInput: lParam));
+                    handled = keyboardHookEventArgs.Handled;
+                }
+            }
+
+            if (handled)
+            {
+                return 1;
+            }
+
+            return CallNextHookEx(IntPtr.Zero, nCode, wParam, ref lParam);
+        }
     }
 }

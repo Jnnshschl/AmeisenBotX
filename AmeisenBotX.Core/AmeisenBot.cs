@@ -313,11 +313,14 @@ namespace AmeisenBotX.Core
 
         private bool TalentUpdateRunning { get; set; }
 
+        private bool Exiting { get; set; }
+
         /// <summary>
         /// Use this method to destroy the bots instance
         /// </summary>
         public void Dispose()
         {
+            Exiting = true;
             AmeisenLogger.I.Log("AmeisenBot", "Stopping", LogLevel.Debug);
 
             if (Config.SaveWowWindowPosition && !StateMachine.WowCrashed)
@@ -1075,7 +1078,7 @@ namespace AmeisenBotX.Core
         private void StateMachineTimerTick(object state)
         {
             // only start one timer tick at a time
-            if (Interlocked.CompareExchange(ref stateMachineTimerBusy, 1, 0) == 1 || !IsRunning)
+            if (Interlocked.CompareExchange(ref stateMachineTimerBusy, 1, 0) == 1 || !IsRunning || Exiting)
             {
                 return;
             }

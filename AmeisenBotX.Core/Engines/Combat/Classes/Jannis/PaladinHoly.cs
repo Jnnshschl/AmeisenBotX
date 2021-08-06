@@ -1,6 +1,8 @@
 ﻿using AmeisenBotX.Core.Data.Objects;
 using AmeisenBotX.Core.Engines.Character.Comparators;
+using AmeisenBotX.Core.Engines.Character.Spells.Objects;
 using AmeisenBotX.Core.Engines.Character.Talents.Objects;
+using AmeisenBotX.Core.Engines.Combat.Helpers.Healing;
 using AmeisenBotX.Core.Engines.Movement.Enums;
 using AmeisenBotX.Core.Fsm;
 using AmeisenBotX.Core.Fsm.Utils.Auras.Objects;
@@ -19,14 +21,37 @@ namespace AmeisenBotX.Core.Engines.Combat.Classes.Jannis
             MyAuraManager.Jobs.Add(new KeepActiveAuraJob(bot.Db, sealOfWisdomSpell, () => Bot.Character.SpellBook.IsSpellKnown(sealOfWisdomSpell) && TryCastSpell(sealOfWisdomSpell, Bot.Wow.PlayerGuid, true)));
             MyAuraManager.Jobs.Add(new KeepActiveAuraJob(bot.Db, sealOfVengeanceSpell, () => !Bot.Character.SpellBook.IsSpellKnown(sealOfWisdomSpell) && TryCastSpell(sealOfVengeanceSpell, Bot.Wow.PlayerGuid, true)));
 
-            SpellUsageHealDict = new Dictionary<int, string>()
+            GroupAuraManager.SpellsToKeepActiveOnParty.Add((blessingOfWisdomSpell, (spellName, guid) => TryCastSpell(spellName, guid, true)));
+
+            HealingManager = new(bot, (string spellName, ulong guid) => { return TryCastSpell(spellName, guid); });
+
+            Bot.CombatLog.OnDamage += HealingManager.OnDamage;
+            Bot.CombatLog.OnHeal += HealingManager.OnHeal;
+
+            Bot.Character.SpellBook.OnSpellBookUpdate += () =>
             {
-                { 0, flashOfLightSpell },
-                { 300, holyLightSpell },
-                { 2000, holyShockSpell },
+                if (Bot.Character.SpellBook.TryGetSpellByName(flashOfLightSpell, out Spell spellFlashOfLight))
+                {
+                    HealingManager.AddSpell(spellFlashOfLight);
+                }
+
+                if (Bot.Character.SpellBook.TryGetSpellByName(holyLightSpell, out Spell spellHolyLight))
+                {
+                    HealingManager.AddSpell(spellHolyLight);
+                }
+
+                if (Bot.Character.SpellBook.TryGetSpellByName(holyShockSpell, out Spell spellHolyShock))
+                {
+                    HealingManager.AddSpell(spellHolyShock);
+                }
+
+                if (Bot.Character.SpellBook.TryGetSpellByName(layOnHandsSpell, out Spell spellLayOnHands))
+                {
+                    HealingManager.AddSpell(spellLayOnHands);
+                }
             };
 
-            GroupAuraManager.SpellsToKeepActiveOnParty.Add((blessingOfWisdomSpell, (spellName, guid) => TryCastSpell(spellName, guid, true)));
+            SpellAbortFunctions.Add(HealingManager.ShouldAbortCasting);
         }
 
         public override string Description => "FCFS based CombatClass for the Holy Paladin spec.";
@@ -96,11 +121,24 @@ namespace AmeisenBotX.Core.Engines.Combat.Classes.Jannis
 
         public override WowClass WowClass => WowClass.Paladin;
 
-        private Dictionary<int, string> SpellUsageHealDict { get; }
+        private HealingManager HealingManager { get; }
 
         public override void Execute()
         {
             base.Execute();
+
+            if (Bot.Player.ManaPercentage < 50
+               && Bot.Player.ManaPercentage > 20
+               && TryCastSpell(divineIlluminationSpell, 0, true))
+            {
+                return;
+            }
+
+            if (Bot.Player.ManaPercentage < 60
+                && TryCastSpell(divinePleaSpell, 0, true))
+            {
+                return;
+            }
 
             if (Bot.Objects.Partymembers.Any(e => e.Guid != Bot.Wow.PlayerGuid) || Bot.Player.HealthPercentage < 65.0)
             {
@@ -155,16 +193,7 @@ namespace AmeisenBotX.Core.Engines.Combat.Classes.Jannis
 
                 if (targetUnit == null)
                 {
-                    if (targetUnit == null)
-                    {
-                        return false;
-                    }
-                }
-
-                if (targetUnit.HealthPercentage < 15.0
-                    && TryCastSpell(layOnHandsSpell, 0))
-                {
-                    return true;
+                    return false;
                 }
 
                 if (unitsToHeal.Count(e => !e.Auras.Any(e => Bot.Db.GetSpellName(e.SpellId) == beaconOfLightSpell)) > 1
@@ -180,31 +209,10 @@ namespace AmeisenBotX.Core.Engines.Combat.Classes.Jannis
                 //     LastHealAction = DateTime.Now;
                 //     return true;
                 // }
+            }
 
-                if (Bot.Player.ManaPercentage < 50
-                   && Bot.Player.ManaPercentage > 20
-                   && TryCastSpell(divineIlluminationSpell, 0, true))
-                {
-                    return true;
-                }
-
-                if (Bot.Player.ManaPercentage < 60
-                    && TryCastSpell(divinePleaSpell, 0, true))
-                {
-                    return true;
-                }
-
-                double healthDifference = targetUnit.MaxHealth - targetUnit.Health;
-                List<KeyValuePair<int, string>> spellsToTry = SpellUsageHealDict.Where(e => e.Key <= healthDifference).ToList();
-
-                foreach (KeyValuePair<int, string> keyValuePair in spellsToTry.OrderByDescending(e => e.Value))
-                {
-                    if (TryCastSpell(keyValuePair.Value, targetUnit.Guid, true))
-                    {
-                        break;
-                    }
-                }
-
+            if (HealingManager.Tick())
+            {
                 return true;
             }
 

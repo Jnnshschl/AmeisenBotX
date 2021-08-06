@@ -151,8 +151,11 @@ namespace AmeisenBotX.Core.Engines.Movement
                     return false;
                 }
 
-                double distance = lastNode.GetDistance(position);
-                return distance < maxDistance;
+                // TODO: handle incomplete paths, disabled for now
+                // double distance = lastNode.GetDistance(position);
+                // return distance < maxDistance;
+
+                return true;
             }
 
             return false;
