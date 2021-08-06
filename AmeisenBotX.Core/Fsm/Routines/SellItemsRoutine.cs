@@ -24,7 +24,8 @@ namespace AmeisenBotX.Core.Fsm.Routines
                     continue;
                 }
 
-                if (bot.Character.IsItemAnImprovement(itemToSell, out IWowInventoryItem itemToReplace))
+                if (bot.Character.IsItemAnImprovement(itemToSell, out IWowInventoryItem itemToReplace)
+                    && itemToReplace != null)
                 {
                     // equip item and sell the other after
                     itemToSell = itemToReplace;

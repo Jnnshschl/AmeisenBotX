@@ -903,6 +903,10 @@ namespace AmeisenBotX.Core
 
                     switch (parts[1].ToUpper())
                     {
+                        case "CONFIRM_LOOT_ROLL":
+                            Bot.Wow.ClickUiElement($"StaticPopup{parts[0]}Button1");
+                            break;
+
                         default:
                             break;
                     }
