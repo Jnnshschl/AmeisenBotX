@@ -1,6 +1,8 @@
 ﻿using AmeisenBotX.Common.Utils;
 using AmeisenBotX.Core.Data.Objects;
 using AmeisenBotX.Core.Engines.Character.Spells.Objects;
+using AmeisenBotX.Logging;
+using AmeisenBotX.Logging.Enums;
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -332,6 +334,8 @@ namespace AmeisenBotX.Core.Engines.Combat.Helpers.Healing
                     IncomingDamage[guid] = 0;
                 }
             }
+
+            AmeisenLogger.I.Log("HealingManager", $"IncomingDamage: {JsonSerializer.Serialize(IncomingDamage)}", LogLevel.Verbose);
         }
 
         /// <summary>
@@ -353,6 +357,8 @@ namespace AmeisenBotX.Core.Engines.Combat.Helpers.Healing
                     SpellHealing[spell] = (int)SpellHealingBuffer[spell].Average();
                 }
             }
+
+            AmeisenLogger.I.Log("HealingManager", $"SpellHealing: {JsonSerializer.Serialize(SpellHealing)}", LogLevel.Verbose);
         }
     }
 }
