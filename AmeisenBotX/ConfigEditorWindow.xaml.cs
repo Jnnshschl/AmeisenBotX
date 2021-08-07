@@ -188,8 +188,13 @@ namespace AmeisenBotX
                 Config.MovementSettings.SeperationDistance = (float)sliderPlayerSeperationDistance.Value;
                 Config.MovementSettings.WaypointCheckThreshold = (float)sliderWaypointThreshold.Value;
 
-                // Key binding settings
-                Config.KeyBindingSettings.StartStopBot = ((VirtualKeyStates)Enum.Parse(typeof(VirtualKeyStates), comboboxStartStopBotBindingAltKey.SelectedValue.ToString()), (Keys)Enum.Parse(typeof(Keys), comboboxStartStopBotBindingKey.SelectedValue.ToString()));
+                if (comboboxStartStopBotBindingAltKey.SelectedValue != null
+                    && comboboxStartStopBotBindingKey.SelectedValue != null
+                    && Enum.TryParse(comboboxStartStopBotBindingAltKey.SelectedValue.ToString(), out VirtualKeyStates alt)
+                    && Enum.TryParse(comboboxStartStopBotBindingKey.SelectedValue.ToString(), out Keys key))
+                {
+                    Config.KeyBindingSettings.StartStopBot = (alt, key);
+                }
 
                 SaveConfig = true;
                 Close();
