@@ -3,7 +3,10 @@ using AmeisenBotX.Core.Data.Objects;
 using AmeisenBotX.Core.Engines.Character.Spells.Objects;
 using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
+using System.Text.Json;
+using System.Text.Json.Serialization;
 
 namespace AmeisenBotX.Core.Engines.Combat.Helpers.Healing
 {
@@ -45,13 +48,33 @@ namespace AmeisenBotX.Core.Engines.Combat.Helpers.Healing
             MeasurementEvent = new(TimeSpan.FromSeconds(1));
             IncomingDamage = new();
             IncomingDamageBuffer = new();
-            SpellHealing = new();
             SpellHealingBuffer = new();
+
+            DataPath = Bot.GetDataPath("combat", "healingmanager.json");
+            Bot.OnExit += OnExit;
+
+            if (File.Exists(DataPath))
+            {
+                try
+                {
+                    SpellHealing = JsonSerializer.Deserialize<Dictionary<string, int>>(File.ReadAllText(DataPath), new() { AllowTrailingCommas = true, NumberHandling = JsonNumberHandling.AllowReadingFromString });
+                }
+                catch
+                {
+                    SpellHealing = new();
+                }
+            }
+            else
+            {
+                SpellHealing = new();
+            }
         }
 
         private AmeisenBotInterfaces Bot { get; }
 
         private int DamageMonitorSeconds { get; }
+
+        private string DataPath { get; }
 
         private List<Spell> HealingSpells { get; }
 
@@ -87,6 +110,15 @@ namespace AmeisenBotX.Core.Engines.Combat.Helpers.Healing
                 SpellHealingBuffer.Add(spell.Name, new());
                 SpellHealing.Add(spell.Name, 0);
             }
+        }
+
+        private void OnExit()
+        {
+            try
+            {
+                File.WriteAllText(DataPath, JsonSerializer.Serialize(SpellHealing));
+            }
+            catch { }
         }
 
         /// <summary>

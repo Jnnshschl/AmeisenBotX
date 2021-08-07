@@ -105,6 +105,7 @@ namespace AmeisenBotX.Core
             // start initializing the wow interface
             Bot = new();
             Bot.Memory = new XMemory();
+            Bot.GetDataPath = GetDataPath;
 
             StateMachine = new(Config, Bot);
             StateMachine.GetState<StateStartWow>().OnWoWStarted += () =>
@@ -115,10 +116,8 @@ namespace AmeisenBotX.Core
                 }
             };
 
-            // Setup keyboard hook
+            // setup keyboard hook to catch hotkeys
             Bot.Keyboard = new KeyboardHook();
-
-            // Enable keyboard hook
             Bot.Keyboard.Enable();
 
             Bot.Chat = new DefaultChatManager(Config, DataFolder);
@@ -323,6 +322,8 @@ namespace AmeisenBotX.Core
             Exiting = true;
             AmeisenLogger.I.Log("AmeisenBot", "Stopping", LogLevel.Debug);
 
+            Bot.Exit();
+
             if (Config.SaveWowWindowPosition && !StateMachine.WowCrashed)
             {
                 SaveWowWindowPosition();
@@ -362,7 +363,7 @@ namespace AmeisenBotX.Core
                 }
                 else
                 {
-                    Bot.Memory.Process.Kill();
+                    Bot.Memory.Process?.Kill();
                 }
             }
 
@@ -691,11 +692,6 @@ namespace AmeisenBotX.Core
             AmeisenLogger.I.Log("AmeisenBot", $"OnBattlegroundStatusChanged: {s}");
         }
 
-        private void OnConfirmBindOnPickup(long timestamp, List<string> args)
-        {
-            Bot.Wow.CofirmStaticPopup();
-        }
-
         private void OnEquipmentChanged(long timestamp, List<string> args)
         {
             if (EquipmentUpdateEvent.Run())
@@ -734,8 +730,7 @@ namespace AmeisenBotX.Core
                     // get the item id and try again
                     itemJson = Bot.Wow.GetItemByNameOrLink
                     (
-                        itemLink
-                            .Split(new string[] { "Hitem:" }, StringSplitOptions.RemoveEmptyEntries)[1]
+                        itemLink.Split(new string[] { "Hitem:" }, StringSplitOptions.RemoveEmptyEntries)[1]
                             .Split(new string[] { ":" }, StringSplitOptions.RemoveEmptyEntries)[0]
                     );
 
@@ -871,11 +866,6 @@ namespace AmeisenBotX.Core
             Bot.Wow.CofirmReadyCheck(true);
         }
 
-        private void OnResurrectRequest(long timestamp, List<string> args)
-        {
-            Bot.Wow.AcceptResurrect();
-        }
-
         private void OnShowQuestFrame(long timestamp, List<string> args)
         {
             if (Config.AutoAcceptQuests && StateMachine.CurrentState.Key != BotState.Questing)
@@ -904,6 +894,7 @@ namespace AmeisenBotX.Core
                         case "CONFIRM_LOOT_ROLL":
                         case "EQUIP_BIND":
                         case "LOOT_BIND":
+                        case "RESURRECT":
                         case "USE_BIND":
                             Bot.Wow.ClickUiElement($"StaticPopup{parts[0]}Button1");
                             break;
@@ -933,6 +924,18 @@ namespace AmeisenBotX.Core
                 Bot.Character.TalentManager.SelectTalents(Bot.CombatClass.Talents, Bot.Wow.GetUnspentTalentPoints());
                 TalentUpdateRunning = false;
             }
+        }
+
+        internal string GetDataPath(string moduleName, string filename)
+        {
+            string path = Path.Combine(DataFolder, "data", moduleName.ToLower());
+
+            if (!Directory.Exists(path))
+            {
+                Directory.CreateDirectory(path);
+            }
+
+            return Path.Combine(path, filename.ToLower());
         }
 
         private void OnTradeAcceptUpdate(long timestamp, List<string> args)
@@ -1112,13 +1115,11 @@ namespace AmeisenBotX.Core
 
             // Request Events
             Bot.Wow.Events.Subscribe("PARTY_INVITE_REQUEST", OnPartyInvitation);
-            Bot.Wow.Events.Subscribe("RESURRECT_REQUEST", OnResurrectRequest);
             Bot.Wow.Events.Subscribe("CONFIRM_SUMMON", OnSummonRequest);
             Bot.Wow.Events.Subscribe("READY_CHECK", OnReadyCheck);
 
             // Loot/Item Events
             Bot.Wow.Events.Subscribe("LOOT_OPENED", OnLootWindowOpened);
-            Bot.Wow.Events.Subscribe("LOOT_BIND_CONFIRM", OnConfirmBindOnPickup);
             Bot.Wow.Events.Subscribe("START_LOOT_ROLL", OnLootRollStarted);
             Bot.Wow.Events.Subscribe("BAG_UPDATE", OnBagChanged);
             Bot.Wow.Events.Subscribe("PLAYER_EQUIPMENT_CHANGED", OnEquipmentChanged);

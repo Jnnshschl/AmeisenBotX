@@ -74,6 +74,10 @@ namespace AmeisenBotX.Core
 
         public IWowUnit Target => Objects.Target;
 
+        public Func<string, string, string> GetDataPath { get; set; }
+
+        public event Action OnExit;
+
         public IWowInterface Wow { get; set; }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -175,6 +179,11 @@ namespace AmeisenBotX.Core
         public T GetWowObjectByGuid<T>(ulong guid) where T : IWowObject
         {
             return Objects.WowObjects.OfType<T>().FirstOrDefault(e => e.Guid == guid);
+        }
+
+        internal void Exit()
+        {
+            OnExit?.Invoke();
         }
     }
 }
