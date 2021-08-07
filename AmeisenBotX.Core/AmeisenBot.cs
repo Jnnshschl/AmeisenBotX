@@ -300,6 +300,8 @@ namespace AmeisenBotX.Core
 
         private Stopwatch ExecutionMsStopwatch { get; }
 
+        private bool Exiting { get; set; }
+
         private bool NeedToSetupRconClient { get; set; }
 
         private TimegatedEvent PoiCacheEvent { get; }
@@ -311,8 +313,6 @@ namespace AmeisenBotX.Core
         private Timer StateMachineTimer { get; set; }
 
         private bool TalentUpdateRunning { get; set; }
-
-        private bool Exiting { get; set; }
 
         /// <summary>
         /// Use this method to destroy the bots instance
@@ -437,6 +437,18 @@ namespace AmeisenBotX.Core
             IsRunning = true;
 
             AmeisenLogger.I.Log("AmeisenBot", "Setup done", LogLevel.Debug);
+        }
+
+        internal string GetDataPath(string moduleName, string filename)
+        {
+            string path = Path.Combine(DataFolder, "data", moduleName.ToLower());
+
+            if (!Directory.Exists(path))
+            {
+                Directory.CreateDirectory(path);
+            }
+
+            return Path.Combine(path, filename.ToLower());
         }
 
         private static T LoadClassByName<T>(IEnumerable<T> profiles, string profileName)
@@ -924,18 +936,6 @@ namespace AmeisenBotX.Core
                 Bot.Character.TalentManager.SelectTalents(Bot.CombatClass.Talents, Bot.Wow.GetUnspentTalentPoints());
                 TalentUpdateRunning = false;
             }
-        }
-
-        internal string GetDataPath(string moduleName, string filename)
-        {
-            string path = Path.Combine(DataFolder, "data", moduleName.ToLower());
-
-            if (!Directory.Exists(path))
-            {
-                Directory.CreateDirectory(path);
-            }
-
-            return Path.Combine(path, filename.ToLower());
         }
 
         private void OnTradeAcceptUpdate(long timestamp, List<string> args)

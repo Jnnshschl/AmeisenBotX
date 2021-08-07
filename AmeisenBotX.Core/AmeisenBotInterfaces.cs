@@ -30,6 +30,8 @@ namespace AmeisenBotX.Core
 {
     public class AmeisenBotInterfaces
     {
+        public event Action OnExit;
+
         public IBattlegroundEngine Battleground { get; set; }
 
         public ICharacterManager Character { get; set; }
@@ -44,9 +46,13 @@ namespace AmeisenBotX.Core
 
         public IDungeonEngine Dungeon { get; set; }
 
+        public Func<string, string, string> GetDataPath { get; set; }
+
         public IGrindingEngine Grinding { get; set; }
 
         public IJobEngine Jobs { get; set; }
+
+        public KeyboardHook Keyboard { get; set; }
 
         public IWowUnit LastTarget => Objects.LastTarget;
 
@@ -68,15 +74,9 @@ namespace AmeisenBotX.Core
 
         public AmeisenBotRconClient Rcon { get; set; }
 
-        public KeyboardHook Keyboard { get; set; }
-
         public ITacticEngine Tactic { get; set; }
 
         public IWowUnit Target => Objects.Target;
-
-        public Func<string, string, string> GetDataPath { get; set; }
-
-        public event Action OnExit;
 
         public IWowInterface Wow { get; set; }
 

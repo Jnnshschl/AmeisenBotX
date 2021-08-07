@@ -31,7 +31,7 @@ namespace AmeisenBotX.Core.Engines.Combat.Helpers.Healing
             float healthWeight = 0.7f,
             float incomingDamageWeight = 0.3f,
             int targetDyingSeconds = 4,
-            float overhealingStopThreshold = 0.25f
+            float overhealingStopThreshold = 0.75f
         )
         {
             Bot = bot;
@@ -108,17 +108,12 @@ namespace AmeisenBotX.Core.Engines.Combat.Helpers.Healing
             {
                 HealingSpells.Add(spell);
                 SpellHealingBuffer.Add(spell.Name, new());
-                SpellHealing.Add(spell.Name, 0);
-            }
-        }
 
-        private void OnExit()
-        {
-            try
-            {
-                File.WriteAllText(DataPath, JsonSerializer.Serialize(SpellHealing));
+                if (!SpellHealing.ContainsKey(spell.Name))
+                {
+                    SpellHealing.Add(spell.Name, 0);
+                }
             }
-            catch { }
         }
 
         /// <summary>
@@ -300,6 +295,15 @@ namespace AmeisenBotX.Core.Engines.Combat.Helpers.Healing
 
             // no need to heal anyone
             return false;
+        }
+
+        private void OnExit()
+        {
+            try
+            {
+                File.WriteAllText(DataPath, JsonSerializer.Serialize(SpellHealing));
+            }
+            catch { }
         }
 
         /// <summary>
