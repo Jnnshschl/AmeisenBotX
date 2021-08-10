@@ -1,4 +1,5 @@
 ﻿using AmeisenBotX.Common.Math;
+using AmeisenBotX.Common.Utils;
 using AmeisenBotX.Core.Data.Objects;
 using AmeisenBotX.Core.Engines.Character.Comparators;
 using AmeisenBotX.Core.Engines.Character.Talents.Objects;
@@ -9,6 +10,7 @@ using AmeisenBotX.Wow.Objects.Enums;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Text.Json;
 
 namespace AmeisenBotX.Core.Engines.Combat.Classes.einTyp
 {
@@ -172,6 +174,11 @@ namespace AmeisenBotX.Core.Engines.Combat.Classes.einTyp
             }
         }
 
+        public void Load(Dictionary<string, JsonElement> objects)
+        {
+            C = objects["Configureables"].ToDyn();
+        }
+
         public void OutOfCombatExecute()
         {
             computeNewRoute = false;
@@ -227,6 +234,14 @@ namespace AmeisenBotX.Core.Engines.Combat.Classes.einTyp
                     Dancing = true;
                 }
             }
+        }
+
+        public Dictionary<string, object> Save()
+        {
+            return new()
+            {
+                { "configureables", C }
+            };
         }
 
         private void HandleAttacking(IWowUnit target)

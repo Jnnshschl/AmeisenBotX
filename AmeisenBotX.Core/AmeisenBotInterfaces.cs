@@ -30,8 +30,6 @@ namespace AmeisenBotX.Core
 {
     public class AmeisenBotInterfaces
     {
-        public event Action OnExit;
-
         public IBattlegroundEngine Battleground { get; set; }
 
         public ICharacterManager Character { get; set; }
@@ -45,8 +43,6 @@ namespace AmeisenBotX.Core
         public IAmeisenBotDb Db { get; set; }
 
         public IDungeonEngine Dungeon { get; set; }
-
-        public Func<string, string, string> GetDataPath { get; set; }
 
         public IGrindingEngine Grinding { get; set; }
 
@@ -179,11 +175,6 @@ namespace AmeisenBotX.Core
         public T GetWowObjectByGuid<T>(ulong guid) where T : IWowObject
         {
             return Objects.WowObjects.OfType<T>().FirstOrDefault(e => e.Guid == guid);
-        }
-
-        internal void Exit()
-        {
-            OnExit?.Invoke();
         }
     }
 }

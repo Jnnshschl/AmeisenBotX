@@ -29,6 +29,7 @@ using AmeisenBotX.Core.Fsm;
 using AmeisenBotX.Core.Fsm.Enums;
 using AmeisenBotX.Core.Fsm.States;
 using AmeisenBotX.Core.Keyboard;
+using AmeisenBotX.Core.Storage;
 using AmeisenBotX.Learning;
 using AmeisenBotX.Learning.Sessions.Combat;
 using AmeisenBotX.Logging;
@@ -102,10 +103,18 @@ namespace AmeisenBotX.Core
 
             ExecutionMsStopwatch = new();
 
+            string dataFolder = Path.Combine(DataFolder, "data");
+
+            if (!Directory.Exists(dataFolder))
+            {
+                Directory.CreateDirectory(dataFolder);
+            }
+
+            Storage = new(dataFolder, new List<string>() { "AmeisenBotX.Core.Engines.Combat.Classes." });
+
             // start initializing the wow interface
             Bot = new();
             Bot.Memory = new XMemory();
-            Bot.GetDataPath = GetDataPath;
 
             StateMachine = new(Config, Bot);
             StateMachine.GetState<StateStartWow>().OnWoWStarted += () =>
@@ -312,6 +321,8 @@ namespace AmeisenBotX.Core
 
         private Timer StateMachineTimer { get; set; }
 
+        private StorageManager Storage { get; set; }
+
         private bool TalentUpdateRunning { get; set; }
 
         /// <summary>
@@ -322,7 +333,7 @@ namespace AmeisenBotX.Core
             Exiting = true;
             AmeisenLogger.I.Log("AmeisenBot", "Stopping", LogLevel.Debug);
 
-            Bot.Exit();
+            Storage.SaveAll();
 
             if (Config.SaveWowWindowPosition && !StateMachine.WowCrashed)
             {
@@ -401,9 +412,13 @@ namespace AmeisenBotX.Core
         /// <param name="newConfig">New config to load</param>
         public void ReloadConfig(AmeisenBotConfig newConfig)
         {
+            Storage.SaveAll();
+
             Config = newConfig;
             StateMachineTimer = new(StateMachineTimerTick, null, 0, Config.StateMachineTickMs);
             LoadProfiles();
+
+            Storage.LoadAll();
         }
 
         /// <summary>
@@ -437,18 +452,9 @@ namespace AmeisenBotX.Core
             IsRunning = true;
 
             AmeisenLogger.I.Log("AmeisenBot", "Setup done", LogLevel.Debug);
-        }
 
-        internal string GetDataPath(string moduleName, string filename)
-        {
-            string path = Path.Combine(DataFolder, "data", moduleName.ToLower());
-
-            if (!Directory.Exists(path))
-            {
-                Directory.CreateDirectory(path);
-            }
-
-            return Path.Combine(path, filename.ToLower());
+            Storage.Storeables.Add(Bot.CombatClass);
+            Storage.LoadAll();
         }
 
         private static T LoadClassByName<T>(IEnumerable<T> profiles, string profileName)

@@ -19,6 +19,7 @@ using System;
 using System.Collections.Generic;
 using System.Globalization;
 using System.Linq;
+using System.Text.Json;
 
 namespace AmeisenBotX.Core.Engines.Combat.Classes.ToadLump
 {
@@ -612,6 +613,11 @@ namespace AmeisenBotX.Core.Engines.Combat.Classes.ToadLump
             }
         }
 
+        public void Load(Dictionary<string, JsonElement> objects)
+        {
+            C = objects["configureables"].ToDyn();
+        }
+
         public virtual void OutOfCombatExecute()
         {
             if ((Bot.Player.Auras.Any(e => Bot.Db.GetSpellName(e.SpellId) == "Food") && Bot.Player.HealthPercentage < 100.0)
@@ -625,6 +631,14 @@ namespace AmeisenBotX.Core.Engines.Combat.Classes.ToadLump
             {
                 return;
             }
+        }
+
+        public Dictionary<string, object> Save()
+        {
+            return new()
+            {
+                { "configureables", C }
+            };
         }
 
         public override string ToString()

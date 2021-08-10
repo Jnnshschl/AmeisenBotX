@@ -19,6 +19,7 @@ using System;
 using System.Collections.Generic;
 using System.Globalization;
 using System.Linq;
+using System.Text.Json;
 
 namespace AmeisenBotX.Core.Engines.Combat.Classes.Jannis
 {
@@ -420,12 +421,6 @@ namespace AmeisenBotX.Core.Engines.Combat.Classes.Jannis
             Bot = bot;
             StateMachine = stateMachine;
 
-            C = new()
-            {
-                { "HealthItemThreshold", 30.0 },
-                { "ManaItemThreshold", 30.0 }
-            };
-
             SpellAbortFunctions = new();
 
             CooldownManager = new(Bot.Character.SpellBook.Spells);
@@ -443,6 +438,12 @@ namespace AmeisenBotX.Core.Engines.Combat.Classes.Jannis
 
             EventCheckFacing = new(TimeSpan.FromMilliseconds(500));
             EventAutoAttack = new(TimeSpan.FromMilliseconds(500));
+
+            C = new()
+            {
+                { "HealthItemThreshold", 30.0 },
+                { "ManaItemThreshold", 30.0 }
+            };
         }
 
         public string Author { get; } = "Jannis";
@@ -640,6 +641,11 @@ namespace AmeisenBotX.Core.Engines.Combat.Classes.Jannis
             }
         }
 
+        public virtual void Load(Dictionary<string, JsonElement> objects)
+        {
+            if (objects.ContainsKey("Configureables")) { C = objects["Configureables"].ToDyn(); }
+        }
+
         public virtual void OutOfCombatExecute()
         {
             if (Bot.Player.IsCasting)
@@ -663,6 +669,11 @@ namespace AmeisenBotX.Core.Engines.Combat.Classes.Jannis
             {
                 return;
             }
+        }
+
+        public virtual Dictionary<string, object> Save()
+        {
+            return new() { { "Configureables", C } };
         }
 
         public override string ToString()
@@ -690,6 +701,11 @@ namespace AmeisenBotX.Core.Engines.Combat.Classes.Jannis
             }
 
             return false;
+        }
+
+        protected string GetFolder()
+        {
+            return GetType().FullName.ToLower().Replace("ameisenbotx.core.engines.", string.Empty);
         }
 
         protected bool HandleDeadPartymembers(string spellName)
@@ -768,7 +784,7 @@ namespace AmeisenBotX.Core.Engines.Combat.Classes.Jannis
         {
             if (TryCastSpell(spellName, guid, needsResource, currentResourceAmount, forceTargetSwitch))
             {
-                if (GetValidTarget(guid, out IWowUnit target, out bool _))
+                if (ValidateTarget(guid, out IWowUnit target, out bool _))
                 {
                     Bot.Wow.ClickOnTerrain(target.Position);
                     LastSpellCast = DateTime.UtcNow;
@@ -783,7 +799,7 @@ namespace AmeisenBotX.Core.Engines.Combat.Classes.Jannis
         {
             if (TryCastSpellDk(spellName, guid, needsRuneenergy, needsBloodrune, needsFrostrune, needsUnholyrune, forceTargetSwitch))
             {
-                if (GetValidTarget(guid, out IWowUnit target, out bool _))
+                if (ValidateTarget(guid, out IWowUnit target, out bool _))
                 {
                     Bot.Wow.ClickOnTerrain(target.Position);
                     LastSpellCast = DateTime.UtcNow;
@@ -798,7 +814,7 @@ namespace AmeisenBotX.Core.Engines.Combat.Classes.Jannis
         {
             if (!Bot.Character.SpellBook.IsSpellKnown(spellName) || ((guid != 0 && guid != Bot.Wow.PlayerGuid) && !Bot.Objects.IsTargetInLineOfSight)) { return false; }
 
-            if (GetValidTarget(guid, out IWowUnit target, out bool needToSwitchTarget))
+            if (ValidateTarget(guid, out IWowUnit target, out bool needToSwitchTarget))
             {
                 if (currentResourceAmount == 0)
                 {
@@ -849,7 +865,7 @@ namespace AmeisenBotX.Core.Engines.Combat.Classes.Jannis
         {
             if (!Bot.Character.SpellBook.IsSpellKnown(spellName) || ((guid != 0 && guid != Bot.Wow.PlayerGuid) && !Bot.Objects.IsTargetInLineOfSight)) { return false; }
 
-            if (GetValidTarget(guid, out IWowUnit target, out bool needToSwitchTarget))
+            if (ValidateTarget(guid, out IWowUnit target, out bool needToSwitchTarget))
             {
                 bool isTargetMyself = guid == 0;
                 Spell spell = Bot.Character.SpellBook.GetSpellByName(spellName);
@@ -893,7 +909,7 @@ namespace AmeisenBotX.Core.Engines.Combat.Classes.Jannis
         {
             if (!Bot.Character.SpellBook.IsSpellKnown(spellName) || ((guid != 0 && guid != Bot.Wow.PlayerGuid) && !Bot.Objects.IsTargetInLineOfSight)) { return false; }
 
-            if (GetValidTarget(guid, out IWowUnit target, out bool needToSwitchTarget))
+            if (ValidateTarget(guid, out IWowUnit target, out bool needToSwitchTarget))
             {
                 bool isTargetMyself = guid == 0;
                 Spell spell = Bot.Character.SpellBook.GetSpellByName(spellName);
@@ -934,7 +950,7 @@ namespace AmeisenBotX.Core.Engines.Combat.Classes.Jannis
         {
             if (!Bot.Character.SpellBook.IsSpellKnown(spellName) || ((guid != 0 && guid != Bot.Wow.PlayerGuid) && !Bot.Objects.IsTargetInLineOfSight)) { return false; }
 
-            if (GetValidTarget(guid, out IWowUnit target, out bool needToSwitchTarget))
+            if (ValidateTarget(guid, out IWowUnit target, out bool needToSwitchTarget))
             {
                 if (currentResourceAmount == 0)
                 {
@@ -1054,7 +1070,7 @@ namespace AmeisenBotX.Core.Engines.Combat.Classes.Jannis
             }
         }
 
-        private bool GetValidTarget(ulong guid, out IWowUnit target, out bool needToSwitchTargets)
+        private bool ValidateTarget(ulong guid, out IWowUnit target, out bool needToSwitchTargets)
         {
             if (guid == 0)
             {

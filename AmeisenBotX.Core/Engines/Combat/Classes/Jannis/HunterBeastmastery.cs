@@ -41,17 +41,17 @@ namespace AmeisenBotX.Core.Engines.Combat.Classes.Jannis
                 { 1, (x) => TryCastSpell(intimidationSpell, x.Guid, true) }
             };
 
-            C.Add("KitingStartDistanceUnit", 3.0f);
-            C.Add("KitingEndDistanceUnit", 12.0f);
-            C.Add("SteadyShotMinDistanceUnit", 12.0f);
-            C.Add("ChaseDistanceUnit", 20.0f);
+            C.TryAdd("KitingStartDistanceUnit", 3.0f);
+            C.TryAdd("KitingEndDistanceUnit", 12.0f);
+            C.TryAdd("SteadyShotMinDistanceUnit", 12.0f);
+            C.TryAdd("ChaseDistanceUnit", 20.0f);
 
-            C.Add("KitingStartDistancePlayer", 8.0f);
-            C.Add("KitingEndDistancePlayer", 22.0f);
-            C.Add("SteadyShotMinDistancePlayer", 22.0f);
-            C.Add("ChaseDistancePlayer", 24.0f);
+            C.TryAdd("KitingStartDistancePlayer", 8.0f);
+            C.TryAdd("KitingEndDistancePlayer", 22.0f);
+            C.TryAdd("SteadyShotMinDistancePlayer", 22.0f);
+            C.TryAdd("ChaseDistancePlayer", 24.0f);
 
-            C.Add("FleeActionCooldown", 400);
+            C.TryAdd("FleeActionCooldown", 400);
         }
 
         public override string Description => "FCFS based CombatClass for the Beastmastery Hunter spec.";

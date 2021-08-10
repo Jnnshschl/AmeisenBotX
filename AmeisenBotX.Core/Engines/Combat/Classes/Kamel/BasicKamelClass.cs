@@ -9,6 +9,7 @@ using AmeisenBotX.Wow.Objects.Enums;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Text.Json;
 
 namespace AmeisenBotX.Core.Engines.Combat.Classes.Kamel
 {
@@ -307,6 +308,11 @@ namespace AmeisenBotX.Core.Engines.Combat.Classes.Kamel
             return false;
         }
 
+        public void Load(Dictionary<string, JsonElement> objects)
+        {
+            C = objects["Configureables"].ToDyn();
+        }
+
         public abstract void OutOfCombatExecute();
 
         public void RevivePartyMember(string reviveSpellName)
@@ -323,6 +329,14 @@ namespace AmeisenBotX.Core.Engines.Combat.Classes.Kamel
                 Bot.Wow.ChangeTarget(partyMemberToHeal.FirstOrDefault().Guid);
                 CustomCastSpellMana(reviveSpellName);
             }
+        }
+
+        public Dictionary<string, object> Save()
+        {
+            return new()
+            {
+                { "configureables", C }
+            };
         }
 
         public void Targetselection()

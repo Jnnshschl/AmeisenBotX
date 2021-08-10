@@ -250,9 +250,19 @@ namespace AmeisenBotX.Core.Keyboard
 
     public class KeyboardHookEventArgs
     {
-        public HashSet<VirtualKeyStates> Alts { get; }
+        private const int KEY_PRESSED = 0x8000;
 
-        public Keys Key { get; }
+        private readonly HashSet<Keys> AltKeyList = new()
+        {
+            Keys.LMenu,
+            Keys.RMenu,
+            Keys.LControlKey,
+            Keys.RControlKey,
+            Keys.LShiftKey,
+            Keys.RShiftKey,
+            Keys.LWin,
+            Keys.RWin
+        };
 
         /// <summary>
         /// Creates a new instance of the class.
@@ -272,22 +282,12 @@ namespace AmeisenBotX.Core.Keyboard
                 (VirtualKeyStates.RWIN, Keys.RWin));
         }
 
+        public HashSet<VirtualKeyStates> Alts { get; }
+
         // Indicates if the event is handled or not.
         public bool Handled { get; set; }
 
-        private const int KEY_PRESSED = 0x8000;
-
-        private readonly HashSet<Keys> AltKeyList = new()
-        {
-            Keys.LMenu,
-            Keys.RMenu,
-            Keys.LControlKey,
-            Keys.RControlKey,
-            Keys.LShiftKey,
-            Keys.RShiftKey,
-            Keys.LWin,
-            Keys.RWin
-        };
+        public Keys Key { get; }
 
         [DllImport("user32.dll")]
         private static extern short GetKeyState(VirtualKeyStates nVirtKey);
