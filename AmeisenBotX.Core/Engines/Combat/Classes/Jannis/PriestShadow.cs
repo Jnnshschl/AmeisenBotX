@@ -12,14 +12,17 @@ namespace AmeisenBotX.Core.Engines.Combat.Classes.Jannis
         {
             MyAuraManager.Jobs.Add(new KeepActiveAuraJob(bot.Db, shadowformSpell, () => TryCastSpell(shadowformSpell, Bot.Wow.PlayerGuid, true)));
             MyAuraManager.Jobs.Add(new KeepActiveAuraJob(bot.Db, powerWordFortitudeSpell, () => TryCastSpell(powerWordFortitudeSpell, Bot.Wow.PlayerGuid, true)));
+            MyAuraManager.Jobs.Add(new KeepActiveAuraJob(bot.Db, divineSpiritSpell, () => TryCastSpell(divineSpiritSpell, Bot.Wow.PlayerGuid, true)));              //add
             MyAuraManager.Jobs.Add(new KeepActiveAuraJob(bot.Db, vampiricEmbraceSpell, () => TryCastSpell(vampiricEmbraceSpell, Bot.Wow.PlayerGuid, true)));
+            MyAuraManager.Jobs.Add(new KeepActiveAuraJob(bot.Db, innerFireSpell, () => TryCastSpell(innerFireSpell, Bot.Wow.PlayerGuid, true)));                    //add
 
-            TargetAuraManager.Jobs.Add(new KeepActiveAuraJob(bot.Db, vampiricTouchSpell, () => TryCastSpell(vampiricTouchSpell, Bot.Wow.TargetGuid, true)));
+            //TargetAuraManager.Jobs.Add(new KeepActiveAuraJob(bot.Db, vampiricTouchSpell, () => TryCastSpell(vampiricTouchSpell, Bot.Wow.TargetGuid, true)));        //bugged
             TargetAuraManager.Jobs.Add(new KeepActiveAuraJob(bot.Db, devouringPlagueSpell, () => TryCastSpell(devouringPlagueSpell, Bot.Wow.TargetGuid, true)));
             TargetAuraManager.Jobs.Add(new KeepActiveAuraJob(bot.Db, shadowWordPainSpell, () => TryCastSpell(shadowWordPainSpell, Bot.Wow.TargetGuid, true)));
             TargetAuraManager.Jobs.Add(new KeepActiveAuraJob(bot.Db, mindBlastSpell, () => TryCastSpell(mindBlastSpell, Bot.Wow.TargetGuid, true)));
 
             GroupAuraManager.SpellsToKeepActiveOnParty.Add((powerWordFortitudeSpell, (spellName, guid) => TryCastSpell(spellName, guid, true)));
+            GroupAuraManager.SpellsToKeepActiveOnParty.Add((divineSpiritSpell, (spellName, guid) => TryCastSpell(spellName, guid, true)));                          //add
         }
 
         public override string Description => "FCFS based CombatClass for the Shadow Priest spec.";
@@ -85,37 +88,31 @@ namespace AmeisenBotX.Core.Engines.Combat.Classes.Jannis
 
             if (SelectTarget(TargetProviderDps))
             {
-                if (Bot.Player.ManaPercentage < 90
-                    && TryCastSpell(shadowfiendSpell, Bot.Wow.TargetGuid))
+                if (Bot.Player.ManaPercentage < 30
+                    && TryCastSpell(dispersionSpell, 0))    //add spell
+                {
+                    return;
+                }
+                
+                if (Bot.Player.ManaPercentage < 20
+                    && TryCastSpell(shadowfiendSpell, Bot.Wow.TargetGuid))      //more cooldown -> lower threshold 
                 {
                     return;
                 }
 
-                if (Bot.Player.ManaPercentage < 30
+                if (Bot.Player.ManaPercentage < 5                               //more cooldown -> lower threshold
                     && TryCastSpell(hymnOfHopeSpell, 0))
                 {
                     return;
                 }
 
-                if (Bot.Player.HealthPercentage < 70
+                if (Bot.Player.HealthPercentage < 60
                     && TryCastSpell(flashHealSpell, Bot.Wow.TargetGuid, true))
                 {
                     return;
                 }
 
-                if (Bot.Player.ManaPercentage >= 50
-                    && TryCastSpell(berserkingSpell, Bot.Wow.TargetGuid))
-                {
-                    return;
-                }
-
-                if (!Bot.Player.IsCasting
-                    && TryCastSpell(mindFlaySpell, Bot.Wow.TargetGuid, true))
-                {
-                    return;
-                }
-
-                if (TryCastSpell(smiteSpell, Bot.Wow.TargetGuid, true))
+                if (TryCastSpell(mindBlastSpell, Bot.Wow.TargetGuid, true))     // adjust spell to fit shadow-spec (why is it in the aura-manager?)
                 {
                     return;
                 }

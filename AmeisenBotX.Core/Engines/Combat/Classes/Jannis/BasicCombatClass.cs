@@ -231,6 +231,8 @@ namespace AmeisenBotX.Core.Engines.Combat.Classes.Jannis
         protected const string bindingHealSpell = "Binding Heal";
         protected const string desperatePrayerSpell = "Desperate Prayer";
         protected const string devouringPlagueSpell = "Devouring Plague";
+        protected const string divineSpiritSpell = "Divine Spirit";         //add
+        protected const string dispersionSpell = "Dispersion";
         protected const string flashHealSpell = "Flash Heal";
         protected const string greaterHealSpell = "Greater Heal";
         protected const string guardianSpiritSpell = "Guardian Spirit";

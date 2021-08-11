@@ -126,7 +126,7 @@ namespace AmeisenBotX.Core.Engines.Combat.Classes.Jannis
 
                 if (distanceToTarget > 8.0)
                 {
-                    if (TryCastSpellWarrior(chargeSpell, battleStanceSpell, Bot.Wow.TargetGuid, true))
+                    if (TryCastSpellWarrior(chargeSpell, defensiveStanceSpell, Bot.Wow.TargetGuid, true))       //changed for charge-talent
                     {
                         return;
                     }

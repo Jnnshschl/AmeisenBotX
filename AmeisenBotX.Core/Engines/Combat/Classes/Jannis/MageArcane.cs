@@ -102,8 +102,7 @@ namespace AmeisenBotX.Core.Engines.Combat.Classes.Jannis
                         || TryCastSpell(mirrorImageSpell, Bot.Wow.TargetGuid, true)
                         || (Bot.Player.Auras.Any(e => Bot.Db.GetSpellName(e.SpellId) == missileBarrageSpell) && TryCastSpell(arcaneMissilesSpell, Bot.Wow.TargetGuid, true))
                         || TryCastSpell(arcaneBarrageSpell, Bot.Wow.TargetGuid, true)
-                        || TryCastSpell(arcaneBlastSpell, Bot.Wow.TargetGuid, true)
-                        || TryCastSpell(fireballSpell, Bot.Wow.TargetGuid, true))
+                        || TryCastSpell(arcaneBlastSpell, Bot.Wow.TargetGuid, true))        //removed fireball, wrong spec, long cooldown
                     {
                         return;
                     }
