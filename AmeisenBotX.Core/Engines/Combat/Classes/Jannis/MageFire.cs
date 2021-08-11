@@ -104,10 +104,5 @@ namespace AmeisenBotX.Core.Engines.Combat.Classes.Jannis
                 }
             }
         }
-
-        public override void OutOfCombatExecute()
-        {
-            base.OutOfCombatExecute();
-        }
     }
 }

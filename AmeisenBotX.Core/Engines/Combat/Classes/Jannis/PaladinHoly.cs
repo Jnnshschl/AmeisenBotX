@@ -1,5 +1,4 @@
 ﻿using AmeisenBotX.Common.Utils;
-using AmeisenBotX.Core.Data.Objects;
 using AmeisenBotX.Core.Engines.Character.Comparators;
 using AmeisenBotX.Core.Engines.Character.Spells.Objects;
 using AmeisenBotX.Core.Engines.Character.Talents.Objects;
@@ -7,6 +6,7 @@ using AmeisenBotX.Core.Engines.Combat.Helpers.Healing;
 using AmeisenBotX.Core.Engines.Movement.Enums;
 using AmeisenBotX.Core.Fsm;
 using AmeisenBotX.Core.Fsm.Utils.Auras.Objects;
+using AmeisenBotX.Wow.Objects;
 using AmeisenBotX.Wow.Objects.Enums;
 using System.Collections.Generic;
 using System.Linq;
@@ -192,10 +192,9 @@ namespace AmeisenBotX.Core.Engines.Combat.Classes.Jannis
 
             if (objects.ContainsKey("HealingManager"))
             {
-                JsonElement j;
                 Dictionary<string, JsonElement> s = objects["HealingManager"].To<Dictionary<string, JsonElement>>();
 
-                if (s.TryGetValue("SpellHealing", out j)) { HealingManager.SpellHealing = j.To<Dictionary<string, int>>(); }
+                if (s.TryGetValue("SpellHealing", out JsonElement j)) { HealingManager.SpellHealing = j.To<Dictionary<string, int>>(); }
                 if (s.TryGetValue("DamageMonitorSeconds", out j)) { HealingManager.DamageMonitorSeconds = j.To<int>(); }
                 if (s.TryGetValue("HealthWeight", out j)) { HealingManager.HealthWeightMod = j.To<float>(); }
                 if (s.TryGetValue("DamageWeight", out j)) { HealingManager.IncomingDamageMod = j.To<float>(); }

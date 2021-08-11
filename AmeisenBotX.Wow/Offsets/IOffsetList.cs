@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace AmeisenBotX.Common.Offsets
+namespace AmeisenBotX.Wow.Offsets
 {
     public interface IOffsetList
     {

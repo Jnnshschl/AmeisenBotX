@@ -5,12 +5,7 @@ namespace AmeisenBotX.BehaviorTree.Objects
 {
     public class Leaf : Node
     {
-        public Leaf(Func<BehaviorTreeStatus> behaviorTreeAction) : base("")
-        {
-            BehaviorTreeAction = behaviorTreeAction;
-        }
-
-        public Leaf(string name, Func<BehaviorTreeStatus> behaviorTreeAction) : base(name)
+        public Leaf(Func<BehaviorTreeStatus> behaviorTreeAction) : base()
         {
             BehaviorTreeAction = behaviorTreeAction;
         }
@@ -30,12 +25,7 @@ namespace AmeisenBotX.BehaviorTree.Objects
 
     public class Leaf<T> : Node<T>
     {
-        public Leaf(Func<T, BehaviorTreeStatus> behaviorTreeAction) : base("")
-        {
-            BehaviorTreeAction = behaviorTreeAction;
-        }
-
-        public Leaf(string name, Func<T, BehaviorTreeStatus> behaviorTreeAction) : base(name)
+        public Leaf(Func<T, BehaviorTreeStatus> behaviorTreeAction) : base()
         {
             BehaviorTreeAction = behaviorTreeAction;
         }

@@ -13,4 +13,8 @@
     <PlatformTarget>x86</PlatformTarget>
   </PropertyGroup>
 
+  <ItemGroup>
+    <ProjectReference Include="..\AmeisenBotX.Common\AmeisenBotX.Common.csproj" />
+  </ItemGroup>
+
 </Project>

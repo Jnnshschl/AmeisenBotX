@@ -13,17 +13,6 @@ namespace AmeisenBotX.BehaviorTree
             ResumeOngoingNodes = resumeOngoingNodes;
         }
 
-        public AmeisenBotBehaviorTree(string name, Node node, bool resumeOngoingNodes = false)
-        {
-            Name = name;
-            RootNode = node;
-            ResumeOngoingNodes = resumeOngoingNodes;
-        }
-
-        public string LastExecutedName { get; private set; }
-
-        public string Name { get; }
-
         public Node OngoingNode { get; private set; }
 
         public bool ResumeOngoingNodes { get; set; }
@@ -60,7 +49,6 @@ namespace AmeisenBotX.BehaviorTree
             else
             {
                 Node nodeToExecute = RootNode.GetNodeToExecute();
-                LastExecutedName = nodeToExecute.Name;
                 return nodeToExecute.Execute();
             }
         }
@@ -87,36 +75,11 @@ namespace AmeisenBotX.BehaviorTree
             BlackboardUpdateEnabled = true;
         }
 
-        public AmeisenBotBehaviorTree(string name, Node<T> node, T blackboard, bool resumeOngoingNodes = false)
-        {
-            Name = name;
-            RootNode = node;
-            Blackboard = blackboard;
-            ResumeOngoingNodes = resumeOngoingNodes;
-
-            BlackboardUpdateEnabled = false;
-        }
-
-        public AmeisenBotBehaviorTree(string name, Node<T> node, T blackboard, TimeSpan blackboardUpdateTime, bool resumeOngoingNodes = false)
-        {
-            Name = name;
-            RootNode = node;
-            Blackboard = blackboard;
-            BlackboardUpdateTime = blackboardUpdateTime;
-            ResumeOngoingNodes = resumeOngoingNodes;
-
-            BlackboardUpdateEnabled = true;
-        }
-
         public T Blackboard { get; set; }
 
         public TimeSpan BlackboardUpdateTime { get; set; }
 
         public DateTime LastBlackBoardUpdate { get; set; }
-
-        public string LastExecutedName { get; private set; }
-
-        public string Name { get; }
 
         public Node<T> OngoingNode { get; private set; }
 
@@ -162,7 +125,6 @@ namespace AmeisenBotX.BehaviorTree
             else
             {
                 Node<T> nodeToExecute = RootNode.GetNodeToExecute(Blackboard);
-                LastExecutedName = nodeToExecute.Name;
                 return nodeToExecute.Execute(Blackboard);
             }
         }

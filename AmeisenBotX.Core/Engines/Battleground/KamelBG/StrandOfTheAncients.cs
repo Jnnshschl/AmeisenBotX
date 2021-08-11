@@ -1,10 +1,10 @@
 ﻿using AmeisenBotX.Common.Math;
 using AmeisenBotX.Common.Utils;
-using AmeisenBotX.Core.Data.Objects;
 using AmeisenBotX.Core.Engines.Battleground.KamelBG.Enums;
 using AmeisenBotX.Core.Engines.Movement.Enums;
 using AmeisenBotX.Core.Fsm;
 using AmeisenBotX.Core.Fsm.States;
+using AmeisenBotX.Wow.Objects;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -53,7 +53,7 @@ namespace AmeisenBotX.Core.Engines.Battleground.KamelBG
                 }
                 else if (CombatEvent.Run())
                 {
-                    StateMachine.GetState<StateCombat>().Mode = CombatMode.Force;
+                    StateMachine.Get<StateCombat>().Mode = CombatMode.Force;
                     Bot.Wow.ChangeTarget(weakestPlayer.Guid);
                 }
             }

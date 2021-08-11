@@ -10,6 +10,15 @@ namespace AmeisenBotX.Core.Storage
 {
     public class StorageManager
     {
+        /// <summary>
+        /// Helper class used to save configureable values in json files. Files
+        /// will be named after their full class name (including namespace).
+        /// </summary>
+        /// <param name="basePath">Folder to save the json files in.</param>
+        /// <param name="partsToRemove">
+        /// Strings that are going to be removed from the final filename,
+        /// use this to remove namespace parts from them.
+        /// </param>
         public StorageManager(string basePath, IEnumerable<string> partsToRemove = null)
         {
             BasePath = basePath;
@@ -24,27 +33,60 @@ namespace AmeisenBotX.Core.Storage
 
         private IEnumerable<string> PartsToRemove { get; }
 
+        public void Load(IStoreable s)
+        {
+            string fullPath = BuildPath(s);
+
+            try
+            {
+                string parent = Path.GetDirectoryName(fullPath);
+
+                if (!Directory.Exists(parent))
+                {
+                    return;
+                }
+
+                s.Load(JsonSerializer.Deserialize<Dictionary<string, JsonElement>>(File.ReadAllText(fullPath), new() { AllowTrailingCommas = true, NumberHandling = JsonNumberHandling.AllowReadingFromString }));
+            }
+            catch (Exception ex)
+            {
+                AmeisenLogger.I.Log("CombatClass", $"Failed to load {s.GetType().Name} ({fullPath}):\n{ex}", LogLevel.Error);
+            }
+        }
+
         public void LoadAll()
         {
             foreach (IStoreable s in Storeables)
             {
-                string fullPath = BuildPath(s);
+                Load(s);
+            }
+        }
 
-                try
+        public void Save(IStoreable s)
+        {
+            string fullPath = BuildPath(s);
+
+            try
+            {
+                Dictionary<string, object> data = s.Save();
+
+                if (data == null)
                 {
-                    string parent = Path.GetDirectoryName(fullPath);
-
-                    if (!Directory.Exists(parent))
-                    {
-                        continue;
-                    }
-
-                    s.Load(JsonSerializer.Deserialize<Dictionary<string, JsonElement>>(File.ReadAllText(fullPath), new() { AllowTrailingCommas = true, NumberHandling = JsonNumberHandling.AllowReadingFromString }));
+                    return;
                 }
-                catch (Exception ex)
+
+                string parent = Path.GetDirectoryName(fullPath);
+
+                if (!Directory.Exists(parent))
                 {
-                    AmeisenLogger.I.Log("CombatClass", $"Failed to load {s.GetType().Name} ({fullPath}):\n{ex}", LogLevel.Error);
+                    Directory.CreateDirectory(parent);
                 }
+
+                File.WriteAllText(fullPath, JsonSerializer.Serialize(data, new() { WriteIndented = true }));
+            }
+            catch (Exception ex)
+            {
+                AmeisenLogger.I.Log("CombatClass", $"Failed to save {s.GetType().Name} ({fullPath}):\n{ex}", LogLevel.Error);
             }
         }
 
@@ -52,30 +94,7 @@ namespace AmeisenBotX.Core.Storage
         {
             foreach (IStoreable s in Storeables)
             {
-                string fullPath = BuildPath(s);
-
-                try
-                {
-                    Dictionary<string, object> data = s.Save();
-
-                    if (data == null)
-                    {
-                        continue;
-                    }
-
-                    string parent = Path.GetDirectoryName(fullPath);
-
-                    if (!Directory.Exists(parent))
-                    {
-                        Directory.CreateDirectory(parent);
-                    }
-
-                    File.WriteAllText(fullPath, JsonSerializer.Serialize(data, new() { WriteIndented = true }));
-                }
-                catch (Exception ex)
-                {
-                    AmeisenLogger.I.Log("CombatClass", $"Failed to save {s.GetType().Name} ({fullPath}):\n{ex}", LogLevel.Error);
-                }
+                Save(s);
             }
         }
 

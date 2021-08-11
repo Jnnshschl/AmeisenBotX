@@ -1,11 +1,10 @@
-﻿using AmeisenBotX.Common.Offsets;
-using AmeisenBotX.Memory;
-using AmeisenBotX.Wow.Objects;
+﻿using AmeisenBotX.Memory;
 using AmeisenBotX.Wow.Objects.Enums;
+using AmeisenBotX.Wow.Offsets;
 using System.Collections.Generic;
 using System.Collections.Specialized;
 
-namespace AmeisenBotX.Core.Data.Objects
+namespace AmeisenBotX.Wow.Objects
 {
     public interface IWowUnit : IWowObject
     {

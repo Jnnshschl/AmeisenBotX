@@ -1,7 +1,6 @@
 ﻿using AmeisenBotX.Common.Math;
 using AmeisenBotX.Common.Utils;
 using AmeisenBotX.Core;
-using AmeisenBotX.Core.Data.Objects;
 using AmeisenBotX.Core.Fsm.Enums;
 using AmeisenBotX.Core.Fsm.States;
 using AmeisenBotX.Logging;
@@ -431,7 +430,7 @@ namespace AmeisenBotX
             if (AmeisenBot != null
                 && AmeisenBot.Config != null
                 && !string.IsNullOrWhiteSpace(AmeisenBot.Config.Path)
-                && Directory.Exists(AmeisenBot.DataFolder))
+                && Directory.Exists(AmeisenBot.ProfileFolder))
             {
                 File.WriteAllText(AmeisenBot.Config.Path, JsonSerializer.Serialize(AmeisenBot.Config, new() { WriteIndented = true }));
             }
@@ -563,7 +562,7 @@ namespace AmeisenBotX
 
             if (Directory.Exists(oldDataPath))
             {
-                MessageBox.Show("You need to move the content of your \"\\\\data\\\\\" folder to \"%AppData%\\\\Roaming\\\\AmeisenbotX\\\\profiles\\\\\". Otherwise your profiles may not be displayed.", "New Data Location", MessageBoxButton.OK, MessageBoxImage.Warning);
+                MessageBox.Show($"You need to move the content of your \"\\\\data\\\\\" folder to \"{DataPath}\". Otherwise your profiles may not be displayed.", "New Data Location", MessageBoxButton.OK, MessageBoxImage.Warning);
             }
 
             // create our data folder, default will be placed at "%APPDATA%/AmeisenBotX/..."
@@ -619,7 +618,7 @@ namespace AmeisenBotX
                         M11 = presentationSource.CompositionTarget.TransformToDevice.M11;
                         M22 = presentationSource.CompositionTarget.TransformToDevice.M22;
 
-                        AmeisenBot.StateMachine.GetState<StateStartWow>().OnWoWStarted += () =>
+                        AmeisenBot.StateMachine.Get<StateStartWow>().OnWoWStarted += () =>
                         {
                             Dispatcher.Invoke(() =>
                             {

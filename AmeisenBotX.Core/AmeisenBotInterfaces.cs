@@ -1,6 +1,5 @@
 ﻿using AmeisenBotX.Common.Math;
 using AmeisenBotX.Common.Utils;
-using AmeisenBotX.Core.Data.Objects;
 using AmeisenBotX.Core.Engines.Battleground;
 using AmeisenBotX.Core.Engines.Character;
 using AmeisenBotX.Core.Engines.Chat;
@@ -13,7 +12,6 @@ using AmeisenBotX.Core.Engines.Movement.Pathfinding;
 using AmeisenBotX.Core.Engines.Quest;
 using AmeisenBotX.Core.Engines.Tactic;
 using AmeisenBotX.Core.Keyboard;
-using AmeisenBotX.Learning;
 using AmeisenBotX.Memory;
 using AmeisenBotX.RconClient;
 using AmeisenBotX.Wow;
@@ -51,8 +49,6 @@ namespace AmeisenBotX.Core
         public KeyboardHook Keyboard { get; set; }
 
         public IWowUnit LastTarget => Objects.LastTarget;
-
-        public AmeisenBotLearner Learner { get; set; }
 
         public IMemoryApi Memory { get; set; }
 

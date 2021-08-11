@@ -1,5 +1,5 @@
 ﻿using AmeisenBotX.Common.Math;
-using AmeisenBotX.Core.Data.Objects;
+using AmeisenBotX.Wow.Objects;
 using System;
 
 namespace AmeisenBotX.Core.Fsm.Routines

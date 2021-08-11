@@ -1,12 +1,12 @@
 ﻿using AmeisenBotX.Common.Math;
 using AmeisenBotX.Common.Utils;
-using AmeisenBotX.Core.Data.Objects;
 using AmeisenBotX.Core.Engines.Movement.Enums;
 using AmeisenBotX.Core.Engines.Tactic.Bosses.Naxxramas10;
 using AmeisenBotX.Core.Engines.Tactic.Bosses.TheObsidianDungeon;
 using AmeisenBotX.Core.Engines.Tactic.Dungeon.ForgeOfSouls;
 using AmeisenBotX.Core.Engines.Tactic.Dungeon.PitOfSaron;
 using AmeisenBotX.Core.Fsm.Enums;
+using AmeisenBotX.Wow.Objects;
 using AmeisenBotX.Wow.Objects.Enums;
 using System;
 using System.Collections.Generic;
@@ -49,7 +49,7 @@ namespace AmeisenBotX.Core.Fsm.States
         public override void Execute()
         {
             if (StateMachine.StateOverride != BotState.Combat
-                && (StateMachine.GetState<StateCombat>().Mode != CombatMode.Allowed
+                && (StateMachine.Get<StateCombat>().Mode != CombatMode.Allowed
                 || !(Bot.Player.IsInCombat
                 || IsAnyPartymemberInCombat()
                 || Bot.GetEnemiesInCombatWithParty<IWowUnit>(Bot.Player.Position, 100.0f).Any())))
@@ -76,12 +76,12 @@ namespace AmeisenBotX.Core.Fsm.States
                     {
                         if (Bot.Wow.TargetGuid == 0 || Bot.Target == null)
                         {
-                            if (StateMachine.GetState<StateCombat>().Mode == CombatMode.Force)
+                            if (StateMachine.Get<StateCombat>().Mode == CombatMode.Force)
                             {
-                                StateMachine.GetState<StateCombat>().Mode = CombatMode.Allowed;
+                                StateMachine.Get<StateCombat>().Mode = CombatMode.Allowed;
                             }
 
-                            if (StateMachine.GetState<StateFollowing>().IsUnitToFollowThere(out IWowUnit player))
+                            if (StateMachine.Get<StateFollowing>().IsUnitToFollowThere(out IWowUnit player))
                             {
                                 Bot.Movement.SetMovementAction(MovementAction.Follow, player.Position);
                             }
@@ -138,8 +138,7 @@ namespace AmeisenBotX.Core.Fsm.States
         private bool HandleDpsMovement(IWowUnit target, Vector3 targetPosition)
         {
             // handle special movement needs
-            if (Bot.CombatClass.WalkBehindEnemy
-                && Bot.Target.TargetGuid != Bot.Wow.PlayerGuid
+            if ((Bot.CombatClass.WalkBehindEnemy && Bot.Target.TargetGuid != Bot.Wow.PlayerGuid)
                 || Bot.Target.Type == WowObjectType.Player) // prevent spinning
             {
                 // walk behind enemy
@@ -160,7 +159,6 @@ namespace AmeisenBotX.Core.Fsm.States
 
         private bool HandleMovement(IWowUnit target)
         {
-            // check if we are facing the unit
             if ((Bot.CombatClass == null || !Bot.CombatClass.HandlesFacing)
                 && target != null
                 && target.Guid != Bot.Wow.PlayerGuid
@@ -171,7 +169,6 @@ namespace AmeisenBotX.Core.Fsm.States
                 Bot.Wow.FacePosition(Bot.Player.BaseAddress, Bot.Player.Position, target.Position);
             }
 
-            // do we need to move
             if (target == null)
             {
                 // just move to our group
@@ -214,7 +211,6 @@ namespace AmeisenBotX.Core.Fsm.States
 
         private bool HandleTankMovement(Vector3 targetPosition)
         {
-            // handle special movement needs
             if (Bot.CombatClass.WalkBehindEnemy
                 && Bot.CombatClass.Role == WowRole.Tank
                 && Bot.Objects.Partymembers.Any()) // no need to rotate

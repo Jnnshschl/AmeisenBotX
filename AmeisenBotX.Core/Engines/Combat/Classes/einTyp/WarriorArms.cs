@@ -1,11 +1,11 @@
 ﻿using AmeisenBotX.Common.Math;
 using AmeisenBotX.Common.Utils;
-using AmeisenBotX.Core.Data.Objects;
 using AmeisenBotX.Core.Engines.Character.Comparators;
 using AmeisenBotX.Core.Engines.Character.Talents.Objects;
 using AmeisenBotX.Core.Engines.Movement.Enums;
 using AmeisenBotX.Core.Fsm;
 using AmeisenBotX.Core.Fsm.States;
+using AmeisenBotX.Wow.Objects;
 using AmeisenBotX.Wow.Objects.Enums;
 using System;
 using System.Collections.Generic;
@@ -157,7 +157,7 @@ namespace AmeisenBotX.Core.Engines.Combat.Classes.einTyp
                 HandleMovement(target);
                 HandleAttacking(target);
             }
-            StateMachine.GetState<StateCombat>().Mode = CombatMode.Allowed;
+            StateMachine.Get<StateCombat>().Mode = CombatMode.Allowed;
         }
 
         public void Load(Dictionary<string, JsonElement> objects)
@@ -199,7 +199,7 @@ namespace AmeisenBotX.Core.Engines.Combat.Classes.einTyp
 
                     Dancing = false;
                     HandleMovement(target);
-                    StateMachine.GetState<StateCombat>().Mode = CombatMode.Force;
+                    StateMachine.Get<StateCombat>().Mode = CombatMode.Force;
                     HandleAttacking(target);
                 }
                 else if (!Dancing || standing)

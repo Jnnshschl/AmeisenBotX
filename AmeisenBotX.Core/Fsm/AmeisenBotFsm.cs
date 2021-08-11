@@ -1,9 +1,9 @@
 ﻿using AmeisenBotX.Common.Utils;
-using AmeisenBotX.Core.Data.Objects;
 using AmeisenBotX.Core.Fsm.Enums;
 using AmeisenBotX.Core.Fsm.States;
 using AmeisenBotX.Logging;
 using AmeisenBotX.Logging.Enums;
+using AmeisenBotX.Wow.Objects;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -108,7 +108,7 @@ namespace AmeisenBotX.Core.Fsm
                     AmeisenLogger.I.Log("StateMachine", "WoW crashed", LogLevel.Verbose);
 
                     WowCrashed = true;
-                    GetState<StateIdle>().FirstStart = true;
+                    Get<StateIdle>().FirstStart = true;
 
                     Bot.Movement.Reset();
                     Bot.Wow.Events.Stop();
@@ -162,9 +162,9 @@ namespace AmeisenBotX.Core.Fsm
                                 OnStateOverride?.Invoke(CurrentState.Key);
                             }
                         }
-                        else if (GetState<StateCombat>().Mode != CombatMode.NotAllowed
+                        else if (Get<StateCombat>().Mode != CombatMode.NotAllowed
                                 && !(Config.IgnoreCombatWhileMounted && Bot.Player.IsMounted)
-                                && (GetState<StateCombat>().Mode == CombatMode.Force || Bot.Player.IsInCombat || GetState<StateCombat>().IsAnyPartymemberInCombat()
+                                && (Get<StateCombat>().Mode == CombatMode.Force || Bot.Player.IsInCombat || Get<StateCombat>().IsAnyPartymemberInCombat()
                                 || Bot.GetEnemiesInCombatWithParty<IWowUnit>(Bot.Player.Position, 100.0f).Any()))
                         {
                             if (SetState(BotState.Combat, true))
@@ -186,7 +186,7 @@ namespace AmeisenBotX.Core.Fsm
         /// </summary>
         /// <typeparam name="T">Type of the state</typeparam>
         /// <returns>State instance or null if not found</returns>
-        public T GetState<T>() where T : BasicState
+        public T Get<T>() where T : BasicState
         {
             return (T)States.FirstOrDefault(e => e.Value.GetType() == typeof(T)).Value;
         }

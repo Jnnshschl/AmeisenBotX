@@ -1,4 +1,4 @@
-﻿namespace AmeisenBotX.Core.Data.Objects
+﻿namespace AmeisenBotX.Wow.Objects
 {
     public interface IWowContainer : IWowObject
     {

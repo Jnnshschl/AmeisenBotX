@@ -1,8 +1,8 @@
 ﻿using AmeisenBotX.Common.Math;
 using AmeisenBotX.Common.Utils;
-using AmeisenBotX.Core.Data.Objects;
 using AmeisenBotX.Core.Engines.Movement.Enums;
 using AmeisenBotX.Core.Fsm.Enums;
+using AmeisenBotX.Wow.Objects;
 using System;
 
 namespace AmeisenBotX.Core.Fsm.States
@@ -27,7 +27,7 @@ namespace AmeisenBotX.Core.Fsm.States
         {
             if (Config.AutoTalkToNearQuestgivers)
             {
-                if (StateMachine.GetState<StateFollowing>().IsUnitToFollowThere(out IWowUnit unitToFollow, true)
+                if (StateMachine.Get<StateFollowing>().IsUnitToFollowThere(out IWowUnit unitToFollow, true)
                     && unitToFollow.TargetGuid != 0)
                 {
                     IWowUnit target = Bot.GetWowObjectByGuid<IWowUnit>(unitToFollow.TargetGuid);

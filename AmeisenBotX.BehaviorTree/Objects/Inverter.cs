@@ -4,12 +4,7 @@ namespace AmeisenBotX.BehaviorTree.Objects
 {
     public class Inverter : Node
     {
-        public Inverter(Node child) : base("")
-        {
-            Child = child;
-        }
-
-        public Inverter(string name, Node child) : base(name)
+        public Inverter(Node child) : base()
         {
             Child = child;
         }
@@ -40,12 +35,7 @@ namespace AmeisenBotX.BehaviorTree.Objects
 
     public class Inverter<T> : Node<T>
     {
-        public Inverter(Node<T> child) : base("")
-        {
-            Child = child;
-        }
-
-        public Inverter(string name, Node<T> child) : base(name)
+        public Inverter(Node<T> child) : base()
         {
             Child = child;
         }

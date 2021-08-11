@@ -58,7 +58,7 @@ namespace AmeisenBotX.Core
 
         public bool ChatProtocols { get; set; } = false;
 
-        public List<string> CustomCombatClassDependencies { get; set; }
+        public List<string> CustomCombatClassDependencies { get; set; } = new();
 
         public string CustomCombatClassFile { get; set; } = string.Empty;
 
@@ -100,9 +100,7 @@ namespace AmeisenBotX.Core
 
         public string JobProfile { get; set; } = string.Empty;
 
-        public KeyBindingSettings KeyBindingSettings { get; set; } = new KeyBindingSettings();
-
-        public bool LearningDataCollectionEnabled { get; set; } = false;
+        public KeyBindingSettings KeyBindingSettings { get; set; } = new();
 
         public bool LootOnlyMoneyAndQuestitems { get; set; } = false;
 
@@ -144,7 +142,7 @@ namespace AmeisenBotX.Core
 
         public string Mounts { get; set; } = string.Empty;
 
-        public MovementSettings MovementSettings { get; set; } = new MovementSettings();
+        public MovementSettings MovementSettings { get; set; } = new();
 
         public int NameshServerPort { get; set; } = 47110;
 
@@ -169,7 +167,7 @@ namespace AmeisenBotX.Core
 
         public bool RconEnabled { get; set; } = false;
 
-        public int RconScreenshotInterval { get; set; } = 5000;
+        public int RconInterval { get; set; } = 5000;
 
         public bool RconSendScreenshots { get; set; } = false;
 

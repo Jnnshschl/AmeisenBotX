@@ -45,13 +45,13 @@ namespace AmeisenBotX.Core.Fsm.States
             }
             else
             {
-                Bot.Wow.SetWorldLoadedCheck(false);
                 StateMachine.SetState(BotState.Idle);
             }
         }
 
         public override void Leave()
         {
+            Bot.Wow.SetWorldLoadedCheck(false);
         }
     }
 }

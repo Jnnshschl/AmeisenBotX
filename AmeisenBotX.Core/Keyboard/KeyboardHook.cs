@@ -10,29 +10,17 @@ namespace AmeisenBotX.Core.Keyboard
     /// </summary>
     public class KeyboardHook : IDisposable
     {
+        private delegate int LowLevelKeyboardProc(int nCode, IntPtr wParam, ref LowLevelKeyboardInputEvent lParam);
+
         /// <summary>
         /// Gets called if a key is pressed.
         /// </summary>
-        public KeyDownEventDelegate OnPressed;
+        public event Action<KeyboardHookEventArgs> OnPressed;
 
         /// <summary>
         /// Gets called if a key is released.
         /// </summary>
-        public KeyUpEventDelegate OnReleased;
-
-        /// <summary>
-        /// Creates a new instance of the class.
-        /// </summary>
-        public KeyboardHook()
-        {
-            KeyboardProc = LowLevelKeyboardCallback;
-        }
-
-        public delegate void KeyDownEventDelegate(KeyboardHookEventArgs e);
-
-        public delegate void KeyUpEventDelegate(KeyboardHookEventArgs e);
-
-        private delegate int LowLevelKeyboardProc(int nCode, IntPtr wParam, ref LowLevelKeyboardInputEvent lParam);
+        public event Action<KeyboardHookEventArgs> OnReleased;
 
         private enum HookType
         {
@@ -66,19 +54,15 @@ namespace AmeisenBotX.Core.Keyboard
 
         private IntPtr HookPtr { get; set; }
 
-        private LowLevelKeyboardProc KeyboardProc { get; }
-
         /// <summary>
         /// Disables the keyboard hook.
         /// </summary>
         public void Disable()
         {
-            if (HookPtr == IntPtr.Zero)
+            if (HookPtr != IntPtr.Zero)
             {
-                return;
+                UnhookWindowsHookEx(hHook: HookPtr);
             }
-
-            UnhookWindowsHookEx(hHook: HookPtr);
         }
 
         /// <summary>
@@ -94,22 +78,20 @@ namespace AmeisenBotX.Core.Keyboard
         /// </summary>
         public void Enable()
         {
-            if (HookPtr != IntPtr.Zero)
-            {
-                return;
-            }
-
-            HookPtr = SetWindowsHookEx
-            (
-                HookType.WhKeyboardLl,
-                KeyboardProc,
-                GetModuleHandle(Process.GetCurrentProcess().MainModule.ModuleName),
-                0
-            );
-
             if (HookPtr == IntPtr.Zero)
             {
-                throw new Win32Exception(Marshal.GetLastWin32Error());
+                HookPtr = SetWindowsHookEx
+                (
+                    HookType.WhKeyboardLl,
+                    LowLevelKeyboardCallback,
+                    GetModuleHandle(Process.GetCurrentProcess().MainModule.ModuleName),
+                    0
+                );
+
+                if (HookPtr == IntPtr.Zero)
+                {
+                    throw new Win32Exception(Marshal.GetLastWin32Error());
+                }
             }
         }
 
@@ -186,19 +168,16 @@ namespace AmeisenBotX.Core.Keyboard
             {
                 KeyboardState keyboardState = (KeyboardState)wParamValue;
 
-                if (keyboardState == KeyboardState.KeyDown
-                    || keyboardState == KeyboardState.SysKeyDown)
+                if (keyboardState is KeyboardState.KeyDown or KeyboardState.SysKeyDown)
                 {
-                    KeyboardHookEventArgs keyboardHookEventArgs = new(keyboardInput: lParam);
+                    KeyboardHookEventArgs keyboardHookEventArgs = new(lParam);
                     OnPressed?.Invoke(keyboardHookEventArgs);
                     handled = keyboardHookEventArgs.Handled;
                 }
-
-                if (keyboardState == KeyboardState.KeyUp
-                    || keyboardState == KeyboardState.SysKeyUp)
+                else if (keyboardState is KeyboardState.KeyUp or KeyboardState.SysKeyUp)
                 {
-                    KeyboardHookEventArgs keyboardHookEventArgs = new(keyboardInput: lParam);
-                    OnReleased?.Invoke(new KeyboardHookEventArgs(keyboardInput: lParam));
+                    KeyboardHookEventArgs keyboardHookEventArgs = new(lParam);
+                    OnReleased?.Invoke(keyboardHookEventArgs);
                     handled = keyboardHookEventArgs.Handled;
                 }
             }

@@ -1,6 +1,5 @@
 ﻿using AmeisenBotX.Common.Math;
 using AmeisenBotX.Common.Utils;
-using AmeisenBotX.Core.Data.Objects;
 using AmeisenBotX.Core.Engines.Character.Comparators;
 using AmeisenBotX.Core.Engines.Character.Inventory.Objects;
 using AmeisenBotX.Core.Engines.Character.Spells.Objects;
@@ -14,6 +13,7 @@ using AmeisenBotX.Core.Fsm;
 using AmeisenBotX.Core.Fsm.Enums;
 using AmeisenBotX.Logging;
 using AmeisenBotX.Logging.Enums;
+using AmeisenBotX.Wow.Objects;
 using AmeisenBotX.Wow.Objects.Enums;
 using System;
 using System.Collections.Generic;
@@ -550,7 +550,6 @@ namespace AmeisenBotX.Core.Engines.Combat.Classes.Jannis
 
             // Update Priority Units
             // --------------------------- >
-
             if (StateMachine.CurrentState.Key == BotState.Dungeon
                 && Bot.Dungeon != null
                 && Bot.Dungeon.Profile.PriorityUnits != null
@@ -579,7 +578,6 @@ namespace AmeisenBotX.Core.Engines.Combat.Classes.Jannis
 
             // Buffs, Debuffs, Interrupts
             // --------------------------- >
-
             if (MyAuraManager.Tick(Bot.Player.Auras)
                 || GroupAuraManager.Tick())
             {
@@ -599,7 +597,6 @@ namespace AmeisenBotX.Core.Engines.Combat.Classes.Jannis
 
             // Useable items, potions, etc.
             // ---------------------------- >
-
             if (Bot.Player.HealthPercentage < C["HealthItemThreshold"])
             {
                 IWowInventoryItem healthItem = Bot.Character.Inventory.Items.FirstOrDefault(e => useableHealingItems.Contains(e.Id));
@@ -622,7 +619,6 @@ namespace AmeisenBotX.Core.Engines.Combat.Classes.Jannis
 
             // Race abilities
             // -------------- >
-
             if (Bot.Player.Race == WowRace.Human
                 && (Bot.Player.IsDazed
                     || Bot.Player.IsFleeing
@@ -1058,8 +1054,7 @@ namespace AmeisenBotX.Core.Engines.Combat.Classes.Jannis
             {
                 angleDiff += MAX_ANGLE;
             }
-
-            if (angleDiff > MAX_ANGLE)
+            else if (angleDiff > MAX_ANGLE)
             {
                 angleDiff -= MAX_ANGLE;
             }

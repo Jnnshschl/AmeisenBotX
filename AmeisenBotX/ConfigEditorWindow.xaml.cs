@@ -49,7 +49,7 @@ namespace AmeisenBotX
             this._errorBorderBrush = new((Color)FindResource("DarkError"));
         }
 
-        #endregion
+        #endregion Constructor
 
         public AmeisenBot AmeisenBot { get; private set; }
 
@@ -152,7 +152,7 @@ namespace AmeisenBotX
                 Config.PermanentNameCache = checkboxPermanentNameCache.IsChecked.GetValueOrDefault(false);
                 Config.PermanentReactionCache = checkboxPermanentReactionCache.IsChecked.GetValueOrDefault(false);
                 Config.RconEnabled = checkboxEnableRcon.IsChecked.GetValueOrDefault(true);
-                Config.RconScreenshotInterval = int.Parse(textboxRconScreenshotInterval.Text, CultureInfo.InvariantCulture);
+                Config.RconInterval = int.Parse(textboxRconScreenshotInterval.Text, CultureInfo.InvariantCulture);
                 Config.RconSendScreenshots = checkboxEnableRconScreenshots.IsChecked.GetValueOrDefault(false);
                 Config.RconServerAddress = textboxRconAddress.Text;
                 Config.RconServerGuid = textboxRconGUID.Text;
@@ -452,7 +452,7 @@ namespace AmeisenBotX
             textboxRconGUID.Text = Config.RconServerGuid;
             textboxRconImage.Text = Config.RconServerImage;
             textboxRconInterval.Text = Config.RconTickMs.ToString(CultureInfo.InvariantCulture);
-            textboxRconScreenshotInterval.Text = Config.RconScreenshotInterval.ToString(CultureInfo.InvariantCulture);
+            textboxRconScreenshotInterval.Text = Config.RconInterval.ToString(CultureInfo.InvariantCulture);
             textboxRealm.Text = Config.Realm;
             textboxRealmlist.Text = Config.Realmlist;
             textboxStatemachineTick.Text = Config.StateMachineTickMs.ToString(CultureInfo.InvariantCulture);

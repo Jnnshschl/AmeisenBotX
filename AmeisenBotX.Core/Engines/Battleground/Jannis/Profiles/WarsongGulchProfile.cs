@@ -3,10 +3,10 @@ using AmeisenBotX.BehaviorTree.Enums;
 using AmeisenBotX.BehaviorTree.Objects;
 using AmeisenBotX.Common.Math;
 using AmeisenBotX.Common.Utils;
-using AmeisenBotX.Core.Data.Objects;
 using AmeisenBotX.Core.Engines.Movement.Enums;
 using AmeisenBotX.Core.Fsm;
 using AmeisenBotX.Core.Fsm.States;
+using AmeisenBotX.Wow.Objects;
 using AmeisenBotX.Wow.Objects.Enums;
 using System;
 using System.Collections.Generic;
@@ -32,48 +32,42 @@ namespace AmeisenBotX.Core.Engines.Battleground.Jannis.Profiles
 
             KillEnemyFlagCarrierSelector = new
             (
-                "EnemyTeamFlagCarrierInRange",
                 (b) => b.EnemyTeamFlagCarrier != null,
                 new Selector<CtfBlackboard>
                 (
-                    "HasFlag",
                     (b) => b.MyTeamHasFlag
                         || b.EnemyTeamFlagCarrier.Position.GetDistance(WsgDataset.EnemyBasePosition)
                          < Bot.Player.Position.GetDistance(WsgDataset.EnemyBasePosition),
-                    new Leaf<CtfBlackboard>("KillEnemyFlagCarrier", KillEnemyFlagCarrier),
-                    new Leaf<CtfBlackboard>("MoveToEnemyBaseAndGetFlag", MoveToEnemyBaseAndGetFlag)
+                    new Leaf<CtfBlackboard>(KillEnemyFlagCarrier),
+                    new Leaf<CtfBlackboard>(MoveToEnemyBaseAndGetFlag)
                 ),
                 new Selector<CtfBlackboard>
                 (
-                    "IsFlagNearOwnOrEnemyBase",
                     (b) => b.EnemyTeamFlagPos.GetDistance2D(WsgDataset.EnemyBasePositionMapCoords)
                          < b.EnemyTeamFlagPos.GetDistance2D(WsgDataset.OwnBasePositionMapCoords),
-                    new Leaf<CtfBlackboard>("MoveToEnemyBase", (b) => MoveToPosition(WsgDataset.EnemyBasePosition)),
-                    new Leaf<CtfBlackboard>("MoveToOwnBase", (b) => MoveToPosition(WsgDataset.OwnBasePosition))
+                    new Leaf<CtfBlackboard>((b) => MoveToPosition(WsgDataset.EnemyBasePosition)),
+                    new Leaf<CtfBlackboard>((b) => MoveToPosition(WsgDataset.OwnBasePosition))
                 )
             );
 
             FlagSelector = new DualSelector<CtfBlackboard>
             (
-                "WhoHasTheFlag",
                 (b) => b.MyTeamHasFlag,
                 (b) => b.EnemyTeamHasFlag,
 
                 // no team has the flag
-                new Leaf<CtfBlackboard>("MoveToEnemyBaseAndGetFlag", MoveToEnemyBaseAndGetFlag),
+                new Leaf<CtfBlackboard>(MoveToEnemyBaseAndGetFlag),
 
                 // only my team has the flag
                 new Selector<CtfBlackboard>
                 (
-                    "AmITheFlagCarrier",
                     (b) => b.MyTeamFlagCarrier != null && b.MyTeamFlagCarrier.Guid == Bot.Wow.PlayerGuid,
-                    new Leaf<CtfBlackboard>("MoveToOwnBase", (b) => MoveToPosition(WsgDataset.OwnBasePosition)),
+                    new Leaf<CtfBlackboard>((b) => MoveToPosition(WsgDataset.OwnBasePosition)),
                     new Selector<CtfBlackboard>
                     (
-                        "IsTheFlagCarrierInRange",
                         (b) => b.MyTeamFlagCarrier != null,
-                        new Leaf<CtfBlackboard>("MoveToOwnFlagCarrier", (b) => MoveToPosition(b.MyTeamFlagCarrier.Position)),
-                        new Leaf<CtfBlackboard>("DefendOwnBase", DefendOwnBase)
+                        new Leaf<CtfBlackboard>((b) => MoveToPosition(b.MyTeamFlagCarrier.Position)),
+                        new Leaf<CtfBlackboard>(DefendOwnBase)
                     )
                 ),
 
@@ -83,14 +77,12 @@ namespace AmeisenBotX.Core.Engines.Battleground.Jannis.Profiles
                 // both teams have the flag
                 new Selector<CtfBlackboard>
                 (
-                    "AmITheFlagCarrier",
                     (b) => b.MyTeamFlagCarrier != null && b.MyTeamFlagCarrier.Guid == Bot.Wow.PlayerGuid,
                     new Selector<CtfBlackboard>
                     (
-                        "AmINearOwnBase",
                         (b) => Bot.Player.Position.GetDistance(WsgDataset.OwnBasePosition) < 128.0f,
-                        new Leaf<CtfBlackboard>("MoveToHidingSpot", (b) => MoveToPosition(WsgDataset.FlagHidingSpot)),
-                        new Leaf<CtfBlackboard>("MoveToOwnBase", (b) => MoveToPosition(WsgDataset.OwnBasePosition))
+                        new Leaf<CtfBlackboard>((b) => MoveToPosition(WsgDataset.FlagHidingSpot)),
+                        new Leaf<CtfBlackboard>((b) => MoveToPosition(WsgDataset.OwnBasePosition))
                     ),
                     KillEnemyFlagCarrierSelector
                 )
@@ -98,33 +90,28 @@ namespace AmeisenBotX.Core.Engines.Battleground.Jannis.Profiles
 
             MainSelector = new Selector<CtfBlackboard>
             (
-                "IsGateOpen",
                 (b) => IsGateOpen(),
                  new Selector<CtfBlackboard>
                  (
-                     "IsFlagNear",
                      (b) => IsFlagNear(),
-                     new Leaf<CtfBlackboard>("UseNearestFlag", UseNearestFlag),
+                     new Leaf<CtfBlackboard>(UseNearestFlag),
                      new Selector<CtfBlackboard>
                      (
-                         "IsAnyBuffNearMe",
                          (b) => IsAnyBuffNearMe(16.0f),
-                         new Leaf<CtfBlackboard>("MoveToNearestBuff", MoveToNearestBuff),
+                         new Leaf<CtfBlackboard>(MoveToNearestBuff),
                          new Selector<CtfBlackboard>
                          (
-                             "DoWeOutnumberOurEnemies",
                              (b) => DoWeOutnumberOurEnemies(b),
-                             new Leaf<CtfBlackboard>("AttackNearWeakestEnemy", AttackNearWeakestEnemy),
+                             new Leaf<CtfBlackboard>(AttackNearWeakestEnemy),
                              FlagSelector
                          )
                      )
                  ),
-                 new Leaf<CtfBlackboard>("MoveToGatePosition", (b) => MoveToPosition(WsgDataset.GatePosition))
+                 new Leaf<CtfBlackboard>((b) => MoveToPosition(WsgDataset.GatePosition))
             );
 
             BehaviorTree = new
             (
-                "JBgWarsongGulchBehaviorTree",
                 MainSelector,
                 JBgBlackboard,
                 TimeSpan.FromSeconds(1)
@@ -223,7 +210,7 @@ namespace AmeisenBotX.Core.Engines.Battleground.Jannis.Profiles
                 }
                 else if (ActionEvent.Run())
                 {
-                    StateMachine.GetState<StateCombat>().Mode = CombatMode.Force;
+                    StateMachine.Get<StateCombat>().Mode = CombatMode.Force;
                     Bot.Wow.ChangeTarget(weakestPlayer.Guid);
                 }
             }
@@ -257,7 +244,7 @@ namespace AmeisenBotX.Core.Engines.Battleground.Jannis.Profiles
                     }
                     else if (ActionEvent.Run())
                     {
-                        StateMachine.GetState<StateCombat>().Mode = CombatMode.Force;
+                        StateMachine.Get<StateCombat>().Mode = CombatMode.Force;
                         Bot.Wow.ChangeTarget(nearEnemy.Guid);
                     }
                 }
@@ -332,7 +319,7 @@ namespace AmeisenBotX.Core.Engines.Battleground.Jannis.Profiles
         {
             if (JBgBlackboard.EnemyTeamFlagCarrier == null)
             {
-                StateMachine.GetState<StateCombat>().Mode = CombatMode.Allowed;
+                StateMachine.Get<StateCombat>().Mode = CombatMode.Allowed;
                 return BehaviorTreeStatus.Success;
             }
 
@@ -345,7 +332,7 @@ namespace AmeisenBotX.Core.Engines.Battleground.Jannis.Profiles
             }
             else if (ActionEvent.Run())
             {
-                StateMachine.GetState<StateCombat>().Mode = CombatMode.Force;
+                StateMachine.Get<StateCombat>().Mode = CombatMode.Force;
                 Bot.Wow.ChangeTarget(JBgBlackboard.EnemyTeamFlagCarrier.Guid);
             }
 
@@ -413,7 +400,7 @@ namespace AmeisenBotX.Core.Engines.Battleground.Jannis.Profiles
                     }
                     else if (ActionEvent.Run())
                     {
-                        StateMachine.GetState<StateCombat>().Mode = CombatMode.Force;
+                        StateMachine.Get<StateCombat>().Mode = CombatMode.Force;
                         Bot.Wow.ChangeTarget(nearEnemy.Guid);
                     }
                 }

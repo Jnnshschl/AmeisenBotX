@@ -12,7 +12,7 @@ namespace AmeisenBotX.Core.Fsm.States
         {
             Bot.Movement.Reset();
             Bot.Dungeon.Enter();
-            StateMachine.OnStateOverride += StateMachine_OnStateOverride;
+            StateMachine.OnStateOverride += OnStateOverride;
         }
 
         public override void Execute()
@@ -29,12 +29,12 @@ namespace AmeisenBotX.Core.Fsm.States
 
         public override void Leave()
         {
-            StateMachine.OnStateOverride -= StateMachine_OnStateOverride;
+            StateMachine.OnStateOverride -= OnStateOverride;
             Bot.Movement.Reset();
             Bot.Dungeon.Exit();
         }
 
-        private void StateMachine_OnStateOverride(BotState botState)
+        private void OnStateOverride(BotState botState)
         {
             if (botState == BotState.Dead)
             {

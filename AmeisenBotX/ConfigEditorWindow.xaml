@@ -1269,12 +1269,11 @@
                                 <SolidColorBrush Color="{DynamicResource DarkBackground}" />
                             </CheckBox.Background>
                         </CheckBox>
-                        
+
                         <Grid
                             Margin="471,56,0,0"
-                            VerticalAlignment="Top" 
-                            HorizontalAlignment="Left"
-                            >
+                            VerticalAlignment="Top"
+                            HorizontalAlignment="Left">
                             <Grid.Resources>
                                 <Style TargetType="ComboBox">
                                     <Setter Property="FontFamily" Value="Bahnschrift Light" />
@@ -1288,16 +1287,14 @@
                                 Orientation="Vertical"
                                 Width="180"
                                 Grid.ColumnSpan="3"
-                                Grid.IsSharedSizeScope="True"
-                                >
+                                Grid.IsSharedSizeScope="True">
 
-                                <Label 
+                                <Label
                                     Content="Start/Stop Binding"
                                     BorderBrush="{DynamicResource Button.MouseOver.Border}"
                                     BorderThickness="0,0,0,1"
                                     Padding="0,5,5,5"
-                                    Margin="0 0 0 5"
-                                    >
+                                    Margin="0 0 0 5">
                                     <Label.Foreground>
                                         <SolidColorBrush Color="{DynamicResource DarkForeground}" />
                                     </Label.Foreground>
@@ -1312,8 +1309,7 @@
                                     <Label
                                         Grid.Column="0"
                                         Content="Alt:"
-                                        Target="{Binding ElementName=comboboxStartStopBotBindingAltKey}"
-                                        >
+                                        Target="{Binding ElementName=comboboxStartStopBotBindingAltKey}">
                                         <Label.Foreground>
                                             <SolidColorBrush Color="{DynamicResource DarkForeground}" />
                                         </Label.Foreground>
@@ -1324,8 +1320,7 @@
                                         x:Name="comboboxStartStopBotBindingAltKey"
                                         Style="{DynamicResource ComboBoxStyleDark}"
                                         VerticalAlignment="Top"
-                                        SelectedValuePath="Content"
-                                        >
+                                        SelectedValuePath="Content">
                                         <ComboBoxItem>RALT</ComboBoxItem>
                                         <ComboBoxItem>LALT</ComboBoxItem>
                                         <ComboBoxItem>LSHIFT</ComboBoxItem>
@@ -1344,8 +1339,7 @@
                                     <Label
                                         Grid.Column="0"
                                         Content="Key:"
-                                        Target="{Binding ElementName=comboboxStartStopBotBindingKey}"
-                                        >
+                                        Target="{Binding ElementName=comboboxStartStopBotBindingKey}">
                                         <Label.Foreground>
                                             <SolidColorBrush Color="{DynamicResource DarkForeground}" />
                                         </Label.Foreground>
@@ -1356,8 +1350,7 @@
                                         x:Name="comboboxStartStopBotBindingKey"
                                         Style="{DynamicResource ComboBoxStyleDark}"
                                         VerticalAlignment="Top"
-                                        SelectedValuePath="Content"
-                                        >
+                                        SelectedValuePath="Content">
                                         <ComboBoxItem>A</ComboBoxItem>
                                         <ComboBoxItem>B</ComboBoxItem>
                                         <ComboBoxItem>C</ComboBoxItem>
@@ -1386,10 +1379,9 @@
                                         <ComboBoxItem>Z</ComboBoxItem>
                                     </ComboBox>
                                 </Grid>
-
                             </StackPanel>
                         </Grid>
-                        
+
                         <Label x:Name="labelAutologin_Copy" Content="Bot Ticks" HorizontalAlignment="Left" VerticalAlignment="Top" FontFamily="Bahnschrift Light" Margin="4,80,0,0" BorderBrush="{DynamicResource Button.MouseOver.Border}" BorderThickness="0,0,0,1" Width="180" Padding="0,5,5,5">
                             <Label.Foreground>
                                 <SolidColorBrush Color="{DynamicResource DarkForeground}" />

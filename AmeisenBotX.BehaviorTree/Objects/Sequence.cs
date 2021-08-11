@@ -10,11 +10,6 @@ namespace AmeisenBotX.BehaviorTree.Objects
             Children = children.ToList();
         }
 
-        public Sequence(string name, params Node[] children) : base(name)
-        {
-            Children = children.ToList();
-        }
-
         public int Counter { get; set; }
 
         public override BehaviorTreeStatus Execute()
@@ -56,11 +51,6 @@ namespace AmeisenBotX.BehaviorTree.Objects
     public class Sequence<T> : Composite<T>
     {
         public Sequence(params Node<T>[] children)
-        {
-            Children = children.ToList();
-        }
-
-        public Sequence(string name, params Node<T>[] children) : base(name)
         {
             Children = children.ToList();
         }

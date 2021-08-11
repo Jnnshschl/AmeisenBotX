@@ -12,7 +12,7 @@ namespace AmeisenBotX.Core.Engines.Movement.Pathfinding
         public AmeisenNavigationHandler(string ip, int port)
         {
             Client = new(ip, port);
-            ConnectionWatchdog = new(ObserverConnection);
+            ConnectionWatchdog = new(ObserveConnection);
             ConnectionWatchdog.Start();
         }
 
@@ -22,11 +22,11 @@ namespace AmeisenBotX.Core.Engines.Movement.Pathfinding
 
         private bool ShouldExit { get; set; }
 
-        public IEnumerable<Vector3> GetPath(int mapId, Vector3 start, Vector3 end)
+        public IEnumerable<Vector3> GetPath(int mapId, Vector3 origin, Vector3 target)
         {
             try
             {
-                return Client.IsConnected ? Client.Send((byte)EMessageType.PATH, (mapId, start, end, 2)).AsArray<Vector3>() : Array.Empty<Vector3>();
+                return Client.IsConnected ? Client.Send((byte)EMessageType.PATH, (mapId, origin, target, 2)).AsArray<Vector3>() : Array.Empty<Vector3>();
             }
             catch
             {
@@ -46,11 +46,11 @@ namespace AmeisenBotX.Core.Engines.Movement.Pathfinding
             }
         }
 
-        public Vector3 GetRandomPointAround(int mapId, Vector3 start, float maxRadius)
+        public Vector3 GetRandomPointAround(int mapId, Vector3 origin, float maxRadius)
         {
             try
             {
-                return Client.IsConnected ? Client.Send((byte)EMessageType.RANDOM_POINT_AROUND, (mapId, start, maxRadius)).As<Vector3>() : Vector3.Zero;
+                return Client.IsConnected ? Client.Send((byte)EMessageType.RANDOM_POINT_AROUND, (mapId, origin, maxRadius)).As<Vector3>() : Vector3.Zero;
             }
             catch
             {
@@ -58,11 +58,11 @@ namespace AmeisenBotX.Core.Engines.Movement.Pathfinding
             }
         }
 
-        public Vector3 MoveAlongSurface(int mapId, Vector3 start, Vector3 end)
+        public Vector3 MoveAlongSurface(int mapId, Vector3 origin, Vector3 target)
         {
             try
             {
-                return Client.IsConnected ? Client.Send((byte)EMessageType.MOVE_ALONG_SURFACE, (mapId, start, end)).As<Vector3>() : Vector3.Zero;
+                return Client.IsConnected ? Client.Send((byte)EMessageType.MOVE_ALONG_SURFACE, (mapId, origin, target)).As<Vector3>() : Vector3.Zero;
             }
             catch
             {
@@ -76,7 +76,7 @@ namespace AmeisenBotX.Core.Engines.Movement.Pathfinding
             ConnectionWatchdog.Join();
         }
 
-        private void ObserverConnection()
+        private void ObserveConnection()
         {
             while (!ShouldExit)
             {
