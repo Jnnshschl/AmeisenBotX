@@ -1,4 +1,4 @@
-﻿using AmeisenBotX.Core.Data.Objects;
+﻿using AmeisenBotX.Wow.Objects;
 using System.Collections.Generic;
 
 namespace AmeisenBotX.Core.Engines.Combat.Helpers.Targets

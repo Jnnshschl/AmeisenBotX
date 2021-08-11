@@ -1,7 +1,7 @@
 ﻿using AmeisenBotX.Wow.Objects.SubStructs;
 using System.Collections.Generic;
 
-namespace AmeisenBotX.Core.Data.Objects
+namespace AmeisenBotX.Wow.Objects
 {
     public interface IWowPlayer : IWowUnit
     {

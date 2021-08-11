@@ -1,6 +1,5 @@
 ﻿using AmeisenBotX.Common.Math;
 using AmeisenBotX.Common.Utils;
-using AmeisenBotX.Core.Data.Objects;
 using AmeisenBotX.Core.Engines.Battleground;
 using AmeisenBotX.Core.Engines.Battleground.einTyp;
 using AmeisenBotX.Core.Engines.Battleground.Jannis;
@@ -29,8 +28,7 @@ using AmeisenBotX.Core.Fsm;
 using AmeisenBotX.Core.Fsm.Enums;
 using AmeisenBotX.Core.Fsm.States;
 using AmeisenBotX.Core.Keyboard;
-using AmeisenBotX.Learning;
-using AmeisenBotX.Learning.Sessions.Combat;
+using AmeisenBotX.Core.Storage;
 using AmeisenBotX.Logging;
 using AmeisenBotX.Logging.Enums;
 using AmeisenBotX.Memory;
@@ -40,6 +38,7 @@ using AmeisenBotX.RconClient.Messages;
 using AmeisenBotX.Wow.Cache;
 using AmeisenBotX.Wow.Cache.Enums;
 using AmeisenBotX.Wow.Combatlog;
+using AmeisenBotX.Wow.Objects;
 using AmeisenBotX.Wow.Objects.Enums;
 using AmeisenBotX.Wow335a;
 using Microsoft.CSharp;
@@ -53,17 +52,13 @@ using System.IO;
 using System.Linq;
 using System.Reflection;
 using System.Text;
-using System.Threading;
 using System.Threading.Tasks;
-using Timer = System.Threading.Timer;
 
 namespace AmeisenBotX.Core
 {
     public class AmeisenBot
     {
         private float currentExecutionMs;
-        private int rconTimerBusy;
-        private int stateMachineTimerBusy;
 
         /// <summary>
         /// Initializes a new bot.
@@ -81,12 +76,12 @@ namespace AmeisenBotX.Core
             if (string.IsNullOrWhiteSpace(config.Path)) { throw new ArgumentException("config.Path cannot be empty, make sure you set it after loading the config", nameof(config)); }
             if (!File.Exists(config.Path)) { throw new ArgumentException("config.Path does not exist", nameof(config)); }
 
-            DataFolder = Path.GetDirectoryName(config.Path);
-            AccountName = Path.GetFileName(DataFolder);
+            ProfileFolder = Path.GetDirectoryName(config.Path);
+            AccountName = Path.GetFileName(ProfileFolder);
 
             if (logfilePath == "DEFAULT")
             {
-                logfilePath = Path.Combine(DataFolder, "log/");
+                logfilePath = Path.Combine(ProfileFolder, "log/");
             }
 
             if (!string.IsNullOrWhiteSpace(logfilePath) && Directory.Exists(logfilePath))
@@ -98,16 +93,25 @@ namespace AmeisenBotX.Core
 
             AmeisenLogger.I.Log("AmeisenBot", $"AmeisenBot ({Assembly.GetExecutingAssembly().GetName().Version}) starting", LogLevel.Master);
             AmeisenLogger.I.Log("AmeisenBot", $"AccountName: {AccountName}", LogLevel.Master);
-            AmeisenLogger.I.Log("AmeisenBot", $"BotDataPath: {DataFolder}", LogLevel.Verbose);
+            AmeisenLogger.I.Log("AmeisenBot", $"BotDataPath: {ProfileFolder}", LogLevel.Verbose);
 
             ExecutionMsStopwatch = new();
+
+            string dataFolder = Path.Combine(ProfileFolder, "data");
+
+            if (!Directory.Exists(dataFolder))
+            {
+                Directory.CreateDirectory(dataFolder);
+            }
+
+            Storage = new(dataFolder, new List<string>() { "AmeisenBotX.Core.Engines.Combat.Classes." });
 
             // start initializing the wow interface
             Bot = new();
             Bot.Memory = new XMemory();
 
             StateMachine = new(Config, Bot);
-            StateMachine.GetState<StateStartWow>().OnWoWStarted += () =>
+            StateMachine.Get<StateStartWow>().OnWoWStarted += () =>
             {
                 if (Config.SaveWowWindowPosition)
                 {
@@ -115,13 +119,11 @@ namespace AmeisenBotX.Core
                 }
             };
 
-            // Setup keyboard hook
+            // setup keyboard hook to catch hotkeys
             Bot.Keyboard = new KeyboardHook();
-
-            // Enable keyboard hook
             Bot.Keyboard.Enable();
 
-            Bot.Chat = new DefaultChatManager(Config, DataFolder);
+            Bot.Chat = new DefaultChatManager(Config, ProfileFolder);
             Bot.Tactic = new DefaultTacticEngine();
 
             // load the wow specific interface based on file version (build number)
@@ -138,13 +140,9 @@ namespace AmeisenBotX.Core
 
             Bot.Character = new DefaultCharacterManager(Bot.Wow, Bot.Memory);
 
-            string dbPath = Path.Combine(DataFolder, "db.json");
+            string dbPath = Path.Combine(ProfileFolder, "db.json");
             AmeisenLogger.I.Log("AmeisenBot", $"Loading DB from: {dbPath}", LogLevel.Master);
             Bot.Db = LocalAmeisenBotDb.FromJson(dbPath, Bot.Wow, Bot.Memory);
-
-            string learnerPath = Path.Combine(DataFolder, "learner.json");
-            AmeisenLogger.I.Log("AmeisenBot", $"Loading Learner from: {learnerPath}", LogLevel.Master);
-            Bot.Learner = AmeisenBotLearner.FromJson(learnerPath);
 
             PoiCacheEvent = new TimegatedEvent(TimeSpan.FromSeconds(2));
             Bot.Objects.OnObjectUpdateComplete += OnObjectUpdateComplete;
@@ -184,37 +182,8 @@ namespace AmeisenBotX.Core
             if (Config.RconEnabled)
             {
                 AmeisenLogger.I.Log("AmeisenBot", "Setting up RconClient", LogLevel.Verbose);
-                RconScreenshotEvent = new(TimeSpan.FromMilliseconds(Config.RconScreenshotInterval));
+                RconEvent = new(TimeSpan.FromMilliseconds(Config.RconInterval));
                 SetupRconClient();
-            }
-
-            if (Config.LearningDataCollectionEnabled)
-            {
-                // data collection setup
-                SpellUsageCombatSession spellUsageCombatSession = new();
-                Bot.Learner.SpellUsageCombatSessions.Add(spellUsageCombatSession);
-
-                Bot.CombatLog.OnDamage += (ulong src, ulong dst, int spellId, int damage, int overDamage) =>
-                {
-                    IWowUnit srcUnit = Bot.GetWowObjectByGuid<IWowUnit>(src);
-                    IWowUnit dstUnit = Bot.GetWowObjectByGuid<IWowUnit>(dst);
-
-                    if (srcUnit != null && dstUnit != null && spellId > 0)
-                    {
-                        LogSpellUsage(spellUsageCombatSession, true, spellId, damage, overDamage, srcUnit, dstUnit);
-                    }
-                };
-
-                Bot.CombatLog.OnHeal += (ulong src, ulong dst, int spellId, int healing, int overHeal) =>
-                {
-                    IWowUnit srcUnit = Bot.GetWowObjectByGuid<IWowUnit>(src);
-                    IWowUnit dstUnit = Bot.GetWowObjectByGuid<IWowUnit>(dst);
-
-                    if (srcUnit != null && dstUnit != null && spellId > 0)
-                    {
-                        LogSpellUsage(spellUsageCombatSession, false, spellId, healing, overHeal, srcUnit, dstUnit);
-                    }
-                };
             }
         }
 
@@ -237,6 +206,11 @@ namespace AmeisenBotX.Core
         /// Collection of all useful interfaces used to control the bots behavior.
         /// </summary>
         public AmeisenBotInterfaces Bot { get; private set; }
+
+        /// <summary>
+        /// Folder where  all profile relevant stuff is stored.
+        /// </summary>
+        public string BotFolder { get; }
 
         /// <summary>
         /// All currently loaded combat classes.
@@ -264,11 +238,6 @@ namespace AmeisenBotX.Core
         }
 
         /// <summary>
-        /// Folder where the config lies, logs get written, ...
-        /// </summary>
-        public string DataFolder { get; }
-
-        /// <summary>
         /// All currently loaded grinding profiles.
         /// </summary>
         public IEnumerable<IGrindingProfile> GrindingProfiles { get; private set; }
@@ -282,6 +251,11 @@ namespace AmeisenBotX.Core
         /// All currently loaded job profiles.
         /// </summary>
         public IEnumerable<IJobProfile> JobProfiles { get; private set; }
+
+        /// <summary>
+        /// Folder where  all profile relevant stuff is stored.
+        /// </summary>
+        public string ProfileFolder { get; }
 
         /// <summary>
         /// All currently loaded quest profiles.
@@ -305,34 +279,27 @@ namespace AmeisenBotX.Core
 
         private TimegatedEvent PoiCacheEvent { get; }
 
-        private Timer RconClientTimer { get; set; }
+        private TimegatedEvent RconEvent { get; }
 
-        private TimegatedEvent RconScreenshotEvent { get; }
+        private LockedTimer StateMachineTimer { get; set; }
 
-        private Timer StateMachineTimer { get; set; }
+        private StorageManager Storage { get; set; }
 
         private bool TalentUpdateRunning { get; set; }
-
-        private bool Exiting { get; set; }
 
         /// <summary>
         /// Use this method to destroy the bots instance
         /// </summary>
         public void Dispose()
         {
-            Exiting = true;
             AmeisenLogger.I.Log("AmeisenBot", "Stopping", LogLevel.Debug);
+            IsRunning = false;
+
+            Storage.SaveAll();
 
             if (Config.SaveWowWindowPosition && !StateMachine.WowCrashed)
             {
                 SaveWowWindowPosition();
-            }
-
-            StateMachineTimer.Dispose();
-
-            if (Config.RconEnabled)
-            {
-                RconClientTimer.Dispose();
             }
 
             Bot.Wow.Events.Stop();
@@ -362,7 +329,7 @@ namespace AmeisenBotX.Core
                 }
                 else
                 {
-                    Bot.Memory.Process.Kill();
+                    Bot.Memory.Process?.Kill();
                 }
             }
 
@@ -371,8 +338,7 @@ namespace AmeisenBotX.Core
             Bot.Wow.Dispose();
             Bot.Memory.Dispose();
 
-            Bot.Db.Save(Path.Combine(DataFolder, "db.json"));
-            Bot.Learner.Save(Path.Combine(DataFolder, "learner.json"));
+            Bot.Db.Save(Path.Combine(ProfileFolder, "db.json"));
 
             AmeisenLogger.I.Log("AmeisenBot", $"Exiting AmeisenBot", LogLevel.Debug);
             AmeisenLogger.I.Stop();
@@ -400,9 +366,26 @@ namespace AmeisenBotX.Core
         /// <param name="newConfig">New config to load</param>
         public void ReloadConfig(AmeisenBotConfig newConfig)
         {
+            Storage.SaveAll();
+
+            bool oldRconState = Config.RconEnabled;
+
             Config = newConfig;
-            StateMachineTimer = new(StateMachineTimerTick, null, 0, Config.StateMachineTickMs);
+            StateMachineTimer.SetInterval(Config.StateMachineTickMs);
             LoadProfiles();
+
+            if (!oldRconState && Config.RconEnabled)
+            {
+                AmeisenLogger.I.Log("Rcon", "Starting Rcon", LogLevel.Debug);
+                StateMachineTimer.OnTick += RconClientTimerTick;
+            }
+            else if (oldRconState && !Config.RconEnabled)
+            {
+                AmeisenLogger.I.Log("Rcon", "Stopping Rcon", LogLevel.Debug);
+                StateMachineTimer.OnTick -= RconClientTimerTick;
+            }
+
+            Storage.LoadAll();
         }
 
         /// <summary>
@@ -412,7 +395,6 @@ namespace AmeisenBotX.Core
         {
             AmeisenLogger.I.Log("AmeisenBot", "Resuming", LogLevel.Debug);
             IsRunning = true;
-            stateMachineTimerBusy = 0;
         }
 
         /// <summary>
@@ -423,59 +405,27 @@ namespace AmeisenBotX.Core
         {
             AmeisenLogger.I.Log("AmeisenBot", "Starting", LogLevel.Debug);
 
+            SubscribeToWowEvents();
+
+            StateMachineTimer = new(Config.StateMachineTickMs, StateMachineTimerTick);
+
             if (Config.RconEnabled)
             {
                 AmeisenLogger.I.Log("Rcon", "Starting Rcon Timer", LogLevel.Debug);
-                RconClientTimer = new(RconClientTimerTick, null, 0, (int)Config.RconTickMs);
+                StateMachineTimer.OnTick += RconClientTimerTick;
             }
 
-            SubscribeToWowEvents();
-
-            StateMachineTimer = new(StateMachineTimerTick, null, 0, Config.StateMachineTickMs);
-            stateMachineTimerBusy = 0;
             IsRunning = true;
 
             AmeisenLogger.I.Log("AmeisenBot", "Setup done", LogLevel.Debug);
+
+            Storage.LoadAll();
         }
 
         private static T LoadClassByName<T>(IEnumerable<T> profiles, string profileName)
         {
             AmeisenLogger.I.Log("AmeisenBot", $"Loading {typeof(T).Name,-24} {profileName}", LogLevel.Verbose);
             return profiles.FirstOrDefault(e => e.ToString().Equals(profileName, StringComparison.OrdinalIgnoreCase));
-        }
-
-        private static void LogSpellUsage(SpellUsageCombatSession spellUsageCombatSession, bool isDamage, int spellId, int amount, int over, IWowUnit srcUnit, IWowUnit dstUnit)
-        {
-            bool srcIsPlayer = srcUnit.Type == WowObjectType.Player;
-            bool dstIsPlayer = dstUnit.Type == WowObjectType.Player;
-
-            spellUsageCombatSession.AddData
-            (
-                srcIsPlayer,
-                dstIsPlayer,
-                srcIsPlayer ? srcUnit.Guid : (ulong)BotUtils.GuidToNpcId(srcUnit.Guid),
-                dstIsPlayer ? dstUnit.Guid : (ulong)BotUtils.GuidToNpcId(dstUnit.Guid),
-                isDamage,
-                (int)srcUnit.Race,
-                (int)srcUnit.Class,
-                (int)srcUnit.PowerType,
-                (int)dstUnit.Race,
-                (int)dstUnit.Class,
-                (int)dstUnit.PowerType,
-                srcUnit.Health,
-                dstUnit.Health,
-                srcUnit.Secondary,
-                dstUnit.Secondary,
-                srcUnit.MaxHealth,
-                dstUnit.MaxHealth,
-                srcUnit.MaxSecondary,
-                dstUnit.MaxSecondary,
-                srcUnit.Level,
-                dstUnit.Level,
-                spellId,
-                amount,
-                over
-            );
         }
 
         private ICombatClass CompileCustomCombatClass()
@@ -568,7 +518,6 @@ namespace AmeisenBotX.Core
                 new Engines.Combat.Classes.einTyp.RogueAssassination(Bot, StateMachine),
                 new Engines.Combat.Classes.einTyp.WarriorArms(Bot, StateMachine),
                 new Engines.Combat.Classes.einTyp.WarriorFury(Bot, StateMachine),
-                new Engines.Combat.Classes.ToadLump.Rogue(Bot, StateMachine),
                 new Engines.Combat.Classes.Shino.PriestShadow(Bot, StateMachine),
                 new Engines.Combat.Classes.Shino.MageFrost(Bot, StateMachine),
             };
@@ -643,6 +592,12 @@ namespace AmeisenBotX.Core
                 LoadCustomCombatClass();
             }
 
+            if (Bot.CombatClass != null)
+            {
+                Storage.Storeables.Add(Bot.CombatClass);
+                Storage.LoadAll();
+            }
+
             // if a combatclass specified an ItemComparator
             // use it instead of the default one
             if (Bot.CombatClass?.ItemComparator != null)
@@ -691,11 +646,6 @@ namespace AmeisenBotX.Core
             AmeisenLogger.I.Log("AmeisenBot", $"OnBattlegroundStatusChanged: {s}");
         }
 
-        private void OnConfirmBindOnPickup(long timestamp, List<string> args)
-        {
-            Bot.Wow.CofirmStaticPopup();
-        }
-
         private void OnEquipmentChanged(long timestamp, List<string> args)
         {
             if (EquipmentUpdateEvent.Run())
@@ -734,8 +684,7 @@ namespace AmeisenBotX.Core
                     // get the item id and try again
                     itemJson = Bot.Wow.GetItemByNameOrLink
                     (
-                        itemLink
-                            .Split(new string[] { "Hitem:" }, StringSplitOptions.RemoveEmptyEntries)[1]
+                        itemLink.Split(new string[] { "Hitem:" }, StringSplitOptions.RemoveEmptyEntries)[1]
                             .Split(new string[] { ":" }, StringSplitOptions.RemoveEmptyEntries)[0]
                     );
 
@@ -831,12 +780,9 @@ namespace AmeisenBotX.Core
 
         private void OnPvpQueueShow(long timestamp, List<string> args)
         {
-            if (Config.AutojoinBg)
+            if (Config.AutojoinBg && args.Count == 1 && args[0] == "1")
             {
-                if (args.Count == 1 && args[0] == "1")
-                {
-                    Bot.Wow.AcceptBattlegroundInvite();
-                }
+                Bot.Wow.AcceptBattlegroundInvite();
             }
         }
 
@@ -871,11 +817,6 @@ namespace AmeisenBotX.Core
             Bot.Wow.CofirmReadyCheck(true);
         }
 
-        private void OnResurrectRequest(long timestamp, List<string> args)
-        {
-            Bot.Wow.AcceptResurrect();
-        }
-
         private void OnShowQuestFrame(long timestamp, List<string> args)
         {
             if (Config.AutoAcceptQuests && StateMachine.CurrentState.Key != BotState.Questing)
@@ -890,6 +831,7 @@ namespace AmeisenBotX.Core
 
             foreach (string popup in s.Split(';'))
             {
+                // 0 = slot of the popup, 1 = type of the popup
                 string[] parts = popup.Split(':');
 
                 if (int.TryParse(parts[0], out int id))
@@ -904,6 +846,7 @@ namespace AmeisenBotX.Core
                         case "CONFIRM_LOOT_ROLL":
                         case "EQUIP_BIND":
                         case "LOOT_BIND":
+                        case "RESURRECT":
                         case "USE_BIND":
                             Bot.Wow.ClickUiElement($"StaticPopup{parts[0]}Button1");
                             break;
@@ -940,110 +883,92 @@ namespace AmeisenBotX.Core
             Bot.Wow.LuaDoString("AcceptTrade();");
         }
 
-        private void RconClientTimerTick(object state)
+        private void RconClientTimerTick()
         {
-            // only start one timer tick at a time
-            if (Interlocked.CompareExchange(ref rconTimerBusy, 1, 0) == 1)
+            if (IsRunning && Bot.Rcon != null && RconEvent.Run())
             {
-                return;
-            }
-
-            try
-            {
-                if (Bot.Rcon != null)
+                try
                 {
-                    try
+                    if (Bot.Rcon.NeedToRegister)
                     {
-                        if (Bot.Rcon.NeedToRegister)
+                        Bot.Rcon.Register();
+                    }
+                    else
+                    {
+                        int currentResource = Bot.Player.Class switch
                         {
-                            Bot.Rcon.Register();
-                        }
-                        else
+                            WowClass.Deathknight => Bot.Player.Runeenergy,
+                            WowClass.Rogue => Bot.Player.Energy,
+                            WowClass.Warrior => Bot.Player.Rage,
+                            _ => Bot.Player.Mana,
+                        };
+
+                        int maxResource = Bot.Player.Class switch
                         {
-                            int currentResource = Bot.Player.Class switch
+                            WowClass.Deathknight => Bot.Player.MaxRuneenergy,
+                            WowClass.Rogue => Bot.Player.MaxEnergy,
+                            WowClass.Warrior => Bot.Player.MaxRage,
+                            _ => Bot.Player.MaxMana,
+                        };
+
+                        Bot.Rcon.SendData(new DataMessage()
+                        {
+                            BagSlotsFree = 0,
+                            CombatClass = Bot.CombatClass != null ? Bot.CombatClass.Role.ToString() : "NoCombatClass",
+                            CurrentProfile = string.Empty,
+                            Energy = currentResource,
+                            Exp = Bot.Player.Xp,
+                            Health = Bot.Player.Health,
+                            ItemLevel = (int)MathF.Round(Bot.Character.Equipment.AverageItemLevel),
+                            Level = Bot.Player.Level,
+                            MapName = Bot.Objects.MapId.ToString(),
+                            MaxEnergy = maxResource,
+                            MaxExp = Bot.Player.NextLevelXp,
+                            MaxHealth = Bot.Player.MaxHealth,
+                            Money = Bot.Character.Money,
+                            PosX = Bot.Player.Position.X,
+                            PosY = Bot.Player.Position.Y,
+                            PosZ = Bot.Player.Position.Z,
+                            State = StateMachine.CurrentState.Key.ToString(),
+                            SubZoneName = Bot.Objects.ZoneSubName,
+                            ZoneName = Bot.Objects.ZoneName,
+                        });
+
+                        Rect rc = Bot.Memory.GetClientSize();
+                        Bitmap bmp = new(rc.Right - rc.Left, rc.Bottom - rc.Top, PixelFormat.Format32bppArgb);
+
+                        using Graphics g = Graphics.FromImage(bmp);
+                        g.CopyFromScreen(rc.Left, rc.Top, 0, 0, new(rc.Right - rc.Left, rc.Bottom - rc.Top));
+
+                        using MemoryStream ms = new();
+                        bmp.Save(ms, ImageFormat.Png);
+
+                        Bot.Rcon.SendImage($"data:image/png;base64,{Convert.ToBase64String(ms.GetBuffer())}");
+
+                        Bot.Rcon.PullPendingActions();
+
+                        if (Bot.Rcon.PendingActions.Any())
+                        {
+                            switch (Bot.Rcon.PendingActions.First())
                             {
-                                WowClass.Deathknight => Bot.Player.Runeenergy,
-                                WowClass.Rogue => Bot.Player.Energy,
-                                WowClass.Warrior => Bot.Player.Rage,
-                                _ => Bot.Player.Mana,
-                            };
+                                case ActionType.PauseResume:
+                                    if (IsRunning)
+                                    {
+                                        Pause();
+                                    }
+                                    else
+                                    {
+                                        Resume();
+                                    }
+                                    break;
 
-                            int maxResource = Bot.Player.Class switch
-                            {
-                                WowClass.Deathknight => Bot.Player.MaxRuneenergy,
-                                WowClass.Rogue => Bot.Player.MaxEnergy,
-                                WowClass.Warrior => Bot.Player.MaxRage,
-                                _ => Bot.Player.MaxMana,
-                            };
-
-                            Bot.Rcon.SendData(new DataMessage()
-                            {
-                                BagSlotsFree = 0,
-                                CombatClass = Bot.CombatClass != null ? Bot.CombatClass.Role.ToString() : "NoCombatClass",
-                                CurrentProfile = string.Empty,
-                                Energy = currentResource,
-                                Exp = Bot.Player.Xp,
-                                Health = Bot.Player.Health,
-                                ItemLevel = (int)MathF.Round(Bot.Character.Equipment.AverageItemLevel),
-                                Level = Bot.Player.Level,
-                                MapName = Bot.Objects.MapId.ToString(),
-                                MaxEnergy = maxResource,
-                                MaxExp = Bot.Player.NextLevelXp,
-                                MaxHealth = Bot.Player.MaxHealth,
-                                Money = Bot.Character.Money,
-                                PosX = Bot.Player.Position.X,
-                                PosY = Bot.Player.Position.Y,
-                                PosZ = Bot.Player.Position.Z,
-                                State = StateMachine.CurrentState.Key.ToString(),
-                                SubZoneName = Bot.Objects.ZoneSubName,
-                                ZoneName = Bot.Objects.ZoneName,
-                            });
-
-                            if (Config.RconSendScreenshots && RconScreenshotEvent.Run())
-                            {
-                                Rect rc = Bot.Memory.GetClientSize();
-                                Bitmap bmp = new(rc.Right - rc.Left, rc.Bottom - rc.Top, PixelFormat.Format32bppArgb);
-
-                                using (Graphics g = Graphics.FromImage(bmp))
-                                {
-                                    g.CopyFromScreen(rc.Left, rc.Top, 0, 0, new(rc.Right - rc.Left, rc.Bottom - rc.Top));
-                                }
-
-                                using MemoryStream ms = new();
-                                bmp.Save(ms, ImageFormat.Png);
-
-                                Bot.Rcon.SendImage($"data:image/png;base64,{Convert.ToBase64String(ms.GetBuffer())}");
-                            }
-
-                            Bot.Rcon.PullPendingActions();
-
-                            if (Bot.Rcon.PendingActions.Any())
-                            {
-                                switch (Bot.Rcon.PendingActions.First())
-                                {
-                                    case ActionType.PauseResume:
-                                        if (IsRunning)
-                                        {
-                                            Pause();
-                                        }
-                                        else
-                                        {
-                                            Resume();
-                                        }
-
-                                        break;
-
-                                    default: break;
-                                }
+                                default:
+                                    break;
                             }
                         }
                     }
-                    catch { }
                 }
-            }
-            finally
-            {
-                rconTimerBusy = 0;
+                catch { }
             }
         }
 
@@ -1084,24 +1009,14 @@ namespace AmeisenBotX.Core
             };
         }
 
-        private void StateMachineTimerTick(object state)
+        private void StateMachineTimerTick()
         {
-            // only start one timer tick at a time
-            if (Interlocked.CompareExchange(ref stateMachineTimerBusy, 1, 0) == 1 || !IsRunning || Exiting)
-            {
-                return;
-            }
-
-            try
+            if (IsRunning)
             {
                 ExecutionMsStopwatch.Restart();
                 StateMachine.Execute();
                 CurrentExecutionMs = ExecutionMsStopwatch.ElapsedMilliseconds;
                 CurrentExecutionCount++;
-            }
-            finally
-            {
-                stateMachineTimerBusy = 0;
             }
         }
 
@@ -1112,13 +1027,11 @@ namespace AmeisenBotX.Core
 
             // Request Events
             Bot.Wow.Events.Subscribe("PARTY_INVITE_REQUEST", OnPartyInvitation);
-            Bot.Wow.Events.Subscribe("RESURRECT_REQUEST", OnResurrectRequest);
             Bot.Wow.Events.Subscribe("CONFIRM_SUMMON", OnSummonRequest);
             Bot.Wow.Events.Subscribe("READY_CHECK", OnReadyCheck);
 
             // Loot/Item Events
             Bot.Wow.Events.Subscribe("LOOT_OPENED", OnLootWindowOpened);
-            Bot.Wow.Events.Subscribe("LOOT_BIND_CONFIRM", OnConfirmBindOnPickup);
             Bot.Wow.Events.Subscribe("START_LOOT_ROLL", OnLootRollStarted);
             Bot.Wow.Events.Subscribe("BAG_UPDATE", OnBagChanged);
             Bot.Wow.Events.Subscribe("PLAYER_EQUIPMENT_CHANGED", OnEquipmentChanged);

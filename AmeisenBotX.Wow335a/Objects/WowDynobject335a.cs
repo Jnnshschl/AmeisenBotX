@@ -1,8 +1,8 @@
 ﻿using AmeisenBotX.Common.Math;
-using AmeisenBotX.Common.Offsets;
-using AmeisenBotX.Core.Data.Objects;
 using AmeisenBotX.Memory;
+using AmeisenBotX.Wow.Objects;
 using AmeisenBotX.Wow.Objects.Enums;
+using AmeisenBotX.Wow.Offsets;
 using AmeisenBotX.Wow335a.Objects.Descriptors;
 using System;
 

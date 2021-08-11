@@ -1,6 +1,6 @@
 ﻿using AmeisenBotX.Common.Math;
-using AmeisenBotX.Core.Data.Objects;
 using AmeisenBotX.Wow.Cache.Enums;
+using AmeisenBotX.Wow.Objects;
 using AmeisenBotX.Wow.Objects.Enums;
 using System.Collections.Generic;
 

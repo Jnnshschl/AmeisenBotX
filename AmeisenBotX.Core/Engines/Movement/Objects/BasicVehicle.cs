@@ -1,8 +1,8 @@
 ﻿using AmeisenBotX.Common.Math;
-using AmeisenBotX.Core.Data.Objects;
 using AmeisenBotX.Core.Engines.Movement.Enums;
 using AmeisenBotX.Core.Fsm;
 using AmeisenBotX.Core.Fsm.States;
+using AmeisenBotX.Wow.Objects;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -83,7 +83,7 @@ namespace AmeisenBotX.Core.Engines.Movement.Objects
             steering -= Velocity;
 
             if (Bot.Player.IsInCombat
-                || StateMachine.GetState<StateCombat>().Mode == CombatMode.Force)
+                || StateMachine.Get<StateCombat>().Mode == CombatMode.Force)
             {
                 float maxSteeringCombat = Config.MovementSettings.MaxSteeringCombat;
 
@@ -110,7 +110,7 @@ namespace AmeisenBotX.Core.Engines.Movement.Objects
             acceleration += steering;
 
             if (Bot.Player.IsInCombat
-                || StateMachine.GetState<StateCombat>().Mode == CombatMode.Force)
+                || StateMachine.Get<StateCombat>().Mode == CombatMode.Force)
             {
                 float maxAcceleration = Config.MovementSettings.MaxAccelerationCombat;
 

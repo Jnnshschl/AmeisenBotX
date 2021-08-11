@@ -21,6 +21,8 @@ namespace AmeisenBotX.Core.Fsm.States
         {
             CurrentlyEating = string.Empty;
             CurrentlyDrinking = string.Empty;
+
+            Bot.Movement.Reset();
             Bot.Movement.StopMovement();
         }
 
@@ -103,6 +105,8 @@ namespace AmeisenBotX.Core.Fsm.States
 
                 string itemName = Bot.Character.Inventory.Items.First(e => Enum.IsDefined(t, e.Id)).Name;
                 Bot.Wow.UseItemByName(itemName);
+
+                Bot.Movement.Reset();
                 Bot.Movement.StopMovement();
 
                 if (t == typeof(WowRefreshment))
@@ -123,6 +127,7 @@ namespace AmeisenBotX.Core.Fsm.States
 
         public override void Leave()
         {
+            Bot.Movement.Reset();
             Bot.Movement.StopMovement();
         }
 

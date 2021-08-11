@@ -1,7 +1,5 @@
 ﻿using AmeisenBotX.Common.Math;
-using AmeisenBotX.Common.Offsets;
 using AmeisenBotX.Common.Utils;
-using AmeisenBotX.Core.Data.Objects;
 using AmeisenBotX.Core.Hook.Modules;
 using AmeisenBotX.Logging;
 using AmeisenBotX.Logging.Enums;
@@ -10,6 +8,7 @@ using AmeisenBotX.Wow;
 using AmeisenBotX.Wow.Events;
 using AmeisenBotX.Wow.Objects;
 using AmeisenBotX.Wow.Objects.Enums;
+using AmeisenBotX.Wow.Offsets;
 using AmeisenBotX.Wow335a.Events;
 using AmeisenBotX.Wow335a.Hook;
 using AmeisenBotX.Wow335a.Objects;

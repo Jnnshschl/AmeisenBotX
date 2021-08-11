@@ -1,4 +1,4 @@
-﻿using AmeisenBotX.Core.Data.Objects;
+﻿using AmeisenBotX.Wow.Objects;
 using AmeisenBotX.Wow.Objects.Enums;
 
 namespace AmeisenBotX.Wow.Cache.Structs

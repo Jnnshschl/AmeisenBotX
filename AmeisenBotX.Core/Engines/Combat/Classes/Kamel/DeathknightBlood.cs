@@ -1,13 +1,15 @@
-﻿using AmeisenBotX.Core.Data.Objects;
+﻿using AmeisenBotX.Common.Utils;
 using AmeisenBotX.Core.Engines.Character.Comparators;
 using AmeisenBotX.Core.Engines.Character.Talents.Objects;
 using AmeisenBotX.Core.Engines.Combat.Helpers.Targets;
 using AmeisenBotX.Core.Engines.Combat.Helpers.Targets.Logics;
 using AmeisenBotX.Core.Engines.Movement.Enums;
+using AmeisenBotX.Wow.Objects;
 using AmeisenBotX.Wow.Objects.Enums;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Text.Json;
 
 namespace AmeisenBotX.Core.Engines.Combat.Classes.Kamel
 {
@@ -91,8 +93,21 @@ namespace AmeisenBotX.Core.Engines.Combat.Classes.Kamel
             }
         }
 
+        public void Load(Dictionary<string, JsonElement> objects)
+        {
+            C = objects["Configureables"].ToDyn();
+        }
+
         public void OutOfCombatExecute()
         {
+        }
+
+        public Dictionary<string, object> Save()
+        {
+            return new()
+            {
+                { "configureables", C }
+            };
         }
 
         private void HandleAttacking(IWowUnit target)

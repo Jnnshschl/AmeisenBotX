@@ -1,4 +1,4 @@
-﻿using AmeisenBotX.Core.Data.Objects;
+﻿using AmeisenBotX.Common.Utils;
 using AmeisenBotX.Core.Engines.Character.Comparators;
 using AmeisenBotX.Core.Engines.Character.Spells.Objects;
 using AmeisenBotX.Core.Engines.Character.Talents.Objects;
@@ -6,9 +6,11 @@ using AmeisenBotX.Core.Engines.Combat.Helpers.Healing;
 using AmeisenBotX.Core.Engines.Movement.Enums;
 using AmeisenBotX.Core.Fsm;
 using AmeisenBotX.Core.Fsm.Utils.Auras.Objects;
+using AmeisenBotX.Wow.Objects;
 using AmeisenBotX.Wow.Objects.Enums;
 using System.Collections.Generic;
 using System.Linq;
+using System.Text.Json;
 
 namespace AmeisenBotX.Core.Engines.Combat.Classes.Jannis
 {
@@ -16,6 +18,10 @@ namespace AmeisenBotX.Core.Engines.Combat.Classes.Jannis
     {
         public PaladinHoly(AmeisenBotInterfaces bot, AmeisenBotFsm stateMachine) : base(bot, stateMachine)
         {
+            C.TryAdd("AttackInGroups", true);
+            C.TryAdd("AttackInGroupsUntilManaPercent", 80.0);
+            C.TryAdd("AttackInGroupsCloseCombat", false);
+
             MyAuraManager.Jobs.Add(new KeepActiveAuraJob(bot.Db, blessingOfWisdomSpell, () => TryCastSpell(blessingOfWisdomSpell, Bot.Wow.PlayerGuid, true)));
             MyAuraManager.Jobs.Add(new KeepActiveAuraJob(bot.Db, devotionAuraSpell, () => TryCastSpell(devotionAuraSpell, Bot.Wow.PlayerGuid, true)));
             MyAuraManager.Jobs.Add(new KeepActiveAuraJob(bot.Db, sealOfWisdomSpell, () => Bot.Character.SpellBook.IsSpellKnown(sealOfWisdomSpell) && TryCastSpell(sealOfWisdomSpell, Bot.Wow.PlayerGuid, true)));
@@ -25,9 +31,7 @@ namespace AmeisenBotX.Core.Engines.Combat.Classes.Jannis
 
             HealingManager = new(bot, (string spellName, ulong guid) => { return TryCastSpell(spellName, guid); });
 
-            Bot.CombatLog.OnDamage += HealingManager.OnDamage;
-            Bot.CombatLog.OnHeal += HealingManager.OnHeal;
-
+            // make sure all new spells get added to the healing manager
             Bot.Character.SpellBook.OnSpellBookUpdate += () =>
             {
                 if (Bot.Character.SpellBook.TryGetSpellByName(flashOfLightSpell, out Spell spellFlashOfLight))
@@ -54,7 +58,7 @@ namespace AmeisenBotX.Core.Engines.Combat.Classes.Jannis
             SpellAbortFunctions.Add(HealingManager.ShouldAbortCasting);
         }
 
-        public override string Description => "FCFS based CombatClass for the Holy Paladin spec.";
+        public override string Description => "Half-Smart CombatClass for the Holy Paladin spec.";
 
         public override string Displayname => "Paladin Holy";
 
@@ -115,7 +119,7 @@ namespace AmeisenBotX.Core.Engines.Combat.Classes.Jannis
 
         public override bool UseAutoAttacks => false;
 
-        public override string Version => "1.0";
+        public override string Version => "1.1";
 
         public override bool WalkBehindEnemy => false;
 
@@ -140,38 +144,62 @@ namespace AmeisenBotX.Core.Engines.Combat.Classes.Jannis
                 return;
             }
 
-            if (Bot.Objects.Partymembers.Any(e => e.Guid != Bot.Wow.PlayerGuid) || Bot.Player.HealthPercentage < 65.0)
+            if (NeedToHealSomeone())
             {
-                if (NeedToHealSomeone())
+                return;
+            }
+            else
+            {
+                bool isAlone = !Bot.Objects.Partymembers.Any(e => e.Guid != Bot.Player.Guid);
+
+                if ((isAlone || (C["AttackInGroups"] && C["AttackInGroupsUntilManaPercent"] < Bot.Player.ManaPercentage))
+                    && SelectTarget(TargetProviderDps))
                 {
-                    return;
+                    if ((Bot.Player.Auras.Any(e => Bot.Db.GetSpellName(e.SpellId) == sealOfVengeanceSpell) || Bot.Player.Auras.Any(e => Bot.Db.GetSpellName(e.SpellId) == sealOfWisdomSpell))
+                        && TryCastSpell(judgementOfLightSpell, Bot.Wow.TargetGuid, true))
+                    {
+                        return;
+                    }
+
+                    if (TryCastSpell(exorcismSpell, Bot.Wow.TargetGuid, true))
+                    {
+                        return;
+                    }
+
+                    // either we are alone or allowed to go close combat in groups
+                    if (isAlone || C["AttackInGroupsCloseCombat"])
+                    {
+                        if (!Bot.Player.IsAutoAttacking
+                            && Bot.Target.Position.GetDistance(Bot.Player.Position) < 3.5f
+                            && EventAutoAttack.Run())
+                        {
+                            Bot.Wow.StartAutoAttack();
+                            return;
+                        }
+                        else
+                        {
+                            Bot.Movement.SetMovementAction(MovementAction.Move, Bot.Target.Position);
+                            return;
+                        }
+                    }
                 }
             }
-            else if (SelectTarget(TargetProviderDps))
+        }
+
+        public override void Load(Dictionary<string, JsonElement> objects)
+        {
+            base.Load(objects);
+
+            if (objects.ContainsKey("HealingManager"))
             {
-                if ((Bot.Player.Auras.Any(e => Bot.Db.GetSpellName(e.SpellId) == sealOfVengeanceSpell) || Bot.Player.Auras.Any(e => Bot.Db.GetSpellName(e.SpellId) == sealOfWisdomSpell))
-                    && TryCastSpell(judgementOfLightSpell, Bot.Wow.TargetGuid, true))
-                {
-                    return;
-                }
+                Dictionary<string, JsonElement> s = objects["HealingManager"].To<Dictionary<string, JsonElement>>();
 
-                if (TryCastSpell(exorcismSpell, Bot.Wow.TargetGuid, true))
-                {
-                    return;
-                }
-
-                if (!Bot.Player.IsAutoAttacking
-                    && Bot.Target.Position.GetDistance(Bot.Player.Position) < 3.5
-                    && EventAutoAttack.Run())
-                {
-                    Bot.Wow.StartAutoAttack();
-                    return;
-                }
-                else
-                {
-                    Bot.Movement.SetMovementAction(MovementAction.Move, Bot.Target.Position);
-                    return;
-                }
+                if (s.TryGetValue("SpellHealing", out JsonElement j)) { HealingManager.SpellHealing = j.To<Dictionary<string, int>>(); }
+                if (s.TryGetValue("DamageMonitorSeconds", out j)) { HealingManager.DamageMonitorSeconds = j.To<int>(); }
+                if (s.TryGetValue("HealthWeight", out j)) { HealingManager.HealthWeightMod = j.To<float>(); }
+                if (s.TryGetValue("DamageWeight", out j)) { HealingManager.IncomingDamageMod = j.To<float>(); }
+                if (s.TryGetValue("OverhealingStopThreshold", out j)) { HealingManager.OverhealingStopThreshold = j.To<float>(); }
+                if (s.TryGetValue("TargetDyingSeconds", out j)) { HealingManager.TargetDyingSeconds = j.To<int>(); }
             }
         }
 
@@ -183,6 +211,23 @@ namespace AmeisenBotX.Core.Engines.Combat.Classes.Jannis
             {
                 return;
             }
+        }
+
+        public override Dictionary<string, object> Save()
+        {
+            Dictionary<string, object> s = base.Save();
+
+            s.Add("HealingManager", new Dictionary<string, object>()
+            {
+                { "SpellHealing", HealingManager.SpellHealing },
+                { "DamageMonitorSeconds", HealingManager.DamageMonitorSeconds },
+                { "HealthWeight", HealingManager.HealthWeightMod },
+                { "DamageWeight", HealingManager.IncomingDamageMod },
+                { "OverhealingStopThreshold", HealingManager.OverhealingStopThreshold },
+                { "TargetDyingSeconds", HealingManager.TargetDyingSeconds },
+            });
+
+            return s;
         }
 
         private bool NeedToHealSomeone()

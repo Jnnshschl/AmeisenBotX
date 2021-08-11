@@ -1,8 +1,9 @@
 ﻿using AmeisenBotX.Common.Math;
+using AmeisenBotX.Common.Utils;
 using AmeisenBotX.Core;
-using AmeisenBotX.Core.Data.Objects;
 using AmeisenBotX.Core.Fsm.Enums;
 using AmeisenBotX.Utils;
+using AmeisenBotX.Wow.Objects;
 using AmeisenBotX.Wow.Objects.Enums;
 using System;
 using System.Collections.Generic;
@@ -10,27 +11,21 @@ using System.Drawing;
 using System.Drawing.Imaging;
 using System.IO;
 using System.Linq;
-using System.Threading;
-using System.Timers;
 using System.Windows;
 using System.Windows.Input;
 using System.Windows.Media.Imaging;
 using Color = System.Drawing.Color;
 using Point = System.Drawing.Point;
-using Timer = System.Timers.Timer;
 
 namespace AmeisenBotX
 {
     public partial class MapWindow : Window
     {
-        private int mapTimerBusy;
-
         public MapWindow(AmeisenBot ameisenBot)
         {
             AmeisenBot = ameisenBot;
 
-            MapTimer = new(250);
-            MapTimer.Elapsed += MapTimer_Elapsed;
+            MapTimer = new(250, MapTimerTick);
 
             MeBrush = new SolidBrush((Color)new ColorConverter().ConvertFromString("#FFFFFFFF"));
             EnemyBrush = new SolidBrush((Color)new ColorConverter().ConvertFromString("#FFFF5D6C"));
@@ -62,6 +57,8 @@ namespace AmeisenBotX
             InitializeComponent();
         }
 
+        public bool Enabled { get; private set; }
+
         private AmeisenBot AmeisenBot { get; set; }
 
         private Bitmap Bitmap { get; set; }
@@ -86,7 +83,7 @@ namespace AmeisenBotX
 
         private Brush HerbBrush { get; set; }
 
-        private Timer MapTimer { get; set; }
+        private LockedTimer MapTimer { get; set; }
 
         private Brush MeBrush { get; set; }
 
@@ -112,7 +109,6 @@ namespace AmeisenBotX
 
         private static Point GetRelativePosition(Vector3 posA, Vector3 posB, float rotation, int x, int y, float scale = 1.0f)
         {
-            // X and Y swapped intentionally here !
             float relativeX = x + ((posA.Y - posB.Y) * scale);
             float relativeY = y + ((posA.X - posB.X) * scale);
 
@@ -172,7 +168,7 @@ namespace AmeisenBotX
 
         private void ButtonExit_Click(object sender, RoutedEventArgs e)
         {
-            MapTimer.Stop();
+            Enabled = false;
             Hide();
         }
 
@@ -388,32 +384,19 @@ namespace AmeisenBotX
             return bitmapImageMap;
         }
 
-        private void MapTimer_Elapsed(object sender, ElapsedEventArgs e)
+        private void MapTimerTick()
         {
-            // only start one timer tick at a time
-            if (Interlocked.CompareExchange(ref mapTimerBusy, 1, 0) == 1)
+            if (Enabled && NeedToUpdateMap && AmeisenBot.StateMachine.CurrentState.Key != BotState.LoadingScreen)
             {
-                return;
-            }
-
-            try
-            {
-                if (NeedToUpdateMap && AmeisenBot.StateMachine.CurrentState.Key != BotState.LoadingScreen)
+                Dispatcher.InvokeAsync(() =>
                 {
-                    Dispatcher.InvokeAsync(() =>
-                    {
-                        int width = (int)mapCanvasBackground.ActualWidth;
-                        int height = (int)mapCanvasBackground.ActualHeight;
+                    int width = (int)mapCanvasBackground.ActualWidth;
+                    int height = (int)mapCanvasBackground.ActualHeight;
 
-                        mapCanvas.Source = GenerateMapImage(Bitmap, Graphics, width, height);
-                    });
+                    mapCanvas.Source = GenerateMapImage(Bitmap, Graphics, width, height);
+                });
 
-                    NeedToUpdateMap = false;
-                }
-            }
-            finally
-            {
-                mapTimerBusy = 0;
+                NeedToUpdateMap = false;
             }
         }
 
@@ -534,21 +517,14 @@ namespace AmeisenBotX
 
         private void Window_IsVisibleChanged(object sender, DependencyPropertyChangedEventArgs e)
         {
-            if (IsVisible)
-            {
-                MapTimer.Start();
-            }
-            else
-            {
-                MapTimer.Stop();
-            }
+            Enabled = IsVisible;
         }
 
         private void Window_Loaded(object sender, RoutedEventArgs e)
         {
             SetupGraphics();
 
-            MapTimer.Start();
+            Enabled = true;
             gridSidemenu.Visibility = Visibility.Collapsed;
 
             checkboxRenderCurrentPath.IsChecked = AmeisenBot.Config.MapRenderCurrentPath;
@@ -576,7 +552,7 @@ namespace AmeisenBotX
 
         private void Window_Unloaded(object sender, RoutedEventArgs e)
         {
-            MapTimer.Stop();
+            Enabled = false;
         }
     }
 }

@@ -1,5 +1,5 @@
-﻿using AmeisenBotX.Common.Offsets;
-using AmeisenBotX.Memory;
+﻿using AmeisenBotX.Memory;
+using AmeisenBotX.Wow.Offsets;
 using System;
 using System.Collections.Generic;
 using System.Text;

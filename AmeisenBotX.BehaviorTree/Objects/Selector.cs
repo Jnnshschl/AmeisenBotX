@@ -5,13 +5,7 @@ namespace AmeisenBotX.BehaviorTree.Objects
 {
     public class Selector : Composite
     {
-        public Selector(Func<bool> condition, Node nodeA, Node nodeB) : base("")
-        {
-            Condition = condition;
-            Children = new() { nodeA, nodeB };
-        }
-
-        public Selector(string name, Func<bool> condition, Node nodeA, Node nodeB) : base(name)
+        public Selector(Func<bool> condition, Node nodeA, Node nodeB) : base()
         {
             Condition = condition;
             Children = new() { nodeA, nodeB };
@@ -39,13 +33,7 @@ namespace AmeisenBotX.BehaviorTree.Objects
 
     public class Selector<T> : Composite<T>
     {
-        public Selector(Func<T, bool> condition, Node<T> nodeA, Node<T> nodeB) : base("")
-        {
-            Condition = condition;
-            Children = new() { nodeA, nodeB };
-        }
-
-        public Selector(string name, Func<T, bool> condition, Node<T> nodeA, Node<T> nodeB) : base(name)
+        public Selector(Func<T, bool> condition, Node<T> nodeA, Node<T> nodeB) : base()
         {
             Condition = condition;
             Children = new() { nodeA, nodeB };

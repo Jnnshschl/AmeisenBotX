@@ -1,9 +1,9 @@
 ﻿using AmeisenBotX.Common.Utils;
-using AmeisenBotX.Core.Data.Objects;
 using AmeisenBotX.Core.Engines.Movement.Enums;
 using AmeisenBotX.Core.Fsm.Enums;
 using AmeisenBotX.Core.Fsm.States.Idle;
 using AmeisenBotX.Core.Fsm.States.Idle.Actions;
+using AmeisenBotX.Wow.Objects;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -90,7 +90,7 @@ namespace AmeisenBotX.Core.Fsm.States
             // do we need to loot stuff
             if (Config.LootUnits
                 && LootCheckEvent.Run()
-                && StateMachine.GetState<StateLooting>().GetNearLootableUnits().Any())
+                && StateMachine.Get<StateLooting>().GetNearLootableUnits().Any())
             {
                 StateMachine.SetState(BotState.Looting);
                 return;
@@ -98,7 +98,7 @@ namespace AmeisenBotX.Core.Fsm.States
 
             // do we need to eat something
             if (EatCheckEvent.Run()
-                && StateMachine.GetState<StateEating>().NeedToEat())
+                && StateMachine.Get<StateEating>().NeedToEat())
             {
                 StateMachine.SetState(BotState.Eating);
                 return;
@@ -124,8 +124,8 @@ namespace AmeisenBotX.Core.Fsm.States
             // do we need to repair our equipment
             if (Config.AutoRepair
                 && RepairCheckEvent.Run()
-                && StateMachine.GetState<StateRepairing>().NeedToRepair()
-                && StateMachine.GetState<StateRepairing>().IsRepairNpcNear(out _))
+                && StateMachine.Get<StateRepairing>().NeedToRepair()
+                && StateMachine.Get<StateRepairing>().IsRepairNpcNear(out _))
             {
                 StateMachine.SetState(BotState.Repairing);
                 return;
@@ -134,8 +134,8 @@ namespace AmeisenBotX.Core.Fsm.States
             // do we need to sell stuff
             if (Config.AutoSell
                 && BagSlotCheckEvent.Run()
-                && StateMachine.GetState<StateSelling>().NeedToSell()
-                && StateMachine.GetState<StateSelling>().IsVendorNpcNear(out _))
+                && StateMachine.Get<StateSelling>().NeedToSell()
+                && StateMachine.Get<StateSelling>().IsVendorNpcNear(out _))
             {
                 StateMachine.SetState(BotState.Selling);
                 return;
@@ -143,7 +143,7 @@ namespace AmeisenBotX.Core.Fsm.States
 
             // do i need to complete/get quests
             if (Config.AutoTalkToNearQuestgivers
-                && StateMachine.GetState<StateFollowing>().IsUnitToFollowThere(out IWowUnit unitToFollow, true)
+                && StateMachine.Get<StateFollowing>().IsUnitToFollowThere(out IWowUnit unitToFollow, true)
                 && unitToFollow.TargetGuid != 0)
             {
                 IWowUnit target = Bot.GetWowObjectByGuid<IWowUnit>(unitToFollow.TargetGuid);
@@ -156,7 +156,7 @@ namespace AmeisenBotX.Core.Fsm.States
             }
 
             // do i need to follow someone
-            if ((!Config.Autopilot || Bot.Objects.MapId.IsDungeonMap()) && StateMachine.GetState<StateFollowing>().IsUnitToFollowThere(out _))
+            if ((!Config.Autopilot || Bot.Objects.MapId.IsDungeonMap()) && StateMachine.Get<StateFollowing>().IsUnitToFollowThere(out _))
             {
                 StateMachine.SetState(BotState.Following);
                 return;
@@ -168,8 +168,7 @@ namespace AmeisenBotX.Core.Fsm.States
                 Bot.CombatClass.OutOfCombatExecute();
             }
 
-            if (StateMachine.StateOverride is not BotState.Idle
-                and not BotState.None)
+            if (StateMachine.StateOverride is not BotState.Idle and not BotState.None)
             {
                 StateMachine.SetState(StateMachine.StateOverride);
                 return;

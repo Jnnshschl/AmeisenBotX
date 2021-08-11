@@ -1,7 +1,7 @@
 ﻿using AmeisenBotX.Wow.Objects.Enums;
 using System.Collections.Specialized;
 
-namespace AmeisenBotX.Core.Data.Objects
+namespace AmeisenBotX.Wow.Objects
 {
     public interface IWowGameobject : IWowObject
     {

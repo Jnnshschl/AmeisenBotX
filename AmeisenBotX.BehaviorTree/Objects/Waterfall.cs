@@ -7,13 +7,7 @@ namespace AmeisenBotX.BehaviorTree.Objects
 {
     public class Waterfall : Composite
     {
-        public Waterfall(Node fallbackNode, params (Func<bool> condition, Node node)[] conditionNodePairs) : base("")
-        {
-            FallbackNode = fallbackNode;
-            ConditionNodePairs = conditionNodePairs.ToList();
-        }
-
-        public Waterfall(string name, Node fallbackNode, params (Func<bool> condition, Node node)[] conditionNodePairs) : base(name)
+        public Waterfall(Node fallbackNode, params (Func<bool> condition, Node node)[] conditionNodePairs) : base()
         {
             FallbackNode = fallbackNode;
             ConditionNodePairs = conditionNodePairs.ToList();
@@ -44,13 +38,7 @@ namespace AmeisenBotX.BehaviorTree.Objects
 
     public class Waterfall<T> : Composite<T>
     {
-        public Waterfall(Node<T> fallbackNode, params (Func<T, bool> condition, Node<T> node)[] conditionNodePairs) : base("")
-        {
-            FallbackNode = fallbackNode;
-            ConditionNodePairs = conditionNodePairs.ToList();
-        }
-
-        public Waterfall(string name, Node<T> fallbackNode, params (Func<T, bool> condition, Node<T> node)[] conditionNodePairs) : base(name)
+        public Waterfall(Node<T> fallbackNode, params (Func<T, bool> condition, Node<T> node)[] conditionNodePairs) : base()
         {
             FallbackNode = fallbackNode;
             ConditionNodePairs = conditionNodePairs.ToList();

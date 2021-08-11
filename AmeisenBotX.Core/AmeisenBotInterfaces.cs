@@ -1,6 +1,5 @@
 ﻿using AmeisenBotX.Common.Math;
 using AmeisenBotX.Common.Utils;
-using AmeisenBotX.Core.Data.Objects;
 using AmeisenBotX.Core.Engines.Battleground;
 using AmeisenBotX.Core.Engines.Character;
 using AmeisenBotX.Core.Engines.Chat;
@@ -13,7 +12,6 @@ using AmeisenBotX.Core.Engines.Movement.Pathfinding;
 using AmeisenBotX.Core.Engines.Quest;
 using AmeisenBotX.Core.Engines.Tactic;
 using AmeisenBotX.Core.Keyboard;
-using AmeisenBotX.Learning;
 using AmeisenBotX.Memory;
 using AmeisenBotX.RconClient;
 using AmeisenBotX.Wow;
@@ -48,9 +46,9 @@ namespace AmeisenBotX.Core
 
         public IJobEngine Jobs { get; set; }
 
-        public IWowUnit LastTarget => Objects.LastTarget;
+        public KeyboardHook Keyboard { get; set; }
 
-        public AmeisenBotLearner Learner { get; set; }
+        public IWowUnit LastTarget => Objects.LastTarget;
 
         public IMemoryApi Memory { get; set; }
 
@@ -67,8 +65,6 @@ namespace AmeisenBotX.Core
         public IQuestEngine Quest { get; set; }
 
         public AmeisenBotRconClient Rcon { get; set; }
-
-        public KeyboardHook Keyboard { get; set; }
 
         public ITacticEngine Tactic { get; set; }
 

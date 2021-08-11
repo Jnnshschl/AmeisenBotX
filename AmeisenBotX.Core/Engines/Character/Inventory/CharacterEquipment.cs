@@ -1,8 +1,8 @@
-﻿using AmeisenBotX.Core.Data.Objects;
-using AmeisenBotX.Core.Engines.Character.Inventory.Objects;
+﻿using AmeisenBotX.Core.Engines.Character.Inventory.Objects;
 using AmeisenBotX.Logging;
 using AmeisenBotX.Logging.Enums;
 using AmeisenBotX.Wow;
+using AmeisenBotX.Wow.Objects;
 using AmeisenBotX.Wow.Objects.Enums;
 using System;
 using System.Collections;

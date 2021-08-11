@@ -3,10 +3,10 @@ using AmeisenBotX.BehaviorTree.Enums;
 using AmeisenBotX.BehaviorTree.Objects;
 using AmeisenBotX.Common.Math;
 using AmeisenBotX.Common.Utils;
-using AmeisenBotX.Core.Data.Objects;
 using AmeisenBotX.Core.Engines.Movement.Enums;
 using AmeisenBotX.Core.Fsm.Enums;
 using AmeisenBotX.Core.Fsm.States.StaticDeathRoutes;
+using AmeisenBotX.Wow.Objects;
 using AmeisenBotX.Wow.Objects.Enums;
 using System;
 using System.Collections.Generic;
@@ -31,11 +31,11 @@ namespace AmeisenBotX.Core.Fsm.States
                 () => Config.DungeonUsePartyMode,
                 new Selector
                 (
-                    () => Bot.Dungeon.TryGetProfileByMapId(StateMachine.GetState<StateDead>().LastDiedMap) != null,
+                    () => Bot.Dungeon.TryGetProfileByMapId(StateMachine.Get<StateDead>().LastDiedMap) != null,
                     new Leaf(RunToDungeonProfileEntry),
                     new Selector
                     (
-                        () => StateMachine.GetState<StateFollowing>().IsUnitToFollowThere(out playerToFollow),
+                        () => StateMachine.Get<StateFollowing>().IsUnitToFollowThere(out playerToFollow),
                         new Leaf(FollowNearestUnit),
                         new Leaf(RunToCorpsePositionAndSearchForPortals)
                     )
@@ -64,7 +64,7 @@ namespace AmeisenBotX.Core.Fsm.States
                         new Leaf(FollowStaticPath),
                         new Selector
                         (
-                            () => StateMachine.GetState<StateDead>().LastDiedMap.IsDungeonMap(),
+                            () => StateMachine.Get<StateDead>().LastDiedMap.IsDungeonMap(),
                             dungeonSelector,
                             new Leaf(RunToCorpseAndRetrieveIt)
                         )
@@ -213,7 +213,7 @@ namespace AmeisenBotX.Core.Fsm.States
             Vector3 upliftedPosition = CorpsePosition;
 
             // TODO: get real ground level from maps
-            upliftedPosition.Z = 0f;
+            upliftedPosition.Z = 0.0f;
 
             return RunToAndExecute(upliftedPosition, () => RunToNearestPortal());
         }
@@ -225,7 +225,7 @@ namespace AmeisenBotX.Core.Fsm.States
 
         private BehaviorTreeStatus RunToDungeonProfileEntry()
         {
-            Vector3 position = Bot.Dungeon.TryGetProfileByMapId(StateMachine.GetState<StateDead>().LastDiedMap).WorldEntry;
+            Vector3 position = Bot.Dungeon.TryGetProfileByMapId(StateMachine.Get<StateDead>().LastDiedMap).WorldEntry;
             return RunToAndExecute(position, () => RunToNearestPortal());
         }
 

@@ -16,11 +16,8 @@ namespace AmeisenBotX.Core.Fsm.States
 
         public event Action OnWoWStarted;
 
-        private bool Initialized { get; set; }
-
         public override void Enter()
         {
-            Initialized = false;
             AmeisenLogger.I.Log("StartWow", "Setting TOS and EULA to 1 in config");
             CheckTosAndEula();
 
@@ -33,7 +30,7 @@ namespace AmeisenBotX.Core.Fsm.States
 
         public override void Execute()
         {
-            if (!Initialized && File.Exists(Config.PathToWowExe))
+            if (File.Exists(Config.PathToWowExe))
             {
                 if (Bot.Memory.Process == null || Bot.Memory.Process.HasExited)
                 {
@@ -55,7 +52,6 @@ namespace AmeisenBotX.Core.Fsm.States
 
                         AmeisenLogger.I.Log("StartWow", $"Switching to login state...");
                         StateMachine.SetState(BotState.Login);
-                        Initialized = true;
                     }
                     else
                     {

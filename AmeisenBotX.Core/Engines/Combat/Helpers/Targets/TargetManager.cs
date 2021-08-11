@@ -1,6 +1,6 @@
 ﻿using AmeisenBotX.Common.Utils;
-using AmeisenBotX.Core.Data.Objects;
 using AmeisenBotX.Core.Engines.Combat.Helpers.Targets.Logics;
+using AmeisenBotX.Wow.Objects;
 using System;
 using System.Collections.Generic;
 

@@ -1,6 +1,5 @@
 ﻿using AmeisenBotX.Common.Math;
 using AmeisenBotX.Common.Utils;
-using AmeisenBotX.Core.Data.Objects;
 using AmeisenBotX.Core.Engines.Movement.Enums;
 using AmeisenBotX.Core.Fsm.Enums;
 using AmeisenBotX.Wow.Objects;
@@ -199,7 +198,7 @@ namespace AmeisenBotX.Core.Fsm.States
 
                 if (Config.FollowPositionDynamic)
                 {
-                    pos += StateMachine.GetState<StateFollowing>().Offset;
+                    pos += StateMachine.Get<StateFollowing>().Offset;
                 }
 
                 double distance = pos.GetDistance(Bot.Player.Position);

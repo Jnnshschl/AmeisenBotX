@@ -1,4 +1,4 @@
-﻿using AmeisenBotX.Common.Offsets;
+﻿using AmeisenBotX.Wow.Offsets;
 using System;
 
 namespace AmeisenBotX.Wow335a.Offsets

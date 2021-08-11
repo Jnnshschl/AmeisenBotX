@@ -1,9 +1,12 @@
 ﻿using AmeisenBotX.Common.Utils;
-using AmeisenBotX.Core.Data.Objects;
 using AmeisenBotX.Core.Engines.Character.Spells.Objects;
+using AmeisenBotX.Logging;
+using AmeisenBotX.Logging.Enums;
+using AmeisenBotX.Wow.Objects;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Text.Json;
 
 namespace AmeisenBotX.Core.Engines.Combat.Helpers.Healing
 {
@@ -11,6 +14,9 @@ namespace AmeisenBotX.Core.Engines.Combat.Helpers.Healing
     {
         /// <summary>
         /// Create a new instance of the HealingManager that is used to choose healing spell in a smart way.
+        /// It observes the heals done by the bot and remembers how much each spell healed. Based of that
+        /// knoweledge it is able to cancel spells to prevent overheal an chose fast heals when the target
+        /// is going to die in a few seconds.
         /// </summary>
         /// <param name="bot">AmeisenBotInterfaces collection</param>
         /// <param name="tryCastSpellAction">Function to cast a spell</param>
@@ -22,13 +28,12 @@ namespace AmeisenBotX.Core.Engines.Combat.Helpers.Healing
         public HealingManager
         (
             AmeisenBotInterfaces bot,
-            Func<string, ulong, bool>
-            tryCastSpellAction,
+            Func<string, ulong, bool> tryCastSpellAction,
             int damageMonitorSeconds = 10,
             float healthWeight = 0.7f,
             float incomingDamageWeight = 0.3f,
             int targetDyingSeconds = 4,
-            float overhealingStopThreshold = 0.25f
+            float overhealingStopThreshold = 0.75f
         )
         {
             Bot = bot;
@@ -45,33 +50,36 @@ namespace AmeisenBotX.Core.Engines.Combat.Helpers.Healing
             MeasurementEvent = new(TimeSpan.FromSeconds(1));
             IncomingDamage = new();
             IncomingDamageBuffer = new();
-            SpellHealing = new();
             SpellHealingBuffer = new();
+            SpellHealing = new();
+
+            Bot.CombatLog.OnDamage += OnDamage;
+            Bot.CombatLog.OnHeal += OnHeal;
         }
+
+        public int DamageMonitorSeconds { get; set; }
+
+        public float HealthWeightMod { get; set; }
+
+        public float IncomingDamageMod { get; set; }
+
+        public float OverhealingStopThreshold { get; set; }
+
+        public Dictionary<string, int> SpellHealing { get; set; }
+
+        public int TargetDyingSeconds { get; set; }
 
         private AmeisenBotInterfaces Bot { get; }
 
-        private int DamageMonitorSeconds { get; }
-
         private List<Spell> HealingSpells { get; }
-
-        private float HealthWeightMod { get; }
 
         private Dictionary<ulong, int> IncomingDamage { get; }
 
         private Dictionary<ulong, Queue<(DateTime, int)>> IncomingDamageBuffer { get; }
 
-        private float IncomingDamageMod { get; }
-
         private TimegatedEvent MeasurementEvent { get; }
 
-        private float OverhealingStopThreshold { get; }
-
-        private Dictionary<string, int> SpellHealing { get; }
-
         private Dictionary<string, Queue<int>> SpellHealingBuffer { get; }
-
-        private int TargetDyingSeconds { get; }
 
         private Func<string, ulong, bool> TryCastSpellAction { get; }
 
@@ -85,55 +93,11 @@ namespace AmeisenBotX.Core.Engines.Combat.Helpers.Healing
             {
                 HealingSpells.Add(spell);
                 SpellHealingBuffer.Add(spell.Name, new());
-                SpellHealing.Add(spell.Name, 0);
-            }
-        }
 
-        /// <summary>
-        /// Fire this when the player received damage.
-        /// </summary>
-        /// <param name="src">Source guid</param>
-        /// <param name="dst">Destination guid</param>
-        /// <param name="spellId">Spell id caused that damage</param>
-        /// <param name="amount">Damage amount</param>
-        /// <param name="over">Overdamage</param>
-        public void OnDamage(ulong src, ulong dst, int spellId, int amount, int over)
-        {
-            if (dst == Bot.Wow.PlayerGuid || Bot.Wow.ObjectProvider.Partymembers.Any(e => e.Guid == dst))
-            {
-                DateTime now = DateTime.UtcNow;
-
-                if (!IncomingDamageBuffer.ContainsKey(dst))
+                if (!SpellHealing.ContainsKey(spell.Name))
                 {
-                    IncomingDamageBuffer.Add(dst, new());
-                    IncomingDamage.Add(dst, 0);
+                    SpellHealing.Add(spell.Name, 0);
                 }
-
-                IncomingDamageBuffer[dst].Enqueue((now, amount));
-            }
-        }
-
-        /// <summary>
-        /// Fire this when a player received healing.
-        /// </summary>
-        /// <param name="src">Source guid</param>
-        /// <param name="dst">Destination guid</param>
-        /// <param name="spellId">Spell id caused that damage</param>
-        /// <param name="amount">Haling amount</param>
-        /// <param name="over">Overhealing</param>
-        public void OnHeal(ulong src, ulong dst, int spellId, int amount, int over)
-        {
-            if (spellId > 0 && src == Bot.Wow.PlayerGuid)
-            {
-                string spellName = Bot.Db.GetSpellName(spellId);
-
-                if (!SpellHealingBuffer.ContainsKey(spellName))
-                {
-                    SpellHealingBuffer.Add(spellName, new());
-                    SpellHealing.Add(spellName, 0);
-                }
-
-                SpellHealingBuffer[spellName].Enqueue(amount);
             }
         }
 
@@ -271,6 +235,54 @@ namespace AmeisenBotX.Core.Engines.Combat.Helpers.Healing
         }
 
         /// <summary>
+        /// Fired when the player received damage.
+        /// </summary>
+        /// <param name="src">Source guid</param>
+        /// <param name="dst">Destination guid</param>
+        /// <param name="spellId">Spell id caused that damage</param>
+        /// <param name="amount">Damage amount</param>
+        /// <param name="over">Overdamage</param>
+        private void OnDamage(ulong src, ulong dst, int spellId, int amount, int over)
+        {
+            if (dst == Bot.Wow.PlayerGuid || Bot.Wow.ObjectProvider.Partymembers.Any(e => e.Guid == dst))
+            {
+                DateTime now = DateTime.UtcNow;
+
+                if (!IncomingDamageBuffer.ContainsKey(dst))
+                {
+                    IncomingDamageBuffer.Add(dst, new());
+                    IncomingDamage.Add(dst, 0);
+                }
+
+                IncomingDamageBuffer[dst].Enqueue((now, amount));
+            }
+        }
+
+        /// <summary>
+        /// Fired when a player received healing.
+        /// </summary>
+        /// <param name="src">Source guid</param>
+        /// <param name="dst">Destination guid</param>
+        /// <param name="spellId">Spell id caused that damage</param>
+        /// <param name="amount">Haling amount</param>
+        /// <param name="over">Overhealing</param>
+        private void OnHeal(ulong src, ulong dst, int spellId, int amount, int over)
+        {
+            if (spellId > 0 && src == Bot.Wow.PlayerGuid)
+            {
+                string spellName = Bot.Db.GetSpellName(spellId);
+
+                if (!SpellHealingBuffer.ContainsKey(spellName))
+                {
+                    SpellHealingBuffer.Add(spellName, new());
+                    SpellHealing.Add(spellName, 0);
+                }
+
+                SpellHealingBuffer[spellName].Enqueue(amount);
+            }
+        }
+
+        /// <summary>
         /// Updates the IncomingDamage dict with the new average damage incoming per unit.
         /// </summary>
         /// <param name="now">Current time</param>
@@ -296,6 +308,8 @@ namespace AmeisenBotX.Core.Engines.Combat.Helpers.Healing
                     IncomingDamage[guid] = 0;
                 }
             }
+
+            AmeisenLogger.I.Log("HealingManager", $"IncomingDamage: {JsonSerializer.Serialize(IncomingDamage)}", LogLevel.Verbose);
         }
 
         /// <summary>
@@ -317,6 +331,8 @@ namespace AmeisenBotX.Core.Engines.Combat.Helpers.Healing
                     SpellHealing[spell] = (int)SpellHealingBuffer[spell].Average();
                 }
             }
+
+            AmeisenLogger.I.Log("HealingManager", $"SpellHealing: {JsonSerializer.Serialize(SpellHealing)}", LogLevel.Verbose);
         }
     }
 }

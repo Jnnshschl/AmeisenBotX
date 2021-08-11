@@ -230,7 +230,7 @@ namespace AmeisenBotX.Core.Engines.Quest.Profiles.StartAreas
                         () => (bot.GetClosestQuestgiverByDisplayId(bot.Player.Position, new List<int> { 16416 }), new Vector3(2340, -5687, 154)),
                         new List<IQuestObjective>()
                         {
-                            new BotActionQuestObjective(() => stateMachine.GetState<StateCombat>().Mode = CombatMode.NotAllowed),
+                            new BotActionQuestObjective(() => stateMachine.Get<StateCombat>().Mode = CombatMode.NotAllowed),
                             new QuestObjectiveChain(new List<IQuestObjective>()
                             {
                                 new MoveToPositionQuestObjective(bot, new Vector3(2243, -5834, 101), 48.0),
@@ -240,7 +240,7 @@ namespace AmeisenBotX.Core.Engines.Quest.Profiles.StartAreas
                                 new MoveToUnitQuestObjective(bot, 16416, 16.0),
                                 new CastVehicleSpellQuestObjective(bot, 52264, () => bot.Objects.Player.QuestlogEntries.FirstOrDefault(e => e.Id == 12680).Finished == 1)
                             }),
-                            new BotActionQuestObjective(() => stateMachine.GetState<StateCombat>().Mode = CombatMode.Allowed)
+                            new BotActionQuestObjective(() => stateMachine.Get<StateCombat>().Mode = CombatMode.Allowed)
                         }
                     ),
                     new BotQuest

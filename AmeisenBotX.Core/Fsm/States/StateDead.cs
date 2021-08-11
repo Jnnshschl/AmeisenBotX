@@ -10,7 +10,7 @@ namespace AmeisenBotX.Core.Fsm.States
         }
 
         /// <summary>
-        /// Returns the map where we died on.
+        /// The map we died on.
         /// </summary>
         public WowMapId LastDiedMap { get; set; }
 

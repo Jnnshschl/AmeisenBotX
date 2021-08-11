@@ -49,7 +49,7 @@ namespace AmeisenBotX
             this._errorBorderBrush = new((Color)FindResource("DarkError"));
         }
 
-        #endregion
+        #endregion Constructor
 
         public AmeisenBot AmeisenBot { get; private set; }
 
@@ -152,7 +152,7 @@ namespace AmeisenBotX
                 Config.PermanentNameCache = checkboxPermanentNameCache.IsChecked.GetValueOrDefault(false);
                 Config.PermanentReactionCache = checkboxPermanentReactionCache.IsChecked.GetValueOrDefault(false);
                 Config.RconEnabled = checkboxEnableRcon.IsChecked.GetValueOrDefault(true);
-                Config.RconScreenshotInterval = int.Parse(textboxRconScreenshotInterval.Text, CultureInfo.InvariantCulture);
+                Config.RconInterval = int.Parse(textboxRconScreenshotInterval.Text, CultureInfo.InvariantCulture);
                 Config.RconSendScreenshots = checkboxEnableRconScreenshots.IsChecked.GetValueOrDefault(false);
                 Config.RconServerAddress = textboxRconAddress.Text;
                 Config.RconServerGuid = textboxRconGUID.Text;
@@ -188,8 +188,13 @@ namespace AmeisenBotX
                 Config.MovementSettings.SeperationDistance = (float)sliderPlayerSeperationDistance.Value;
                 Config.MovementSettings.WaypointCheckThreshold = (float)sliderWaypointThreshold.Value;
 
-                // Key binding settings
-                Config.KeyBindingSettings.StartStopBot = ((VirtualKeyStates)Enum.Parse(typeof(VirtualKeyStates), comboboxStartStopBotBindingAltKey.SelectedValue.ToString()), (Keys)Enum.Parse(typeof(Keys), comboboxStartStopBotBindingKey.SelectedValue.ToString()));
+                if (comboboxStartStopBotBindingAltKey.SelectedValue != null
+                    && comboboxStartStopBotBindingKey.SelectedValue != null
+                    && Enum.TryParse(comboboxStartStopBotBindingAltKey.SelectedValue.ToString(), out VirtualKeyStates alt)
+                    && Enum.TryParse(comboboxStartStopBotBindingKey.SelectedValue.ToString(), out Keys key))
+                {
+                    Config.KeyBindingSettings.StartStopBot = (alt, key);
+                }
 
                 SaveConfig = true;
                 Close();
@@ -447,7 +452,7 @@ namespace AmeisenBotX
             textboxRconGUID.Text = Config.RconServerGuid;
             textboxRconImage.Text = Config.RconServerImage;
             textboxRconInterval.Text = Config.RconTickMs.ToString(CultureInfo.InvariantCulture);
-            textboxRconScreenshotInterval.Text = Config.RconScreenshotInterval.ToString(CultureInfo.InvariantCulture);
+            textboxRconScreenshotInterval.Text = Config.RconInterval.ToString(CultureInfo.InvariantCulture);
             textboxRealm.Text = Config.Realm;
             textboxRealmlist.Text = Config.Realmlist;
             textboxStatemachineTick.Text = Config.StateMachineTickMs.ToString(CultureInfo.InvariantCulture);

@@ -4,11 +4,7 @@ namespace AmeisenBotX.BehaviorTree.Objects
 {
     public abstract class Composite : Node
     {
-        public Composite() : base("")
-        {
-        }
-
-        public Composite(string name) : base(name)
+        public Composite() : base()
         {
         }
 
@@ -17,11 +13,7 @@ namespace AmeisenBotX.BehaviorTree.Objects
 
     public abstract class Composite<T> : Node<T>
     {
-        public Composite() : base("")
-        {
-        }
-
-        public Composite(string name) : base(name)
+        public Composite() : base()
         {
         }
 

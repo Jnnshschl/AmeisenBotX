@@ -3,7 +3,6 @@ using AmeisenBotX.BehaviorTree.Enums;
 using AmeisenBotX.BehaviorTree.Objects;
 using AmeisenBotX.Common.Math;
 using AmeisenBotX.Common.Utils;
-using AmeisenBotX.Core.Data.Objects;
 using AmeisenBotX.Core.Engines.Character.Inventory.Objects;
 using AmeisenBotX.Core.Engines.Dungeon.Enums;
 using AmeisenBotX.Core.Engines.Dungeon.Objects;
@@ -12,6 +11,7 @@ using AmeisenBotX.Core.Engines.Dungeon.Profiles.TBC;
 using AmeisenBotX.Core.Engines.Dungeon.Profiles.WotLK;
 using AmeisenBotX.Core.Engines.Jobs.Profiles;
 using AmeisenBotX.Core.Engines.Movement.Enums;
+using AmeisenBotX.Wow.Objects;
 using AmeisenBotX.Wow.Objects.Enums;
 using System;
 using System.Collections.Generic;
@@ -32,17 +32,15 @@ namespace AmeisenBotX.Core.Engines.Dungeon
 
             RootSelector = new
             (
-                "HasFinishedDungeon",
                 () => Progress == 100.0,
-                new Leaf("LeaveDungeon", () => ExitDungeon()),
+                new Leaf(ExitDungeon),
                 new Selector
                 (
-                    "IDied",
                     () => IDied,
                     new Sequence
                     (
-                        new Leaf("RecoverDeathPosition", () => MoveToPosition(DeathPosition)),
-                        new Leaf("SetIDiedToFalse", () =>
+                        new Leaf(() => MoveToPosition(DeathPosition)),
+                        new Leaf(() =>
                         {
                             IDied = false;
                             return BehaviorTreeStatus.Success;
@@ -50,27 +48,23 @@ namespace AmeisenBotX.Core.Engines.Dungeon
                     ),
                     new Selector
                     (
-                        "AmITheLeader",
                         () => Bot.Objects.Partyleader == null || Bot.Objects.Partyleader.Guid == Bot.Wow.PlayerGuid || !Bot.Objects.PartymemberGuids.Any(),
                         new Selector
                         (
-                            "AreAllPlayersPresent",
                             () => AreAllPlayersPresent(20.0f, 14.0f),
                             new Selector
                             (
-                                "IsAnyoneEating",
                                 () => Bot.Objects.Partymembers.Any(e => e.Auras.Any(e => Bot.Db.GetSpellName(e.SpellId) == "Food") || e.Auras.Any(e => Bot.Db.GetSpellName(e.SpellId) == "Drink")),
-                                new Leaf("WaitForPlayersToArrive", () => { return BehaviorTreeStatus.Success; }),
-                                new Leaf("FollowNodePath", () => FollowNodePath())
+                                new Leaf(() => { return BehaviorTreeStatus.Success; }),
+                                new Leaf(() => FollowNodePath())
                             ),
-                            new Leaf("WaitForPlayersToArrive", () => { return BehaviorTreeStatus.Success; })
+                            new Leaf(() => { return BehaviorTreeStatus.Success; })
                         ),
                         new Selector
                         (
-                            "IsDungeonLeaderInRange",
                             () => Bot.Objects.Partyleader != null,
-                            new Leaf("FollowLeader", () => MoveToPosition(Bot.Objects.Partyleader.Position + LeaderFollowOffset, 0f, MovementAction.Follow)),
-                            new Leaf("WaitForLeaderToArrive", () => { return BehaviorTreeStatus.Success; })
+                            new Leaf(() => MoveToPosition(Bot.Objects.Partyleader.Position + LeaderFollowOffset, 0.0f, MovementAction.Follow)),
+                            new Leaf(() => { return BehaviorTreeStatus.Success; })
                         )
                     )
                 )

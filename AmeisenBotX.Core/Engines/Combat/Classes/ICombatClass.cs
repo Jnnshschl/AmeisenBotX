@@ -1,11 +1,12 @@
 ﻿using AmeisenBotX.Core.Engines.Character.Comparators;
 using AmeisenBotX.Core.Engines.Character.Talents.Objects;
+using AmeisenBotX.Core.Storage;
 using AmeisenBotX.Wow.Objects.Enums;
 using System.Collections.Generic;
 
 namespace AmeisenBotX.Core.Engines.Combat.Classes
 {
-    public interface ICombatClass
+    public interface ICombatClass : IStoreable
     {
         /// <summary>
         /// Who built the combat class?
