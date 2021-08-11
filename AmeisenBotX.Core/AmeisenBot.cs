@@ -595,6 +595,7 @@ namespace AmeisenBotX.Core
             if (Bot.CombatClass != null)
             {
                 Storage.Storeables.Add(Bot.CombatClass);
+                Storage.LoadAll();
             }
 
             // if a combatclass specified an ItemComparator
