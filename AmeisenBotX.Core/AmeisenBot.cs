@@ -27,7 +27,6 @@ using AmeisenBotX.Core.Engines.Tactic;
 using AmeisenBotX.Core.Fsm;
 using AmeisenBotX.Core.Fsm.Enums;
 using AmeisenBotX.Core.Fsm.States;
-using AmeisenBotX.Core.Keyboard;
 using AmeisenBotX.Core.Storage;
 using AmeisenBotX.Logging;
 using AmeisenBotX.Logging.Enums;
@@ -118,10 +117,6 @@ namespace AmeisenBotX.Core
                     LoadWowWindowPosition();
                 }
             };
-
-            // setup keyboard hook to catch hotkeys
-            Bot.Keyboard = new KeyboardHook();
-            Bot.Keyboard.Enable();
 
             Bot.Chat = new DefaultChatManager(Config, ProfileFolder);
             Bot.Tactic = new DefaultTacticEngine();
