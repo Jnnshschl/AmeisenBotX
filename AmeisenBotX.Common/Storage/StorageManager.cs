@@ -1,12 +1,10 @@
-﻿using AmeisenBotX.Logging;
-using AmeisenBotX.Logging.Enums;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Text.Json;
 using System.Text.Json.Serialization;
 
-namespace AmeisenBotX.Core.Storage
+namespace AmeisenBotX.Common.Storage
 {
     public class StorageManager
     {
@@ -50,7 +48,7 @@ namespace AmeisenBotX.Core.Storage
             }
             catch (Exception ex)
             {
-                AmeisenLogger.I.Log("CombatClass", $"Failed to load {s.GetType().Name} ({fullPath}):\n{ex}", LogLevel.Error);
+                // AmeisenLogger.I.Log("CombatClass", $"Failed to load {s.GetType().Name} ({fullPath}):\n{ex}", LogLevel.Error);
             }
         }
 
@@ -86,7 +84,7 @@ namespace AmeisenBotX.Core.Storage
             }
             catch (Exception ex)
             {
-                AmeisenLogger.I.Log("CombatClass", $"Failed to save {s.GetType().Name} ({fullPath}):\n{ex}", LogLevel.Error);
+                // AmeisenLogger.I.Log("CombatClass", $"Failed to save {s.GetType().Name} ({fullPath}):\n{ex}", LogLevel.Error);
             }
         }
 

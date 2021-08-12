@@ -1,4 +1,4 @@
-﻿using AmeisenBotX.Common.Enums;
+﻿using AmeisenBotX.Common.Keyboard.Enums;
 using AmeisenBotX.Common.Math;
 using AmeisenBotX.Common.Utils;
 using AmeisenBotX.Core.Engines.Character.Comparators;
@@ -180,7 +180,7 @@ namespace AmeisenBotX.Core.Engines.Character
         public void Jump()
         {
             AmeisenLogger.I.Log("Movement", $"Jumping", LogLevel.Verbose);
-            Task.Run(() => BotUtils.SendKey(MemoryApi.Process.MainWindowHandle, new((int)VirtualKey.VKSPACE), 500, 1000));
+            Task.Run(() => BotUtils.SendKey(MemoryApi.Process.MainWindowHandle, new((int)KeyCodes.Space), 500, 1000));
         }
 
         public void MoveToPosition(Vector3 pos, float turnSpeed = 20.9f, float distance = 0.1f)
