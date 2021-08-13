@@ -1,10 +1,9 @@
-﻿using AmeisenBotX.Core;
+﻿using AmeisenBotX.Common.Keyboard.Enums;
+using AmeisenBotX.Common.Objects.Keyboard;
+using AmeisenBotX.Core;
 using AmeisenBotX.Core.Engines.Battleground;
-using AmeisenBotX.Core.Keyboard;
 using AmeisenBotX.Views;
-
 using Microsoft.Win32;
-
 using System;
 using System.Collections.Generic;
 using System.Globalization;
@@ -20,36 +19,30 @@ namespace AmeisenBotX
 {
     public partial class ConfigEditorWindow : Window
     {
-        private readonly SolidColorBrush _errorBorderBrush;
-        private readonly SolidColorBrush _normalBorderBrush;
-
-        #region Constructor
-
         /// <summary>
         /// Creates a new instance of the class.
         /// </summary>
         /// <param name="dataDir">The data directory path.</param>
         /// <param name="ameisenBot">A <see cref="AmeisenBot"/> instance.</param>
         /// <param name="initialConfig">A <see cref="AmeisenBotConfig"/> instance (Optional).</param>
-        /// <param name="initialConfigName">A initial config name(Optional).</param>
+        /// <param name="initialConfigName">A initial config name (Optional).</param>
         public ConfigEditorWindow(string dataDir, AmeisenBot ameisenBot, AmeisenBotConfig initialConfig = null, string initialConfigName = "")
         {
-            // Initial
-            this.InitializeComponent();
+            InitializeComponent();
 
-            // Configure
-            this.DataDir = dataDir;
-            this.NewConfig = initialConfig == null;
-            this.Config = initialConfig ?? new();
-            this.AmeisenBot = ameisenBot;
-            this.ConfigName = initialConfigName;
-            this.SaveConfig = this.NewConfig;
+            DataDir = dataDir;
+            NewConfig = initialConfig == null;
+            Config = initialConfig ?? new();
+            AmeisenBot = ameisenBot;
+            ConfigName = initialConfigName;
+            SaveConfig = NewConfig;
 
-            this._normalBorderBrush = new((Color)FindResource("DarkBorder"));
-            this._errorBorderBrush = new((Color)FindResource("DarkError"));
+            NormalBorderBrush = new((Color)FindResource("DarkBorder"));
+            ErrorBorderBrush = new((Color)FindResource("DarkError"));
+
+            NormalBorderBrush.Freeze();
+            ErrorBorderBrush.Freeze();
         }
-
-        #endregion Constructor
 
         public AmeisenBot AmeisenBot { get; private set; }
 
@@ -68,6 +61,10 @@ namespace AmeisenBotX
         public bool SaveConfig { get; private set; }
 
         public bool WindowLoaded { get; set; }
+
+        private SolidColorBrush ErrorBorderBrush { get; }
+
+        private SolidColorBrush NormalBorderBrush { get; }
 
         private void AddBattlegroundEngines()
         {
@@ -188,12 +185,17 @@ namespace AmeisenBotX
                 Config.MovementSettings.SeperationDistance = (float)sliderPlayerSeperationDistance.Value;
                 Config.MovementSettings.WaypointCheckThreshold = (float)sliderWaypointThreshold.Value;
 
-                if (comboboxStartStopBotBindingAltKey.SelectedValue != null
-                    && comboboxStartStopBotBindingKey.SelectedValue != null
-                    && Enum.TryParse(comboboxStartStopBotBindingAltKey.SelectedValue.ToString(), out VirtualKeyStates alt)
-                    && Enum.TryParse(comboboxStartStopBotBindingKey.SelectedValue.ToString(), out Keys key))
+                if (Enum.TryParse(comboboxStartStopBotBindingAltKey.Text.ToString(), out KeyCodes mod)
+                    && Enum.TryParse(comboboxStartStopBotBindingKey.Text.ToString(), out KeyCodes key))
                 {
-                    Config.KeyBindingSettings.StartStopBot = (alt, key);
+                    if (!Config.Hotkeys.ContainsKey("StartStop"))
+                    {
+                        Config.Hotkeys.Add("StartStop", new() { Key = (int)key, Mod = (int)mod });
+                    }
+                    else
+                    {
+                        Config.Hotkeys["StartStop"] = new() { Key = (int)key, Mod = (int)mod };
+                    }
                 }
 
                 SaveConfig = true;
@@ -470,8 +472,16 @@ namespace AmeisenBotX
             sliderWaypointThresholdMount.Value = Config.MovementSettings.WaypointCheckThresholdMounted;
 
             // Load keybinding settings
-            comboboxStartStopBotBindingAltKey.SelectedValue = Config.KeyBindingSettings.StartStopBot.Item1.ToString();
-            comboboxStartStopBotBindingKey.SelectedValue = Config.KeyBindingSettings.StartStopBot.Item2.ToString();
+            if (Config.Hotkeys.TryGetValue("StartStop", out Keybind kv))
+            {
+                comboboxStartStopBotBindingAltKey.Text = ((KeyCodes)kv.Mod).ToString();
+                comboboxStartStopBotBindingKey.Text = ((KeyCodes)kv.Key).ToString();
+            }
+            else
+            {
+                comboboxStartStopBotBindingAltKey.Text = KeyCodes.None.ToString();
+                comboboxStartStopBotBindingKey.Text = KeyCodes.None.ToString();
+            }
 
             ChangedSomething = false;
         }
@@ -659,22 +669,22 @@ namespace AmeisenBotX
             {
                 if (textboxUsername.Text.Length == 0)
                 {
-                    textboxUsername.BorderBrush = _errorBorderBrush;
+                    textboxUsername.BorderBrush = ErrorBorderBrush;
                     failed = true;
                 }
                 else
                 {
-                    textboxUsername.BorderBrush = _normalBorderBrush;
+                    textboxUsername.BorderBrush = NormalBorderBrush;
                 }
 
                 if (textboxPassword.Password.Length == 0)
                 {
-                    textboxPassword.BorderBrush = _errorBorderBrush;
+                    textboxPassword.BorderBrush = ErrorBorderBrush;
                     failed = true;
                 }
                 else
                 {
-                    textboxPassword.BorderBrush = _normalBorderBrush;
+                    textboxPassword.BorderBrush = NormalBorderBrush;
                 }
 
                 if (textboxCharacterSlot.Text.Length == 0
@@ -682,12 +692,12 @@ namespace AmeisenBotX
                     || charslot < 0
                     || charslot > 9)
                 {
-                    textboxCharacterSlot.BorderBrush = _errorBorderBrush;
+                    textboxCharacterSlot.BorderBrush = ErrorBorderBrush;
                     failed = true;
                 }
                 else
                 {
-                    textboxCharacterSlot.BorderBrush = _normalBorderBrush;
+                    textboxCharacterSlot.BorderBrush = NormalBorderBrush;
                 }
             }
 
@@ -700,12 +710,12 @@ namespace AmeisenBotX
             {
                 if (textboxWowPath.Text.Length == 0)
                 {
-                    textboxConfigName.BorderBrush = _errorBorderBrush;
+                    textboxConfigName.BorderBrush = ErrorBorderBrush;
                     failed = true;
                 }
                 else
                 {
-                    textboxConfigName.BorderBrush = _normalBorderBrush;
+                    textboxConfigName.BorderBrush = NormalBorderBrush;
                 }
             }
 
@@ -719,12 +729,12 @@ namespace AmeisenBotX
             if (textboxConfigName.Text.Length == 0
                 || regex.IsMatch(textboxConfigName.Text))
             {
-                textboxConfigName.BorderBrush = _errorBorderBrush;
+                textboxConfigName.BorderBrush = ErrorBorderBrush;
                 failed = true;
             }
             else
             {
-                textboxConfigName.BorderBrush = _normalBorderBrush;
+                textboxConfigName.BorderBrush = NormalBorderBrush;
             }
 
             return failed;
@@ -746,12 +756,12 @@ namespace AmeisenBotX
             if (textboxNavmeshServerIp.Text.Length == 0
                 || !IPAddress.TryParse(textboxNavmeshServerIp.Text, out IPAddress _))
             {
-                textboxNavmeshServerIp.BorderBrush = _errorBorderBrush;
+                textboxNavmeshServerIp.BorderBrush = ErrorBorderBrush;
                 failed = true;
             }
             else
             {
-                textboxNavmeshServerIp.BorderBrush = _normalBorderBrush;
+                textboxNavmeshServerIp.BorderBrush = NormalBorderBrush;
             }
 
             if (textboxNavmeshServerPort.Text.Length == 0
@@ -759,12 +769,12 @@ namespace AmeisenBotX
                 || port < 0
                 || port > ushort.MaxValue)
             {
-                textboxNavmeshServerPort.BorderBrush = _errorBorderBrush;
+                textboxNavmeshServerPort.BorderBrush = ErrorBorderBrush;
                 failed = true;
             }
             else
             {
-                textboxNavmeshServerPort.BorderBrush = _normalBorderBrush;
+                textboxNavmeshServerPort.BorderBrush = NormalBorderBrush;
             }
 
             return failed;
@@ -776,12 +786,12 @@ namespace AmeisenBotX
             {
                 if (textboxFollowSpecificCharacterName.Text.Length == 0)
                 {
-                    textboxFollowSpecificCharacterName.BorderBrush = _errorBorderBrush;
+                    textboxFollowSpecificCharacterName.BorderBrush = ErrorBorderBrush;
                     failed = true;
                 }
                 else
                 {
-                    textboxFollowSpecificCharacterName.BorderBrush = _normalBorderBrush;
+                    textboxFollowSpecificCharacterName.BorderBrush = NormalBorderBrush;
                 }
             }
 
@@ -813,6 +823,34 @@ namespace AmeisenBotX
             }
 
             textboxCombatClassFile.Visibility = Visibility.Hidden;
+
+            // add hotkeys to comboboxes
+            foreach (KeyCodes k in Enum.GetValues(typeof(KeyCodes)))
+            {
+                switch (k)
+                {
+                    case KeyCodes.None:
+                        comboboxStartStopBotBindingKey.Items.Add(k.ToString());
+                        comboboxStartStopBotBindingAltKey.Items.Add(k.ToString());
+                        break;
+
+                    case KeyCodes.LControlKey:
+                    case KeyCodes.RControlKey:
+                    case KeyCodes.LShiftKey:
+                    case KeyCodes.RShiftKey:
+                    case KeyCodes.LWin:
+                    case KeyCodes.RWin:
+                    case KeyCodes.LMenu:
+                    case KeyCodes.RMenu:
+                    case KeyCodes.Alt:
+                        comboboxStartStopBotBindingAltKey.Items.Add(k.ToString());
+                        break;
+
+                    default:
+                        comboboxStartStopBotBindingKey.Items.Add(k.ToString());
+                        break;
+                }
+            }
 
             LoadConfigToUi();
         }

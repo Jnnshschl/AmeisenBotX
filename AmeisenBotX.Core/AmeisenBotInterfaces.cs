@@ -11,7 +11,6 @@ using AmeisenBotX.Core.Engines.Movement;
 using AmeisenBotX.Core.Engines.Movement.Pathfinding;
 using AmeisenBotX.Core.Engines.Quest;
 using AmeisenBotX.Core.Engines.Tactic;
-using AmeisenBotX.Core.Keyboard;
 using AmeisenBotX.Memory;
 using AmeisenBotX.RconClient;
 using AmeisenBotX.Wow;
@@ -45,8 +44,6 @@ namespace AmeisenBotX.Core
         public IGrindingEngine Grinding { get; set; }
 
         public IJobEngine Jobs { get; set; }
-
-        public KeyboardHook Keyboard { get; set; }
 
         public IWowUnit LastTarget => Objects.LastTarget;
 

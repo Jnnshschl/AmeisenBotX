@@ -1,14 +1,9 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Runtime.InteropServices;
 
-namespace AmeisenBotX.Core.Keyboard
+namespace AmeisenBotX.Common.Keyboard.Enums
 {
-    /// <summary>
-    /// The key codes and modifiers list.
-    /// </summary>
     [Flags]
-    public enum Keys
+    public enum KeyCodes
     {
         A = 0x41,
         Add = 0x6b,
@@ -204,108 +199,5 @@ namespace AmeisenBotX.Core.Keyboard
         Y = 0x59,
         Z = 90,
         Zoom = 0xfb
-    }
-
-    public enum VirtualKeyStates
-    {
-        NONE = 0x0,
-        LWIN = 0x5B,
-        RWIN = 0x5C,
-        LSHIFT = 0xA0,
-        RSHIFT = 0xA1,
-        LCONTROL = 0xA2,
-        RCONTROL = 0xA3,
-        LALT = 0xA4, //aka VK_LMENU
-        RALT = 0xA5 //aka VK_RMENU
-    }
-
-    [StructLayout(LayoutKind.Sequential)]
-    public struct LowLevelKeyboardInputEvent
-    {
-        /// <summary>
-        /// A virtual-key code. The code must be a value in the range 1 to 254.
-        /// </summary>
-        public int VirtualCode;
-
-        /// <summary>
-        /// A hardware scan code for the key.
-        /// </summary>
-        public int HardwareScanCode;
-
-        /// <summary>
-        /// The extended-key flag, event-injected Flags, context code, and transition-state flag. This member is specified as follows. An application can use the following values to test the keystroke Flags. Testing LLKHF_INJECTED (bit 4) will tell you whether the event was injected. If it was, then testing LLKHF_LOWER_IL_INJECTED (bit 1) will tell you whether or not the event was injected from a process running at lower integrity level.
-        /// </summary>
-        public int Flags;
-
-        /// <summary>
-        /// The time stamp stamp for this message, equivalent to what GetMessageTime would return for this message.
-        /// </summary>
-        public int TimeStamp;
-
-        /// <summary>
-        /// Additional information associated with the message.
-        /// </summary>
-        public IntPtr AdditionalInformation;
-    }
-
-    public class KeyboardHookEventArgs
-    {
-        private const int KEY_PRESSED = 0x8000;
-
-        private readonly HashSet<Keys> AltKeyList = new()
-        {
-            Keys.LMenu,
-            Keys.RMenu,
-            Keys.LControlKey,
-            Keys.RControlKey,
-            Keys.LShiftKey,
-            Keys.RShiftKey,
-            Keys.LWin,
-            Keys.RWin
-        };
-
-        /// <summary>
-        /// Creates a new instance of the class.
-        /// </summary>
-        public KeyboardHookEventArgs(LowLevelKeyboardInputEvent keyboardInput)
-        {
-            Keys key = (Keys)keyboardInput.VirtualCode;
-
-            Key = AltKeyList.Contains(Key) ? Keys.None : key;
-            Alts = GetPressedAltKeys((VirtualKeyStates.LALT, Keys.LMenu),
-                (VirtualKeyStates.RALT, Keys.RMenu),
-                (VirtualKeyStates.LCONTROL, Keys.LControlKey),
-                (VirtualKeyStates.RCONTROL, Keys.RControlKey),
-                (VirtualKeyStates.LSHIFT, Keys.LShiftKey),
-                (VirtualKeyStates.RSHIFT, Keys.RShiftKey),
-                (VirtualKeyStates.LWIN, Keys.LWin),
-                (VirtualKeyStates.RWIN, Keys.RWin));
-        }
-
-        public HashSet<VirtualKeyStates> Alts { get; }
-
-        // Indicates if the event is handled or not.
-        public bool Handled { get; set; }
-
-        public Keys Key { get; }
-
-        [DllImport("user32.dll")]
-        private static extern short GetKeyState(VirtualKeyStates nVirtKey);
-
-        private HashSet<VirtualKeyStates> GetPressedAltKeys(params (VirtualKeyStates, Keys)[] keys)
-        {
-            HashSet<VirtualKeyStates> altKeys = new();
-
-            foreach ((VirtualKeyStates, Keys) keySet in keys)
-            {
-                if ((Convert.ToBoolean(GetKeyState(keySet.Item1) & KEY_PRESSED) || Key == keySet.Item2)
-                    && !altKeys.Contains(keySet.Item1))
-                {
-                    altKeys.Add(keySet.Item1);
-                }
-            }
-
-            return altKeys;
-        }
     }
 }

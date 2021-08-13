@@ -57,6 +57,32 @@ namespace AmeisenBotX
             InitializeComponent();
         }
 
+        ~MapWindow()
+        {
+            Bitmap.Dispose();
+            Graphics.Dispose();
+
+            BlacklistNodeBrush.Dispose();
+            BlacklistNodePen.Dispose();
+            BlacklistNodePen.Dispose();
+            DeadBrush.Dispose();
+            DefaultEntityBrush.Dispose();
+            DungeonNodeBrush.Dispose();
+            DungeonNodePen.Dispose();
+            EnemyBrush.Dispose();
+            FriendBrush.Dispose();
+            HerbBrush.Dispose();
+            MeBrush.Dispose();
+            NeutralBrush.Dispose();
+            OreBrush.Dispose();
+            PathNodeBrush.Dispose();
+            PathNodePen.Dispose();
+            SubTextBrush.Dispose();
+            SubTextFont.Dispose();
+            TextBrush.Dispose();
+            TextFont.Dispose();
+        }
+
         public bool Enabled { get; private set; }
 
         private AmeisenBot AmeisenBot { get; set; }
@@ -83,7 +109,7 @@ namespace AmeisenBotX
 
         private Brush HerbBrush { get; set; }
 
-        private LockedTimer MapTimer { get; set; }
+        private LockedTimer MapTimer { get; }
 
         private Brush MeBrush { get; set; }
 
@@ -121,7 +147,7 @@ namespace AmeisenBotX
             float newX = originX * cSin - originY * rSin;
             float newY = originX * rSin + originY * cSin;
 
-            return new Point((int)(newX + x), (int)(newY + y));
+            return new((int)(newX + x), (int)(newY + y));
         }
 
         private static void RenderBlacklistNode(int x, int y, Brush blacklistNodeBrush, Pen blacklistNodePen, Graphics graphics, int size, int radius)
@@ -503,6 +529,16 @@ namespace AmeisenBotX
 
         private void SetupGraphics()
         {
+            if (Graphics != null)
+            {
+                Graphics.Dispose();
+            }
+
+            if (Bitmap != null)
+            {
+                Bitmap.Dispose();
+            }
+
             int width = (int)mapCanvasBackground.ActualWidth;
             int height = (int)mapCanvasBackground.ActualHeight;
 

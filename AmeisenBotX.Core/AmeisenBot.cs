@@ -1,4 +1,5 @@
 ﻿using AmeisenBotX.Common.Math;
+using AmeisenBotX.Common.Storage;
 using AmeisenBotX.Common.Utils;
 using AmeisenBotX.Core.Engines.Battleground;
 using AmeisenBotX.Core.Engines.Battleground.einTyp;
@@ -27,8 +28,6 @@ using AmeisenBotX.Core.Engines.Tactic;
 using AmeisenBotX.Core.Fsm;
 using AmeisenBotX.Core.Fsm.Enums;
 using AmeisenBotX.Core.Fsm.States;
-using AmeisenBotX.Core.Keyboard;
-using AmeisenBotX.Core.Storage;
 using AmeisenBotX.Logging;
 using AmeisenBotX.Logging.Enums;
 using AmeisenBotX.Memory;
@@ -119,10 +118,6 @@ namespace AmeisenBotX.Core
                 }
             };
 
-            // setup keyboard hook to catch hotkeys
-            Bot.Keyboard = new KeyboardHook();
-            Bot.Keyboard.Enable();
-
             Bot.Chat = new DefaultChatManager(Config, ProfileFolder);
             Bot.Tactic = new DefaultTacticEngine();
 
@@ -191,6 +186,11 @@ namespace AmeisenBotX.Core
         /// Fires when a custom BombatClass was compiled.
         /// </summary>
         public event Action<bool, string, string> OnCombatClassCompilationResult;
+
+        /// <summary>
+        /// Fires the bot changes from running to pause or vice versa.
+        /// </summary>
+        public event Action OnStatusChanged;
 
         /// <summary>
         /// Current account name used.
@@ -292,8 +292,8 @@ namespace AmeisenBotX.Core
         /// </summary>
         public void Dispose()
         {
-            AmeisenLogger.I.Log("AmeisenBot", "Stopping", LogLevel.Debug);
             IsRunning = false;
+            AmeisenLogger.I.Log("AmeisenBot", "Stopping", LogLevel.Debug);
 
             Storage.SaveAll();
 
@@ -341,7 +341,8 @@ namespace AmeisenBotX.Core
             Bot.Db.Save(Path.Combine(ProfileFolder, "db.json"));
 
             AmeisenLogger.I.Log("AmeisenBot", $"Exiting AmeisenBot", LogLevel.Debug);
-            AmeisenLogger.I.Stop();
+
+            OnStatusChanged?.Invoke();
         }
 
         /// <summary>
@@ -349,14 +350,19 @@ namespace AmeisenBotX.Core
         /// </summary>
         public void Pause()
         {
-            AmeisenLogger.I.Log("AmeisenBot", "Pausing", LogLevel.Debug);
-            IsRunning = false;
-
-            if (StateMachine.CurrentState.Key is not BotState.StartWow
-                and not BotState.Login
-                and not BotState.LoadingScreen)
+            if (IsRunning)
             {
-                StateMachine.SetState(BotState.Idle);
+                IsRunning = false;
+                AmeisenLogger.I.Log("AmeisenBot", "Pausing", LogLevel.Debug);
+
+                if (StateMachine.CurrentState.Key is not BotState.StartWow
+                    and not BotState.Login
+                    and not BotState.LoadingScreen)
+                {
+                    StateMachine.SetState(BotState.Idle);
+                }
+
+                OnStatusChanged?.Invoke();
             }
         }
 
@@ -393,8 +399,13 @@ namespace AmeisenBotX.Core
         /// </summary>
         public void Resume()
         {
-            AmeisenLogger.I.Log("AmeisenBot", "Resuming", LogLevel.Debug);
-            IsRunning = true;
+            if (!IsRunning)
+            {
+                IsRunning = true;
+                AmeisenLogger.I.Log("AmeisenBot", "Resuming", LogLevel.Debug);
+
+                OnStatusChanged?.Invoke();
+            }
         }
 
         /// <summary>
@@ -403,23 +414,26 @@ namespace AmeisenBotX.Core
         /// </summary>
         public void Start()
         {
-            AmeisenLogger.I.Log("AmeisenBot", "Starting", LogLevel.Debug);
-
-            SubscribeToWowEvents();
-
-            StateMachineTimer = new(Config.StateMachineTickMs, StateMachineTimerTick);
-
-            if (Config.RconEnabled)
+            if (!IsRunning)
             {
-                AmeisenLogger.I.Log("Rcon", "Starting Rcon Timer", LogLevel.Debug);
-                StateMachineTimer.OnTick += RconClientTimerTick;
+                IsRunning = true;
+                AmeisenLogger.I.Log("AmeisenBot", "Starting", LogLevel.Debug);
+
+                SubscribeToWowEvents();
+
+                StateMachineTimer = new(Config.StateMachineTickMs, StateMachineTimerTick);
+
+                if (Config.RconEnabled)
+                {
+                    AmeisenLogger.I.Log("Rcon", "Starting Rcon Timer", LogLevel.Debug);
+                    StateMachineTimer.OnTick += RconClientTimerTick;
+                }
+
+                Storage.LoadAll();
+
+                AmeisenLogger.I.Log("AmeisenBot", "Setup done", LogLevel.Debug);
+                OnStatusChanged?.Invoke();
             }
-
-            IsRunning = true;
-
-            AmeisenLogger.I.Log("AmeisenBot", "Setup done", LogLevel.Debug);
-
-            Storage.LoadAll();
         }
 
         private static T LoadClassByName<T>(IEnumerable<T> profiles, string profileName)
@@ -935,8 +949,8 @@ namespace AmeisenBotX.Core
                         });
 
                         Rect rc = Bot.Memory.GetClientSize();
-                        Bitmap bmp = new(rc.Right - rc.Left, rc.Bottom - rc.Top, PixelFormat.Format32bppArgb);
 
+                        using Bitmap bmp = new(rc.Right - rc.Left, rc.Bottom - rc.Top, PixelFormat.Format32bppArgb);
                         using Graphics g = Graphics.FromImage(bmp);
                         g.CopyFromScreen(rc.Left, rc.Top, 0, 0, new(rc.Right - rc.Left, rc.Bottom - rc.Top));
 

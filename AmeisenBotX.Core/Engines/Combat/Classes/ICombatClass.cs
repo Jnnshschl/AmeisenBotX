@@ -1,6 +1,6 @@
-﻿using AmeisenBotX.Core.Engines.Character.Comparators;
+﻿using AmeisenBotX.Common.Storage;
+using AmeisenBotX.Core.Engines.Character.Comparators;
 using AmeisenBotX.Core.Engines.Character.Talents.Objects;
-using AmeisenBotX.Core.Storage;
 using AmeisenBotX.Wow.Objects.Enums;
 using System.Collections.Generic;
 

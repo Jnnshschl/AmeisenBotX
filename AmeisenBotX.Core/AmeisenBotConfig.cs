@@ -1,5 +1,5 @@
-﻿using AmeisenBotX.Core.Engines.Movement.Settings;
-using AmeisenBotX.Core.Keyboard;
+﻿using AmeisenBotX.Common.Objects.Keyboard;
+using AmeisenBotX.Core.Engines.Movement.Settings;
 using AmeisenBotX.Memory.Win32;
 
 using System;
@@ -84,6 +84,8 @@ namespace AmeisenBotX.Core
 
         public string GrindingProfile { get; set; } = string.Empty;
 
+        public Dictionary<string, Keybind> Hotkeys { get; set; } = new();
+
         public bool IdleActions { get; set; } = false;
 
         public bool IgnoreCombatWhileMounted { get; set; } = true;
@@ -99,8 +101,6 @@ namespace AmeisenBotX.Core
         public string JobEngineMailText { get; set; } = string.Empty;
 
         public string JobProfile { get; set; } = string.Empty;
-
-        public KeyBindingSettings KeyBindingSettings { get; set; } = new();
 
         public bool LootOnlyMoneyAndQuestitems { get; set; } = false;
 

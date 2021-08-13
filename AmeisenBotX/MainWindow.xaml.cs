@@ -1,4 +1,7 @@
-﻿using AmeisenBotX.Common.Math;
+﻿using AmeisenBotX.Common.Keyboard;
+using AmeisenBotX.Common.Keyboard.Enums;
+using AmeisenBotX.Common.Math;
+using AmeisenBotX.Common.Objects.Keyboard;
 using AmeisenBotX.Common.Utils;
 using AmeisenBotX.Core;
 using AmeisenBotX.Core.Fsm.Enums;
@@ -27,17 +30,10 @@ namespace AmeisenBotX
 {
     public partial class MainWindow : Window
     {
-        #region Constructor
-
-        /// <summary>
-        /// Creates a new instance of the class.
-        /// </summary>
         public MainWindow()
         {
-            // Initialize
-            this.InitializeComponent();
+            InitializeComponent();
 
-            // Configure
             CurrentTickTimeBadBrush = new SolidColorBrush(Color.FromRgb(255, 0, 80));
             CurrentTickTimeGoodBrush = new SolidColorBrush(Color.FromRgb(160, 255, 0));
             DarkForegroundBrush = new SolidColorBrush((Color)FindResource("DarkForeground"));
@@ -54,11 +50,14 @@ namespace AmeisenBotX
             NotificationEvent = new(TimeSpan.FromSeconds(1));
 
             RenderState = true;
+
+            KeyboardHook = new KeyboardHook();
+            KeyboardHook.Enable();
         }
 
-        #endregion Constructor
-
         public bool IsAutoPositionSetup { get; private set; }
+
+        public KeyboardHook KeyboardHook { get; }
 
         public double M11 { get; private set; }
 
@@ -175,6 +174,9 @@ namespace AmeisenBotX
             {
                 AmeisenBot.ReloadConfig(configWindow.Config);
                 File.WriteAllText(AmeisenBot.Config.Path, JsonSerializer.Serialize(configWindow.Config, new() { WriteIndented = true }));
+
+                KeyboardHook.Clear();
+                LoadHotkeys();
             }
         }
 
@@ -200,8 +202,7 @@ namespace AmeisenBotX
 
         private void ButtonStartPause_Click(object sender, RoutedEventArgs e)
         {
-            // Call
-            this.StartPause();
+            StartPause();
         }
 
         private void ButtonStateConfig_Click(object sender, RoutedEventArgs e)
@@ -264,11 +265,18 @@ namespace AmeisenBotX
             }
         }
 
+        private void LoadHotkeys()
+        {
+            if (AmeisenBot.Config.Hotkeys.TryGetValue("StartStop", out Keybind kv))
+            {
+                KeyboardHook.AddHotkey((KeyCodes)kv.Key, (KeyCodes)kv.Mod, StartPause);
+            }
+        }
+
         private void OnObjectUpdateComplete(IEnumerable<IWowObject> wowObjects)
         {
             Dispatcher.InvokeAsync(() =>
             {
-                // Notification Symbol
                 if (NotificationEvent.Run())
                 {
                     if (!PendingNotification)
@@ -309,7 +317,6 @@ namespace AmeisenBotX
                     }
                 }
 
-                // Update the main view
                 IWowPlayer player = AmeisenBot.Bot.Player;
 
                 switch (player.Class)
@@ -355,13 +362,11 @@ namespace AmeisenBotX
                         break;
                 }
 
-                // Bottom labels
                 if (LabelUpdateEvent.Run())
                 {
                     UpdateBottomLabels();
                 }
 
-                // Overlay drawing
                 if (DrawOverlay)
                 {
                     Overlay ??= new(AmeisenBot.Bot.Memory.Process.MainWindowHandle);
@@ -430,25 +435,22 @@ namespace AmeisenBotX
             if (AmeisenBot != null
                 && AmeisenBot.Config != null
                 && !string.IsNullOrWhiteSpace(AmeisenBot.Config.Path)
-                && Directory.Exists(AmeisenBot.ProfileFolder))
+                && Directory.Exists(Path.GetDirectoryName(AmeisenBot.Config.Path)))
             {
-                File.WriteAllText(AmeisenBot.Config.Path, JsonSerializer.Serialize(AmeisenBot.Config, new() { WriteIndented = true }));
+                File.WriteAllText(AmeisenBot.Config.Path, JsonSerializer.Serialize(AmeisenBot.Config, new() { WriteIndented = true, IncludeFields = true }));
             }
         }
 
         private void StartPause()
         {
-            // Is running?
             if (AmeisenBot.IsRunning)
             {
-                // Set pause
                 AmeisenBot.Pause();
                 buttonStartPause.Content = "▶";
                 buttonStartPause.Foreground = TextAccentBrush;
             }
             else
             {
-                // Set resume
                 AmeisenBot.Resume();
                 buttonStartPause.Content = "||";
                 buttonStartPause.Foreground = DarkForegroundBrush;
@@ -457,7 +459,6 @@ namespace AmeisenBotX
 
         private void UpdateBotInfo(int maxSecondary, int secondary, Brush primaryBrush, Brush secondaryBrush)
         {
-            // Generic labels
             labelPlayerName.Content = AmeisenBot.Bot.Db.GetUnitName(AmeisenBot.Bot.Player, out string name) ? name : "unknown";
 
             labelMapName.Content = AmeisenBot.Bot.Objects.MapId.ToString();
@@ -478,12 +479,10 @@ namespace AmeisenBotX
 
             labelCurrentCombatclass.Content = AmeisenBot.Bot.CombatClass == null ? $"No CombatClass" : AmeisenBot.Bot.CombatClass.ToString();
 
-            // Class specific labels
             progressbarSecondary.Maximum = maxSecondary;
             progressbarSecondary.Value = secondary;
             labelCurrentSecondary.Content = BotUtils.BigValueToString(secondary);
 
-            // Colors
             progressbarHealth.Foreground = primaryBrush;
             progressbarSecondary.Foreground = secondaryBrush;
             labelCurrentClass.Foreground = primaryBrush;
@@ -491,10 +490,8 @@ namespace AmeisenBotX
 
         private void UpdateBottomLabels()
         {
-            // Object count label
             labelCurrentObjectCount.Content = AmeisenBot.Bot.Objects.ObjectCount.ToString(CultureInfo.InvariantCulture).PadLeft(4);
 
-            // Tick time label
             float executionMs = AmeisenBot.CurrentExecutionMs;
 
             if (float.IsNaN(executionMs) || float.IsInfinity(executionMs))
@@ -514,7 +511,6 @@ namespace AmeisenBotX
                 AmeisenLogger.I.Log("MainWindow", $"High executionMs ({executionMs}), something blocks our thread or CPU is to slow", LogLevel.Warning);
             }
 
-            // HookCall label
             labelHookCallCount.Content = AmeisenBot.Bot.Wow.HookCallCount.ToString(CultureInfo.InvariantCulture).PadLeft(2);
 
             if (AmeisenBot.Bot.Wow.HookCallCount <= (AmeisenBot.Bot.Player.IsInCombat ? AmeisenBot.Config.MaxFpsCombat : AmeisenBot.Config.MaxFps))
@@ -527,7 +523,6 @@ namespace AmeisenBotX
                 AmeisenLogger.I.Log("MainWindow", "High HookCall count, maybe increase your FPS", LogLevel.Warning);
             }
 
-            // RPM/WPM labels
             labelRpmCallCount.Content = AmeisenBot.Bot.Memory.RpmCallCount.ToString(CultureInfo.InvariantCulture).PadLeft(5);
             labelWpmCallCount.Content = AmeisenBot.Bot.Memory.WpmCallCount.ToString(CultureInfo.InvariantCulture).PadLeft(3);
         }
@@ -535,6 +530,8 @@ namespace AmeisenBotX
         private void Window_Closing(object sender, System.ComponentModel.CancelEventArgs e)
         {
             SaveBotWindowPosition();
+
+            KeyboardHook.Disable();
 
             Overlay?.Exit();
             AmeisenBot?.Dispose();
@@ -553,6 +550,8 @@ namespace AmeisenBotX
             }
 
             SaveConfig();
+
+            AmeisenLogger.I.Stop();
         }
 
         private void Window_Loaded(object sender, RoutedEventArgs e)
@@ -598,7 +597,6 @@ namespace AmeisenBotX
                 // display the PID, maybe remove this when not debugging
                 labelPID.Content = $"PID: {Environment.ProcessId}";
 
-                // init the bots engine
                 if (File.Exists(loadConfigWindow.ConfigToLoad) && TryLoadConfig(loadConfigWindow.ConfigToLoad, out AmeisenBotConfig config))
                 {
                     AmeisenBot = new(config);
@@ -636,6 +634,9 @@ namespace AmeisenBotX
                         };
                     }
 
+                    AmeisenLogger.I.Log("AmeisenBot", "Loading Hotkeys", LogLevel.Verbose);
+                    LoadHotkeys();
+
                     AmeisenBot.Start();
 
                     // init misc GUI related stuff
@@ -670,20 +671,6 @@ namespace AmeisenBotX
                     MessageBox.Show($"Check your config, maybe it contains some invalid stuff.\n\n{loadConfigWindow.ConfigToLoad}", "Failed to load Config", MessageBoxButton.OK, MessageBoxImage.Error);
                     Close();
                 }
-            }
-
-            // Subscribe to keyboard event
-            if (AmeisenBot?.Bot?.Keyboard != null)
-            {
-                AmeisenBot.Bot.Keyboard.OnPressed += (args) =>
-                {
-                    if (args.Alts.Count == 1
-                        && args.Alts.Contains(AmeisenBot.Config.KeyBindingSettings.StartStopBot.Item1)
-                        && args.Key == AmeisenBot.Config.KeyBindingSettings.StartStopBot.Item2)
-                    {
-                        StartPause();
-                    }
-                };
             }
         }
 
