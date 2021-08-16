@@ -31,19 +31,10 @@ namespace AmeisenBotX.Core.Logic
             Bot = bot;
 
             LoginAttemptEvent = new(TimeSpan.FromMilliseconds(500));
-            AntiAfkEvent = new(TimeSpan.FromMilliseconds(1800));
+            AntiAfkEvent = new(TimeSpan.FromMilliseconds(1200));
             RenderSwitchEvent = new(TimeSpan.FromMilliseconds(1000));
             CharacterUpdateEvent = new(TimeSpan.FromMilliseconds(5000));
-
-            Node combatNode = new Selector
-            (
-                () => Bot.CombatClass == null,
-                // start autoattacking if we have no combat class loaded
-                new Leaf(() => { if (!Bot.Player.IsAutoAttacking) Bot.Wow.StartAutoAttack(); return BehaviorTreeStatus.Success; }),
-                // TODO: handle tactics here
-                // run combat class logic
-                new Leaf(() => { Bot.CombatClass.Execute(); return BehaviorTreeStatus.Success; })
-            );
+            OffsetCheckEvent = new(TimeSpan.FromMilliseconds(15000));
 
             Node ghostNode = new Selector
             (
@@ -68,6 +59,16 @@ namespace AmeisenBotX.Core.Logic
                 )
             );
 
+            Node combatNode = new Selector
+            (
+                () => Bot.CombatClass == null,
+                // start autoattacking if we have no combat class loaded
+                new Leaf(() => { if (!Bot.Player.IsAutoAttacking) Bot.Wow.StartAutoAttack(); return BehaviorTreeStatus.Success; }),
+                // TODO: handle tactics here
+                // run combat class logic
+                new Leaf(() => { Bot.CombatClass.Execute(); return BehaviorTreeStatus.Success; })
+            );
+
             Node mainLogicNode = new Annotator
             (
                 // run the update stuff before we execute the main logic
@@ -83,7 +84,8 @@ namespace AmeisenBotX.Core.Logic
                         // handle main states
                         (() => Bot.Player.IsDead, new Leaf(Dead)),
                         (() => Bot.Player.IsGhost, ghostNode),
-                        (IsInCombat, combatNode)
+                        (IsInCombat, combatNode),
+                        (NeedToFollow, new Leaf(Follow))
                     ),
                     // we are in the loading screen or player is null
                     new Leaf(() => BehaviorTreeStatus.Success)
@@ -128,9 +130,15 @@ namespace AmeisenBotX.Core.Logic
 
         private AmeisenBotConfig Config { get; }
 
+        private Vector3 FollowOffset { get; set; }
+
         private TimegatedEvent LoginAttemptEvent { get; set; }
 
         private bool NeedToLogin => Bot.Memory.Read(Bot.Wow.Offsets.IsIngame, out int isIngame) && isIngame == 0;
+
+        private TimegatedEvent OffsetCheckEvent { get; }
+
+        private ulong PlayerToFollowGuid { get; set; }
 
         private TimegatedEvent RenderSwitchEvent { get; set; }
 
@@ -139,6 +147,22 @@ namespace AmeisenBotX.Core.Logic
         private IStaticDeathRoute StaticRoute { get; set; }
 
         private AmeisenBotBehaviorTree Tree { get; }
+
+        public bool NeedToFollow()
+        {
+            if (PlayerToFollowGuid != 0)
+            {
+                IWowUnit unitToFollow = Bot.GetWowObjectByGuid<IWowUnit>(PlayerToFollowGuid);
+
+                if (unitToFollow != null)
+                {
+                    float distance = Bot.Player.DistanceTo(unitToFollow);
+                    return distance > Config.MinFollowDistance && distance <= Config.MaxFollowDistance;
+                }
+            }
+
+            return false;
+        }
 
         public bool IsInCombat()
         {
@@ -149,6 +173,33 @@ namespace AmeisenBotX.Core.Logic
                 || Bot.GetEnemiesInCombatWithParty<IWowUnit>(Bot.Player.Position, 100.0f).Any();
         }
 
+        public bool IsUnitToFollowThere(out IWowUnit playerToFollow, bool ignoreRange = false)
+        {
+            IEnumerable<IWowPlayer> wowPlayers = Bot.Objects.WowObjects.OfType<IWowPlayer>().Where(e => !e.IsDead);
+
+            if (wowPlayers.Any())
+            {
+                IWowUnit[] playersToTry =
+                {
+                    Config.FollowSpecificCharacter ? wowPlayers.FirstOrDefault(p => Bot.Db.GetUnitName(p, out string name) && name.Equals(Config.SpecificCharacterToFollow, StringComparison.OrdinalIgnoreCase)) : null,
+                    Config.FollowGroupLeader ? Bot.Objects.Partyleader : null,
+                    Config.FollowGroupMembers ? Bot.Objects.Partymembers.FirstOrDefault() : null
+                };
+
+                for (int i = 0; i < playersToTry.Length; ++i)
+                {
+                    if (playersToTry[i] != null && (ignoreRange || ShouldIFollowPlayer(playersToTry[i])))
+                    {
+                        playerToFollow = playersToTry[i];
+                        return true;
+                    }
+                }
+            }
+
+            playerToFollow = null;
+            return false;
+        }
+
         public void Tick()
         {
             Tree.Tick();
@@ -156,7 +207,11 @@ namespace AmeisenBotX.Core.Logic
 
         private BehaviorTreeStatus AntiAfk()
         {
-            Bot.Memory.Write(Bot.Wow.Offsets.TickCount, Environment.TickCount);
+            if (AntiAfkEvent.Run())
+            {
+                Bot.Memory.Write(Bot.Wow.Offsets.TickCount, Environment.TickCount);
+            }
+
             return BehaviorTreeStatus.Success;
         }
 
@@ -394,6 +449,26 @@ namespace AmeisenBotX.Core.Logic
             return BehaviorTreeStatus.Success;
         }
 
+        private BehaviorTreeStatus Follow()
+        {
+            IWowUnit unitToFollow = Bot.GetWowObjectByGuid<IWowUnit>(PlayerToFollowGuid);
+
+            if (unitToFollow != null)
+            {
+                Vector3 pos = unitToFollow.Position;
+
+                if (Config.FollowPositionDynamic)
+                {
+                    pos += FollowOffset;
+                }
+
+                Bot.Movement.SetMovementAction(MovementAction.Move, pos);
+                return BehaviorTreeStatus.Success;
+            }
+
+            return BehaviorTreeStatus.Failed;
+        }
+
         private BehaviorTreeStatus RunToCorpseAndRetrieveIt()
         {
             if (Bot.Memory.Read(Bot.Wow.Offsets.CorpsePosition, out Vector3 corpsePosition))
@@ -416,6 +491,28 @@ namespace AmeisenBotX.Core.Logic
         private BehaviorTreeStatus SetupWowInterface()
         {
             return Bot.Wow.Setup() ? BehaviorTreeStatus.Success : BehaviorTreeStatus.Failed;
+        }
+
+        private bool ShouldIFollowPlayer(IWowUnit playerToFollow)
+        {
+            if (playerToFollow != null)
+            {
+                Vector3 pos = playerToFollow.Position;
+
+                if (Config.FollowPositionDynamic)
+                {
+                    pos += FollowOffset;
+                }
+
+                double distance = pos.GetDistance(Bot.Player.Position);
+
+                if (distance > Config.MinFollowDistance && distance < Config.MaxFollowDistance)
+                {
+                    return true;
+                }
+            }
+
+            return false;
         }
 
         private BehaviorTreeStatus StartWow()
@@ -458,6 +555,22 @@ namespace AmeisenBotX.Core.Logic
             if (Bot.Player != null)
             {
                 Bot.Movement.Execute();
+            }
+
+            if (Bot.Objects.WowObjects != null && IsUnitToFollowThere(out IWowUnit player))
+            {
+                PlayerToFollowGuid = player.Guid;
+            }
+
+            if (Config.FollowPositionDynamic && OffsetCheckEvent.Run())
+            {
+                Random rnd = new();
+                FollowOffset = new()
+                {
+                    X = ((float)rnd.NextDouble() * ((float)Config.MinFollowDistance * 2.0f)) - (float)Config.MinFollowDistance,
+                    Y = ((float)rnd.NextDouble() * ((float)Config.MinFollowDistance * 2.0f)) - (float)Config.MinFollowDistance,
+                    Z = 0.0f
+                };
             }
 
             // auto disable rendering when not in focus
