@@ -309,7 +309,7 @@ namespace AmeisenBotX.Core.Engines.Combat.Helpers.Healing
                 }
             }
 
-            AmeisenLogger.I.Log("HealingManager", $"IncomingDamage: {JsonSerializer.Serialize(IncomingDamage)}", LogLevel.Verbose);
+            // AmeisenLogger.I.Log("HealingManager", $"IncomingDamage: {JsonSerializer.Serialize(IncomingDamage)}", LogLevel.Verbose);
         }
 
         /// <summary>
@@ -332,7 +332,7 @@ namespace AmeisenBotX.Core.Engines.Combat.Helpers.Healing
                 }
             }
 
-            AmeisenLogger.I.Log("HealingManager", $"SpellHealing: {JsonSerializer.Serialize(SpellHealing)}", LogLevel.Verbose);
+            // AmeisenLogger.I.Log("HealingManager", $"SpellHealing: {JsonSerializer.Serialize(SpellHealing)}", LogLevel.Verbose);
         }
     }
 }

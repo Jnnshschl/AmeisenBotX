@@ -1,8 +1,8 @@
 ﻿using AmeisenBotX.Common.Utils;
 using AmeisenBotX.Core.Engines.Quest.Objects.Quests;
 using AmeisenBotX.Core.Engines.Quest.Profiles;
-using AmeisenBotX.Core.Fsm;
-using AmeisenBotX.Core.Fsm.Enums;
+using AmeisenBotX.Core.Logic;
+using AmeisenBotX.Core.Logic.Enums;
 using AmeisenBotX.Wow.Objects;
 using AmeisenBotX.Wow.Objects.Enums;
 using System;
@@ -13,11 +13,9 @@ namespace AmeisenBotX.Core.Engines.Quest
 {
     public class DefaultQuestEngine : IQuestEngine
     {
-        public DefaultQuestEngine(AmeisenBotInterfaces bot, AmeisenBotConfig config, AmeisenBotFsm stateMachine)
+        public DefaultQuestEngine(AmeisenBotInterfaces bot)
         {
             Bot = bot;
-            Config = config;
-            StateMachine = stateMachine;
 
             CompletedQuests = new();
             QueryCompletedQuestsEvent = new(TimeSpan.FromSeconds(2));
@@ -31,13 +29,9 @@ namespace AmeisenBotX.Core.Engines.Quest
 
         private AmeisenBotInterfaces Bot { get; }
 
-        private AmeisenBotConfig Config { get; }
-
         private DateTime LastAbandonQuestTime { get; set; } = DateTime.UtcNow;
 
         private TimegatedEvent QueryCompletedQuestsEvent { get; }
-
-        private AmeisenBotFsm StateMachine { get; }
 
         public void Execute()
         {
@@ -63,18 +57,6 @@ namespace AmeisenBotX.Core.Engines.Quest
 
             if (Profile.Quests.Count > 0)
             {
-                // do i need to recover my hp
-                if (Bot.Player.HealthPercentage < Config.EatUntilPercent
-                    && Bot.GetNearEnemies<IWowUnit>(Bot.Player.Position, 60.0f).Any())
-                {
-                    // wait or eat something
-                    if (Bot.Character.HasItemTypeInBag<WowFood>() || Bot.Character.HasItemTypeInBag<WowRefreshment>())
-                    {
-                        StateMachine.SetState(BotState.Eating);
-                        return;
-                    }
-                }
-
                 IEnumerable<IBotQuest> selectedQuests = Profile.Quests.Peek().Where(e => !e.Returned && !CompletedQuests.Contains(e.Id));
 
                 // drop all quest that are not selected

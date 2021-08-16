@@ -1,7 +1,7 @@
 ﻿using AmeisenBotX.Core.Engines.Character.Comparators;
 using AmeisenBotX.Core.Engines.Character.Talents.Objects;
-using AmeisenBotX.Core.Fsm;
-using AmeisenBotX.Core.Fsm.Utils.Auras.Objects;
+using AmeisenBotX.Core.Logic;
+using AmeisenBotX.Core.Logic.Utils.Auras.Objects;
 using AmeisenBotX.Wow.Objects;
 using AmeisenBotX.Wow.Objects.Enums;
 using System;
@@ -11,7 +11,7 @@ namespace AmeisenBotX.Core.Engines.Combat.Classes.Jannis
 {
     public class DruidBalance : BasicCombatClass
     {
-        public DruidBalance(AmeisenBotInterfaces bot, AmeisenBotFsm stateMachine) : base(bot, stateMachine)
+        public DruidBalance(AmeisenBotInterfaces bot) : base(bot)
         {
             MyAuraManager.Jobs.Add(new KeepActiveAuraJob(bot.Db, moonkinFormSpell, () => TryCastSpell(moonkinFormSpell, 0, true)));
             MyAuraManager.Jobs.Add(new KeepActiveAuraJob(bot.Db, thornsSpell, () => TryCastSpell(thornsSpell, 0, true)));

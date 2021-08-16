@@ -101,6 +101,8 @@ namespace AmeisenBotX.Wow335a.Offsets
 
         public IntPtr IsWorldLoaded { get; } = new(0xBEBA40);
 
+        public IntPtr IsIngame { get; } = new(0xBEBAA4);
+
         public IntPtr LastTargetGuid { get; } = new(0xBD07B8);
 
         public IntPtr LootWindowOpen { get; } = new(0xBFA8D8);

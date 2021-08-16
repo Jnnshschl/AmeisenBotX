@@ -36,6 +36,8 @@ namespace AmeisenBotX.Utils
         public static readonly SolidBrush warriorPrimaryBrush = new(Color.FromArgb(255, 199, 156, 110));
         public static readonly SolidBrush warriorSecondaryBrush = new(Color.FromArgb(255, 255, 0, 0));
 
+        public static readonly SolidBrush unknownBrush = new(Color.FromArgb(255, 255, 255, 255));
+
         public static SolidBrush GetClassPrimaryBrush(WowClass wowClass)
         {
             return wowClass switch
@@ -50,6 +52,8 @@ namespace AmeisenBotX.Utils
                 WowClass.Shaman => shamanPrimaryBrush,
                 WowClass.Warlock => warlockPrimaryBrush,
                 WowClass.Warrior => warriorPrimaryBrush,
+                WowClass.Unknown => unknownBrush,
+                _ => unknownBrush,
             };
         }
     }

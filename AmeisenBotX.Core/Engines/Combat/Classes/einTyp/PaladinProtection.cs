@@ -3,8 +3,8 @@ using AmeisenBotX.Common.Utils;
 using AmeisenBotX.Core.Engines.Character.Comparators;
 using AmeisenBotX.Core.Engines.Character.Talents.Objects;
 using AmeisenBotX.Core.Engines.Movement.Enums;
-using AmeisenBotX.Core.Fsm;
-using AmeisenBotX.Core.Fsm.States;
+using AmeisenBotX.Core.Logic;
+using AmeisenBotX.Core.Logic.States;
 using AmeisenBotX.Wow.Objects;
 using AmeisenBotX.Wow.Objects.Enums;
 using System;
@@ -24,10 +24,9 @@ namespace AmeisenBotX.Core.Engines.Combat.Classes.einTyp
         private bool multipleTargets = false;
         private bool standing = false;
 
-        public PaladinProtection(AmeisenBotInterfaces bot, AmeisenBotFsm stateMachine)
+        public PaladinProtection(AmeisenBotInterfaces bot)
         {
             Bot = bot;
-            StateMachine = stateMachine;
         }
 
         public string Author => "einTyp";
@@ -120,8 +119,6 @@ namespace AmeisenBotX.Core.Engines.Combat.Classes.einTyp
 
         private DateTime LastWisdom { get; set; }
 
-        private AmeisenBotFsm StateMachine { get; }
-
         public void AttackTarget()
         {
             IWowUnit target = Bot.Target;
@@ -170,7 +167,6 @@ namespace AmeisenBotX.Core.Engines.Combat.Classes.einTyp
                 HandleMovement(target);
                 HandleAttacking(target);
             }
-            StateMachine.Get<StateCombat>().Mode = CombatMode.Allowed;
         }
 
         public void Load(Dictionary<string, JsonElement> objects)
@@ -213,7 +209,6 @@ namespace AmeisenBotX.Core.Engines.Combat.Classes.einTyp
 
                     Dancing = false;
                     HandleMovement(target);
-                    StateMachine.Get<StateCombat>().Mode = CombatMode.Force;
                     HandleAttacking(target);
                 }
                 else if (!Dancing || standing)

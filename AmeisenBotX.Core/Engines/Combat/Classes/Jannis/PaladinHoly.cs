@@ -4,8 +4,8 @@ using AmeisenBotX.Core.Engines.Character.Spells.Objects;
 using AmeisenBotX.Core.Engines.Character.Talents.Objects;
 using AmeisenBotX.Core.Engines.Combat.Helpers.Healing;
 using AmeisenBotX.Core.Engines.Movement.Enums;
-using AmeisenBotX.Core.Fsm;
-using AmeisenBotX.Core.Fsm.Utils.Auras.Objects;
+using AmeisenBotX.Core.Logic;
+using AmeisenBotX.Core.Logic.Utils.Auras.Objects;
 using AmeisenBotX.Wow.Objects;
 using AmeisenBotX.Wow.Objects.Enums;
 using System.Collections.Generic;
@@ -16,7 +16,7 @@ namespace AmeisenBotX.Core.Engines.Combat.Classes.Jannis
 {
     public class PaladinHoly : BasicCombatClass
     {
-        public PaladinHoly(AmeisenBotInterfaces bot, AmeisenBotFsm stateMachine) : base(bot, stateMachine)
+        public PaladinHoly(AmeisenBotInterfaces bot) : base(bot)
         {
             C.TryAdd("AttackInGroups", true);
             C.TryAdd("AttackInGroupsUntilManaPercent", 80.0);

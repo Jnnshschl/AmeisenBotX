@@ -1,8 +1,8 @@
 ﻿using AmeisenBotX.Common.Utils;
 using AmeisenBotX.Core.Engines.Character.Comparators;
 using AmeisenBotX.Core.Engines.Character.Talents.Objects;
-using AmeisenBotX.Core.Fsm;
-using AmeisenBotX.Core.Fsm.Utils.Auras.Objects;
+using AmeisenBotX.Core.Logic;
+using AmeisenBotX.Core.Logic.Utils.Auras.Objects;
 using AmeisenBotX.Wow.Objects;
 using AmeisenBotX.Wow.Objects.Enums;
 using System;
@@ -13,7 +13,7 @@ namespace AmeisenBotX.Core.Engines.Combat.Classes.Jannis
 {
     public class DruidRestoration : BasicCombatClass
     {
-        public DruidRestoration(AmeisenBotInterfaces bot, AmeisenBotFsm stateMachine) : base(bot, stateMachine)
+        public DruidRestoration(AmeisenBotInterfaces bot) : base(bot)
         {
             MyAuraManager.Jobs.Add(new KeepActiveAuraJob(bot.Db, treeOfLifeSpell, () => Bot.Objects.PartymemberGuids.Any() && TryCastSpell(treeOfLifeSpell, Bot.Wow.PlayerGuid, true)));
             MyAuraManager.Jobs.Add(new KeepActiveAuraJob(bot.Db, markOfTheWildSpell, () => TryCastSpell(markOfTheWildSpell, Bot.Wow.PlayerGuid, true)));

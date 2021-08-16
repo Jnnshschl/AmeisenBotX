@@ -1,7 +1,7 @@
 ﻿using AmeisenBotX.Common.Math;
 using AmeisenBotX.Common.Utils;
 using AmeisenBotX.Core;
-using AmeisenBotX.Core.Fsm.Enums;
+using AmeisenBotX.Core.Logic.Enums;
 using AmeisenBotX.Utils;
 using AmeisenBotX.Wow.Objects;
 using AmeisenBotX.Wow.Objects.Enums;
@@ -412,7 +412,7 @@ namespace AmeisenBotX
 
         private void MapTimerTick()
         {
-            if (Enabled && NeedToUpdateMap && AmeisenBot.StateMachine.CurrentState.Key != BotState.LoadingScreen)
+            if (Enabled && NeedToUpdateMap)
             {
                 Dispatcher.InvokeAsync(() =>
                 {

@@ -1,7 +1,7 @@
 ﻿using AmeisenBotX.Common.Math;
 using AmeisenBotX.Common.Utils;
-using AmeisenBotX.Core.Fsm;
-using AmeisenBotX.Core.Fsm.States;
+using AmeisenBotX.Core.Logic;
+using AmeisenBotX.Core.Logic.States;
 using AmeisenBotX.Wow.Objects;
 using AmeisenBotX.Wow.Objects.Enums;
 using System;
@@ -25,10 +25,9 @@ namespace AmeisenBotX.Core.Engines.Battleground.einTyp
         private bool ownTeamHasFlag = false;
         private ulong TeamFlagCarrierGuid;
 
-        public RunBoyRunEngine(AmeisenBotInterfaces bot, AmeisenBotFsm stateMachine)
+        public RunBoyRunEngine(AmeisenBotInterfaces bot)
         {
             Bot = bot;
-            StateMachine = stateMachine;
 
             bot.Wow.Events.Subscribe("CHAT_MSG_BG_SYSTEM_ALLIANCE", OnFlagAlliance);
             bot.Wow.Events.Subscribe("CHAT_MSG_BG_SYSTEM_HORDE", OnFlagAlliance);

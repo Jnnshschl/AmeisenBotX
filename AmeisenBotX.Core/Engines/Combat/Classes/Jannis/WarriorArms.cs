@@ -1,8 +1,8 @@
 ﻿using AmeisenBotX.Common.Utils;
 using AmeisenBotX.Core.Engines.Character.Comparators;
 using AmeisenBotX.Core.Engines.Character.Talents.Objects;
-using AmeisenBotX.Core.Fsm;
-using AmeisenBotX.Core.Fsm.Utils.Auras.Objects;
+using AmeisenBotX.Core.Logic;
+using AmeisenBotX.Core.Logic.Utils.Auras.Objects;
 using AmeisenBotX.Wow.Objects;
 using AmeisenBotX.Wow.Objects.Enums;
 using System;
@@ -12,7 +12,7 @@ namespace AmeisenBotX.Core.Engines.Combat.Classes.Jannis
 {
     public class WarriorArms : BasicCombatClass
     {
-        public WarriorArms(AmeisenBotInterfaces bot, AmeisenBotFsm stateMachine) : base(bot, stateMachine)
+        public WarriorArms(AmeisenBotInterfaces bot) : base(bot)
         {
             MyAuraManager.Jobs.Add(new KeepActiveAuraJob(bot.Db, battleShoutSpell, () => TryCastSpell(battleShoutSpell, 0, true)));
 

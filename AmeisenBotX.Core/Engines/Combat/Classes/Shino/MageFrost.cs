@@ -1,9 +1,9 @@
 ﻿using AmeisenBotX.Core.Engines.Character.Comparators;
 using AmeisenBotX.Core.Engines.Character.Spells.Objects;
 using AmeisenBotX.Core.Engines.Character.Talents.Objects;
-using AmeisenBotX.Core.Fsm;
-using AmeisenBotX.Core.Fsm.CombatClasses.Shino;
-using AmeisenBotX.Core.Fsm.Utils.Auras.Objects;
+using AmeisenBotX.Core.Logic;
+using AmeisenBotX.Core.Logic.CombatClasses.Shino;
+using AmeisenBotX.Core.Logic.Utils.Auras.Objects;
 using AmeisenBotX.Wow.Objects;
 using AmeisenBotX.Wow.Objects.Enums;
 using System;
@@ -13,7 +13,7 @@ namespace AmeisenBotX.Core.Engines.Combat.Classes.Shino
 {
     public class MageFrost : TemplateCombatClass
     {
-        public MageFrost(AmeisenBotInterfaces bot, AmeisenBotFsm stateMachine) : base(bot, stateMachine)
+        public MageFrost(AmeisenBotInterfaces bot) : base(bot)
         {
             MyAuraManager.Jobs.Add(new KeepActiveAuraJob(bot.Db, arcaneIntellectSpell, () => TryCastSpell(arcaneIntellectSpell, 0, true)));
             MyAuraManager.Jobs.Add(new KeepActiveAuraJob(bot.Db, frostArmorSpell, () => TryCastSpell(frostArmorSpell, 0, true)));

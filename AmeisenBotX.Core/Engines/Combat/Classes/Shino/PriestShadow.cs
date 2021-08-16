@@ -2,9 +2,9 @@
 using AmeisenBotX.Core.Engines.Character.Comparators;
 using AmeisenBotX.Core.Engines.Character.Spells.Objects;
 using AmeisenBotX.Core.Engines.Character.Talents.Objects;
-using AmeisenBotX.Core.Fsm;
-using AmeisenBotX.Core.Fsm.CombatClasses.Shino;
-using AmeisenBotX.Core.Fsm.Utils.Auras.Objects;
+using AmeisenBotX.Core.Logic;
+using AmeisenBotX.Core.Logic.CombatClasses.Shino;
+using AmeisenBotX.Core.Logic.Utils.Auras.Objects;
 using AmeisenBotX.Wow.Objects.Enums;
 using System.Collections.Generic;
 
@@ -12,7 +12,7 @@ namespace AmeisenBotX.Core.Engines.Combat.Classes.Shino
 {
     public class PriestShadow : TemplateCombatClass
     {
-        public PriestShadow(AmeisenBotInterfaces bot, AmeisenBotFsm stateMachine) : base(bot, stateMachine)
+        public PriestShadow(AmeisenBotInterfaces bot) : base(bot)
         {
             MyAuraManager.Jobs.Add(new KeepActiveAuraJob(bot.Db, shadowformSpell, () => TryCastSpell(shadowformSpell, Bot.Wow.PlayerGuid, true)));
             MyAuraManager.Jobs.Add(new KeepActiveAuraJob(bot.Db, powerWordFortitudeSpell, () => TryCastSpell(powerWordFortitudeSpell, Bot.Wow.PlayerGuid, true)));

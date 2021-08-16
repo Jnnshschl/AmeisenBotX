@@ -2,8 +2,8 @@
 using AmeisenBotX.Common.Utils;
 using AmeisenBotX.Core.Engines.Battleground.KamelBG.Enums;
 using AmeisenBotX.Core.Engines.Movement.Enums;
-using AmeisenBotX.Core.Fsm;
-using AmeisenBotX.Core.Fsm.States;
+using AmeisenBotX.Core.Logic;
+using AmeisenBotX.Core.Logic.States;
 using AmeisenBotX.Wow.Objects;
 using System;
 using System.Collections.Generic;
@@ -13,10 +13,9 @@ namespace AmeisenBotX.Core.Engines.Battleground.KamelBG
 {
     internal class EyeOfTheStorm : IBattlegroundEngine
     {
-        public EyeOfTheStorm(AmeisenBotInterfaces bot, AmeisenBotFsm stateMachine)
+        public EyeOfTheStorm(AmeisenBotInterfaces bot)
         {
             Bot = bot;
-            StateMachine = stateMachine;
 
             CaptureFlagEvent = new(TimeSpan.FromSeconds(1));
             CombatEvent = new(TimeSpan.FromSeconds(2));
@@ -51,8 +50,6 @@ namespace AmeisenBotX.Core.Engines.Battleground.KamelBG
 
         private string FactionFlagState { get; set; }
 
-        private AmeisenBotFsm StateMachine { get; }
-
         public void Combat()
         {
             IWowPlayer weakestPlayer = Bot.GetNearEnemies<IWowPlayer>(Bot.Player.Position, 30.0f).OrderBy(e => e.Health).FirstOrDefault();
@@ -68,7 +65,7 @@ namespace AmeisenBotX.Core.Engines.Battleground.KamelBG
                 }
                 else if (CombatEvent.Run())
                 {
-                    StateMachine.Get<StateCombat>().Mode = CombatMode.Force;
+                    // StateMachine.Get<StateCombat>().Mode = CombatMode.Force;
                     Bot.Wow.ChangeTarget(weakestPlayer.Guid);
                 }
             }

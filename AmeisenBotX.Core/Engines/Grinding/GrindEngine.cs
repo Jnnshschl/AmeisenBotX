@@ -3,9 +3,9 @@ using AmeisenBotX.Common.Utils;
 using AmeisenBotX.Core.Engines.Grinding.Objects;
 using AmeisenBotX.Core.Engines.Grinding.Profiles;
 using AmeisenBotX.Core.Engines.Movement.Enums;
-using AmeisenBotX.Core.Fsm;
-using AmeisenBotX.Core.Fsm.Enums;
-using AmeisenBotX.Core.Fsm.States;
+using AmeisenBotX.Core.Logic;
+using AmeisenBotX.Core.Logic.Enums;
+using AmeisenBotX.Core.Logic.States;
 using AmeisenBotX.Wow.Cache.Enums;
 using AmeisenBotX.Wow.Objects;
 using System;
@@ -16,11 +16,10 @@ namespace AmeisenBotX.Core.Engines.Grinding
 {
     public class DefaultGrindingEngine : IGrindingEngine
     {
-        public DefaultGrindingEngine(AmeisenBotInterfaces bot, AmeisenBotConfig config, AmeisenBotFsm stateMachine)
+        public DefaultGrindingEngine(AmeisenBotInterfaces bot, AmeisenBotConfig config)
         {
             Bot = bot;
             Config = config;
-            StateMachine = stateMachine;
 
             Blacklist = new();
             TargetInLosEvent = new(TimeSpan.FromMilliseconds(500));
@@ -43,8 +42,6 @@ namespace AmeisenBotX.Core.Engines.Grinding
         private int CurrentSpotIndex { get; set; }
 
         private DateTime LookingForEnemiesSince { get; set; }
-
-        private AmeisenBotFsm StateMachine { get; }
 
         private ulong TargetGuid { get; set; }
 
@@ -110,7 +107,7 @@ namespace AmeisenBotX.Core.Engines.Grinding
                     if (nearestUnit.Position.GetDistance(Bot.Player.Position) < 20.0f && TargetInLos)
                     {
                         Bot.Wow.ChangeTarget(nearestUnit.Guid);
-                        StateMachine.Get<StateCombat>().Mode = CombatMode.Force;
+                        // StateMachine.Get<StateCombat>().Mode = CombatMode.Force;
                     }
                     else
                     {
@@ -178,7 +175,7 @@ namespace AmeisenBotX.Core.Engines.Grinding
             else
             {
                 Bot.Movement.StopMovement();
-                StateMachine.SetState(BotState.Repairing);
+                // StateMachine.SetState(BotState.Repairing);
             }
         }
 

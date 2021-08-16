@@ -25,9 +25,9 @@ using AmeisenBotX.Core.Engines.Quest.Profiles;
 using AmeisenBotX.Core.Engines.Quest.Profiles.Shino;
 using AmeisenBotX.Core.Engines.Quest.Profiles.StartAreas;
 using AmeisenBotX.Core.Engines.Tactic;
-using AmeisenBotX.Core.Fsm;
-using AmeisenBotX.Core.Fsm.Enums;
-using AmeisenBotX.Core.Fsm.States;
+using AmeisenBotX.Core.Logic;
+using AmeisenBotX.Core.Logic.Enums;
+using AmeisenBotX.Core.Logic.States;
 using AmeisenBotX.Logging;
 using AmeisenBotX.Logging.Enums;
 using AmeisenBotX.Memory;
@@ -109,14 +109,7 @@ namespace AmeisenBotX.Core
             Bot = new();
             Bot.Memory = new XMemory();
 
-            StateMachine = new(Config, Bot);
-            StateMachine.Get<StateStartWow>().OnWoWStarted += () =>
-            {
-                if (Config.SaveWowWindowPosition)
-                {
-                    LoadWowWindowPosition();
-                }
-            };
+            Logic = new AmeisenBotLogic(Config, Bot);
 
             Bot.Chat = new DefaultChatManager(Config, ProfileFolder);
             Bot.Tactic = new DefaultTacticEngine();
@@ -147,11 +140,11 @@ namespace AmeisenBotX.Core
             // setup all instances that use the whole Bot class last
             Bot.Dungeon = new DefaultDungeonEngine(Bot, Config);
             Bot.Jobs = new DefaultJobEngine(Bot, Config);
-            Bot.Quest = new DefaultQuestEngine(Bot, Config, StateMachine);
-            Bot.Grinding = new DefaultGrindingEngine(Bot, Config, StateMachine);
+            Bot.Quest = new DefaultQuestEngine(Bot);
+            Bot.Grinding = new DefaultGrindingEngine(Bot, Config);
 
             Bot.PathfindingHandler = new AmeisenNavigationHandler(Config.NavmeshServerIp, Config.NameshServerPort);
-            Bot.Movement = new DefaultMovementEngine(Bot, Config, StateMachine);
+            Bot.Movement = new DefaultMovementEngine(Bot, Config);
             // wow interface setup done
 
             AmeisenLogger.I.Log("AmeisenBot", "Finished setting up Bot", LogLevel.Verbose);
@@ -265,7 +258,7 @@ namespace AmeisenBotX.Core
         /// <summary>
         /// State machine of the bot.
         /// </summary>
-        public AmeisenBotFsm StateMachine { get; private set; }
+        public IAmeisenBotLogic Logic { get; private set; }
 
         private TimegatedEvent BagUpdateEvent { get; set; }
 
@@ -297,7 +290,7 @@ namespace AmeisenBotX.Core
 
             Storage.SaveAll();
 
-            if (Config.SaveWowWindowPosition && !StateMachine.WowCrashed)
+            if (Config.SaveWowWindowPosition)
             {
                 SaveWowWindowPosition();
             }
@@ -355,12 +348,12 @@ namespace AmeisenBotX.Core
                 IsRunning = false;
                 AmeisenLogger.I.Log("AmeisenBot", "Pausing", LogLevel.Debug);
 
-                if (StateMachine.CurrentState.Key is not BotState.StartWow
-                    and not BotState.Login
-                    and not BotState.LoadingScreen)
-                {
-                    StateMachine.SetState(BotState.Idle);
-                }
+                // if (StateMachine.CurrentState.Key is not BotState.StartWow
+                //     and not BotState.Login
+                //     and not BotState.LoadingScreen)
+                // {
+                //     StateMachine.SetState(BotState.Idle);
+                // }
 
                 OnStatusChanged?.Invoke();
             }
@@ -479,11 +472,11 @@ namespace AmeisenBotX.Core
             // add battleground engines here
             BattlegroundEngines = new List<IBattlegroundEngine>()
             {
-                new UniversalBattlegroundEngine(Bot, StateMachine),
-                new ArathiBasin(Bot, StateMachine),
-                new StrandOfTheAncients(Bot, StateMachine),
-                new EyeOfTheStorm(Bot, StateMachine),
-                new RunBoyRunEngine(Bot, StateMachine)
+                new UniversalBattlegroundEngine(Bot),
+                new ArathiBasin(Bot),
+                new StrandOfTheAncients(Bot),
+                new EyeOfTheStorm(Bot),
+                new RunBoyRunEngine(Bot)
             };
         }
 
@@ -492,34 +485,34 @@ namespace AmeisenBotX.Core
             // add combat classes here
             CombatClasses = new List<ICombatClass>()
             {
-                new Engines.Combat.Classes.Jannis.DeathknightBlood(Bot, StateMachine),
-                new Engines.Combat.Classes.Jannis.DeathknightFrost(Bot, StateMachine),
-                new Engines.Combat.Classes.Jannis.DeathknightUnholy(Bot, StateMachine),
-                new Engines.Combat.Classes.Jannis.DruidBalance(Bot, StateMachine),
-                new Engines.Combat.Classes.Jannis.DruidFeralBear(Bot, StateMachine),
-                new Engines.Combat.Classes.Jannis.DruidFeralCat(Bot, StateMachine),
-                new Engines.Combat.Classes.Jannis.DruidRestoration(Bot, StateMachine),
-                new Engines.Combat.Classes.Jannis.HunterBeastmastery(Bot, StateMachine),
-                new Engines.Combat.Classes.Jannis.HunterMarksmanship(Bot, StateMachine),
-                new Engines.Combat.Classes.Jannis.HunterSurvival(Bot, StateMachine),
-                new Engines.Combat.Classes.Jannis.MageArcane(Bot, StateMachine),
-                new Engines.Combat.Classes.Jannis.MageFire(Bot, StateMachine),
-                new Engines.Combat.Classes.Jannis.PaladinHoly(Bot, StateMachine),
-                new Engines.Combat.Classes.Jannis.PaladinProtection(Bot, StateMachine),
-                new Engines.Combat.Classes.Jannis.PaladinRetribution(Bot, StateMachine),
-                new Engines.Combat.Classes.Jannis.PriestDiscipline(Bot, StateMachine),
-                new Engines.Combat.Classes.Jannis.PriestHoly(Bot, StateMachine),
-                new Engines.Combat.Classes.Jannis.PriestShadow(Bot, StateMachine),
-                new Engines.Combat.Classes.Jannis.RogueAssassination(Bot, StateMachine),
-                new Engines.Combat.Classes.Jannis.ShamanElemental(Bot, StateMachine),
-                new Engines.Combat.Classes.Jannis.ShamanEnhancement(Bot, StateMachine),
-                new Engines.Combat.Classes.Jannis.ShamanRestoration(Bot, StateMachine),
-                new Engines.Combat.Classes.Jannis.WarlockAffliction(Bot, StateMachine),
-                new Engines.Combat.Classes.Jannis.WarlockDemonology(Bot, StateMachine),
-                new Engines.Combat.Classes.Jannis.WarlockDestruction(Bot, StateMachine),
-                new Engines.Combat.Classes.Jannis.WarriorArms(Bot, StateMachine),
-                new Engines.Combat.Classes.Jannis.WarriorFury(Bot, StateMachine),
-                new Engines.Combat.Classes.Jannis.WarriorProtection(Bot, StateMachine),
+                new Engines.Combat.Classes.Jannis.DeathknightBlood(Bot),
+                new Engines.Combat.Classes.Jannis.DeathknightFrost(Bot),
+                new Engines.Combat.Classes.Jannis.DeathknightUnholy(Bot),
+                new Engines.Combat.Classes.Jannis.DruidBalance(Bot),
+                new Engines.Combat.Classes.Jannis.DruidFeralBear(Bot),
+                new Engines.Combat.Classes.Jannis.DruidFeralCat(Bot),
+                new Engines.Combat.Classes.Jannis.DruidRestoration(Bot),
+                new Engines.Combat.Classes.Jannis.HunterBeastmastery(Bot),
+                new Engines.Combat.Classes.Jannis.HunterMarksmanship(Bot),
+                new Engines.Combat.Classes.Jannis.HunterSurvival(Bot),
+                new Engines.Combat.Classes.Jannis.MageArcane(Bot),
+                new Engines.Combat.Classes.Jannis.MageFire(Bot),
+                new Engines.Combat.Classes.Jannis.PaladinHoly(Bot),
+                new Engines.Combat.Classes.Jannis.PaladinProtection(Bot),
+                new Engines.Combat.Classes.Jannis.PaladinRetribution(Bot),
+                new Engines.Combat.Classes.Jannis.PriestDiscipline(Bot),
+                new Engines.Combat.Classes.Jannis.PriestHoly(Bot),
+                new Engines.Combat.Classes.Jannis.PriestShadow(Bot),
+                new Engines.Combat.Classes.Jannis.RogueAssassination(Bot),
+                new Engines.Combat.Classes.Jannis.ShamanElemental(Bot),
+                new Engines.Combat.Classes.Jannis.ShamanEnhancement(Bot),
+                new Engines.Combat.Classes.Jannis.ShamanRestoration(Bot),
+                new Engines.Combat.Classes.Jannis.WarlockAffliction(Bot),
+                new Engines.Combat.Classes.Jannis.WarlockDemonology(Bot),
+                new Engines.Combat.Classes.Jannis.WarlockDestruction(Bot),
+                new Engines.Combat.Classes.Jannis.WarriorArms(Bot),
+                new Engines.Combat.Classes.Jannis.WarriorFury(Bot),
+                new Engines.Combat.Classes.Jannis.WarriorProtection(Bot),
                 new Engines.Combat.Classes.Kamel.DeathknightBlood(Bot),
                 new Engines.Combat.Classes.Kamel.RestorationShaman(Bot),
                 new Engines.Combat.Classes.Kamel.ShamanEnhancement(Bot),
@@ -528,12 +521,12 @@ namespace AmeisenBotX.Core
                 new Engines.Combat.Classes.Kamel.WarriorFury(Bot),
                 new Engines.Combat.Classes.Kamel.WarriorArms(Bot),
                 new Engines.Combat.Classes.Kamel.RogueAssassination(Bot),
-                new Engines.Combat.Classes.einTyp.PaladinProtection(Bot, StateMachine),
-                new Engines.Combat.Classes.einTyp.RogueAssassination(Bot, StateMachine),
-                new Engines.Combat.Classes.einTyp.WarriorArms(Bot, StateMachine),
-                new Engines.Combat.Classes.einTyp.WarriorFury(Bot, StateMachine),
-                new Engines.Combat.Classes.Shino.PriestShadow(Bot, StateMachine),
-                new Engines.Combat.Classes.Shino.MageFrost(Bot, StateMachine),
+                new Engines.Combat.Classes.einTyp.PaladinProtection(Bot),
+                new Engines.Combat.Classes.einTyp.RogueAssassination(Bot),
+                new Engines.Combat.Classes.einTyp.WarriorArms(Bot),
+                new Engines.Combat.Classes.einTyp.WarriorFury(Bot),
+                new Engines.Combat.Classes.Shino.PriestShadow(Bot),
+                new Engines.Combat.Classes.Shino.MageFrost(Bot),
             };
         }
 
@@ -562,7 +555,7 @@ namespace AmeisenBotX.Core
             // add quest profiles here
             QuestProfiles = new List<IQuestProfile>()
             {
-                new DeathknightStartAreaQuestProfile(Bot, StateMachine),
+                new DeathknightStartAreaQuestProfile(Bot),
                 new X5Horde1To80Profile(Bot),
                 new Horde1To60GrinderProfile(Bot)
             };
@@ -623,22 +616,6 @@ namespace AmeisenBotX.Core
             Bot.Grinding.Profile = LoadClassByName(GrindingProfiles, Config.GrindingProfile);
             Bot.Jobs.Profile = LoadClassByName(JobProfiles, Config.JobProfile);
             Bot.Quest.Profile = LoadClassByName(QuestProfiles, Config.QuestProfile);
-        }
-
-        private void LoadWowWindowPosition()
-        {
-            if (Config.SaveWowWindowPosition && !Config.AutoPositionWow)
-            {
-                if (Bot.Memory.Process.MainWindowHandle != IntPtr.Zero && Config.WowWindowRect != new Rect() { Left = -1, Top = -1, Right = -1, Bottom = -1 })
-                {
-                    Bot.Memory.SetWindowPosition(Bot.Memory.Process.MainWindowHandle, Config.WowWindowRect);
-                    AmeisenLogger.I.Log("AmeisenBot", $"Loaded window position: {Config.WowWindowRect}", LogLevel.Verbose);
-                }
-                else
-                {
-                    AmeisenLogger.I.Log("AmeisenBot", $"Unable to load window position of {Bot.Memory.Process.MainWindowHandle} to {Config.WowWindowRect}", LogLevel.Warning);
-                }
-            }
         }
 
         private void OnBagChanged(long timestamp, List<string> args)
@@ -802,7 +779,7 @@ namespace AmeisenBotX.Core
 
         private void OnQuestAcceptConfirm(long timestamp, List<string> args)
         {
-            if (Config.AutoAcceptQuests && StateMachine.CurrentState.Key != BotState.Questing)
+            if (Config.AutoAcceptQuests)
             {
                 Bot.Wow.LuaDoString("ConfirmAcceptQuest();");
             }
@@ -810,9 +787,7 @@ namespace AmeisenBotX.Core
 
         private void OnQuestGreeting(long timestamp, List<string> args)
         {
-            if (Config.AutoAcceptQuests
-                && StateMachine.CurrentState.Key != BotState.Selling
-                && StateMachine.CurrentState.Key != BotState.Repairing)
+            if (Config.AutoAcceptQuests)
             {
                 Bot.Wow.AcceptQuests();
             }
@@ -820,7 +795,7 @@ namespace AmeisenBotX.Core
 
         private void OnQuestProgress(long timestamp, List<string> args)
         {
-            if (Config.AutoAcceptQuests && StateMachine.CurrentState.Key != BotState.Questing)
+            if (Config.AutoAcceptQuests)
             {
                 Bot.Wow.ClickUiElement("QuestFrameCompleteQuestButton");
             }
@@ -833,7 +808,7 @@ namespace AmeisenBotX.Core
 
         private void OnShowQuestFrame(long timestamp, List<string> args)
         {
-            if (Config.AutoAcceptQuests && StateMachine.CurrentState.Key != BotState.Questing)
+            if (Config.AutoAcceptQuests)
             {
                 Bot.Wow.LuaDoString("AcceptQuest();");
             }
@@ -943,7 +918,7 @@ namespace AmeisenBotX.Core
                             PosX = Bot.Player.Position.X,
                             PosY = Bot.Player.Position.Y,
                             PosZ = Bot.Player.Position.Z,
-                            State = StateMachine.CurrentState.Key.ToString(),
+                            State = string.Empty, // StateMachine.CurrentState.Key.ToString(),
                             SubZoneName = Bot.Objects.ZoneSubName,
                             ZoneName = Bot.Objects.ZoneName,
                         });
@@ -1028,7 +1003,7 @@ namespace AmeisenBotX.Core
             if (IsRunning)
             {
                 ExecutionMsStopwatch.Restart();
-                StateMachine.Execute();
+                Logic.Tick();
                 CurrentExecutionMs = ExecutionMsStopwatch.ElapsedMilliseconds;
                 CurrentExecutionCount++;
             }

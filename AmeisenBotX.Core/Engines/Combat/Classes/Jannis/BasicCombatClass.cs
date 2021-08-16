@@ -9,8 +9,8 @@ using AmeisenBotX.Core.Engines.Combat.Helpers.Aura;
 using AmeisenBotX.Core.Engines.Combat.Helpers.Targets;
 using AmeisenBotX.Core.Engines.Combat.Helpers.Targets.Logics;
 using AmeisenBotX.Core.Engines.Movement.Enums;
-using AmeisenBotX.Core.Fsm;
-using AmeisenBotX.Core.Fsm.Enums;
+using AmeisenBotX.Core.Logic;
+using AmeisenBotX.Core.Logic.Enums;
 using AmeisenBotX.Logging;
 using AmeisenBotX.Logging.Enums;
 using AmeisenBotX.Wow.Objects;
@@ -332,6 +332,7 @@ namespace AmeisenBotX.Core.Engines.Combat.Classes.Jannis
         protected const string lifeTapSpell = "Life Tap";
         protected const string metamorphosisSpell = "Metamorphosis";
         protected const string moltenCoreSpell = "Molten Core";
+        protected const string rainOfFireSpell = "Rain of Fire";
         protected const string seedOfCorruptionSpell = "Seed of Corruption";
         protected const string shadowBoltSpell = "Shadow Bolt";
         protected const string shadowMasterySpell = "Shadow Mastery";
@@ -416,10 +417,9 @@ namespace AmeisenBotX.Core.Engines.Combat.Classes.Jannis
             2245, 3385, 3827, 6149, 13443, 13444, 33448, 22832,
         };
 
-        protected BasicCombatClass(AmeisenBotInterfaces bot, AmeisenBotFsm stateMachine)
+        protected BasicCombatClass(AmeisenBotInterfaces bot)
         {
             Bot = bot;
-            StateMachine = stateMachine;
 
             SpellAbortFunctions = new();
 
@@ -508,8 +508,6 @@ namespace AmeisenBotX.Core.Engines.Combat.Classes.Jannis
 
         protected List<Func<bool>> SpellAbortFunctions { get; }
 
-        private AmeisenBotFsm StateMachine { get; }
-
         public virtual void AttackTarget()
         {
             IWowUnit target = Bot.Target;
@@ -550,8 +548,7 @@ namespace AmeisenBotX.Core.Engines.Combat.Classes.Jannis
 
             // Update Priority Units
             // --------------------------- >
-            if (StateMachine.CurrentState.Key == BotState.Dungeon
-                && Bot.Dungeon != null
+            if (Bot.Dungeon.Profile != null
                 && Bot.Dungeon.Profile.PriorityUnits != null
                 && Bot.Dungeon.Profile.PriorityUnits.Count > 0)
             {

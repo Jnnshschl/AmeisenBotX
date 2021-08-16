@@ -4,8 +4,8 @@ using AmeisenBotX.Common.Math;
 using AmeisenBotX.Common.Objects.Keyboard;
 using AmeisenBotX.Common.Utils;
 using AmeisenBotX.Core;
-using AmeisenBotX.Core.Fsm.Enums;
-using AmeisenBotX.Core.Fsm.States;
+using AmeisenBotX.Core.Logic.Enums;
+using AmeisenBotX.Core.Logic.States;
 using AmeisenBotX.Logging;
 using AmeisenBotX.Logging.Enums;
 using AmeisenBotX.Overlay;
@@ -260,7 +260,7 @@ namespace AmeisenBotX
         {
             if (AmeisenBot != null)
             {
-                AmeisenBot.StateMachine.StateOverride = (BotState)comboboxStateOverride.SelectedItem;
+                // AmeisenBot.StateMachine.StateOverride = (BotState)comboboxStateOverride.SelectedItem;
                 buttonStateConfig.IsEnabled = StateConfigWindows.ContainsKey((BotState)comboboxStateOverride.SelectedItem);
             }
         }
@@ -603,10 +603,10 @@ namespace AmeisenBotX
 
                     // events used to update our GUI
                     AmeisenBot.Bot.Objects.OnObjectUpdateComplete += OnObjectUpdateComplete;
-                    AmeisenBot.StateMachine.OnStateMachineStateChanged += () =>
-                    {
-                        Dispatcher.InvokeAsync(() => { labelCurrentState.Content = $"{AmeisenBot.StateMachine.CurrentState.Key}"; });
-                    };
+                    // AmeisenBot.StateMachine.OnStateMachineStateChanged += () =>
+                    // {
+                    //     Dispatcher.InvokeAsync(() => { labelCurrentState.Content = $"{AmeisenBot.StateMachine.CurrentState.Key}"; });
+                    // };
 
                     // handle the autoposition function where the wow window gets "absorbed" by the bots window
                     if (AmeisenBot.Config.AutoPositionWow)
@@ -616,7 +616,7 @@ namespace AmeisenBotX
                         M11 = presentationSource.CompositionTarget.TransformToDevice.M11;
                         M22 = presentationSource.CompositionTarget.TransformToDevice.M22;
 
-                        AmeisenBot.StateMachine.Get<StateStartWow>().OnWoWStarted += () =>
+                        AmeisenBot.Logic.OnWoWStarted += () =>
                         {
                             Dispatcher.Invoke(() =>
                             {

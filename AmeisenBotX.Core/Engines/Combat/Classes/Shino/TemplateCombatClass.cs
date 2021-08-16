@@ -8,11 +8,11 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 
-namespace AmeisenBotX.Core.Fsm.CombatClasses.Shino
+namespace AmeisenBotX.Core.Logic.CombatClasses.Shino
 {
     public abstract class TemplateCombatClass : BasicCombatClass
     {
-        public TemplateCombatClass(AmeisenBotInterfaces bot, AmeisenBotFsm stateMachine) : base(bot, stateMachine)
+        public TemplateCombatClass(AmeisenBotInterfaces bot) : base(bot)
         {
             //this line cause a bug because it run out of index
             //Bot.EventHookManager.Subscribe("UI_ERROR_MESSAGE", (t, a) => OnUIErrorMessage(a[0]));

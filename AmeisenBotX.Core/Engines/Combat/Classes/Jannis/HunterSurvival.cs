@@ -2,8 +2,8 @@
 using AmeisenBotX.Core.Engines.Character.Talents.Objects;
 using AmeisenBotX.Core.Engines.Combat.Helpers;
 using AmeisenBotX.Core.Engines.Movement.Enums;
-using AmeisenBotX.Core.Fsm;
-using AmeisenBotX.Core.Fsm.Utils.Auras.Objects;
+using AmeisenBotX.Core.Logic;
+using AmeisenBotX.Core.Logic.Utils.Auras.Objects;
 using AmeisenBotX.Wow.Objects;
 using AmeisenBotX.Wow.Objects.Enums;
 using System;
@@ -14,7 +14,7 @@ namespace AmeisenBotX.Core.Engines.Combat.Classes.Jannis
 {
     public class HunterSurvival : BasicCombatClass
     {
-        public HunterSurvival(AmeisenBotInterfaces bot, AmeisenBotFsm stateMachine) : base(bot, stateMachine)
+        public HunterSurvival(AmeisenBotInterfaces bot) : base(bot)
         {
             PetManager = new PetManager
             (

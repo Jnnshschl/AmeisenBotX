@@ -1,7 +1,7 @@
 ﻿using AmeisenBotX.Core.Engines.Character.Comparators;
 using AmeisenBotX.Core.Engines.Character.Talents.Objects;
-using AmeisenBotX.Core.Fsm;
-using AmeisenBotX.Core.Fsm.Utils.Auras.Objects;
+using AmeisenBotX.Core.Logic;
+using AmeisenBotX.Core.Logic.Utils.Auras.Objects;
 using AmeisenBotX.Wow.Objects.Enums;
 using System.Linq;
 
@@ -9,7 +9,7 @@ namespace AmeisenBotX.Core.Engines.Combat.Classes.Jannis
 {
     public class PaladinRetribution : BasicCombatClass
     {
-        public PaladinRetribution(AmeisenBotInterfaces bot, AmeisenBotFsm stateMachine) : base(bot, stateMachine)
+        public PaladinRetribution(AmeisenBotInterfaces bot) : base(bot)
         {
             MyAuraManager.Jobs.Add(new KeepActiveAuraJob(bot.Db, blessingOfMightSpell, () => TryCastSpell(blessingOfMightSpell, Bot.Wow.PlayerGuid, true)));
             MyAuraManager.Jobs.Add(new KeepActiveAuraJob(bot.Db, retributionAuraSpell, () => TryCastSpell(retributionAuraSpell, 0, true)));

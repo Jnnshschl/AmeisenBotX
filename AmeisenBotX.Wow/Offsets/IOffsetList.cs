@@ -12,6 +12,8 @@ namespace AmeisenBotX.Wow.Offsets
 
         IntPtr AuraTable2 { get; }
 
+        IntPtr IsIngame { get; }
+
         IntPtr BattlegroundFinished { get; }
 
         IntPtr BattlegroundStatus { get; }

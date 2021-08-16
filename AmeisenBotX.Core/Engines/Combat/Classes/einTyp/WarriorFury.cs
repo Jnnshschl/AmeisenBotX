@@ -3,8 +3,6 @@ using AmeisenBotX.Common.Utils;
 using AmeisenBotX.Core.Engines.Character.Comparators;
 using AmeisenBotX.Core.Engines.Character.Talents.Objects;
 using AmeisenBotX.Core.Engines.Movement.Enums;
-using AmeisenBotX.Core.Fsm;
-using AmeisenBotX.Core.Fsm.States;
 using AmeisenBotX.Wow.Objects;
 using AmeisenBotX.Wow.Objects.Enums;
 using System;
@@ -28,10 +26,9 @@ namespace AmeisenBotX.Core.Engines.Combat.Classes.einTyp
         private bool multipleTargets = false;
         private bool standing = false;
 
-        public WarriorFury(AmeisenBotInterfaces bot, AmeisenBotFsm stateMachine)
+        public WarriorFury(AmeisenBotInterfaces bot)
         {
             Bot = bot;
-            StateMachine = stateMachine;
 
             spells = new WarriorFurySpells(bot);
         }
@@ -104,8 +101,6 @@ namespace AmeisenBotX.Core.Engines.Combat.Classes.einTyp
 
         private Vector3 LastTargetPosition { get; set; }
 
-        private AmeisenBotFsm StateMachine { get; }
-
         public void AttackTarget()
         {
             IWowUnit target = Bot.Target;
@@ -163,7 +158,6 @@ namespace AmeisenBotX.Core.Engines.Combat.Classes.einTyp
                     Bot.Wow.ClearTarget();
                     Bot.Wow.SendChatMessage(standingEmotes[new Random().Next(standingEmotes.Length)]);
                     Dancing = true;
-                    StateMachine.Get<StateCombat>().Mode = CombatMode.Allowed;
                 }
                 else
                 {
@@ -213,7 +207,6 @@ namespace AmeisenBotX.Core.Engines.Combat.Classes.einTyp
 
                     Dancing = false;
                     HandleMovement(target);
-                    StateMachine.Get<StateCombat>().Mode = CombatMode.Force;
                     HandleAttacking(target);
                 }
                 else if (!Dancing || standing)
