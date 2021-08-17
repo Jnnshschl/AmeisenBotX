@@ -36,6 +36,8 @@ namespace AmeisenBotX.Core.Logic
 
             AntiAfkEvent = new(TimeSpan.FromMilliseconds(1200));
             CharacterUpdateEvent = new(TimeSpan.FromMilliseconds(5000));
+            EatEvent = new(TimeSpan.FromMilliseconds(250));
+            EatBlockEvent = new(TimeSpan.FromMilliseconds(30000));
             LoginAttemptEvent = new(TimeSpan.FromMilliseconds(500));
             LootTryEvent = new(TimeSpan.FromMilliseconds(750));
             NpcInteractionEvent = new(TimeSpan.FromMilliseconds(1000));
@@ -97,6 +99,7 @@ namespace AmeisenBotX.Core.Logic
                 (IsInCombat, openworldCombatNode),
                 (NeedToRepairOrSell, new Leaf(SpeakWithMerchant)),
                 (NeedToLoot, new Leaf(LootNearUnits)),
+                (NeedToEat, new Leaf(Eat)),
                 (NeedToFollow, new Leaf(Follow))
             );
 
@@ -155,6 +158,87 @@ namespace AmeisenBotX.Core.Logic
                     (() => NeedToLogin, new Leaf(Login))
                 )
             );
+        }
+
+        private BtStatus Eat()
+        {
+            if (EatEvent.Run())
+            {
+                bool needToEat = Bot.Player.HealthPercentage < Config.EatUntilPercent;
+                bool needToDrink = Bot.Player.ManaPercentage < Config.DrinkUntilPercent;
+
+                bool isEating = Bot.Player.Auras.Any(e => Bot.Db.GetSpellName(e.SpellId) == "Food");
+                bool isDrinking = Bot.Player.Auras.Any(e => Bot.Db.GetSpellName(e.SpellId) == "Drink");
+
+                if (isEating && isDrinking)
+                {
+                    return BtStatus.Ongoing;
+                }
+
+                bool hasRefreshment = Bot.Character.HasItemTypeInBag<WowRefreshment>(true);
+
+                if (needToEat && needToDrink && hasRefreshment)
+                {
+                    string itemName = Bot.Character.Inventory.Items
+                        .OrderByDescending(e => e.ItemLevel)
+                        .First(e => Enum.IsDefined(typeof(WowRefreshment), e.Id)).Name;
+
+                    Bot.Wow.UseItemByName(itemName);
+                    return BtStatus.Ongoing;
+                }
+
+                bool hasFood = Bot.Character.HasItemTypeInBag<WowFood>(true);
+
+                if (!isEating && needToEat && (hasFood || hasRefreshment))
+                {
+                    string itemName = Bot.Character.Inventory.Items
+                        .OrderByDescending(e => e.ItemLevel)
+                        .First(e => Enum.IsDefined(typeof(WowFood), e.Id) || Enum.IsDefined(typeof(WowRefreshment), e.Id)).Name;
+
+                    Bot.Wow.UseItemByName(itemName);
+                    return BtStatus.Ongoing;
+                }
+
+                bool hasWater = Bot.Character.HasItemTypeInBag<WowWater>(true);
+
+                if (!isDrinking && needToDrink && (hasWater || hasRefreshment))
+                {
+                    string itemName = Bot.Character.Inventory.Items
+                        .OrderByDescending(e => e.ItemLevel)
+                        .First(e => Enum.IsDefined(typeof(WowWater), e.Id) || Enum.IsDefined(typeof(WowRefreshment), e.Id)).Name;
+
+                    Bot.Wow.UseItemByName(itemName);
+                    return BtStatus.Ongoing;
+                }
+            }
+
+            return BtStatus.Success;
+        }
+
+        private TimegatedEvent EatBlockEvent { get; }
+
+        private TimegatedEvent EatEvent { get; }
+
+        private bool NeedToEat()
+        {
+            // is eating blocked, used to prevent shredding of food
+            if (!EatBlockEvent.Ready)
+            {
+                return false;
+            }
+
+            // when we are in a group an they move too far away, abort eating
+            // and dont start eating for 30s
+            if (Bot.Objects.PartymemberGuids.Any() && Bot.Player.DistanceTo(Bot.Objects.CenterPartyPosition) > 25.0f)
+            {
+                EatBlockEvent.Run();
+                return false;
+            }
+
+            return (Bot.Player.HealthPercentage < Config.EatUntilPercent
+                       && (Bot.Character.HasItemTypeInBag<WowFood>(true) || Bot.Character.HasItemTypeInBag<WowRefreshment>(true)))
+                   || (Bot.Player.MaxMana > 0 && Bot.Player.ManaPercentage < Config.DrinkUntilPercent
+                       && (Bot.Character.HasItemTypeInBag<WowWater>(true) || Bot.Character.HasItemTypeInBag<WowRefreshment>(true)));
         }
 
         public event Action OnWoWStarted;

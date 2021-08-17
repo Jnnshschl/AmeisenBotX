@@ -136,18 +136,14 @@ namespace AmeisenBotX.Core.Logic.States
             return Bot.Objects.Partyleader != null
                 && (((Bot.Objects.Partyleader.Guid == 0 || Bot.Player.Position.GetDistance(Bot.Objects.CenterPartyPosition) < 30.0f)
                     && Bot.Player.HealthPercentage < Config.EatUntilPercent
-                             && Bot.Player.HealthPercentage < 95.0
                              && Bot.Player.ManaPercentage < Config.DrinkUntilPercent
-                             && Bot.Player.ManaPercentage < 95.0
                              && Bot.Character.HasItemTypeInBag<WowRefreshment>(true))
                          // Food
                          || (Bot.Player.HealthPercentage < Config.EatUntilPercent
-                             && Bot.Player.HealthPercentage < 95.0
                              && Bot.Character.HasItemTypeInBag<WowFood>(true))
                          // Water
                          || (Bot.Player.MaxMana > 0
                              && Bot.Player.ManaPercentage < Config.DrinkUntilPercent
-                             && Bot.Player.ManaPercentage < 95.0
                              && Bot.Character.HasItemTypeInBag<WowWater>(true)));
         }
     }
