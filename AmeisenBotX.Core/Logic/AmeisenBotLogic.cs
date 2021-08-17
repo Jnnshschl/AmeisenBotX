@@ -70,6 +70,15 @@ namespace AmeisenBotX.Core.Logic
 
             // OPEN WORLD -----------------------------
 
+            Node openworldGhostNode = new Selector
+            (
+                () => CanUseStaticPaths(),
+                // prefer static paths
+                new Leaf(() => MoveToPosition(StaticRoute.GetNextPoint(Bot.Player.Position))),
+                // run to corpse by position
+                new Leaf(RunToCorpseAndRetrieveIt)
+            );
+
             Node openworldCombatNode = new Selector
             (
                 () => Bot.CombatClass == null,
@@ -86,18 +95,8 @@ namespace AmeisenBotX.Core.Logic
                 new Leaf(Idle),
                 // handle main open world states
                 (() => Bot.Player.IsDead, new Leaf(Dead)),
-                (
-                    () => Bot.Player.IsGhost,
-                    new Selector
-                    (
-                        () => CanUseStaticPaths(),
-                        // prefer static paths
-                        new Leaf(() => MoveToPosition(StaticRoute.GetNextPoint(Bot.Player.Position))),
-                        // run to corpse by position
-                        new Leaf(RunToCorpseAndRetrieveIt)
-                    )
-                ),
-                (IsInCombat, openworldCombatNode),
+                (() => Bot.Player.IsGhost, openworldGhostNode),
+                (NeedToFight, openworldCombatNode),
                 (NeedToRepairOrSell, new Leaf(SpeakWithMerchant)),
                 (NeedToLoot, new Leaf(LootNearUnits)),
                 (NeedToEat, new Leaf(Eat)),
@@ -156,7 +155,7 @@ namespace AmeisenBotX.Core.Logic
                     ),
                     // setup interface and login
                     (() => !Bot.Wow.IsReady, new Leaf(SetupWowInterface)),
-                    (() => NeedToLogin, new Leaf(Login))
+                    (NeedToLogin, new Leaf(Login))
                 )
             );
         }
@@ -188,8 +187,6 @@ namespace AmeisenBotX.Core.Logic
         private TimegatedEvent LootTryEvent { get; }
 
         private IWowUnit Merchant { get; set; }
-
-        private bool NeedToLogin => Bot.Memory.Read(Bot.Wow.Offsets.IsIngame, out int isIngame) && isIngame == 0;
 
         private TimegatedEvent NpcInteractionEvent { get; }
 
@@ -493,15 +490,6 @@ namespace AmeisenBotX.Core.Logic
             return BtStatus.Success;
         }
 
-        private bool IsInCombat()
-        {
-            return Bot.Player.IsInCombat
-                || Bot.Objects.WowObjects.OfType<IWowPlayer>()
-                       .Where(e => e.IsInCombat && Bot.Objects.PartymemberGuids.Contains(e.Guid) && e.DistanceTo(Bot.Player) < Config.SupportRange)
-                       .Any()
-                || Bot.GetEnemiesInCombatWithParty<IWowUnit>(Bot.Player.Position, 100.0f).Any();
-        }
-
         private bool IsRepairNpcNear(out IWowUnit unit)
         {
             unit = Bot.Objects.WowObjects.OfType<IWowUnit>()
@@ -662,6 +650,15 @@ namespace AmeisenBotX.Core.Logic
                 || (Bot.Player.MaxMana > 0 && Bot.Player.ManaPercentage < Config.DrinkUntilPercent && (hasWater || hasRefreshment));
         }
 
+        private bool NeedToFight()
+        {
+            return Bot.Player.IsInCombat
+                || Bot.Objects.WowObjects.OfType<IWowPlayer>()
+                       .Where(e => e.IsInCombat && Bot.Objects.PartymemberGuids.Contains(e.Guid) && e.DistanceTo(Bot.Player) < Config.SupportRange)
+                       .Any()
+                || Bot.GetEnemiesInCombatWithParty<IWowUnit>(Bot.Player.Position, 100.0f).Any();
+        }
+
         private bool NeedToFollow()
         {
             if (Bot.Objects.WowObjects != null && IsUnitToFollowThere(out IWowUnit player))
@@ -672,6 +669,11 @@ namespace AmeisenBotX.Core.Logic
             }
 
             return false;
+        }
+
+        private bool NeedToLogin()
+        {
+            return Bot.Memory.Read(Bot.Wow.Offsets.IsIngame, out int isIngame) && isIngame == 0;
         }
 
         private bool NeedToLoot()

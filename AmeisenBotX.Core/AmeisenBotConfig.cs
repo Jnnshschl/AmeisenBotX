@@ -203,7 +203,7 @@ namespace AmeisenBotX.Core
 
         public string SpecificCharacterToFollow { get; set; } = string.Empty;
 
-        public int StateMachineTickMs { get; set; } = 10;
+        public int StateMachineTickMs { get; set; } = 50;
 
         public bool StayCloseToGroupInCombat { get; set; } = false;
 
