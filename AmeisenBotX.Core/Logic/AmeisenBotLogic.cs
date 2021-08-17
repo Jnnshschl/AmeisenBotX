@@ -3,6 +3,7 @@ using AmeisenBotX.BehaviorTree.Enums;
 using AmeisenBotX.BehaviorTree.Objects;
 using AmeisenBotX.Common.Math;
 using AmeisenBotX.Common.Utils;
+using AmeisenBotX.Core.Engines.Character.Inventory.Objects;
 using AmeisenBotX.Core.Engines.Movement.Enums;
 using AmeisenBotX.Core.Logic.Routines;
 using AmeisenBotX.Core.Logic.StaticDeathRoutes;
@@ -160,87 +161,6 @@ namespace AmeisenBotX.Core.Logic
             );
         }
 
-        private BtStatus Eat()
-        {
-            if (EatEvent.Run())
-            {
-                bool needToEat = Bot.Player.HealthPercentage < Config.EatUntilPercent;
-                bool needToDrink = Bot.Player.ManaPercentage < Config.DrinkUntilPercent;
-
-                bool isEating = Bot.Player.Auras.Any(e => Bot.Db.GetSpellName(e.SpellId) == "Food");
-                bool isDrinking = Bot.Player.Auras.Any(e => Bot.Db.GetSpellName(e.SpellId) == "Drink");
-
-                if (isEating && isDrinking)
-                {
-                    return BtStatus.Ongoing;
-                }
-
-                bool hasRefreshment = Bot.Character.HasItemTypeInBag<WowRefreshment>(true);
-
-                if (needToEat && needToDrink && hasRefreshment)
-                {
-                    string itemName = Bot.Character.Inventory.Items
-                        .OrderByDescending(e => e.ItemLevel)
-                        .First(e => Enum.IsDefined(typeof(WowRefreshment), e.Id)).Name;
-
-                    Bot.Wow.UseItemByName(itemName);
-                    return BtStatus.Ongoing;
-                }
-
-                bool hasFood = Bot.Character.HasItemTypeInBag<WowFood>(true);
-
-                if (!isEating && needToEat && (hasFood || hasRefreshment))
-                {
-                    string itemName = Bot.Character.Inventory.Items
-                        .OrderByDescending(e => e.ItemLevel)
-                        .First(e => Enum.IsDefined(typeof(WowFood), e.Id) || Enum.IsDefined(typeof(WowRefreshment), e.Id)).Name;
-
-                    Bot.Wow.UseItemByName(itemName);
-                    return BtStatus.Ongoing;
-                }
-
-                bool hasWater = Bot.Character.HasItemTypeInBag<WowWater>(true);
-
-                if (!isDrinking && needToDrink && (hasWater || hasRefreshment))
-                {
-                    string itemName = Bot.Character.Inventory.Items
-                        .OrderByDescending(e => e.ItemLevel)
-                        .First(e => Enum.IsDefined(typeof(WowWater), e.Id) || Enum.IsDefined(typeof(WowRefreshment), e.Id)).Name;
-
-                    Bot.Wow.UseItemByName(itemName);
-                    return BtStatus.Ongoing;
-                }
-            }
-
-            return BtStatus.Success;
-        }
-
-        private TimegatedEvent EatBlockEvent { get; }
-
-        private TimegatedEvent EatEvent { get; }
-
-        private bool NeedToEat()
-        {
-            // is eating blocked, used to prevent shredding of food
-            if (!EatBlockEvent.Ready)
-            {
-                return false;
-            }
-
-            // when we are in a group an they move too far away, abort eating
-            // and dont start eating for 30s
-            if (Bot.Objects.PartymemberGuids.Any() && Bot.Player.DistanceTo(Bot.Objects.CenterPartyPosition) > 25.0f)
-            {
-                EatBlockEvent.Run();
-                return false;
-            }
-
-            return (Bot.Player.HealthPercentage < Config.EatUntilPercent
-                       && (Bot.Character.HasItemTypeInBag<WowFood>(true) || Bot.Character.HasItemTypeInBag<WowRefreshment>(true)))
-                   || (Bot.Player.MaxMana > 0 && Bot.Player.ManaPercentage < Config.DrinkUntilPercent
-                       && (Bot.Character.HasItemTypeInBag<WowWater>(true) || Bot.Character.HasItemTypeInBag<WowRefreshment>(true)));
-        }
-
         public event Action OnWoWStarted;
 
         private TimegatedEvent AntiAfkEvent { get; set; }
@@ -251,9 +171,15 @@ namespace AmeisenBotX.Core.Logic
 
         private AmeisenBotConfig Config { get; }
 
+        private TimegatedEvent EatBlockEvent { get; }
+
+        private TimegatedEvent EatEvent { get; }
+
         private bool FirstStart { get; set; }
 
         private Vector3 FollowOffset { get; set; }
+
+        private IEnumerable<IWowInventoryItem> Food { get; set; }
 
         private TimegatedEvent LoginAttemptEvent { get; set; }
 
@@ -475,6 +401,72 @@ namespace AmeisenBotX.Core.Logic
             return BtStatus.Success;
         }
 
+        private BtStatus Eat()
+        {
+            if (EatEvent.Run())
+            {
+                bool needToEat = Bot.Player.HealthPercentage < Config.EatUntilPercent;
+                bool needToDrink = Bot.Player.ManaPercentage < Config.DrinkUntilPercent;
+
+                bool isEating = Bot.Player.Auras.Any(e => Bot.Db.GetSpellName(e.SpellId) == "Food");
+                bool isDrinking = Bot.Player.Auras.Any(e => Bot.Db.GetSpellName(e.SpellId) == "Drink");
+
+                if (isEating && isDrinking)
+                {
+                    return BtStatus.Ongoing;
+                }
+
+                IWowInventoryItem refreshment = Food.First(e => Enum.IsDefined(typeof(WowRefreshment), e.Id));
+
+                if (needToEat && needToDrink && refreshment != null)
+                {
+                    if (refreshment != null)
+                    {
+                        Bot.Wow.UseItemByName(refreshment.Name);
+                        return BtStatus.Ongoing;
+                    }
+                }
+
+                IWowInventoryItem food = Food.First(e => Enum.IsDefined(typeof(WowFood), e.Id));
+
+                if (!isEating && needToEat && (food != null || refreshment != null))
+                {
+                    // only use food if its not very lowlevel, otherwise try to use a refreshment
+                    if (food != null && (refreshment == null || food.RequiredLevel >= Bot.Player.Level - 5))
+                    {
+                        Bot.Wow.UseItemByName(food.Name);
+                        return BtStatus.Ongoing;
+                    }
+
+                    if (refreshment != null)
+                    {
+                        Bot.Wow.UseItemByName(refreshment.Name);
+                        return BtStatus.Ongoing;
+                    }
+                }
+
+                IWowInventoryItem water = Food.First(e => Enum.IsDefined(typeof(WowWater), e.Id));
+
+                if (!isDrinking && needToDrink && (water != null || refreshment != null))
+                {
+                    // only use water if its not very lowlevel, otherwise try to use a refreshment
+                    if (water != null && (refreshment == null || water.RequiredLevel >= Bot.Player.Level - 5))
+                    {
+                        Bot.Wow.UseItemByName(water.Name);
+                        return BtStatus.Ongoing;
+                    }
+
+                    if (refreshment != null)
+                    {
+                        Bot.Wow.UseItemByName(refreshment.Name);
+                        return BtStatus.Ongoing;
+                    }
+                }
+            }
+
+            return BtStatus.Success;
+        }
+
         private BtStatus Follow()
         {
             Vector3 pos = Config.FollowPositionDynamic ? PlayerToFollow.Position + FollowOffset : PlayerToFollow.Position;
@@ -642,6 +634,32 @@ namespace AmeisenBotX.Core.Logic
             }
 
             return BtStatus.Success;
+        }
+
+        private bool NeedToEat()
+        {
+            // is eating blocked, used to prevent shredding of food
+            if (!EatBlockEvent.Ready)
+            {
+                return false;
+            }
+
+            // when we are in a group an they move too far away, abort eating
+            // and dont start eating for 30s
+            if (Bot.Objects.PartymemberGuids.Any() && Bot.Player.DistanceTo(Bot.Objects.CenterPartyPosition) > 25.0f)
+            {
+                EatBlockEvent.Run();
+                return false;
+            }
+
+            Food = Bot.Character.Inventory.Items.Where(e => e.RequiredLevel <= Bot.Player.Level).OrderByDescending(e => e.ItemLevel);
+
+            bool hasRefreshment = Food.Any(e => Enum.IsDefined(typeof(WowRefreshment), e.Id));
+            bool hasFood = Food.Any(e => Enum.IsDefined(typeof(WowFood), e.Id));
+            bool hasWater = Food.Any(e => Enum.IsDefined(typeof(WowWater), e.Id));
+
+            return (Bot.Player.HealthPercentage < Config.EatUntilPercent && (hasFood || hasRefreshment))
+                || (Bot.Player.MaxMana > 0 && Bot.Player.ManaPercentage < Config.DrinkUntilPercent && (hasWater || hasRefreshment));
         }
 
         private bool NeedToFollow()

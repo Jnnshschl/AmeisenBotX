@@ -702,6 +702,19 @@ namespace AmeisenBotX.Core
             Bot.Wow.LootEverything();
         }
 
+        private void OnMerchantShow(long timestamp, List<string> args)
+        {
+            if (Config.AutoRepair && Bot.Target.IsRepairVendor)
+            {
+                Bot.Wow.RepairAllItems();
+            }
+
+            if (Config.AutoSell)
+            {
+                SellItemsRoutine.Run(Bot, Config);
+            }
+        }
+
         private void OnObjectUpdateComplete(IEnumerable<IWowObject> wowObjects)
         {
             if (Config.CachePointsOfInterest && PoiCacheEvent.Run())
@@ -1077,19 +1090,6 @@ namespace AmeisenBotX.Core
             Bot.Wow.Events.Subscribe("COMBAT_LOG_EVENT_UNFILTERED", Bot.CombatLog.Parse);
 
             Bot.Wow.Events.Subscribe("MERCHANT_SHOW", OnMerchantShow);
-        }
-
-        private void OnMerchantShow(long timestamp, List<string> args)
-        {
-            if (Config.AutoRepair && Bot.Target.IsRepairVendor)
-            {
-                Bot.Wow.RepairAllItems();
-            }
-
-            if (Config.AutoSell)
-            {
-                SellItemsRoutine.Run(Bot, Config);
-            }
         }
     }
 }
