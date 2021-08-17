@@ -37,13 +37,14 @@ namespace AmeisenBotX.Core.Logic
 
             AntiAfkEvent = new(TimeSpan.FromMilliseconds(1200));
             CharacterUpdateEvent = new(TimeSpan.FromMilliseconds(5000));
-            EatEvent = new(TimeSpan.FromMilliseconds(250));
             EatBlockEvent = new(TimeSpan.FromMilliseconds(30000));
+            EatEvent = new(TimeSpan.FromMilliseconds(250));
             LoginAttemptEvent = new(TimeSpan.FromMilliseconds(500));
             LootTryEvent = new(TimeSpan.FromMilliseconds(750));
             NpcInteractionEvent = new(TimeSpan.FromMilliseconds(1000));
             OffsetCheckEvent = new(TimeSpan.FromMilliseconds(15000));
             RenderSwitchEvent = new(TimeSpan.FromMilliseconds(1000));
+            UpdateFood = new(TimeSpan.FromMilliseconds(1000));
 
             UnitsLooted = new();
             UnitsToLoot = new();
@@ -86,7 +87,12 @@ namespace AmeisenBotX.Core.Logic
                 new Leaf(() => { if (!Bot.Player.IsAutoAttacking) Bot.Wow.StartAutoAttack(); return BtStatus.Success; }),
                 // TODO: handle tactics here
                 // run combat class logic
-                new Leaf(() => { Bot.CombatClass.Execute(); return BtStatus.Success; })
+                new Selector
+                (
+                    () => Bot.Target == null || !Bot.Objects.IsTargetInLineOfSight || Bot.Player.DistanceTo(Bot.Target) < 28.0f,
+                    new Leaf(() => { Bot.CombatClass.Execute(); return BtStatus.Success; }),
+                    new Leaf(() => MoveToPosition(Bot.Target.Position))
+                )
             );
 
             Node openworldNode = new Waterfall
@@ -122,9 +128,9 @@ namespace AmeisenBotX.Core.Logic
                             // open world as fallback
                             openworldNode,
                             // handle special environments
-                            (() => Bot.Objects.MapId.IsBattlegroundMap(), battlegroundNode),
-                            (() => Bot.Objects.MapId.IsDungeonMap(), dungeonNode),
-                            (() => Bot.Objects.MapId.IsRaidMap(), raidNode)
+                            (() => false && Bot.Objects.MapId.IsBattlegroundMap(), battlegroundNode),
+                            (() => false && Bot.Objects.MapId.IsDungeonMap(), dungeonNode),
+                            (() => false && Bot.Objects.MapId.IsRaidMap(), raidNode)
                         )
                     ),
                     // we are in the loading screen or player is null
@@ -162,11 +168,11 @@ namespace AmeisenBotX.Core.Logic
 
         public event Action OnWoWStarted;
 
-        private TimegatedEvent AntiAfkEvent { get; set; }
+        private TimegatedEvent AntiAfkEvent { get; }
 
         private AmeisenBotInterfaces Bot { get; }
 
-        private TimegatedEvent CharacterUpdateEvent { get; set; }
+        private TimegatedEvent CharacterUpdateEvent { get; }
 
         private AmeisenBotConfig Config { get; }
 
@@ -180,7 +186,7 @@ namespace AmeisenBotX.Core.Logic
 
         private IEnumerable<IWowInventoryItem> Food { get; set; }
 
-        private TimegatedEvent LoginAttemptEvent { get; set; }
+        private TimegatedEvent LoginAttemptEvent { get; }
 
         private int LootTry { get; set; }
 
@@ -194,7 +200,7 @@ namespace AmeisenBotX.Core.Logic
 
         private IWowUnit PlayerToFollow { get; set; }
 
-        private TimegatedEvent RenderSwitchEvent { get; set; }
+        private TimegatedEvent RenderSwitchEvent { get; }
 
         private bool SearchedStaticRoutes { get; set; }
 
@@ -205,6 +211,8 @@ namespace AmeisenBotX.Core.Logic
         private List<ulong> UnitsLooted { get; }
 
         private Queue<ulong> UnitsToLoot { get; }
+
+        private TimegatedEvent UpdateFood { get; }
 
         public void Tick()
         {
@@ -586,7 +594,7 @@ namespace AmeisenBotX.Core.Logic
 
             if (unit.Position != Vector3.Zero && Bot.Player.DistanceTo(unit) > 3.0f)
             {
-                Bot.Movement.SetMovementAction(MovementAction.DirectMove, unit.Position);
+                Bot.Movement.SetMovementAction(MovementAction.Move, unit.Position);
                 return BtStatus.Ongoing;
             }
             else if (LootTryEvent.Run())
@@ -617,7 +625,7 @@ namespace AmeisenBotX.Core.Logic
         {
             if (position != Vector3.Zero && Bot.Player.DistanceTo(position) > 3.0f)
             {
-                Bot.Movement.SetMovementAction(MovementAction.DirectMove, position);
+                Bot.Movement.SetMovementAction(MovementAction.Move, position);
                 return BtStatus.Ongoing;
             }
 
@@ -640,23 +648,25 @@ namespace AmeisenBotX.Core.Logic
                 return false;
             }
 
-            Food = Bot.Character.Inventory.Items.Where(e => e.RequiredLevel <= Bot.Player.Level).OrderByDescending(e => e.ItemLevel);
+            if (UpdateFood.Run())
+            {
+                Food = Bot.Character.Inventory.Items.Where(e => e.RequiredLevel <= Bot.Player.Level).OrderByDescending(e => e.ItemLevel);
+            }
 
-            bool hasRefreshment = Food.Any(e => Enum.IsDefined(typeof(WowRefreshment), e.Id));
-            bool hasFood = Food.Any(e => Enum.IsDefined(typeof(WowFood), e.Id));
-            bool hasWater = Food.Any(e => Enum.IsDefined(typeof(WowWater), e.Id));
-
-            return (Bot.Player.HealthPercentage < Config.EatUntilPercent && (hasFood || hasRefreshment))
-                || (Bot.Player.MaxMana > 0 && Bot.Player.ManaPercentage < Config.DrinkUntilPercent && (hasWater || hasRefreshment));
+            return (Bot.Player.HealthPercentage < Config.EatUntilPercent
+                    && (Food.Any(e => Enum.IsDefined(typeof(WowFood), e.Id)) || Food.Any(e => Enum.IsDefined(typeof(WowRefreshment), e.Id))))
+                || (Bot.Player.MaxMana > 0 && Bot.Player.ManaPercentage < Config.DrinkUntilPercent
+                    && (Food.Any(e => Enum.IsDefined(typeof(WowWater), e.Id)) || Food.Any(e => Enum.IsDefined(typeof(WowRefreshment), e.Id))));
         }
 
         private bool NeedToFight()
         {
             return Bot.Player.IsInCombat
-                || Bot.Objects.WowObjects.OfType<IWowPlayer>()
-                       .Where(e => e.IsInCombat && Bot.Objects.PartymemberGuids.Contains(e.Guid) && e.DistanceTo(Bot.Player) < Config.SupportRange)
-                       .Any()
-                || Bot.GetEnemiesInCombatWithParty<IWowUnit>(Bot.Player.Position, 100.0f).Any();
+                || Bot.Objects.Partymembers.Any(e => e.IsInCombat && e.DistanceTo(Bot.Player) < Config.SupportRange)
+                || Bot.Objects.WowObjects.OfType<IWowUnit>().Any(e => ((e.IsInCombat && (e.IsTaggedByMe || !e.IsTaggedByOther))
+                    || e.TargetGuid == Bot.Player.Guid                    
+                    || Bot.Objects.Partymembers.Any(x => x.Guid == e.TargetGuid))
+                    && Bot.Wow.GetReaction(Bot.Player.BaseAddress, e.BaseAddress) == WowUnitReaction.Hostile);
         }
 
         private bool NeedToFollow()
