@@ -12,8 +12,6 @@ namespace AmeisenBotX.Wow.Offsets
 
         IntPtr AuraTable2 { get; }
 
-        IntPtr IsIngame { get; }
-
         IntPtr BattlegroundFinished { get; }
 
         IntPtr BattlegroundStatus { get; }
@@ -99,6 +97,8 @@ namespace AmeisenBotX.Wow.Offsets
         IntPtr FunctionWorldRenderWorld { get; }
 
         IntPtr GameState { get; }
+
+        IntPtr IsIngame { get; }
 
         IntPtr IsWorldLoaded { get; }
 

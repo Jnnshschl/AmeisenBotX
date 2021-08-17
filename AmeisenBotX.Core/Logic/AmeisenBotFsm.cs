@@ -96,6 +96,46 @@ namespace AmeisenBotX.Core.Logic
         private TimegatedEvent RenderSwitchEvent { get; set; }
 
         /// <summary>
+        /// Returns a state instance by its type.
+        /// </summary>
+        /// <typeparam name="T">Type of the state</typeparam>
+        /// <returns>State instance or null if not found</returns>
+        public T Get<T>() where T : BasicState
+        {
+            return (T)States.FirstOrDefault(e => e.Value.GetType() == typeof(T)).Value;
+        }
+
+        /// <summary>
+        /// Changes the current state of the bots fsm.
+        /// </summary>
+        /// <param name="state">State to change to</param>
+        /// <param name="ignoreExit">If true, the states Leave() function won't be called. This is used to override states and resume them.</param>
+        /// <returns>True when the state was changed, false if we are already in that state</returns>
+        public bool SetState(BotState state, bool ignoreExit = false)
+        {
+            if (CurrentState.Key == state)
+            {
+                // we are already in this state
+                return false;
+            }
+
+            AmeisenLogger.I.Log("StateMachine", $"Changing State to {state}");
+
+            // this is used by the combat state because
+            // it will override any existing state
+            if (!ignoreExit)
+            {
+                CurrentState.Value.Leave();
+            }
+
+            CurrentState = States.First(s => s.Key == state);
+            CurrentState.Value.Enter();
+
+            OnStateMachineStateChanged?.Invoke();
+            return true;
+        }
+
+        /// <summary>
         /// Runs a tick of the bots fsm.
         /// </summary>
         public void Tick()
@@ -181,46 +221,6 @@ namespace AmeisenBotX.Core.Logic
             // execute the current state
             CurrentState.Value.Execute();
             OnStateMachineTick?.Invoke();
-        }
-
-        /// <summary>
-        /// Returns a state instance by its type.
-        /// </summary>
-        /// <typeparam name="T">Type of the state</typeparam>
-        /// <returns>State instance or null if not found</returns>
-        public T Get<T>() where T : BasicState
-        {
-            return (T)States.FirstOrDefault(e => e.Value.GetType() == typeof(T)).Value;
-        }
-
-        /// <summary>
-        /// Changes the current state of the bots fsm.
-        /// </summary>
-        /// <param name="state">State to change to</param>
-        /// <param name="ignoreExit">If true, the states Leave() function won't be called. This is used to override states and resume them.</param>
-        /// <returns>True when the state was changed, false if we are already in that state</returns>
-        public bool SetState(BotState state, bool ignoreExit = false)
-        {
-            if (CurrentState.Key == state)
-            {
-                // we are already in this state
-                return false;
-            }
-
-            AmeisenLogger.I.Log("StateMachine", $"Changing State to {state}");
-
-            // this is used by the combat state because
-            // it will override any existing state
-            if (!ignoreExit)
-            {
-                CurrentState.Value.Leave();
-            }
-
-            CurrentState = States.First(s => s.Key == state);
-            CurrentState.Value.Enter();
-
-            OnStateMachineStateChanged?.Invoke();
-            return true;
         }
     }
 }

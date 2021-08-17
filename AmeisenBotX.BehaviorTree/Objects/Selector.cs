@@ -13,7 +13,7 @@ namespace AmeisenBotX.BehaviorTree.Objects
 
         public Func<bool> Condition { get; set; }
 
-        public override BehaviorTreeStatus Execute()
+        public override BtStatus Execute()
         {
             return GetNodeToExecute().Execute();
         }
@@ -41,7 +41,7 @@ namespace AmeisenBotX.BehaviorTree.Objects
 
         public Func<T, bool> Condition { get; set; }
 
-        public override BehaviorTreeStatus Execute(T blackboard)
+        public override BtStatus Execute(T blackboard)
         {
             return GetNodeToExecute(blackboard).Execute(blackboard);
         }

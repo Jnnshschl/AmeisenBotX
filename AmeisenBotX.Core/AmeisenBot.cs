@@ -26,8 +26,7 @@ using AmeisenBotX.Core.Engines.Quest.Profiles.Shino;
 using AmeisenBotX.Core.Engines.Quest.Profiles.StartAreas;
 using AmeisenBotX.Core.Engines.Tactic;
 using AmeisenBotX.Core.Logic;
-using AmeisenBotX.Core.Logic.Enums;
-using AmeisenBotX.Core.Logic.States;
+using AmeisenBotX.Core.Logic.Routines;
 using AmeisenBotX.Logging;
 using AmeisenBotX.Logging.Enums;
 using AmeisenBotX.Memory;
@@ -246,6 +245,11 @@ namespace AmeisenBotX.Core
         public IEnumerable<IJobProfile> JobProfiles { get; private set; }
 
         /// <summary>
+        /// State machine of the bot.
+        /// </summary>
+        public IAmeisenBotLogic Logic { get; private set; }
+
+        /// <summary>
         /// Folder where  all profile relevant stuff is stored.
         /// </summary>
         public string ProfileFolder { get; }
@@ -254,11 +258,6 @@ namespace AmeisenBotX.Core
         /// All currently loaded quest profiles.
         /// </summary>
         public IEnumerable<IQuestProfile> QuestProfiles { get; private set; }
-
-        /// <summary>
-        /// State machine of the bot.
-        /// </summary>
-        public IAmeisenBotLogic Logic { get; private set; }
 
         private TimegatedEvent BagUpdateEvent { get; set; }
 
@@ -1078,6 +1077,21 @@ namespace AmeisenBotX.Core
             // Misc Events
             Bot.Wow.Events.Subscribe("CHARACTER_POINTS_CHANGED", OnTalentPointsChange);
             Bot.Wow.Events.Subscribe("COMBAT_LOG_EVENT_UNFILTERED", Bot.CombatLog.Parse);
+
+            Bot.Wow.Events.Subscribe("MERCHANT_SHOW", OnMerchantShow);
+        }
+
+        private void OnMerchantShow(long timestamp, List<string> args)
+        {
+            if (Config.AutoRepair && Bot.Target.IsRepairVendor)
+            {
+                Bot.Wow.RepairAllItems();
+            }
+
+            if (Config.AutoSell)
+            {
+                SellItemsRoutine.Run(Bot, Config);
+            }
         }
     }
 }

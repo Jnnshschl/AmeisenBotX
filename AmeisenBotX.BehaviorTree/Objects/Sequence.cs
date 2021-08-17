@@ -12,16 +12,16 @@ namespace AmeisenBotX.BehaviorTree.Objects
 
         public int Counter { get; set; }
 
-        public override BehaviorTreeStatus Execute()
+        public override BtStatus Execute()
         {
             if (Counter == Children.Count)
             {
-                return BehaviorTreeStatus.Success;
+                return BtStatus.Success;
             }
 
-            BehaviorTreeStatus status = Children[Counter].Execute();
+            BtStatus status = Children[Counter].Execute();
 
-            if (status == BehaviorTreeStatus.Success)
+            if (status == BtStatus.Success)
             {
                 if (Counter < Children.Count)
                 {
@@ -29,17 +29,17 @@ namespace AmeisenBotX.BehaviorTree.Objects
 
                     if (Counter == Children.Count)
                     {
-                        return BehaviorTreeStatus.Success;
+                        return BtStatus.Success;
                     }
                 }
             }
-            else if (status == BehaviorTreeStatus.Failed)
+            else if (status == BtStatus.Failed)
             {
                 Counter = 0;
-                return BehaviorTreeStatus.Failed;
+                return BtStatus.Failed;
             }
 
-            return BehaviorTreeStatus.Ongoing;
+            return BtStatus.Ongoing;
         }
 
         internal override Node GetNodeToExecute()
@@ -57,16 +57,16 @@ namespace AmeisenBotX.BehaviorTree.Objects
 
         public int Counter { get; set; }
 
-        public override BehaviorTreeStatus Execute(T blackboard)
+        public override BtStatus Execute(T blackboard)
         {
             if (Counter == Children.Count)
             {
-                return BehaviorTreeStatus.Success;
+                return BtStatus.Success;
             }
 
-            BehaviorTreeStatus status = Children[Counter].Execute(blackboard);
+            BtStatus status = Children[Counter].Execute(blackboard);
 
-            if (status == BehaviorTreeStatus.Success)
+            if (status == BtStatus.Success)
             {
                 if (Counter < Children.Count)
                 {
@@ -74,17 +74,17 @@ namespace AmeisenBotX.BehaviorTree.Objects
 
                     if (Counter == Children.Count)
                     {
-                        return BehaviorTreeStatus.Success;
+                        return BtStatus.Success;
                     }
                 }
             }
-            else if (status == BehaviorTreeStatus.Failed)
+            else if (status == BtStatus.Failed)
             {
                 Counter = 0;
-                return BehaviorTreeStatus.Failed;
+                return BtStatus.Failed;
             }
 
-            return BehaviorTreeStatus.Ongoing;
+            return BtStatus.Ongoing;
         }
 
         internal override Node<T> GetNodeToExecute(T blackboard)

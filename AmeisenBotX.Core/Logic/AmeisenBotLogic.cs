@@ -4,11 +4,13 @@ using AmeisenBotX.BehaviorTree.Objects;
 using AmeisenBotX.Common.Math;
 using AmeisenBotX.Common.Utils;
 using AmeisenBotX.Core.Engines.Movement.Enums;
+using AmeisenBotX.Core.Logic.Routines;
 using AmeisenBotX.Core.Logic.StaticDeathRoutes;
 using AmeisenBotX.Logging;
 using AmeisenBotX.Logging.Enums;
 using AmeisenBotX.Memory.Win32;
 using AmeisenBotX.Wow.Objects;
+using AmeisenBotX.Wow.Objects.Enums;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
@@ -30,65 +32,93 @@ namespace AmeisenBotX.Core.Logic
             Config = config;
             Bot = bot;
 
-            LoginAttemptEvent = new(TimeSpan.FromMilliseconds(500));
             AntiAfkEvent = new(TimeSpan.FromMilliseconds(1200));
-            RenderSwitchEvent = new(TimeSpan.FromMilliseconds(1000));
             CharacterUpdateEvent = new(TimeSpan.FromMilliseconds(5000));
+            LoginAttemptEvent = new(TimeSpan.FromMilliseconds(500));
+            LootTryEvent = new(TimeSpan.FromMilliseconds(750));
+            NpcInteractionEvent = new(TimeSpan.FromMilliseconds(1000));
             OffsetCheckEvent = new(TimeSpan.FromMilliseconds(15000));
+            RenderSwitchEvent = new(TimeSpan.FromMilliseconds(1000));
 
-            Node ghostNode = new Selector
+            UnitsLooted = new();
+            UnitsToLoot = new();
+
+            // SPECIAL ENVIRONMENTS -----------------------------
+
+            Node battlegroundNode = new Leaf
             (
-                () => Bot.Objects.MapId.IsBattlegroundMap(),
-                // on a battleground, wait for the mass ress
-                new Leaf(() => { Bot.Movement.StopMovement(); return BehaviorTreeStatus.Ongoing; }),
-                new Selector
-                (
-                    () => CanUseStaticPaths(),
-                    // prefer static paths
-                    new Leaf(FollowStaticPath),
-                    new Selector
-                    (
-                        // TODO: handle instances here
-                        () => false,
-                        // find the instance entrance and go there, corpse wont be
-                        // reachable if we die in a dungeon for example
-                        null,
-                        // run to corpse by position
-                        new Leaf(RunToCorpseAndRetrieveIt)
-                    )
-                )
+                // TODO: run bg engine here
+                () => BtStatus.Success
             );
 
-            Node combatNode = new Selector
+            Node dungeonNode = new Leaf
+            (
+                // TODO: run dungeon engine here
+                () => BtStatus.Success
+            );
+
+            Node raidNode = new Leaf
+            (
+                // TODO: run raid engine here
+                () => BtStatus.Success
+            );
+
+            // OPEN WORLD -----------------------------
+
+            Node openworldCombatNode = new Selector
             (
                 () => Bot.CombatClass == null,
                 // start autoattacking if we have no combat class loaded
-                new Leaf(() => { if (!Bot.Player.IsAutoAttacking) Bot.Wow.StartAutoAttack(); return BehaviorTreeStatus.Success; }),
+                new Leaf(() => { if (!Bot.Player.IsAutoAttacking) Bot.Wow.StartAutoAttack(); return BtStatus.Success; }),
                 // TODO: handle tactics here
                 // run combat class logic
-                new Leaf(() => { Bot.CombatClass.Execute(); return BehaviorTreeStatus.Success; })
+                new Leaf(() => { Bot.CombatClass.Execute(); return BtStatus.Success; })
             );
+
+            Node openworldNode = new Waterfall
+            (
+                // do idle stuff as fallback
+                new Leaf(Idle),
+                // handle main open world states
+                (() => Bot.Player.IsDead, new Leaf(Dead)),
+                (
+                    () => Bot.Player.IsGhost,
+                    new Selector
+                    (
+                        () => CanUseStaticPaths(),
+                        // prefer static paths
+                        new Leaf(() => MoveToPosition(StaticRoute.GetNextPoint(Bot.Player.Position))),
+                        // run to corpse by position
+                        new Leaf(RunToCorpseAndRetrieveIt)
+                    )
+                ),
+                (IsInCombat, openworldCombatNode),
+                (NeedToRepairOrSell, new Leaf(SpeakWithMerchant)),
+                (NeedToLoot, new Leaf(LootNearUnits)),
+                (NeedToFollow, new Leaf(Follow))
+            );
+
+            // GENERIC -----------------------------
 
             Node mainLogicNode = new Annotator
             (
                 // run the update stuff before we execute the main logic
                 // objects will be updated here for example
-                new Leaf(UpdateStuff),
+                new Leaf(UpdateWowInterface),
                 new Selector
                 (
-                    () => Bot.Objects.IsWorldLoaded && Bot.Player != null,
+                    () => Bot.Objects.IsWorldLoaded && Bot.Player != null && Bot.Objects != null,
                     new Waterfall
                     (
-                        // do idle stuff as fallback
-                        new Leaf(Idle),
-                        // handle main states
-                        (() => Bot.Player.IsDead, new Leaf(Dead)),
-                        (() => Bot.Player.IsGhost, ghostNode),
-                        (IsInCombat, combatNode),
-                        (NeedToFollow, new Leaf(Follow))
+                        // open world as fallback
+                        openworldNode,
+                        // handle special environments
+                        (() => Bot.Objects.MapId.IsBattlegroundMap(), battlegroundNode),
+                        (() => Bot.Objects.MapId.IsDungeonMap(), dungeonNode),
+                        (() => Bot.Objects.MapId.IsRaidMap(), raidNode)
                     ),
                     // we are in the loading screen or player is null
-                    new Leaf(() => BehaviorTreeStatus.Success)
+                    new Leaf(() => BtStatus.Success)
                 )
             );
 
@@ -134,11 +164,15 @@ namespace AmeisenBotX.Core.Logic
 
         private TimegatedEvent LoginAttemptEvent { get; set; }
 
+        private IWowUnit Merchant { get; set; }
+
         private bool NeedToLogin => Bot.Memory.Read(Bot.Wow.Offsets.IsIngame, out int isIngame) && isIngame == 0;
+
+        private TimegatedEvent NpcInteractionEvent { get; }
 
         private TimegatedEvent OffsetCheckEvent { get; }
 
-        private ulong PlayerToFollowGuid { get; set; }
+        private IWowUnit PlayerToFollow { get; set; }
 
         private TimegatedEvent RenderSwitchEvent { get; set; }
 
@@ -148,71 +182,19 @@ namespace AmeisenBotX.Core.Logic
 
         private AmeisenBotBehaviorTree Tree { get; }
 
-        public bool NeedToFollow()
-        {
-            if (PlayerToFollowGuid != 0)
-            {
-                IWowUnit unitToFollow = Bot.GetWowObjectByGuid<IWowUnit>(PlayerToFollowGuid);
-
-                if (unitToFollow != null)
-                {
-                    float distance = Bot.Player.DistanceTo(unitToFollow);
-                    return distance > Config.MinFollowDistance && distance <= Config.MaxFollowDistance;
-                }
-            }
-
-            return false;
-        }
-
-        public bool IsInCombat()
-        {
-            return Bot.Player.IsInCombat
-                || Bot.Objects.WowObjects.OfType<IWowPlayer>()
-                       .Where(e => e.IsInCombat && Bot.Objects.PartymemberGuids.Contains(e.Guid) && e.DistanceTo(Bot.Player) < Config.SupportRange)
-                       .Any()
-                || Bot.GetEnemiesInCombatWithParty<IWowUnit>(Bot.Player.Position, 100.0f).Any();
-        }
-
-        public bool IsUnitToFollowThere(out IWowUnit playerToFollow, bool ignoreRange = false)
-        {
-            IEnumerable<IWowPlayer> wowPlayers = Bot.Objects.WowObjects.OfType<IWowPlayer>().Where(e => !e.IsDead);
-
-            if (wowPlayers.Any())
-            {
-                IWowUnit[] playersToTry =
-                {
-                    Config.FollowSpecificCharacter ? wowPlayers.FirstOrDefault(p => Bot.Db.GetUnitName(p, out string name) && name.Equals(Config.SpecificCharacterToFollow, StringComparison.OrdinalIgnoreCase)) : null,
-                    Config.FollowGroupLeader ? Bot.Objects.Partyleader : null,
-                    Config.FollowGroupMembers ? Bot.Objects.Partymembers.FirstOrDefault() : null
-                };
-
-                for (int i = 0; i < playersToTry.Length; ++i)
-                {
-                    if (playersToTry[i] != null && (ignoreRange || ShouldIFollowPlayer(playersToTry[i])))
-                    {
-                        playerToFollow = playersToTry[i];
-                        return true;
-                    }
-                }
-            }
-
-            playerToFollow = null;
-            return false;
-        }
-
         public void Tick()
         {
             Tree.Tick();
         }
 
-        private BehaviorTreeStatus AntiAfk()
+        private BtStatus AntiAfk()
         {
             if (AntiAfkEvent.Run())
             {
                 Bot.Memory.Write(Bot.Wow.Offsets.TickCount, Environment.TickCount);
             }
 
-            return BehaviorTreeStatus.Success;
+            return BtStatus.Success;
         }
 
         /// <summary>
@@ -253,11 +235,11 @@ namespace AmeisenBotX.Core.Logic
             return StaticRoute != null;
         }
 
-        private BehaviorTreeStatus ChangeRealmlist()
+        private BtStatus ChangeRealmlist()
         {
             if (!Config.AutoChangeRealmlist)
             {
-                return BehaviorTreeStatus.Success;
+                return BtStatus.Success;
             }
 
             try
@@ -300,17 +282,17 @@ namespace AmeisenBotX.Core.Logic
                     }
                 }
 
-                return BehaviorTreeStatus.Success;
+                return BtStatus.Success;
             }
             catch
             {
                 AmeisenLogger.I.Log("StartWow", "Cannot write realmlist to config.wtf");
             }
 
-            return BehaviorTreeStatus.Failed;
+            return BtStatus.Failed;
         }
 
-        private BehaviorTreeStatus CheckTosAndEula()
+        private BtStatus CheckTosAndEula()
         {
             try
             {
@@ -371,17 +353,17 @@ namespace AmeisenBotX.Core.Logic
                     }
                 }
 
-                return BehaviorTreeStatus.Success;
+                return BtStatus.Success;
             }
             catch
             {
                 AmeisenLogger.I.Log("StartWow", "Cannot write to config.wtf");
             }
 
-            return BehaviorTreeStatus.Failed;
+            return BtStatus.Failed;
         }
 
-        private BehaviorTreeStatus Dead()
+        private BtStatus Dead()
         {
             if (Config.ReleaseSpirit || Bot.Objects.MapId.IsBattlegroundMap())
             {
@@ -389,23 +371,16 @@ namespace AmeisenBotX.Core.Logic
             }
 
             SearchedStaticRoutes = false;
-            return BehaviorTreeStatus.Success;
+            return BtStatus.Success;
         }
 
-        private BehaviorTreeStatus FollowStaticPath()
+        private BtStatus Follow()
         {
-            Vector3 nextPosition = StaticRoute.GetNextPoint(Bot.Player.Position);
-
-            if (nextPosition != Vector3.Zero)
-            {
-                Bot.Movement.SetMovementAction(MovementAction.DirectMove, nextPosition);
-                return BehaviorTreeStatus.Ongoing;
-            }
-
-            return BehaviorTreeStatus.Success;
+            Vector3 pos = Config.FollowPositionDynamic ? PlayerToFollow.Position + FollowOffset : PlayerToFollow.Position;
+            return MoveToPosition(pos);
         }
 
-        private BehaviorTreeStatus Idle()
+        private BtStatus Idle()
         {
             Bot.CombatClass.OutOfCombatExecute();
 
@@ -414,7 +389,67 @@ namespace AmeisenBotX.Core.Logic
                 Bot.Character.UpdateAll();
             }
 
-            return BehaviorTreeStatus.Success;
+            return BtStatus.Success;
+        }
+
+        private bool IsInCombat()
+        {
+            return Bot.Player.IsInCombat
+                || Bot.Objects.WowObjects.OfType<IWowPlayer>()
+                       .Where(e => e.IsInCombat && Bot.Objects.PartymemberGuids.Contains(e.Guid) && e.DistanceTo(Bot.Player) < Config.SupportRange)
+                       .Any()
+                || Bot.GetEnemiesInCombatWithParty<IWowUnit>(Bot.Player.Position, 100.0f).Any();
+        }
+
+        private bool IsRepairNpcNear(out IWowUnit unit)
+        {
+            unit = Bot.Objects.WowObjects.OfType<IWowUnit>()
+                .FirstOrDefault(e => e.GetType() != typeof(IWowPlayer)
+                    && !e.IsDead
+                    && e.IsRepairVendor
+                    && Bot.Db.GetReaction(Bot.Player, e) != WowUnitReaction.Hostile
+                    && Bot.Player.DistanceTo(e) <= Config.RepairNpcSearchRadius);
+
+            return unit != null;
+        }
+
+        private bool IsUnitToFollowThere(out IWowUnit playerToFollow, bool ignoreRange = false)
+        {
+            IEnumerable<IWowPlayer> wowPlayers = Bot.Objects.WowObjects.OfType<IWowPlayer>().Where(e => !e.IsDead);
+
+            if (wowPlayers.Any())
+            {
+                IWowUnit[] playersToTry =
+                {
+                    Config.FollowSpecificCharacter ? wowPlayers.FirstOrDefault(p => Bot.Db.GetUnitName(p, out string name) && name.Equals(Config.SpecificCharacterToFollow, StringComparison.OrdinalIgnoreCase)) : null,
+                    Config.FollowGroupLeader ? Bot.Objects.Partyleader : null,
+                    Config.FollowGroupMembers ? Bot.Objects.Partymembers.FirstOrDefault() : null
+                };
+
+                for (int i = 0; i < playersToTry.Length; ++i)
+                {
+                    if (playersToTry[i] != null && (ignoreRange || ShouldIFollowPlayer(playersToTry[i])))
+                    {
+                        playerToFollow = playersToTry[i];
+                        return true;
+                    }
+                }
+            }
+
+            playerToFollow = null;
+            return false;
+        }
+
+        private bool IsVendorNpcNear(out IWowUnit unit)
+        {
+            unit = Bot.Objects.WowObjects.OfType<IWowUnit>()
+                .FirstOrDefault(e => e.GetType() != typeof(IWowPlayer)
+                    && !e.IsDead
+                    && e.IsVendor
+                    && Bot.Db.GetReaction(Bot.Player, e) != WowUnitReaction.Hostile
+                    && e.Position.GetDistance(Bot.Player.Position) < Config.RepairNpcSearchRadius);
+
+            return unit != null;
         }
 
         private void LoadWowWindowPosition()
@@ -433,7 +468,7 @@ namespace AmeisenBotX.Core.Logic
             }
         }
 
-        private BehaviorTreeStatus Login()
+        private BtStatus Login()
         {
             Bot.Wow.SetWorldLoadedCheck(true);
 
@@ -446,65 +481,160 @@ namespace AmeisenBotX.Core.Logic
             }
 
             Bot.Wow.SetWorldLoadedCheck(false);
-            return BehaviorTreeStatus.Success;
+            return BtStatus.Success;
         }
 
-        private BehaviorTreeStatus Follow()
+        private int LootTry { get; set; }
+
+        private TimegatedEvent LootTryEvent { get; }
+
+        private BtStatus LootNearUnits()
         {
-            IWowUnit unitToFollow = Bot.GetWowObjectByGuid<IWowUnit>(PlayerToFollowGuid);
+            IWowUnit unit = Bot.GetWowObjectByGuid<IWowUnit>(UnitsToLoot.Peek());
 
-            if (unitToFollow != null)
+            if (unit == null || !unit.IsLootable || LootTry > 3)
             {
-                Vector3 pos = unitToFollow.Position;
-
-                if (Config.FollowPositionDynamic)
-                {
-                    pos += FollowOffset;
-                }
-
-                Bot.Movement.SetMovementAction(MovementAction.Move, pos);
-                return BehaviorTreeStatus.Success;
+                UnitsToLoot.Dequeue();
+                LootTry = 0;
+                return BtStatus.Failed;
             }
 
-            return BehaviorTreeStatus.Failed;
+            if (unit.Position != Vector3.Zero && Bot.Player.DistanceTo(unit) > 3.0f)
+            {
+                Bot.Movement.SetMovementAction(MovementAction.DirectMove, unit.Position);
+                return BtStatus.Ongoing;
+            }
+            else if (LootTryEvent.Run())
+            {
+                if (Bot.Memory.Read(Bot.Wow.Offsets.LootWindowOpen, out byte lootOpen)
+                    && lootOpen > 0)
+                {
+                    Bot.Wow.LootEverything();
+
+                    UnitsLooted.Add(UnitsToLoot.Dequeue());
+                    LootTry = 0;
+
+                    Bot.Wow.ClickUiElement("LootCloseButton");
+                    return BtStatus.Success;
+                }
+                else
+                {
+                    Bot.Wow.StopClickToMove();
+                    Bot.Wow.InteractWithUnit(unit.BaseAddress);
+                    ++LootTry;
+                }
+            }
+
+            return BtStatus.Ongoing;
         }
 
-        private BehaviorTreeStatus RunToCorpseAndRetrieveIt()
+        private BtStatus MoveToPosition(Vector3 position)
+        {
+            if (position != Vector3.Zero && Bot.Player.DistanceTo(position) > 3.0f)
+            {
+                Bot.Movement.SetMovementAction(MovementAction.DirectMove, position);
+                return BtStatus.Ongoing;
+            }
+
+            return BtStatus.Success;
+        }
+
+        private bool NeedToFollow()
+        {
+            if (Bot.Objects.WowObjects != null && IsUnitToFollowThere(out IWowUnit player))
+            {
+                PlayerToFollow = player;
+                float distance = Bot.Player.DistanceTo(player);
+                return distance > Config.MinFollowDistance && distance <= Config.MaxFollowDistance;
+            }
+
+            return false;
+        }
+
+        private List<ulong> UnitsLooted { get; }
+
+        private Queue<ulong> UnitsToLoot { get; }
+
+        private IEnumerable<IWowUnit> GetLootableUnits()
+        {
+            return Bot.Objects.WowObjects.OfType<IWowUnit>()
+                .Where(e => e.IsLootable
+                    && !UnitsLooted.Contains(e.Guid)
+                    && e.Position.GetDistance(Bot.Player.Position) < Config.LootUnitsRadius);
+        }
+
+        private bool NeedToLoot()
+        {
+            IEnumerable<IWowUnit> units = GetLootableUnits();
+
+            if (units.Any())
+            {
+                foreach (IWowUnit unit in units)
+                {
+                    UnitsToLoot.Enqueue(unit.Guid);
+                }
+            }
+
+            return UnitsToLoot.Count > 0;
+        }
+
+        private bool NeedToRepairOrSell()
+        {
+            if (Bot.Character.Equipment.Items.Any(e => e.Value.MaxDurability > 0 && (e.Value.Durability / (double)e.Value.MaxDurability * 100.0) <= Config.ItemRepairThreshold)
+                && IsRepairNpcNear(out IWowUnit repairNpc))
+            {
+                Merchant = repairNpc;
+                return true;
+            }
+
+            if (Bot.Character.Inventory.FreeBagSlots < Config.BagSlotsToGoSell
+                && Bot.Character.Inventory.Items.Where(e => e.Price > 0
+                    && !Config.ItemSellBlacklist.Contains(e.Name)
+                    && ((Config.SellGrayItems && e.ItemQuality == (int)WowItemQuality.Poor)
+                        || (Config.SellWhiteItems && e.ItemQuality == (int)WowItemQuality.Common)
+                        || (Config.SellGreenItems && e.ItemQuality == (int)WowItemQuality.Uncommon)
+                        || (Config.SellBlueItems && e.ItemQuality == (int)WowItemQuality.Rare)
+                        || (Config.SellPurpleItems && e.ItemQuality == (int)WowItemQuality.Epic)))
+                   .Any()
+                && IsVendorNpcNear(out IWowUnit sellNpc))
+            {
+                Merchant = sellNpc;
+                return true;
+            }
+
+            return false;
+        }
+
+        private BtStatus RunToCorpseAndRetrieveIt()
         {
             if (Bot.Memory.Read(Bot.Wow.Offsets.CorpsePosition, out Vector3 corpsePosition))
             {
                 if (Bot.Player.Position.GetDistance(corpsePosition) > Config.GhostResurrectThreshold)
                 {
                     Bot.Movement.SetMovementAction(MovementAction.Move, corpsePosition);
-                    return BehaviorTreeStatus.Ongoing;
+                    return BtStatus.Ongoing;
                 }
                 else
                 {
                     Bot.Wow.RetrieveCorpse();
-                    return BehaviorTreeStatus.Success;
+                    return BtStatus.Success;
                 }
             }
 
-            return BehaviorTreeStatus.Failed;
+            return BtStatus.Failed;
         }
 
-        private BehaviorTreeStatus SetupWowInterface()
+        private BtStatus SetupWowInterface()
         {
-            return Bot.Wow.Setup() ? BehaviorTreeStatus.Success : BehaviorTreeStatus.Failed;
+            return Bot.Wow.Setup() ? BtStatus.Success : BtStatus.Failed;
         }
 
         private bool ShouldIFollowPlayer(IWowUnit playerToFollow)
         {
             if (playerToFollow != null)
             {
-                Vector3 pos = playerToFollow.Position;
-
-                if (Config.FollowPositionDynamic)
-                {
-                    pos += FollowOffset;
-                }
-
-                double distance = pos.GetDistance(Bot.Player.Position);
+                Vector3 pos = Config.FollowPositionDynamic ? playerToFollow.Position + FollowOffset : playerToFollow.Position;
+                double distance = Bot.Player.DistanceTo(pos);
 
                 if (distance > Config.MinFollowDistance && distance < Config.MaxFollowDistance)
                 {
@@ -515,7 +645,34 @@ namespace AmeisenBotX.Core.Logic
             return false;
         }
 
-        private BehaviorTreeStatus StartWow()
+        private BtStatus SpeakWithMerchant()
+        {
+            if (Merchant != null)
+            {
+                float distance = Bot.Player.Position.GetDistance(Merchant.Position);
+
+                if (distance > 3.0f)
+                {
+                    Bot.Movement.SetMovementAction(MovementAction.Move, Merchant.Position);
+                    return BtStatus.Success;
+                }
+                else
+                {
+                    Bot.Movement.StopMovement();
+
+                    if (NpcInteractionEvent.Run())
+                    {
+                        SpeakToMerchantRoutine.Run(Bot, Merchant);
+                    }
+
+                    return BtStatus.Success;
+                }
+            }
+
+            return BtStatus.Failed;
+        }
+
+        private BtStatus StartWow()
         {
             if (File.Exists(Config.PathToWowExe))
             {
@@ -534,20 +691,20 @@ namespace AmeisenBotX.Core.Logic
                         LoadWowWindowPosition();
                     }
 
-                    return BehaviorTreeStatus.Success;
+                    return BtStatus.Success;
                 }
                 else
                 {
                     AmeisenLogger.I.Log("StartWow", $"Attaching XMemory failed...");
                     p.Kill();
-                    return BehaviorTreeStatus.Failed;
+                    return BtStatus.Failed;
                 }
             }
 
-            return BehaviorTreeStatus.Failed;
+            return BtStatus.Failed;
         }
 
-        private BehaviorTreeStatus UpdateStuff()
+        private BtStatus UpdateWowInterface()
         {
             Bot.Wow.Tick();
             Bot.Wow.Events.Tick();
@@ -555,11 +712,6 @@ namespace AmeisenBotX.Core.Logic
             if (Bot.Player != null)
             {
                 Bot.Movement.Execute();
-            }
-
-            if (Bot.Objects.WowObjects != null && IsUnitToFollowThere(out IWowUnit player))
-            {
-                PlayerToFollowGuid = player.Guid;
             }
 
             if (Config.FollowPositionDynamic && OffsetCheckEvent.Run())
@@ -580,7 +732,7 @@ namespace AmeisenBotX.Core.Logic
                 Bot.Wow.SetRenderState(foregroundWindow == Bot.Memory.Process.MainWindowHandle);
             }
 
-            return BehaviorTreeStatus.Success;
+            return BtStatus.Success;
         }
     }
 }

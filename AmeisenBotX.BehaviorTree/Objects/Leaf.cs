@@ -5,14 +5,14 @@ namespace AmeisenBotX.BehaviorTree.Objects
 {
     public class Leaf : Node
     {
-        public Leaf(Func<BehaviorTreeStatus> behaviorTreeAction) : base()
+        public Leaf(Func<BtStatus> behaviorTreeAction) : base()
         {
             BehaviorTreeAction = behaviorTreeAction;
         }
 
-        public Func<BehaviorTreeStatus> BehaviorTreeAction { get; set; }
+        public Func<BtStatus> BehaviorTreeAction { get; set; }
 
-        public override BehaviorTreeStatus Execute()
+        public override BtStatus Execute()
         {
             return BehaviorTreeAction();
         }
@@ -25,14 +25,14 @@ namespace AmeisenBotX.BehaviorTree.Objects
 
     public class Leaf<T> : Node<T>
     {
-        public Leaf(Func<T, BehaviorTreeStatus> behaviorTreeAction) : base()
+        public Leaf(Func<T, BtStatus> behaviorTreeAction) : base()
         {
             BehaviorTreeAction = behaviorTreeAction;
         }
 
-        public Func<T, BehaviorTreeStatus> BehaviorTreeAction { get; set; }
+        public Func<T, BtStatus> BehaviorTreeAction { get; set; }
 
-        public override BehaviorTreeStatus Execute(T blackboard)
+        public override BtStatus Execute(T blackboard)
         {
             return BehaviorTreeAction(blackboard);
         }

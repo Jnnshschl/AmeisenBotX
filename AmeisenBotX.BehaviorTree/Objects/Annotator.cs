@@ -14,7 +14,7 @@ namespace AmeisenBotX.BehaviorTree.Objects
 
         public Node Child { get; set; }
 
-        public override BehaviorTreeStatus Execute()
+        public override BtStatus Execute()
         {
             AnnotationNode.Execute();
             return Child.Execute();
@@ -38,7 +38,7 @@ namespace AmeisenBotX.BehaviorTree.Objects
 
         public Node<T> Child { get; set; }
 
-        public override BehaviorTreeStatus Execute(T blackboard)
+        public override BtStatus Execute(T blackboard)
         {
             AnnotationNode.Execute(blackboard);
             return Child.Execute(blackboard);

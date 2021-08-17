@@ -2,8 +2,6 @@
 using AmeisenBotX.Common.Utils;
 using AmeisenBotX.Core.Engines.Battleground.KamelBG.Enums;
 using AmeisenBotX.Core.Engines.Movement.Enums;
-using AmeisenBotX.Core.Logic;
-using AmeisenBotX.Core.Logic.States;
 using AmeisenBotX.Wow.Objects;
 using System;
 using System.Collections.Generic;

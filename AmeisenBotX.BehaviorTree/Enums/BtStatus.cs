@@ -1,6 +1,6 @@
 ﻿namespace AmeisenBotX.BehaviorTree.Enums
 {
-    public enum BehaviorTreeStatus
+    public enum BtStatus
     {
         Success,
         Ongoing,

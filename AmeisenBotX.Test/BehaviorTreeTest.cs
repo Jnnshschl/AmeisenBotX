@@ -30,7 +30,7 @@ namespace AmeisenBotX.Test
                         (blackboard) =>
                         {
                             ++treeResult00;
-                            return BehaviorTreeStatus.Success;
+                            return BtStatus.Success;
                         }
                     ),
                     new Leaf<TestBlackboard>
@@ -38,7 +38,7 @@ namespace AmeisenBotX.Test
                         (blackboard) =>
                         {
                             ++treeResult10;
-                            return BehaviorTreeStatus.Success;
+                            return BtStatus.Success;
                         }
                     ),
                     new Leaf<TestBlackboard>
@@ -46,7 +46,7 @@ namespace AmeisenBotX.Test
                         (blackboard) =>
                         {
                             ++treeResult01;
-                            return BehaviorTreeStatus.Success;
+                            return BtStatus.Success;
                         }
                     ),
                     new Leaf<TestBlackboard>
@@ -54,7 +54,7 @@ namespace AmeisenBotX.Test
                         (blackboard) =>
                         {
                             ++treeResult11;
-                            return BehaviorTreeStatus.Success;
+                            return BtStatus.Success;
                         }
                     )
                 ),
@@ -123,7 +123,7 @@ namespace AmeisenBotX.Test
                             (blackboard) =>
                             {
                                 ++treeResult0;
-                                return BehaviorTreeStatus.Success;
+                                return BtStatus.Success;
                             }
                         )
                     ),
@@ -132,7 +132,7 @@ namespace AmeisenBotX.Test
                         (blackboard) =>
                         {
                             ++treeResult1;
-                            return BehaviorTreeStatus.Success;
+                            return BtStatus.Success;
                         }
                     )
                 ),
@@ -174,7 +174,7 @@ namespace AmeisenBotX.Test
                         (blackboard) =>
                         {
                             ++treeResult0;
-                            return BehaviorTreeStatus.Success;
+                            return BtStatus.Success;
                         }
                     ),
                     new Selector<TestBlackboard>
@@ -185,7 +185,7 @@ namespace AmeisenBotX.Test
                             (blackboard) =>
                             {
                                 ++treeResult01;
-                                return BehaviorTreeStatus.Success;
+                                return BtStatus.Success;
                             }
                         ),
                         new Leaf<TestBlackboard>
@@ -193,7 +193,7 @@ namespace AmeisenBotX.Test
                             (blackboard) =>
                             {
                                 ++treeResult1;
-                                return BehaviorTreeStatus.Success;
+                                return BtStatus.Success;
                             }
                         )
                     )
@@ -242,7 +242,7 @@ namespace AmeisenBotX.Test
                         (blackboard) =>
                         {
                             ++treeResult1;
-                            return BehaviorTreeStatus.Success;
+                            return BtStatus.Success;
                         }
                     ),
                     new Leaf<TestBlackboard>
@@ -250,7 +250,7 @@ namespace AmeisenBotX.Test
                         (blackboard) =>
                         {
                             ++treeResult0;
-                            return BehaviorTreeStatus.Success;
+                            return BtStatus.Success;
                         }
                     ),
                     new Leaf<TestBlackboard>
@@ -258,7 +258,7 @@ namespace AmeisenBotX.Test
                         (blackboard) =>
                         {
                             ++treeResult2;
-                            return treeResult2 < 5 ? BehaviorTreeStatus.Ongoing : BehaviorTreeStatus.Success;
+                            return treeResult2 < 5 ? BtStatus.Ongoing : BtStatus.Success;
                         }
                     ),
                     new Leaf<TestBlackboard>
@@ -266,7 +266,7 @@ namespace AmeisenBotX.Test
                         (blackboard) =>
                         {
                             ++treeResult0;
-                            return BehaviorTreeStatus.Success;
+                            return BtStatus.Success;
                         }
                     )
                 ),
@@ -340,7 +340,7 @@ namespace AmeisenBotX.Test
                         (blackboard) =>
                         {
                             ++treeResult1;
-                            return BehaviorTreeStatus.Success;
+                            return BtStatus.Success;
                         }
                     ),
                     new Leaf<TestBlackboard>
@@ -348,7 +348,7 @@ namespace AmeisenBotX.Test
                         (blackboard) =>
                         {
                             ++treeResult0;
-                            return BehaviorTreeStatus.Success;
+                            return BtStatus.Success;
                         }
                     ),
                     new Leaf<TestBlackboard>
@@ -356,7 +356,7 @@ namespace AmeisenBotX.Test
                         (blackboard) =>
                         {
                             ++treeResult2;
-                            return treeResult2 < 5 ? BehaviorTreeStatus.Ongoing : BehaviorTreeStatus.Success;
+                            return treeResult2 < 5 ? BtStatus.Ongoing : BtStatus.Success;
                         }
                     ),
                     new Leaf<TestBlackboard>
@@ -364,7 +364,7 @@ namespace AmeisenBotX.Test
                         (blackboard) =>
                         {
                             ++treeResult0;
-                            return BehaviorTreeStatus.Success;
+                            return BtStatus.Success;
                         }
                     )
                 ),
@@ -458,7 +458,7 @@ namespace AmeisenBotX.Test
                         (blackboard) =>
                         {
                             ++treeResult1;
-                            return BehaviorTreeStatus.Success;
+                            return BtStatus.Success;
                         }
                     ),
                     new Leaf<TestBlackboard>
@@ -466,7 +466,7 @@ namespace AmeisenBotX.Test
                         (blackboard) =>
                         {
                             ++treeResult0;
-                            return BehaviorTreeStatus.Success;
+                            return BtStatus.Success;
                         }
                     ),
                     new Leaf<TestBlackboard>
@@ -474,7 +474,7 @@ namespace AmeisenBotX.Test
                         (blackboard) =>
                         {
                             ++treeResult2;
-                            return BehaviorTreeStatus.Failed;
+                            return BtStatus.Failed;
                         }
                     ),
                     new Leaf<TestBlackboard>
@@ -482,7 +482,7 @@ namespace AmeisenBotX.Test
                         (blackboard) =>
                         {
                             ++treeResult0;
-                            return BehaviorTreeStatus.Success;
+                            return BtStatus.Success;
                         }
                     )
                 ),
@@ -535,7 +535,7 @@ namespace AmeisenBotX.Test
                         (blackboard) =>
                         {
                             ++treeResult0;
-                            return BehaviorTreeStatus.Success;
+                            return BtStatus.Success;
                         }
                     ),
                     new Leaf<TestBlackboard>
@@ -543,7 +543,7 @@ namespace AmeisenBotX.Test
                         (blackboard) =>
                         {
                             ++treeResult1;
-                            return BehaviorTreeStatus.Success;
+                            return BtStatus.Success;
                         }
                     )
                 ),
@@ -577,7 +577,7 @@ namespace AmeisenBotX.Test
             (
                 new Waterfall<TestBlackboard>
                 (
-                    new Leaf<TestBlackboard>((b) => { ++treeResult2; return BehaviorTreeStatus.Success; }),
+                    new Leaf<TestBlackboard>((b) => { ++treeResult2; return BtStatus.Success; }),
                     (
                         (blackboard) => treeResult0 == 0,
                         new Leaf<TestBlackboard>
@@ -585,7 +585,7 @@ namespace AmeisenBotX.Test
                             (blackboard) =>
                             {
                                 ++treeResult0;
-                                return BehaviorTreeStatus.Success;
+                                return BtStatus.Success;
                             }
                         )
                     ),
@@ -596,7 +596,7 @@ namespace AmeisenBotX.Test
                             (blackboard) =>
                             {
                                 ++treeResult0;
-                                return BehaviorTreeStatus.Success;
+                                return BtStatus.Success;
                             }
                         )
                     ),
@@ -607,7 +607,7 @@ namespace AmeisenBotX.Test
                             (blackboard) =>
                             {
                                 ++treeResult1;
-                                return BehaviorTreeStatus.Success;
+                                return BtStatus.Success;
                             }
                         )
                     )

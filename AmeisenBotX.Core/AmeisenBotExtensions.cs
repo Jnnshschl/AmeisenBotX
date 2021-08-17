@@ -47,23 +47,52 @@ namespace AmeisenBotX.Core
 
         public static bool IsDungeonMap(this WowMapId map)
         {
-            // classic dungeon
+            // classic
             return map is WowMapId.RagefireChasm
                 or WowMapId.WailingCaverns
                 or WowMapId.Deadmines
                 or WowMapId.ShadowfangKeep
                 or WowMapId.StormwindStockade
-                // tbc dungeons
+                // tbc
                 or WowMapId.HellfireRamparts
                 or WowMapId.TheBloodFurnace
                 or WowMapId.TheSlavePens
                 or WowMapId.TheUnderbog
                 or WowMapId.TheSteamvault
-                // wotlk dungeons
+                // wotlk
                 or WowMapId.UtgardeKeep
                 or WowMapId.AzjolNerub
                 or WowMapId.TheForgeOfSouls
                 or WowMapId.PitOfSaron;
+        }
+
+        public static bool IsRaidMap(this WowMapId map)
+        {
+            // classic 
+            return map is WowMapId.MoltenCore
+                or WowMapId.OnyxiasLair
+                or WowMapId.BlackwingLair
+                or WowMapId.RuinsOfAhnQiraj
+                or WowMapId.AhnQirajTemple
+                or WowMapId.Naxxramas
+                // tbc
+                or WowMapId.GruulsLair
+                or WowMapId.Karazhan
+                or WowMapId.MagtheridonsLair
+                or WowMapId.SerpentshrineCavern
+                or WowMapId.TempestKeep
+                or WowMapId.TheBattleForMountHyjal
+                or WowMapId.BlackTemple
+                or WowMapId.ZulAman
+                or WowMapId.TheSunwell
+                // wotlk
+                or WowMapId.VaultOfArchavon
+                or WowMapId.TheObsidianSanctum
+                or WowMapId.TheEyeOfEternity
+                or WowMapId.Ulduar
+                or WowMapId.TrialOfTheCrusader
+                or WowMapId.IcecrownCitadel
+                or WowMapId.TheRubySanctum;
         }
     }
 }

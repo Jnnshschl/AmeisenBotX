@@ -11,17 +11,17 @@ namespace AmeisenBotX.BehaviorTree.Objects
 
         public Node Child { get; set; }
 
-        public override BehaviorTreeStatus Execute()
+        public override BtStatus Execute()
         {
-            BehaviorTreeStatus status = Child.Execute();
+            BtStatus status = Child.Execute();
 
-            if (status == BehaviorTreeStatus.Success)
+            if (status == BtStatus.Success)
             {
-                status = BehaviorTreeStatus.Failed;
+                status = BtStatus.Failed;
             }
-            else if (status == BehaviorTreeStatus.Failed)
+            else if (status == BtStatus.Failed)
             {
-                status = BehaviorTreeStatus.Success;
+                status = BtStatus.Success;
             }
 
             return status;
@@ -42,17 +42,17 @@ namespace AmeisenBotX.BehaviorTree.Objects
 
         public Node<T> Child { get; set; }
 
-        public override BehaviorTreeStatus Execute(T blackboard)
+        public override BtStatus Execute(T blackboard)
         {
-            BehaviorTreeStatus status = Child.Execute(blackboard);
+            BtStatus status = Child.Execute(blackboard);
 
-            if (status == BehaviorTreeStatus.Success)
+            if (status == BtStatus.Success)
             {
-                status = BehaviorTreeStatus.Failed;
+                status = BtStatus.Failed;
             }
-            else if (status == BehaviorTreeStatus.Failed)
+            else if (status == BtStatus.Failed)
             {
-                status = BehaviorTreeStatus.Success;
+                status = BtStatus.Success;
             }
 
             return status;

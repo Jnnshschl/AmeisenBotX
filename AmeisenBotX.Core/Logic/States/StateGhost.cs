@@ -56,7 +56,7 @@ namespace AmeisenBotX.Core.Logic.States
                     new Leaf(() =>
                     {
                         Bot.Movement.StopMovement();
-                        return BehaviorTreeStatus.Ongoing;
+                        return BtStatus.Ongoing;
                     }),
                     new Selector
                     (
@@ -151,61 +151,61 @@ namespace AmeisenBotX.Core.Logic.States
             return StaticRoute != null;
         }
 
-        private BehaviorTreeStatus FollowNearestUnit()
+        private BtStatus FollowNearestUnit()
         {
             if (Bot.Player.Position.GetDistance(PlayerToFollow.Position) > Config.MinFollowDistance)
             {
                 Bot.Movement.SetMovementAction(MovementAction.Move, PlayerToFollow.Position);
             }
 
-            return BehaviorTreeStatus.Ongoing;
+            return BtStatus.Ongoing;
         }
 
-        private BehaviorTreeStatus FollowStaticPath()
+        private BtStatus FollowStaticPath()
         {
             Vector3 nextPosition = StaticRoute.GetNextPoint(Bot.Player.Position);
 
             if (nextPosition != Vector3.Zero)
             {
                 Bot.Movement.SetMovementAction(MovementAction.DirectMove, nextPosition);
-                return BehaviorTreeStatus.Ongoing;
+                return BtStatus.Ongoing;
             }
             else
             {
                 // we should be in the dungeon now
-                return BehaviorTreeStatus.Ongoing;
+                return BtStatus.Ongoing;
             }
         }
 
-        private BehaviorTreeStatus RunToAndExecute(Vector3 position, Action action, double distance = 20.0)
+        private BtStatus RunToAndExecute(Vector3 position, Action action, double distance = 20.0)
         {
             if (Bot.Player.Position.GetDistance(position) > distance)
             {
                 Bot.Movement.SetMovementAction(MovementAction.Move, position);
-                return BehaviorTreeStatus.Ongoing;
+                return BtStatus.Ongoing;
             }
             else
             {
                 action();
-                return BehaviorTreeStatus.Success;
+                return BtStatus.Success;
             }
         }
 
-        private BehaviorTreeStatus RunToCorpseAndRetrieveIt()
+        private BtStatus RunToCorpseAndRetrieveIt()
         {
             if (Bot.Player.Position.GetDistance(CorpsePosition) > Config.GhostResurrectThreshold)
             {
                 Bot.Movement.SetMovementAction(MovementAction.Move, CorpsePosition);
-                return BehaviorTreeStatus.Ongoing;
+                return BtStatus.Ongoing;
             }
             else
             {
                 Bot.Wow.RetrieveCorpse();
-                return BehaviorTreeStatus.Success;
+                return BtStatus.Success;
             }
         }
 
-        private BehaviorTreeStatus RunToCorpsePositionAndSearchForPortals()
+        private BtStatus RunToCorpsePositionAndSearchForPortals()
         {
             // we need to uplift the corpse to ground level because
             // blizz decided its good to place the corpse -100000m
@@ -218,12 +218,12 @@ namespace AmeisenBotX.Core.Logic.States
             return RunToAndExecute(upliftedPosition, () => RunToNearestPortal());
         }
 
-        private BehaviorTreeStatus RunToDungeonEntry()
+        private BtStatus RunToDungeonEntry()
         {
             return RunToAndExecute(Bot.Dungeon.Profile.WorldEntry, () => RunToNearestPortal());
         }
 
-        private BehaviorTreeStatus RunToDungeonProfileEntry()
+        private BtStatus RunToDungeonProfileEntry()
         {
             Vector3 position = Bot.Dungeon.TryGetProfileByMapId(StateMachine.Get<StateDead>().LastDiedMap).WorldEntry;
             return RunToAndExecute(position, () => RunToNearestPortal());
