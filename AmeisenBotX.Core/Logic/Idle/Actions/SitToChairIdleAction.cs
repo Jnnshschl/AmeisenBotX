@@ -5,14 +5,13 @@ using AmeisenBotX.Wow.Objects.Enums;
 using System;
 using System.Linq;
 
-namespace AmeisenBotX.Core.Logic.States.Idle.Actions
+namespace AmeisenBotX.Core.Logic.Idle.Actions
 {
     public class SitToChairIdleAction : IIdleAction
     {
-        public SitToChairIdleAction(AmeisenBotInterfaces bot, AmeisenBotFsm stateMachine, double maxDistance)
+        public SitToChairIdleAction(AmeisenBotInterfaces bot, double maxDistance)
         {
             Bot = bot;
-            StateMachine = stateMachine;
             MaxDistance = maxDistance;
         }
 
@@ -36,8 +35,6 @@ namespace AmeisenBotX.Core.Logic.States.Idle.Actions
 
         private bool SatDown { get; set; }
 
-        private AmeisenBotFsm StateMachine { get; }
-
         public bool Enter()
         {
             SatDown = false;
@@ -45,7 +42,7 @@ namespace AmeisenBotX.Core.Logic.States.Idle.Actions
             // get the center from where to cal the distance, this is needed
             // to prevent going out of the follow trigger radius, which
             // would cause a suspicous loop of running around
-            Vector3 originPos = StateMachine.Get<StateFollowing>().IsUnitToFollowThere(out IWowUnit unit, false) ? unit.Position : Bot.Player.Position;
+            Vector3 originPos = Bot.Player.Position; // StateMachine.Get<StateFollowing>().IsUnitToFollowThere(out IWowUnit unit, false) ? unit.Position : Bot.Player.Position;
 
             IWowGameobject seat = Bot.Objects.WowObjects.OfType<IWowGameobject>()
                 .OrderBy(e => e.Position.GetDistance(originPos))

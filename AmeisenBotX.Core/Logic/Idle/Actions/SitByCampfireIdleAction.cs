@@ -3,7 +3,7 @@ using AmeisenBotX.Wow.Objects.Enums;
 using System;
 using System.Linq;
 
-namespace AmeisenBotX.Core.Logic.States.Idle.Actions
+namespace AmeisenBotX.Core.Logic.Idle.Actions
 {
     public class SitByCampfireIdleAction : IIdleAction
     {

@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace AmeisenBotX.Core.Logic.States.Idle.Actions
+namespace AmeisenBotX.Core.Logic.Idle.Actions
 {
     public class LookAroundIdleAction : IIdleAction
     {

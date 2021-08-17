@@ -27,27 +27,27 @@ namespace AmeisenBotX.Core.Logic.States
         {
             if (Config.AutoTalkToNearQuestgivers)
             {
-                if (StateMachine.Get<StateFollowing>().IsUnitToFollowThere(out IWowUnit unitToFollow, true)
-                    && unitToFollow.TargetGuid != 0)
-                {
-                    IWowUnit target = Bot.GetWowObjectByGuid<IWowUnit>(unitToFollow.TargetGuid);
-
-                    if (target == null || unitToFollow.DistanceTo(target) >= 5.0f || !(target.IsQuestgiver || target.IsGossip))
-                    {
-                        StateMachine.SetState(BotState.Idle);
-                        return;
-                    }
-
-                    if (QuestgiverCheckEvent.Run())
-                    {
-                        HandleAutoQuestMode(target);
-                    }
-                }
-                else
-                {
-                    StateMachine.SetState(BotState.Idle);
-                    return;
-                }
+                // if (StateMachine.Get<StateFollowing>().IsUnitToFollowThere(out IWowUnit unitToFollow, true)
+                //     && unitToFollow.TargetGuid != 0)
+                // {
+                //     IWowUnit target = Bot.GetWowObjectByGuid<IWowUnit>(unitToFollow.TargetGuid);
+                // 
+                //     if (target == null || unitToFollow.DistanceTo(target) >= 5.0f || !(target.IsQuestgiver || target.IsGossip))
+                //     {
+                //         StateMachine.SetState(BotState.Idle);
+                //         return;
+                //     }
+                // 
+                //     if (QuestgiverCheckEvent.Run())
+                //     {
+                //         HandleAutoQuestMode(target);
+                //     }
+                // }
+                // else
+                // {
+                //     StateMachine.SetState(BotState.Idle);
+                //     return;
+                // }
             }
         }
 

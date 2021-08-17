@@ -21,24 +21,12 @@ namespace AmeisenBotX.Core.Logic
 
             States = new()
             {
-                { BotState.None, new StateNone(this, Config, Bot) },
                 { BotState.Battleground, new StateBattleground(this, Config, Bot) },
-                { BotState.Combat, new StateCombat(this, Config, Bot) },
-                { BotState.Dead, new StateDead(this, Config, Bot) },
                 { BotState.Dungeon, new StateDungeon(this, Config, Bot) },
-                { BotState.Eating, new StateEating(this, Config, Bot) },
-                { BotState.Following, new StateFollowing(this, Config, Bot) },
-                { BotState.Ghost, new StateGhost(this, Config, Bot) },
                 { BotState.Grinding, new StateGrinding(this, Config, Bot) },
                 { BotState.Idle, new StateIdle(this, Config, Bot) },
                 { BotState.Job, new StateJob(this, Config, Bot) },
-                { BotState.LoadingScreen, new StateLoadingScreen(this, Config, Bot) },
-                { BotState.Login, new StateLogin(this, Config, Bot) },
-                { BotState.Looting, new StateLooting(this, Config, Bot) },
                 { BotState.Questing, new StateQuesting(this, Config, Bot) },
-                { BotState.Repairing, new StateRepairing(this, Config, Bot) },
-                { BotState.Selling, new StateSelling(this, Config, Bot) },
-                { BotState.StartWow, new StateStartWow(this, Config, Bot) },
                 { BotState.StateTalkToQuestgivers, new StateTalkToQuestgivers(this, Config, Bot) }
                 // add new state here
             };
@@ -199,16 +187,6 @@ namespace AmeisenBotX.Core.Logic
                         else if (Bot.Player.IsGhost)
                         {
                             if (SetState(BotState.Ghost, true))
-                            {
-                                OnStateOverride?.Invoke(CurrentState.Key);
-                            }
-                        }
-                        else if (Get<StateCombat>().Mode != CombatMode.NotAllowed
-                                && !(Config.IgnoreCombatWhileMounted && Bot.Player.IsMounted)
-                                && (Get<StateCombat>().Mode == CombatMode.Force || Bot.Player.IsInCombat || Get<StateCombat>().IsAnyPartymemberInCombat()
-                                || Bot.GetEnemiesInCombatWithParty<IWowUnit>(Bot.Player.Position, 100.0f).Any()))
-                        {
-                            if (SetState(BotState.Combat, true))
                             {
                                 OnStateOverride?.Invoke(CurrentState.Key);
                             }

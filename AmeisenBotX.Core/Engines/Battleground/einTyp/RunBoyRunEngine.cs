@@ -117,7 +117,7 @@ namespace AmeisenBotX.Core.Engines.Battleground.einTyp
 
                         if (IsEnemyClose())
                         {
-                            StateMachine.Get<StateCombat>().Mode = CombatMode.Force;
+                            // StateMachine.Get<StateCombat>().Mode = CombatMode.Force;
                             return;
                         }
                     }
@@ -149,7 +149,7 @@ namespace AmeisenBotX.Core.Engines.Battleground.einTyp
 
                         if (IsEnemyClose())
                         {
-                            StateMachine.Get<StateCombat>().Mode = CombatMode.Force;
+                            // StateMachine.Get<StateCombat>().Mode = CombatMode.Force;
                             return;
                         }
                     }
@@ -168,7 +168,7 @@ namespace AmeisenBotX.Core.Engines.Battleground.einTyp
 
                             if (IsEnemyClose())
                             {
-                                StateMachine.Get<StateCombat>().Mode = CombatMode.Force;
+                                // StateMachine.Get<StateCombat>().Mode = CombatMode.Force;
                                 return;
                             }
                         }
@@ -202,7 +202,7 @@ namespace AmeisenBotX.Core.Engines.Battleground.einTyp
 
                     if (IsEnemyClose())
                     {
-                        StateMachine.Get<StateCombat>().Mode = CombatMode.Force;
+                        // StateMachine.Get<StateCombat>().Mode = CombatMode.Force;
                         return;
                     }
                 }
@@ -215,7 +215,7 @@ namespace AmeisenBotX.Core.Engines.Battleground.einTyp
                 {
                     if (IsEnemyClose())
                     {
-                        StateMachine.Get<StateCombat>().Mode = CombatMode.Force;
+                        // StateMachine.Get<StateCombat>().Mode = CombatMode.Force;
                         return;
                     }
                 }
@@ -260,7 +260,7 @@ namespace AmeisenBotX.Core.Engines.Battleground.einTyp
 
                         if (IsEnemyClose())
                         {
-                            StateMachine.Get<StateCombat>().Mode = CombatMode.Force;
+                            // StateMachine.Get<StateCombat>().Mode = CombatMode.Force;
                             return;
                         }
                     }
@@ -296,7 +296,7 @@ namespace AmeisenBotX.Core.Engines.Battleground.einTyp
                 Bot.Movement.SetMovementAction(Movement.Enums.MovementAction.Move, isHorde ? baseAlly : baseHord);
                 if (IsEnemyClose())
                 {
-                    StateMachine.Get<StateCombat>().Mode = CombatMode.Force;
+                    // StateMachine.Get<StateCombat>().Mode = CombatMode.Force;
                     return;
                 }
                 Bot.CombatClass.OutOfCombatExecute();

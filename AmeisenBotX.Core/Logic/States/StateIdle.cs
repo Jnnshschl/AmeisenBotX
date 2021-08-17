@@ -1,8 +1,8 @@
 ﻿using AmeisenBotX.Common.Utils;
 using AmeisenBotX.Core.Engines.Movement.Enums;
 using AmeisenBotX.Core.Logic.Enums;
-using AmeisenBotX.Core.Logic.States.Idle;
-using AmeisenBotX.Core.Logic.States.Idle.Actions;
+using AmeisenBotX.Core.Logic.Idle;
+using AmeisenBotX.Core.Logic.Idle.Actions;
 using AmeisenBotX.Wow.Objects;
 using System;
 using System.Collections.Generic;
@@ -24,7 +24,7 @@ namespace AmeisenBotX.Core.Logic.States
                 new LookAtGroupIdleAction(bot),
                 new RandomEmoteIdleAction(bot),
                 new SitByCampfireIdleAction(bot),
-                new SitToChairIdleAction(bot, stateMachine, Config.MinFollowDistance),
+                new SitToChairIdleAction(bot, Config.MinFollowDistance),
             });
 
             BagSlotCheckEvent = new(TimeSpan.FromMilliseconds(5000));
@@ -85,23 +85,6 @@ namespace AmeisenBotX.Core.Logic.States
 
         public override void Execute()
         {
-            // do we need to loot stuff
-            if (Config.LootUnits
-                && LootCheckEvent.Run()
-                && StateMachine.Get<StateLooting>().GetNearLootableUnits().Any())
-            {
-                StateMachine.SetState(BotState.Looting);
-                return;
-            }
-
-            // do we need to eat something
-            if (EatCheckEvent.Run()
-                && StateMachine.Get<StateEating>().NeedToEat())
-            {
-                StateMachine.SetState(BotState.Eating);
-                return;
-            }
-
             // we are on a battleground
             if (Bot.Memory.Read(Bot.Wow.Offsets.BattlegroundStatus, out int bgStatus)
                 && bgStatus == 3
@@ -119,46 +102,17 @@ namespace AmeisenBotX.Core.Logic.States
                 return;
             }
 
-            // do we need to repair our equipment
-            if (Config.AutoRepair
-                && RepairCheckEvent.Run()
-                && StateMachine.Get<StateRepairing>().NeedToRepair()
-                && StateMachine.Get<StateRepairing>().IsRepairNpcNear(out _))
-            {
-                StateMachine.SetState(BotState.Repairing);
-                return;
-            }
-
-            // do we need to sell stuff
-            if (Config.AutoSell
-                && BagSlotCheckEvent.Run()
-                && StateMachine.Get<StateSelling>().NeedToSell()
-                && StateMachine.Get<StateSelling>().IsVendorNpcNear(out _))
-            {
-                StateMachine.SetState(BotState.Selling);
-                return;
-            }
-
             // do i need to complete/get quests
-            if (Config.AutoTalkToNearQuestgivers
-                && StateMachine.Get<StateFollowing>().IsUnitToFollowThere(out IWowUnit unitToFollow, true)
-                && unitToFollow.TargetGuid != 0)
-            {
-                IWowUnit target = Bot.GetWowObjectByGuid<IWowUnit>(unitToFollow.TargetGuid);
-
-                if (target != null && unitToFollow.DistanceTo(target) < 5.0f && (target.IsQuestgiver || target.IsGossip))
-                {
-                    StateMachine.SetState(BotState.StateTalkToQuestgivers);
-                    return;
-                }
-            }
-
-            // do i need to follow someone
-            if ((!Config.Autopilot || Bot.Objects.MapId.IsDungeonMap()) && StateMachine.Get<StateFollowing>().IsUnitToFollowThere(out _))
-            {
-                StateMachine.SetState(BotState.Following);
-                return;
-            }
+            // if (Config.AutoTalkToNearQuestgivers)
+            // {
+            //     IWowUnit target = Bot.GetWowObjectByGuid<IWowUnit>(unitToFollow.TargetGuid);
+            // 
+            //     if (target != null && unitToFollow.DistanceTo(target) < 5.0f && (target.IsQuestgiver || target.IsGossip))
+            //     {
+            //         StateMachine.SetState(BotState.StateTalkToQuestgivers);
+            //         return;
+            //     }
+            // }
 
             // do buffing etc...
             if (Bot.CombatClass != null)

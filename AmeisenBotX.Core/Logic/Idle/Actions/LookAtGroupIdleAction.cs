@@ -3,7 +3,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 
-namespace AmeisenBotX.Core.Logic.States.Idle.Actions
+namespace AmeisenBotX.Core.Logic.Idle.Actions
 {
     public class LookAtGroupIdleAction : IIdleAction
     {

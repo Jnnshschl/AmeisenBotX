@@ -1,9 +1,9 @@
-﻿using AmeisenBotX.Core.Logic.States.Idle.Actions;
+﻿using AmeisenBotX.Core.Logic.Idle.Actions;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 
-namespace AmeisenBotX.Core.Logic.States.Idle
+namespace AmeisenBotX.Core.Logic.Idle
 {
     public class IdleActionManager
     {
