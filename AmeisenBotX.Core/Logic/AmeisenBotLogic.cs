@@ -32,6 +32,8 @@ namespace AmeisenBotX.Core.Logic
             Config = config;
             Bot = bot;
 
+            FirstStart = true;
+
             AntiAfkEvent = new(TimeSpan.FromMilliseconds(1200));
             CharacterUpdateEvent = new(TimeSpan.FromMilliseconds(5000));
             LoginAttemptEvent = new(TimeSpan.FromMilliseconds(500));
@@ -108,14 +110,19 @@ namespace AmeisenBotX.Core.Logic
                 new Selector
                 (
                     () => Bot.Objects.IsWorldLoaded && Bot.Player != null && Bot.Objects != null,
-                    new Waterfall
+                    new Annotator
                     (
-                        // open world as fallback
-                        openworldNode,
-                        // handle special environments
-                        (() => Bot.Objects.MapId.IsBattlegroundMap(), battlegroundNode),
-                        (() => Bot.Objects.MapId.IsDungeonMap(), dungeonNode),
-                        (() => Bot.Objects.MapId.IsRaidMap(), raidNode)
+                        // update stuff that needs us to be ingame
+                        new Leaf(UpdateIngame),
+                        new Waterfall
+                        (
+                            // open world as fallback
+                            openworldNode,
+                            // handle special environments
+                            (() => Bot.Objects.MapId.IsBattlegroundMap(), battlegroundNode),
+                            (() => Bot.Objects.MapId.IsDungeonMap(), dungeonNode),
+                            (() => Bot.Objects.MapId.IsRaidMap(), raidNode)
+                        )
                     ),
                     // we are in the loading screen or player is null
                     new Leaf(() => BtStatus.Success)
@@ -160,9 +167,15 @@ namespace AmeisenBotX.Core.Logic
 
         private AmeisenBotConfig Config { get; }
 
+        private bool FirstStart { get; set; }
+
         private Vector3 FollowOffset { get; set; }
 
         private TimegatedEvent LoginAttemptEvent { get; set; }
+
+        private int LootTry { get; set; }
+
+        private TimegatedEvent LootTryEvent { get; }
 
         private IWowUnit Merchant { get; set; }
 
@@ -181,6 +194,10 @@ namespace AmeisenBotX.Core.Logic
         private IStaticDeathRoute StaticRoute { get; set; }
 
         private AmeisenBotBehaviorTree Tree { get; }
+
+        private List<ulong> UnitsLooted { get; }
+
+        private Queue<ulong> UnitsToLoot { get; }
 
         public void Tick()
         {
@@ -380,6 +397,14 @@ namespace AmeisenBotX.Core.Logic
             return MoveToPosition(pos);
         }
 
+        private IEnumerable<IWowUnit> GetLootableUnits()
+        {
+            return Bot.Objects.WowObjects.OfType<IWowUnit>()
+                .Where(e => e.IsLootable
+                    && !UnitsLooted.Contains(e.Guid)
+                    && e.Position.GetDistance(Bot.Player.Position) < Config.LootUnitsRadius);
+        }
+
         private BtStatus Idle()
         {
             Bot.CombatClass.OutOfCombatExecute();
@@ -484,10 +509,6 @@ namespace AmeisenBotX.Core.Logic
             return BtStatus.Success;
         }
 
-        private int LootTry { get; set; }
-
-        private TimegatedEvent LootTryEvent { get; }
-
         private BtStatus LootNearUnits()
         {
             IWowUnit unit = Bot.GetWowObjectByGuid<IWowUnit>(UnitsToLoot.Peek());
@@ -551,18 +572,6 @@ namespace AmeisenBotX.Core.Logic
             return false;
         }
 
-        private List<ulong> UnitsLooted { get; }
-
-        private Queue<ulong> UnitsToLoot { get; }
-
-        private IEnumerable<IWowUnit> GetLootableUnits()
-        {
-            return Bot.Objects.WowObjects.OfType<IWowUnit>()
-                .Where(e => e.IsLootable
-                    && !UnitsLooted.Contains(e.Guid)
-                    && e.Position.GetDistance(Bot.Player.Position) < Config.LootUnitsRadius);
-        }
-
         private bool NeedToLoot()
         {
             IEnumerable<IWowUnit> units = GetLootableUnits();
@@ -622,6 +631,11 @@ namespace AmeisenBotX.Core.Logic
             }
 
             return BtStatus.Failed;
+        }
+
+        private void SetUlowGfxSettings()
+        {
+            Bot.Wow.LuaDoString("SetCVar(\"gxcolorbits\",\"16\");SetCVar(\"gxdepthbits\",\"16\");SetCVar(\"skycloudlod\",\"0\");SetCVar(\"particledensity\",\"0.3\");SetCVar(\"lod\",\"0\");SetCVar(\"mapshadows\",\"0\");SetCVar(\"maxlights\",\"0\");SetCVar(\"specular\",\"0\");SetCVar(\"waterlod\",\"0\");SetCVar(\"basemip\",\"1\");SetCVar(\"shadowlevel\",\"1\")");
         }
 
         private BtStatus SetupWowInterface()
@@ -704,15 +718,26 @@ namespace AmeisenBotX.Core.Logic
             return BtStatus.Failed;
         }
 
-        private BtStatus UpdateWowInterface()
+        private BtStatus UpdateIngame()
         {
-            Bot.Wow.Tick();
+            if (FirstStart)
+            {
+                FirstStart = false;
+
+                Bot.Wow.Events.Start();
+
+                Bot.Wow.LuaDoString($"SetCVar(\"maxfps\", {Config.MaxFps});SetCVar(\"maxfpsbk\", {Config.MaxFps})");
+                Bot.Wow.EnableClickToMove();
+
+                if (Config.AutoSetUlowGfxSettings)
+                {
+                    SetUlowGfxSettings();
+                }
+            }
+
             Bot.Wow.Events.Tick();
 
-            if (Bot.Player != null)
-            {
-                Bot.Movement.Execute();
-            }
+            Bot.Movement.Execute();
 
             if (Config.FollowPositionDynamic && OffsetCheckEvent.Run())
             {
@@ -732,6 +757,12 @@ namespace AmeisenBotX.Core.Logic
                 Bot.Wow.SetRenderState(foregroundWindow == Bot.Memory.Process.MainWindowHandle);
             }
 
+            return BtStatus.Success;
+        }
+
+        private BtStatus UpdateWowInterface()
+        {
+            Bot.Wow.Tick();
             return BtStatus.Success;
         }
     }

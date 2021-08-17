@@ -294,8 +294,6 @@ namespace AmeisenBotX.Core
                 SaveWowWindowPosition();
             }
 
-            Bot.Wow.Events.Stop();
-
             if (Config.AutocloseWow || Config.AutoPositionWow)
             {
                 if (Bot.Wow.IsReady)

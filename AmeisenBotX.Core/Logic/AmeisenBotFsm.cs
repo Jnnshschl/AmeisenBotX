@@ -153,7 +153,6 @@ namespace AmeisenBotX.Core.Logic
                     Get<StateIdle>().FirstStart = true;
 
                     Bot.Movement.Reset();
-                    Bot.Wow.Events.Stop();
                     return;
                 }
 

@@ -59,8 +59,6 @@ namespace AmeisenBotX.Core.Logic.States
                 {
                     FirstStart = false;
 
-                    Bot.Wow.Events.Start();
-
                     Bot.Wow.LuaDoString($"SetCVar(\"maxfps\", {Config.MaxFps});SetCVar(\"maxfpsbk\", {Config.MaxFps})");
                     Bot.Wow.EnableClickToMove();
                 }
