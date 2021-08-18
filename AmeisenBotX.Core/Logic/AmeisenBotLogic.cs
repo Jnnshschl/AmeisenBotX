@@ -4,6 +4,8 @@ using AmeisenBotX.Common.Math;
 using AmeisenBotX.Common.Utils;
 using AmeisenBotX.Core.Engines.Character.Inventory.Objects;
 using AmeisenBotX.Core.Engines.Movement.Enums;
+using AmeisenBotX.Core.Logic.Idle;
+using AmeisenBotX.Core.Logic.Idle.Actions;
 using AmeisenBotX.Core.Logic.Routines;
 using AmeisenBotX.Core.Logic.StaticDeathRoutes;
 using AmeisenBotX.Logging;
@@ -33,11 +35,25 @@ namespace AmeisenBotX.Core.Logic
             Bot = bot;
 
             FirstStart = true;
+            Rnd = new();
+
+            IdleActionManager = new(new List<IIdleAction>()
+            {
+                new AuctionHouseIdleAction(bot),
+                new CheckMailsIdleAction(bot),
+                new FishingIdleAction(bot),
+                new LookAroundIdleAction(bot),
+                new LookAtGroupIdleAction(bot),
+                new RandomEmoteIdleAction(bot),
+                new SitByCampfireIdleAction(bot),
+                new SitToChairIdleAction(bot, Config.MinFollowDistance),
+            });
 
             AntiAfkEvent = new(TimeSpan.FromMilliseconds(1200));
             CharacterUpdateEvent = new(TimeSpan.FromMilliseconds(5000));
             EatBlockEvent = new(TimeSpan.FromMilliseconds(30000));
             EatEvent = new(TimeSpan.FromMilliseconds(250));
+            IdleActionEvent = new(TimeSpan.FromMilliseconds(1000));
             LoginAttemptEvent = new(TimeSpan.FromMilliseconds(500));
             LootTryEvent = new(TimeSpan.FromMilliseconds(750));
             NpcInteractionEvent = new(TimeSpan.FromMilliseconds(1000));
@@ -113,13 +129,13 @@ namespace AmeisenBotX.Core.Logic
                                     () => Bot.CombatClass.IsMelee,
                                     new Selector
                                     (
-                                        () => Bot.Player.DistanceTo(Bot.Target) > 2.5f,
-                                        new Leaf(() => MoveToPosition(Bot.Target.Position, MovementAction.Chase)),
+                                        () => !Bot.Player.IsInMeleeRange(Bot.Target),
+                                        new Leaf(() => MoveToPosition(Bot.Target.Position)),
                                         new Leaf(() => { Bot.CombatClass.Execute(); return BtStatus.Success; })
                                     ),
                                     new Selector
                                     (
-                                        () => Bot.Player.DistanceTo(Bot.Target) > 28.0f,
+                                        () => Bot.Player.DistanceTo(Bot.Target) > 26.5f + Bot.Target.CombatReach,
                                         new Leaf(() => MoveToPosition(Bot.Target.Position)),
                                         new Leaf(() => { Bot.CombatClass.Execute(); return BtStatus.Success; })
                                     )
@@ -130,8 +146,8 @@ namespace AmeisenBotX.Core.Logic
                                 () => Bot.CombatClass.Role == WowRole.Tank,
                                 new Selector
                                 (
-                                    () => Bot.Player.DistanceTo(Bot.Target) > 2.5f,
-                                    new Leaf(() => MoveToPosition(Bot.Target.Position, MovementAction.Chase)),
+                                    () => !Bot.Player.IsInMeleeRange(Bot.Target),
+                                    new Leaf(() => MoveToPosition(Bot.Target.Position)),
                                     new Leaf(() => { Bot.CombatClass.Execute(); return BtStatus.Success; })
                                 )
                             ),
@@ -140,7 +156,7 @@ namespace AmeisenBotX.Core.Logic
                                 () => Bot.CombatClass.Role == WowRole.Heal,
                                 new Selector
                                 (
-                                    () => Bot.Player.DistanceTo(Bot.Target) > 25.0f,
+                                    () => Bot.Player.DistanceTo(Bot.Target) > 23.5f + Bot.Target.CombatReach,
                                     new Leaf(() => MoveToPosition(Bot.Target.Position)),
                                     new Leaf(() => { Bot.CombatClass.Execute(); return BtStatus.Success; })
                                 )
@@ -161,7 +177,8 @@ namespace AmeisenBotX.Core.Logic
                 (NeedToRepairOrSell, new Leaf(SpeakWithMerchant)),
                 (NeedToLoot, new Leaf(LootNearUnits)),
                 (NeedToEat, new Leaf(Eat)),
-                (NeedToFollow, new Leaf(Follow))
+                (NeedToFollow, new Leaf(Follow)),
+                (() => Config.IdleActions && IdleActionEvent.Run(), new Leaf(() => { IdleActionManager.Tick(Config.Autopilot); return BtStatus.Success; }))
             );
 
             // GENERIC -----------------------------
@@ -241,6 +258,10 @@ namespace AmeisenBotX.Core.Logic
 
         private IEnumerable<IWowInventoryItem> Food { get; set; }
 
+        private TimegatedEvent IdleActionEvent { get; }
+
+        private IdleActionManager IdleActionManager { get; }
+
         private TimegatedEvent LoginAttemptEvent { get; }
 
         private int LootTry { get; set; }
@@ -256,6 +277,8 @@ namespace AmeisenBotX.Core.Logic
         private IWowUnit PlayerToFollow { get; set; }
 
         private TimegatedEvent RenderSwitchEvent { get; }
+
+        private Random Rnd { get; }
 
         private bool SearchedStaticRoutes { get; set; }
 
@@ -726,7 +749,7 @@ namespace AmeisenBotX.Core.Logic
 
         private bool NeedToFollow()
         {
-            if (Bot.Objects.WowObjects != null && IsUnitToFollowThere(out IWowUnit player))
+            if (!Config.Autopilot && Bot.Objects.WowObjects != null && IsUnitToFollowThere(out IWowUnit player))
             {
                 PlayerToFollow = player;
                 float distance = Bot.Player.DistanceTo(player);
@@ -910,11 +933,12 @@ namespace AmeisenBotX.Core.Logic
 
             if (Config.FollowPositionDynamic && OffsetCheckEvent.Run())
             {
-                Random rnd = new();
+                float factor = Bot.Player.IsOutdoors ? 2.0f : 1.0f;
+
                 FollowOffset = new()
                 {
-                    X = ((float)rnd.NextDouble() * ((float)Config.MinFollowDistance * 2.0f)) - (float)Config.MinFollowDistance,
-                    Y = ((float)rnd.NextDouble() * ((float)Config.MinFollowDistance * 2.0f)) - (float)Config.MinFollowDistance,
+                    X = (((float)Rnd.NextDouble() * ((float)Config.MinFollowDistance * factor)) - ((float)Config.MinFollowDistance * (0.5f * factor))) * 0.7071f,
+                    Y = (((float)Rnd.NextDouble() * ((float)Config.MinFollowDistance * factor)) - ((float)Config.MinFollowDistance * (0.5f * factor))) * 0.7071f,
                     Z = 0.0f
                 };
             }
