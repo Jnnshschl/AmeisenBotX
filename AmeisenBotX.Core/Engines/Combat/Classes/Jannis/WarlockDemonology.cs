@@ -46,7 +46,7 @@ namespace AmeisenBotX.Core.Engines.Combat.Classes.Jannis
 
         public override string Description => "FCFS based CombatClass for the Demonology Warlock spec.";
 
-        public override string Displayname => "Warlock Demonology";
+        public override string DisplayName => "Warlock Demonology";
 
         public override bool HandlesMovement => false;
 

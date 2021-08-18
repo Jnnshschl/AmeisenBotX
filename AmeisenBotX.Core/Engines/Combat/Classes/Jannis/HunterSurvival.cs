@@ -44,7 +44,7 @@ namespace AmeisenBotX.Core.Engines.Combat.Classes.Jannis
 
         public override string Description => "FCFS based CombatClass for the Survival Hunter spec.";
 
-        public override string Displayname => "Hunter Survival";
+        public override string DisplayName => "Hunter Survival";
 
         public override bool HandlesMovement => false;
 

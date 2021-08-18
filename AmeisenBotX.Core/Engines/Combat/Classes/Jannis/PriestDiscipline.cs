@@ -29,7 +29,7 @@ namespace AmeisenBotX.Core.Engines.Combat.Classes.Jannis
 
         public override string Description => "FCFS based CombatClass for the Discipline Priest spec.";
 
-        public override string Displayname => "Priest Discipline";
+        public override string DisplayName => "Priest Discipline";
 
         public override bool HandlesMovement => false;
 

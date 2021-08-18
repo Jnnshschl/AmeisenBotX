@@ -44,7 +44,7 @@ namespace AmeisenBotX.Core.Engines.Combat.Classes.einTyp
 
         public string Description => "...";
 
-        public string Displayname => "Fury Warrior";
+        public string DisplayName => "Fury Warrior";
 
         public bool HandlesFacing => false;
 

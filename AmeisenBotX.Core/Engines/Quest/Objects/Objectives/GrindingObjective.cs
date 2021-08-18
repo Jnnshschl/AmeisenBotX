@@ -41,18 +41,19 @@ namespace AmeisenBotX.Core.Engines.Quest.Objects.Objectives
                 IWowUnit = null;
             }
 
-            if (!Bot.Player.IsInCombat)
+            if (!Bot.Player.IsInCombat
+                && Bot.Target == null) // if pulling with ranged we have target and yet not in combat
             {
                 IWowUnit = Bot.Objects.WowObjects
                     .OfType<IWowUnit>()
-                    .Where(e => !e.IsDead && !e.IsNotAttackable && Bot.Db.GetReaction(Bot.Player, e) != WowUnitReaction.Friendly)
+                    .Where(e => !e.IsDead && !e.IsNotAttackable 
+                                    && Bot.Db.GetReaction(Bot.Player, e) != WowUnitReaction.Friendly
+                                    && e.Health > 10) // workaround to filter some critters, would be nice e.CreatureType != WoWCreatureType.Critter
                     .OrderBy(e => e.Position.GetDistance(Bot.Player.Position))
                     .FirstOrDefault();
 
                 if (IWowUnit != null)
-                {
                     Bot.Wow.ChangeTarget(IWowUnit.Guid);
-                }
             }
 
             if (IWowUnit != null)

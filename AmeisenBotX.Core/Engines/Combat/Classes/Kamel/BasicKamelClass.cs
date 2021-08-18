@@ -104,7 +104,7 @@ namespace AmeisenBotX.Core.Engines.Combat.Classes.Kamel
 
         public abstract string Description { get; }
 
-        public abstract string Displayname { get; }
+        public abstract string DisplayName { get; }
 
         public bool HandlesFacing => false;
 
@@ -412,7 +412,7 @@ namespace AmeisenBotX.Core.Engines.Combat.Classes.Kamel
 
         public override string ToString()
         {
-            return $"[{WowClass}] [{Role}] {Displayname} ({Author})";
+            return $"[{WowClass}] [{Role}] {DisplayName} ({Author})";
         }
 
         public bool TotemItemCheck()

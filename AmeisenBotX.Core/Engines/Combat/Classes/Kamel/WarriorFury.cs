@@ -100,7 +100,7 @@ namespace AmeisenBotX.Core.Engines.Combat.Classes.Kamel
 
         public override string Description => "Warrior Fury";
 
-        public override string Displayname => "Warrior Fury Final";
+        public override string DisplayName => "Warrior Fury Final";
 
         public TimegatedEvent ExecuteEvent { get; private set; }
 

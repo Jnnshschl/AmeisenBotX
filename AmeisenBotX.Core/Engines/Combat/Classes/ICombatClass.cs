@@ -31,7 +31,7 @@ namespace AmeisenBotX.Core.Engines.Combat.Classes
         /// <summary>
         /// Name that will be displayed in the bot.
         /// </summary>
-        string Displayname { get; }
+        string DisplayName { get; }
 
         /// <summary>
         /// Set to true when you want to handle the facing stuff yourself.

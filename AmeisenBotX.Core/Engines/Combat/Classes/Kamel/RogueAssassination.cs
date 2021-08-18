@@ -18,7 +18,7 @@ namespace AmeisenBotX.Core.Engines.Combat.Classes.Kamel
 
         public override string Description => "Rogue Assassination";
 
-        public override string Displayname => "Rogue Assassination";
+        public override string DisplayName => "Rogue Assassination";
 
         public override bool HandlesMovement => false;
 

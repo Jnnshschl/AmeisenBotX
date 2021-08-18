@@ -30,7 +30,7 @@ namespace AmeisenBotX.Core.Engines.Combat.Classes.Jannis
 
         public override string Description => "FCFS based CombatClass for the Fury Warrior spec.";
 
-        public override string Displayname => "Warrior Fury";
+        public override string DisplayName => "Warrior Fury";
 
         public override bool HandlesMovement => false;
 
