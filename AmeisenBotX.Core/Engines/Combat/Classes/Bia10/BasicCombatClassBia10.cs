@@ -75,7 +75,7 @@ namespace AmeisenBotX.Core.Engines.Combat.Classes.Bia10
             public int MinRange;
             public TimeSpan Cooldown;
             public TimeSpan CastTime;
-            public WoWSpellSchool SchoolType; 
+            public WoWSpellSchool SchoolType;
 
             public WoWSpell(int maxRange, int minRange, TimeSpan castTime, WoWSpellSchool schoolType)
             {
@@ -277,7 +277,7 @@ namespace AmeisenBotX.Core.Engines.Combat.Classes.Bia10
         public virtual Dictionary<string, object> Save() =>
             new() { { "Configureables", C } };
 
-        public override string ToString() => 
+        public override string ToString() =>
             $"[{WowClass}] [{Role}] {DisplayName} ({Author})";
 
         protected bool CheckForWeaponEnchantment(WowEquipmentSlot slot, string enchantmentName, string spellToCastEnchantment)
@@ -294,8 +294,8 @@ namespace AmeisenBotX.Core.Engines.Combat.Classes.Bia10
         protected bool HandleDeadPartyMembers(string spellName)
         {
             var spell = Bot.Character.SpellBook.GetSpellByName(spellName);
-            if (spell == null || CooldownManager.IsSpellOnCooldown(spellName) 
-                              || spell.Costs >= Bot.Player.Mana) 
+            if (spell == null || CooldownManager.IsSpellOnCooldown(spellName)
+                              || spell.Costs >= Bot.Player.Mana)
                 return false;
 
             var groupPlayers = Bot.Objects.Partymembers
@@ -312,11 +312,11 @@ namespace AmeisenBotX.Core.Engines.Combat.Classes.Bia10
             if (!Bot.Db.GetUnitName(player, out var name)) return false;
 
             if (ResurrectionTargets.ContainsKey(name))
-                    return ResurrectionTargets[name] >= DateTime.Now || TryCastSpell(spellName, player.Guid, true);
+                return ResurrectionTargets[name] >= DateTime.Now || TryCastSpell(spellName, player.Guid, true);
 
             ResurrectionTargets.Add(name, DateTime.Now + TimeSpan.FromSeconds(10));
             return TryCastSpell(spellName, player.Guid, true);
-            
+
         }
 
         protected bool TryCastSpell(string spellName, ulong guid, bool needsResource = false, int currentResourceAmount = 0, bool forceTargetSwitch = false)
@@ -336,8 +336,8 @@ namespace AmeisenBotX.Core.Engines.Combat.Classes.Bia10
             var spell = Bot.Character.SpellBook.GetSpellByName(spellName);
 
             if (spell == null || CooldownManager.IsSpellOnCooldown(spellName)
-                              || needsResource && spell.Costs >= currentResourceAmount 
-                              || target != null && !IsInSpellRange(target, spell.Name)) 
+                              || needsResource && spell.Costs >= currentResourceAmount
+                              || target != null && !IsInSpellRange(target, spell.Name))
                 return false;
 
             if (!isTargetMyself && (needToSwitchTarget || forceTargetSwitch))
@@ -374,7 +374,7 @@ namespace AmeisenBotX.Core.Engines.Combat.Classes.Bia10
             if (parts[1].Contains(',', StringComparison.OrdinalIgnoreCase))
                 parts[1] = parts[1].Replace(',', '.');
 
-            if (!int.TryParse(parts[0], out var castSuccessful) 
+            if (!int.TryParse(parts[0], out var castSuccessful)
                 || !double.TryParse(parts[1], NumberStyles.Any, CultureInfo.InvariantCulture, out var cooldown))
                 return false;
 
