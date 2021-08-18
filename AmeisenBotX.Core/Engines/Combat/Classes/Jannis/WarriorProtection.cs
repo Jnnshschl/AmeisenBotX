@@ -29,7 +29,7 @@ namespace AmeisenBotX.Core.Engines.Combat.Classes.Jannis
 
         public override string Description => "Leveling ready CombatClass for the Protection Warrior spec. For Dungeons and Questing";
 
-        public override string Displayname => "Warrior Protection";
+        public override string DisplayName => "Warrior Protection";
 
         public override bool HandlesMovement => false;
 

@@ -99,7 +99,7 @@ namespace AmeisenBotX.Core.Engines.Combat.Classes.Kamel
 
         public override string Description => "Priest Holy";
 
-        public override string Displayname => "Priest Holy";
+        public override string DisplayName => "Priest Holy";
 
         public override bool HandlesMovement => false;
 

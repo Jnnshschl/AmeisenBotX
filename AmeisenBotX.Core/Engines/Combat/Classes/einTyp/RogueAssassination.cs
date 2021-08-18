@@ -51,7 +51,7 @@ namespace AmeisenBotX.Core.Engines.Combat.Classes.einTyp
 
         public string Description => "...";
 
-        public string Displayname => "Assasination Rogue";
+        public string DisplayName => "Assasination Rogue";
 
         public bool HandlesFacing => false;
 

@@ -60,7 +60,7 @@ namespace AmeisenBotX.Core.Engines.Combat.Classes.Jannis
 
         public override string Description => "Half-Smart CombatClass for the Holy Paladin spec.";
 
-        public override string Displayname => "Paladin Holy";
+        public override string DisplayName => "Paladin Holy";
 
         public override bool HandlesMovement => false;
 

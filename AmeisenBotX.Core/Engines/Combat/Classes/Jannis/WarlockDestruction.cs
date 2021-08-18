@@ -38,7 +38,7 @@ namespace AmeisenBotX.Core.Engines.Combat.Classes.Jannis
 
         public override string Description => "FCFS based CombatClass for the Destruction Warlock spec.";
 
-        public override string Displayname => "Warlock Destruction";
+        public override string DisplayName => "Warlock Destruction";
 
         public override bool HandlesMovement => false;
 

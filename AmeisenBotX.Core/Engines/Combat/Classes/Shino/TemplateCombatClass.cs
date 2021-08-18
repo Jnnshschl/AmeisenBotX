@@ -77,7 +77,7 @@ namespace AmeisenBotX.Core.Fsm.CombatClasses.Shino
 
         public override string ToString()
         {
-            return $"[{WowClass}] [{Role}] {Displayname} ({Author})";
+            return $"[{WowClass}] [{Role}] {DisplayName} ({Author})";
         }
 
         protected abstract Spell GetOpeningSpell();

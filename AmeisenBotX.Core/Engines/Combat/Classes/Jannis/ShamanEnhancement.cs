@@ -25,7 +25,7 @@ namespace AmeisenBotX.Core.Engines.Combat.Classes.Jannis
 
         public override string Description => "FCFS based CombatClass for the Enhancement Shaman spec.";
 
-        public override string Displayname => "Shaman Enhancement";
+        public override string DisplayName => "Shaman Enhancement";
 
         public override bool HandlesMovement => false;
 
