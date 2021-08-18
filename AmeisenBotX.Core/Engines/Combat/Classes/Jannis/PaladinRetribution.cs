@@ -25,7 +25,7 @@ namespace AmeisenBotX.Core.Engines.Combat.Classes.Jannis
 
         public override string Description => "FCFS based CombatClass for the Retribution Paladin spec.";
 
-        public override string Displayname => "Paladin Retribution";
+        public override string DisplayName => "Paladin Retribution";
 
         public override bool HandlesMovement => false;
 

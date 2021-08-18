@@ -105,7 +105,7 @@ namespace AmeisenBotX.Core.Engines.Combat.Classes.Kamel
 
         public override string Description => "Resto Shaman";
 
-        public override string Displayname => "Shaman Restoration";
+        public override string DisplayName => "Shaman Restoration";
 
         //Time event
         public TimegatedEvent EarthShieldEvent { get; private set; }

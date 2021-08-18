@@ -534,6 +534,7 @@ namespace AmeisenBotX.Core
                 new Engines.Combat.Classes.einTyp.WarriorFury(Bot, StateMachine),
                 new Engines.Combat.Classes.Shino.PriestShadow(Bot, StateMachine),
                 new Engines.Combat.Classes.Shino.MageFrost(Bot, StateMachine),
+                new Engines.Combat.Classes.Bia10.ShamanElemental(Bot, StateMachine)
             };
         }
 

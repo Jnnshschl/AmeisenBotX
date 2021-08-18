@@ -47,7 +47,7 @@ namespace AmeisenBotX.Core.Engines.Combat.Classes.Jannis
 
         public override string Description => "FCFS based CombatClass for the Affliction Warlock spec.";
 
-        public override string Displayname => "Warlock Affliction";
+        public override string DisplayName => "Warlock Affliction";
 
         public override bool HandlesMovement => false;
 
