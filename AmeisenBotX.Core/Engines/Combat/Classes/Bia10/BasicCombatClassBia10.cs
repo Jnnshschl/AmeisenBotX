@@ -22,60 +22,6 @@ namespace AmeisenBotX.Core.Engines.Combat.Classes.Bia10
 {
     public abstract class BasicCombatClassBia10 : ICombatClass
     {
-        #region Shaman
-        protected const string ancestralSpiritSpell = "Ancestral Spirit";
-        protected const string chainHealSpell = "Chain Heal";
-        protected const string chainLightningSpell = "Chain Lightning";
-        protected const string earthlivingBuff = "Earthliving ";
-        protected const string earthlivingWeaponSpell = "Earthliving Weapon";
-        protected const string earthShieldSpell = "Earth Shield";
-        protected const string earthShockSpell = "Earth Shock";
-        protected const string elementalMasterySpell = "Elemental Mastery";
-        protected const string feralSpiritSpell = "Feral Spirit";
-        protected const string flameShockSpell = "Flame Shock";
-        protected const string flametongueBuff = "Flametongue ";
-        protected const string flametongueWeaponSpell = "Flametongue Weapon";
-        protected const string flametoungueBuff = "Flametongue ";
-        protected const string flametoungueWeaponSpell = "Flametongue Weapon";
-        protected const string healingWaveSpell = "Healing Wave";
-        protected const string heroismSpell = "Heroism";
-        protected const string hexSpell = "Hex";
-        protected const string lavaBurstSpell = "Lava Burst";
-        protected const string lavaLashSpell = "Lava Lash";
-        protected const string lesserHealingWaveSpell = "Lesser Healing Wave";
-        protected const string lightningBoltSpell = "Lightning Bolt";
-        protected const string lightningShieldSpell = "Lightning Shield";
-        protected const string maelstromWeaponSpell = "Mealstrom Weapon";
-        protected const string riptideSpell = "Riptide";
-        protected const string shamanisticRageSpell = "Shamanistic Rage";
-        protected const string stormstrikeSpell = "Stormstrike";
-        protected const string thunderstormSpell = "Thunderstorm";
-        protected const string tidalForceSpell = "Tidal Force";
-        protected const string waterShieldSpell = "Water Shield";
-        protected const string windfuryBuff = "Windfury";
-        protected const string windfuryWeaponSpell = "Windfury Weapon";
-        protected const string windShearSpell = "Wind Shear";
-        #endregion Shaman
-
-        #region Racials
-        protected const string berserkingSpell = "Berserking"; // Troll
-        protected const string bloodFurySpell = "Blood Fury";  // Orc
-        #endregion Racials
-
-        private const float MAX_ANGLE = MathF.PI * 2.0f;
-
-        private readonly int[] useableHealingItems = {
-            // potions
-            118, 929, 1710, 2938, 3928, 4596, 5509, 13446, 22829, 33447,
-            // healthstones
-            5509, 5510, 5511, 5512, 9421, 19013, 22103, 36889, 36892,
-        };
-
-        private readonly int[] useableManaItems = {
-            // potions
-            2245, 3385, 3827, 6149, 13443, 13444, 33448, 22832,
-        };
-
         protected BasicCombatClassBia10(AmeisenBotInterfaces bot, AmeisenBotFsm stateMachine)
         {
             Bot = bot;
@@ -84,11 +30,7 @@ namespace AmeisenBotX.Core.Engines.Combat.Classes.Bia10
             SpellAbortFunctions = new List<Func<bool>>();
 
             CooldownManager = new CooldownManager(Bot.Character.SpellBook.Spells);
-            RessurrectionTargets = new Dictionary<string, DateTime>();
-
-            //TargetProviderDps = new TargetManager(new DpsTargetSelectionLogic(Bot), TimeSpan.FromMilliseconds(250));
-            //TargetProviderTank = new TargetManager(new TankTargetSelectionLogic(Bot), TimeSpan.FromMilliseconds(250));
-            //TargetProviderHeal = new TargetManager(new HealTargetSelectionLogic(Bot), TimeSpan.FromMilliseconds(250));
+            ResurrectionTargets = new Dictionary<string, DateTime>();
 
             MyAuraManager = new AuraManager(Bot);
             TargetAuraManager = new AuraManager(Bot);
@@ -108,7 +50,7 @@ namespace AmeisenBotX.Core.Engines.Combat.Classes.Bia10
             //Load spells, would be nice to have proper SpellManager for extra spell info :/
             KnownSpells = new Dictionary<string, WoWSpell>();
             var lightingBoltData = new WoWSpell(30, 0, TimeSpan.FromSeconds(1.5), WoWSpell.WoWSpellSchool.Nature);
-            KnownSpells.Add(lightningBoltSpell, lightingBoltData);
+            KnownSpells.Add(DataConstants.ShamanSpells.LightningBolt, lightingBoltData);
         }
 
         public Dictionary<string, WoWSpell> KnownSpells { get; set; }
@@ -162,13 +104,11 @@ namespace AmeisenBotX.Core.Engines.Combat.Classes.Bia10
         public abstract IItemComparator ItemComparator { get; set; }
         public AuraManager MyAuraManager { get; private set; }
         public IEnumerable<int> PriorityTargetDisplayIds { get => TargetProviderDps.PriorityTargets; set => TargetProviderDps.PriorityTargets = value; }
-        public Dictionary<string, DateTime> RessurrectionTargets { get; private set; }
+        public Dictionary<string, DateTime> ResurrectionTargets { get; private set; }
         public abstract WowRole Role { get; }
         public abstract TalentTree Talents { get; }
         public AuraManager TargetAuraManager { get; private set; }
         public ITargetProvider TargetProviderDps { get; private set; }
-        public ITargetProvider TargetProviderHeal { get; private set; }
-        public ITargetProvider TargetProviderTank { get; private set; }
         public abstract bool UseAutoAttacks { get; }
         public abstract string Version { get; }
         public abstract bool WalkBehindEnemy { get; }
@@ -196,22 +136,26 @@ namespace AmeisenBotX.Core.Engines.Combat.Classes.Bia10
             var target = Bot.Target;
             if (target == null) return;
 
-            if (Bot.Player.Position.GetDistance(target.Position) <= 3.0f) // this will likely buggout with facing check, endless loop of turning on mob position
-            {
-                Bot.Wow.StopClickToMove();
-                Bot.Movement.Reset();
-                Bot.Wow.InteractWithUnit(target.BaseAddress);
-            }
-            else if (IsMelee)
+            if (IsMelee)
                 Bot.Movement.SetMovementAction(MovementAction.Move, target.Position);
-            else if (IsInSpellRange(target, lightningBoltSpell))
-                TryCastSpell(lightningBoltSpell, target.Guid);
-            else if (!IsInSpellRange(target, lightningBoltSpell) // try closer location
+            else if (IsInSpellRange(target, DataConstants.ShamanSpells.LightningBolt))
+                TryCastSpell(DataConstants.ShamanSpells.LightningBolt, target.Guid);
+            else if (!IsInSpellRange(target, DataConstants.ShamanSpells.LightningBolt) // try closer location
                      || !Bot.Wow.IsInLineOfSight(Bot.Player.Position, target.Position))
-                Bot.Movement.SetMovementAction(MovementAction.Move, target.Position);
+            {
+                var distanceToTarget = Bot.Player.DistanceTo(target.Position);
+                var heightDifference = target.Position.Z - Bot.Player.Position.Z;
+
+                // a mere workaround, some calculation of slope would be nice
+                if (heightDifference <= 10 && distanceToTarget >= 30)
+                    Bot.Movement.SetMovementAction(MovementAction.Move, target.Position);
+
+                //Bot.Wow.ClearTarget();
+                //Todo: add to blacklist for a while
+            }
         }
 
-        public virtual void Execute()
+        public virtual void Execute() //TODO: refactor
         {
             if (Bot.Player.IsCasting)
             {
@@ -270,7 +214,7 @@ namespace AmeisenBotX.Core.Engines.Combat.Classes.Bia10
             if (Bot.Player.HealthPercentage < C["HealthItemThreshold"])
             {
                 var healthItem = Bot.Character.Inventory.Items.FirstOrDefault(e =>
-                    useableHealingItems.Contains(e.Id));
+                    DataConstants.usableHealingItems.Contains(e.Id));
 
                 if (healthItem != null)
                 {
@@ -281,7 +225,7 @@ namespace AmeisenBotX.Core.Engines.Combat.Classes.Bia10
             if (Bot.Player.ManaPercentage < C["ManaItemThreshold"])
             {
                 var manaItem = Bot.Character.Inventory.Items.FirstOrDefault(e =>
-                    useableManaItems.Contains(e.Id));
+                    DataConstants.usableManaItems.Contains(e.Id));
 
                 if (manaItem != null)
                     Bot.Wow.UseItemByName(manaItem.Name);
@@ -347,44 +291,32 @@ namespace AmeisenBotX.Core.Engines.Combat.Classes.Bia10
                                 && TryCastSpell(spellToCastEnchantment, 0, true);
         }
 
-        protected bool HandleDeadPartymembers(string spellName) //TODO: mess refactor
+        protected bool HandleDeadPartyMembers(string spellName)
         {
             var spell = Bot.Character.SpellBook.GetSpellByName(spellName);
+            if (spell == null || CooldownManager.IsSpellOnCooldown(spellName) 
+                              || spell.Costs >= Bot.Player.Mana) 
+                return false;
 
-            if (spell != null
-                && !CooldownManager.IsSpellOnCooldown(spellName)
-                && spell.Costs < Bot.Player.Mana)
-            {
-                var groupPlayers = Bot.Objects.Partymembers
-                    .OfType<IWowPlayer>()
-                    .Where(e => e.IsDead);
+            var groupPlayers = Bot.Objects.Partymembers
+                .OfType<IWowPlayer>()
+                .Where(e => e.Health == 0)
+                .ToList();
 
-                if (groupPlayers.Any())
-                {
-                    var player = groupPlayers.FirstOrDefault(e => Bot.Db.GetUnitName(e, out var name) && !RessurrectionTargets.ContainsKey(name) || RessurrectionTargets[name] < DateTime.Now);
+            if (!groupPlayers.Any()) return false;
 
-                    if (player != null)
-                    {
-                        if (Bot.Db.GetUnitName(player, out var name))
-                        {
-                            if (!RessurrectionTargets.ContainsKey(name))
-                            {
-                                RessurrectionTargets.Add(name, DateTime.Now + TimeSpan.FromSeconds(10));
-                                return TryCastSpell(spellName, player.Guid, true);
-                            }
+            var player = groupPlayers.FirstOrDefault(e => Bot.Db.GetUnitName(e, out var name)
+                && !ResurrectionTargets.ContainsKey(name) || ResurrectionTargets[name] < DateTime.Now);
 
-                            if (RessurrectionTargets[name] < DateTime.Now)
-                            {
-                                return TryCastSpell(spellName, player.Guid, true);
-                            }
-                        }
-                    }
+            if (player == null) return false;
+            if (!Bot.Db.GetUnitName(player, out var name)) return false;
 
-                    return true;
-                }
-            }
+            if (ResurrectionTargets.ContainsKey(name))
+                    return ResurrectionTargets[name] >= DateTime.Now || TryCastSpell(spellName, player.Guid, true);
 
-            return false;
+            ResurrectionTargets.Add(name, DateTime.Now + TimeSpan.FromSeconds(10));
+            return TryCastSpell(spellName, player.Guid, true);
+            
         }
 
         protected bool TryCastSpell(string spellName, ulong guid, bool needsResource = false, int currentResourceAmount = 0, bool forceTargetSwitch = false)
@@ -426,41 +358,39 @@ namespace AmeisenBotX.Core.Engines.Combat.Classes.Bia10
             return CastSpell(spellName, isTargetMyself);
         }
 
-        private bool CastSpell(string spellName, bool castOnSelf) //TODO: mess refactor
+        private bool CastSpell(string spellName, bool castOnSelf)
         {
             // spits out stuff like this "1;300" (1 or 0 whether the cast was successful or not);(the cooldown in ms)
-            if (Bot.Wow.ExecuteLuaAndRead(BotUtils.ObfuscateLua($"{{v:3}},{{v:4}}=GetSpellCooldown(\"{spellName}\"){{v:2}}=({{v:3}}+{{v:4}}-GetTime())*1000;if {{v:2}}<=0 then {{v:2}}=0;CastSpellByName(\"{spellName}\"{(castOnSelf ? ", \"player\"" : string.Empty)}){{v:5}},{{v:6}}=GetSpellCooldown(\"{spellName}\"){{v:1}}=({{v:5}}+{{v:6}}-GetTime())*1000;{{v:0}}=\"1;\"..{{v:1}} else {{v:0}}=\"0;\"..{{v:2}} end"), out var result))
+            if (!Bot.Wow.ExecuteLuaAndRead(BotUtils.ObfuscateLua(
+                    DataConstants.GetCastSpellString(spellName, castOnSelf)), out var result))
+                return false;
+
+            if (result.Length < 3) return false;
+
+            var parts = result.Split(";", StringSplitOptions.RemoveEmptyEntries);
+            if (parts.Length < 2) return false;
+
+            // replace comma with dot in the cooldown
+            if (parts[1].Contains(',', StringComparison.OrdinalIgnoreCase))
+                parts[1] = parts[1].Replace(',', '.');
+
+            if (!int.TryParse(parts[0], out var castSuccessful) 
+                || !double.TryParse(parts[1], NumberStyles.Any, CultureInfo.InvariantCulture, out var cooldown))
+                return false;
+
+            cooldown = Math.Max(cooldown, 0);
+            CooldownManager.SetSpellCooldown(spellName, (int)cooldown);
+
+            if (castSuccessful == 1)
             {
-                if (result.Length < 3)
-                    return false;
-
-                var parts = result.Split(";", StringSplitOptions.RemoveEmptyEntries);
-                if (parts.Length < 2)
-                    return false;
-                
-                // replace comma with dot in the cooldown
-                if (parts[1].Contains(',', StringComparison.OrdinalIgnoreCase))
-                    parts[1] = parts[1].Replace(',', '.');
-
-                if (int.TryParse(parts[0], out var castSuccessful)
-                    && double.TryParse(parts[1], NumberStyles.Any, CultureInfo.InvariantCulture, out var cooldown))
-                {
-                    cooldown = Math.Max(cooldown, 0);
-                    CooldownManager.SetSpellCooldown(spellName, (int)cooldown);
-
-                    if (castSuccessful == 1)
-                    {
-                        AmeisenLogger.I.Log("CombatClass", $"[{DisplayName}]: Casting Spell \"{spellName}\" on \"{Bot.Target?.Guid}\"", LogLevel.Verbose);
-                        IsWanding = IsWanding && spellName == "Shoot";
-                        return true;
-                    }
-
-                    AmeisenLogger.I.Log("CombatClass", $"[{DisplayName}]: Spell \"{spellName}\" is on cooldown for \"{cooldown}\"ms", LogLevel.Verbose);
-                    return false;
-                }
+                AmeisenLogger.I.Log("CombatClass", $"[{DisplayName}]: Casting Spell \"{spellName}\" on \"{Bot.Target?.Guid}\"", LogLevel.Verbose);
+                IsWanding = IsWanding && spellName == "Shoot";
+                return true;
             }
 
+            AmeisenLogger.I.Log("CombatClass", $"[{DisplayName}]: Spell \"{spellName}\" is on cooldown for \"{cooldown}\"ms", LogLevel.Verbose);
             return false;
+
         }
 
         private void CheckFacing(IWowObject target)
@@ -471,10 +401,15 @@ namespace AmeisenBotX.Core.Engines.Combat.Classes.Bia10
             var facingAngle = BotMath.GetFacingAngle(Bot.Player.Position, target.Position);
             var angleDiff = facingAngle - Bot.Player.Rotation;
 
-            if (angleDiff < 0)
-                angleDiff += MAX_ANGLE;
-            else if (angleDiff > MAX_ANGLE)
-                angleDiff -= MAX_ANGLE;
+            switch (angleDiff)
+            {
+                case < 0:
+                    angleDiff += DataConstants.MAX_ANGLE;
+                    break;
+                case > DataConstants.MAX_ANGLE:
+                    angleDiff -= DataConstants.MAX_ANGLE;
+                    break;
+            }
 
             if (angleDiff > 1.0)
                 Bot.Wow.FacePosition(Bot.Player.BaseAddress, Bot.Player.Position, target.Position);
