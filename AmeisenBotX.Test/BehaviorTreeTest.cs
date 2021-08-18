@@ -19,7 +19,7 @@ namespace AmeisenBotX.Test
 
             TestBlackboard testBlackboard = new();
 
-            AmeisenBotBehaviorTree<TestBlackboard> tree = new
+            BehaviorTree<TestBlackboard> tree = new
             (
                 new DualSelector<TestBlackboard>
                 (
@@ -112,7 +112,7 @@ namespace AmeisenBotX.Test
                 FirstNode = true
             };
 
-            AmeisenBotBehaviorTree<TestBlackboard> tree = new
+            BehaviorTree<TestBlackboard> tree = new
             (
                 new Sequence<TestBlackboard>
                 (
@@ -164,7 +164,7 @@ namespace AmeisenBotX.Test
                 SecondFirstNode = true
             };
 
-            AmeisenBotBehaviorTree<TestBlackboard> tree = new
+            BehaviorTree<TestBlackboard> tree = new
             (
                 new Selector<TestBlackboard>
                 (
@@ -233,7 +233,7 @@ namespace AmeisenBotX.Test
 
             TestBlackboard testBlackboard = new();
 
-            AmeisenBotBehaviorTree<TestBlackboard> tree = new
+            BehaviorTree<TestBlackboard> tree = new
             (
                 new Sequence<TestBlackboard>
                 (
@@ -331,7 +331,7 @@ namespace AmeisenBotX.Test
 
             TestBlackboard testBlackboard = new();
 
-            AmeisenBotBehaviorTree<TestBlackboard> tree = new
+            BehaviorTree<TestBlackboard> tree = new
             (
                 new Sequence<TestBlackboard>
                 (
@@ -449,7 +449,7 @@ namespace AmeisenBotX.Test
 
             TestBlackboard testBlackboard = new();
 
-            AmeisenBotBehaviorTree<TestBlackboard> tree = new
+            BehaviorTree<TestBlackboard> tree = new
             (
                 new Sequence<TestBlackboard>
                 (
@@ -525,7 +525,7 @@ namespace AmeisenBotX.Test
                 FirstNode = true
             };
 
-            AmeisenBotBehaviorTree<TestBlackboard> tree = new
+            BehaviorTree<TestBlackboard> tree = new
             (
                 new Selector<TestBlackboard>
                 (
@@ -573,7 +573,7 @@ namespace AmeisenBotX.Test
 
             TestBlackboard testBlackboard = new() { };
 
-            AmeisenBotBehaviorTree<TestBlackboard> tree = new
+            BehaviorTree<TestBlackboard> tree = new
             (
                 new Waterfall<TestBlackboard>
                 (

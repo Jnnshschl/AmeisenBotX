@@ -2,49 +2,52 @@
 
 namespace AmeisenBotX.BehaviorTree.Objects
 {
-    public class Annotator : Node
+    /// <summary>
+    /// BehaviorTree Node that executes a node before executing annother node. Use this to update stuff before executing a node.
+    /// </summary>
+    public class Annotator : INode
     {
-        public Annotator(Node annotationNode, Node child) : base()
+        public Annotator(INode annotationNode, INode child) : base()
         {
             AnnotationNode = annotationNode;
             Child = child;
         }
 
-        public Node AnnotationNode { get; set; }
+        public INode AnnotationNode { get; set; }
 
-        public Node Child { get; set; }
+        public INode Child { get; set; }
 
-        public override BtStatus Execute()
+        public BtStatus Execute()
         {
             AnnotationNode.Execute();
             return Child.Execute();
         }
 
-        internal override Node GetNodeToExecute()
+        public INode GetNodeToExecute()
         {
             return Child;
         }
     }
 
-    public class Annotator<T> : Node<T>
+    public class Annotator<T> : INode<T>
     {
-        public Annotator(Node<T> annotationNode, Node<T> child) : base()
+        public Annotator(INode<T> annotationNode, INode<T> child) : base()
         {
             AnnotationNode = annotationNode;
             Child = child;
         }
 
-        public Node<T> AnnotationNode { get; set; }
+        public INode<T> AnnotationNode { get; set; }
 
-        public Node<T> Child { get; set; }
+        public INode<T> Child { get; set; }
 
-        public override BtStatus Execute(T blackboard)
+        public BtStatus Execute(T blackboard)
         {
             AnnotationNode.Execute(blackboard);
             return Child.Execute(blackboard);
         }
 
-        internal override Node<T> GetNodeToExecute(T blackboard)
+        public INode<T> GetNodeToExecute(T blackboard)
         {
             return Child;
         }

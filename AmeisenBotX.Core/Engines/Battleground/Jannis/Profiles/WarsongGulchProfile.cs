@@ -130,7 +130,7 @@ namespace AmeisenBotX.Core.Engines.Battleground.Jannis.Profiles
             Vector3 OwnBasePositionMapCoords { get; }
         }
 
-        public AmeisenBotBehaviorTree<CtfBlackboard> BehaviorTree { get; }
+        public BehaviorTree<CtfBlackboard> BehaviorTree { get; }
 
         public DualSelector<CtfBlackboard> FlagSelector { get; }
 

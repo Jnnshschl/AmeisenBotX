@@ -5,58 +5,57 @@ using System;
 
 namespace AmeisenBotX.BehaviorTree
 {
-    public class AmeisenBotBehaviorTree
+    public class BehaviorTree
     {
-        public AmeisenBotBehaviorTree(Node node, bool resumeOngoingNodes = false)
+        public BehaviorTree(INode node, bool resumeOngoingNodes = false)
         {
             RootNode = node;
             ResumeOngoingNodes = resumeOngoingNodes;
         }
 
-        public Node OngoingNode { get; private set; }
+        public INode OngoingNode { get; private set; }
 
         public bool ResumeOngoingNodes { get; set; }
 
-        public Node RootNode { get; set; }
+        public INode RootNode { get; set; }
 
         public BtStatus Tick()
         {
             if (ResumeOngoingNodes)
             {
+                BtStatus status;
+
                 if (OngoingNode != null)
                 {
-                    BtStatus status = OngoingNode.Execute();
+                    status = OngoingNode.Execute();
 
-                    if (status == BtStatus.Failed || status == BtStatus.Success)
+                    if (status is BtStatus.Failed or BtStatus.Success)
                     {
                         OngoingNode = null;
                     }
-
-                    return status;
                 }
                 else
                 {
-                    BtStatus status = RootNode.Execute();
+                    status = RootNode.Execute();
 
-                    if (status == BtStatus.Ongoing)
+                    if (status is BtStatus.Ongoing)
                     {
                         OngoingNode = RootNode.GetNodeToExecute();
                     }
-
-                    return status;
                 }
+
+                return status;
             }
             else
             {
-                Node nodeToExecute = RootNode.GetNodeToExecute();
-                return nodeToExecute.Execute();
+                return RootNode.GetNodeToExecute().Execute();
             }
         }
     }
 
-    public class AmeisenBotBehaviorTree<T> where T : IBlackboard
+    public class BehaviorTree<T> where T : IBlackboard
     {
-        public AmeisenBotBehaviorTree(Node<T> node, T blackboard, bool resumeOngoingNodes = false)
+        public BehaviorTree(INode<T> node, T blackboard, bool resumeOngoingNodes = false)
         {
             RootNode = node;
             Blackboard = blackboard;
@@ -65,7 +64,7 @@ namespace AmeisenBotX.BehaviorTree
             BlackboardUpdateEnabled = false;
         }
 
-        public AmeisenBotBehaviorTree(Node<T> node, T blackboard, TimeSpan blackboardUpdateTime, bool resumeOngoingNodes = false)
+        public BehaviorTree(INode<T> node, T blackboard, TimeSpan blackboardUpdateTime, bool resumeOngoingNodes = false)
         {
             RootNode = node;
             Blackboard = blackboard;
@@ -77,17 +76,17 @@ namespace AmeisenBotX.BehaviorTree
 
         public T Blackboard { get; set; }
 
+        public bool BlackboardUpdateEnabled { get; set; }
+
         public TimeSpan BlackboardUpdateTime { get; set; }
 
         public DateTime LastBlackBoardUpdate { get; set; }
 
-        public Node<T> OngoingNode { get; private set; }
+        public INode<T> OngoingNode { get; private set; }
 
         public bool ResumeOngoingNodes { get; set; }
 
-        public Node<T> RootNode { get; set; }
-
-        private bool BlackboardUpdateEnabled { get; set; }
+        public INode<T> RootNode { get; set; }
 
         public BtStatus Tick()
         {
@@ -99,33 +98,32 @@ namespace AmeisenBotX.BehaviorTree
 
             if (ResumeOngoingNodes)
             {
+                BtStatus status;
+
                 if (OngoingNode != null)
                 {
-                    BtStatus status = OngoingNode.Execute(Blackboard);
+                    status = OngoingNode.Execute(Blackboard);
 
-                    if (status == BtStatus.Failed || status == BtStatus.Success)
+                    if (status is BtStatus.Failed or BtStatus.Success)
                     {
                         OngoingNode = null;
                     }
-
-                    return status;
                 }
                 else
                 {
-                    BtStatus status = RootNode.Execute(Blackboard);
+                    status = RootNode.Execute(Blackboard);
 
-                    if (status == BtStatus.Ongoing)
+                    if (status is BtStatus.Ongoing)
                     {
                         OngoingNode = RootNode.GetNodeToExecute(Blackboard);
                     }
-
-                    return status;
                 }
+
+                return status;
             }
             else
             {
-                Node<T> nodeToExecute = RootNode.GetNodeToExecute(Blackboard);
-                return nodeToExecute.Execute(Blackboard);
+                return RootNode.GetNodeToExecute(Blackboard).Execute(Blackboard);
             }
         }
     }

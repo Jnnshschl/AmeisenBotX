@@ -2,16 +2,19 @@
 
 namespace AmeisenBotX.BehaviorTree.Objects
 {
-    public class Inverter : Node
+    /// <summary>
+    /// Inverts the status of a node. Ongoing state will remain Onging.
+    /// </summary>
+    public class Inverter : INode
     {
-        public Inverter(Node child) : base()
+        public Inverter(INode child) : base()
         {
             Child = child;
         }
 
-        public Node Child { get; set; }
+        public INode Child { get; }
 
-        public override BtStatus Execute()
+        public BtStatus Execute()
         {
             BtStatus status = Child.Execute();
 
@@ -27,22 +30,22 @@ namespace AmeisenBotX.BehaviorTree.Objects
             return status;
         }
 
-        internal override Node GetNodeToExecute()
+        public INode GetNodeToExecute()
         {
             return Child;
         }
     }
 
-    public class Inverter<T> : Node<T>
+    public class Inverter<T> : INode<T>
     {
-        public Inverter(Node<T> child) : base()
+        public Inverter(INode<T> child) : base()
         {
             Child = child;
         }
 
-        public Node<T> Child { get; set; }
+        public INode<T> Child { get; }
 
-        public override BtStatus Execute(T blackboard)
+        public BtStatus Execute(T blackboard)
         {
             BtStatus status = Child.Execute(blackboard);
 
@@ -58,7 +61,7 @@ namespace AmeisenBotX.BehaviorTree.Objects
             return status;
         }
 
-        internal override Node<T> GetNodeToExecute(T blackboard)
+        public INode<T> GetNodeToExecute(T blackboard)
         {
             return Child;
         }

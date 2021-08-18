@@ -1,7 +1,6 @@
-﻿using AmeisenBotX.Common.Objects.Keyboard;
+﻿using AmeisenBotX.Common.Keyboard.Objects;
 using AmeisenBotX.Core.Engines.Movement.Settings;
 using AmeisenBotX.Memory.Win32;
-
 using System;
 using System.Collections.Generic;
 using System.Text.Json.Serialization;

@@ -1,21 +1,26 @@
 ﻿using AmeisenBotX.BehaviorTree.Enums;
-using System.Linq;
 
 namespace AmeisenBotX.BehaviorTree.Objects
 {
-    public class Sequence : Composite
+    /// <summary>
+    /// Executes a sequence of nodes until all nodes returned success. If a node fails or the sequence finished, it gets resetted.
+    /// </summary>
+    public class Sequence : IComposite
     {
-        public Sequence(params Node[] children)
+        public Sequence(params INode[] children)
         {
-            Children = children.ToList();
+            Children = children;
         }
 
-        public int Counter { get; set; }
+        public INode[] Children { get; }
 
-        public override BtStatus Execute()
+        public int Counter { get; private set; }
+
+        public BtStatus Execute()
         {
-            if (Counter == Children.Count)
+            if (Counter == Children.Length)
             {
+                Counter = 0;
                 return BtStatus.Success;
             }
 
@@ -23,12 +28,13 @@ namespace AmeisenBotX.BehaviorTree.Objects
 
             if (status == BtStatus.Success)
             {
-                if (Counter < Children.Count)
+                if (Counter < Children.Length)
                 {
                     ++Counter;
 
-                    if (Counter == Children.Count)
+                    if (Counter == Children.Length)
                     {
+                        Counter = 0;
                         return BtStatus.Success;
                     }
                 }
@@ -42,25 +48,28 @@ namespace AmeisenBotX.BehaviorTree.Objects
             return BtStatus.Ongoing;
         }
 
-        internal override Node GetNodeToExecute()
+        public INode GetNodeToExecute()
         {
             return this;
         }
     }
 
-    public class Sequence<T> : Composite<T>
+    public class Sequence<T> : IComposite<T>
     {
-        public Sequence(params Node<T>[] children)
+        public Sequence(params INode<T>[] children)
         {
-            Children = children.ToList();
+            Children = children;
         }
 
-        public int Counter { get; set; }
+        public INode<T>[] Children { get; }
 
-        public override BtStatus Execute(T blackboard)
+        public int Counter { get; private set; }
+
+        public BtStatus Execute(T blackboard)
         {
-            if (Counter == Children.Count)
+            if (Counter == Children.Length)
             {
+                Counter = 0;
                 return BtStatus.Success;
             }
 
@@ -68,12 +77,13 @@ namespace AmeisenBotX.BehaviorTree.Objects
 
             if (status == BtStatus.Success)
             {
-                if (Counter < Children.Count)
+                if (Counter < Children.Length)
                 {
                     ++Counter;
 
-                    if (Counter == Children.Count)
+                    if (Counter == Children.Length)
                     {
+                        Counter = 0;
                         return BtStatus.Success;
                     }
                 }
@@ -87,7 +97,7 @@ namespace AmeisenBotX.BehaviorTree.Objects
             return BtStatus.Ongoing;
         }
 
-        internal override Node<T> GetNodeToExecute(T blackboard)
+        public INode<T> GetNodeToExecute(T blackboard)
         {
             return this;
         }

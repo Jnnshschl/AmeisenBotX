@@ -3,25 +3,30 @@ using System;
 
 namespace AmeisenBotX.BehaviorTree.Objects
 {
-    public class DualSelector : Composite
+    /// <summary>
+    /// Special selector that executes nodeNone when input is 0|0, nodeA when input is 1|0, nodeB when input is 0|1 and nodeBoth when input is 1|1.
+    /// </summary>
+    public class DualSelector : IComposite
     {
-        public DualSelector(Func<bool> conditionA, Func<bool> conditionB, Node nodeNone, Node nodeA, Node nodeB, Node nodeBoth) : base()
+        public DualSelector(Func<bool> conditionA, Func<bool> conditionB, INode nodeNone, INode nodeA, INode nodeB, INode nodeBoth) : base()
         {
             ConditionA = conditionA;
             ConditionB = conditionB;
-            Children = new() { nodeNone, nodeA, nodeB, nodeBoth };
+            Children = new INode[] { nodeNone, nodeA, nodeB, nodeBoth };
         }
 
-        public Func<bool> ConditionA { get; set; }
+        public INode[] Children { get; }
 
-        public Func<bool> ConditionB { get; set; }
+        public Func<bool> ConditionA { get; }
 
-        public override BtStatus Execute()
+        public Func<bool> ConditionB { get; }
+
+        public BtStatus Execute()
         {
             return GetNodeToExecute().Execute();
         }
 
-        internal override Node GetNodeToExecute()
+        public INode GetNodeToExecute()
         {
             if (ConditionA() && ConditionB())
             {
@@ -42,25 +47,27 @@ namespace AmeisenBotX.BehaviorTree.Objects
         }
     }
 
-    public class DualSelector<T> : Composite<T>
+    public class DualSelector<T> : IComposite<T>
     {
-        public DualSelector(Func<T, bool> conditionA, Func<T, bool> conditionB, Node<T> nodeNone, Node<T> nodeA, Node<T> nodeB, Node<T> nodeBoth) : base()
+        public DualSelector(Func<T, bool> conditionA, Func<T, bool> conditionB, INode<T> nodeNone, INode<T> nodeA, INode<T> nodeB, INode<T> nodeBoth) : base()
         {
             ConditionA = conditionA;
             ConditionB = conditionB;
-            Children = new() { nodeNone, nodeA, nodeB, nodeBoth };
+            Children = new INode<T>[] { nodeNone, nodeA, nodeB, nodeBoth };
         }
 
-        public Func<T, bool> ConditionA { get; set; }
+        public INode<T>[] Children { get; }
 
-        public Func<T, bool> ConditionB { get; set; }
+        public Func<T, bool> ConditionA { get; }
 
-        public override BtStatus Execute(T blackboard)
+        public Func<T, bool> ConditionB { get; }
+
+        public BtStatus Execute(T blackboard)
         {
             return GetNodeToExecute(blackboard).Execute(blackboard);
         }
 
-        internal override Node<T> GetNodeToExecute(T blackboard)
+        public INode<T> GetNodeToExecute(T blackboard)
         {
             if (ConditionA(blackboard) && ConditionB(blackboard))
             {

@@ -3,59 +3,52 @@ using System;
 
 namespace AmeisenBotX.BehaviorTree.Objects
 {
-    public class Selector : Composite
+    /// <summary>
+    /// Executes a when input is true and b when it is false.
+    /// </summary>
+    public class Selector : IComposite
     {
-        public Selector(Func<bool> condition, Node nodeA, Node nodeB) : base()
+        public Selector(Func<bool> condition, INode nodeA, INode nodeB) : base()
         {
             Condition = condition;
-            Children = new() { nodeA, nodeB };
+            Children = new INode[] { nodeA, nodeB };
         }
 
-        public Func<bool> Condition { get; set; }
+        public INode[] Children { get; }
 
-        public override BtStatus Execute()
+        public Func<bool> Condition { get; }
+
+        public BtStatus Execute()
         {
             return GetNodeToExecute().Execute();
         }
 
-        internal override Node GetNodeToExecute()
+        public INode GetNodeToExecute()
         {
-            if (Condition())
-            {
-                return Children[0];
-            }
-            else
-            {
-                return Children[1];
-            }
+            return Condition() ? Children[0] : Children[1];
         }
     }
 
-    public class Selector<T> : Composite<T>
+    public class Selector<T> : IComposite<T>
     {
-        public Selector(Func<T, bool> condition, Node<T> nodeA, Node<T> nodeB) : base()
+        public Selector(Func<T, bool> condition, INode<T> nodeA, INode<T> nodeB) : base()
         {
             Condition = condition;
-            Children = new() { nodeA, nodeB };
+            Children = new INode<T>[] { nodeA, nodeB };
         }
 
-        public Func<T, bool> Condition { get; set; }
+        public INode<T>[] Children { get; }
 
-        public override BtStatus Execute(T blackboard)
+        public Func<T, bool> Condition { get; }
+
+        public BtStatus Execute(T blackboard)
         {
             return GetNodeToExecute(blackboard).Execute(blackboard);
         }
 
-        internal override Node<T> GetNodeToExecute(T blackboard)
+        public INode<T> GetNodeToExecute(T blackboard)
         {
-            if (Condition(blackboard))
-            {
-                return Children[0];
-            }
-            else
-            {
-                return Children[1];
-            }
+            return Condition(blackboard) ? Children[0] : Children[1];
         }
     }
 }

@@ -1,7 +1,7 @@
 ﻿using AmeisenBotX.Common.Keyboard;
 using AmeisenBotX.Common.Keyboard.Enums;
+using AmeisenBotX.Common.Keyboard.Objects;
 using AmeisenBotX.Common.Math;
-using AmeisenBotX.Common.Objects.Keyboard;
 using AmeisenBotX.Common.Utils;
 using AmeisenBotX.Core;
 using AmeisenBotX.Core.Logic.Enums;
@@ -29,8 +29,14 @@ namespace AmeisenBotX
 {
     public partial class MainWindow : Window
     {
-        public MainWindow()
+        public MainWindow(string dataPath, string configPath)
         {
+            if (!Directory.Exists(dataPath)) { throw new FileNotFoundException(dataPath); }
+            if (!File.Exists(configPath)) { throw new FileNotFoundException(configPath); }
+
+            DataPath = dataPath;
+            ConfigPath = configPath;
+
             InitializeComponent();
 
             CurrentTickTimeBadBrush = new SolidColorBrush(Color.FromRgb(255, 0, 80));
@@ -39,11 +45,21 @@ namespace AmeisenBotX
             DarkBackgroundBrush = new SolidColorBrush((Color)FindResource("DarkBackground"));
             TextAccentBrush = new SolidColorBrush((Color)FindResource("TextAccent"));
 
+            NotificationGmBrush = new(Colors.Cyan);
+            NotificationBrush = new(Colors.Pink);
+            NotificationWhiteBrush = new(Colors.White);
+            NotificationTransparentBrush = new(Colors.Transparent);
+
             CurrentTickTimeBadBrush.Freeze();
             CurrentTickTimeGoodBrush.Freeze();
             DarkForegroundBrush.Freeze();
             DarkBackgroundBrush.Freeze();
             TextAccentBrush.Freeze();
+
+            NotificationGmBrush.Freeze();
+            NotificationBrush.Freeze();
+            NotificationWhiteBrush.Freeze();
+            NotificationTransparentBrush.Freeze();
 
             LabelUpdateEvent = new(TimeSpan.FromSeconds(1));
             NotificationEvent = new(TimeSpan.FromSeconds(1));
@@ -68,6 +84,8 @@ namespace AmeisenBotX
 
         private AmeisenBot AmeisenBot { get; set; }
 
+        private string ConfigPath { get; }
+
         private Brush CurrentTickTimeBadBrush { get; }
 
         private Brush CurrentTickTimeGoodBrush { get; }
@@ -76,7 +94,7 @@ namespace AmeisenBotX
 
         private Brush DarkForegroundBrush { get; }
 
-        private string DataPath { get; } = $"{Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData)}\\AmeisenBotX\\profiles\\";
+        private string DataPath { get; }
 
         private DevToolsWindow DevToolsWindow { get; set; }
 
@@ -96,9 +114,17 @@ namespace AmeisenBotX
 
         private bool NotificationBlinkState { get; set; }
 
+        private SolidColorBrush NotificationBrush { get; }
+
         private TimegatedEvent NotificationEvent { get; }
 
+        private SolidColorBrush NotificationGmBrush { get; }
+
         private long NotificationLastTimestamp { get; set; }
+
+        private SolidColorBrush NotificationTransparentBrush { get; }
+
+        private SolidColorBrush NotificationWhiteBrush { get; }
 
         private bool PendingNotification { get; set; }
 
@@ -119,7 +145,7 @@ namespace AmeisenBotX
 
             if (AmeisenBot != null && IsAutoPositionSetup)
             {
-                Dispatcher.InvokeAsync(() =>
+                Dispatcher.Invoke(() =>
                 {
                     AmeisenBot.Bot.Memory.ResizeParentWindow
                     (
@@ -140,11 +166,7 @@ namespace AmeisenBotX
             {
                 if (File.Exists(configPath))
                 {
-                    // convert old configs to new format
-                    string configData = File.ReadAllText(configPath);
-                    configData = configData.Replace(".0,", ",");
-
-                    config = JsonSerializer.Deserialize<AmeisenBotConfig>(configData, new() { AllowTrailingCommas = true, NumberHandling = JsonNumberHandling.AllowReadingFromString });
+                    config = JsonSerializer.Deserialize<AmeisenBotConfig>(File.ReadAllText(configPath), new() { AllowTrailingCommas = true, NumberHandling = JsonNumberHandling.AllowReadingFromString });
                 }
                 else
                 {
@@ -195,8 +217,8 @@ namespace AmeisenBotX
             PendingNotification = false;
             NotificationBlinkState = false;
 
-            buttonNotification.Foreground = new SolidColorBrush(Colors.White);
-            buttonNotification.Background = new SolidColorBrush(Colors.Transparent);
+            buttonNotification.Foreground = NotificationWhiteBrush;
+            buttonNotification.Background = NotificationTransparentBrush;
         }
 
         private void ButtonStartPause_Click(object sender, RoutedEventArgs e)
@@ -274,48 +296,8 @@ namespace AmeisenBotX
 
         private void OnObjectUpdateComplete(IEnumerable<IWowObject> wowObjects)
         {
-            Dispatcher.InvokeAsync(() =>
+            Dispatcher.Invoke(() =>
             {
-                if (NotificationEvent.Run())
-                {
-                    if (!PendingNotification)
-                    {
-                        WowChatMessage message = AmeisenBot.Bot.Chat.ChatMessages
-                            .Where(e => e.Timestamp > NotificationLastTimestamp)
-                            .FirstOrDefault(e => e.Type == WowChat.WHISPER);
-
-                        if (message != null)
-                        {
-                            PendingNotification = true;
-                            NotificationLastTimestamp = message.Timestamp;
-
-                            if (message.Flags.Contains("GM", StringComparison.OrdinalIgnoreCase))
-                            {
-                                NoticifactionColor = new SolidColorBrush(Colors.Cyan);
-                            }
-                            else
-                            {
-                                NoticifactionColor = new SolidColorBrush(Colors.Magenta);
-                            }
-                        }
-                    }
-                    else
-                    {
-                        if (NotificationBlinkState)
-                        {
-                            buttonNotification.Foreground = DarkBackgroundBrush;
-                            buttonNotification.Background = NoticifactionColor;
-                        }
-                        else
-                        {
-                            buttonNotification.Foreground = new SolidColorBrush(Colors.White);
-                            buttonNotification.Background = new SolidColorBrush(Colors.Transparent);
-                        }
-
-                        NotificationBlinkState = !NotificationBlinkState;
-                    }
-                }
-
                 IWowPlayer player = AmeisenBot.Bot.Player;
 
                 switch (player.Class)
@@ -380,6 +362,39 @@ namespace AmeisenBotX
                     NeedToClearOverlay = false;
                 }
             });
+        }
+
+        private void OnWhisper(long timestamp, List<string> args)
+        {
+            if (!PendingNotification)
+            {
+                WowChatMessage message = AmeisenBot.Bot.Chat.ChatMessages
+                    .Where(e => e.Timestamp > NotificationLastTimestamp)
+                    .FirstOrDefault(e => e.Type == WowChat.WHISPER);
+
+                if (message != null)
+                {
+                    PendingNotification = true;
+                    NotificationLastTimestamp = message.Timestamp;
+
+                    NoticifactionColor = message.Flags.Contains("GM", StringComparison.OrdinalIgnoreCase) ? NotificationGmBrush : NotificationBrush;
+                }
+            }
+            else
+            {
+                if (NotificationBlinkState)
+                {
+                    buttonNotification.Foreground = DarkBackgroundBrush;
+                    buttonNotification.Background = NoticifactionColor;
+                }
+                else
+                {
+                    buttonNotification.Foreground = NotificationWhiteBrush;
+                    buttonNotification.Background = NotificationTransparentBrush;
+                }
+
+                NotificationBlinkState = !NotificationBlinkState;
+            }
         }
 
         private void OverlayRenderCurrentPath()
@@ -555,121 +570,95 @@ namespace AmeisenBotX
 
         private void Window_Loaded(object sender, RoutedEventArgs e)
         {
-            // check for older data folder that users need to migrate to the new location
-            string oldDataPath = $"{Directory.GetCurrentDirectory()}\\data\\";
+            // obtain a window handle (HWND) to out current WPF window
+            MainWindowHandle = new WindowInteropHelper(this).EnsureHandle();
 
-            if (Directory.Exists(oldDataPath))
+            comboboxStateOverride.Items.Add(BotState.Idle);
+            comboboxStateOverride.Items.Add(BotState.Combat);
+            comboboxStateOverride.Items.Add(BotState.Grinding);
+            comboboxStateOverride.Items.Add(BotState.Job);
+            comboboxStateOverride.Items.Add(BotState.Questing);
+
+            comboboxStateOverride.SelectedIndex = 0;
+
+            // display the PID, maybe remove this when not debugging
+            labelPID.Content = $"PID: {Environment.ProcessId}";
+
+            if (TryLoadConfig(ConfigPath, out AmeisenBotConfig config))
             {
-                MessageBox.Show($"You need to move the content of your \"\\\\data\\\\\" folder to \"{DataPath}\". Otherwise your profiles may not be displayed.", "New Data Location", MessageBoxButton.OK, MessageBoxImage.Warning);
-            }
+                AmeisenBot = new(config);
 
-            // create our data folder, default will be placed at "%APPDATA%/AmeisenBotX/..."
-            if (!Directory.Exists(DataPath))
-            {
-                Directory.CreateDirectory(DataPath);
-            }
+                // capture whisper messages and display them in the bots ui as a flashing button
+                AmeisenBot.Bot.Wow.Events.Subscribe("CHAT_MSG_WHISPER", OnWhisper);
 
-            // show the load config window first
-            LoadConfigWindow loadConfigWindow = new(DataPath);
-            loadConfigWindow.ShowDialog();
+                // events used to update our GUI
+                AmeisenBot.Bot.Objects.OnObjectUpdateComplete += OnObjectUpdateComplete;
+                // AmeisenBot.StateMachine.OnStateMachineStateChanged += () =>
+                // {
+                //     Dispatcher.InvokeAsync(() => { labelCurrentState.Content = $"{AmeisenBot.StateMachine.CurrentState.Key}"; });
+                // };
 
-            // exit if the user selected no config
-            if (string.IsNullOrWhiteSpace(loadConfigWindow.ConfigToLoad))
-            {
-                // TODO: close the window without crashing here
-                // Close();
+                // handle the autoposition function where the wow window gets "absorbed" by the bots window
+                if (AmeisenBot.Config.AutoPositionWow)
+                {
+                    // this is used to measure the size of wow's window
+                    PresentationSource presentationSource = PresentationSource.FromVisual(this);
+                    M11 = presentationSource.CompositionTarget.TransformToDevice.M11;
+                    M22 = presentationSource.CompositionTarget.TransformToDevice.M22;
+
+                    AmeisenBot.Logic.OnWoWStarted += () =>
+                    {
+                        Dispatcher.Invoke(() =>
+                        {
+                            AmeisenBot.Bot.Memory.SetupAutoPosition
+                            (
+                                MainWindowHandle,
+                                (int)((wowRect.Margin.Left + 1) * M11),
+                                (int)((wowRect.Margin.Top + 1) * M22),
+                                (int)((wowRect.ActualWidth - 1) * M11),
+                                (int)((wowRect.ActualHeight - 1) * M22)
+                            );
+                        });
+
+                        IsAutoPositionSetup = true;
+                    };
+                }
+
+                AmeisenLogger.I.Log("AmeisenBot", "Loading Hotkeys", LogLevel.Verbose);
+                LoadHotkeys();
+
+                AmeisenBot.Start();
+
+                StateConfigWindows = new()
+                {
+                    { BotState.Grinding, new StateGrindingConfigWindow(AmeisenBot, AmeisenBot.Config) },
+                    { BotState.Job, new StateJobConfigWindow(AmeisenBot, AmeisenBot.Config) },
+                    { BotState.Questing, new StateQuestingConfigWindow(AmeisenBot, AmeisenBot.Config) },
+                };
+
+                if (AmeisenBot.Config.Autopilot)
+                {
+                    buttonToggleAutopilot.Foreground = CurrentTickTimeGoodBrush;
+                }
+
+                // load our old window position
+                if (AmeisenBot.Config.SaveBotWindowPosition)
+                {
+                    if (MainWindowHandle != IntPtr.Zero && AmeisenBot.Config.BotWindowRect != new Memory.Win32.Rect() { Left = -1, Top = -1, Right = -1, Bottom = -1 })
+                    {
+                        AmeisenBot.Bot.Memory.SetWindowPosition(MainWindowHandle, AmeisenBot.Config.BotWindowRect);
+                        AmeisenLogger.I.Log("AmeisenBot", $"Loaded window position: {AmeisenBot.Config.BotWindowRect}", LogLevel.Verbose);
+                    }
+                    else
+                    {
+                        AmeisenLogger.I.Log("AmeisenBot", $"Unable to load window position of {MainWindowHandle} to {AmeisenBot.Config.BotWindowRect}", LogLevel.Warning);
+                    }
+                }
             }
             else
             {
-                // init GUI related stuff
-                MainWindowHandle = new WindowInteropHelper(this).EnsureHandle(); // obtain a window handle (HWND) to out current WPF window
-
-                // load the state overrides
-                comboboxStateOverride.Items.Add(BotState.Idle);
-                comboboxStateOverride.Items.Add(BotState.Combat);
-                comboboxStateOverride.Items.Add(BotState.Grinding);
-                comboboxStateOverride.Items.Add(BotState.Job);
-                comboboxStateOverride.Items.Add(BotState.Questing);
-
-                comboboxStateOverride.SelectedIndex = 0;
-
-                // display the PID, maybe remove this when not debugging
-                labelPID.Content = $"PID: {Environment.ProcessId}";
-
-                if (File.Exists(loadConfigWindow.ConfigToLoad) && TryLoadConfig(loadConfigWindow.ConfigToLoad, out AmeisenBotConfig config))
-                {
-                    AmeisenBot = new(config);
-
-                    // events used to update our GUI
-                    AmeisenBot.Bot.Objects.OnObjectUpdateComplete += OnObjectUpdateComplete;
-                    // AmeisenBot.StateMachine.OnStateMachineStateChanged += () =>
-                    // {
-                    //     Dispatcher.InvokeAsync(() => { labelCurrentState.Content = $"{AmeisenBot.StateMachine.CurrentState.Key}"; });
-                    // };
-
-                    // handle the autoposition function where the wow window gets "absorbed" by the bots window
-                    if (AmeisenBot.Config.AutoPositionWow)
-                    {
-                        // this is used to measure the size of wow's window
-                        PresentationSource presentationSource = PresentationSource.FromVisual(this);
-                        M11 = presentationSource.CompositionTarget.TransformToDevice.M11;
-                        M22 = presentationSource.CompositionTarget.TransformToDevice.M22;
-
-                        AmeisenBot.Logic.OnWoWStarted += () =>
-                        {
-                            Dispatcher.Invoke(() =>
-                            {
-                                AmeisenBot.Bot.Memory.SetupAutoPosition
-                                (
-                                    MainWindowHandle,
-                                    (int)((wowRect.Margin.Left + 1) * M11),
-                                    (int)((wowRect.Margin.Top + 1) * M22),
-                                    (int)((wowRect.ActualWidth - 1) * M11),
-                                    (int)((wowRect.ActualHeight - 1) * M22)
-                                );
-                            });
-
-                            IsAutoPositionSetup = true;
-                        };
-                    }
-
-                    AmeisenLogger.I.Log("AmeisenBot", "Loading Hotkeys", LogLevel.Verbose);
-                    LoadHotkeys();
-
-                    AmeisenBot.Start();
-
-                    // init misc GUI related stuff
-                    StateConfigWindows = new()
-                    {
-                        { BotState.Grinding, new StateGrindingConfigWindow(AmeisenBot, AmeisenBot.Config) },
-                        { BotState.Job, new StateJobConfigWindow(AmeisenBot, AmeisenBot.Config) },
-                        { BotState.Questing, new StateQuestingConfigWindow(AmeisenBot, AmeisenBot.Config) },
-                    };
-
-                    if (AmeisenBot.Config.Autopilot)
-                    {
-                        buttonToggleAutopilot.Foreground = CurrentTickTimeGoodBrush;
-                    }
-
-                    // load our old window position
-                    if (AmeisenBot.Config.SaveBotWindowPosition)
-                    {
-                        if (MainWindowHandle != IntPtr.Zero && AmeisenBot.Config.BotWindowRect != new Memory.Win32.Rect() { Left = -1, Top = -1, Right = -1, Bottom = -1 })
-                        {
-                            AmeisenBot.Bot.Memory.SetWindowPosition(MainWindowHandle, AmeisenBot.Config.BotWindowRect);
-                            AmeisenLogger.I.Log("AmeisenBot", $"Loaded window position: {AmeisenBot.Config.BotWindowRect}", LogLevel.Verbose);
-                        }
-                        else
-                        {
-                            AmeisenLogger.I.Log("AmeisenBot", $"Unable to load window position of {MainWindowHandle} to {AmeisenBot.Config.BotWindowRect}", LogLevel.Warning);
-                        }
-                    }
-                }
-                else
-                {
-                    MessageBox.Show($"Check your config, maybe it contains some invalid stuff.\n\n{loadConfigWindow.ConfigToLoad}", "Failed to load Config", MessageBoxButton.OK, MessageBoxImage.Error);
-                    Close();
-                }
+                MessageBox.Show($"Check your config, maybe it contains some invalid stuff.\n\n{ConfigPath}", "Failed to load Config", MessageBoxButton.OK, MessageBoxImage.Error);
+                Close();
             }
         }
 

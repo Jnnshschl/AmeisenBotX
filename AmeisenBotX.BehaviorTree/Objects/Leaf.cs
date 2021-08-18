@@ -3,7 +3,7 @@ using System;
 
 namespace AmeisenBotX.BehaviorTree.Objects
 {
-    public class Leaf : Node
+    public class Leaf : INode
     {
         public Leaf(Func<BtStatus> behaviorTreeAction) : base()
         {
@@ -12,18 +12,18 @@ namespace AmeisenBotX.BehaviorTree.Objects
 
         public Func<BtStatus> BehaviorTreeAction { get; set; }
 
-        public override BtStatus Execute()
+        public BtStatus Execute()
         {
             return BehaviorTreeAction();
         }
 
-        internal override Node GetNodeToExecute()
+        public INode GetNodeToExecute()
         {
             return this;
         }
     }
 
-    public class Leaf<T> : Node<T>
+    public class Leaf<T> : INode<T>
     {
         public Leaf(Func<T, BtStatus> behaviorTreeAction) : base()
         {
@@ -32,12 +32,12 @@ namespace AmeisenBotX.BehaviorTree.Objects
 
         public Func<T, BtStatus> BehaviorTreeAction { get; set; }
 
-        public override BtStatus Execute(T blackboard)
+        public BtStatus Execute(T blackboard)
         {
             return BehaviorTreeAction(blackboard);
         }
 
-        internal override Node<T> GetNodeToExecute(T blackboard)
+        public INode<T> GetNodeToExecute(T blackboard)
         {
             return this;
         }

@@ -68,7 +68,7 @@ namespace AmeisenBotX.Core
 
         public static bool IsRaidMap(this WowMapId map)
         {
-            // classic 
+            // classic
             return map is WowMapId.MoltenCore
                 or WowMapId.OnyxiasLair
                 or WowMapId.BlackwingLair

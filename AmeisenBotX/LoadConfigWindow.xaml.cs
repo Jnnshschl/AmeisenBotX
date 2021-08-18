@@ -11,16 +11,15 @@ namespace AmeisenBotX
 {
     public partial class LoadConfigWindow : Window
     {
-        public LoadConfigWindow(string botDataPath)
+        public LoadConfigWindow()
         {
-            BotDataPath = botDataPath;
             ConfigToLoad = string.Empty;
             InitializeComponent();
         }
 
         public string ConfigToLoad { get; set; }
 
-        private string BotDataPath { get; set; }
+        private string DataPath { get; } = $"{Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData)}\\AmeisenBotX\\profiles\\";
 
         private void ButtonClose_Click(object sender, RoutedEventArgs e)
         {
@@ -36,7 +35,7 @@ namespace AmeisenBotX
 
             if ((string)comboboxSelectedConfig.SelectedItem == "New Config")
             {
-                ConfigEditorWindow configEditor = new(BotDataPath, null);
+                ConfigEditorWindow configEditor = new(DataPath, null);
                 configEditor.ShowDialog();
 
                 if (configEditor.Cancel)
@@ -47,7 +46,7 @@ namespace AmeisenBotX
 
                 if (configEditor.ConfigName != null && configEditor.Config != null)
                 {
-                    ConfigToLoad = Path.Combine(BotDataPath, configEditor.ConfigName, "config.json");
+                    ConfigToLoad = Path.Combine(DataPath, configEditor.ConfigName, "config.json");
 
                     if (!Directory.Exists(Path.GetDirectoryName(ConfigToLoad)))
                     {
@@ -59,24 +58,40 @@ namespace AmeisenBotX
             }
             else
             {
-                ConfigToLoad = Path.Combine(BotDataPath, (string)comboboxSelectedConfig.SelectedItem, "config.json");
+                ConfigToLoad = Path.Combine(DataPath, (string)comboboxSelectedConfig.SelectedItem, "config.json");
             }
+
+            Hide();
+
+            MainWindow mainWindow = new(DataPath, ConfigToLoad);
+            mainWindow.Show();
 
             Close();
         }
 
         private void Window_Loaded(object sender, RoutedEventArgs e)
         {
+            // check for older data folder that users need to migrate to the new location
+            string oldDataPath = $"{Directory.GetCurrentDirectory()}\\data\\";
+
+            if (Directory.Exists(oldDataPath))
+            {
+                MessageBox.Show($"You need to move the content of your \"\\\\data\\\\\" folder to \"{DataPath}\". Otherwise your profiles may not be displayed.", "New Data Location", MessageBoxButton.OK, MessageBoxImage.Warning);
+            }
+
+            // create our data folder, default will be placed at "%APPDATA%/AmeisenBotX/..."
+            if (!Directory.Exists(DataPath))
+            {
+                Directory.CreateDirectory(DataPath);
+            }
+
             comboboxSelectedConfig.Items.Add("New Config");
 
-            if (Directory.Exists(BotDataPath))
-            {
-                string[] directories = Directory.GetDirectories(BotDataPath);
+            string[] directories = Directory.GetDirectories(DataPath);
 
-                for (int i = 0; i < directories.Length; ++i)
-                {
-                    comboboxSelectedConfig.Items.Add(Path.GetFileName(directories[i]));
-                }
+            for (int i = 0; i < directories.Length; ++i)
+            {
+                comboboxSelectedConfig.Items.Add(Path.GetFileName(directories[i]));
             }
 
             string[] args = Environment.GetCommandLineArgs();

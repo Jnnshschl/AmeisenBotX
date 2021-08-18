@@ -2,17 +2,17 @@
 
 namespace AmeisenBotX.BehaviorTree.Objects
 {
-    public abstract class Node
+    public interface INode
     {
-        public abstract BtStatus Execute();
+        BtStatus Execute();
 
-        internal abstract Node GetNodeToExecute();
+        INode GetNodeToExecute();
     }
 
-    public abstract class Node<T>
+    public interface INode<T>
     {
-        public abstract BtStatus Execute(T blackboard);
+        BtStatus Execute(T blackboard);
 
-        internal abstract Node<T> GetNodeToExecute(T blackboard);
+        INode<T> GetNodeToExecute(T blackboard);
     }
 }

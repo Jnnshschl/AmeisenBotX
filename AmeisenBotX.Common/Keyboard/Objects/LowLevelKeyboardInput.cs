@@ -2,7 +2,7 @@
 using System;
 using System.Runtime.InteropServices;
 
-namespace AmeisenBotX.Common.Objects.Keyboard
+namespace AmeisenBotX.Common.Keyboard.Objects
 {
     [StructLayout(LayoutKind.Sequential)]
     public struct LowLevelKeyboardInput

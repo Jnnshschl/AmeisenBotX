@@ -1,5 +1,4 @@
-﻿using AmeisenBotX.BehaviorTree;
-using AmeisenBotX.BehaviorTree.Enums;
+﻿using AmeisenBotX.BehaviorTree.Enums;
 using AmeisenBotX.BehaviorTree.Objects;
 using AmeisenBotX.Common.Math;
 using AmeisenBotX.Common.Utils;
@@ -51,19 +50,19 @@ namespace AmeisenBotX.Core.Logic
 
             // SPECIAL ENVIRONMENTS -----------------------------
 
-            Node battlegroundNode = new Leaf
+            INode battlegroundNode = new Leaf
             (
                 // TODO: run bg engine here
                 () => BtStatus.Success
             );
 
-            Node dungeonNode = new Leaf
+            INode dungeonNode = new Leaf
             (
                 // TODO: run dungeon engine here
                 () => BtStatus.Success
             );
 
-            Node raidNode = new Leaf
+            INode raidNode = new Leaf
             (
                 // TODO: run raid engine here
                 () => BtStatus.Success
@@ -71,7 +70,7 @@ namespace AmeisenBotX.Core.Logic
 
             // OPEN WORLD -----------------------------
 
-            Node openworldGhostNode = new Selector
+            INode openworldGhostNode = new Selector
             (
                 () => CanUseStaticPaths(),
                 // prefer static paths
@@ -80,22 +79,78 @@ namespace AmeisenBotX.Core.Logic
                 new Leaf(RunToCorpseAndRetrieveIt)
             );
 
-            Node openworldCombatNode = new Selector
+            INode openworldCombatNode = new Selector
             (
                 () => Bot.CombatClass == null,
                 // start autoattacking if we have no combat class loaded
-                new Leaf(() => { if (!Bot.Player.IsAutoAttacking) Bot.Wow.StartAutoAttack(); return BtStatus.Success; }),
+                new Selector
+                (
+                    () => !Bot.Player.IsAutoAttacking,
+                    new Leaf(() => { Bot.Wow.StartAutoAttack(); return BtStatus.Success; }),
+                    new Leaf(() => { return BtStatus.Success; })
+                ),
                 // TODO: handle tactics here
                 // run combat class logic
                 new Selector
                 (
-                    () => Bot.Target == null || !Bot.Objects.IsTargetInLineOfSight || Bot.Player.DistanceTo(Bot.Target) < 28.0f,
+                    // combatclass handles movement itself or has no target
+                    () => Bot.CombatClass.HandlesMovement || Bot.Target == null,
                     new Leaf(() => { Bot.CombatClass.Execute(); return BtStatus.Success; }),
-                    new Leaf(() => MoveToPosition(Bot.Target.Position))
+                    new Selector
+                    (
+                        // check whether we need to move
+                        () => !Bot.Objects.IsTargetInLineOfSight,
+                        new Leaf(() => MoveToPosition(Bot.Target.Position)),
+                        new Waterfall
+                        (
+                            // fallback, run to the target unit
+                            new Leaf(() => { Bot.CombatClass.Execute(); return BtStatus.Success; }),
+                            // dps logic
+                            (
+                                () => Bot.CombatClass.Role == WowRole.Dps,
+                                new Selector
+                                (
+                                    () => Bot.CombatClass.IsMelee,
+                                    new Selector
+                                    (
+                                        () => Bot.Player.DistanceTo(Bot.Target) > 2.5f,
+                                        new Leaf(() => MoveToPosition(Bot.Target.Position, MovementAction.Chase)),
+                                        new Leaf(() => { Bot.CombatClass.Execute(); return BtStatus.Success; })
+                                    ),
+                                    new Selector
+                                    (
+                                        () => Bot.Player.DistanceTo(Bot.Target) > 28.0f,
+                                        new Leaf(() => MoveToPosition(Bot.Target.Position)),
+                                        new Leaf(() => { Bot.CombatClass.Execute(); return BtStatus.Success; })
+                                    )
+                                )
+                            ),
+                            // tank logic
+                            (
+                                () => Bot.CombatClass.Role == WowRole.Tank,
+                                new Selector
+                                (
+                                    () => Bot.Player.DistanceTo(Bot.Target) > 2.5f,
+                                    new Leaf(() => MoveToPosition(Bot.Target.Position, MovementAction.Chase)),
+                                    new Leaf(() => { Bot.CombatClass.Execute(); return BtStatus.Success; })
+                                )
+                            ),
+                            // heal logic
+                            (
+                                () => Bot.CombatClass.Role == WowRole.Heal,
+                                new Selector
+                                (
+                                    () => Bot.Player.DistanceTo(Bot.Target) > 25.0f,
+                                    new Leaf(() => MoveToPosition(Bot.Target.Position)),
+                                    new Leaf(() => { Bot.CombatClass.Execute(); return BtStatus.Success; })
+                                )
+                            )
+                        )
+                    )
                 )
             );
 
-            Node openworldNode = new Waterfall
+            INode openworldNode = new Waterfall
             (
                 // do idle stuff as fallback
                 new Leaf(Idle),
@@ -111,7 +166,7 @@ namespace AmeisenBotX.Core.Logic
 
             // GENERIC -----------------------------
 
-            Node mainLogicNode = new Annotator
+            INode mainLogicNode = new Annotator
             (
                 // run the update stuff before we execute the main logic
                 // objects will be updated here for example
@@ -206,7 +261,7 @@ namespace AmeisenBotX.Core.Logic
 
         private IStaticDeathRoute StaticRoute { get; set; }
 
-        private AmeisenBotBehaviorTree Tree { get; }
+        private BehaviorTree.BehaviorTree Tree { get; }
 
         private List<ulong> UnitsLooted { get; }
 
@@ -621,11 +676,11 @@ namespace AmeisenBotX.Core.Logic
             return BtStatus.Ongoing;
         }
 
-        private BtStatus MoveToPosition(Vector3 position)
+        private BtStatus MoveToPosition(Vector3 position, MovementAction movementAction = MovementAction.Move)
         {
             if (position != Vector3.Zero && Bot.Player.DistanceTo(position) > 3.0f)
             {
-                Bot.Movement.SetMovementAction(MovementAction.Move, position);
+                Bot.Movement.SetMovementAction(movementAction, position);
                 return BtStatus.Ongoing;
             }
 
@@ -664,7 +719,7 @@ namespace AmeisenBotX.Core.Logic
             return Bot.Player.IsInCombat
                 || Bot.Objects.Partymembers.Any(e => e.IsInCombat && e.DistanceTo(Bot.Player) < Config.SupportRange)
                 || Bot.Objects.WowObjects.OfType<IWowUnit>().Any(e => ((e.IsInCombat && (e.IsTaggedByMe || !e.IsTaggedByOther))
-                    || e.TargetGuid == Bot.Player.Guid                    
+                    || e.TargetGuid == Bot.Player.Guid
                     || Bot.Objects.Partymembers.Any(x => x.Guid == e.TargetGuid))
                     && Bot.Wow.GetReaction(Bot.Player.BaseAddress, e.BaseAddress) == WowUnitReaction.Hostile);
         }

@@ -82,7 +82,7 @@ namespace AmeisenBotX.Core.Engines.Dungeon
         ///<inheritdoc cref="IDungeonEngine.Profile"/>
         public IDungeonProfile Profile { get; private set; }
 
-        private AmeisenBotBehaviorTree BehaviorTree { get; }
+        private BehaviorTree.BehaviorTree BehaviorTree { get; }
 
         private AmeisenBotInterfaces Bot { get; }
 
