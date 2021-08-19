@@ -4,6 +4,7 @@ using AmeisenBotX.Common.Math;
 using AmeisenBotX.Common.Utils;
 using AmeisenBotX.Core.Engines.Character.Inventory.Objects;
 using AmeisenBotX.Core.Engines.Movement.Enums;
+using AmeisenBotX.Core.Logic.Enums;
 using AmeisenBotX.Core.Logic.Idle;
 using AmeisenBotX.Core.Logic.Idle.Actions;
 using AmeisenBotX.Core.Logic.Routines;
@@ -37,6 +38,8 @@ namespace AmeisenBotX.Core.Logic
             FirstStart = true;
             Rnd = new();
 
+            Mode = BotMode.None;
+
             IdleActionManager = new(new List<IIdleAction>()
             {
                 new AuctionHouseIdleAction(bot),
@@ -66,10 +69,13 @@ namespace AmeisenBotX.Core.Logic
 
             // SPECIAL ENVIRONMENTS -----------------------------
 
-            INode battlegroundNode = new Leaf
+            INode battlegroundNode = new Selector
             (
+                IsBattlegroundFinished,
+                // leave battleground once it is finished
+                new Leaf(() => { Bot.Wow.LeaveBattleground(); Bot.Battleground.Leave(); return BtStatus.Success; }),
                 // TODO: run bg engine here
-                () => BtStatus.Success
+                new Leaf(() => { Bot.Battleground.Execute(); return BtStatus.Success; })
             );
 
             INode dungeonNode = new Leaf
@@ -166,6 +172,16 @@ namespace AmeisenBotX.Core.Logic
                 )
             );
 
+            INode grindingNode = new Leaf
+            (
+                () => { Bot.Grinding.Execute(); return BtStatus.Success; }
+            );
+
+            INode questingNode = new Leaf
+            (
+                () => { Bot.Quest.Execute(); return BtStatus.Success; }
+            );
+
             INode openworldNode = new Waterfall
             (
                 // do idle stuff as fallback
@@ -197,12 +213,15 @@ namespace AmeisenBotX.Core.Logic
                         new Leaf(UpdateIngame),
                         new Waterfall
                         (
-                            // open world as fallback
+                            // open world auto behavior as fallback
                             openworldNode,
                             // handle special environments
                             (() => false && Bot.Objects.MapId.IsBattlegroundMap(), battlegroundNode),
                             (() => false && Bot.Objects.MapId.IsDungeonMap(), dungeonNode),
-                            (() => false && Bot.Objects.MapId.IsRaidMap(), raidNode)
+                            (() => false && Bot.Objects.MapId.IsRaidMap(), raidNode),
+                            // handle open world modes
+                            (() => Mode == BotMode.Grinding, grindingNode),
+                            (() => Mode == BotMode.Questing, questingNode)
                         )
                     ),
                     // we are in the loading screen or player is null
@@ -239,6 +258,8 @@ namespace AmeisenBotX.Core.Logic
         }
 
         public event Action OnWoWStarted;
+
+        public BotMode Mode { get; private set; }
 
         private TimegatedEvent AntiAfkEvent { get; }
 
@@ -291,6 +312,35 @@ namespace AmeisenBotX.Core.Logic
         private Queue<ulong> UnitsToLoot { get; }
 
         private TimegatedEvent UpdateFood { get; }
+
+        public void ChangeMode(BotMode mode)
+        {
+            switch (Mode)
+            {
+                case BotMode.Grinding:
+                    Bot.Grinding.Exit();
+                    break;
+
+                default:
+                    break;
+            }
+
+            Mode = mode;
+
+            switch (Mode)
+            {
+                case BotMode.Questing:
+                    Bot.Quest.Enter();
+                    break;
+
+                case BotMode.Grinding:
+                    Bot.Grinding.Enter();
+                    break;
+
+                default:
+                    break;
+            }
+        }
 
         public void Tick()
         {
@@ -574,6 +624,12 @@ namespace AmeisenBotX.Core.Logic
             }
 
             return BtStatus.Success;
+        }
+
+        private bool IsBattlegroundFinished()
+        {
+            return Bot.Memory.Read(Bot.Wow.Offsets.BattlegroundFinished, out int bgFinished)
+                && bgFinished == 1;
         }
 
         private bool IsRepairNpcNear(out IWowUnit unit)

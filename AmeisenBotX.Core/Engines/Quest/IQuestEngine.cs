@@ -13,6 +13,6 @@ namespace AmeisenBotX.Core.Engines.Quest
 
         void Execute();
 
-        void Start();
+        void Enter();
     }
 }

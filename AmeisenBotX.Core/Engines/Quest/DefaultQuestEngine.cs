@@ -111,7 +111,7 @@ namespace AmeisenBotX.Core.Engines.Quest
             CompletedQuests = CompletedQuests.Distinct().ToList();
         }
 
-        public void Start()
+        public void Enter()
         {
         }
 
