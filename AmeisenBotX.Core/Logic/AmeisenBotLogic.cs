@@ -61,6 +61,7 @@ namespace AmeisenBotX.Core.Logic
             LootTryEvent = new(TimeSpan.FromMilliseconds(750));
             NpcInteractionEvent = new(TimeSpan.FromMilliseconds(1000));
             OffsetCheckEvent = new(TimeSpan.FromMilliseconds(15000));
+            PartymembersFightEvent = new(TimeSpan.FromMilliseconds(1000));
             RenderSwitchEvent = new(TimeSpan.FromMilliseconds(1000));
             UpdateFood = new(TimeSpan.FromMilliseconds(1000));
 
@@ -793,14 +794,23 @@ namespace AmeisenBotX.Core.Logic
                     && (Food.Any(e => Enum.IsDefined(typeof(WowWater), e.Id)) || Food.Any(e => Enum.IsDefined(typeof(WowRefreshment), e.Id))));
         }
 
+        private bool ArePartymembersInFight{get;set;}
+
+        private TimegatedEvent PartymembersFightEvent { get; }
+
         private bool NeedToFight()
         {
+            if(PartymembersFightEvent.Run())
+            {
+                ArePartymembersInFight = Bot.Objects.Partymembers.Any(e => e.IsInCombat && e.DistanceTo(Bot.Player) < Config.SupportRange)
+                    || Bot.Objects.WowObjects.OfType<IWowUnit>().Any(e => ((e.IsInCombat && (e.IsTaggedByMe || !e.IsTaggedByOther))
+                        || e.TargetGuid == Bot.Player.Guid
+                        || Bot.Objects.Partymembers.Any(x => x.Guid == e.TargetGuid))
+                        && Bot.Wow.GetReaction(Bot.Player.BaseAddress, e.BaseAddress) == WowUnitReaction.Hostile);
+            }
+
             return Bot.Player.IsInCombat
-                || Bot.Objects.Partymembers.Any(e => e.IsInCombat && e.DistanceTo(Bot.Player) < Config.SupportRange)
-                || Bot.Objects.WowObjects.OfType<IWowUnit>().Any(e => ((e.IsInCombat && (e.IsTaggedByMe || !e.IsTaggedByOther))
-                    || e.TargetGuid == Bot.Player.Guid
-                    || Bot.Objects.Partymembers.Any(x => x.Guid == e.TargetGuid))
-                    && Bot.Wow.GetReaction(Bot.Player.BaseAddress, e.BaseAddress) == WowUnitReaction.Hostile);
+                || ArePartymembersInFight;
         }
 
         private bool NeedToFollow()

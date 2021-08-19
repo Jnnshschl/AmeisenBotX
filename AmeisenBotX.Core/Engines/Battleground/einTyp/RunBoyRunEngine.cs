@@ -40,8 +40,6 @@ namespace AmeisenBotX.Core.Engines.Battleground.einTyp
 
         public string Name => "RunBoyRunEngine";
 
-        private AmeisenBotFsm StateMachine { get; }
-
         public void Enter()
         {
             isHorde = Bot.Player.IsHorde();
