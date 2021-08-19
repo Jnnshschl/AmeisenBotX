@@ -75,6 +75,13 @@ namespace AmeisenBotX.Core.Engines.Quest
                     }
                 }
 
+                // this will only work if vendor is within RepairNpcSearchRadius
+                if (Bot.Character.Inventory.FreeBagSlots <= Config.BagSlotsToGoSell && Config.RepairNpcSearchRadius >= 120)
+                {
+                    StateMachine.SetState(BotState.Selling);
+                    return;
+                }
+
                 IEnumerable<IBotQuest> selectedQuests = Profile.Quests.Peek().Where(e => !e.Returned && !CompletedQuests.Contains(e.Id));
 
                 // drop all quest that are not selected
