@@ -28,7 +28,7 @@ namespace AmeisenBotX.Core.Engines.Combat.Classes.Shino
 
         public override string Description => "Grinding and Leveling CombatClass.";
 
-        public override string Displayname => "Frostmage";
+        public override string DisplayName => "Frostmage";
 
         public override bool HandlesMovement => false;
 

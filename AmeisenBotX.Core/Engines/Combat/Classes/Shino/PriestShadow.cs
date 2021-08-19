@@ -27,7 +27,7 @@ namespace AmeisenBotX.Core.Engines.Combat.Classes.Shino
 
         public override string Description => "FCFS based CombatClass for the Shadow Priest spec.";
 
-        public override string Displayname => "Priest Shadow";
+        public override string DisplayName => "Priest Shadow";
 
         public override bool HandlesMovement => false;
 

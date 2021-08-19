@@ -25,7 +25,7 @@ namespace AmeisenBotX.Core.Engines.Combat.Classes.Jannis
 
         public override string Description => "FCFS based CombatClass for the Frost Deathknight spec.";
 
-        public override string Displayname => "Deathknight Frost";
+        public override string DisplayName => "Deathknight Frost";
 
         public override bool HandlesMovement => false;
 

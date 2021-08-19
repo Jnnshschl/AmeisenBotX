@@ -105,7 +105,7 @@ namespace AmeisenBotX.Core.Engines.Combat.Classes.Kamel
 
         public override string Description => "Warrior Arms";
 
-        public override string Displayname => "Warrior Arms Beta";
+        public override string DisplayName => "Warrior Arms Beta";
 
         public TimegatedEvent ExecuteEvent { get; private set; }
 

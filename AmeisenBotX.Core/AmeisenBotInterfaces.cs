@@ -105,16 +105,18 @@ namespace AmeisenBotX.Core
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public IEnumerable<T> GetEnemiesInCombatWithParty<T>(Vector3 position, float distance) where T : IWowUnit
+        public IEnumerable<T> GetEnemiesInCombatWithParty<T>(Vector3 position, float distance)
+            where T : IWowUnit
         {
-            return GetNearEnemies<T>(position, distance)                                // is hostile
-                .Where(e => (e.IsInCombat && (e.IsTaggedByMe || !e.IsTaggedByOther))    // needs to be in combat and tagged by us or no one else
-                         || e.TargetGuid == Player.Guid                                 // targets us
-                         || Objects.Partymembers.Any(x => x.Guid == e.TargetGuid));     // targets a party member
+            return GetNearEnemies<T>(position, distance)                                    // is hostile
+                .Where(e => (e.IsInCombat && (e.IsTaggedByMe || !e.IsTaggedByOther))      // needs to be in combat and tagged by us or no one else
+                         || e.TargetGuid == Player.Guid                                     // targets us
+                         || Objects.Partymembers.Any(x => x.Guid == e.TargetGuid)); // targets a party member
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public IEnumerable<T> GetEnemiesInPath<T>(IEnumerable<Vector3> path, float distance) where T : IWowUnit
+        public IEnumerable<T> GetEnemiesInPath<T>(IEnumerable<Vector3> path, float distance) 
+            where T : IWowUnit
         {
             foreach (Vector3 pathPosition in path)
             {
@@ -130,42 +132,57 @@ namespace AmeisenBotX.Core
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public IEnumerable<T> GetEnemiesTargetingPartymembers<T>(Vector3 position, float distance) where T : IWowUnit
+        public IEnumerable<T> GetEnemiesTargetingPartymembers<T>(Vector3 position, float distance) 
+            where T : IWowUnit
         {
-            return GetNearEnemies<T>(position, distance)                                // is hostile
-                .Where(e => e.IsInCombat                                                // is in combat
-                         && (Objects.Partymembers.Any(x => x.Guid == e.TargetGuid)      // is targeting a partymember
-                            || Objects.PartyPets.Any(x => x.Guid == e.TargetGuid)));    // is targeting a pet in party
+            return GetNearEnemies<T>(position, distance)                                   // is hostile
+                .Where(e => e.IsInCombat                                                 // is in combat
+                         && (Objects.Partymembers.Any(x => x.Guid == e.TargetGuid) // is targeting a partymember
+                         || Objects.PartyPets.Any(x => x.Guid == e.TargetGuid)));  // is targeting a pet in party
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public IEnumerable<T> GetNearEnemies<T>(Vector3 position, float distance) where T : IWowUnit
+        public IEnumerable<T> GetNearEnemies<T>(Vector3 position, float distance) 
+            where T : IWowUnit
+        {
+            return Objects.WowObjects.OfType<T>()
+                .Where(e => !e.IsDead && !e.IsNotAttackable                        // is alive and attackable
+                         && Db.GetReaction(Player, e) == WowUnitReaction.Hostile // is hostile
+                         && e.Position.GetDistance(position) < distance);            // is in range
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public IEnumerable<T> GetNearEnemiesOrNeutrals<T>(Vector3 position, float distance) 
+            where T : IWowUnit
+        {
+            return Objects.WowObjects.OfType<T>()
+                .Where(e => !e.IsDead && !e.IsNotAttackable                          // is alive and attackable
+                          && Db.GetReaction(Player, e) != WowUnitReaction.Friendly // is hostile/neutral
+                          && e.Position.GetDistance(position) < distance);             // is in range
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public IEnumerable<T> GetNearFriends<T>(Vector3 position, float distance)
+            where T : IWowUnit
         {
             return Objects.WowObjects.OfType<T>()
                 .Where(e => !e.IsDead && !e.IsNotAttackable                         // is alive and attackable
-                         && Db.GetReaction(Player, e) == WowUnitReaction.Hostile    // is hostile
-                         && e.Position.GetDistance(position) < distance);           // is in range
+                         && Db.GetReaction(Player, e) == WowUnitReaction.Friendly // is hostile
+                         && e.Position.GetDistance(position) < distance);             // is in range
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public IEnumerable<T> GetNearFriends<T>(Vector3 position, float distance) where T : IWowUnit
-        {
-            return Objects.WowObjects.OfType<T>()
-                .Where(e => !e.IsDead && !e.IsNotAttackable                         // is alive and attackable
-                         && Db.GetReaction(Player, e) == WowUnitReaction.Friendly   // is hostile
-                         && e.Position.GetDistance(position) < distance);           // is in range
-        }
-
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public IEnumerable<T> GetNearPartymembers<T>(Vector3 position, float distance) where T : IWowUnit
+        public IEnumerable<T> GetNearPartymembers<T>(Vector3 position, float distance) 
+            where T : IWowUnit
         {
             return Objects.Partymembers.OfType<T>()
-                .Where(e => !e.IsDead && !e.IsNotAttackable                 // is alive and attackable
-                         && e.Position.GetDistance(position) < distance);   // is in range
+                .Where(e => !e.IsDead && !e.IsNotAttackable             // is alive and attackable
+                         && e.Position.GetDistance(position) < distance); // is in range
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public T GetWowObjectByGuid<T>(ulong guid) where T : IWowObject
+        public T GetWowObjectByGuid<T>(ulong guid)
+            where T : IWowObject
         {
             return Objects.WowObjects.OfType<T>().FirstOrDefault(e => e.Guid == guid);
         }

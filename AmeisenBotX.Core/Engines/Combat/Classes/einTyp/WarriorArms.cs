@@ -39,7 +39,7 @@ namespace AmeisenBotX.Core.Engines.Combat.Classes.einTyp
 
         public string Description => "...";
 
-        public string Displayname => "Arms Warrior";
+        public string DisplayName => "Arms Warrior";
 
         public bool HandlesFacing => false;
 

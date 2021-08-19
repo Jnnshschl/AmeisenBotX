@@ -479,52 +479,22 @@ namespace AmeisenBotX.Core
 
         private void InitCombatClasses()
         {
-            // add combat classes here
-            CombatClasses = new List<ICombatClass>()
-            {
-                new Engines.Combat.Classes.Jannis.DeathknightBlood(Bot),
-                new Engines.Combat.Classes.Jannis.DeathknightFrost(Bot),
-                new Engines.Combat.Classes.Jannis.DeathknightUnholy(Bot),
-                new Engines.Combat.Classes.Jannis.DruidBalance(Bot),
-                new Engines.Combat.Classes.Jannis.DruidFeralBear(Bot),
-                new Engines.Combat.Classes.Jannis.DruidFeralCat(Bot),
-                new Engines.Combat.Classes.Jannis.DruidRestoration(Bot),
-                new Engines.Combat.Classes.Jannis.HunterBeastmastery(Bot),
-                new Engines.Combat.Classes.Jannis.HunterMarksmanship(Bot),
-                new Engines.Combat.Classes.Jannis.HunterSurvival(Bot),
-                new Engines.Combat.Classes.Jannis.MageArcane(Bot),
-                new Engines.Combat.Classes.Jannis.MageFire(Bot),
-                new Engines.Combat.Classes.Jannis.PaladinHoly(Bot),
-                new Engines.Combat.Classes.Jannis.PaladinProtection(Bot),
-                new Engines.Combat.Classes.Jannis.PaladinRetribution(Bot),
-                new Engines.Combat.Classes.Jannis.PriestDiscipline(Bot),
-                new Engines.Combat.Classes.Jannis.PriestHoly(Bot),
-                new Engines.Combat.Classes.Jannis.PriestShadow(Bot),
-                new Engines.Combat.Classes.Jannis.RogueAssassination(Bot),
-                new Engines.Combat.Classes.Jannis.ShamanElemental(Bot),
-                new Engines.Combat.Classes.Jannis.ShamanEnhancement(Bot),
-                new Engines.Combat.Classes.Jannis.ShamanRestoration(Bot),
-                new Engines.Combat.Classes.Jannis.WarlockAffliction(Bot),
-                new Engines.Combat.Classes.Jannis.WarlockDemonology(Bot),
-                new Engines.Combat.Classes.Jannis.WarlockDestruction(Bot),
-                new Engines.Combat.Classes.Jannis.WarriorArms(Bot),
-                new Engines.Combat.Classes.Jannis.WarriorFury(Bot),
-                new Engines.Combat.Classes.Jannis.WarriorProtection(Bot),
-                new Engines.Combat.Classes.Kamel.DeathknightBlood(Bot),
-                new Engines.Combat.Classes.Kamel.RestorationShaman(Bot),
-                new Engines.Combat.Classes.Kamel.ShamanEnhancement(Bot),
-                new Engines.Combat.Classes.Kamel.PaladinProtection(Bot),
-                new Engines.Combat.Classes.Kamel.PriestHoly(Bot),
-                new Engines.Combat.Classes.Kamel.WarriorFury(Bot),
-                new Engines.Combat.Classes.Kamel.WarriorArms(Bot),
-                new Engines.Combat.Classes.Kamel.RogueAssassination(Bot),
-                new Engines.Combat.Classes.einTyp.PaladinProtection(Bot),
-                new Engines.Combat.Classes.einTyp.RogueAssassination(Bot),
-                new Engines.Combat.Classes.einTyp.WarriorArms(Bot),
-                new Engines.Combat.Classes.einTyp.WarriorFury(Bot),
-                new Engines.Combat.Classes.Shino.PriestShadow(Bot),
-                new Engines.Combat.Classes.Shino.MageFrost(Bot),
-            };
+            // Get search namespace
+            string combatClassNamespace = "AmeisenBotX.Core.Engines.Combat.Classes";
+            
+            IEnumerable<Type> combatClassTypes = AppDomain.CurrentDomain.GetAssemblies()
+                .SelectMany(x => x.GetTypes())
+                .Where(x => x.GetInterfaces().Contains(typeof(ICombatClass)))
+                .Where(x => x.Namespace.Contains(combatClassNamespace));
+
+            List<ICombatClass> combatClassInstances = new();
+
+            // Add combat classes with bot parameter
+            combatClassInstances.AddRange(combatClassTypes.Where(x => x.GetConstructor(new Type[] { typeof(AmeisenBotInterfaces) }) != null)
+                .Select(x => (ICombatClass)Activator.CreateInstance(x, Bot)));
+
+            // Set combat classes
+            CombatClasses = combatClassInstances;
         }
 
         private void InitGrindingProfiles()

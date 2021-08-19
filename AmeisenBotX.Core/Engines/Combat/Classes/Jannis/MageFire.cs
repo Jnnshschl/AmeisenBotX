@@ -29,7 +29,7 @@ namespace AmeisenBotX.Core.Engines.Combat.Classes.Jannis
 
         public override string Description => "FCFS based CombatClass for the Fire Mage spec.";
 
-        public override string Displayname => "Mage Fire";
+        public override string DisplayName => "Mage Fire";
 
         public override bool HandlesMovement => false;
 

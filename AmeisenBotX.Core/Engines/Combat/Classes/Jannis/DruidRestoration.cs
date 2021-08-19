@@ -24,7 +24,7 @@ namespace AmeisenBotX.Core.Engines.Combat.Classes.Jannis
 
         public override string Description => "FCFS based CombatClass for the Druid Restoration spec.";
 
-        public override string Displayname => "Druid Restoration";
+        public override string DisplayName => "Druid Restoration";
 
         public override bool HandlesMovement => false;
 

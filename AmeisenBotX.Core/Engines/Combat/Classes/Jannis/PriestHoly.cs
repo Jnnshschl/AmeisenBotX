@@ -27,7 +27,7 @@ namespace AmeisenBotX.Core.Engines.Combat.Classes.Jannis
 
         public override string Description => "FCFS based CombatClass for the Holy Priest spec.";
 
-        public override string Displayname => "Priest Holy";
+        public override string DisplayName => "Priest Holy";
 
         public override bool HandlesMovement => false;
 

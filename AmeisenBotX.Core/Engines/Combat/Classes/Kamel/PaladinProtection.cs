@@ -86,7 +86,7 @@ namespace AmeisenBotX.Core.Engines.Combat.Classes.Kamel
 
         public override string Description => "Paladin Protection 1.0";
 
-        public override string Displayname => "Paladin Protection";
+        public override string DisplayName => "Paladin Protection";
 
         public TimegatedEvent ExecuteEvent { get; private set; }
 

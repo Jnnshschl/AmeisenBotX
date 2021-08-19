@@ -29,7 +29,7 @@ namespace AmeisenBotX.Core.Engines.Combat.Classes.Jannis
 
         public override string Description => "FCFS based CombatClass for the Arms Warrior spec.";
 
-        public override string Displayname => "Warrior Arms";
+        public override string DisplayName => "Warrior Arms";
 
         public override bool HandlesMovement => false;
 

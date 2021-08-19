@@ -32,7 +32,7 @@ namespace AmeisenBotX.Core.Engines.Combat.Classes.Jannis
 
         public override string Description => "FCFS based CombatClass for the Balance (Owl) Druid spec.";
 
-        public override string Displayname => "Druid Balance";
+        public override string DisplayName => "Druid Balance";
 
         public override bool HandlesMovement => false;
 

@@ -454,7 +454,7 @@ namespace AmeisenBotX.Core.Engines.Combat.Classes.Jannis
 
         public abstract string Description { get; }
 
-        public abstract string Displayname { get; }
+        public abstract string DisplayName { get; }
 
         public TimegatedEvent EventAutoAttack { get; private set; }
 
@@ -669,7 +669,7 @@ namespace AmeisenBotX.Core.Engines.Combat.Classes.Jannis
 
         public override string ToString()
         {
-            return $"[{WowClass}] [{Role}] {Displayname} ({Author})";
+            return $"[{WowClass}] [{Role}] {DisplayName} ({Author})";
         }
 
         protected bool CheckForWeaponEnchantment(WowEquipmentSlot slot, string enchantmentName, string spellToCastEnchantment)
@@ -1020,13 +1020,13 @@ namespace AmeisenBotX.Core.Engines.Combat.Classes.Jannis
 
                     if (castSuccessful == 1)
                     {
-                        AmeisenLogger.I.Log("CombatClass", $"[{Displayname}]: Casting Spell \"{spellName}\" on \"{Bot.Target?.Guid}\"", LogLevel.Verbose);
+                        AmeisenLogger.I.Log("CombatClass", $"[{DisplayName}]: Casting Spell \"{spellName}\" on \"{Bot.Target?.Guid}\"", LogLevel.Verbose);
                         IsWanding = IsWanding && spellName == "Shoot";
                         return true;
                     }
                     else
                     {
-                        AmeisenLogger.I.Log("CombatClass", $"[{Displayname}]: Spell \"{spellName}\" is on cooldown for \"{cooldown}\"ms", LogLevel.Verbose);
+                        AmeisenLogger.I.Log("CombatClass", $"[{DisplayName}]: Spell \"{spellName}\" is on cooldown for \"{cooldown}\"ms", LogLevel.Verbose);
                         return false;
                     }
                 }

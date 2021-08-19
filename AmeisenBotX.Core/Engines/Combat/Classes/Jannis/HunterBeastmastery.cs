@@ -55,7 +55,7 @@ namespace AmeisenBotX.Core.Engines.Combat.Classes.Jannis
 
         public override string Description => "FCFS based CombatClass for the Beastmastery Hunter spec.";
 
-        public override string Displayname => "Hunter Beastmastery";
+        public override string DisplayName => "Hunter Beastmastery";
 
         public override bool HandlesMovement => true;
 

@@ -28,7 +28,7 @@ namespace AmeisenBotX.Core.Engines.Combat.Classes.Jannis
 
         public override string Description => "FCFS based CombatClass for the Feral (Cat) Druid spec.";
 
-        public override string Displayname => "Druid Feral Cat";
+        public override string DisplayName => "Druid Feral Cat";
 
         public override bool HandlesMovement => false;
 

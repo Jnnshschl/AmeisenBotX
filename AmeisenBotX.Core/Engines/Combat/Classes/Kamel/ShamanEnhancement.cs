@@ -106,7 +106,7 @@ namespace AmeisenBotX.Core.Engines.Combat.Classes.Kamel
 
         public override string Description => "Shaman Enhancement";
 
-        public override string Displayname => "Shaman Enhancement";
+        public override string DisplayName => "Shaman Enhancement";
 
         //Event
         public TimegatedEvent EnhancementEvent { get; private set; }

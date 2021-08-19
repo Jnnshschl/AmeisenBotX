@@ -25,7 +25,7 @@ namespace AmeisenBotX.Core.Engines.Combat.Classes.Jannis
 
         public override string Description => "FCFS based CombatClass for the Protection Paladin spec.";
 
-        public override string Displayname => "Paladin Protection";
+        public override string DisplayName => "Paladin Protection";
 
         public override bool HandlesMovement => false;
 

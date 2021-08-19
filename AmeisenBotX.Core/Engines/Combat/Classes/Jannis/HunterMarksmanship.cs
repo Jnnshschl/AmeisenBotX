@@ -42,7 +42,7 @@ namespace AmeisenBotX.Core.Engines.Combat.Classes.Jannis
 
         public override string Description => "FCFS based CombatClass for the Marksmanship Hunter spec.";
 
-        public override string Displayname => "Hunter Marksmanship";
+        public override string DisplayName => "Hunter Marksmanship";
 
         public override bool HandlesMovement => false;
 

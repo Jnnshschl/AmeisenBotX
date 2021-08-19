@@ -4,6 +4,7 @@ using AmeisenBotX.Common.Keyboard.Objects;
 using AmeisenBotX.Common.Math;
 using AmeisenBotX.Common.Utils;
 using AmeisenBotX.Core;
+using AmeisenBotX.Core.Logic;
 using AmeisenBotX.Core.Logic.Enums;
 using AmeisenBotX.Logging;
 using AmeisenBotX.Logging.Enums;
@@ -130,7 +131,7 @@ namespace AmeisenBotX
 
         private RelationshipWindow RelationshipWindow { get; set; }
 
-        private Dictionary<BotState, Window> StateConfigWindows { get; set; }
+        private Dictionary<BotMode, Window> StateConfigWindows { get; set; }
 
         private Brush TextAccentBrush { get; }
 
@@ -228,9 +229,9 @@ namespace AmeisenBotX
 
         private void ButtonStateConfig_Click(object sender, RoutedEventArgs e)
         {
-            if (StateConfigWindows.ContainsKey((BotState)comboboxStateOverride.SelectedItem))
+            if (StateConfigWindows.ContainsKey((BotMode)comboboxStateOverride.SelectedItem))
             {
-                Window selectedWindow = StateConfigWindows[(BotState)comboboxStateOverride.SelectedItem];
+                Window selectedWindow = StateConfigWindows[(BotMode)comboboxStateOverride.SelectedItem];
                 selectedWindow.ShowDialog();
 
                 if (((IStateConfigWindow)selectedWindow).ShouldSave)
@@ -281,8 +282,8 @@ namespace AmeisenBotX
         {
             if (AmeisenBot != null)
             {
-                // AmeisenBot.StateMachine.StateOverride = (BotState)comboboxStateOverride.SelectedItem;
-                buttonStateConfig.IsEnabled = StateConfigWindows.ContainsKey((BotState)comboboxStateOverride.SelectedItem);
+                ((AmeisenBotLogic)AmeisenBot.Logic).ChangeMode((BotMode)comboboxStateOverride.SelectedItem);
+                buttonStateConfig.IsEnabled = StateConfigWindows.ContainsKey((BotMode)comboboxStateOverride.SelectedItem);
             }
         }
 
@@ -573,11 +574,9 @@ namespace AmeisenBotX
             // obtain a window handle (HWND) to out current WPF window
             MainWindowHandle = new WindowInteropHelper(this).EnsureHandle();
 
-            comboboxStateOverride.Items.Add(BotState.Idle);
-            comboboxStateOverride.Items.Add(BotState.Combat);
-            comboboxStateOverride.Items.Add(BotState.Grinding);
-            comboboxStateOverride.Items.Add(BotState.Job);
-            comboboxStateOverride.Items.Add(BotState.Questing);
+            comboboxStateOverride.Items.Add(BotMode.None);
+            comboboxStateOverride.Items.Add(BotMode.Grinding);
+            comboboxStateOverride.Items.Add(BotMode.Questing);
 
             comboboxStateOverride.SelectedIndex = 0;
 
@@ -631,9 +630,8 @@ namespace AmeisenBotX
 
                 StateConfigWindows = new()
                 {
-                    { BotState.Grinding, new StateGrindingConfigWindow(AmeisenBot, AmeisenBot.Config) },
-                    { BotState.Job, new StateJobConfigWindow(AmeisenBot, AmeisenBot.Config) },
-                    { BotState.Questing, new StateQuestingConfigWindow(AmeisenBot, AmeisenBot.Config) },
+                    { BotMode.Grinding, new StateGrindingConfigWindow(AmeisenBot, AmeisenBot.Config) },
+                    { BotMode.Questing, new StateQuestingConfigWindow(AmeisenBot, AmeisenBot.Config) },
                 };
 
                 if (AmeisenBot.Config.Autopilot)

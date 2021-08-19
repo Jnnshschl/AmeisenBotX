@@ -20,7 +20,7 @@ namespace AmeisenBotX.Core.Engines.Combat.Classes.Jannis
 
         public override string Description => "FCFS based CombatClass for the Assasination Rogue spec.";
 
-        public override string Displayname => "[WIP] Rogue Assasination";
+        public override string DisplayName => "[WIP] Rogue Assasination";
 
         public override bool HandlesMovement => false;
 

@@ -35,7 +35,7 @@ namespace AmeisenBotX.Core.Engines.Combat.Classes.einTyp
 
         public string Description => "...";
 
-        public string Displayname => "Protection Paladin";
+        public string DisplayName => "Protection Paladin";
 
         public bool HandlesFacing => false;
 

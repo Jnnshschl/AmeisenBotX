@@ -30,7 +30,7 @@ namespace AmeisenBotX.Core.Engines.Combat.Classes.Jannis
 
         public override string Description => "FCFS based CombatClass for the Blood Deathknight spec.";
 
-        public override string Displayname => "Deathknight Blood";
+        public override string DisplayName => "Deathknight Blood";
 
         public override bool HandlesMovement => false;
 

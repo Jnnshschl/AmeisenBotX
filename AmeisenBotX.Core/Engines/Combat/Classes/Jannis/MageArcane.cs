@@ -27,7 +27,7 @@ namespace AmeisenBotX.Core.Engines.Combat.Classes.Jannis
 
         public override string Description => "FCFS based CombatClass for the Arcane Mage spec.";
 
-        public override string Displayname => "Mage Arcane";
+        public override string DisplayName => "Mage Arcane";
 
         public override bool HandlesMovement => false;
 

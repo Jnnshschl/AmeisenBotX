@@ -68,29 +68,6 @@ namespace AmeisenBotX.Core.Logic
             UnitsLooted = new();
             UnitsToLoot = new();
 
-            // SPECIAL ENVIRONMENTS -----------------------------
-
-            INode battlegroundNode = new Selector
-            (
-                IsBattlegroundFinished,
-                // leave battleground once it is finished
-                new Leaf(() => { Bot.Wow.LeaveBattleground(); Bot.Battleground.Leave(); return BtStatus.Success; }),
-                // TODO: run bg engine here
-                new Leaf(() => { Bot.Battleground.Execute(); return BtStatus.Success; })
-            );
-
-            INode dungeonNode = new Leaf
-            (
-                // TODO: run dungeon engine here
-                () => BtStatus.Success
-            );
-
-            INode raidNode = new Leaf
-            (
-                // TODO: run raid engine here
-                () => BtStatus.Success
-            );
-
             // OPEN WORLD -----------------------------
 
             INode openworldGhostNode = new Selector
@@ -198,6 +175,37 @@ namespace AmeisenBotX.Core.Logic
                 (() => Config.IdleActions && IdleActionEvent.Run(), new Leaf(() => { IdleActionManager.Tick(Config.Autopilot); return BtStatus.Success; }))
             );
 
+            // SPECIAL ENVIRONMENTS -----------------------------
+
+            INode battlegroundNode = new Selector
+            (
+                IsBattlegroundFinished,
+                // leave battleground once it is finished
+                new Leaf(() => { Bot.Wow.LeaveBattleground(); Bot.Battleground.Leave(); return BtStatus.Success; }),
+                // TODO: run bg engine here
+                new Leaf(() => { Bot.Battleground.Execute(); return BtStatus.Success; })
+            );
+
+            INode dungeonNode = new Waterfall
+            (
+                new Selector
+                (
+                    () => Config.DungeonUsePartyMode && NeedToFollow(),
+                    new Leaf(Follow),
+                    new Leaf(() => { Bot.Dungeon.Execute(); return BtStatus.Success; })
+                ),
+                //TODO: implement speclized dungeon combat logic
+                (NeedToFight, openworldCombatNode),
+                (NeedToLoot, new Leaf(LootNearUnits)),
+                (NeedToEat, new Leaf(Eat))
+            );
+
+            INode raidNode = new Leaf
+            (
+                // TODO: run raid engine here
+                () => BtStatus.Success
+            );
+
             // GENERIC -----------------------------
 
             INode mainLogicNode = new Annotator
@@ -218,7 +226,7 @@ namespace AmeisenBotX.Core.Logic
                             openworldNode,
                             // handle special environments
                             (() => false && Bot.Objects.MapId.IsBattlegroundMap(), battlegroundNode),
-                            (() => false && Bot.Objects.MapId.IsDungeonMap(), dungeonNode),
+                            (() => Bot.Objects.MapId.IsDungeonMap(), dungeonNode),
                             (() => false && Bot.Objects.MapId.IsRaidMap(), raidNode),
                             // handle open world modes
                             (() => Mode == BotMode.Grinding, grindingNode),

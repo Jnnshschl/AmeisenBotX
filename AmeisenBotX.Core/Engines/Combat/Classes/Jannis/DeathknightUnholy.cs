@@ -25,7 +25,7 @@ namespace AmeisenBotX.Core.Engines.Combat.Classes.Jannis
 
         public override string Description => "FCFS based CombatClass for the Unholy Deathknight spec.";
 
-        public override string Displayname => "Deathknight Unholy";
+        public override string DisplayName => "Deathknight Unholy";
 
         public override bool HandlesMovement => false;
 

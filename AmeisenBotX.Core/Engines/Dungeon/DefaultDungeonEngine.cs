@@ -106,20 +106,6 @@ namespace AmeisenBotX.Core.Engines.Dungeon
 
         private Selector RootSelector { get; }
 
-        ///<inheritdoc cref="IDungeonEngine.Enter"/>
-        public void Enter()
-        {
-            Profile = null;
-            Random rnd = new();
-
-            LeaderFollowOffset = new()
-            {
-                X = ((float)rnd.NextDouble() * (10.0f * 2)) - 10.0f,
-                Y = ((float)rnd.NextDouble() * (10.0f * 2)) - 10.0f,
-                Z = 0f
-            };
-        }
-
         ///<inheritdoc cref="IDungeonEngine.Execute"/>
         public void Execute()
         {
@@ -129,13 +115,17 @@ namespace AmeisenBotX.Core.Engines.Dungeon
             }
             else
             {
+                Random rnd = new();
+
+                LeaderFollowOffset = new()
+                {
+                    X = ((float)rnd.NextDouble() * (5.0f * 2)) - 5.0f,
+                    Y = ((float)rnd.NextDouble() * (5.0f * 2)) - 5.0f,
+                    Z = 0f
+                };
+
                 LoadProfile(TryGetProfileByMapId(Bot.Objects.MapId));
             }
-        }
-
-        ///<inheritdoc cref="IDungeonEngine.Exit"/>
-        public void Exit()
-        {
         }
 
         ///<inheritdoc cref="IDungeonEngine.OnDeath"/>

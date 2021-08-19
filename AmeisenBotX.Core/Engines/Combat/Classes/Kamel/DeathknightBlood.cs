@@ -29,7 +29,7 @@ namespace AmeisenBotX.Core.Engines.Combat.Classes.Kamel
 
         public string Description => "FCFS based CombatClass for the Blood Deathknight spec.";
 
-        public string Displayname => "[WIP] Blood Deathknight";
+        public string DisplayName => "[WIP] Blood Deathknight";
 
         public bool HandlesFacing => false;
 
