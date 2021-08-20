@@ -7,7 +7,6 @@ using AmeisenBotX.Core.Engines.Combat.Helpers.Aura;
 using AmeisenBotX.Core.Engines.Combat.Helpers.Targets;
 using AmeisenBotX.Core.Engines.Movement.Enums;
 using AmeisenBotX.Core.Fsm;
-using AmeisenBotX.Core.Fsm.Enums;
 using AmeisenBotX.Logging;
 using AmeisenBotX.Logging.Enums;
 using AmeisenBotX.Wow.Objects;
@@ -41,7 +40,7 @@ namespace AmeisenBotX.Core.Engines.Combat.Classes.Bia10
             EventCheckFacing = new TimegatedEvent(TimeSpan.FromMilliseconds(500));
             EventAutoAttack = new TimegatedEvent(TimeSpan.FromMilliseconds(500));
 
-            C = new Dictionary<string, dynamic>
+            ConfigurableThresholds = new Dictionary<string, dynamic>
             {
                 { "HealthItemThreshold", 30.0 },
                 { "ManaItemThreshold", 30.0 }
@@ -51,6 +50,8 @@ namespace AmeisenBotX.Core.Engines.Combat.Classes.Bia10
             KnownSpells = new Dictionary<string, WoWSpell>();
             var lightingBoltData = new WoWSpell(30, 0, TimeSpan.FromSeconds(1.5), WoWSpell.WoWSpellSchool.Nature);
             KnownSpells.Add(DataConstants.ShamanSpells.LightningBolt, lightingBoltData);
+            var earthShockData = new WoWSpell(25, 0, TimeSpan.FromSeconds(6), WoWSpell.WoWSpellSchool.Nature);
+            KnownSpells.Add(DataConstants.ShamanSpells.EarthShock, earthShockData);
         }
 
         public Dictionary<string, WoWSpell> KnownSpells { get; set; }
@@ -88,11 +89,12 @@ namespace AmeisenBotX.Core.Engines.Combat.Classes.Bia10
         }
 
         public string Author { get; } = "Bia10";
-        public IEnumerable<int> BlacklistedTargetDisplayIds { get => TargetProviderDps.BlacklistedTargets; set => TargetProviderDps.BlacklistedTargets = value; }
-        public Dictionary<string, dynamic> C { get; set; }
-        public CooldownManager CooldownManager { get; private set; }
         public abstract string Description { get; }
         public abstract string DisplayName { get; }
+        public IEnumerable<int> BlacklistedTargetDisplayIds { get; set; }
+        public IEnumerable<int> PriorityTargetDisplayIds { get; set; }
+        public Dictionary<string, dynamic> ConfigurableThresholds { get; set; }
+        public CooldownManager CooldownManager { get; private set; }
         public TimegatedEvent EventAutoAttack { get; private set; }
         public TimegatedEvent EventCheckFacing { get; set; }
         public GroupAuraManager GroupAuraManager { get; private set; }
@@ -103,7 +105,6 @@ namespace AmeisenBotX.Core.Engines.Combat.Classes.Bia10
         public bool IsWanding { get; private set; }
         public abstract IItemComparator ItemComparator { get; set; }
         public AuraManager MyAuraManager { get; private set; }
-        public IEnumerable<int> PriorityTargetDisplayIds { get => TargetProviderDps.PriorityTargets; set => TargetProviderDps.PriorityTargets = value; }
         public Dictionary<string, DateTime> ResurrectionTargets { get; private set; }
         public abstract WowRole Role { get; }
         public abstract TalentTree Talents { get; }
@@ -151,7 +152,6 @@ namespace AmeisenBotX.Core.Engines.Combat.Classes.Bia10
                     Bot.Movement.SetMovementAction(MovementAction.Move, target.Position);
 
                 //Bot.Wow.ClearTarget();
-                //Todo: add to blacklist for a while
             }
         }
 
@@ -168,92 +168,89 @@ namespace AmeisenBotX.Core.Engines.Combat.Classes.Bia10
             if (Bot.Target != null && EventCheckFacing.Run())
                 CheckFacing(Bot.Target);
 
-            // Update Priority Units
-            // --------------------------- >
-            if (StateMachine.CurrentState.Key == BotState.Dungeon
-                && Bot.Dungeon != null
-                && Bot.Dungeon.Profile.PriorityUnits != null
-                && Bot.Dungeon.Profile.PriorityUnits.Count > 0)
-            {
-                TargetProviderDps.PriorityTargets = Bot.Dungeon.Profile.PriorityUnits;
-            }
-
             // Autoattacks
             // --------------------------- >
             if (UseAutoAttacks)
             {
                 IsWanding = Bot.Character.SpellBook.IsSpellKnown("Shoot")
                     && Bot.Character.Equipment.Items.ContainsKey(WowEquipmentSlot.INVSLOT_RANGED)
-                    && (WowClass == WowClass.Priest || WowClass == WowClass.Mage || WowClass == WowClass.Warlock)
+                    && WowClass is WowClass.Priest or WowClass.Mage or WowClass.Warlock
                     && (IsWanding || TryCastSpell("Shoot", Bot.Wow.TargetGuid));
 
-                if (!IsWanding
-                    && EventAutoAttack.Run()
-                    && !Bot.Player.IsAutoAttacking
-                    && Bot.Player.IsInMeleeRange(Bot.Target))
-                {
+                if (!IsWanding && EventAutoAttack.Run()
+                               && !Bot.Player.IsAutoAttacking
+                               && Bot.Player.IsInMeleeRange(Bot.Target))
                     Bot.Wow.StartAutoAttack();
-                }
             }
 
             // Buffs, Debuffs, Interrupts
             // --------------------------- >
-            if (MyAuraManager.Tick(Bot.Player.Auras)
-                || GroupAuraManager.Tick())
+            if (MyAuraManager.Tick(Bot.Player.Auras) || GroupAuraManager.Tick())
                 return;
-
-            if (Bot.Target != null
-                && TargetAuraManager.Tick(Bot.Target.Auras))
+            if (Bot.Target != null && TargetAuraManager.Tick(Bot.Target.Auras))
                 return;
-
             if (InterruptManager.Tick(Bot.GetNearEnemies<IWowUnit>(Bot.Player.Position, IsMelee ? 5.0f : 30.0f)))
                 return;
 
             // Useable items, potions, etc.
             // ---------------------------- >
-            if (Bot.Player.HealthPercentage < C["HealthItemThreshold"])
+            if (Bot.Player.HealthPercentage < ConfigurableThresholds["HealthItemThreshold"])
             {
                 var healthItem = Bot.Character.Inventory.Items.FirstOrDefault(e =>
                     DataConstants.usableHealingItems.Contains(e.Id));
 
-                if (healthItem != null)
-                {
-                    Bot.Wow.UseItemByName(healthItem.Name);
-                }
+                if (healthItem == null) return;
+                Bot.Wow.UseItemByName(healthItem.Name);
             }
 
-            if (Bot.Player.ManaPercentage < C["ManaItemThreshold"])
+            if (Bot.Player.ManaPercentage < ConfigurableThresholds["ManaItemThreshold"])
             {
                 var manaItem = Bot.Character.Inventory.Items.FirstOrDefault(e =>
                     DataConstants.usableManaItems.Contains(e.Id));
 
-                if (manaItem != null)
-                    Bot.Wow.UseItemByName(manaItem.Name);
+                if (manaItem == null) return;
+                Bot.Wow.UseItemByName(manaItem.Name);
             }
 
             // Race abilities
             // -------------- >
-            if (Bot.Player.Race == WowRace.Human
-                && (Bot.Player.IsDazed
-                    || Bot.Player.IsFleeing
-                    || Bot.Player.IsInfluenced
-                    || Bot.Player.IsPossessed)
-                && TryCastSpell("Every Man for Himself", 0))
+            switch (Bot.Player.Race)
             {
-                return;
-            }
+                case WowRace.Human:
+                    if (Bot.Player.IsDazed || Bot.Player.IsFleeing || Bot.Player.IsInfluenced || Bot.Player.IsPossessed)
+                        TryCastSpell("Every Man for Himself", 0);
+                    break;
+                case WowRace.Orc:
+                    break;
+                case WowRace.Dwarf:
+                    if (Bot.Player.HealthPercentage < 50.0)
+                        TryCastSpell("Stoneform", 0);
+                    break;
+                case WowRace.Nightelf:
+                    break;
+                case WowRace.Undead:
+                    break;
+                case WowRace.Tauren:
+                    break;
+                case WowRace.Gnome:
+                    break;
+                case WowRace.Troll:
+                    break;
+                case WowRace.Bloodelf:
+                    break;
+                case WowRace.Draenei:
+                    if (Bot.Player.HealthPercentage < 50.0)
+                        TryCastSpell("Gift of the Naaru", 0);
+                    break;
 
-            if (Bot.Player.HealthPercentage < 50.0
-                && (Bot.Player.Race == WowRace.Draenei && TryCastSpell("Gift of the Naaru", 0)
-                    || Bot.Player.Race == WowRace.Dwarf && TryCastSpell("Stoneform", 0)))
-            {
-                return;
+                default:
+                    throw new ArgumentOutOfRangeException();
             }
         }
 
         public virtual void Load(Dictionary<string, JsonElement> objects)
         {
-            if (objects.ContainsKey("Configureables")) { C = objects["Configureables"].ToDyn(); }
+            if (objects.ContainsKey("Configureables")) { ConfigurableThresholds = objects["Configureables"].ToDyn(); }
         }
 
         public virtual void OutOfCombatExecute()
@@ -275,7 +272,7 @@ namespace AmeisenBotX.Core.Engines.Combat.Classes.Bia10
         }
 
         public virtual Dictionary<string, object> Save() =>
-            new() { { "Configureables", C } };
+            new() { { "Configureables", ConfigurableThresholds } };
 
         public override string ToString() =>
             $"[{WowClass}] [{Role}] {DisplayName} ({Author})";
@@ -316,7 +313,6 @@ namespace AmeisenBotX.Core.Engines.Combat.Classes.Bia10
 
             ResurrectionTargets.Add(name, DateTime.Now + TimeSpan.FromSeconds(10));
             return TryCastSpell(spellName, player.Guid, true);
-
         }
 
         protected bool TryCastSpell(string spellName, ulong guid, bool needsResource = false, int currentResourceAmount = 0, bool forceTargetSwitch = false)

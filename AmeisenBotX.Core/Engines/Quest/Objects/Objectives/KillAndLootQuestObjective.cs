@@ -66,6 +66,8 @@ namespace AmeisenBotX.Core.Engines.Quest.Objects.Objectives
 
         private Vector3 CurrentSpot { get; set; }
 
+        public List<Vector3> VendorsLocation { get; }
+
         private IWowUnit IWowUnit { get; set; }
 
         private int Killed { get; set; }

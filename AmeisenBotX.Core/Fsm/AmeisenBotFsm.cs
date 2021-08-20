@@ -37,6 +37,7 @@ namespace AmeisenBotX.Core.Fsm
                 { BotState.Looting, new StateLooting(this, Config, Bot) },
                 { BotState.Questing, new StateQuesting(this, Config, Bot) },
                 { BotState.Repairing, new StateRepairing(this, Config, Bot) },
+                { BotState.GoingToVendor, new StateGoingToVendor(this, Config, Bot) },
                 { BotState.Selling, new StateSelling(this, Config, Bot) },
                 { BotState.StartWow, new StateStartWow(this, Config, Bot) },
                 { BotState.StateTalkToQuestgivers, new StateTalkToQuestgivers(this, Config, Bot) }

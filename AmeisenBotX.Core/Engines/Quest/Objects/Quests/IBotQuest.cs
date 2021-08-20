@@ -1,4 +1,7 @@
-﻿namespace AmeisenBotX.Core.Engines.Quest.Objects.Quests
+﻿using AmeisenBotX.Core.Engines.Quest.Objects.Objectives;
+using System.Collections.Generic;
+
+namespace AmeisenBotX.Core.Engines.Quest.Objects.Quests
 {
     public interface IBotQuest
     {
@@ -11,6 +14,8 @@
         string Name { get; }
 
         bool Returned { get; }
+
+        List<IQuestObjective> Objectives { get; }
 
         void AcceptQuest();
 

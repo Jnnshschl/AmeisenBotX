@@ -60,7 +60,7 @@ namespace AmeisenBotX.Core.Engines.Quest
 
                 return;
             }
-
+            
             if (Profile.Quests.Count > 0)
             {
                 // do i need to recover my hp
@@ -75,13 +75,19 @@ namespace AmeisenBotX.Core.Engines.Quest
                     }
                 }
 
-                // this will only work if vendor is within RepairNpcSearchRadius
-                if (Bot.Character.Inventory.FreeBagSlots <= Config.BagSlotsToGoSell && Config.RepairNpcSearchRadius >= 120)
+                // goto vendor or sell
+                if (Bot.Character.Inventory.FreeBagSlots < Config.BagSlotsToGoSell)
                 {
-                    StateMachine.SetState(BotState.Selling);
-                    return;
-                }
+                    var vendor = Bot.GetClosestVendor();
+                    if (vendor == null || Bot.Player.DistanceTo(vendor) > 5.0f)
+                    {
+                        StateMachine.SetState(BotState.GoingToVendor);
+                        return;
+                    }
 
+                    StateMachine.SetState(BotState.Selling);
+                }
+  
                 IEnumerable<IBotQuest> selectedQuests = Profile.Quests.Peek().Where(e => !e.Returned && !CompletedQuests.Contains(e.Id));
 
                 // drop all quest that are not selected

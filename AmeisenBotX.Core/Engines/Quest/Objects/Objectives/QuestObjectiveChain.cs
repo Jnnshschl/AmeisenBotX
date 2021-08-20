@@ -23,7 +23,7 @@ namespace AmeisenBotX.Core.Engines.Quest.Objects.Objectives
             }
         }
 
-        private List<IQuestObjective> QuestObjectives { get; }
+        public List<IQuestObjective> QuestObjectives { get; }
 
         public void Execute()
         {
