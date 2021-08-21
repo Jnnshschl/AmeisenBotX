@@ -141,21 +141,12 @@ namespace AmeisenBotX.Core.Engines.Combat.Classes.Bia10
                 Bot.Movement.SetMovementAction(MovementAction.Move, target.Position);
             else if (IsInSpellRange(target, DataConstants.ShamanSpells.LightningBolt))
                 TryCastSpell(DataConstants.ShamanSpells.LightningBolt, target.Guid);
-            else if (!IsInSpellRange(target, DataConstants.ShamanSpells.LightningBolt) // try closer location
+            else if (!IsInSpellRange(target, DataConstants.ShamanSpells.LightningBolt) 
                      || !Bot.Wow.IsInLineOfSight(Bot.Player.Position, target.Position))
-            {
-                var distanceToTarget = Bot.Player.DistanceTo(target.Position);
-                var heightDifference = target.Position.Z - Bot.Player.Position.Z;
-
-                // a mere workaround, some calculation of slope would be nice
-                if (heightDifference <= 10 && distanceToTarget >= 30)
-                    Bot.Movement.SetMovementAction(MovementAction.Move, target.Position);
-
-                //Bot.Wow.ClearTarget();
-            }
+                Bot.Movement.SetMovementAction(MovementAction.Move, target.Position);
         }
 
-        public virtual void Execute() //TODO: refactor
+        public virtual void Execute()
         {
             if (Bot.Player.IsCasting)
             {
@@ -177,9 +168,8 @@ namespace AmeisenBotX.Core.Engines.Combat.Classes.Bia10
                     && WowClass is WowClass.Priest or WowClass.Mage or WowClass.Warlock
                     && (IsWanding || TryCastSpell("Shoot", Bot.Wow.TargetGuid));
 
-                if (!IsWanding && EventAutoAttack.Run()
-                               && !Bot.Player.IsAutoAttacking
-                               && Bot.Player.IsInMeleeRange(Bot.Target))
+                if (!IsWanding && Bot.Player.IsInMeleeRange(Bot.Target)
+                               && EventAutoAttack.Run() && !Bot.Player.IsAutoAttacking) 
                     Bot.Wow.StartAutoAttack();
             }
 
@@ -194,6 +184,7 @@ namespace AmeisenBotX.Core.Engines.Combat.Classes.Bia10
 
             // Useable items, potions, etc.
             // ---------------------------- >
+            /* TODO: rest state
             if (Bot.Player.HealthPercentage < ConfigurableThresholds["HealthItemThreshold"])
             {
                 var healthItem = Bot.Character.Inventory.Items.FirstOrDefault(e =>
@@ -202,7 +193,6 @@ namespace AmeisenBotX.Core.Engines.Combat.Classes.Bia10
                 if (healthItem == null) return;
                 Bot.Wow.UseItemByName(healthItem.Name);
             }
-
             if (Bot.Player.ManaPercentage < ConfigurableThresholds["ManaItemThreshold"])
             {
                 var manaItem = Bot.Character.Inventory.Items.FirstOrDefault(e =>
@@ -210,8 +200,8 @@ namespace AmeisenBotX.Core.Engines.Combat.Classes.Bia10
 
                 if (manaItem == null) return;
                 Bot.Wow.UseItemByName(manaItem.Name);
-            }
-
+            }*/
+            
             // Race abilities
             // -------------- >
             switch (Bot.Player.Race)

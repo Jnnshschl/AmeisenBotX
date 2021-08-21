@@ -55,7 +55,7 @@ namespace AmeisenBotX.Core.Engines.Combat.Classes.Bia10
             Tree3 = new Dictionary<int, Talent>(),
         };
 
-        public override bool UseAutoAttacks => false;
+        public override bool UseAutoAttacks => true;
         public override bool WalkBehindEnemy => false;
 
         private bool HexedTarget { get; set; }
