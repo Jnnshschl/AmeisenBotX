@@ -646,11 +646,6 @@ namespace AmeisenBotX.Core.Logic
         {
             Bot.CombatClass.OutOfCombatExecute();
 
-            if (CharacterUpdateEvent.Run())
-            {
-                Bot.Character.UpdateAll();
-            }
-
             return BtStatus.Success;
         }
 
@@ -747,9 +742,9 @@ namespace AmeisenBotX.Core.Logic
         {
             IWowUnit unit = Bot.GetWowObjectByGuid<IWowUnit>(UnitsToLoot.Peek());
 
-            if (unit == null || !unit.IsLootable || LootTry > 1)
+            if (unit == null || !unit.IsLootable || LootTry > 2)
             {
-                UnitsToLoot.Dequeue();
+                UnitsLooted.Add(UnitsToLoot.Dequeue());
                 LootTry = 0;
                 return BtStatus.Failed;
             }
@@ -859,9 +854,12 @@ namespace AmeisenBotX.Core.Logic
 
             if (units.Any())
             {
-                foreach (IWowUnit unit in units.Where(e => !UnitsLooted.Contains(e.Guid)))
+                foreach (IWowUnit unit in units)
                 {
-                    UnitsToLoot.Enqueue(unit.Guid);
+                    if (!UnitsLooted.Contains(unit.Guid) && !UnitsToLoot.Contains(unit.Guid))
+                    {
+                        UnitsToLoot.Enqueue(unit.Guid);
+                    }
                 }
             }
 
@@ -1019,6 +1017,11 @@ namespace AmeisenBotX.Core.Logic
             Bot.Wow.Events.Tick();
 
             Bot.Movement.Execute();
+
+            if (CharacterUpdateEvent.Run())
+            {
+                Bot.Character.UpdateAll();
+            }
 
             if (Config.FollowPositionDynamic && OffsetCheckEvent.Run())
             {
