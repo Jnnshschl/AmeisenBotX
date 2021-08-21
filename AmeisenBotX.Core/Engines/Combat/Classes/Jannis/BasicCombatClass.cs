@@ -437,7 +437,7 @@ namespace AmeisenBotX.Core.Engines.Combat.Classes.Jannis
             EventCheckFacing = new(TimeSpan.FromMilliseconds(500));
             EventAutoAttack = new(TimeSpan.FromMilliseconds(500));
 
-            ConfigurableThresholds = new()
+            Configurables = new()
             {
                 { "HealthItemThreshold", 30.0 },
                 { "ManaItemThreshold", 30.0 }
@@ -448,7 +448,7 @@ namespace AmeisenBotX.Core.Engines.Combat.Classes.Jannis
 
         public IEnumerable<int> BlacklistedTargetDisplayIds { get => TargetProviderDps.BlacklistedTargets; set => TargetProviderDps.BlacklistedTargets = value; }
 
-        public Dictionary<string, dynamic> ConfigurableThresholds { get; set; }
+        public Dictionary<string, dynamic> Configurables { get; set; }
 
         public CooldownManager CooldownManager { get; private set; }
 
@@ -592,7 +592,7 @@ namespace AmeisenBotX.Core.Engines.Combat.Classes.Jannis
 
             // Useable items, potions, etc.
             // ---------------------------- >
-            if (Bot.Player.HealthPercentage < ConfigurableThresholds["HealthItemThreshold"])
+            if (Bot.Player.HealthPercentage < Configurables["HealthItemThreshold"])
             {
                 IWowInventoryItem healthItem = Bot.Character.Inventory.Items.FirstOrDefault(e => useableHealingItems.Contains(e.Id));
 
@@ -602,7 +602,7 @@ namespace AmeisenBotX.Core.Engines.Combat.Classes.Jannis
                 }
             }
 
-            if (Bot.Player.ManaPercentage < ConfigurableThresholds["ManaItemThreshold"])
+            if (Bot.Player.ManaPercentage < Configurables["ManaItemThreshold"])
             {
                 IWowInventoryItem manaItem = Bot.Character.Inventory.Items.FirstOrDefault(e => useableManaItems.Contains(e.Id));
 
@@ -634,7 +634,7 @@ namespace AmeisenBotX.Core.Engines.Combat.Classes.Jannis
 
         public virtual void Load(Dictionary<string, JsonElement> objects)
         {
-            if (objects.ContainsKey("Configureables")) { ConfigurableThresholds = objects["Configureables"].ToDyn(); }
+            if (objects.ContainsKey("Configureables")) { Configurables = objects["Configureables"].ToDyn(); }
         }
 
         public virtual void OutOfCombatExecute()
@@ -664,7 +664,7 @@ namespace AmeisenBotX.Core.Engines.Combat.Classes.Jannis
 
         public virtual Dictionary<string, object> Save()
         {
-            return new() { { "Configureables", ConfigurableThresholds } };
+            return new() { { "Configureables", Configurables } };
         }
 
         public override string ToString()

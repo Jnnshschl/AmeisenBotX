@@ -577,7 +577,7 @@ namespace AmeisenBotX.Core.Logic
                     return BtStatus.Ongoing;
                 }
 
-                IWowInventoryItem refreshment = Food.First(e => Enum.IsDefined(typeof(WowRefreshment), e.Id));
+                IWowInventoryItem refreshment = Food.FirstOrDefault(e => Enum.IsDefined(typeof(WowRefreshment), e.Id));
 
                 if (needToEat && needToDrink && refreshment != null)
                 {
@@ -588,7 +588,7 @@ namespace AmeisenBotX.Core.Logic
                     }
                 }
 
-                IWowInventoryItem food = Food.First(e => Enum.IsDefined(typeof(WowFood), e.Id));
+                IWowInventoryItem food = Food.FirstOrDefault(e => Enum.IsDefined(typeof(WowFood), e.Id));
 
                 if (!isEating && needToEat && (food != null || refreshment != null))
                 {
@@ -606,7 +606,7 @@ namespace AmeisenBotX.Core.Logic
                     }
                 }
 
-                IWowInventoryItem water = Food.First(e => Enum.IsDefined(typeof(WowWater), e.Id));
+                IWowInventoryItem water = Food.FirstOrDefault(e => Enum.IsDefined(typeof(WowWater), e.Id));
 
                 if (!isDrinking && needToDrink && (water != null || refreshment != null))
                 {

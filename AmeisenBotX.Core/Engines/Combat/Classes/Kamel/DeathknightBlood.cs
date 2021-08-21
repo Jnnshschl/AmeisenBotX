@@ -25,7 +25,7 @@ namespace AmeisenBotX.Core.Engines.Combat.Classes.Kamel
 
         public IEnumerable<int> BlacklistedTargetDisplayIds { get; set; }
 
-        public Dictionary<string, dynamic> ConfigurableThresholds { get; set; } = new Dictionary<string, dynamic>();
+        public Dictionary<string, dynamic> Configurables { get; set; } = new Dictionary<string, dynamic>();
 
         public string Description => "FCFS based CombatClass for the Blood Deathknight spec.";
 
@@ -95,7 +95,7 @@ namespace AmeisenBotX.Core.Engines.Combat.Classes.Kamel
 
         public void Load(Dictionary<string, JsonElement> objects)
         { 
-            ConfigurableThresholds = objects["Configureables"].ToDyn();
+            Configurables = objects["Configureables"].ToDyn();
         }
 
         public void OutOfCombatExecute()
@@ -106,7 +106,7 @@ namespace AmeisenBotX.Core.Engines.Combat.Classes.Kamel
         {
             return new()
             {
-                { "configureables", ConfigurableThresholds }
+                { "configureables", Configurables }
             };
         }
 

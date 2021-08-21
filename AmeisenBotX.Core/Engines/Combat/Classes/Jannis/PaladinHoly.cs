@@ -17,9 +17,9 @@ namespace AmeisenBotX.Core.Engines.Combat.Classes.Jannis
     {
         public PaladinHoly(AmeisenBotInterfaces bot) : base(bot)
         {
-            ConfigurableThresholds.TryAdd("AttackInGroups", true);
-            ConfigurableThresholds.TryAdd("AttackInGroupsUntilManaPercent", 80.0);
-            ConfigurableThresholds.TryAdd("AttackInGroupsCloseCombat", false);
+            Configurables.TryAdd("AttackInGroups", true);
+            Configurables.TryAdd("AttackInGroupsUntilManaPercent", 80.0);
+            Configurables.TryAdd("AttackInGroupsCloseCombat", false);
 
             MyAuraManager.Jobs.Add(new KeepActiveAuraJob(bot.Db, blessingOfWisdomSpell, () => TryCastSpell(blessingOfWisdomSpell, Bot.Wow.PlayerGuid, true)));
             MyAuraManager.Jobs.Add(new KeepActiveAuraJob(bot.Db, devotionAuraSpell, () => TryCastSpell(devotionAuraSpell, Bot.Wow.PlayerGuid, true)));
@@ -151,7 +151,7 @@ namespace AmeisenBotX.Core.Engines.Combat.Classes.Jannis
             {
                 bool isAlone = !Bot.Objects.Partymembers.Any(e => e.Guid != Bot.Player.Guid);
 
-                if ((isAlone || (ConfigurableThresholds["AttackInGroups"] && ConfigurableThresholds["AttackInGroupsUntilManaPercent"] < Bot.Player.ManaPercentage))
+                if ((isAlone || (Configurables["AttackInGroups"] && Configurables["AttackInGroupsUntilManaPercent"] < Bot.Player.ManaPercentage))
                     && SelectTarget(TargetProviderDps))
                 {
                     if ((Bot.Player.Auras.Any(e => Bot.Db.GetSpellName(e.SpellId) == sealOfVengeanceSpell) || Bot.Player.Auras.Any(e => Bot.Db.GetSpellName(e.SpellId) == sealOfWisdomSpell))
@@ -166,7 +166,7 @@ namespace AmeisenBotX.Core.Engines.Combat.Classes.Jannis
                     }
 
                     // either we are alone or allowed to go close combat in groups
-                    if (isAlone || ConfigurableThresholds["AttackInGroupsCloseCombat"])
+                    if (isAlone || Configurables["AttackInGroupsCloseCombat"])
                     {
                         if (!Bot.Player.IsAutoAttacking
                             && Bot.Target.Position.GetDistance(Bot.Player.Position) < 3.5f
