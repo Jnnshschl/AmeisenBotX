@@ -1,5 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.IO;
 using System.Text.Json;
 using System.Text.Json.Serialization;
@@ -46,7 +45,7 @@ namespace AmeisenBotX.Common.Storage
 
                 s.Load(JsonSerializer.Deserialize<Dictionary<string, JsonElement>>(File.ReadAllText(fullPath), new() { AllowTrailingCommas = true, NumberHandling = JsonNumberHandling.AllowReadingFromString }));
             }
-            catch (Exception ex)
+            catch
             {
                 // AmeisenLogger.I.Log("CombatClass", $"Failed to load {s.GetType().Name} ({fullPath}):\n{ex}", LogLevel.Error);
             }
@@ -82,7 +81,7 @@ namespace AmeisenBotX.Common.Storage
 
                 File.WriteAllText(fullPath, JsonSerializer.Serialize(data, new() { WriteIndented = true }));
             }
-            catch (Exception ex)
+            catch
             {
                 // AmeisenLogger.I.Log("CombatClass", $"Failed to save {s.GetType().Name} ({fullPath}):\n{ex}", LogLevel.Error);
             }

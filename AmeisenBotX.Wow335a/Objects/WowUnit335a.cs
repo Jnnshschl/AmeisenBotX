@@ -155,7 +155,8 @@ namespace AmeisenBotX.Wow335a.Objects
 
         public bool IsInMeleeRange(IWowUnit wowUnit)
         {
-            return wowUnit != null && Position.GetDistance(wowUnit.Position) < MathF.Max(4.5f, CombatReach + wowUnit.CombatReach + 1.0f);
+            // TODO: figure out real way to use combat reach
+            return wowUnit != null && Position.GetDistance(wowUnit.Position) < 2.75f;
         }
 
         public virtual string ReadName(IMemoryApi memoryApi, IOffsetList offsetList)

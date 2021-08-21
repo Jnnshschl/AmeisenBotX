@@ -1,7 +1,6 @@
 ﻿using AmeisenBotX.Core.Engines.Character.Comparators;
 using AmeisenBotX.Core.Engines.Character.Talents.Objects;
-using AmeisenBotX.Core.Fsm;
-using AmeisenBotX.Core.Fsm.Utils.Auras.Objects;
+using AmeisenBotX.Core.Logic.Utils.Auras.Objects;
 using AmeisenBotX.Wow.Objects.Enums;
 using System.Linq;
 
@@ -9,7 +8,7 @@ namespace AmeisenBotX.Core.Engines.Combat.Classes.Jannis
 {
     public class ShamanEnhancement : BasicCombatClass
     {
-        public ShamanEnhancement(AmeisenBotInterfaces bot, AmeisenBotFsm stateMachine) : base(bot, stateMachine)
+        public ShamanEnhancement(AmeisenBotInterfaces bot) : base(bot)
         {
             MyAuraManager.Jobs.Add(new KeepActiveAuraJob(bot.Db, lightningShieldSpell, () => Bot.Player.ManaPercentage > 60.0 && TryCastSpell(lightningShieldSpell, 0, true)));
             MyAuraManager.Jobs.Add(new KeepActiveAuraJob(bot.Db, waterShieldSpell, () => Bot.Player.ManaPercentage < 20.0 && TryCastSpell(waterShieldSpell, 0, true)));

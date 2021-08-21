@@ -1,22 +1,12 @@
-﻿using System.Collections.Generic;
-
-namespace AmeisenBotX.BehaviorTree.Objects
+﻿namespace AmeisenBotX.BehaviorTree.Objects
 {
-    public abstract class Composite : Node
+    public interface IComposite : INode
     {
-        public Composite() : base()
-        {
-        }
-
-        public List<Node> Children { get; protected set; }
+        INode[] Children { get; }
     }
 
-    public abstract class Composite<T> : Node<T>
+    public interface IComposite<T> : INode<T>
     {
-        public Composite() : base()
-        {
-        }
-
-        public List<Node<T>> Children { get; protected set; }
+        INode<T>[] Children { get; }
     }
 }

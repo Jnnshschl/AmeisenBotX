@@ -43,7 +43,7 @@ namespace AmeisenBotX.Core.Engines.Dungeon
                         new Leaf(() =>
                         {
                             IDied = false;
-                            return BehaviorTreeStatus.Success;
+                            return BtStatus.Success;
                         })
                     ),
                     new Selector
@@ -55,16 +55,16 @@ namespace AmeisenBotX.Core.Engines.Dungeon
                             new Selector
                             (
                                 () => Bot.Objects.Partymembers.Any(e => e.Auras.Any(e => Bot.Db.GetSpellName(e.SpellId) == "Food") || e.Auras.Any(e => Bot.Db.GetSpellName(e.SpellId) == "Drink")),
-                                new Leaf(() => { return BehaviorTreeStatus.Success; }),
+                                new Leaf(() => { return BtStatus.Success; }),
                                 new Leaf(() => FollowNodePath())
                             ),
-                            new Leaf(() => { return BehaviorTreeStatus.Success; })
+                            new Leaf(() => { return BtStatus.Success; })
                         ),
                         new Selector
                         (
                             () => Bot.Objects.Partyleader != null,
                             new Leaf(() => MoveToPosition(Bot.Objects.Partyleader.Position + LeaderFollowOffset, 0.0f, MovementAction.Follow)),
-                            new Leaf(() => { return BehaviorTreeStatus.Success; })
+                            new Leaf(() => { return BtStatus.Success; })
                         )
                     )
                 )
@@ -82,7 +82,7 @@ namespace AmeisenBotX.Core.Engines.Dungeon
         ///<inheritdoc cref="IDungeonEngine.Profile"/>
         public IDungeonProfile Profile { get; private set; }
 
-        private AmeisenBotBehaviorTree BehaviorTree { get; }
+        private Tree BehaviorTree { get; }
 
         private AmeisenBotInterfaces Bot { get; }
 
@@ -106,20 +106,6 @@ namespace AmeisenBotX.Core.Engines.Dungeon
 
         private Selector RootSelector { get; }
 
-        ///<inheritdoc cref="IDungeonEngine.Enter"/>
-        public void Enter()
-        {
-            Profile = null;
-            Random rnd = new();
-
-            LeaderFollowOffset = new()
-            {
-                X = ((float)rnd.NextDouble() * (10.0f * 2)) - 10.0f,
-                Y = ((float)rnd.NextDouble() * (10.0f * 2)) - 10.0f,
-                Z = 0f
-            };
-        }
-
         ///<inheritdoc cref="IDungeonEngine.Execute"/>
         public void Execute()
         {
@@ -129,13 +115,17 @@ namespace AmeisenBotX.Core.Engines.Dungeon
             }
             else
             {
+                Random rnd = new();
+
+                LeaderFollowOffset = new()
+                {
+                    X = ((float)rnd.NextDouble() * (5.0f * 2)) - 5.0f,
+                    Y = ((float)rnd.NextDouble() * (5.0f * 2)) - 5.0f,
+                    Z = 0f
+                };
+
                 LoadProfile(TryGetProfileByMapId(Bot.Objects.MapId));
             }
-        }
-
-        ///<inheritdoc cref="IDungeonEngine.Exit"/>
-        public void Exit()
-        {
         }
 
         ///<inheritdoc cref="IDungeonEngine.OnDeath"/>
@@ -197,7 +187,7 @@ namespace AmeisenBotX.Core.Engines.Dungeon
             }
         }
 
-        private BehaviorTreeStatus ExitDungeon()
+        private BtStatus ExitDungeon()
         {
             if (ExitDungeonEvent.Run())
             {
@@ -211,16 +201,16 @@ namespace AmeisenBotX.Core.Engines.Dungeon
                 }
             }
 
-            return BehaviorTreeStatus.Success;
+            return BtStatus.Success;
         }
 
-        private BehaviorTreeStatus FollowNodePath()
+        private BtStatus FollowNodePath()
         {
             if (CurrentNodes.Any())
             {
                 if (Bot.Player.IsCasting)
                 {
-                    return BehaviorTreeStatus.Ongoing;
+                    return BtStatus.Ongoing;
                 }
 
                 DungeonNode node = CurrentNodes.Peek();
@@ -244,7 +234,7 @@ namespace AmeisenBotX.Core.Engines.Dungeon
                                 Bot.Wow.InteractWithObject(nearestGameobject.BaseAddress);
                             }
 
-                            return BehaviorTreeStatus.Ongoing;
+                            return BtStatus.Ongoing;
                         }
                     }
                     else if (node.Type == DungeonNodeType.Jump)
@@ -286,18 +276,18 @@ namespace AmeisenBotX.Core.Engines.Dungeon
                                         Bot.Wow.LootEverything();
                                     }
 
-                                    return BehaviorTreeStatus.Ongoing;
+                                    return BtStatus.Ongoing;
                                 }
                             }
 
-                            return BehaviorTreeStatus.Ongoing;
+                            return BtStatus.Ongoing;
                         }
                     }
                 }
 
-                BehaviorTreeStatus status = MoveToPosition(node.Position, 3.0f);
+                BtStatus status = MoveToPosition(node.Position, 3.0f);
 
-                if (status == BehaviorTreeStatus.Success)
+                if (status == BtStatus.Success)
                 {
                     CurrentNodes.Dequeue();
                 }
@@ -325,18 +315,18 @@ namespace AmeisenBotX.Core.Engines.Dungeon
             Bot.CombatClass.PriorityTargetDisplayIds = profile.PriorityUnits;
         }
 
-        private BehaviorTreeStatus MoveToPosition(Vector3 position, float minDistance = 2.5f, MovementAction movementAction = MovementAction.Move)
+        private BtStatus MoveToPosition(Vector3 position, float minDistance = 2.5f, MovementAction movementAction = MovementAction.Move)
         {
             float distance = Bot.Player.Position.GetDistance(position);
 
             if (distance > minDistance)
             {
                 Bot.Movement.SetMovementAction(movementAction, position);
-                return BehaviorTreeStatus.Ongoing;
+                return BtStatus.Ongoing;
             }
             else
             {
-                return BehaviorTreeStatus.Success;
+                return BtStatus.Success;
             }
         }
     }

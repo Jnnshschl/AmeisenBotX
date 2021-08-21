@@ -25,9 +25,8 @@ using AmeisenBotX.Core.Engines.Quest.Profiles;
 using AmeisenBotX.Core.Engines.Quest.Profiles.Shino;
 using AmeisenBotX.Core.Engines.Quest.Profiles.StartAreas;
 using AmeisenBotX.Core.Engines.Tactic;
-using AmeisenBotX.Core.Fsm;
-using AmeisenBotX.Core.Fsm.Enums;
-using AmeisenBotX.Core.Fsm.States;
+using AmeisenBotX.Core.Logic;
+using AmeisenBotX.Core.Logic.Routines;
 using AmeisenBotX.Logging;
 using AmeisenBotX.Logging.Enums;
 using AmeisenBotX.Memory;
@@ -109,14 +108,7 @@ namespace AmeisenBotX.Core
             Bot = new();
             Bot.Memory = new XMemory();
 
-            StateMachine = new(Config, Bot);
-            StateMachine.Get<StateStartWow>().OnWoWStarted += () =>
-            {
-                if (Config.SaveWowWindowPosition)
-                {
-                    LoadWowWindowPosition();
-                }
-            };
+            Logic = new AmeisenBotLogic(Config, Bot);
 
             Bot.Chat = new DefaultChatManager(Config, ProfileFolder);
             Bot.Tactic = new DefaultTacticEngine();
@@ -147,11 +139,11 @@ namespace AmeisenBotX.Core
             // setup all instances that use the whole Bot class last
             Bot.Dungeon = new DefaultDungeonEngine(Bot, Config);
             Bot.Jobs = new DefaultJobEngine(Bot, Config);
-            Bot.Quest = new DefaultQuestEngine(Bot, Config, StateMachine);
-            Bot.Grinding = new DefaultGrindingEngine(Bot, Config, StateMachine);
+            Bot.Quest = new DefaultQuestEngine(Bot);
+            Bot.Grinding = new DefaultGrindingEngine(Bot, Config);
 
             Bot.PathfindingHandler = new AmeisenNavigationHandler(Config.NavmeshServerIp, Config.NameshServerPort);
-            Bot.Movement = new DefaultMovementEngine(Bot, Config, StateMachine);
+            Bot.Movement = new DefaultMovementEngine(Bot, Config);
             // wow interface setup done
 
             AmeisenLogger.I.Log("AmeisenBot", "Finished setting up Bot", LogLevel.Verbose);
@@ -253,6 +245,11 @@ namespace AmeisenBotX.Core
         public IEnumerable<IJobProfile> JobProfiles { get; private set; }
 
         /// <summary>
+        /// State machine of the bot.
+        /// </summary>
+        public IAmeisenBotLogic Logic { get; private set; }
+
+        /// <summary>
         /// Folder where  all profile relevant stuff is stored.
         /// </summary>
         public string ProfileFolder { get; }
@@ -261,11 +258,6 @@ namespace AmeisenBotX.Core
         /// All currently loaded quest profiles.
         /// </summary>
         public IEnumerable<IQuestProfile> QuestProfiles { get; private set; }
-
-        /// <summary>
-        /// State machine of the bot.
-        /// </summary>
-        public AmeisenBotFsm StateMachine { get; private set; }
 
         private TimegatedEvent BagUpdateEvent { get; set; }
 
@@ -297,12 +289,10 @@ namespace AmeisenBotX.Core
 
             Storage.SaveAll();
 
-            if (Config.SaveWowWindowPosition && !StateMachine.WowCrashed)
+            if (Config.SaveWowWindowPosition)
             {
                 SaveWowWindowPosition();
             }
-
-            Bot.Wow.Events.Stop();
 
             if (Config.AutocloseWow || Config.AutoPositionWow)
             {
@@ -355,12 +345,12 @@ namespace AmeisenBotX.Core
                 IsRunning = false;
                 AmeisenLogger.I.Log("AmeisenBot", "Pausing", LogLevel.Debug);
 
-                if (StateMachine.CurrentState.Key is not BotState.StartWow
-                    and not BotState.Login
-                    and not BotState.LoadingScreen)
-                {
-                    StateMachine.SetState(BotState.Idle);
-                }
+                // if (StateMachine.CurrentState.Key is not BotState.StartWow
+                //     and not BotState.Login
+                //     and not BotState.LoadingScreen)
+                // {
+                //     StateMachine.SetState(BotState.Idle);
+                // }
 
                 OnStatusChanged?.Invoke();
             }
@@ -479,11 +469,11 @@ namespace AmeisenBotX.Core
             // add battleground engines here
             BattlegroundEngines = new List<IBattlegroundEngine>()
             {
-                new UniversalBattlegroundEngine(Bot, StateMachine),
-                new ArathiBasin(Bot, StateMachine),
-                new StrandOfTheAncients(Bot, StateMachine),
-                new EyeOfTheStorm(Bot, StateMachine),
-                new RunBoyRunEngine(Bot, StateMachine)
+                new UniversalBattlegroundEngine(Bot),
+                new ArathiBasin(Bot),
+                new StrandOfTheAncients(Bot),
+                new EyeOfTheStorm(Bot),
+                new RunBoyRunEngine(Bot)
             };
         }
 
@@ -491,22 +481,17 @@ namespace AmeisenBotX.Core
         {
             // Get search namespace
             string combatClassNamespace = "AmeisenBotX.Core.Engines.Combat.Classes";
-
-            // add combat classes here
+            
             IEnumerable<Type> combatClassTypes = AppDomain.CurrentDomain.GetAssemblies()
-                                                                                                                    .SelectMany(x => x.GetTypes())
-                                                                                                                    .Where(x => x.GetInterfaces().Contains(typeof(ICombatClass)))
-                                                                                                                    .Where(x => x.Namespace.Contains(combatClassNamespace));
+                .SelectMany(x => x.GetTypes())
+                .Where(x => x.GetInterfaces().Contains(typeof(ICombatClass)))
+                .Where(x => x.Namespace.Contains(combatClassNamespace));
 
-            List<ICombatClass> combatClassInstances = new List<ICombatClass>();
+            List<ICombatClass> combatClassInstances = new();
 
             // Add combat classes with bot parameter
             combatClassInstances.AddRange(combatClassTypes.Where(x => x.GetConstructor(new Type[] { typeof(AmeisenBotInterfaces) }) != null)
-                                                                                        .Select(x => (ICombatClass)Activator.CreateInstance(x, this.Bot)));
-
-            // Add combat classes with bot and statemachine parameter
-            combatClassInstances.AddRange(combatClassTypes.Where(x => x.GetConstructor(new Type[] { typeof(AmeisenBotInterfaces), typeof(AmeisenBotFsm) }) != null)
-                                                                                        .Select(x => (ICombatClass)Activator.CreateInstance(x, this.Bot, this.StateMachine)));
+                .Select(x => (ICombatClass)Activator.CreateInstance(x, Bot)));
 
             // Set combat classes
             CombatClasses = combatClassInstances;
@@ -537,7 +522,7 @@ namespace AmeisenBotX.Core
             // add quest profiles here
             QuestProfiles = new List<IQuestProfile>()
             {
-                new DeathknightStartAreaQuestProfile(Bot, StateMachine),
+                new DeathknightStartAreaQuestProfile(Bot),
                 new X5Horde1To80Profile(Bot),
                 new Horde1To60GrinderProfile(Bot)
             };
@@ -598,22 +583,6 @@ namespace AmeisenBotX.Core
             Bot.Grinding.Profile = LoadClassByName(GrindingProfiles, Config.GrindingProfile);
             Bot.Jobs.Profile = LoadClassByName(JobProfiles, Config.JobProfile);
             Bot.Quest.Profile = LoadClassByName(QuestProfiles, Config.QuestProfile);
-        }
-
-        private void LoadWowWindowPosition()
-        {
-            if (Config.SaveWowWindowPosition && !Config.AutoPositionWow)
-            {
-                if (Bot.Memory.Process.MainWindowHandle != IntPtr.Zero && Config.WowWindowRect != new Rect() { Left = -1, Top = -1, Right = -1, Bottom = -1 })
-                {
-                    Bot.Memory.SetWindowPosition(Bot.Memory.Process.MainWindowHandle, Config.WowWindowRect);
-                    AmeisenLogger.I.Log("AmeisenBot", $"Loaded window position: {Config.WowWindowRect}", LogLevel.Verbose);
-                }
-                else
-                {
-                    AmeisenLogger.I.Log("AmeisenBot", $"Unable to load window position of {Bot.Memory.Process.MainWindowHandle} to {Config.WowWindowRect}", LogLevel.Warning);
-                }
-            }
         }
 
         private void OnBagChanged(long timestamp, List<string> args)
@@ -703,6 +672,19 @@ namespace AmeisenBotX.Core
             Bot.Wow.LootEverything();
         }
 
+        private void OnMerchantShow(long timestamp, List<string> args)
+        {
+            if (Config.AutoRepair && Bot.Target.IsRepairVendor)
+            {
+                Bot.Wow.RepairAllItems();
+            }
+
+            if (Config.AutoSell)
+            {
+                SellItemsRoutine.Run(Bot, Config);
+            }
+        }
+
         private void OnObjectUpdateComplete(IEnumerable<IWowObject> wowObjects)
         {
             if (Config.CachePointsOfInterest && PoiCacheEvent.Run())
@@ -777,7 +759,7 @@ namespace AmeisenBotX.Core
 
         private void OnQuestAcceptConfirm(long timestamp, List<string> args)
         {
-            if (Config.AutoAcceptQuests && StateMachine.CurrentState.Key != BotState.Questing)
+            if (Config.AutoAcceptQuests)
             {
                 Bot.Wow.LuaDoString("ConfirmAcceptQuest();");
             }
@@ -785,9 +767,7 @@ namespace AmeisenBotX.Core
 
         private void OnQuestGreeting(long timestamp, List<string> args)
         {
-            if (Config.AutoAcceptQuests
-                && StateMachine.CurrentState.Key != BotState.Selling
-                && StateMachine.CurrentState.Key != BotState.Repairing)
+            if (Config.AutoAcceptQuests)
             {
                 Bot.Wow.AcceptQuests();
             }
@@ -795,7 +775,7 @@ namespace AmeisenBotX.Core
 
         private void OnQuestProgress(long timestamp, List<string> args)
         {
-            if (Config.AutoAcceptQuests && StateMachine.CurrentState.Key != BotState.Questing)
+            if (Config.AutoAcceptQuests)
             {
                 Bot.Wow.ClickUiElement("QuestFrameCompleteQuestButton");
             }
@@ -808,7 +788,7 @@ namespace AmeisenBotX.Core
 
         private void OnShowQuestFrame(long timestamp, List<string> args)
         {
-            if (Config.AutoAcceptQuests && StateMachine.CurrentState.Key != BotState.Questing)
+            if (Config.AutoAcceptQuests)
             {
                 Bot.Wow.LuaDoString("AcceptQuest();");
             }
@@ -918,7 +898,7 @@ namespace AmeisenBotX.Core
                             PosX = Bot.Player.Position.X,
                             PosY = Bot.Player.Position.Y,
                             PosZ = Bot.Player.Position.Z,
-                            State = StateMachine.CurrentState.Key.ToString(),
+                            State = string.Empty, // StateMachine.CurrentState.Key.ToString(),
                             SubZoneName = Bot.Objects.ZoneSubName,
                             ZoneName = Bot.Objects.ZoneName,
                         });
@@ -1003,7 +983,7 @@ namespace AmeisenBotX.Core
             if (IsRunning)
             {
                 ExecutionMsStopwatch.Restart();
-                StateMachine.Execute();
+                Logic.Tick();
                 CurrentExecutionMs = ExecutionMsStopwatch.ElapsedMilliseconds;
                 CurrentExecutionCount++;
             }
@@ -1078,6 +1058,8 @@ namespace AmeisenBotX.Core
             // Misc Events
             Bot.Wow.Events.Subscribe("CHARACTER_POINTS_CHANGED", OnTalentPointsChange);
             Bot.Wow.Events.Subscribe("COMBAT_LOG_EVENT_UNFILTERED", Bot.CombatLog.Parse);
+
+            Bot.Wow.Events.Subscribe("MERCHANT_SHOW", OnMerchantShow);
         }
     }
 }

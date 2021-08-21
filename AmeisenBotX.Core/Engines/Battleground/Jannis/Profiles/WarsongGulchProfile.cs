@@ -4,8 +4,6 @@ using AmeisenBotX.BehaviorTree.Objects;
 using AmeisenBotX.Common.Math;
 using AmeisenBotX.Common.Utils;
 using AmeisenBotX.Core.Engines.Movement.Enums;
-using AmeisenBotX.Core.Fsm;
-using AmeisenBotX.Core.Fsm.States;
 using AmeisenBotX.Wow.Objects;
 using AmeisenBotX.Wow.Objects.Enums;
 using System;
@@ -20,10 +18,9 @@ namespace AmeisenBotX.Core.Engines.Battleground.Jannis.Profiles
 {
     public class WarsongGulchProfile : IBattlegroundProfile
     {
-        public WarsongGulchProfile(AmeisenBotInterfaces bot, AmeisenBotFsm stateMachine)
+        public WarsongGulchProfile(AmeisenBotInterfaces bot)
         {
             Bot = bot;
-            StateMachine = stateMachine;
 
             ActionEvent = new(TimeSpan.FromMilliseconds(500));
             LosCheckEvent = new(TimeSpan.FromMilliseconds(1000));
@@ -133,7 +130,7 @@ namespace AmeisenBotX.Core.Engines.Battleground.Jannis.Profiles
             Vector3 OwnBasePositionMapCoords { get; }
         }
 
-        public AmeisenBotBehaviorTree<CtfBlackboard> BehaviorTree { get; }
+        public BehaviorTree<CtfBlackboard> BehaviorTree { get; }
 
         public DualSelector<CtfBlackboard> FlagSelector { get; }
 
@@ -150,8 +147,6 @@ namespace AmeisenBotX.Core.Engines.Battleground.Jannis.Profiles
         private Selector<CtfBlackboard> KillEnemyFlagCarrierSelector { get; }
 
         private TimegatedEvent LosCheckEvent { get; }
-
-        private AmeisenBotFsm StateMachine { get; }
 
         private IWsgDataset WsgDataset { get; set; }
 
@@ -195,7 +190,7 @@ namespace AmeisenBotX.Core.Engines.Battleground.Jannis.Profiles
             return index > -1 && index <= memberCount;
         }
 
-        private BehaviorTreeStatus AttackNearWeakestEnemy(CtfBlackboard blackboard)
+        private BtStatus AttackNearWeakestEnemy(CtfBlackboard blackboard)
         {
             IWowPlayer weakestPlayer = Bot.GetNearEnemies<IWowPlayer>(Bot.Player.Position, 20.0f).OrderBy(e => e.Health).FirstOrDefault();
 
@@ -210,19 +205,19 @@ namespace AmeisenBotX.Core.Engines.Battleground.Jannis.Profiles
                 }
                 else if (ActionEvent.Run())
                 {
-                    StateMachine.Get<StateCombat>().Mode = CombatMode.Force;
+                    // StateMachine.Get<StateCombat>().Mode = CombatMode.Force;
                     Bot.Wow.ChangeTarget(weakestPlayer.Guid);
                 }
             }
             else
             {
-                return BehaviorTreeStatus.Failed;
+                return BtStatus.Failed;
             }
 
-            return BehaviorTreeStatus.Ongoing;
+            return BtStatus.Ongoing;
         }
 
-        private BehaviorTreeStatus DefendOwnBase(CtfBlackboard blackboard)
+        private BtStatus DefendOwnBase(CtfBlackboard blackboard)
         {
             double distance = Bot.Player.Position.GetDistance(WsgDataset.OwnBasePosition);
 
@@ -244,12 +239,12 @@ namespace AmeisenBotX.Core.Engines.Battleground.Jannis.Profiles
                     }
                     else if (ActionEvent.Run())
                     {
-                        StateMachine.Get<StateCombat>().Mode = CombatMode.Force;
+                        // StateMachine.Get<StateCombat>().Mode = CombatMode.Force;
                         Bot.Wow.ChangeTarget(nearEnemy.Guid);
                     }
                 }
             }
-            return BehaviorTreeStatus.Ongoing;
+            return BtStatus.Ongoing;
         }
 
         private bool DoWeOutnumberOurEnemies(CtfBlackboard blackboard)
@@ -270,18 +265,18 @@ namespace AmeisenBotX.Core.Engines.Battleground.Jannis.Profiles
             return blackboard.MyTeamFlagCarrier.Position.GetDistance(Bot.Player.Position) < 32.0;
         }
 
-        private BehaviorTreeStatus FleeFromComingEnemies()
+        private BtStatus FleeFromComingEnemies()
         {
             IWowUnit nearestEnemy = Bot.GetNearEnemies<IWowUnit>(Bot.Player.Position, 48.0f).OrderBy(e => e.Position.GetDistance(Bot.Player.Position)).FirstOrDefault();
 
             if (nearestEnemy != null)
             {
                 Bot.Movement.SetMovementAction(MovementAction.Flee, nearestEnemy.Position, nearestEnemy.Rotation);
-                return BehaviorTreeStatus.Ongoing;
+                return BtStatus.Ongoing;
             }
             else
             {
-                return BehaviorTreeStatus.Success;
+                return BtStatus.Success;
             }
         }
 
@@ -315,12 +310,12 @@ namespace AmeisenBotX.Core.Engines.Battleground.Jannis.Profiles
             }
         }
 
-        private BehaviorTreeStatus KillEnemyFlagCarrier(CtfBlackboard blackboard)
+        private BtStatus KillEnemyFlagCarrier(CtfBlackboard blackboard)
         {
             if (JBgBlackboard.EnemyTeamFlagCarrier == null)
             {
-                StateMachine.Get<StateCombat>().Mode = CombatMode.Allowed;
-                return BehaviorTreeStatus.Success;
+                // StateMachine.Get<StateCombat>().Mode = CombatMode.Allowed;
+                return BtStatus.Success;
             }
 
             float distance = Bot.Player.Position.GetDistance(JBgBlackboard.EnemyTeamFlagCarrier.Position);
@@ -332,14 +327,14 @@ namespace AmeisenBotX.Core.Engines.Battleground.Jannis.Profiles
             }
             else if (ActionEvent.Run())
             {
-                StateMachine.Get<StateCombat>().Mode = CombatMode.Force;
+                // StateMachine.Get<StateCombat>().Mode = CombatMode.Force;
                 Bot.Wow.ChangeTarget(JBgBlackboard.EnemyTeamFlagCarrier.Guid);
             }
 
-            return BehaviorTreeStatus.Ongoing;
+            return BtStatus.Ongoing;
         }
 
-        private BehaviorTreeStatus MoveToEnemyBaseAndGetFlag(CtfBlackboard blackboard)
+        private BtStatus MoveToEnemyBaseAndGetFlag(CtfBlackboard blackboard)
         {
             float distance = Bot.Player.Position.GetDistance(WsgDataset.EnemyBasePosition);
 
@@ -352,10 +347,10 @@ namespace AmeisenBotX.Core.Engines.Battleground.Jannis.Profiles
                 return UseNearestFlag(blackboard);
             }
 
-            return BehaviorTreeStatus.Ongoing;
+            return BtStatus.Ongoing;
         }
 
-        private BehaviorTreeStatus MoveToNearestBuff(CtfBlackboard blackboard)
+        private BtStatus MoveToNearestBuff(CtfBlackboard blackboard)
         {
             IWowGameobject buffObject = Bot.GetClosestGameobjectByDisplayId(Bot.Player.Position, new List<int>() { 5991, 5995, 5931 });
 
@@ -366,17 +361,17 @@ namespace AmeisenBotX.Core.Engines.Battleground.Jannis.Profiles
             }
             else
             {
-                return BehaviorTreeStatus.Failed;
+                return BtStatus.Failed;
             }
 
-            return BehaviorTreeStatus.Ongoing;
+            return BtStatus.Ongoing;
         }
 
-        private BehaviorTreeStatus MoveToOwnFlagCarrierAndHelp()
+        private BtStatus MoveToOwnFlagCarrierAndHelp()
         {
             if (JBgBlackboard.MyTeamFlagCarrier == null)
             {
-                return BehaviorTreeStatus.Failed;
+                return BtStatus.Failed;
             }
 
             float distance = Bot.Player.Position.GetDistance(JBgBlackboard.MyTeamFlagCarrier.Position);
@@ -400,16 +395,16 @@ namespace AmeisenBotX.Core.Engines.Battleground.Jannis.Profiles
                     }
                     else if (ActionEvent.Run())
                     {
-                        StateMachine.Get<StateCombat>().Mode = CombatMode.Force;
+                        // StateMachine.Get<StateCombat>().Mode = CombatMode.Force;
                         Bot.Wow.ChangeTarget(nearEnemy.Guid);
                     }
                 }
             }
 
-            return BehaviorTreeStatus.Ongoing;
+            return BtStatus.Ongoing;
         }
 
-        private BehaviorTreeStatus MoveToPosition(Vector3 position, float minDistance = 2.5f)
+        private BtStatus MoveToPosition(Vector3 position, float minDistance = 2.5f)
         {
             double distance = Bot.Player.Position.GetDistance(position);
 
@@ -438,11 +433,11 @@ namespace AmeisenBotX.Core.Engines.Battleground.Jannis.Profiles
                     Bot.Movement.SetMovementAction(MovementAction.Move, position);
                 }
 
-                return BehaviorTreeStatus.Ongoing;
+                return BtStatus.Ongoing;
             }
             else
             {
-                return BehaviorTreeStatus.Success;
+                return BtStatus.Success;
             }
         }
 
@@ -524,7 +519,7 @@ namespace AmeisenBotX.Core.Engines.Battleground.Jannis.Profiles
             catch { }
         }
 
-        private BehaviorTreeStatus UseNearestFlag(CtfBlackboard blackboard)
+        private BtStatus UseNearestFlag(CtfBlackboard blackboard)
         {
             IWowGameobject nearestFlag = JBgBlackboard.NearFlags.OrderBy(e => e.Position.GetDistance(Bot.Player.Position)).FirstOrDefault();
 
@@ -543,10 +538,10 @@ namespace AmeisenBotX.Core.Engines.Battleground.Jannis.Profiles
             }
             else
             {
-                return BehaviorTreeStatus.Failed;
+                return BtStatus.Failed;
             }
 
-            return BehaviorTreeStatus.Ongoing;
+            return BtStatus.Ongoing;
         }
 
         private class AllianceWsgDataset : IWsgDataset

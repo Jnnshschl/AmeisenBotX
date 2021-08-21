@@ -32,6 +32,14 @@ namespace AmeisenBotX.Common.Utils
                         result.Add(d.Key, d.Value.GetDouble());
                         break;
 
+                    case JsonValueKind.True:
+                        result.Add(d.Key, true);
+                        break;
+
+                    case JsonValueKind.False:
+                        result.Add(d.Key, false);
+                        break;
+
                     default:
                         result.Add(d.Key, d.Value.To<dynamic>());
                         break;

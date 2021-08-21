@@ -1,7 +1,6 @@
-﻿using AmeisenBotX.Common.Objects.Keyboard;
+﻿using AmeisenBotX.Common.Keyboard.Objects;
 using AmeisenBotX.Core.Engines.Movement.Settings;
 using AmeisenBotX.Memory.Win32;
-
 using System;
 using System.Collections.Generic;
 using System.Text.Json.Serialization;
@@ -185,7 +184,7 @@ namespace AmeisenBotX.Core
 
         public bool ReleaseSpirit { get; set; } = false;
 
-        public float RepairNpcSearchRadius { get; set; } = 50 - 0f;
+        public float RepairNpcSearchRadius { get; set; } = 50.0f;
 
         public bool SaveBotWindowPosition { get; set; } = false;
 
@@ -203,7 +202,7 @@ namespace AmeisenBotX.Core
 
         public string SpecificCharacterToFollow { get; set; } = string.Empty;
 
-        public int StateMachineTickMs { get; set; } = 10;
+        public int StateMachineTickMs { get; set; } = 20;
 
         public bool StayCloseToGroupInCombat { get; set; } = false;
 

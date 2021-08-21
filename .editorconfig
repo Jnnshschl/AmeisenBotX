@@ -1,0 +1,4 @@
+﻿[*.cs]
+
+# IDE0058: Der Ausdruckswert wird niemals verwendet.
+dotnet_diagnostic.IDE0058.severity = none

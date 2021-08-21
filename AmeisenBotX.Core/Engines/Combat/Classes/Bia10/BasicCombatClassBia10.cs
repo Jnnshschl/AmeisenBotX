@@ -6,7 +6,6 @@ using AmeisenBotX.Core.Engines.Combat.Helpers;
 using AmeisenBotX.Core.Engines.Combat.Helpers.Aura;
 using AmeisenBotX.Core.Engines.Combat.Helpers.Targets;
 using AmeisenBotX.Core.Engines.Movement.Enums;
-using AmeisenBotX.Core.Fsm;
 using AmeisenBotX.Logging;
 using AmeisenBotX.Logging.Enums;
 using AmeisenBotX.Wow.Objects;
@@ -21,10 +20,9 @@ namespace AmeisenBotX.Core.Engines.Combat.Classes.Bia10
 {
     public abstract class BasicCombatClassBia10 : ICombatClass
     {
-        protected BasicCombatClassBia10(AmeisenBotInterfaces bot, AmeisenBotFsm stateMachine)
+        protected BasicCombatClassBia10(AmeisenBotInterfaces bot)
         {
             Bot = bot;
-            StateMachine = stateMachine;
 
             SpellAbortFunctions = new List<Func<bool>>();
 
@@ -40,7 +38,7 @@ namespace AmeisenBotX.Core.Engines.Combat.Classes.Bia10
             EventCheckFacing = new TimegatedEvent(TimeSpan.FromMilliseconds(500));
             EventAutoAttack = new TimegatedEvent(TimeSpan.FromMilliseconds(500));
 
-            ConfigurableThresholds = new Dictionary<string, dynamic>
+            Configurables = new Dictionary<string, dynamic>
             {
                 { "HealthItemThreshold", 30.0 },
                 { "ManaItemThreshold", 30.0 }
@@ -93,7 +91,7 @@ namespace AmeisenBotX.Core.Engines.Combat.Classes.Bia10
         public abstract string DisplayName { get; }
         public IEnumerable<int> BlacklistedTargetDisplayIds { get; set; }
         public IEnumerable<int> PriorityTargetDisplayIds { get; set; }
-        public Dictionary<string, dynamic> ConfigurableThresholds { get; set; }
+        public Dictionary<string, dynamic> Configurables { get; set; }
         public CooldownManager CooldownManager { get; private set; }
         public TimegatedEvent EventAutoAttack { get; private set; }
         public TimegatedEvent EventCheckFacing { get; set; }
@@ -117,7 +115,6 @@ namespace AmeisenBotX.Core.Engines.Combat.Classes.Bia10
         protected AmeisenBotInterfaces Bot { get; }
         protected DateTime LastSpellCast { get; private set; }
         protected List<Func<bool>> SpellAbortFunctions { get; }
-        private AmeisenBotFsm StateMachine { get; }
 
         protected bool IsInSpellRange(IWowUnit unit, string spellName)
         {
@@ -158,6 +155,15 @@ namespace AmeisenBotX.Core.Engines.Combat.Classes.Bia10
 
             if (Bot.Target != null && EventCheckFacing.Run())
                 CheckFacing(Bot.Target);
+
+            // Update Priority Units
+            // --------------------------- >
+            if (Bot.Dungeon != null
+                && Bot.Dungeon.Profile.PriorityUnits != null
+                && Bot.Dungeon.Profile.PriorityUnits.Count > 0)
+            {
+                TargetProviderDps.PriorityTargets = Bot.Dungeon.Profile.PriorityUnits;
+            }
 
             // Autoattacks
             // --------------------------- >
@@ -240,7 +246,7 @@ namespace AmeisenBotX.Core.Engines.Combat.Classes.Bia10
 
         public virtual void Load(Dictionary<string, JsonElement> objects)
         {
-            if (objects.ContainsKey("Configureables")) { ConfigurableThresholds = objects["Configureables"].ToDyn(); }
+            if (objects.ContainsKey("Configureables")) { Configurables = objects["Configureables"].ToDyn(); }
         }
 
         public virtual void OutOfCombatExecute()
@@ -262,7 +268,7 @@ namespace AmeisenBotX.Core.Engines.Combat.Classes.Bia10
         }
 
         public virtual Dictionary<string, object> Save() =>
-            new() { { "Configureables", ConfigurableThresholds } };
+            new() { { "Configureables", Configurables } };
 
         public override string ToString() =>
             $"[{WowClass}] [{Role}] {DisplayName} ({Author})";

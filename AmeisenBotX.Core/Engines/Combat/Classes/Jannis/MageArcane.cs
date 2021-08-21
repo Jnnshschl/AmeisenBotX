@@ -1,7 +1,6 @@
 ﻿using AmeisenBotX.Core.Engines.Character.Comparators;
 using AmeisenBotX.Core.Engines.Character.Talents.Objects;
-using AmeisenBotX.Core.Fsm;
-using AmeisenBotX.Core.Fsm.Utils.Auras.Objects;
+using AmeisenBotX.Core.Logic.Utils.Auras.Objects;
 using AmeisenBotX.Wow.Objects.Enums;
 using System;
 using System.Linq;
@@ -10,7 +9,7 @@ namespace AmeisenBotX.Core.Engines.Combat.Classes.Jannis
 {
     public class MageArcane : BasicCombatClass
     {
-        public MageArcane(AmeisenBotInterfaces bot, AmeisenBotFsm stateMachine) : base(bot, stateMachine)
+        public MageArcane(AmeisenBotInterfaces bot) : base(bot)
         {
             MyAuraManager.Jobs.Add(new KeepActiveAuraJob(bot.Db, arcaneIntellectSpell, () => TryCastSpell(arcaneIntellectSpell, Bot.Wow.PlayerGuid, true)));
             MyAuraManager.Jobs.Add(new KeepActiveAuraJob(bot.Db, mageArmorSpell, () => TryCastSpell(mageArmorSpell, 0, true)));

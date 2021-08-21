@@ -97,7 +97,7 @@ namespace AmeisenBotX.Core.Engines.Combat.Classes.Kamel
         public TimegatedEvent AutoAttackEvent { get; private set; }
 
         public IEnumerable<int> BlacklistedTargetDisplayIds { get; set; }
-        public Dictionary<string, dynamic> ConfigurableThresholds { get; set; }
+        public Dictionary<string, dynamic> Configurables { get; set; }
 
         public AmeisenBotInterfaces Bot { get; internal set; }
 
@@ -311,7 +311,7 @@ namespace AmeisenBotX.Core.Engines.Combat.Classes.Kamel
 
         public void Load(Dictionary<string, JsonElement> objects)
         {
-            ConfigurableThresholds = objects["Configureables"].ToDyn();
+            Configurables = objects["Configureables"].ToDyn();
         }
 
         public abstract void OutOfCombatExecute();
@@ -336,7 +336,7 @@ namespace AmeisenBotX.Core.Engines.Combat.Classes.Kamel
         {
             return new()
             {
-                { "configureables", ConfigurableThresholds }
+                { "configureables", Configurables }
             };
         }
 
