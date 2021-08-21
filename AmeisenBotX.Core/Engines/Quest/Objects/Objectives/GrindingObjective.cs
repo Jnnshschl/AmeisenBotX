@@ -30,16 +30,13 @@ namespace AmeisenBotX.Core.Engines.Quest.Objects.Objectives
 
         private Vector3 CurrentNode { get; set; }
 
-        private List<Vector3> VendorsLocation { get; }
+        public List<Vector3> VendorsLocation { get; }
 
         private int WantedLevel { get; }
 
         public void Execute()
         {
             if (Finished || Bot.Player.IsCasting) { return; }
-
-            if (Bot.Character.Inventory.FreeBagSlots < 4) //1. issue value not loaded from config
-                Bot.Movement.SetMovementAction(MovementAction.Move, VendorsLocation.FirstOrDefault()); //2.nd issue no actual path creation, only suffices if nearby
 
             if (!SearchAreas.IsPlayerNearSearchArea(Bot) && Bot.Target == null) // if i have target, go nearby don't clear it
             {

@@ -22,7 +22,7 @@ namespace AmeisenBotX.Core.Engines.Quest.Objects.Quests
 
         public bool Returned => Finished;
 
-        private List<IQuestObjective> Objectives { get; }
+        public List<IQuestObjective> Objectives { get; }
 
         public void AcceptQuest()
         {

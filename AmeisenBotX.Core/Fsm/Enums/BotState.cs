@@ -16,6 +16,7 @@
         Unstuck,
         Looting,
         Repairing,
+        GoingToVendor,
         Selling,
         Battleground,
         Job,

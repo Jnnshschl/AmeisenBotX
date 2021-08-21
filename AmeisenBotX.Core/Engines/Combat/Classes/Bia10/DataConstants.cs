@@ -47,6 +47,8 @@ namespace AmeisenBotX.Core.Engines.Combat.Classes.Bia10
         public const float MAX_ANGLE = MathF.PI * 2.0f;
 
         public static readonly int[] usableHealingItems = {
+            // food
+            117,
             // potions
             118, 929, 1710, 2938, 3928, 4596, 5509, 13446, 22829, 33447,
             // healthstones
@@ -54,6 +56,8 @@ namespace AmeisenBotX.Core.Engines.Combat.Classes.Bia10
         };
 
         public static readonly int[] usableManaItems = {
+            // drinks
+            159,
             // potions
             2245, 3385, 3827, 6149, 13443, 13444, 33448, 22832,
         };
