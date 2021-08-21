@@ -29,13 +29,14 @@ namespace AmeisenBotX.Common.Math
         {
             const float MAX_ANGLE = MathF.PI * 2.0f;
 
-            if (angle < 0.0f)
+            switch (angle)
             {
-                angle += MAX_ANGLE;
-            }
-            else if (angle > MAX_ANGLE)
-            {
-                angle -= MAX_ANGLE;
+                case < 0.0f:
+                    angle += MAX_ANGLE;
+                    break;
+                case > MAX_ANGLE:
+                    angle -= MAX_ANGLE;
+                    break;
             }
 
             return angle;
@@ -102,10 +103,33 @@ namespace AmeisenBotX.Common.Math
             {
                 return 0;
             }
-            else
-            {
-                return value / (float)max * 100.0f;
-            }
+
+            return value / (float)max * 100.0f;
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static float GetSlope(Vector3 startPoint, Vector3 endPoint, bool toPercentage = false)
+        {
+            //Calculate the values of the run and rise
+            float run = System.Math.Abs(endPoint.X - startPoint.X);
+            float rise = System.Math.Abs(endPoint.Y - startPoint.Y);
+
+            if (!toPercentage)
+                return rise / run;
+
+            return (rise / run) * 100;
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static double SlopeGradientAngle(Vector3 startPoint, Vector3 endPoint)
+        {
+            float slope = GetSlope(startPoint, endPoint, true);
+            //Calculates the arctan to get the radians (arctan(alpha) = rise / run)
+            double radAngle = System.Math.Atan(slope / 100);
+            //Converts the radians in degrees
+            double degAngle = radAngle * 180 / System.Math.PI;
+
+            return degAngle;
         }
     }
 }
