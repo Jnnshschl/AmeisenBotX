@@ -46,10 +46,6 @@ namespace AmeisenBotX.Core.Engines.Grinding
 
         private TimegatedEvent TargetInLosEvent { get; }
 
-        public void Enter()
-        {
-        }
-
         public void Execute()
         {
             if (Bot.Character.Equipment.Items.Any(e => e.Value.MaxDurability > 0
@@ -148,12 +144,6 @@ namespace AmeisenBotX.Core.Engines.Grinding
                     MoveToRandomPositionOnSpot();
                 }
             }
-        }
-
-        public void Exit()
-        {
-            GrindingSpot = null;
-            CurrentSpotIndex = -1;
         }
 
         public void LoadProfile(IGrindingProfile questProfile)

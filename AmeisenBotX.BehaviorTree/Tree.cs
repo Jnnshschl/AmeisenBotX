@@ -5,9 +5,9 @@ using System;
 
 namespace AmeisenBotX.BehaviorTree
 {
-    public class BehaviorTree
+    public class Tree
     {
-        public BehaviorTree(INode node, bool resumeOngoingNodes = false)
+        public Tree(INode node, bool resumeOngoingNodes = false)
         {
             RootNode = node;
             ResumeOngoingNodes = resumeOngoingNodes;
