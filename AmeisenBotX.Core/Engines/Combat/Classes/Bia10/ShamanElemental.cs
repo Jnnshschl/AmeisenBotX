@@ -35,9 +35,9 @@ namespace AmeisenBotX.Core.Engines.Combat.Classes.Bia10
         public override IItemComparator ItemComparator { get; set; } =
             new BasicIntellectComparator(null, new List<WowWeaponType>
             {
-                WowWeaponType.TWOHANDED_AXES,
-                WowWeaponType.TWOHANDED_MACES,
-                WowWeaponType.TWOHANDED_SWORDS
+                WowWeaponType.ONEHANDED_AXES,
+                WowWeaponType.ONEHANDED_MACES,
+                WowWeaponType.ONEHANDED_SWORDS
             });
 
         public IEnumerable<int> BlacklistedTargetDisplayIds { get; set; }
@@ -54,7 +54,7 @@ namespace AmeisenBotX.Core.Engines.Combat.Classes.Bia10
             Tree3 = new Dictionary<int, Talent>(),
         };
 
-        public override bool UseAutoAttacks => false;
+        public override bool UseAutoAttacks => true;
         public override bool WalkBehindEnemy => false;
 
         private bool HexedTarget { get; set; }
@@ -62,14 +62,14 @@ namespace AmeisenBotX.Core.Engines.Combat.Classes.Bia10
 
         public override void Execute()
         {
-            //base.Execute();
+            base.Execute();
 
             if (Bot.Player.HealthPercentage < HealSelfPercentage)
                 TryCastSpell(DataConstants.ShamanSpells.HealingWave, Bot.Wow.PlayerGuid, true);
+            if (IsInSpellRange(Bot.Target, DataConstants.ShamanSpells.EarthShock))
+                TryCastSpell(DataConstants.ShamanSpells.EarthShock, Bot.Target.Guid, true);
             if (IsInSpellRange(Bot.Target, DataConstants.ShamanSpells.LightningBolt))
                 TryCastSpell(DataConstants.ShamanSpells.LightningBolt, Bot.Target.Guid, true);
-            if (Bot.Player.IsInMeleeRange(Bot.Target) && !Bot.Player.IsAutoAttacking)
-                Bot.Wow.StartAutoAttack();
         }
 
         public override void OutOfCombatExecute()

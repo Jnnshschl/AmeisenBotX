@@ -87,6 +87,15 @@ namespace AmeisenBotX.Core
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public IWowUnit GetClosestVendor()
+        {
+            return Objects.WowObjects.OfType<IWowUnit>()
+                .Where(e => !e.IsDead && e.IsVendor && Db.GetReaction(Player, e) != WowUnitReaction.Hostile)
+                .OrderBy(e => e.Position.GetDistance(Player.Position))
+                .FirstOrDefault();
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public IWowUnit GetClosestQuestgiverByDisplayId(Vector3 position, IEnumerable<int> displayIds, bool onlyQuestgivers = true)
         {
             return Objects.WowObjects.OfType<IWowUnit>()
