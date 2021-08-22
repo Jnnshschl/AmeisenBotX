@@ -2,7 +2,6 @@
 using AmeisenBotX.Common.Utils;
 using AmeisenBotX.Core.Engines.Movement.Enums;
 using AmeisenBotX.Core.Engines.Movement.Objects;
-using AmeisenBotX.Core.Fsm;
 using AmeisenBotX.Wow.Objects;
 using AmeisenBotX.Wow.Objects.Enums;
 using System;
@@ -13,7 +12,7 @@ namespace AmeisenBotX.Core.Engines.Movement
 {
     public class DefaultMovementEngine : IMovementEngine
     {
-        public DefaultMovementEngine(AmeisenBotInterfaces bot, AmeisenBotConfig config, AmeisenBotFsm stateMachine)
+        public DefaultMovementEngine(AmeisenBotInterfaces bot, AmeisenBotConfig config)
         {
             Bot = bot;
             Config = config;
@@ -25,7 +24,7 @@ namespace AmeisenBotX.Core.Engines.Movement
             PathQueue = new();
             PlacesToAvoidList = new();
 
-            PlayerVehicle = new(bot, config, stateMachine);
+            PlayerVehicle = new(bot, config);
         }
 
         public float CurrentSpeed { get; private set; }

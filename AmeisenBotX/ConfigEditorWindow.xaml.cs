@@ -1,5 +1,5 @@
 ﻿using AmeisenBotX.Common.Keyboard.Enums;
-using AmeisenBotX.Common.Objects.Keyboard;
+using AmeisenBotX.Common.Keyboard.Objects;
 using AmeisenBotX.Core;
 using AmeisenBotX.Core.Engines.Battleground;
 using AmeisenBotX.Views;

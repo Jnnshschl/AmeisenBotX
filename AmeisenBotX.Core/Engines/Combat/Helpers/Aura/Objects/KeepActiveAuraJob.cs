@@ -4,7 +4,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 
-namespace AmeisenBotX.Core.Fsm.Utils.Auras.Objects
+namespace AmeisenBotX.Core.Logic.Utils.Auras.Objects
 {
     public class KeepActiveAuraJob : IAuraJob
     {

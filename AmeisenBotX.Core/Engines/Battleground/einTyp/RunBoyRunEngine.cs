@@ -1,7 +1,6 @@
 ﻿using AmeisenBotX.Common.Math;
 using AmeisenBotX.Common.Utils;
-using AmeisenBotX.Core.Fsm;
-using AmeisenBotX.Core.Fsm.States;
+using AmeisenBotX.Core.Logic;
 using AmeisenBotX.Wow.Objects;
 using AmeisenBotX.Wow.Objects.Enums;
 using System;
@@ -25,10 +24,9 @@ namespace AmeisenBotX.Core.Engines.Battleground.einTyp
         private bool ownTeamHasFlag = false;
         private ulong TeamFlagCarrierGuid;
 
-        public RunBoyRunEngine(AmeisenBotInterfaces bot, AmeisenBotFsm stateMachine)
+        public RunBoyRunEngine(AmeisenBotInterfaces bot)
         {
             Bot = bot;
-            StateMachine = stateMachine;
 
             bot.Wow.Events.Subscribe("CHAT_MSG_BG_SYSTEM_ALLIANCE", OnFlagAlliance);
             bot.Wow.Events.Subscribe("CHAT_MSG_BG_SYSTEM_HORDE", OnFlagAlliance);
@@ -41,8 +39,6 @@ namespace AmeisenBotX.Core.Engines.Battleground.einTyp
         public string Description => "...";
 
         public string Name => "RunBoyRunEngine";
-
-        private AmeisenBotFsm StateMachine { get; }
 
         public void Enter()
         {
@@ -118,7 +114,7 @@ namespace AmeisenBotX.Core.Engines.Battleground.einTyp
 
                         if (IsEnemyClose())
                         {
-                            StateMachine.Get<StateCombat>().Mode = CombatMode.Force;
+                            // StateMachine.Get<StateCombat>().Mode = CombatMode.Force;
                             return;
                         }
                     }
@@ -150,7 +146,7 @@ namespace AmeisenBotX.Core.Engines.Battleground.einTyp
 
                         if (IsEnemyClose())
                         {
-                            StateMachine.Get<StateCombat>().Mode = CombatMode.Force;
+                            // StateMachine.Get<StateCombat>().Mode = CombatMode.Force;
                             return;
                         }
                     }
@@ -169,7 +165,7 @@ namespace AmeisenBotX.Core.Engines.Battleground.einTyp
 
                             if (IsEnemyClose())
                             {
-                                StateMachine.Get<StateCombat>().Mode = CombatMode.Force;
+                                // StateMachine.Get<StateCombat>().Mode = CombatMode.Force;
                                 return;
                             }
                         }
@@ -203,7 +199,7 @@ namespace AmeisenBotX.Core.Engines.Battleground.einTyp
 
                     if (IsEnemyClose())
                     {
-                        StateMachine.Get<StateCombat>().Mode = CombatMode.Force;
+                        // StateMachine.Get<StateCombat>().Mode = CombatMode.Force;
                         return;
                     }
                 }
@@ -216,7 +212,7 @@ namespace AmeisenBotX.Core.Engines.Battleground.einTyp
                 {
                     if (IsEnemyClose())
                     {
-                        StateMachine.Get<StateCombat>().Mode = CombatMode.Force;
+                        // StateMachine.Get<StateCombat>().Mode = CombatMode.Force;
                         return;
                     }
                 }
@@ -261,7 +257,7 @@ namespace AmeisenBotX.Core.Engines.Battleground.einTyp
 
                         if (IsEnemyClose())
                         {
-                            StateMachine.Get<StateCombat>().Mode = CombatMode.Force;
+                            // StateMachine.Get<StateCombat>().Mode = CombatMode.Force;
                             return;
                         }
                     }
@@ -297,7 +293,7 @@ namespace AmeisenBotX.Core.Engines.Battleground.einTyp
                 Bot.Movement.SetMovementAction(Movement.Enums.MovementAction.Move, isHorde ? baseAlly : baseHord);
                 if (IsEnemyClose())
                 {
-                    StateMachine.Get<StateCombat>().Mode = CombatMode.Force;
+                    // StateMachine.Get<StateCombat>().Mode = CombatMode.Force;
                     return;
                 }
                 Bot.CombatClass.OutOfCombatExecute();

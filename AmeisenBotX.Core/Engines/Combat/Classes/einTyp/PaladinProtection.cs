@@ -3,8 +3,6 @@ using AmeisenBotX.Common.Utils;
 using AmeisenBotX.Core.Engines.Character.Comparators;
 using AmeisenBotX.Core.Engines.Character.Talents.Objects;
 using AmeisenBotX.Core.Engines.Movement.Enums;
-using AmeisenBotX.Core.Fsm;
-using AmeisenBotX.Core.Fsm.States;
 using AmeisenBotX.Wow.Objects;
 using AmeisenBotX.Wow.Objects.Enums;
 using System;
@@ -24,17 +22,16 @@ namespace AmeisenBotX.Core.Engines.Combat.Classes.einTyp
         private bool multipleTargets = false;
         private bool standing = false;
 
-        public PaladinProtection(AmeisenBotInterfaces bot, AmeisenBotFsm stateMachine)
+        public PaladinProtection(AmeisenBotInterfaces bot)
         {
             Bot = bot;
-            StateMachine = stateMachine;
         }
 
         public string Author => "einTyp";
 
         public IEnumerable<int> BlacklistedTargetDisplayIds { get; set; }
 
-        public Dictionary<string, dynamic> ConfigurableThresholds { get; set; } = new Dictionary<string, dynamic>();
+        public Dictionary<string, dynamic> Configurables { get; set; } = new Dictionary<string, dynamic>();
 
         public string Description => "...";
 
@@ -120,8 +117,6 @@ namespace AmeisenBotX.Core.Engines.Combat.Classes.einTyp
 
         private DateTime LastWisdom { get; set; }
 
-        private AmeisenBotFsm StateMachine { get; }
-
         public void AttackTarget()
         {
             IWowUnit target = Bot.Target;
@@ -170,12 +165,11 @@ namespace AmeisenBotX.Core.Engines.Combat.Classes.einTyp
                 HandleMovement(target);
                 HandleAttacking(target);
             }
-            StateMachine.Get<StateCombat>().Mode = CombatMode.Allowed;
         }
 
         public void Load(Dictionary<string, JsonElement> objects)
         {
-            ConfigurableThresholds = objects["Configureables"].ToDyn();
+            Configurables = objects["Configureables"].ToDyn();
         }
 
         public void OutOfCombatExecute()
@@ -213,7 +207,6 @@ namespace AmeisenBotX.Core.Engines.Combat.Classes.einTyp
 
                     Dancing = false;
                     HandleMovement(target);
-                    StateMachine.Get<StateCombat>().Mode = CombatMode.Force;
                     HandleAttacking(target);
                 }
                 else if (!Dancing || standing)
@@ -240,7 +233,7 @@ namespace AmeisenBotX.Core.Engines.Combat.Classes.einTyp
         {
             return new()
             {
-                { "configureables", ConfigurableThresholds }
+                { "configureables", Configurables }
             };
         }
 

@@ -98,6 +98,8 @@ namespace AmeisenBotX.Wow.Offsets
 
         IntPtr GameState { get; }
 
+        IntPtr IsIngame { get; }
+
         IntPtr IsWorldLoaded { get; }
 
         IntPtr LastTargetGuid { get; }

@@ -215,7 +215,12 @@ namespace AmeisenBotX.Memory
         public Rect GetWindowPosition()
         {
             Rect rect = new();
-            GetWindowRect(Process.MainWindowHandle, ref rect);
+
+            if (Process != null)
+            {
+                GetWindowRect(Process.MainWindowHandle, ref rect);
+            }
+
             return rect;
         }
 

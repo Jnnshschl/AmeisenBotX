@@ -1,30 +1,33 @@
 ﻿using AmeisenBotX.BehaviorTree.Enums;
 using System;
-using System.Collections.Generic;
-using System.Linq;
 
 namespace AmeisenBotX.BehaviorTree.Objects
 {
-    public class Waterfall : Composite
+    /// <summary>
+    /// Special selector that runs the first node where the condition returns true. If none returned true, the fallbackNode will be executed
+    /// </summary>
+    public class Waterfall : IComposite
     {
-        public Waterfall(Node fallbackNode, params (Func<bool> condition, Node node)[] conditionNodePairs) : base()
+        public Waterfall(INode fallbackNode, params (Func<bool> condition, INode node)[] conditionNodePairs) : base()
         {
             FallbackNode = fallbackNode;
-            ConditionNodePairs = conditionNodePairs.ToList();
+            ConditionNodePairs = conditionNodePairs;
         }
 
-        public List<(Func<bool> condition, Node node)> ConditionNodePairs { get; }
+        public INode[] Children { get; }
 
-        public Node FallbackNode { get; set; }
+        public (Func<bool> condition, INode node)[] ConditionNodePairs { get; }
 
-        public override BehaviorTreeStatus Execute()
+        public INode FallbackNode { get; }
+
+        public BtStatus Execute()
         {
             return GetNodeToExecute().Execute();
         }
 
-        internal override Node GetNodeToExecute()
+        public INode GetNodeToExecute()
         {
-            for (int i = 0; i < ConditionNodePairs.Count; ++i)
+            for (int i = 0; i < ConditionNodePairs.Length; ++i)
             {
                 if (ConditionNodePairs[i].condition())
                 {
@@ -36,26 +39,28 @@ namespace AmeisenBotX.BehaviorTree.Objects
         }
     }
 
-    public class Waterfall<T> : Composite<T>
+    public class Waterfall<T> : IComposite<T>
     {
-        public Waterfall(Node<T> fallbackNode, params (Func<T, bool> condition, Node<T> node)[] conditionNodePairs) : base()
+        public Waterfall(INode<T> fallbackNode, params (Func<T, bool> condition, INode<T> node)[] conditionNodePairs) : base()
         {
             FallbackNode = fallbackNode;
-            ConditionNodePairs = conditionNodePairs.ToList();
+            ConditionNodePairs = conditionNodePairs;
         }
 
-        public List<(Func<T, bool> condition, Node<T> node)> ConditionNodePairs { get; }
+        public INode<T>[] Children { get; }
 
-        public Node<T> FallbackNode { get; set; }
+        public (Func<T, bool> condition, INode<T> node)[] ConditionNodePairs { get; }
 
-        public override BehaviorTreeStatus Execute(T blackboard)
+        public INode<T> FallbackNode { get; }
+
+        public BtStatus Execute(T blackboard)
         {
             return GetNodeToExecute(blackboard).Execute(blackboard);
         }
 
-        internal override Node<T> GetNodeToExecute(T blackboard)
+        public INode<T> GetNodeToExecute(T blackboard)
         {
-            for (int i = 0; i < ConditionNodePairs.Count; ++i)
+            for (int i = 0; i < ConditionNodePairs.Length; ++i)
             {
                 if (ConditionNodePairs[i].condition(blackboard))
                 {

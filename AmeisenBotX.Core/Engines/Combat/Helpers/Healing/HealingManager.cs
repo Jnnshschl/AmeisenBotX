@@ -1,12 +1,9 @@
 ﻿using AmeisenBotX.Common.Utils;
 using AmeisenBotX.Core.Engines.Character.Spells.Objects;
-using AmeisenBotX.Logging;
-using AmeisenBotX.Logging.Enums;
 using AmeisenBotX.Wow.Objects;
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text.Json;
 
 namespace AmeisenBotX.Core.Engines.Combat.Helpers.Healing
 {
@@ -309,7 +306,7 @@ namespace AmeisenBotX.Core.Engines.Combat.Helpers.Healing
                 }
             }
 
-            AmeisenLogger.I.Log("HealingManager", $"IncomingDamage: {JsonSerializer.Serialize(IncomingDamage)}", LogLevel.Verbose);
+            // AmeisenLogger.I.Log("HealingManager", $"IncomingDamage: {JsonSerializer.Serialize(IncomingDamage)}", LogLevel.Verbose);
         }
 
         /// <summary>
@@ -332,7 +329,7 @@ namespace AmeisenBotX.Core.Engines.Combat.Helpers.Healing
                 }
             }
 
-            AmeisenLogger.I.Log("HealingManager", $"SpellHealing: {JsonSerializer.Serialize(SpellHealing)}", LogLevel.Verbose);
+            // AmeisenLogger.I.Log("HealingManager", $"SpellHealing: {JsonSerializer.Serialize(SpellHealing)}", LogLevel.Verbose);
         }
     }
 }

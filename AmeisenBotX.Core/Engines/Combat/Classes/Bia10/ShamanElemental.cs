@@ -1,8 +1,7 @@
 ﻿using AmeisenBotX.Core.Engines.Character.Comparators;
 using AmeisenBotX.Core.Engines.Character.Talents.Objects;
 using AmeisenBotX.Core.Engines.Combat.Helpers;
-using AmeisenBotX.Core.Fsm;
-using AmeisenBotX.Core.Fsm.Utils.Auras.Objects;
+using AmeisenBotX.Core.Logic.Utils.Auras.Objects;
 using AmeisenBotX.Wow.Objects.Enums;
 using System.Collections.Generic;
 
@@ -10,7 +9,7 @@ namespace AmeisenBotX.Core.Engines.Combat.Classes.Bia10
 {
     public class ShamanElemental : BasicCombatClassBia10
     {
-        public ShamanElemental(AmeisenBotInterfaces bot, AmeisenBotFsm stateMachine) : base(bot, stateMachine)
+        public ShamanElemental(AmeisenBotInterfaces bot) : base(bot)
         {
             // my buffs
             MyAuraManager.Jobs.Add(new KeepActiveAuraJob(bot.Db, DataConstants.ShamanSpells.LightningShield, () =>

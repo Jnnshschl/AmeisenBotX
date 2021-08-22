@@ -1,93 +1,103 @@
 ﻿using AmeisenBotX.BehaviorTree.Enums;
-using System.Linq;
 
 namespace AmeisenBotX.BehaviorTree.Objects
 {
-    public class Sequence : Composite
+    /// <summary>
+    /// Executes a sequence of nodes until all nodes returned success. If a node fails or the sequence finished, it gets resetted.
+    /// </summary>
+    public class Sequence : IComposite
     {
-        public Sequence(params Node[] children)
+        public Sequence(params INode[] children)
         {
-            Children = children.ToList();
+            Children = children;
         }
 
-        public int Counter { get; set; }
+        public INode[] Children { get; }
 
-        public override BehaviorTreeStatus Execute()
+        public int Counter { get; private set; }
+
+        public BtStatus Execute()
         {
-            if (Counter == Children.Count)
+            if (Counter == Children.Length)
             {
-                return BehaviorTreeStatus.Success;
+                Counter = 0;
+                return BtStatus.Success;
             }
 
-            BehaviorTreeStatus status = Children[Counter].Execute();
+            BtStatus status = Children[Counter].Execute();
 
-            if (status == BehaviorTreeStatus.Success)
+            if (status == BtStatus.Success)
             {
-                if (Counter < Children.Count)
+                if (Counter < Children.Length)
                 {
                     ++Counter;
 
-                    if (Counter == Children.Count)
+                    if (Counter == Children.Length)
                     {
-                        return BehaviorTreeStatus.Success;
+                        Counter = 0;
+                        return BtStatus.Success;
                     }
                 }
             }
-            else if (status == BehaviorTreeStatus.Failed)
+            else if (status == BtStatus.Failed)
             {
                 Counter = 0;
-                return BehaviorTreeStatus.Failed;
+                return BtStatus.Failed;
             }
 
-            return BehaviorTreeStatus.Ongoing;
+            return BtStatus.Ongoing;
         }
 
-        internal override Node GetNodeToExecute()
+        public INode GetNodeToExecute()
         {
             return this;
         }
     }
 
-    public class Sequence<T> : Composite<T>
+    public class Sequence<T> : IComposite<T>
     {
-        public Sequence(params Node<T>[] children)
+        public Sequence(params INode<T>[] children)
         {
-            Children = children.ToList();
+            Children = children;
         }
 
-        public int Counter { get; set; }
+        public INode<T>[] Children { get; }
 
-        public override BehaviorTreeStatus Execute(T blackboard)
+        public int Counter { get; private set; }
+
+        public BtStatus Execute(T blackboard)
         {
-            if (Counter == Children.Count)
+            if (Counter == Children.Length)
             {
-                return BehaviorTreeStatus.Success;
+                Counter = 0;
+                return BtStatus.Success;
             }
 
-            BehaviorTreeStatus status = Children[Counter].Execute(blackboard);
+            BtStatus status = Children[Counter].Execute(blackboard);
 
-            if (status == BehaviorTreeStatus.Success)
+            if (status == BtStatus.Success)
             {
-                if (Counter < Children.Count)
+                if (Counter < Children.Length)
                 {
                     ++Counter;
 
-                    if (Counter == Children.Count)
+                    if (Counter == Children.Length)
                     {
-                        return BehaviorTreeStatus.Success;
+                        Counter = 0;
+                        return BtStatus.Success;
                     }
                 }
             }
-            else if (status == BehaviorTreeStatus.Failed)
+            else if (status == BtStatus.Failed)
             {
                 Counter = 0;
-                return BehaviorTreeStatus.Failed;
+                return BtStatus.Failed;
             }
 
-            return BehaviorTreeStatus.Ongoing;
+            return BtStatus.Ongoing;
         }
 
-        internal override Node<T> GetNodeToExecute(T blackboard)
+        public INode<T> GetNodeToExecute(T blackboard)
         {
             return this;
         }

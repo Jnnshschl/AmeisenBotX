@@ -21,7 +21,7 @@ namespace AmeisenBotX.Core.Engines.Combat.Classes
         /// <summary>
         /// Dynamic config values specific for your combat class.
         /// </summary>
-        Dictionary<string, dynamic> ConfigurableThresholds { get; set; }
+        Dictionary<string, dynamic> Configurables { get; set; }
 
         /// <summary>
         /// Short description how this class is going to play or what it needs.

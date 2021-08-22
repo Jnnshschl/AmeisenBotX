@@ -3,8 +3,6 @@ using AmeisenBotX.Common.Utils;
 using AmeisenBotX.Core.Engines.Character.Comparators;
 using AmeisenBotX.Core.Engines.Character.Talents.Objects;
 using AmeisenBotX.Core.Engines.Movement.Enums;
-using AmeisenBotX.Core.Fsm;
-using AmeisenBotX.Core.Fsm.States;
 using AmeisenBotX.Wow.Objects;
 using AmeisenBotX.Wow.Objects.Enums;
 using System;
@@ -35,10 +33,9 @@ namespace AmeisenBotX.Core.Engines.Combat.Classes.einTyp
 
         private bool wasInStealth = false;
 
-        public RogueAssassination(AmeisenBotInterfaces bot, AmeisenBotFsm stateMachine)
+        public RogueAssassination(AmeisenBotInterfaces bot)
         {
             Bot = bot;
-            StateMachine = stateMachine;
 
             spells = new RogueAssassinSpells(bot);
         }
@@ -47,7 +44,7 @@ namespace AmeisenBotX.Core.Engines.Combat.Classes.einTyp
 
         public IEnumerable<int> BlacklistedTargetDisplayIds { get; set; }
 
-        public Dictionary<string, dynamic> ConfigurableThresholds { get; set; } = new Dictionary<string, dynamic>();
+        public Dictionary<string, dynamic> Configurables { get; set; } = new Dictionary<string, dynamic>();
 
         public string Description => "...";
 
@@ -116,8 +113,6 @@ namespace AmeisenBotX.Core.Engines.Combat.Classes.einTyp
 
         private float LastTargetRotation { get; set; }
 
-        private AmeisenBotFsm StateMachine { get; }
-
         public void AttackTarget()
         {
             IWowUnit target = Bot.Target;
@@ -183,7 +178,6 @@ namespace AmeisenBotX.Core.Engines.Combat.Classes.einTyp
                     Bot.Wow.ClearTarget();
                     Bot.Wow.SendChatMessage(standingEmotes[new Random().Next(standingEmotes.Length)]);
                     Dancing = true;
-                    StateMachine.Get<StateCombat>().Mode = CombatMode.Allowed;
                 }
                 else
                 {
@@ -195,7 +189,7 @@ namespace AmeisenBotX.Core.Engines.Combat.Classes.einTyp
 
         public void Load(Dictionary<string, JsonElement> objects)
         {
-            ConfigurableThresholds = objects["Configureables"].ToDyn();
+            Configurables = objects["Configureables"].ToDyn();
         }
 
         public void OutOfCombatExecute()
@@ -231,7 +225,6 @@ namespace AmeisenBotX.Core.Engines.Combat.Classes.einTyp
 
                     Dancing = false;
                     HandleMovement(target);
-                    StateMachine.Get<StateCombat>().Mode = CombatMode.Force;
                     HandleAttacking(target);
                 }
                 else if (!Dancing || standing)
@@ -257,7 +250,7 @@ namespace AmeisenBotX.Core.Engines.Combat.Classes.einTyp
         {
             return new()
             {
-                { "configureables", ConfigurableThresholds }
+                { "configureables", Configurables }
             };
         }
 

@@ -1,5 +1,5 @@
 ﻿using AmeisenBotX.Common.Keyboard.Enums;
-using AmeisenBotX.Common.Objects.Keyboard;
+using AmeisenBotX.Common.Keyboard.Objects;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
@@ -79,11 +79,6 @@ namespace AmeisenBotX.Common.Keyboard
                     GetModuleHandle(Process.GetCurrentProcess().MainModule.ModuleName),
                     0
                 );
-
-                if (HookPtr == IntPtr.Zero)
-                {
-                    // AmeisenLogger.I.Log("AmeisenBot", $"Failed to HookKeyboard: {Marshal.GetLastWin32Error()}", LogLevel.Error);
-                }
             }
         }
 

@@ -1,8 +1,7 @@
 ﻿using AmeisenBotX.Core.Engines.Character.Comparators;
 using AmeisenBotX.Core.Engines.Character.Talents.Objects;
 using AmeisenBotX.Core.Engines.Combat.Helpers;
-using AmeisenBotX.Core.Fsm;
-using AmeisenBotX.Core.Fsm.Utils.Auras.Objects;
+using AmeisenBotX.Core.Logic.Utils.Auras.Objects;
 using AmeisenBotX.Wow.Objects;
 using AmeisenBotX.Wow.Objects.Enums;
 using System;
@@ -13,7 +12,7 @@ namespace AmeisenBotX.Core.Engines.Combat.Classes.Jannis
 {
     public class WarlockAffliction : BasicCombatClass
     {
-        public WarlockAffliction(AmeisenBotInterfaces bot, AmeisenBotFsm stateMachine) : base(bot, stateMachine)
+        public WarlockAffliction(AmeisenBotInterfaces bot) : base(bot)
         {
             PetManager = new PetManager
             (
@@ -139,8 +138,9 @@ namespace AmeisenBotX.Core.Engines.Combat.Classes.Jannis
                 }
 
                 if (Bot.GetNearEnemies<IWowUnit>(Bot.Target.Position, 16.0f).Count() > 2
-                    && !Bot.Target.Auras.Any(e => Bot.Db.GetSpellName(e.SpellId) == seedOfCorruptionSpell)
-                    && TryCastSpell(seedOfCorruptionSpell, Bot.Wow.TargetGuid, true))
+                    && ((!Bot.Target.Auras.Any(e => Bot.Db.GetSpellName(e.SpellId) == seedOfCorruptionSpell)
+                        && TryCastSpell(seedOfCorruptionSpell, Bot.Wow.TargetGuid, true))
+                    || TryCastAoeSpell(rainOfFireSpell, Bot.Wow.TargetGuid, true)))
                 {
                     return;
                 }

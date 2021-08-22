@@ -1,4 +1,4 @@
-﻿using AmeisenBotX.Core.Fsm.Utils.Auras.Objects;
+﻿using AmeisenBotX.Core.Logic.Utils.Auras.Objects;
 using AmeisenBotX.Wow.Objects;
 using System.Collections.Generic;
 

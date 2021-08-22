@@ -3,7 +3,8 @@
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
     xmlns:Themes="clr-namespace:Microsoft.Windows.Themes;assembly=PresentationFramework.Aero2"
     x:Class="AmeisenBotX.App"
-             StartupUri="MainWindow.xaml">
+    StartupUri="LoadConfigWindow.xaml">
+
     <Application.Resources>
         <Color x:Key="DarkBackground">#FF212121</Color>
         <Color x:Key="DarkBackgroundAlt">#FF141414</Color>

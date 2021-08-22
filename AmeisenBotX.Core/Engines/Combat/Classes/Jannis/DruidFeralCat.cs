@@ -1,7 +1,6 @@
 ﻿using AmeisenBotX.Core.Engines.Character.Comparators;
 using AmeisenBotX.Core.Engines.Character.Talents.Objects;
-using AmeisenBotX.Core.Fsm;
-using AmeisenBotX.Core.Fsm.Utils.Auras.Objects;
+using AmeisenBotX.Core.Logic.Utils.Auras.Objects;
 using AmeisenBotX.Wow.Objects.Enums;
 using System.Linq;
 
@@ -9,7 +8,7 @@ namespace AmeisenBotX.Core.Engines.Combat.Classes.Jannis
 {
     public class DruidFeralCat : BasicCombatClass
     {
-        public DruidFeralCat(AmeisenBotInterfaces bot, AmeisenBotFsm stateMachine) : base(bot, stateMachine)
+        public DruidFeralCat(AmeisenBotInterfaces bot) : base(bot)
         {
             MyAuraManager.Jobs.Add(new KeepActiveAuraJob(bot.Db, markOfTheWildSpell, () => TryCastSpell(markOfTheWildSpell, Bot.Wow.PlayerGuid, true, 0, true)));
             MyAuraManager.Jobs.Add(new KeepActiveAuraJob(bot.Db, catFormSpell, () => TryCastSpell(catFormSpell, 0, true)));

@@ -1,4 +1,4 @@
-﻿namespace AmeisenBotX.Common.Objects.Keyboard
+﻿namespace AmeisenBotX.Common.Keyboard.Objects
 {
     public struct Keybind
     {

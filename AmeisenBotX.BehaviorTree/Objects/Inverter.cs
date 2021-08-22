@@ -2,63 +2,66 @@
 
 namespace AmeisenBotX.BehaviorTree.Objects
 {
-    public class Inverter : Node
+    /// <summary>
+    /// Inverts the status of a node. Ongoing state will remain Onging.
+    /// </summary>
+    public class Inverter : INode
     {
-        public Inverter(Node child) : base()
+        public Inverter(INode child) : base()
         {
             Child = child;
         }
 
-        public Node Child { get; set; }
+        public INode Child { get; }
 
-        public override BehaviorTreeStatus Execute()
+        public BtStatus Execute()
         {
-            BehaviorTreeStatus status = Child.Execute();
+            BtStatus status = Child.Execute();
 
-            if (status == BehaviorTreeStatus.Success)
+            if (status == BtStatus.Success)
             {
-                status = BehaviorTreeStatus.Failed;
+                status = BtStatus.Failed;
             }
-            else if (status == BehaviorTreeStatus.Failed)
+            else if (status == BtStatus.Failed)
             {
-                status = BehaviorTreeStatus.Success;
+                status = BtStatus.Success;
             }
 
             return status;
         }
 
-        internal override Node GetNodeToExecute()
+        public INode GetNodeToExecute()
         {
             return Child;
         }
     }
 
-    public class Inverter<T> : Node<T>
+    public class Inverter<T> : INode<T>
     {
-        public Inverter(Node<T> child) : base()
+        public Inverter(INode<T> child) : base()
         {
             Child = child;
         }
 
-        public Node<T> Child { get; set; }
+        public INode<T> Child { get; }
 
-        public override BehaviorTreeStatus Execute(T blackboard)
+        public BtStatus Execute(T blackboard)
         {
-            BehaviorTreeStatus status = Child.Execute(blackboard);
+            BtStatus status = Child.Execute(blackboard);
 
-            if (status == BehaviorTreeStatus.Success)
+            if (status == BtStatus.Success)
             {
-                status = BehaviorTreeStatus.Failed;
+                status = BtStatus.Failed;
             }
-            else if (status == BehaviorTreeStatus.Failed)
+            else if (status == BtStatus.Failed)
             {
-                status = BehaviorTreeStatus.Success;
+                status = BtStatus.Success;
             }
 
             return status;
         }
 
-        internal override Node<T> GetNodeToExecute(T blackboard)
+        public INode<T> GetNodeToExecute(T blackboard)
         {
             return Child;
         }
