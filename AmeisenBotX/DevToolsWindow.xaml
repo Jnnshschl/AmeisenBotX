@@ -45,7 +45,7 @@
                 <SolidColorBrush Color="{DynamicResource DarkBorder}" />
             </Rectangle.Fill>
         </Rectangle>
-        <TabControl x:Name="tabcontrolMain" Margin="10,33,10,10" Background="{x:Null}" BorderBrush="{x:Null}" BorderThickness="0" SelectionChanged="TabcontrolMain_SelectionChanged">
+        <TabControl x:Name="tabcontrolMain" Margin="10,33,10,10" Background="{x:Null}" BorderBrush="{x:Null}" BorderThickness="0" SelectionChanged="TabControlMain_SelectionChanged">
             <TabItem x:Name="tabitemCachePoi" Header="POI" Background="{x:Null}" Foreground="White" BorderBrush="{x:Null}" BorderThickness="0">
                 <Border BorderThickness="0,1,0,0" Margin="0,-3,0,0">
                     <Border.BorderBrush>
@@ -107,7 +107,7 @@
                     </Grid>
                 </Border>
             </TabItem>
-            <TabItem x:Name="tabitemNearWowObjects" Header="Near WowObjects" Background="{x:Null}" Foreground="White" BorderBrush="{x:Null}" BorderThickness="0">
+            <TabItem x:Name="tabitemNearWowObjects" Header="Near WowObjects" Background="{x:Null}" Foreground="White" BorderBrush="{x:Null}" BorderThickness="0" KeyDown="ListViewNearWowObjects_KeyDown">
                 <Border BorderThickness="0,1,0,0" Margin="0,-3,0,0">
                     <Border.BorderBrush>
                         <SolidColorBrush Color="{DynamicResource DarkForeground}" />

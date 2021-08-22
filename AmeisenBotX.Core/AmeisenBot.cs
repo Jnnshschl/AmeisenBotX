@@ -14,6 +14,7 @@ using AmeisenBotX.Core.Engines.Dungeon;
 using AmeisenBotX.Core.Engines.Grinding;
 using AmeisenBotX.Core.Engines.Grinding.Profiles;
 using AmeisenBotX.Core.Engines.Grinding.Profiles.Profiles.Alliance.Group;
+using AmeisenBotX.Core.Engines.Grinding.Profiles.Profiles.Horde;
 using AmeisenBotX.Core.Engines.Jobs;
 using AmeisenBotX.Core.Engines.Jobs.Profiles;
 using AmeisenBotX.Core.Engines.Jobs.Profiles.Gathering;
@@ -503,6 +504,7 @@ namespace AmeisenBotX.Core
             GrindingProfiles = new List<IGrindingProfile>()
             {
                 new UltimateGrinding1To80(),
+                new DurotarGrindTo6()
             };
         }
 
