@@ -62,6 +62,7 @@ namespace AmeisenBotX.Core
                 // wotlk
                 or WowMapId.UtgardeKeep
                 or WowMapId.AzjolNerub
+                or WowMapId.HallsOfLighting
                 or WowMapId.TheForgeOfSouls
                 or WowMapId.PitOfSaron;
         }

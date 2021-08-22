@@ -4,6 +4,7 @@ using AmeisenBotX.Core.Engines.Character.Talents.Objects;
 using AmeisenBotX.Core.Logic.Utils.Auras.Objects;
 using AmeisenBotX.Wow.Objects;
 using AmeisenBotX.Wow.Objects.Enums;
+using AmeisenBotX.Wow335a.Constants;
 using System;
 using System.Linq;
 
@@ -13,15 +14,15 @@ namespace AmeisenBotX.Core.Engines.Combat.Classes.Jannis
     {
         public WarriorFury(AmeisenBotInterfaces bot) : base(bot)
         {
-            MyAuraManager.Jobs.Add(new KeepActiveAuraJob(bot.Db, battleShoutSpell, () => TryCastSpell(battleShoutSpell, 0, true)));
+            MyAuraManager.Jobs.Add(new KeepActiveAuraJob(bot.Db, Warrior335a.BattleShout, () => TryCastSpell(Warrior335a.BattleShout, 0, true)));
 
-            TargetAuraManager.Jobs.Add(new KeepActiveAuraJob(bot.Db, hamstringSpell, () => Bot.Target?.Type == WowObjectType.Player && TryCastSpell(hamstringSpell, Bot.Wow.TargetGuid, true)));
-            TargetAuraManager.Jobs.Add(new KeepActiveAuraJob(bot.Db, rendSpell, () => Bot.Target?.Type == WowObjectType.Player && Bot.Player.Rage > 75 && TryCastSpell(rendSpell, Bot.Wow.TargetGuid, true)));
+            TargetAuraManager.Jobs.Add(new KeepActiveAuraJob(bot.Db, Warrior335a.Hamstring, () => Bot.Target?.Type == WowObjectType.Player && TryCastSpell(Warrior335a.Hamstring, Bot.Wow.TargetGuid, true)));
+            TargetAuraManager.Jobs.Add(new KeepActiveAuraJob(bot.Db, Warrior335a.Rend, () => Bot.Target?.Type == WowObjectType.Player && Bot.Player.Rage > 75 && TryCastSpell(Warrior335a.Rend, Bot.Wow.TargetGuid, true)));
 
             InterruptManager.InterruptSpells = new()
             {
-                { 0, (x) => TryCastSpellWarrior(intimidatingShoutSpell, berserkerStanceSpell, x.Guid, true) },
-                { 1, (x) => TryCastSpellWarrior(intimidatingShoutSpell, battleStanceSpell, x.Guid, true) }
+                { 0, (x) => TryCastSpellWarrior(Warrior335a.IntimidatingShout, Warrior335a.BerserkerStance, x.Guid, true) },
+                { 1, (x) => TryCastSpellWarrior(Warrior335a.IntimidatingShout, Warrior335a.BattleStance, x.Guid, true) }
             };
 
             HeroicStrikeEvent = new(TimeSpan.FromSeconds(2));
@@ -99,73 +100,73 @@ namespace AmeisenBotX.Core.Engines.Combat.Classes.Jannis
                         || Bot.Player.IsConfused
                         || Bot.Player.IsPossessed
                         || Bot.Player.IsFleeing)
-                        && TryCastSpell(heroicFurySpell, 0))
+                        && TryCastSpell(Warrior335a.HeroicFury, 0))
                     {
                         return;
                     }
 
                     if (distanceToTarget > 4.0)
                     {
-                        if (TryCastSpellWarrior(chargeSpell, battleStanceSpell, Bot.Wow.TargetGuid, true)
-                            || (TryCastSpell(berserkerRageSpell, Bot.Wow.TargetGuid, true) && TryCastSpellWarrior(interceptSpell, berserkerStanceSpell, Bot.Wow.TargetGuid, true)))
+                        if (TryCastSpellWarrior(Warrior335a.Charge, Warrior335a.BattleStance, Bot.Wow.TargetGuid, true)
+                            || (TryCastSpell(Warrior335a.BerserkerRage, Bot.Wow.TargetGuid, true) && TryCastSpellWarrior(Warrior335a.Intercept, Warrior335a.BerserkerStance, Bot.Wow.TargetGuid, true)))
                         {
                             return;
                         }
                     }
                     else
                     {
-                        if (HeroicStrikeEvent.Ready && !Bot.Player.Auras.Any(e => Bot.Db.GetSpellName(e.SpellId) == recklessnessSpell))
+                        if (HeroicStrikeEvent.Ready && !Bot.Player.Auras.Any(e => Bot.Db.GetSpellName(e.SpellId) == Warrior335a.Recklessness))
                         {
-                            if ((Bot.Player.Rage > 50 && Bot.GetNearEnemies<IWowUnit>(Bot.Player.Position, 8.0f).Count() > 2 && TryCastSpellWarrior(cleaveSpell, berserkerStanceSpell, 0, true))
-                                || (Bot.Player.Rage > 50 && TryCastSpellWarrior(heroicStrikeSpell, berserkerStanceSpell, Bot.Wow.TargetGuid, true)))
+                            if ((Bot.Player.Rage > 50 && Bot.GetNearEnemies<IWowUnit>(Bot.Player.Position, 8.0f).Count() > 2 && TryCastSpellWarrior(Warrior335a.Cleave, Warrior335a.BerserkerStance, 0, true))
+                                || (Bot.Player.Rage > 50 && TryCastSpellWarrior(Warrior335a.HeroicStrike, Warrior335a.BerserkerStance, Bot.Wow.TargetGuid, true)))
                             {
                                 HeroicStrikeEvent.Run();
                                 return;
                             }
                         }
 
-                        if (TryCastSpellWarrior(bloodthirstSpell, berserkerStanceSpell, Bot.Wow.TargetGuid, true)
-                            || TryCastSpellWarrior(whirlwindSpell, berserkerStanceSpell, Bot.Wow.TargetGuid, true))
+                        if (TryCastSpellWarrior(Warrior335a.Bloodthirst, Warrior335a.BerserkerStance, Bot.Wow.TargetGuid, true)
+                            || TryCastSpellWarrior(Warrior335a.Whirlwind, Warrior335a.BerserkerStance, Bot.Wow.TargetGuid, true))
                         {
                             return;
                         }
 
                         // dont prevent BT or WW with GCD
-                        if (CooldownManager.GetSpellCooldown(bloodthirstSpell) <= 1200
-                            || CooldownManager.GetSpellCooldown(whirlwindSpell) <= 1200)
+                        if (CooldownManager.GetSpellCooldown(Warrior335a.Bloodthirst) <= 1200
+                            || CooldownManager.GetSpellCooldown(Warrior335a.Whirlwind) <= 1200)
                         {
                             return;
                         }
 
-                        if (Bot.Player.Auras.Any(e => Bot.Db.GetSpellName(e.SpellId) == $"{slamSpell}!")
-                           && TryCastSpell(slamSpell, Bot.Wow.TargetGuid, true))
+                        if (Bot.Player.Auras.Any(e => Bot.Db.GetSpellName(e.SpellId) == $"{Warrior335a.Slam}!")
+                           && TryCastSpell(Warrior335a.Slam, Bot.Wow.TargetGuid, true))
                         {
                             return;
                         }
 
-                        if (TryCastSpell(berserkerRageSpell, 0))
+                        if (TryCastSpell(Warrior335a.BerserkerRage, 0))
                         {
                             return;
                         }
 
-                        if (TryCastSpell(bloodrageSpell, Bot.Wow.TargetGuid, true, Bot.Player.Health))
+                        if (TryCastSpell(Warrior335a.Bloodrage, Bot.Wow.TargetGuid, true, Bot.Player.Health))
                         {
                             return;
                         }
 
-                        if (TryCastSpell(recklessnessSpell, Bot.Wow.TargetGuid, true))
+                        if (TryCastSpell(Warrior335a.Recklessness, Bot.Wow.TargetGuid, true))
                         {
                             return;
                         }
 
-                        if (TryCastSpell(deathWishSpell, Bot.Wow.TargetGuid, true))
+                        if (TryCastSpell(Warrior335a.DeathWish, Bot.Wow.TargetGuid, true))
                         {
                             return;
                         }
 
                         if (Bot.Player.Rage > 25
                            && Bot.Target.HealthPercentage < 20
-                           && TryCastSpellWarrior(executeSpell, berserkerStanceSpell, Bot.Wow.TargetGuid, true))
+                           && TryCastSpellWarrior(Warrior335a.Execute, Warrior335a.BerserkerStance, Bot.Wow.TargetGuid, true))
                         {
                             return;
                         }

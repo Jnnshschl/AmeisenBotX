@@ -3,6 +3,7 @@ using AmeisenBotX.Core.Engines.Character.Talents.Objects;
 using AmeisenBotX.Core.Logic.Utils.Auras.Objects;
 using AmeisenBotX.Wow.Objects;
 using AmeisenBotX.Wow.Objects.Enums;
+using AmeisenBotX.Wow335a.Constants;
 using System.Linq;
 
 namespace AmeisenBotX.Core.Engines.Combat.Classes.Jannis
@@ -11,17 +12,17 @@ namespace AmeisenBotX.Core.Engines.Combat.Classes.Jannis
     {
         public DruidFeralBear(AmeisenBotInterfaces bot) : base(bot)
         {
-            MyAuraManager.Jobs.Add(new KeepActiveAuraJob(bot.Db, markOfTheWildSpell, () => TryCastSpell(markOfTheWildSpell, Bot.Wow.PlayerGuid, true, 0, true)));
-            MyAuraManager.Jobs.Add(new KeepActiveAuraJob(bot.Db, direBearFormSpell, () => TryCastSpell(direBearFormSpell, 0, true)));
+            MyAuraManager.Jobs.Add(new KeepActiveAuraJob(bot.Db, Druid335a.MarkOfTheWild, () => TryCastSpell(Druid335a.MarkOfTheWild, Bot.Wow.PlayerGuid, true, 0, true)));
+            MyAuraManager.Jobs.Add(new KeepActiveAuraJob(bot.Db, Druid335a.DireBearForm, () => TryCastSpell(Druid335a.DireBearForm, 0, true)));
 
-            TargetAuraManager.Jobs.Add(new KeepActiveAuraJob(bot.Db, mangleBearSpell, () => TryCastSpell(mangleBearSpell, Bot.Wow.TargetGuid, true)));
+            TargetAuraManager.Jobs.Add(new KeepActiveAuraJob(bot.Db, Druid335a.MangleBear, () => TryCastSpell(Druid335a.MangleBear, Bot.Wow.TargetGuid, true)));
 
             InterruptManager.InterruptSpells = new()
             {
-                { 0, (x) => TryCastSpell(bashSpell, x.Guid, true) },
+                { 0, (x) => TryCastSpell(Druid335a.Bash, x.Guid, true) },
             };
 
-            GroupAuraManager.SpellsToKeepActiveOnParty.Add((markOfTheWildSpell, (spellName, guid) => TryCastSpell(spellName, guid, true)));
+            GroupAuraManager.SpellsToKeepActiveOnParty.Add((Druid335a.MarkOfTheWild, (spellName, guid) => TryCastSpell(spellName, guid, true)));
         }
 
         public override string Description => "FCFS based CombatClass for the Feral (Bear) Druid spec.";
@@ -93,24 +94,24 @@ namespace AmeisenBotX.Core.Engines.Combat.Classes.Jannis
                 double distanceToTarget = Bot.Target.Position.GetDistance(Bot.Player.Position);
 
                 if (distanceToTarget > 9.0
-                    && TryCastSpell(feralChargeBearSpell, Bot.Wow.TargetGuid, true))
+                    && TryCastSpell(Druid335a.FeralChargeBear, Bot.Wow.TargetGuid, true))
                 {
                     return;
                 }
 
                 if (Bot.Player.HealthPercentage < 40
-                    && TryCastSpell(survivalInstinctsSpell, 0, true))
+                    && TryCastSpell(Druid335a.SurvivalInstincts, 0, true))
                 {
                     return;
                 }
 
                 if (Bot.Target.TargetGuid != Bot.Wow.PlayerGuid
-                    && TryCastSpell(growlSpell, 0, true))
+                    && TryCastSpell(Druid335a.Growl, 0, true))
                 {
                     return;
                 }
 
-                if (TryCastSpell(berserkSpell, 0))
+                if (TryCastSpell(Druid335a.Berserk, 0))
                 {
                     return;
                 }
@@ -123,15 +124,15 @@ namespace AmeisenBotX.Core.Engines.Combat.Classes.Jannis
                 int nearEnemies = Bot.GetNearEnemies<IWowUnit>(Bot.Player.Position, 10).Count();
 
                 if ((Bot.Player.HealthPercentage > 80
-                        && TryCastSpell(enrageSpell, 0, true))
+                        && TryCastSpell(Druid335a.Enrage, 0, true))
                     || (Bot.Player.HealthPercentage < 70
-                        && TryCastSpell(barkskinSpell, 0, true))
+                        && TryCastSpell(Druid335a.Barkskin, 0, true))
                     || (Bot.Player.HealthPercentage < 75
-                        && TryCastSpell(frenziedRegenerationSpell, 0, true))
-                    || (nearEnemies > 2 && TryCastSpell(challengingRoarSpell, 0, true))
-                    || TryCastSpell(lacerateSpell, Bot.Wow.TargetGuid, true)
-                    || (nearEnemies > 2 && TryCastSpell(swipeSpell, 0, true))
-                    || TryCastSpell(mangleBearSpell, Bot.Wow.TargetGuid, true))
+                        && TryCastSpell(Druid335a.FrenziedRegeneration, 0, true))
+                    || (nearEnemies > 2 && TryCastSpell(Druid335a.ChallengingRoar, 0, true))
+                    || TryCastSpell(Druid335a.Lacerate, Bot.Wow.TargetGuid, true)
+                    || (nearEnemies > 2 && TryCastSpell(Druid335a.Swipe, 0, true))
+                    || TryCastSpell(Druid335a.MangleBear, Bot.Wow.TargetGuid, true))
                 {
                     return;
                 }
@@ -151,14 +152,14 @@ namespace AmeisenBotX.Core.Engines.Combat.Classes.Jannis
         private bool NeedToHealMySelf()
         {
             if (Bot.Player.HealthPercentage < 60
-                && !Bot.Player.Auras.Any(e => Bot.Db.GetSpellName(e.SpellId) == rejuvenationSpell)
-                && TryCastSpell(rejuvenationSpell, 0, true))
+                && !Bot.Player.Auras.Any(e => Bot.Db.GetSpellName(e.SpellId) == Druid335a.Rejuvenation)
+                && TryCastSpell(Druid335a.Rejuvenation, 0, true))
             {
                 return true;
             }
 
             if (Bot.Player.HealthPercentage < 40
-                && TryCastSpell(healingTouchSpell, 0, true))
+                && TryCastSpell(Druid335a.HealingTouch, 0, true))
             {
                 return true;
             }

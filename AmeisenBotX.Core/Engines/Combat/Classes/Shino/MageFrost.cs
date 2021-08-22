@@ -5,6 +5,7 @@ using AmeisenBotX.Core.Logic.CombatClasses.Shino;
 using AmeisenBotX.Core.Logic.Utils.Auras.Objects;
 using AmeisenBotX.Wow.Objects;
 using AmeisenBotX.Wow.Objects.Enums;
+using AmeisenBotX.Wow335a.Constants;
 using System;
 using System.Linq;
 
@@ -14,15 +15,15 @@ namespace AmeisenBotX.Core.Engines.Combat.Classes.Shino
     {
         public MageFrost(AmeisenBotInterfaces bot) : base(bot)
         {
-            MyAuraManager.Jobs.Add(new KeepActiveAuraJob(bot.Db, arcaneIntellectSpell, () => TryCastSpell(arcaneIntellectSpell, 0, true)));
-            MyAuraManager.Jobs.Add(new KeepActiveAuraJob(bot.Db, frostArmorSpell, () => TryCastSpell(frostArmorSpell, 0, true)));
-            MyAuraManager.Jobs.Add(new KeepActiveAuraJob(bot.Db, iceArmorSpell, () => TryCastSpell(iceArmorSpell, 0, true)));
-            MyAuraManager.Jobs.Add(new KeepActiveAuraJob(bot.Db, manaShieldSpell, () => TryCastSpell(manaShieldSpell, 0, true)));
-            MyAuraManager.Jobs.Add(new KeepActiveAuraJob(bot.Db, iceBarrierSpell, () => TryCastSpell(iceBarrierSpell, 0, true)));
+            MyAuraManager.Jobs.Add(new KeepActiveAuraJob(bot.Db, Mage335a.ArcaneIntellect, () => TryCastSpell(Mage335a.ArcaneIntellect, 0, true)));
+            MyAuraManager.Jobs.Add(new KeepActiveAuraJob(bot.Db, Mage335a.FrostArmor, () => TryCastSpell(Mage335a.FrostArmor, 0, true)));
+            MyAuraManager.Jobs.Add(new KeepActiveAuraJob(bot.Db, Mage335a.IceArmor, () => TryCastSpell(Mage335a.IceArmor, 0, true)));
+            MyAuraManager.Jobs.Add(new KeepActiveAuraJob(bot.Db, Mage335a.ManaShield, () => TryCastSpell(Mage335a.ManaShield, 0, true)));
+            MyAuraManager.Jobs.Add(new KeepActiveAuraJob(bot.Db, Mage335a.IceBarrier, () => TryCastSpell(Mage335a.IceBarrier, 0, true)));
 
             InterruptManager.InterruptSpells = new()
             {
-                { 0, (x) => TryCastSpell(counterspellSpell, x.Guid, true) }
+                { 0, (x) => TryCastSpell(Mage335a.Counterspell, x.Guid, true) }
             };
         }
 
@@ -97,39 +98,39 @@ namespace AmeisenBotX.Core.Engines.Combat.Classes.Shino
 
             if (SelectTarget(out IWowUnit target))
             {
-                if (Bot.Player.ManaPercentage <= 25.0 && TryCastSpell(evocationSpell, 0, true))
+                if (Bot.Player.ManaPercentage <= 25.0 && TryCastSpell(Mage335a.Evocation, 0, true))
                 {
                     return;
                 }
 
-                if (CooldownManager.IsSpellOnCooldown(summonWaterElementalSpell) &&
-                    CooldownManager.IsSpellOnCooldown(icyVeinsSpell))
+                if (CooldownManager.IsSpellOnCooldown(Mage335a.SummonWaterElemental) &&
+                    CooldownManager.IsSpellOnCooldown(Mage335a.IcyVeins))
                 {
-                    TryCastSpell(coldSnapSpell, 0);
+                    TryCastSpell(Mage335a.ColdSnap, 0);
                 }
 
-                if (Bot.Character.SpellBook.IsSpellKnown(freezeSpell))
+                if (Bot.Character.SpellBook.IsSpellKnown(Mage335a.Freeze))
                 {
-                    TryCastAoeSpell(freezeSpell, target.Guid);
+                    TryCastAoeSpell(Mage335a.Freeze, target.Guid);
                 }
 
                 System.Collections.Generic.IEnumerable<IWowUnit> nearbyTargets = Bot.GetEnemiesInCombatWithParty<IWowUnit>(Bot.Player.Position, 64.0f);
                 if (nearbyTargets.Count(e => e.Position.GetDistance(Bot.Player.Position) <= 9.0) == 1
-                    && TryCastSpell(frostNovaSpell, 0, true))
+                    && TryCastSpell(Mage335a.FrostNova, 0, true))
                 {
                     return;
                 }
 
                 if (DateTime.Now.Subtract(LastSheep).TotalMilliseconds >= 3000.0)
                 {
-                    if (nearbyTargets.Count() > 1 && !nearbyTargets.Any(e => e.Auras.Any(aura => Bot.Db.GetSpellName(aura.SpellId) == polymorphSpell)))
+                    if (nearbyTargets.Count() > 1 && !nearbyTargets.Any(e => e.Auras.Any(aura => Bot.Db.GetSpellName(aura.SpellId) == Mage335a.Polymorph)))
                     {
                         IWowUnit targetInDistance = nearbyTargets
                             .Where(e => e.Guid != Bot.Wow.TargetGuid)
                             .OrderBy(e => e.Position.GetDistance(Bot.Player.Position))
                             .FirstOrDefault();
                         Bot.Wow.ChangeTarget(targetInDistance.Guid);
-                        if (TryCastSpell(polymorphSpell, targetInDistance.Guid, true))
+                        if (TryCastSpell(Mage335a.Polymorph, targetInDistance.Guid, true))
                         {
                             Bot.Wow.ChangeTarget(target.Guid);
                             LastSheep = DateTime.Now;
@@ -141,7 +142,7 @@ namespace AmeisenBotX.Core.Engines.Combat.Classes.Shino
                 if (Bot.Target.Position.GetDistance(Bot.Player.Position) <= 4.0)
                 {
                     // TODO: Logic to check if the target blink location is dangerous
-                    if (!TryCastSpell(blinkSpell, 0, true))
+                    if (!TryCastSpell(Mage335a.Blink, 0, true))
                     {
                     }
                     else
@@ -153,38 +154,38 @@ namespace AmeisenBotX.Core.Engines.Combat.Classes.Shino
 
                 if (Bot.Target.Position.GetDistance(Bot.Player.Position) <= 4.0
                     && Bot.Player.HealthPercentage <= 50.0
-                    && CooldownManager.IsSpellOnCooldown(blinkSpell) && TryCastSpell(iceBlockSpell, 0, true))
+                    && CooldownManager.IsSpellOnCooldown(Mage335a.Blink) && TryCastSpell(Mage335a.IceBlock, 0, true))
                 {
                     return;
                 }
 
-                if (TryCastSpell(summonWaterElementalSpell, target.Guid, true))
+                if (TryCastSpell(Mage335a.SummonWaterElemental, target.Guid, true))
                 {
                     return;
                 }
 
-                if (TryCastSpell(deepFreezeSpell, target.Guid, true))
+                if (TryCastSpell(Mage335a.DeepFreeze, target.Guid, true))
                 {
                     return;
                 }
 
-                TryCastSpell(icyVeinsSpell, 0, true);
-                TryCastSpell(berserkingSpell, 0, true);
+                TryCastSpell(Mage335a.IcyVeins, 0, true);
+                TryCastSpell(Racials335a.Berserking, 0, true);
 
-                if (TryCastSpell(frostBoltSpell, target.Guid, true))
+                if (TryCastSpell(Mage335a.FrostBolt, target.Guid, true))
                 {
                     return;
                 }
 
-                TryCastSpell(fireballSpell, target.Guid, true);
+                TryCastSpell(Mage335a.Fireball, target.Guid, true);
             }
         }
 
         public override void OutOfCombatExecute()
         {
-            if (Bot.Character.SpellBook.IsSpellKnown(conjureWaterSpell))
+            if (Bot.Character.SpellBook.IsSpellKnown(Mage335a.ConjureWater))
             {
-                Spell spell = Bot.Character.SpellBook.GetSpellByName(conjureWaterSpell);
+                Spell spell = Bot.Character.SpellBook.GetSpellByName(Mage335a.ConjureWater);
                 spell.TryGetRank(out int spellRank);
                 if (spellRank >= 2)
                 {
@@ -221,7 +222,7 @@ namespace AmeisenBotX.Core.Engines.Combat.Classes.Shino
                     Bot.Character.Inventory.DestroyItemByName("Conjured Mountain Spring Water");
                 }
 
-                if (Bot.Character.SpellBook.IsSpellKnown(conjureRefreshment))
+                if (Bot.Character.SpellBook.IsSpellKnown(Mage335a.ConjureRefreshment))
                 {
                     Bot.Character.Inventory.DestroyItemByName("Conjured Glacier Water");
                 }
@@ -237,14 +238,14 @@ namespace AmeisenBotX.Core.Engines.Combat.Classes.Shino
                     || (spellRank == 8 && !Bot.Character.Inventory.HasItemByName("Conjured Glacier Water"))
                     )
                 {
-                    TryCastSpell(conjureWaterSpell, 0, true);
+                    TryCastSpell(Mage335a.ConjureWater, 0, true);
                     return;
                 }
             }
 
-            if (Bot.Character.SpellBook.IsSpellKnown(conjureFoodSpell))
+            if (Bot.Character.SpellBook.IsSpellKnown(Mage335a.ConjureFood))
             {
-                Spell spell = Bot.Character.SpellBook.GetSpellByName(conjureFoodSpell);
+                Spell spell = Bot.Character.SpellBook.GetSpellByName(Mage335a.ConjureFood);
                 spell.TryGetRank(out int spellRank);
                 if (spellRank >= 2)
                 {
@@ -281,7 +282,7 @@ namespace AmeisenBotX.Core.Engines.Combat.Classes.Shino
                     Bot.Character.Inventory.DestroyItemByName("Conjured Cinnamon Roll");
                 }
 
-                if (Bot.Character.SpellBook.IsSpellKnown(conjureRefreshment))
+                if (Bot.Character.SpellBook.IsSpellKnown(Mage335a.ConjureRefreshment))
                 {
                     Bot.Character.Inventory.DestroyItemByName("Conjured Croissant");
                 }
@@ -297,14 +298,14 @@ namespace AmeisenBotX.Core.Engines.Combat.Classes.Shino
                     || (spellRank == 8 && !Bot.Character.Inventory.HasItemByName("Conjured Croissant"))
                     )
                 {
-                    TryCastSpell(conjureFoodSpell, 0, true);
+                    TryCastSpell(Mage335a.ConjureFood, 0, true);
                     return;
                 }
             }
 
-            if (Bot.Character.SpellBook.IsSpellKnown(conjureRefreshment))
+            if (Bot.Character.SpellBook.IsSpellKnown(Mage335a.ConjureRefreshment))
             {
-                Spell spell = Bot.Character.SpellBook.GetSpellByName(conjureRefreshment);
+                Spell spell = Bot.Character.SpellBook.GetSpellByName(Mage335a.ConjureRefreshment);
                 spell.TryGetRank(out int spellRank);
 
                 if (spellRank >= 2)
@@ -317,7 +318,7 @@ namespace AmeisenBotX.Core.Engines.Combat.Classes.Shino
                     || (spellRank == 2 && !Bot.Character.Inventory.HasItemByName("Conjured Mana Strudel"))
                 )
                 {
-                    TryCastSpell(conjureRefreshment, 0, true);
+                    TryCastSpell(Mage335a.ConjureRefreshment, 0, true);
                     return;
                 }
             }
@@ -327,12 +328,12 @@ namespace AmeisenBotX.Core.Engines.Combat.Classes.Shino
 
         protected override Spell GetOpeningSpell()
         {
-            Spell spell = Bot.Character.SpellBook.GetSpellByName(frostBoltSpell);
+            Spell spell = Bot.Character.SpellBook.GetSpellByName(Mage335a.FrostBolt);
             if (spell != null)
             {
                 return spell;
             }
-            return Bot.Character.SpellBook.GetSpellByName(fireballSpell);
+            return Bot.Character.SpellBook.GetSpellByName(Mage335a.Fireball);
         }
     }
 }

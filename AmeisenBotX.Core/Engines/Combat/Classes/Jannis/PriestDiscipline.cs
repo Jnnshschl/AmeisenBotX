@@ -3,6 +3,7 @@ using AmeisenBotX.Core.Engines.Character.Talents.Objects;
 using AmeisenBotX.Core.Logic.Utils.Auras.Objects;
 using AmeisenBotX.Wow.Objects;
 using AmeisenBotX.Wow.Objects.Enums;
+using AmeisenBotX.Wow335a.Constants;
 using System.Collections.Generic;
 using System.Linq;
 
@@ -12,18 +13,18 @@ namespace AmeisenBotX.Core.Engines.Combat.Classes.Jannis
     {
         public PriestDiscipline(AmeisenBotInterfaces bot) : base(bot)
         {
-            MyAuraManager.Jobs.Add(new KeepActiveAuraJob(bot.Db, powerWordFortitudeSpell, () => TryCastSpell(powerWordFortitudeSpell, Bot.Wow.PlayerGuid, true)));
-            MyAuraManager.Jobs.Add(new KeepActiveAuraJob(bot.Db, innerFireSpell, () => TryCastSpell(innerFireSpell, 0, true)));
+            MyAuraManager.Jobs.Add(new KeepActiveAuraJob(bot.Db, Priest335a.PowerWordFortitude, () => TryCastSpell(Priest335a.PowerWordFortitude, Bot.Wow.PlayerGuid, true)));
+            MyAuraManager.Jobs.Add(new KeepActiveAuraJob(bot.Db, Priest335a.InnerFire, () => TryCastSpell(Priest335a.InnerFire, 0, true)));
 
             SpellUsageHealDict = new Dictionary<int, string>()
             {
-                { 0, flashHealSpell },
-                { 400, flashHealSpell },
-                { 3000, penanceSpell },
-                { 5000, greaterHealSpell },
+                { 0, Priest335a.FlashHeal },
+                { 400, Priest335a.FlashHeal },
+                { 3000, Priest335a.Penance },
+                { 5000, Priest335a.GreaterHeal },
             };
 
-            GroupAuraManager.SpellsToKeepActiveOnParty.Add((powerWordFortitudeSpell, (spellName, guid) => TryCastSpell(spellName, guid, true)));
+            GroupAuraManager.SpellsToKeepActiveOnParty.Add((Priest335a.PowerWordFortitude, (spellName, guid) => TryCastSpell(spellName, guid, true)));
         }
 
         public override string Description => "FCFS based CombatClass for the Discipline Priest spec.";
@@ -97,23 +98,23 @@ namespace AmeisenBotX.Core.Engines.Combat.Classes.Jannis
 
             if ((!Bot.Objects.PartymemberGuids.Any() || Bot.Player.ManaPercentage > 50) && SelectTarget(TargetProviderDps))
             {
-                if (Bot.Target.Auras.Any(e => Bot.Db.GetSpellName(e.SpellId) == shadowWordPainSpell)
-                    && TryCastSpell(shadowWordPainSpell, Bot.Wow.TargetGuid, true))
+                if (Bot.Target.Auras.Any(e => Bot.Db.GetSpellName(e.SpellId) == Priest335a.ShadowWordPain)
+                    && TryCastSpell(Priest335a.ShadowWordPain, Bot.Wow.TargetGuid, true))
                 {
                     return;
                 }
 
-                if (TryCastSpell(smiteSpell, Bot.Wow.TargetGuid, true))
+                if (TryCastSpell(Priest335a.Smite, Bot.Wow.TargetGuid, true))
                 {
                     return;
                 }
 
-                if (TryCastSpell(holyShockSpell, Bot.Wow.TargetGuid, true))
+                if (TryCastSpell(Priest335a.HolyShock, Bot.Wow.TargetGuid, true))
                 {
                     return;
                 }
 
-                if (TryCastSpell(consecrationSpell, Bot.Wow.TargetGuid, true))
+                if (TryCastSpell(Priest335a.Consecration, Bot.Wow.TargetGuid, true))
                 {
                     return;
                 }
@@ -125,7 +126,7 @@ namespace AmeisenBotX.Core.Engines.Combat.Classes.Jannis
             base.OutOfCombatExecute();
 
             if (NeedToHealSomeone()
-                || HandleDeadPartymembers(resurrectionSpell))
+                || HandleDeadPartymembers(Priest335a.Resurrection))
             {
                 return;
             }
@@ -138,7 +139,7 @@ namespace AmeisenBotX.Core.Engines.Combat.Classes.Jannis
                 IWowUnit target = unitsToHeal.First();
 
                 if (unitsToHeal.Count() > 3
-                    && TryCastSpell(prayerOfHealingSpell, target.Guid, true))
+                    && TryCastSpell(Priest335a.PrayerOfHealing, target.Guid, true))
                 {
                     return true;
                 }
@@ -146,30 +147,30 @@ namespace AmeisenBotX.Core.Engines.Combat.Classes.Jannis
                 if (target.Guid != Bot.Wow.PlayerGuid
                     && target.HealthPercentage < 70
                     && Bot.Player.HealthPercentage < 70
-                    && TryCastSpell(bindingHealSpell, target.Guid, true))
+                    && TryCastSpell(Priest335a.BindingHeal, target.Guid, true))
                 {
                     return true;
                 }
 
                 if (Bot.Player.ManaPercentage < 50
-                    && TryCastSpell(hymnOfHopeSpell, 0))
+                    && TryCastSpell(Priest335a.HymnOfHope, 0))
                 {
                     return true;
                 }
 
                 if (Bot.Player.HealthPercentage < 20
-                    && TryCastSpell(desperatePrayerSpell, 0))
+                    && TryCastSpell(Priest335a.DesperatePrayer, 0))
                 {
                     return true;
                 }
 
                 if ((target.HealthPercentage < 98 && target.HealthPercentage > 80
-                        && !target.Auras.Any(e => Bot.Db.GetSpellName(e.SpellId) == weakenedSoulSpell)
-                        && !target.Auras.Any(e => Bot.Db.GetSpellName(e.SpellId) == powerWordShieldSpell)
-                        && TryCastSpell(powerWordShieldSpell, target.Guid, true))
+                        && !target.Auras.Any(e => Bot.Db.GetSpellName(e.SpellId) == Priest335a.WeakenedSoul)
+                        && !target.Auras.Any(e => Bot.Db.GetSpellName(e.SpellId) == Priest335a.PowerWordShield)
+                        && TryCastSpell(Priest335a.PowerWordShield, target.Guid, true))
                     || (target.HealthPercentage < 90 && target.HealthPercentage > 80
-                        && !target.Auras.Any(e => Bot.Db.GetSpellName(e.SpellId) == renewSpell)
-                        && TryCastSpell(renewSpell, target.Guid, true)))
+                        && !target.Auras.Any(e => Bot.Db.GetSpellName(e.SpellId) == Priest335a.Renew)
+                        && TryCastSpell(Priest335a.Renew, target.Guid, true)))
                 {
                     return true;
                 }

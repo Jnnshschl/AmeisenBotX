@@ -2,6 +2,7 @@
 using AmeisenBotX.Core.Engines.Character.Talents.Objects;
 using AmeisenBotX.Core.Logic.Utils.Auras.Objects;
 using AmeisenBotX.Wow.Objects.Enums;
+using AmeisenBotX.Wow335a.Constants;
 
 namespace AmeisenBotX.Core.Engines.Combat.Classes.Jannis
 {
@@ -9,12 +10,12 @@ namespace AmeisenBotX.Core.Engines.Combat.Classes.Jannis
     {
         public RogueAssassination(AmeisenBotInterfaces bot) : base(bot)
         {
-            MyAuraManager.Jobs.Add(new KeepActiveAuraJob(bot.Db, sliceAndDiceSpell, () => TryCastSpellRogue(sliceAndDiceSpell, 0, true, true, 1)));
-            MyAuraManager.Jobs.Add(new KeepActiveAuraJob(bot.Db, coldBloodSpell, () => TryCastSpellRogue(coldBloodSpell, 0, true)));
+            MyAuraManager.Jobs.Add(new KeepActiveAuraJob(bot.Db, Rogue335a.SliceAndDice, () => TryCastSpellRogue(Rogue335a.SliceAndDice, 0, true, true, 1)));
+            MyAuraManager.Jobs.Add(new KeepActiveAuraJob(bot.Db, Rogue335a.ColdBlood, () => TryCastSpellRogue(Rogue335a.ColdBlood, 0, true)));
 
             InterruptManager.InterruptSpells = new()
             {
-                { 0, (x) => TryCastSpellRogue(kickSpell, x.Guid, true) }
+                { 0, (x) => TryCastSpellRogue(Rogue335a.Kick, x.Guid, true) }
             };
         }
 
@@ -80,7 +81,7 @@ namespace AmeisenBotX.Core.Engines.Combat.Classes.Jannis
             if (SelectTarget(TargetProviderDps))
             {
                 if ((Bot.Player.HealthPercentage < 20
-                        && TryCastSpellRogue(cloakOfShadowsSpell, 0, true)))
+                        && TryCastSpellRogue(Rogue335a.CloakOfShadows, 0, true)))
                 {
                     return;
                 }
@@ -88,14 +89,14 @@ namespace AmeisenBotX.Core.Engines.Combat.Classes.Jannis
                 if (Bot.Target != null)
                 {
                     if ((Bot.Target.Position.GetDistance(Bot.Player.Position) > 16
-                            && TryCastSpellRogue(sprintSpell, 0, true)))
+                            && TryCastSpellRogue(Rogue335a.Sprint, 0, true)))
                     {
                         return;
                     }
                 }
 
-                if (TryCastSpellRogue(eviscerateSpell, Bot.Wow.TargetGuid, true, true, 5)
-                    || TryCastSpellRogue(mutilateSpell, Bot.Wow.TargetGuid, true))
+                if (TryCastSpellRogue(Rogue335a.Eviscerate, Bot.Wow.TargetGuid, true, true, 5)
+                    || TryCastSpellRogue(Rogue335a.Mutilate, Bot.Wow.TargetGuid, true))
                 {
                     return;
                 }

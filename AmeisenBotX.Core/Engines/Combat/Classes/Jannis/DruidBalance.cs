@@ -3,6 +3,7 @@ using AmeisenBotX.Core.Engines.Character.Talents.Objects;
 using AmeisenBotX.Core.Logic.Utils.Auras.Objects;
 using AmeisenBotX.Wow.Objects;
 using AmeisenBotX.Wow.Objects.Enums;
+using AmeisenBotX.Wow335a.Constants;
 using System;
 using System.Linq;
 
@@ -12,19 +13,19 @@ namespace AmeisenBotX.Core.Engines.Combat.Classes.Jannis
     {
         public DruidBalance(AmeisenBotInterfaces bot) : base(bot)
         {
-            MyAuraManager.Jobs.Add(new KeepActiveAuraJob(bot.Db, moonkinFormSpell, () => TryCastSpell(moonkinFormSpell, 0, true)));
-            MyAuraManager.Jobs.Add(new KeepActiveAuraJob(bot.Db, thornsSpell, () => TryCastSpell(thornsSpell, 0, true)));
-            MyAuraManager.Jobs.Add(new KeepActiveAuraJob(bot.Db, markOfTheWildSpell, () => TryCastSpell(markOfTheWildSpell, Bot.Wow.PlayerGuid, true, 0, true)));
+            MyAuraManager.Jobs.Add(new KeepActiveAuraJob(bot.Db, Druid335a.MoonkinForm, () => TryCastSpell(Druid335a.MoonkinForm, 0, true)));
+            MyAuraManager.Jobs.Add(new KeepActiveAuraJob(bot.Db, Druid335a.Thorns, () => TryCastSpell(Druid335a.Thorns, 0, true)));
+            MyAuraManager.Jobs.Add(new KeepActiveAuraJob(bot.Db, Druid335a.MarkOfTheWild, () => TryCastSpell(Druid335a.MarkOfTheWild, Bot.Wow.PlayerGuid, true, 0, true)));
 
-            TargetAuraManager.Jobs.Add(new KeepActiveAuraJob(bot.Db, moonfireSpell, () => LunarEclipse && TryCastSpell(moonfireSpell, Bot.Wow.TargetGuid, true)));
-            TargetAuraManager.Jobs.Add(new KeepActiveAuraJob(bot.Db, insectSwarmSpell, () => SolarEclipse && TryCastSpell(insectSwarmSpell, Bot.Wow.TargetGuid, true)));
+            TargetAuraManager.Jobs.Add(new KeepActiveAuraJob(bot.Db, Druid335a.Moonfire, () => LunarEclipse && TryCastSpell(Druid335a.Moonfire, Bot.Wow.TargetGuid, true)));
+            TargetAuraManager.Jobs.Add(new KeepActiveAuraJob(bot.Db, Druid335a.InsectSwarm, () => SolarEclipse && TryCastSpell(Druid335a.InsectSwarm, Bot.Wow.TargetGuid, true)));
 
             InterruptManager.InterruptSpells = new()
             {
-                { 0, (x) => TryCastSpell(faerieFireSpell, x.Guid, true) },
+                { 0, (x) => TryCastSpell(Druid335a.FaerieFire, x.Guid, true) },
             };
 
-            GroupAuraManager.SpellsToKeepActiveOnParty.Add((markOfTheWildSpell, (spellName, guid) => TryCastSpell(spellName, guid, true)));
+            GroupAuraManager.SpellsToKeepActiveOnParty.Add((Druid335a.MarkOfTheWild, (spellName, guid) => TryCastSpell(spellName, guid, true)));
 
             SolarEclipse = false;
             LunarEclipse = true;
@@ -103,7 +104,7 @@ namespace AmeisenBotX.Core.Engines.Combat.Classes.Jannis
 
             if (SelectTarget(TargetProviderDps))
             {
-                if (TryCastSpell(naturesGraspSpell, 0))
+                if (TryCastSpell(Druid335a.NaturesGrasp, 0))
                 {
                     return;
                 }
@@ -111,8 +112,8 @@ namespace AmeisenBotX.Core.Engines.Combat.Classes.Jannis
                 double distance = Bot.Target.Position.GetDistance(Bot.Player.Position);
 
                 if (distance < 12.0
-                    && Bot.Target.Auras.Any(e => Bot.Db.GetSpellName(e.SpellId) == entanglingRootsSpell)
-                    && TryCastSpellDk(entanglingRootsSpell, Bot.Wow.TargetGuid, false, false, true))
+                    && Bot.Target.Auras.Any(e => Bot.Db.GetSpellName(e.SpellId) == Druid335a.EntanglingRoots)
+                    && TryCastSpellDk(Druid335a.EntanglingRoots, Bot.Wow.TargetGuid, false, false, true))
                 {
                     return;
                 }
@@ -123,20 +124,20 @@ namespace AmeisenBotX.Core.Engines.Combat.Classes.Jannis
                 }
 
                 if ((Bot.Player.ManaPercentage < 30
-                        && TryCastSpell(innervateSpell, 0))
+                        && TryCastSpell(Druid335a.Innervate, 0))
                     || (Bot.Player.HealthPercentage < 70
-                        && TryCastSpell(barkskinSpell, 0, true))
+                        && TryCastSpell(Druid335a.Barkskin, 0, true))
                     || (LunarEclipse
-                        && TryCastSpell(starfireSpell, Bot.Wow.TargetGuid, true))
+                        && TryCastSpell(Druid335a.Starfire, Bot.Wow.TargetGuid, true))
                     || (SolarEclipse
-                        && TryCastSpell(wrathSpell, Bot.Wow.TargetGuid, true))
+                        && TryCastSpell(Druid335a.Wrath, Bot.Wow.TargetGuid, true))
                     || (Bot.Objects.WowObjects.OfType<IWowUnit>().Where(e => !e.IsInCombat && Bot.Player.Position.GetDistance(e.Position) < 35).Count() < 4
-                        && TryCastSpell(starfallSpell, Bot.Wow.TargetGuid, true)))
+                        && TryCastSpell(Druid335a.Starfall, Bot.Wow.TargetGuid, true)))
                 {
                     return;
                 }
 
-                if (TryCastSpell(forceOfNatureSpell, 0, true))
+                if (TryCastSpell(Druid335a.ForceOfNature, 0, true))
                 {
                     Bot.Wow.ClickOnTerrain(Bot.Player.Position);
                 }
@@ -155,12 +156,12 @@ namespace AmeisenBotX.Core.Engines.Combat.Classes.Jannis
 
         private bool CheckForEclipseProcs()
         {
-            if (Bot.Player.Auras.Any(e => Bot.Db.GetSpellName(e.SpellId) == eclipseLunarSpell))
+            if (Bot.Player.Auras.Any(e => Bot.Db.GetSpellName(e.SpellId) == Druid335a.EclipseLunar))
             {
                 SolarEclipse = false;
                 LunarEclipse = true;
             }
-            else if (Bot.Player.Auras.Any(e => Bot.Db.GetSpellName(e.SpellId) == eclipseSolarSpell))
+            else if (Bot.Player.Auras.Any(e => Bot.Db.GetSpellName(e.SpellId) == Druid335a.EclipseSolar))
             {
                 SolarEclipse = true;
                 LunarEclipse = false;
@@ -173,14 +174,14 @@ namespace AmeisenBotX.Core.Engines.Combat.Classes.Jannis
         private bool NeedToHealMySelf()
         {
             if (Bot.Player.HealthPercentage < 60
-                && !Bot.Player.Auras.Any(e => Bot.Db.GetSpellName(e.SpellId) == rejuvenationSpell)
-                && TryCastSpell(rejuvenationSpell, 0, true))
+                && !Bot.Player.Auras.Any(e => Bot.Db.GetSpellName(e.SpellId) == Druid335a.Rejuvenation)
+                && TryCastSpell(Druid335a.Rejuvenation, 0, true))
             {
                 return true;
             }
 
             if (Bot.Player.HealthPercentage < 40
-                && TryCastSpell(healingTouchSpell, 0, true))
+                && TryCastSpell(Druid335a.HealingTouch, 0, true))
             {
                 return true;
             }
