@@ -4,6 +4,7 @@ using AmeisenBotX.Core.Engines.Character.Talents.Objects;
 using AmeisenBotX.Core.Logic.Utils.Auras.Objects;
 using AmeisenBotX.Wow.Objects;
 using AmeisenBotX.Wow.Objects.Enums;
+using AmeisenBotX.Wow335a.Constants;
 using System;
 using System.Linq;
 
@@ -13,14 +14,14 @@ namespace AmeisenBotX.Core.Engines.Combat.Classes.Jannis
     {
         public WarriorProtection(AmeisenBotInterfaces bot) : base(bot)
         {
-            MyAuraManager.Jobs.Add(new KeepActiveAuraJob(bot.Db, commandingShoutSpell, () => TryCastSpell(commandingShoutSpell, 0, true)));
+            MyAuraManager.Jobs.Add(new KeepActiveAuraJob(bot.Db, Warrior335a.CommandingShout, () => TryCastSpell(Warrior335a.CommandingShout, 0, true)));
 
-            TargetAuraManager.Jobs.Add(new KeepActiveAuraJob(bot.Db, demoralizingShoutSpell, () => TryCastSpell(demoralizingShoutSpell, Bot.Wow.TargetGuid, true)));
+            TargetAuraManager.Jobs.Add(new KeepActiveAuraJob(bot.Db, Warrior335a.DemoralizingShout, () => TryCastSpell(Warrior335a.DemoralizingShout, Bot.Wow.TargetGuid, true)));
 
             InterruptManager.InterruptSpells = new()
             {
-                { 0, (x) => (TryCastSpellWarrior(shieldBashSpell, defensiveStanceSpell, x.Guid, true)) },
-                { 1, (x) => TryCastSpell(concussionBlowSpell, x.Guid, true) }
+                { 0, (x) => (TryCastSpellWarrior(Warrior335a.ShieldBash, Warrior335a.DefensiveStance, x.Guid, true)) },
+                { 1, (x) => TryCastSpell(Warrior335a.ConcussionBlow, x.Guid, true) }
             };
 
             HeroicStrikeEvent = new(TimeSpan.FromSeconds(2));
@@ -116,7 +117,7 @@ namespace AmeisenBotX.Core.Engines.Combat.Classes.Jannis
                 if ((Bot.Player.IsFleeing
                     || Bot.Player.IsDazed
                     || Bot.Player.IsDisarmed)
-                    && TryCastSpell(berserkerRageSpell, 0, false))
+                    && TryCastSpell(Warrior335a.BerserkerRage, 0, false))
                 {
                     return;
                 }
@@ -125,7 +126,7 @@ namespace AmeisenBotX.Core.Engines.Combat.Classes.Jannis
 
                 if (distanceToTarget > 8.0)
                 {
-                    if (TryCastSpellWarrior(chargeSpell, battleStanceSpell, Bot.Wow.TargetGuid, true))
+                    if (TryCastSpellWarrior(Warrior335a.Charge, Warrior335a.BattleStance, Bot.Wow.TargetGuid, true))
                     {
                         return;
                     }
@@ -134,7 +135,7 @@ namespace AmeisenBotX.Core.Engines.Combat.Classes.Jannis
                 {
                     if (Bot.Player.Rage > 40
                         && HeroicStrikeEvent.Run()
-                        && TryCastSpell(heroicStrikeSpell, Bot.Wow.TargetGuid, true))
+                        && TryCastSpell(Warrior335a.HeroicStrike, Bot.Wow.TargetGuid, true))
                     {
                         // do not return, hehe xd
                     }
@@ -142,53 +143,53 @@ namespace AmeisenBotX.Core.Engines.Combat.Classes.Jannis
                     int nearEnemies = Bot.GetNearEnemies<IWowUnit>(Bot.Player.Position, 10.0f).Count();
 
                     if ((nearEnemies > 2 || Bot.Player.Rage > 40)
-                        && TryCastSpellWarrior(thunderClapSpell, defensiveStanceSpell, Bot.Wow.TargetGuid, true))
+                        && TryCastSpellWarrior(Warrior335a.ThunderClap, Warrior335a.DefensiveStance, Bot.Wow.TargetGuid, true))
                     {
                         return;
                     }
 
                     if (Bot.Target.TargetGuid != Bot.Wow.PlayerGuid
                         && (Bot.Objects.WowObjects.OfType<IWowUnit>().Where(e => Bot.Target.Position.GetDistance(e.Position) < 10.0).Count() > 3
-                            && TryCastSpell(challengingShoutSpell, 0, true))
-                        || TryCastSpellWarrior(tauntSpell, defensiveStanceSpell, Bot.Wow.TargetGuid))
+                            && TryCastSpell(Warrior335a.ChallengingShout, 0, true))
+                        || TryCastSpellWarrior(Warrior335a.Taunt, Warrior335a.DefensiveStance, Bot.Wow.TargetGuid))
                     {
                         return;
                     }
 
                     if (Bot.Player.HealthPercentage < 25.0
-                        && TryCastSpellWarrior(retaliationSpell, battleStanceSpell, 0))
+                        && TryCastSpellWarrior(Warrior335a.Retaliation, Warrior335a.BattleStance, 0))
                     {
                         return;
                     }
 
                     if (Bot.Player.HealthPercentage < 40.0
-                        && (TryCastSpell(lastStandSpell, 0)
-                            || TryCastSpellWarrior(shieldWallSpell, defensiveStanceSpell, 0)
-                            || TryCastSpellWarrior(shieldBlockSpell, defensiveStanceSpell, Bot.Wow.TargetGuid, true)))
+                        && (TryCastSpell(Warrior335a.LastStand, 0)
+                            || TryCastSpellWarrior(Warrior335a.ShieldWall, Warrior335a.DefensiveStance, 0)
+                            || TryCastSpellWarrior(Warrior335a.ShieldBlock, Warrior335a.DefensiveStance, Bot.Wow.TargetGuid, true)))
                     {
                         return;
                     }
 
                     if (Bot.Target.IsCasting
-                        && (TryCastSpellWarrior(shieldBashSpell, defensiveStanceSpell, Bot.Wow.TargetGuid)
-                            || TryCastSpellWarrior(spellReflectionSpell, defensiveStanceSpell, 0)))
+                        && (TryCastSpellWarrior(Warrior335a.ShieldBash, Warrior335a.DefensiveStance, Bot.Wow.TargetGuid)
+                            || TryCastSpellWarrior(Warrior335a.SpellReflection, Warrior335a.DefensiveStance, 0)))
                     {
                         return;
                     }
 
                     if (Bot.Player.HealthPercentage > 50.0
-                        && TryCastSpell(bloodrageSpell, 0))
+                        && TryCastSpell(Warrior335a.Bloodrage, 0))
                     {
                         return;
                     }
 
-                    if (TryCastSpell(berserkerRageSpell, 0, true)
-                        || TryCastSpell(shieldSlamSpell, Bot.Wow.TargetGuid, true)
-                        || TryCastSpell(mockingBlowSpell, Bot.Wow.TargetGuid, true)
+                    if (TryCastSpell(Warrior335a.BerserkerRage, 0, true)
+                        || TryCastSpell(Warrior335a.ShieldSlam, Bot.Wow.TargetGuid, true)
+                        || TryCastSpell(Warrior335a.MockingBlow, Bot.Wow.TargetGuid, true)
                         || ((nearEnemies > 2 || Bot.Player.Rage > 40)
-                            && TryCastSpell(shockwaveSpell, Bot.Wow.TargetGuid, true))
-                        || TryCastSpell(devastateSpell, Bot.Wow.TargetGuid, true)
-                        || TryCastSpellWarrior(revengeSpell, defensiveStanceSpell, Bot.Wow.TargetGuid, true))
+                            && TryCastSpell(Warrior335a.Shockwave, Bot.Wow.TargetGuid, true))
+                        || TryCastSpell(Warrior335a.Devastate, Bot.Wow.TargetGuid, true)
+                        || TryCastSpellWarrior(Warrior335a.Revenge, Warrior335a.DefensiveStance, Bot.Wow.TargetGuid, true))
                     {
                         return;
                     }

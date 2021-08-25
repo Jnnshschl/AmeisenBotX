@@ -2,6 +2,7 @@
 using AmeisenBotX.Core.Engines.Character.Talents.Objects;
 using AmeisenBotX.Core.Logic.Utils.Auras.Objects;
 using AmeisenBotX.Wow.Objects.Enums;
+using AmeisenBotX.Wow335a.Constants;
 using System.Linq;
 
 namespace AmeisenBotX.Core.Engines.Combat.Classes.Jannis
@@ -10,17 +11,17 @@ namespace AmeisenBotX.Core.Engines.Combat.Classes.Jannis
     {
         public PaladinProtection(AmeisenBotInterfaces bot) : base(bot)
         {
-            MyAuraManager.Jobs.Add(new KeepActiveAuraJob(bot.Db, devotionAuraSpell, () => TryCastSpell(devotionAuraSpell, 0, true)));
-            MyAuraManager.Jobs.Add(new KeepActiveAuraJob(bot.Db, blessingOfKingsSpell, () => TryCastSpell(blessingOfKingsSpell, 0, true)));
-            MyAuraManager.Jobs.Add(new KeepActiveAuraJob(bot.Db, sealOfVengeanceSpell, () => TryCastSpell(sealOfVengeanceSpell, 0, true)));
-            MyAuraManager.Jobs.Add(new KeepActiveAuraJob(bot.Db, righteousFurySpell, () => TryCastSpell(righteousFurySpell, 0, true)));
+            MyAuraManager.Jobs.Add(new KeepActiveAuraJob(bot.Db, Paladin335a.DevotionAura, () => TryCastSpell(Paladin335a.DevotionAura, 0, true)));
+            MyAuraManager.Jobs.Add(new KeepActiveAuraJob(bot.Db, Paladin335a.BlessingOfKings, () => TryCastSpell(Paladin335a.BlessingOfKings, 0, true)));
+            MyAuraManager.Jobs.Add(new KeepActiveAuraJob(bot.Db, Paladin335a.SealOfVengeance, () => TryCastSpell(Paladin335a.SealOfVengeance, 0, true)));
+            MyAuraManager.Jobs.Add(new KeepActiveAuraJob(bot.Db, Paladin335a.RighteousFury, () => TryCastSpell(Paladin335a.RighteousFury, 0, true)));
 
             InterruptManager.InterruptSpells = new()
             {
-                { 0, (x) => TryCastSpell(hammerOfJusticeSpell, x.Guid, true) }
+                { 0, (x) => TryCastSpell(Paladin335a.HammerOfJustice, x.Guid, true) }
             };
 
-            GroupAuraManager.SpellsToKeepActiveOnParty.Add((blessingOfKingsSpell, (spellName, guid) => TryCastSpell(spellName, guid, true)));
+            GroupAuraManager.SpellsToKeepActiveOnParty.Add((Paladin335a.BlessingOfKings, (spellName, guid) => TryCastSpell(spellName, guid, true)));
         }
 
         public override string Description => "FCFS based CombatClass for the Protection Paladin spec.";
@@ -89,24 +90,24 @@ namespace AmeisenBotX.Core.Engines.Combat.Classes.Jannis
             if (SelectTarget(TargetProviderTank))
             {
                 if (Bot.Player.HealthPercentage < 10.0
-                    && TryCastSpell(layOnHandsSpell, 0, true))
+                    && TryCastSpell(Paladin335a.LayOnHands, 0, true))
                 {
                     return;
                 }
 
                 if (Bot.Player.HealthPercentage < 20.0
-                    && TryCastSpell(flashOfLightSpell, 0, true))
+                    && TryCastSpell(Paladin335a.FlashOfLight, 0, true))
                 {
                     return;
                 }
                 else if (Bot.Player.HealthPercentage < 35.0
-                    && TryCastSpell(holyLightSpell, 0, true))
+                    && TryCastSpell(Paladin335a.HolyLight, 0, true))
                 {
                     return;
                 }
 
-                if (TryCastSpell(sacredShieldSpell, 0, true)
-                    || TryCastSpell(divinePleaSpell, 0, true))
+                if (TryCastSpell(Paladin335a.SacredShield, 0, true)
+                    || TryCastSpell(Paladin335a.DivinePlea, 0, true))
                 {
                     return;
                 }
@@ -114,28 +115,28 @@ namespace AmeisenBotX.Core.Engines.Combat.Classes.Jannis
                 if (Bot.Target != null)
                 {
                     if (Bot.Target.TargetGuid != Bot.Wow.PlayerGuid
-                        && TryCastSpell(handOfReckoningSpell, Bot.Wow.TargetGuid, true))
+                        && TryCastSpell(Paladin335a.HandOfReckoning, Bot.Wow.TargetGuid, true))
                     {
                         return;
                     }
 
-                    if (TryCastSpell(avengersShieldSpell, Bot.Wow.TargetGuid, true)
-                        || (Bot.Target.HealthPercentage < 20.0 && TryCastSpell(hammerOfWrathSpell, Bot.Wow.TargetGuid, true)))
+                    if (TryCastSpell(Paladin335a.AvengersShield, Bot.Wow.TargetGuid, true)
+                        || (Bot.Target.HealthPercentage < 20.0 && TryCastSpell(Paladin335a.HammerOfWrath, Bot.Wow.TargetGuid, true)))
                     {
                         return;
                     }
 
                     if (Use9SecSpell
-                        && (((Bot.Player.Auras.Any(e => Bot.Db.GetSpellName(e.SpellId) == sealOfVengeanceSpell) || Bot.Player.Auras.Any(e => Bot.Db.GetSpellName(e.SpellId) == sealOfWisdomSpell))
-                                && TryCastSpell(judgementOfLightSpell, Bot.Wow.TargetGuid, true))
-                            || TryCastSpell(consecrationSpell, Bot.Wow.TargetGuid, true)
-                            || TryCastSpell(holyShieldSpell, Bot.Wow.TargetGuid, true)))
+                        && (((Bot.Player.Auras.Any(e => Bot.Db.GetSpellName(e.SpellId) == Paladin335a.SealOfVengeance) || Bot.Player.Auras.Any(e => Bot.Db.GetSpellName(e.SpellId) == Paladin335a.SealOfWisdom))
+                                && TryCastSpell(Paladin335a.JudgementOfLight, Bot.Wow.TargetGuid, true))
+                            || TryCastSpell(Paladin335a.Consecration, Bot.Wow.TargetGuid, true)
+                            || TryCastSpell(Paladin335a.HolyShield, Bot.Wow.TargetGuid, true)))
                     {
                         Use9SecSpell = false;
                         return;
                     }
-                    else if (TryCastSpell(shieldOfTheRighteousnessSpell, Bot.Wow.TargetGuid, true)
-                             || TryCastSpell(hammerOfTheRighteousSpell, Bot.Wow.TargetGuid, true))
+                    else if (TryCastSpell(Paladin335a.ShieldOfTheRighteousness, Bot.Wow.TargetGuid, true)
+                             || TryCastSpell(Paladin335a.HammerOfTheRighteous, Bot.Wow.TargetGuid, true))
                     {
                         Use9SecSpell = true;
                         return;

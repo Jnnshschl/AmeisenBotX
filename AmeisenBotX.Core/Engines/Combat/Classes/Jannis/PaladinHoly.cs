@@ -5,8 +5,8 @@ using AmeisenBotX.Core.Engines.Character.Talents.Objects;
 using AmeisenBotX.Core.Engines.Combat.Helpers.Healing;
 using AmeisenBotX.Core.Engines.Movement.Enums;
 using AmeisenBotX.Core.Logic.Utils.Auras.Objects;
-using AmeisenBotX.Wow.Objects;
 using AmeisenBotX.Wow.Objects.Enums;
+using AmeisenBotX.Wow335a.Constants;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text.Json;
@@ -18,37 +18,37 @@ namespace AmeisenBotX.Core.Engines.Combat.Classes.Jannis
         public PaladinHoly(AmeisenBotInterfaces bot) : base(bot)
         {
             Configurables.TryAdd("AttackInGroups", true);
-            Configurables.TryAdd("AttackInGroupsUntilManaPercent", 80.0);
+            Configurables.TryAdd("AttackInGroupsUntilManaPercent", 85.0);
             Configurables.TryAdd("AttackInGroupsCloseCombat", false);
 
-            MyAuraManager.Jobs.Add(new KeepActiveAuraJob(bot.Db, blessingOfWisdomSpell, () => TryCastSpell(blessingOfWisdomSpell, Bot.Wow.PlayerGuid, true)));
-            MyAuraManager.Jobs.Add(new KeepActiveAuraJob(bot.Db, devotionAuraSpell, () => TryCastSpell(devotionAuraSpell, Bot.Wow.PlayerGuid, true)));
-            MyAuraManager.Jobs.Add(new KeepActiveAuraJob(bot.Db, sealOfWisdomSpell, () => Bot.Character.SpellBook.IsSpellKnown(sealOfWisdomSpell) && TryCastSpell(sealOfWisdomSpell, Bot.Wow.PlayerGuid, true)));
-            MyAuraManager.Jobs.Add(new KeepActiveAuraJob(bot.Db, sealOfVengeanceSpell, () => !Bot.Character.SpellBook.IsSpellKnown(sealOfWisdomSpell) && TryCastSpell(sealOfVengeanceSpell, Bot.Wow.PlayerGuid, true)));
+            MyAuraManager.Jobs.Add(new KeepActiveAuraJob(bot.Db, Paladin335a.BlessingOfWisdom, () => TryCastSpell(Paladin335a.BlessingOfWisdom, Bot.Wow.PlayerGuid, true)));
+            MyAuraManager.Jobs.Add(new KeepActiveAuraJob(bot.Db, Paladin335a.DevotionAura, () => TryCastSpell(Paladin335a.DevotionAura, Bot.Wow.PlayerGuid, true)));
+            MyAuraManager.Jobs.Add(new KeepActiveAuraJob(bot.Db, Paladin335a.SealOfWisdom, () => Bot.Character.SpellBook.IsSpellKnown(Paladin335a.SealOfWisdom) && TryCastSpell(Paladin335a.SealOfWisdom, Bot.Wow.PlayerGuid, true)));
+            MyAuraManager.Jobs.Add(new KeepActiveAuraJob(bot.Db, Paladin335a.SealOfVengeance, () => !Bot.Character.SpellBook.IsSpellKnown(Paladin335a.SealOfWisdom) && TryCastSpell(Paladin335a.SealOfVengeance, Bot.Wow.PlayerGuid, true)));
 
-            GroupAuraManager.SpellsToKeepActiveOnParty.Add((blessingOfWisdomSpell, (spellName, guid) => TryCastSpell(spellName, guid, true)));
+            GroupAuraManager.SpellsToKeepActiveOnParty.Add((Paladin335a.BlessingOfWisdom, (spellName, guid) => TryCastSpell(spellName, guid, true)));
 
             HealingManager = new(bot, (string spellName, ulong guid) => { return TryCastSpell(spellName, guid); });
 
             // make sure all new spells get added to the healing manager
             Bot.Character.SpellBook.OnSpellBookUpdate += () =>
             {
-                if (Bot.Character.SpellBook.TryGetSpellByName(flashOfLightSpell, out Spell spellFlashOfLight))
+                if (Bot.Character.SpellBook.TryGetSpellByName(Paladin335a.FlashOfLight, out Spell spellFlashOfLight))
                 {
                     HealingManager.AddSpell(spellFlashOfLight);
                 }
 
-                if (Bot.Character.SpellBook.TryGetSpellByName(holyLightSpell, out Spell spellHolyLight))
+                if (Bot.Character.SpellBook.TryGetSpellByName(Paladin335a.HolyLight, out Spell spellHolyLight))
                 {
                     HealingManager.AddSpell(spellHolyLight);
                 }
 
-                if (Bot.Character.SpellBook.TryGetSpellByName(holyShockSpell, out Spell spellHolyShock))
+                if (Bot.Character.SpellBook.TryGetSpellByName(Paladin335a.HolyShock, out Spell spellHolyShock))
                 {
                     HealingManager.AddSpell(spellHolyShock);
                 }
 
-                if (Bot.Character.SpellBook.TryGetSpellByName(layOnHandsSpell, out Spell spellLayOnHands))
+                if (Bot.Character.SpellBook.TryGetSpellByName(Paladin335a.LayOnHands, out Spell spellLayOnHands))
                 {
                     HealingManager.AddSpell(spellLayOnHands);
                 }
@@ -132,13 +132,13 @@ namespace AmeisenBotX.Core.Engines.Combat.Classes.Jannis
 
             if (Bot.Player.ManaPercentage < 50
                && Bot.Player.ManaPercentage > 20
-               && TryCastSpell(divineIlluminationSpell, 0, true))
+               && TryCastSpell(Paladin335a.DivineIllumination, 0, true))
             {
                 return;
             }
 
             if (Bot.Player.ManaPercentage < 60
-                && TryCastSpell(divinePleaSpell, 0, true))
+                && TryCastSpell(Paladin335a.DivinePlea, 0, true))
             {
                 return;
             }
@@ -154,13 +154,13 @@ namespace AmeisenBotX.Core.Engines.Combat.Classes.Jannis
                 if ((isAlone || (Configurables["AttackInGroups"] && Configurables["AttackInGroupsUntilManaPercent"] < Bot.Player.ManaPercentage))
                     && SelectTarget(TargetProviderDps))
                 {
-                    if ((Bot.Player.Auras.Any(e => Bot.Db.GetSpellName(e.SpellId) == sealOfVengeanceSpell) || Bot.Player.Auras.Any(e => Bot.Db.GetSpellName(e.SpellId) == sealOfWisdomSpell))
-                        && TryCastSpell(judgementOfLightSpell, Bot.Wow.TargetGuid, true))
+                    if ((Bot.Player.Auras.Any(e => Bot.Db.GetSpellName(e.SpellId) == Paladin335a.SealOfVengeance) || Bot.Player.Auras.Any(e => Bot.Db.GetSpellName(e.SpellId) == Paladin335a.SealOfWisdom))
+                        && TryCastSpell(Paladin335a.JudgementOfLight, Bot.Wow.TargetGuid, true))
                     {
                         return;
                     }
 
-                    if (TryCastSpell(exorcismSpell, Bot.Wow.TargetGuid, true))
+                    if (TryCastSpell(Paladin335a.Exorcism, Bot.Wow.TargetGuid, true))
                     {
                         return;
                     }
@@ -231,28 +231,18 @@ namespace AmeisenBotX.Core.Engines.Combat.Classes.Jannis
 
         private bool NeedToHealSomeone()
         {
-            if (TargetProviderHeal.Get(out IEnumerable<IWowUnit> unitsToHeal))
+            // TODO: bugged need to figure out why cooldown is always wrong
+            // if (targetUnit.HealthPercentage < 50
+            //     && CastSpellIfPossible(divineFavor, targetUnit.Guid, true))
+            // {
+            //     LastHealAction = DateTime.Now;
+            //     return true;
+            // }
+
+            if (Bot.Player.Auras.Any(e => Bot.Db.GetSpellName(e.SpellId) == Paladin335a.BeaconOfLight)
+                && TryCastSpell(Paladin335a.BeaconOfLight, Bot.Player.Guid, true))
             {
-                IWowUnit targetUnit = unitsToHeal.FirstOrDefault(e => !e.Auras.Any(e => Bot.Db.GetSpellName(e.SpellId) == beaconOfLightSpell));
-
-                if (targetUnit == null)
-                {
-                    return false;
-                }
-
-                if (unitsToHeal.Count(e => !e.Auras.Any(e => Bot.Db.GetSpellName(e.SpellId) == beaconOfLightSpell)) > 1
-                    && TryCastSpell(beaconOfLightSpell, targetUnit.Guid, true))
-                {
-                    return true;
-                }
-
-                // TODO: bugged need to figure out why cooldown is always wrong
-                // if (targetUnit.HealthPercentage < 50
-                //     && CastSpellIfPossible(divineFavorSpell, targetUnit.Guid, true))
-                // {
-                //     LastHealAction = DateTime.Now;
-                //     return true;
-                // }
+                return true;
             }
 
             if (HealingManager.Tick())

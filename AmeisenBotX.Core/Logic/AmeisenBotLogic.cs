@@ -213,6 +213,7 @@ namespace AmeisenBotX.Core.Logic
                     new Leaf(Follow),
                     new Leaf(() => { Bot.Dungeon.Execute(); return BtStatus.Success; })
                 ),
+                (() => Bot.Player.IsDead, new Leaf(DeadDungeon)),
                 //TODO: implement specialized dungeon combat logic
                 (NeedToFight, openworldCombatNode),
                 (NeedToLoot, new Leaf(LootNearUnits)),
@@ -308,6 +309,8 @@ namespace AmeisenBotX.Core.Logic
 
         private AmeisenBotConfig Config { get; }
 
+        private DateTime DungeonDiedTimestamp { get; set; }
+
         private TimegatedEvent EatBlockEvent { get; }
 
         private TimegatedEvent EatEvent { get; }
@@ -338,9 +341,9 @@ namespace AmeisenBotX.Core.Logic
 
         private IWowUnit PlayerToFollow { get; set; }
 
-        private TimegatedEvent RenderSwitchEvent { get; }
-
         private Random Random { get; }
+
+        private TimegatedEvent RenderSwitchEvent { get; }
 
         private bool SearchedStaticRoutes { get; set; }
 
@@ -556,10 +559,41 @@ namespace AmeisenBotX.Core.Logic
             if (Config.ReleaseSpirit || Bot.Objects.MapId.IsBattlegroundMap())
             {
                 Bot.Wow.RepopMe();
+
+                SearchedStaticRoutes = false;
+                return BtStatus.Success;
             }
 
-            SearchedStaticRoutes = false;
-            return BtStatus.Success;
+            return BtStatus.Ongoing;
+        }
+
+        private BtStatus DeadDungeon()
+        {
+            if (!ArePartymembersInFight)
+            {
+                if (DungeonDiedTimestamp == default)
+                {
+                    DungeonDiedTimestamp = DateTime.UtcNow;
+                }
+                else if (DateTime.UtcNow - DungeonDiedTimestamp > TimeSpan.FromSeconds(30))
+                {
+                    Bot.Wow.RepopMe();
+                    SearchedStaticRoutes = false;
+                    return BtStatus.Success;
+                }
+            }
+
+            if ((!ArePartymembersInFight && DateTime.UtcNow - DungeonDiedTimestamp > TimeSpan.FromSeconds(30))
+                || Bot.Objects.Partymembers.Any(e => !e.IsDead
+                    && (e.Class == WowClass.Paladin || e.Class == WowClass.Druid || e.Class == WowClass.Priest || e.Class == WowClass.Shaman)))
+            {
+                // if we died 30s ago or no one that can ress us is alive
+                Bot.Wow.RepopMe();
+                SearchedStaticRoutes = false;
+                return BtStatus.Success;
+            }
+
+            return BtStatus.Ongoing;
         }
 
         private BtStatus Eat()
@@ -1021,6 +1055,11 @@ namespace AmeisenBotX.Core.Logic
             if (CharacterUpdateEvent.Run())
             {
                 Bot.Character.UpdateAll();
+            }
+
+            if (!Bot.Player.IsDead)
+            {
+                DungeonDiedTimestamp = default;
             }
 
             if (Config.FollowPositionDynamic && OffsetCheckEvent.Run())

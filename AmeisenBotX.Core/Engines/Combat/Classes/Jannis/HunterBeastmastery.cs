@@ -5,6 +5,7 @@ using AmeisenBotX.Core.Engines.Movement.Enums;
 using AmeisenBotX.Core.Logic.Utils.Auras.Objects;
 using AmeisenBotX.Wow.Objects;
 using AmeisenBotX.Wow.Objects.Enums;
+using AmeisenBotX.Wow335a.Constants;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -19,25 +20,25 @@ namespace AmeisenBotX.Core.Engines.Combat.Classes.Jannis
             (
                 Bot,
                 TimeSpan.FromSeconds(5),
-                () => TryCastSpell(mendPetSpell, 0, true),
-                () => TryCastSpell(callPetSpell, 0),
-                () => TryCastSpell(revivePetSpell, 0)
+                () => TryCastSpell(Hunter335a.MendPet, 0, true),
+                () => TryCastSpell(Hunter335a.CallPet, 0),
+                () => TryCastSpell(Hunter335a.RevivePet, 0)
             );
 
             MyAuraManager.Jobs.Add(new KeepBestActiveAuraJob(bot.Db, new List<(string, Func<bool>)>()
             {
-                (aspectOfTheViperSpell, () => Bot.Player.ManaPercentage < 25.0 && TryCastSpell(aspectOfTheViperSpell, 0, true)),
-                (aspectOfTheDragonhawkSpell, () => (!bot.Character.SpellBook.IsSpellKnown(aspectOfTheViperSpell) || Bot.Player.ManaPercentage > 80.0) && TryCastSpell(aspectOfTheDragonhawkSpell, 0, true)),
-                (aspectOfTheHawkSpell, () => TryCastSpell(aspectOfTheHawkSpell, 0, true))
+                (Hunter335a.AspectOfTheViper, () => Bot.Player.ManaPercentage < 25.0 && TryCastSpell(Hunter335a.AspectOfTheViper, 0, true)),
+                (Hunter335a.AspectOfTheDragonhawk, () => (!bot.Character.SpellBook.IsSpellKnown(Hunter335a.AspectOfTheViper) || Bot.Player.ManaPercentage > 80.0) && TryCastSpell(Hunter335a.AspectOfTheDragonhawk, 0, true)),
+                (Hunter335a.AspectOfTheHawk, () => TryCastSpell(Hunter335a.AspectOfTheHawk, 0, true))
             }));
 
-            TargetAuraManager.Jobs.Add(new KeepActiveAuraJob(bot.Db, huntersMarkSpell, () => TryCastSpell(huntersMarkSpell, Bot.Wow.TargetGuid, true)));
-            TargetAuraManager.Jobs.Add(new KeepActiveAuraJob(bot.Db, serpentStingSpell, () => TryCastSpell(serpentStingSpell, Bot.Wow.TargetGuid, true)));
+            TargetAuraManager.Jobs.Add(new KeepActiveAuraJob(bot.Db, Hunter335a.HuntersMark, () => TryCastSpell(Hunter335a.HuntersMark, Bot.Wow.TargetGuid, true)));
+            TargetAuraManager.Jobs.Add(new KeepActiveAuraJob(bot.Db, Hunter335a.SerpentSting, () => TryCastSpell(Hunter335a.SerpentSting, Bot.Wow.TargetGuid, true)));
 
             InterruptManager.InterruptSpells = new()
             {
-                { 0, (x) => TryCastSpell(scatterShotSpell, x.Guid, true) },
-                { 1, (x) => TryCastSpell(intimidationSpell, x.Guid, true) }
+                { 0, (x) => TryCastSpell(Hunter335a.ScatterShot, x.Guid, true) },
+                { 1, (x) => TryCastSpell(Hunter335a.Intimidation, x.Guid, true) }
             };
 
             Configurables.TryAdd("KitingStartDistanceUnit", 10.0f);
@@ -130,7 +131,7 @@ namespace AmeisenBotX.Core.Engines.Combat.Classes.Jannis
                     float distanceToTarget = Bot.Target.Position.GetDistance(Bot.Player.Position);
 
                     if (Bot.Player.HealthPercentage < 15.0
-                        && TryCastSpell(feignDeathSpell, 0))
+                        && TryCastSpell(Hunter335a.FeignDeath, 0))
                     {
                         return;
                     }
@@ -138,69 +139,69 @@ namespace AmeisenBotX.Core.Engines.Combat.Classes.Jannis
                     if (distanceToTarget < (Bot.Target.IsPlayer() ? Configurables["KitingStartDistancePlayer"] : Configurables["KitingStartDistanceUnit"]))
                     {
                         if (ReadyToDisengage
-                            && TryCastSpell(disengageSpell, 0, true))
+                            && TryCastSpell(Hunter335a.Disengage, 0, true))
                         {
                             ReadyToDisengage = false;
                             return;
                         }
 
-                        if (TryCastSpell(frostTrapSpell, 0, true))
+                        if (TryCastSpell(Hunter335a.FrostTrap, 0, true))
                         {
                             ReadyToDisengage = true;
                             return;
                         }
 
                         if (Bot.Player.HealthPercentage < 30.0
-                            && TryCastSpell(deterrenceSpell, 0, true))
+                            && TryCastSpell(Hunter335a.Deterrence, 0, true))
                         {
                             return;
                         }
 
-                        TryCastSpell(raptorStrikeSpell, Bot.Wow.TargetGuid, true);
-                        TryCastSpell(mongooseBiteSpell, Bot.Wow.TargetGuid, true);
+                        TryCastSpell(Hunter335a.RaptorStrike, Bot.Wow.TargetGuid, true);
+                        TryCastSpell(Hunter335a.MongooseBite, Bot.Wow.TargetGuid, true);
                     }
                     else if (distanceToTarget < (Bot.Target.IsPlayer() ? Configurables["KitingEndDistancePlayer"] : Configurables["KitingEndDistanceUnit"]))
                     {
-                        if (!Bot.Target.Auras.Any(e => Bot.Db.GetSpellName(e.SpellId) == concussiveShotSpell)
+                        if (!Bot.Target.Auras.Any(e => Bot.Db.GetSpellName(e.SpellId) == Hunter335a.ConcussiveShot)
                             && !Bot.Target.Auras.Any(e => Bot.Db.GetSpellName(e.SpellId) == "Frost Trap Aura")
-                            && TryCastSpell(concussiveShotSpell, Bot.Wow.TargetGuid, true))
+                            && TryCastSpell(Hunter335a.ConcussiveShot, Bot.Wow.TargetGuid, true))
                         {
                             return;
                         }
 
                         if (Bot.Target.HealthPercentage < 20.0
-                            && TryCastSpell(killShotSpell, Bot.Wow.TargetGuid, true))
+                            && TryCastSpell(Hunter335a.KillShot, Bot.Wow.TargetGuid, true))
                         {
                             return;
                         }
 
-                        TryCastSpell(killCommandSpell, Bot.Wow.TargetGuid, true);
-                        TryCastSpell(beastialWrathSpell, Bot.Wow.TargetGuid, true);
-                        TryCastSpell(rapidFireSpell, 0);
+                        TryCastSpell(Hunter335a.KillCommand, Bot.Wow.TargetGuid, true);
+                        TryCastSpell(Hunter335a.BeastialWrath, Bot.Wow.TargetGuid, true);
+                        TryCastSpell(Hunter335a.RapidFire, 0);
 
                         if (Bot.GetNearEnemies<IWowUnit>(Bot.Target.Position, 16.0f).Count() > 2
-                            && TryCastSpell(multiShotSpell, Bot.Wow.TargetGuid, true))
+                            && TryCastSpell(Hunter335a.MultiShot, Bot.Wow.TargetGuid, true))
                         {
                             return;
                         }
 
-                        if (TryCastSpell(arcaneShotSpell, Bot.Wow.TargetGuid, true))
+                        if (TryCastSpell(Hunter335a.ArcaneShot, Bot.Wow.TargetGuid, true))
                         {
                             return;
                         }
 
                         // only cast when we are far away and disengage is ready
                         if (distanceToTarget > (Bot.Target.IsPlayer() ? Configurables["SteadyShotMinDistancePlayer"] : Configurables["SteadyShotMinDistanceUnit"])
-                            && TryCastSpell(steadyShotSpell, Bot.Wow.TargetGuid, true))
+                            && TryCastSpell(Hunter335a.SteadyShot, Bot.Wow.TargetGuid, true))
                         {
                             return;
                         }
                     }
                     else if (distanceToTarget > (Bot.Target.IsPlayer() ? Configurables["ChaseDistancePlayer"] : Configurables["ChaseDistanceUnit"]))
                     {
-                        if (!Bot.Target.Auras.Any(e => Bot.Db.GetSpellName(e.SpellId) == concussiveShotSpell)
+                        if (!Bot.Target.Auras.Any(e => Bot.Db.GetSpellName(e.SpellId) == Hunter335a.ConcussiveShot)
                             && !Bot.Target.Auras.Any(e => Bot.Db.GetSpellName(e.SpellId) == "Frost Trap Aura")
-                            && TryCastSpell(concussiveShotSpell, Bot.Wow.TargetGuid, true))
+                            && TryCastSpell(Hunter335a.ConcussiveShot, Bot.Wow.TargetGuid, true))
                         {
                             return;
                         }

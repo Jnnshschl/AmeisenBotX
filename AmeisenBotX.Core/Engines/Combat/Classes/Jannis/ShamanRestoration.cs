@@ -3,6 +3,7 @@ using AmeisenBotX.Core.Engines.Character.Talents.Objects;
 using AmeisenBotX.Core.Logic.Utils.Auras.Objects;
 using AmeisenBotX.Wow.Objects;
 using AmeisenBotX.Wow.Objects.Enums;
+using AmeisenBotX.Wow335a.Constants;
 using System.Collections.Generic;
 using System.Linq;
 
@@ -12,12 +13,12 @@ namespace AmeisenBotX.Core.Engines.Combat.Classes.Jannis
     {
         public ShamanRestoration(AmeisenBotInterfaces bot) : base(bot)
         {
-            MyAuraManager.Jobs.Add(new KeepActiveAuraJob(bot.Db, waterShieldSpell, () => TryCastSpell(waterShieldSpell, 0, true)));
+            MyAuraManager.Jobs.Add(new KeepActiveAuraJob(bot.Db, Shaman335a.WaterShield, () => TryCastSpell(Shaman335a.WaterShield, 0, true)));
 
             SpellUsageHealDict = new Dictionary<int, string>()
             {
-                { 0, riptideSpell },
-                { 5000, healingWaveSpell },
+                { 0, Shaman335a.Riptide },
+                { 5000, Shaman335a.HealingWave },
             };
         }
 
@@ -89,13 +90,13 @@ namespace AmeisenBotX.Core.Engines.Combat.Classes.Jannis
 
             if (SelectTarget(TargetProviderDps))
             {
-                if (Bot.Target.Auras.Any(e => Bot.Db.GetSpellName(e.SpellId) == flameShockSpell)
-                    && TryCastSpell(flameShockSpell, Bot.Wow.TargetGuid, true))
+                if (Bot.Target.Auras.Any(e => Bot.Db.GetSpellName(e.SpellId) == Shaman335a.FlameShock)
+                    && TryCastSpell(Shaman335a.FlameShock, Bot.Wow.TargetGuid, true))
                 {
                     return;
                 }
 
-                if (TryCastSpell(lightningBoltSpell, Bot.Wow.TargetGuid, true))
+                if (TryCastSpell(Shaman335a.LightningBolt, Bot.Wow.TargetGuid, true))
                 {
                     return;
                 }
@@ -106,12 +107,12 @@ namespace AmeisenBotX.Core.Engines.Combat.Classes.Jannis
         {
             base.OutOfCombatExecute();
 
-            if (HandleDeadPartymembers(ancestralSpiritSpell))
+            if (HandleDeadPartymembers(Shaman335a.AncestralSpirit))
             {
                 return;
             }
 
-            if (CheckForWeaponEnchantment(WowEquipmentSlot.INVSLOT_MAINHAND, earthlivingBuff, earthlivingWeaponSpell))
+            if (CheckForWeaponEnchantment(WowEquipmentSlot.INVSLOT_MAINHAND, Shaman335a.EarthlivingBuff, Shaman335a.EarthlivingWeapon))
             {
                 return;
             }
@@ -126,20 +127,20 @@ namespace AmeisenBotX.Core.Engines.Combat.Classes.Jannis
                 if (Bot.Target != null)
                 {
                     if (Bot.Target.HealthPercentage < 25
-                        && TryCastSpell(earthShieldSpell, 0, true))
+                        && TryCastSpell(Shaman335a.EarthShield, 0, true))
                     {
                         return true;
                     }
 
                     if (unitsToHeal.Count() > 4
-                        && TryCastSpell(chainHealSpell, Bot.Wow.TargetGuid, true))
+                        && TryCastSpell(Shaman335a.ChainHeal, Bot.Wow.TargetGuid, true))
                     {
                         return true;
                     }
 
                     if (unitsToHeal.Count() > 6
-                        && (TryCastSpell(naturesSwiftnessSpell, 0, true)
-                        || TryCastSpell(tidalForceSpell, Bot.Wow.TargetGuid, true)))
+                        && (TryCastSpell(Shaman335a.NaturesSwiftness, 0, true)
+                        || TryCastSpell(Shaman335a.TidalForce, Bot.Wow.TargetGuid, true)))
                     {
                         return true;
                     }

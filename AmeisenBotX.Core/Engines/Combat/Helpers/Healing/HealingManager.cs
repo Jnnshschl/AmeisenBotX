@@ -143,7 +143,7 @@ namespace AmeisenBotX.Core.Engines.Combat.Helpers.Healing
             }
 
             List<IWowUnit> healableTargets = Bot.Wow.ObjectProvider.Partymembers.Where(e => !e.IsDead).ToList();
-            healableTargets.Add(Bot.Wow.ObjectProvider.Player);
+            healableTargets.Add(Bot.Player);
 
             // is anyone going to die in the next seconds that we could save
             // order by max health to prioritize tanks

@@ -4,6 +4,7 @@ using AmeisenBotX.Core.Engines.Character.Talents.Objects;
 using AmeisenBotX.Core.Logic.Utils.Auras.Objects;
 using AmeisenBotX.Wow.Objects;
 using AmeisenBotX.Wow.Objects.Enums;
+using AmeisenBotX.Wow335a.Constants;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -14,10 +15,10 @@ namespace AmeisenBotX.Core.Engines.Combat.Classes.Jannis
     {
         public DruidRestoration(AmeisenBotInterfaces bot) : base(bot)
         {
-            MyAuraManager.Jobs.Add(new KeepActiveAuraJob(bot.Db, treeOfLifeSpell, () => Bot.Objects.PartymemberGuids.Any() && TryCastSpell(treeOfLifeSpell, Bot.Wow.PlayerGuid, true)));
-            MyAuraManager.Jobs.Add(new KeepActiveAuraJob(bot.Db, markOfTheWildSpell, () => TryCastSpell(markOfTheWildSpell, Bot.Wow.PlayerGuid, true)));
+            MyAuraManager.Jobs.Add(new KeepActiveAuraJob(bot.Db, Druid335a.TreeOfLife, () => Bot.Objects.PartymemberGuids.Any() && TryCastSpell(Druid335a.TreeOfLife, Bot.Wow.PlayerGuid, true)));
+            MyAuraManager.Jobs.Add(new KeepActiveAuraJob(bot.Db, Druid335a.MarkOfTheWild, () => TryCastSpell(Druid335a.MarkOfTheWild, Bot.Wow.PlayerGuid, true)));
 
-            GroupAuraManager.SpellsToKeepActiveOnParty.Add((markOfTheWildSpell, (spellName, guid) => TryCastSpell(spellName, guid, true)));
+            GroupAuraManager.SpellsToKeepActiveOnParty.Add((Druid335a.MarkOfTheWild, (spellName, guid) => TryCastSpell(spellName, guid, true)));
 
             SwiftmendEvent = new(TimeSpan.FromSeconds(15));
         }
@@ -99,13 +100,13 @@ namespace AmeisenBotX.Core.Engines.Combat.Classes.Jannis
             base.Execute();
 
             if (Bot.Player.ManaPercentage < 30.0
-                && TryCastSpell(innervateSpell, 0, true))
+                && TryCastSpell(Druid335a.Innervate, 0, true))
             {
                 return;
             }
 
             if (Bot.Player.HealthPercentage < 50.0
-                && TryCastSpell(barkskinSpell, 0, true))
+                && TryCastSpell(Druid335a.Barkskin, 0, true))
             {
                 return;
             }
@@ -127,18 +128,18 @@ namespace AmeisenBotX.Core.Engines.Combat.Classes.Jannis
 
                 if (SelectTarget(TargetProviderDps))
                 {
-                    if (!Bot.Target.Auras.Any(e => Bot.Db.GetSpellName(e.SpellId) == moonfireSpell)
-                        && TryCastSpell(moonfireSpell, Bot.Wow.TargetGuid, true))
+                    if (!Bot.Target.Auras.Any(e => Bot.Db.GetSpellName(e.SpellId) == Druid335a.Moonfire)
+                        && TryCastSpell(Druid335a.Moonfire, Bot.Wow.TargetGuid, true))
                     {
                         return;
                     }
 
-                    if (TryCastSpell(starfireSpell, Bot.Wow.TargetGuid, true))
+                    if (TryCastSpell(Druid335a.Starfire, Bot.Wow.TargetGuid, true))
                     {
                         return;
                     }
 
-                    if (TryCastSpell(wrathSpell, Bot.Wow.TargetGuid, true))
+                    if (TryCastSpell(Druid335a.Wrath, Bot.Wow.TargetGuid, true))
                     {
                         return;
                     }
@@ -151,7 +152,7 @@ namespace AmeisenBotX.Core.Engines.Combat.Classes.Jannis
             base.OutOfCombatExecute();
 
             if (NeedToHealSomeone()
-                || HandleDeadPartymembers(reviveSpell))
+                || HandleDeadPartymembers(Druid335a.Revive))
             {
                 return;
             }
@@ -162,7 +163,7 @@ namespace AmeisenBotX.Core.Engines.Combat.Classes.Jannis
             if (TargetProviderHeal.Get(out IEnumerable<IWowUnit> unitsToHeal))
             {
                 if (unitsToHeal.Count(e => e.HealthPercentage < 40.0) > 3
-                    && TryCastSpell(tranquilitySpell, 0, true))
+                    && TryCastSpell(Druid335a.Tranquility, 0, true))
                 {
                     return true;
                 }
@@ -172,22 +173,22 @@ namespace AmeisenBotX.Core.Engines.Combat.Classes.Jannis
                 if (target.HealthPercentage < 90.0
                     && target.HealthPercentage > 75.0
                     && unitsToHeal.Count(e => e.HealthPercentage < 90.0) > 1
-                    && TryCastSpell(wildGrowthSpell, target.Guid, true))
+                    && TryCastSpell(Druid335a.WildGrowth, target.Guid, true))
                 {
                     return true;
                 }
 
                 if (target.HealthPercentage < 20.0
-                    && TryCastSpell(naturesSwiftnessSpell, target.Guid, true)
-                    && TryCastSpell(healingTouchSpell, target.Guid, true))
+                    && TryCastSpell(Druid335a.NaturesSwiftness, target.Guid, true)
+                    && TryCastSpell(Druid335a.HealingTouch, target.Guid, true))
                 {
                     return true;
                 }
 
                 if (target.HealthPercentage < 50.0
-                    && (target.Auras.Any(e => Bot.Db.GetSpellName(e.SpellId) == regrowthSpell) || target.Auras.Any(e => Bot.Db.GetSpellName(e.SpellId) == rejuvenationSpell))
+                    && (target.Auras.Any(e => Bot.Db.GetSpellName(e.SpellId) == Druid335a.Regrowth) || target.Auras.Any(e => Bot.Db.GetSpellName(e.SpellId) == Druid335a.Rejuvenation))
                     && SwiftmendEvent.Ready
-                    && TryCastSpell(swiftmendSpell, target.Guid, true)
+                    && TryCastSpell(Druid335a.Swiftmend, target.Guid, true)
                     && SwiftmendEvent.Run())
                 {
                     return true;
@@ -195,35 +196,35 @@ namespace AmeisenBotX.Core.Engines.Combat.Classes.Jannis
 
                 if (target.HealthPercentage < 95.0
                     && target.HealthPercentage > 70.0
-                    && !target.Auras.Any(e => Bot.Db.GetSpellName(e.SpellId) == rejuvenationSpell)
-                    && TryCastSpell(rejuvenationSpell, target.Guid, true))
+                    && !target.Auras.Any(e => Bot.Db.GetSpellName(e.SpellId) == Druid335a.Rejuvenation)
+                    && TryCastSpell(Druid335a.Rejuvenation, target.Guid, true))
                 {
                     return true;
                 }
 
                 if (target.HealthPercentage < 98.0
                     && target.HealthPercentage > 70.0
-                    && !target.Auras.Any(e => Bot.Db.GetSpellName(e.SpellId) == lifebloomSpell)
-                    && TryCastSpell(lifebloomSpell, target.Guid, true))
+                    && !target.Auras.Any(e => Bot.Db.GetSpellName(e.SpellId) == Druid335a.Lifebloom)
+                    && TryCastSpell(Druid335a.Lifebloom, target.Guid, true))
                 {
                     return true;
                 }
 
                 if (target.HealthPercentage < 65.0
-                    && TryCastSpell(nourishSpell, target.Guid, true))
+                    && TryCastSpell(Druid335a.Nourish, target.Guid, true))
                 {
                     return true;
                 }
 
                 if (target.HealthPercentage < 65.0
-                    && TryCastSpell(healingTouchSpell, target.Guid, true))
+                    && TryCastSpell(Druid335a.HealingTouch, target.Guid, true))
                 {
                     return true;
                 }
 
                 if (target.HealthPercentage < 65.0
-                    && !target.Auras.Any(e => Bot.Db.GetSpellName(e.SpellId) == regrowthSpell)
-                    && TryCastSpell(regrowthSpell, target.Guid, true))
+                    && !target.Auras.Any(e => Bot.Db.GetSpellName(e.SpellId) == Druid335a.Regrowth)
+                    && TryCastSpell(Druid335a.Regrowth, target.Guid, true))
                 {
                     return true;
                 }

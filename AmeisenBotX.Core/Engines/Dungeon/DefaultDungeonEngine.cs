@@ -154,6 +154,7 @@ namespace AmeisenBotX.Core.Engines.Dungeon
 
                 WowMapId.UtgardeKeep => new UtgardeKeepProfile(),
                 WowMapId.AzjolNerub => new AzjolNerubProfile(),
+                WowMapId.HallsOfLighting => new HallsOfLightningProfile(),
                 WowMapId.TheForgeOfSouls => new ForgeOfSoulsProfile(),
                 WowMapId.PitOfSaron => new PitOfSaronProfile(),
 

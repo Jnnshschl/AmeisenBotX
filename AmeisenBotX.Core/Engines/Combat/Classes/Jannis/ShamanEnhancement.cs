@@ -2,6 +2,7 @@
 using AmeisenBotX.Core.Engines.Character.Talents.Objects;
 using AmeisenBotX.Core.Logic.Utils.Auras.Objects;
 using AmeisenBotX.Wow.Objects.Enums;
+using AmeisenBotX.Wow335a.Constants;
 using System.Linq;
 
 namespace AmeisenBotX.Core.Engines.Combat.Classes.Jannis
@@ -10,15 +11,15 @@ namespace AmeisenBotX.Core.Engines.Combat.Classes.Jannis
     {
         public ShamanEnhancement(AmeisenBotInterfaces bot) : base(bot)
         {
-            MyAuraManager.Jobs.Add(new KeepActiveAuraJob(bot.Db, lightningShieldSpell, () => Bot.Player.ManaPercentage > 60.0 && TryCastSpell(lightningShieldSpell, 0, true)));
-            MyAuraManager.Jobs.Add(new KeepActiveAuraJob(bot.Db, waterShieldSpell, () => Bot.Player.ManaPercentage < 20.0 && TryCastSpell(waterShieldSpell, 0, true)));
+            MyAuraManager.Jobs.Add(new KeepActiveAuraJob(bot.Db, Shaman335a.LightningShield, () => Bot.Player.ManaPercentage > 60.0 && TryCastSpell(Shaman335a.LightningShield, 0, true)));
+            MyAuraManager.Jobs.Add(new KeepActiveAuraJob(bot.Db, Shaman335a.WaterShield, () => Bot.Player.ManaPercentage < 20.0 && TryCastSpell(Shaman335a.WaterShield, 0, true)));
 
-            TargetAuraManager.Jobs.Add(new KeepActiveAuraJob(bot.Db, flameShockSpell, () => TryCastSpell(flameShockSpell, Bot.Wow.TargetGuid, true)));
+            TargetAuraManager.Jobs.Add(new KeepActiveAuraJob(bot.Db, Shaman335a.FlameShock, () => TryCastSpell(Shaman335a.FlameShock, Bot.Wow.TargetGuid, true)));
 
             InterruptManager.InterruptSpells = new()
             {
-                { 0, (x) => TryCastSpell(windShearSpell, x.Guid, true) },
-                { 1, (x) => TryCastSpell(hexSpell, x.Guid, true) }
+                { 0, (x) => TryCastSpell(Shaman335a.WindShear, x.Guid, true) },
+                { 1, (x) => TryCastSpell(Shaman335a.Hex, x.Guid, true) }
             };
         }
 
@@ -86,22 +87,22 @@ namespace AmeisenBotX.Core.Engines.Combat.Classes.Jannis
 
             if (SelectTarget(TargetProviderDps))
             {
-                if (CheckForWeaponEnchantment(WowEquipmentSlot.INVSLOT_MAINHAND, flametoungueBuff, flametoungueWeaponSpell)
-                    || CheckForWeaponEnchantment(WowEquipmentSlot.INVSLOT_OFFHAND, windfuryBuff, windfuryWeaponSpell))
+                if (CheckForWeaponEnchantment(WowEquipmentSlot.INVSLOT_MAINHAND, Shaman335a.FlametoungueBuff, Shaman335a.FlametoungueWeapon)
+                    || CheckForWeaponEnchantment(WowEquipmentSlot.INVSLOT_OFFHAND, Shaman335a.WindfuryBuff, Shaman335a.WindfuryWeapon))
                 {
                     return;
                 }
 
                 if (Bot.Player.HealthPercentage < 30
                     && Bot.Target.Type == WowObjectType.Player
-                    && TryCastSpell(hexSpell, Bot.Wow.TargetGuid, true))
+                    && TryCastSpell(Shaman335a.Hex, Bot.Wow.TargetGuid, true))
                 {
                     HexedTarget = true;
                     return;
                 }
 
                 if (Bot.Player.HealthPercentage < 60
-                    && TryCastSpell(healingWaveSpell, Bot.Wow.PlayerGuid, true))
+                    && TryCastSpell(Shaman335a.HealingWave, Bot.Wow.PlayerGuid, true))
                 {
                     return;
                 }
@@ -110,17 +111,17 @@ namespace AmeisenBotX.Core.Engines.Combat.Classes.Jannis
                 {
                     if ((Bot.Target.MaxHealth > 10000000
                             && Bot.Target.HealthPercentage < 25
-                            && TryCastSpell(heroismSpell, 0))
-                        || TryCastSpell(stormstrikeSpell, Bot.Wow.TargetGuid, true)
-                        || TryCastSpell(lavaLashSpell, Bot.Wow.TargetGuid, true)
-                        || TryCastSpell(earthShockSpell, Bot.Wow.TargetGuid, true))
+                            && TryCastSpell(Shaman335a.Heroism, 0))
+                        || TryCastSpell(Shaman335a.Stormstrike, Bot.Wow.TargetGuid, true)
+                        || TryCastSpell(Shaman335a.LavaLash, Bot.Wow.TargetGuid, true)
+                        || TryCastSpell(Shaman335a.EarthShock, Bot.Wow.TargetGuid, true))
                     {
                         return;
                     }
 
-                    if (Bot.Player.Auras.Any(e => Bot.Db.GetSpellName(e.SpellId) == maelstromWeaponSpell)
-                        && Bot.Player.Auras.FirstOrDefault(e => Bot.Db.GetSpellName(e.SpellId) == maelstromWeaponSpell).StackCount >= 5
-                        && TryCastSpell(lightningBoltSpell, Bot.Wow.TargetGuid, true))
+                    if (Bot.Player.Auras.Any(e => Bot.Db.GetSpellName(e.SpellId) == Shaman335a.MaelstromWeapon)
+                        && Bot.Player.Auras.FirstOrDefault(e => Bot.Db.GetSpellName(e.SpellId) == Shaman335a.MaelstromWeapon).StackCount >= 5
+                        && TryCastSpell(Shaman335a.LightningBolt, Bot.Wow.TargetGuid, true))
                     {
                         return;
                     }
@@ -132,13 +133,13 @@ namespace AmeisenBotX.Core.Engines.Combat.Classes.Jannis
         {
             base.OutOfCombatExecute();
 
-            if (HandleDeadPartymembers(ancestralSpiritSpell))
+            if (HandleDeadPartymembers(Shaman335a.AncestralSpirit))
             {
                 return;
             }
 
-            if (CheckForWeaponEnchantment(WowEquipmentSlot.INVSLOT_MAINHAND, flametoungueBuff, flametoungueWeaponSpell)
-                || CheckForWeaponEnchantment(WowEquipmentSlot.INVSLOT_OFFHAND, windfuryBuff, windfuryWeaponSpell))
+            if (CheckForWeaponEnchantment(WowEquipmentSlot.INVSLOT_MAINHAND, Shaman335a.FlametoungueBuff, Shaman335a.FlametoungueWeapon)
+                || CheckForWeaponEnchantment(WowEquipmentSlot.INVSLOT_OFFHAND, Shaman335a.WindfuryBuff, Shaman335a.WindfuryWeapon))
             {
                 return;
             }

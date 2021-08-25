@@ -4,6 +4,7 @@ using AmeisenBotX.Core.Engines.Combat.Helpers;
 using AmeisenBotX.Core.Logic.Utils.Auras.Objects;
 using AmeisenBotX.Wow.Objects;
 using AmeisenBotX.Wow.Objects.Enums;
+using AmeisenBotX.Wow335a.Constants;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -19,29 +20,29 @@ namespace AmeisenBotX.Core.Engines.Combat.Classes.Jannis
                 Bot,
                 TimeSpan.FromSeconds(1),
                 null,
-                () => (Bot.Character.SpellBook.IsSpellKnown(summonFelhunterSpell)
+                () => (Bot.Character.SpellBook.IsSpellKnown(Warlock335a.SummonFelhunter)
                        && Bot.Character.Inventory.HasItemByName("Soul Shard")
-                       && TryCastSpell(summonFelhunterSpell, 0))
-                   || (Bot.Character.SpellBook.IsSpellKnown(summonImpSpell)
-                       && TryCastSpell(summonImpSpell, 0)),
-                () => (Bot.Character.SpellBook.IsSpellKnown(summonFelhunterSpell)
+                       && TryCastSpell(Warlock335a.SummonFelhunter, 0))
+                   || (Bot.Character.SpellBook.IsSpellKnown(Warlock335a.SummonImp)
+                       && TryCastSpell(Warlock335a.SummonImp, 0)),
+                () => (Bot.Character.SpellBook.IsSpellKnown(Warlock335a.SummonFelhunter)
                        && Bot.Character.Inventory.HasItemByName("Soul Shard")
-                       && TryCastSpell(summonFelhunterSpell, 0))
-                   || (Bot.Character.SpellBook.IsSpellKnown(summonImpSpell)
-                       && TryCastSpell(summonImpSpell, 0))
+                       && TryCastSpell(Warlock335a.SummonFelhunter, 0))
+                   || (Bot.Character.SpellBook.IsSpellKnown(Warlock335a.SummonImp)
+                       && TryCastSpell(Warlock335a.SummonImp, 0))
             );
 
             MyAuraManager.Jobs.Add(new KeepBestActiveAuraJob(bot.Db, new List<(string, Func<bool>)>()
             {
-                (felArmorSpell, () => TryCastSpell(felArmorSpell, 0, true)),
-                (demonArmorSpell, () => TryCastSpell(demonArmorSpell, 0, true)),
-                (demonSkinSpell, () => TryCastSpell(demonSkinSpell, 0, true)),
+                (Warlock335a.FelArmor, () => TryCastSpell(Warlock335a.FelArmor, 0, true)),
+                (Warlock335a.DemonArmor, () => TryCastSpell(Warlock335a.DemonArmor, 0, true)),
+                (Warlock335a.DemonSkin, () => TryCastSpell(Warlock335a.DemonSkin, 0, true)),
             }));
 
-            TargetAuraManager.Jobs.Add(new KeepActiveAuraJob(bot.Db, corruptionSpell, () => Bot.Target != null && !Bot.Target.Auras.Any(e => Bot.Db.GetSpellName(e.SpellId) == seedOfCorruptionSpell) && TryCastSpell(corruptionSpell, Bot.Wow.TargetGuid, true)));
-            TargetAuraManager.Jobs.Add(new KeepActiveAuraJob(bot.Db, curseOfAgonySpell, () => TryCastSpell(curseOfAgonySpell, Bot.Wow.TargetGuid, true)));
-            TargetAuraManager.Jobs.Add(new KeepActiveAuraJob(bot.Db, unstableAfflictionSpell, () => TryCastSpell(unstableAfflictionSpell, Bot.Wow.TargetGuid, true)));
-            TargetAuraManager.Jobs.Add(new KeepActiveAuraJob(bot.Db, hauntSpell, () => TryCastSpell(hauntSpell, Bot.Wow.TargetGuid, true)));
+            TargetAuraManager.Jobs.Add(new KeepActiveAuraJob(bot.Db, Warlock335a.Corruption, () => Bot.Target != null && !Bot.Target.Auras.Any(e => Bot.Db.GetSpellName(e.SpellId) == Warlock335a.SeedOfCorruption) && TryCastSpell(Warlock335a.Corruption, Bot.Wow.TargetGuid, true)));
+            TargetAuraManager.Jobs.Add(new KeepActiveAuraJob(bot.Db, Warlock335a.CurseOfAgony, () => TryCastSpell(Warlock335a.CurseOfAgony, Bot.Wow.TargetGuid, true)));
+            TargetAuraManager.Jobs.Add(new KeepActiveAuraJob(bot.Db, Warlock335a.UnstableAffliction, () => TryCastSpell(Warlock335a.UnstableAffliction, Bot.Wow.TargetGuid, true)));
+            TargetAuraManager.Jobs.Add(new KeepActiveAuraJob(bot.Db, Warlock335a.Haunt, () => TryCastSpell(Warlock335a.Haunt, Bot.Wow.TargetGuid, true)));
         }
 
         public override string Description => "FCFS based CombatClass for the Affliction Warlock spec.";
@@ -110,8 +111,8 @@ namespace AmeisenBotX.Core.Engines.Combat.Classes.Jannis
             {
                 if (PetManager.Tick()) { return; }
 
-                if ((Bot.Player.ManaPercentage < 75.0 && Bot.Player.HealthPercentage > 60.0 && TryCastSpell(lifeTapSpell, 0))
-                    || (Bot.Player.HealthPercentage < 80.0 && TryCastSpell(deathCoilSpell, Bot.Wow.TargetGuid, true)))
+                if ((Bot.Player.ManaPercentage < 75.0 && Bot.Player.HealthPercentage > 60.0 && TryCastSpell(Warlock335a.LifeTap, 0))
+                    || (Bot.Player.HealthPercentage < 80.0 && TryCastSpell(Warlock335a.DeathCoil, Bot.Wow.TargetGuid, true)))
                 {
                     return;
                 }
@@ -121,8 +122,8 @@ namespace AmeisenBotX.Core.Engines.Combat.Classes.Jannis
                     if (Bot.Target.GetType() == typeof(IWowPlayer))
                     {
                         if (DateTime.UtcNow - LastFearAttempt > TimeSpan.FromSeconds(5)
-                            && ((Bot.Player.Position.GetDistance(Bot.Target.Position) < 6.0f && TryCastSpell(howlOfTerrorSpell, 0, true))
-                            || (Bot.Player.Position.GetDistance(Bot.Target.Position) < 12.0f && TryCastSpell(fearSpell, Bot.Wow.TargetGuid, true))))
+                            && ((Bot.Player.Position.GetDistance(Bot.Target.Position) < 6.0f && TryCastSpell(Warlock335a.HowlOfTerror, 0, true))
+                            || (Bot.Player.Position.GetDistance(Bot.Target.Position) < 12.0f && TryCastSpell(Warlock335a.Fear, Bot.Wow.TargetGuid, true))))
                         {
                             LastFearAttempt = DateTime.UtcNow;
                             return;
@@ -131,21 +132,21 @@ namespace AmeisenBotX.Core.Engines.Combat.Classes.Jannis
 
                     if (Bot.Character.Inventory.Items.Count(e => e.Name.Equals("Soul Shard", StringComparison.OrdinalIgnoreCase)) < 5
                         && Bot.Target.HealthPercentage < 25.0
-                        && TryCastSpell(drainSoulSpell, Bot.Wow.TargetGuid, true))
+                        && TryCastSpell(Warlock335a.DrainSoul, Bot.Wow.TargetGuid, true))
                     {
                         return;
                     }
                 }
 
                 if (Bot.GetNearEnemies<IWowUnit>(Bot.Target.Position, 16.0f).Count() > 2
-                    && ((!Bot.Target.Auras.Any(e => Bot.Db.GetSpellName(e.SpellId) == seedOfCorruptionSpell)
-                        && TryCastSpell(seedOfCorruptionSpell, Bot.Wow.TargetGuid, true))
-                    || TryCastAoeSpell(rainOfFireSpell, Bot.Wow.TargetGuid, true)))
+                    && ((!Bot.Target.Auras.Any(e => Bot.Db.GetSpellName(e.SpellId) == Warlock335a.SeedOfCorruption)
+                        && TryCastSpell(Warlock335a.SeedOfCorruption, Bot.Wow.TargetGuid, true))
+                    || TryCastAoeSpell(Warlock335a.RainOfFire, Bot.Wow.TargetGuid, true)))
                 {
                     return;
                 }
 
-                if (TryCastSpell(shadowBoltSpell, Bot.Wow.TargetGuid, true))
+                if (TryCastSpell(Warlock335a.ShadowBolt, Bot.Wow.TargetGuid, true))
                 {
                     return;
                 }

@@ -4,6 +4,7 @@ using AmeisenBotX.Core.Engines.Combat.Classes.Jannis;
 using AmeisenBotX.Core.Engines.Movement.Enums;
 using AmeisenBotX.Wow.Objects;
 using AmeisenBotX.Wow.Objects.Enums;
+using AmeisenBotX.Wow335a.Constants;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -88,13 +89,13 @@ namespace AmeisenBotX.Core.Logic.CombatClasses.Shino
             IEnumerable<IWowUnit> nearAttackingEnemies = Bot
                 .GetEnemiesInCombatWithParty<IWowUnit>(Bot.Player.Position, 64.0f)
                 .Where(e => !e.IsDead && !e.IsNotAttackable)
-                .OrderBy(e => e.Auras.All(aura => Bot.Db.GetSpellName(aura.SpellId) != polymorphSpell));
+                .OrderBy(e => e.Auras.All(aura => Bot.Db.GetSpellName(aura.SpellId) != Mage335a.Polymorph));
 
             if (currentTarget != null && currentTarget.Guid != 0
                && (currentTarget.IsDead
                    || currentTarget.IsNotAttackable
-                   || (currentTarget.Auras.Any(e => Bot.Db.GetSpellName(e.SpellId) == polymorphSpell) &&
-                       nearAttackingEnemies.Where(e => e.Auras.All(aura => Bot.Db.GetSpellName(aura.SpellId) != polymorphSpell)).Any(e => e.Guid != currentTarget.Guid))
+                   || (currentTarget.Auras.Any(e => Bot.Db.GetSpellName(e.SpellId) == Mage335a.Polymorph) &&
+                       nearAttackingEnemies.Where(e => e.Auras.All(aura => Bot.Db.GetSpellName(aura.SpellId) != Mage335a.Polymorph)).Any(e => e.Guid != currentTarget.Guid))
                    || (!currentTarget.IsInCombat && nearAttackingEnemies.Any())
                    || !IWowUnit.IsValidUnit(Bot.Target)
                    || Bot.Db.GetReaction(Bot.Player, currentTarget) == WowUnitReaction.Friendly))
