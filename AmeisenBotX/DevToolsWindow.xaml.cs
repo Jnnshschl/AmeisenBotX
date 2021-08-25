@@ -9,6 +9,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text.Json;
 using System.Windows;
+using System.Windows.Controls;
 using System.Windows.Input;
 
 namespace AmeisenBotX
@@ -46,14 +47,8 @@ namespace AmeisenBotX
 
         private void ButtonLuaExecute_Click(object sender, RoutedEventArgs e)
         {
-            if (AmeisenBot.Bot.Wow.ExecuteLuaAndRead(BotUtils.ObfuscateLua(textboxLuaCode.Text), out string result))
-            {
-                textboxLuaResult.Text = result;
-            }
-            else
-            {
-                textboxLuaResult.Text = "Failed to execute LUA...";
-            }
+            textboxLuaResult.Text = AmeisenBot.Bot.Wow.ExecuteLuaAndRead(BotUtils.ObfuscateLua(textboxLuaCode.Text), out string result)
+                ? result : "Failed to execute LUA...";
         }
 
         private void ButtonLuaExecute_Copy_Click(object sender, RoutedEventArgs e)
@@ -61,9 +56,27 @@ namespace AmeisenBotX
             AmeisenBot.Bot.Wow.LuaDoString(textboxLuaCode.Text);
         }
 
+        private void ListViewNearWowObjects_KeyDown(object sender, KeyEventArgs e)
+        {
+            if (e.Key == Key.C)
+            {
+                CopyLocalPlayerPosition(listviewNearWowObjects);
+            }
+        }
+
         private void ButtonRefresh_Click(object sender, RoutedEventArgs e)
         {
             RefreshActiveData();
+        }
+
+        private void TabControlMain_SelectionChanged(object sender, SelectionChangedEventArgs e)
+        {
+            RefreshActiveData();
+        }
+
+        private void Window_MouseLeftButtonDown(object sender, MouseButtonEventArgs e)
+        {
+            DragMove();
         }
 
         private void OnWowEventFired(long timestamp, List<string> args)
@@ -158,21 +171,32 @@ namespace AmeisenBotX
                     wowObjects.Add((x, Math.Round(x.Position.GetDistance(AmeisenBot.Bot.Player.Position), 2)));
                 }
 
-                foreach ((IWowObject, double) x in wowObjects.OrderBy(e => e.Item2))
+                foreach ((IWowObject wowObject, double distanceTo) in wowObjects.OrderBy(e => e.Item2))
                 {
-                    listviewNearWowObjects.Items.Add(x);
+                    listviewNearWowObjects.Items.Add($"Type: {wowObject.Type} Guid: {wowObject.Guid} Pos: [{wowObject.Position}] DistanceTo: {distanceTo}");
                 }
             }
         }
 
-        private void TabcontrolMain_SelectionChanged(object sender, System.Windows.Controls.SelectionChangedEventArgs e)
+        private void CopyLocalPlayerPosition(ListView list)
         {
-            RefreshActiveData();
-        }
+            ItemCollection listItems = list.Items;
+            if (listItems.Count <= 0) { return; }
+            object playerData = listItems[0];
+            if (playerData == null) { return; }
 
-        private void Window_MouseLeftButtonDown(object sender, MouseButtonEventArgs e)
-        {
-            DragMove();
+            string[] split = playerData.ToString().Split("[", 2);
+            string pos = split[1].Replace("] DistanceTo: 0", string.Empty);
+            string[] posComponents = pos.Split(", ");
+            string[] cleanComponents = { "", "", "" };
+
+            for (int i = 0; i < posComponents.Length; i++)
+            {
+                cleanComponents[i] = posComponents[i].Split(".")[0];
+            }
+
+            string finalPosStr = cleanComponents[0] + ", " + cleanComponents[1] + ", " + cleanComponents[2];
+            Clipboard.SetDataObject(finalPosStr);
         }
     }
 }
