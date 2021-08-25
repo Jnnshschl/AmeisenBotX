@@ -136,8 +136,6 @@ namespace AmeisenBotX.Core.Engines.Combat.Classes.Bia10
 
             if (IsMelee)
                 Bot.Movement.SetMovementAction(MovementAction.Move, target.Position);
-            else if (IsInSpellRange(target, DataConstants.ShamanSpells.LightningBolt))
-                TryCastSpell(DataConstants.ShamanSpells.LightningBolt, target.Guid);
             else if (!IsInSpellRange(target, DataConstants.ShamanSpells.LightningBolt) 
                      || !Bot.Wow.IsInLineOfSight(Bot.Player.Position, target.Position))
                 Bot.Movement.SetMovementAction(MovementAction.Move, target.Position);
@@ -156,14 +154,7 @@ namespace AmeisenBotX.Core.Engines.Combat.Classes.Bia10
             if (Bot.Target != null && EventCheckFacing.Run())
                 CheckFacing(Bot.Target);
 
-            // Update Priority Units
-            // --------------------------- >
-            if (Bot.Dungeon != null
-                && Bot.Dungeon.Profile.PriorityUnits != null
-                && Bot.Dungeon.Profile.PriorityUnits.Count > 0)
-            {
-                TargetProviderDps.PriorityTargets = Bot.Dungeon.Profile.PriorityUnits;
-            }
+            AttackTarget();
 
             // Autoattacks
             // --------------------------- >
@@ -188,26 +179,6 @@ namespace AmeisenBotX.Core.Engines.Combat.Classes.Bia10
             if (InterruptManager.Tick(Bot.GetNearEnemies<IWowUnit>(Bot.Player.Position, IsMelee ? 5.0f : 30.0f)))
                 return;
 
-            // Useable items, potions, etc.
-            // ---------------------------- >
-            /* TODO: rest state
-            if (Bot.Player.HealthPercentage < ConfigurableThresholds["HealthItemThreshold"])
-            {
-                var healthItem = Bot.Character.Inventory.Items.FirstOrDefault(e =>
-                    DataConstants.usableHealingItems.Contains(e.Id));
-
-                if (healthItem == null) return;
-                Bot.Wow.UseItemByName(healthItem.Name);
-            }
-            if (Bot.Player.ManaPercentage < ConfigurableThresholds["ManaItemThreshold"])
-            {
-                var manaItem = Bot.Character.Inventory.Items.FirstOrDefault(e =>
-                    DataConstants.usableManaItems.Contains(e.Id));
-
-                if (manaItem == null) return;
-                Bot.Wow.UseItemByName(manaItem.Name);
-            }*/
-            
             // Race abilities
             // -------------- >
             switch (Bot.Player.Race)
@@ -318,20 +289,21 @@ namespace AmeisenBotX.Core.Engines.Combat.Classes.Bia10
                 || !Bot.Objects.IsTargetInLineOfSight)           // not in los
                 return false;
 
-            if (!ValidateTarget(guid, out var target, out var needToSwitchTarget)) // target invalid
-                return false;
-
             if (currentResourceAmount == 0)
                 currentResourceAmount = Bot.Player.Mana;
 
-            var isTargetMyself = guid is 0 or 2;
             var spell = Bot.Character.SpellBook.GetSpellByName(spellName);
-
-            if (spell == null || CooldownManager.IsSpellOnCooldown(spellName)
-                              || needsResource && spell.Costs >= currentResourceAmount
-                              || target != null && !IsInSpellRange(target, spell.Name))
+            if (spell == null || needsResource && spell.Costs >= currentResourceAmount 
+                              || CooldownManager.IsSpellOnCooldown(spellName))
                 return false;
 
+            if (!ValidateTarget(guid, out var target, out var needToSwitchTarget)) // target invalid
+                return false;
+
+            if (target != null && !IsInSpellRange(target, spell.Name))
+                return false;
+
+            var isTargetMyself = guid is 0 or 2;
             if (!isTargetMyself && (needToSwitchTarget || forceTargetSwitch))
                 Bot.Wow.ChangeTarget(guid);
 

@@ -1,4 +1,5 @@
 ﻿using AmeisenBotX.Core.Engines.Grinding.Objects;
+using AmeisenBotX.Core.Engines.Npc;
 using System.Collections.Generic;
 
 namespace AmeisenBotX.Core.Engines.Grinding.Profiles.Profiles.Alliance.Group
@@ -6,6 +7,10 @@ namespace AmeisenBotX.Core.Engines.Grinding.Profiles.Profiles.Alliance.Group
     public class UltimateGrinding1To80 : IGrindingProfile
     {
         public bool RandomizeSpots { get; } = true;
+
+        public List<Vendor> Vendors { get; }
+
+        public List<Trainer> Trainers { get; }
 
         public List<GrindingSpot> Spots { get; } = new()
         {
