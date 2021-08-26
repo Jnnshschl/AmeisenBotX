@@ -118,18 +118,21 @@ namespace AmeisenBotX.Core.Engines.Grinding
 
         private BtStatus GoToNpcAndSell()
         {
-            List<Vector3> sellNpcsPos = (
-                from vendor in Profile.Vendors
-                where vendor.Type is NpcType.VendorSellBuy or NpcType.VendorRepair
-                select vendor.Position).ToList();
+            List<Vendor> profileVendors = Profile.Vendors;
+            if (!profileVendors.Any()) return BtStatus.Failed;
 
-            Vector3 sellNpcPos = sellNpcsPos.OrderBy(e => e.GetDistance(Bot.Player.Position)).First();
-            if (sellNpcPos.GetDistance(Bot.Player.Position) > 5.0f)
+            Vendor firstVendor = profileVendors
+                .Where(e => e.Type is NpcType.VendorSellBuy or NpcType.VendorRepair)
+                .OrderBy(e => e.Position.GetDistance(Bot.Player.Position))
+                .FirstOrDefault();
+            if (firstVendor == null) return BtStatus.Failed;
+
+            if (firstVendor.Position.GetDistance(Bot.Player.Position) > 5.0f)
             {
-                Bot.Movement.SetMovementAction(MovementAction.Move, sellNpcPos);
+                Bot.Movement.SetMovementAction(MovementAction.Move, firstVendor.Position);
                 return BtStatus.Ongoing;
             }
-            if (sellNpcPos.GetDistance(Bot.Player.Position) < 5.0f)
+            if (firstVendor.Position.GetDistance(Bot.Player.Position) < 5.0f)
             {
                 Bot.Movement.StopMovement();
             }
@@ -141,13 +144,12 @@ namespace AmeisenBotX.Core.Engines.Grinding
         {
             GrindingSpot nearestGrindSpot = Profile.Spots
                 .Where(e => e.Position.GetDistance(Bot.Player.Position) <= e.Radius)
-                .OrderBy(e => e.Position.GetDistance2D(Bot.Player.Position)).FirstOrDefault();
-
+                .OrderBy(e => e.Position.GetDistance2D(Bot.Player.Position))
+                .FirstOrDefault();
             if (nearestGrindSpot == null) return false;
 
             IEnumerable<IWowUnit> nearUnits = Bot.GetNearEnemiesOrNeutrals<IWowUnit>(nearestGrindSpot.Position, nearestGrindSpot.Radius)
-                .Where(e => e.Level >= nearestGrindSpot.MinLevel && e.Level <= nearestGrindSpot.MaxLevel 
-                                            && e.Position.GetDistance(nearestGrindSpot.Position) < nearestGrindSpot.Radius)
+                .Where(e => UnitWithinGrindSpotLvlLimit(e, nearestGrindSpot) && ObjectWithinGrindSpotRadius(e, nearestGrindSpot))
                 .OrderBy(e => e.Position.GetDistance2D(Bot.Player.Position));
 
             return nearUnits.Any();
@@ -161,20 +163,23 @@ namespace AmeisenBotX.Core.Engines.Grinding
                 .Where(e => e.Position.GetDistance(Bot.Player.Position) <= e.Radius)
                 .OrderBy(e => e.Position.GetDistance2D(Bot.Player.Position)).FirstOrDefault();
 
-            IEnumerable<IWowUnit> nearUnits = Bot.GetNearEnemiesOrNeutrals<IWowUnit>(nearestGrindSpot.Position, nearestGrindSpot.Radius)
-                .Where(e => e.Level >= nearestGrindSpot.MinLevel && e.Level <= nearestGrindSpot.MaxLevel
-                                            && e.Position.GetDistance(nearestGrindSpot.Position) < nearestGrindSpot.Radius)
-                .OrderBy(e => e.Position.GetDistance2D(Bot.Player.Position));
+            if (nearestGrindSpot == null) return false;
 
-            var selectedTarget = nearUnits.FirstOrDefault();
-            if (selectedTarget == null) return false;
+            IWowUnit possibleTarget = Bot.GetNearEnemiesOrNeutrals<IWowUnit>(nearestGrindSpot.Position, nearestGrindSpot.Radius)
+                .Where(e => UnitWithinGrindSpotLvlLimit(e, nearestGrindSpot) && ObjectWithinGrindSpotRadius(e, nearestGrindSpot))
+                .OrderBy(e => e.Position.GetDistance2D(Bot.Player.Position))
+                .FirstOrDefault();
 
-            Bot.Wow.ChangeTarget(selectedTarget.Guid);
+            if (possibleTarget == null) return false;
+
+            Bot.Wow.ChangeTarget(possibleTarget.Guid);
             return true;
         }
 
         private BtStatus MoveToNextGrindNode()
         {
+            Bot.CombatClass.OutOfCombatExecute();
+
             List<GrindingSpot> spots = Profile.Spots.Where(e =>
                 Bot.Player.Level >= e.MinLevel && Bot.Player.Level <= e.MaxLevel).ToList();
 
@@ -226,6 +231,16 @@ namespace AmeisenBotX.Core.Engines.Grinding
 
             Bot.CombatClass.Execute();
             return BtStatus.Success;
+        }
+
+        private static bool UnitWithinGrindSpotLvlLimit(IWowUnit unit, GrindingSpot grindSpot)
+        {
+            return unit.Level >= grindSpot.MinLevel && unit.Level <= grindSpot.MaxLevel;
+        }
+
+        private static bool ObjectWithinGrindSpotRadius(IWowObject wowObject, GrindingSpot grindSpot)
+        {
+            return wowObject.Position.GetDistance(grindSpot.Position) <= grindSpot.Radius;
         }
     }
 }

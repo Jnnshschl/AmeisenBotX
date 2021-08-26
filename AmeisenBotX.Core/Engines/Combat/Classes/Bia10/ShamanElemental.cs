@@ -79,7 +79,7 @@ namespace AmeisenBotX.Core.Engines.Combat.Classes.Bia10
             if (HandleDeadPartyMembers(DataConstants.ShamanSpells.AncestralSpirit))
                 return;
             if (CheckForWeaponEnchantment(WowEquipmentSlot.INVSLOT_MAINHAND,
-                DataConstants.ShamanSpells.FlametongueBuff, DataConstants.ShamanSpells.FlametongueWeapon))
+                DataConstants.ShamanSpells.RockbiterWeapon, DataConstants.ShamanSpells.RockbiterWeapon))
                 return;
 
             HexedTarget = false;

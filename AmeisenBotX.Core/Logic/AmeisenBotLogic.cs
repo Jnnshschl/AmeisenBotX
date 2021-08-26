@@ -5,6 +5,7 @@ using AmeisenBotX.Common.Math;
 using AmeisenBotX.Common.Utils;
 using AmeisenBotX.Core.Engines.Character.Inventory.Objects;
 using AmeisenBotX.Core.Engines.Movement.Enums;
+using AmeisenBotX.Core.Engines.Npc;
 using AmeisenBotX.Core.Logic.Enums;
 using AmeisenBotX.Core.Logic.Idle;
 using AmeisenBotX.Core.Logic.Idle.Actions;
@@ -583,7 +584,7 @@ namespace AmeisenBotX.Core.Logic
                 }
             }
 
-            if ((!ArePartymembersInFight && DateTime.UtcNow - DungeonDiedTimestamp > TimeSpan.FromSeconds(30))
+            if (!ArePartymembersInFight && DateTime.UtcNow - DungeonDiedTimestamp > TimeSpan.FromSeconds(30)
                 || Bot.Objects.Partymembers.Any(e => !e.IsDead
                     && (e.Class == WowClass.Paladin || e.Class == WowClass.Druid || e.Class == WowClass.Priest || e.Class == WowClass.Shaman)))
             {
@@ -692,11 +693,11 @@ namespace AmeisenBotX.Core.Logic
         private bool IsRepairNpcNear(out IWowUnit unit)
         {
             unit = Bot.Objects.WowObjects.OfType<IWowUnit>()
-                .FirstOrDefault(e => e.GetType() != typeof(IWowPlayer)
-                    && !e.IsDead
-                    && e.IsRepairVendor
-                    && Bot.Db.GetReaction(Bot.Player, e) != WowUnitReaction.Hostile
-                    && Bot.Player.DistanceTo(e) <= Config.RepairNpcSearchRadius);
+                    .FirstOrDefault(e => e.GetType() != typeof(IWowPlayer)
+                                         && !e.IsDead
+                                         && e.IsRepairVendor
+                && Bot.Db.GetReaction(Bot.Player, e) != WowUnitReaction.Hostile
+                && Bot.Player.DistanceTo(e) <= Config.RepairNpcSearchRadius);
 
             return unit != null;
         }
@@ -841,13 +842,17 @@ namespace AmeisenBotX.Core.Logic
 
             if (UpdateFood.Run())
             {
-                Food = Bot.Character.Inventory.Items.Where(e => e.RequiredLevel <= Bot.Player.Level).OrderByDescending(e => e.ItemLevel);
+                Food = Bot.Character.Inventory.Items
+                    .Where(e => e.RequiredLevel <= Bot.Player.Level)
+                    .OrderByDescending(e => e.ItemLevel);
             }
 
-            return (Bot.Player.HealthPercentage < Config.EatUntilPercent
-                    && (Food.Any(e => Enum.IsDefined(typeof(WowFood), e.Id)) || Food.Any(e => Enum.IsDefined(typeof(WowRefreshment), e.Id))))
-                || (Bot.Player.MaxMana > 0 && Bot.Player.ManaPercentage < Config.DrinkUntilPercent
-                    && (Food.Any(e => Enum.IsDefined(typeof(WowWater), e.Id)) || Food.Any(e => Enum.IsDefined(typeof(WowRefreshment), e.Id))));
+            return Bot.Player.HealthPercentage < Config.EatUntilPercent
+                   && (Food.Any(e => Enum.IsDefined(typeof(WowFood), e.Id)) 
+                       || Food.Any(e => Enum.IsDefined(typeof(WowRefreshment), e.Id)))
+                || Bot.Player.MaxMana > 0 && Bot.Player.ManaPercentage < Config.DrinkUntilPercent
+                   && (Food.Any(e => Enum.IsDefined(typeof(WowWater), e.Id)) 
+                       || Food.Any(e => Enum.IsDefined(typeof(WowRefreshment), e.Id)));
         }
 
         private bool NeedToFight()
@@ -855,7 +860,7 @@ namespace AmeisenBotX.Core.Logic
             if (PartymembersFightEvent.Run())
             {
                 ArePartymembersInFight = Bot.Objects.Partymembers.Any(e => e.IsInCombat && e.DistanceTo(Bot.Player) < Config.SupportRange)
-                    || Bot.Objects.WowObjects.OfType<IWowUnit>().Any(e => ((e.IsInCombat && (e.IsTaggedByMe || !e.IsTaggedByOther))
+                    || Bot.Objects.WowObjects.OfType<IWowUnit>().Any(e => (e.IsInCombat && (e.IsTaggedByMe || !e.IsTaggedByOther)
                         || e.TargetGuid == Bot.Player.Guid
                         || Bot.Objects.Partymembers.Any(x => x.Guid == e.TargetGuid))
                         && Bot.Wow.GetReaction(Bot.Player.BaseAddress, e.BaseAddress) == WowUnitReaction.Hostile);
@@ -902,25 +907,59 @@ namespace AmeisenBotX.Core.Logic
 
         private bool NeedToRepairOrSell()
         {
-            if (Bot.Character.Equipment.Items.Any(e => e.Value.MaxDurability > 0 && (e.Value.Durability / (double)e.Value.MaxDurability * 100.0) <= Config.ItemRepairThreshold)
-                && IsRepairNpcNear(out IWowUnit repairNpc))
+            bool needToRepair = Bot.Character.Equipment.Items.Any(e =>
+                e.Value.MaxDurability > 0 && e.Value.Durability / (double)e.Value.MaxDurability * 100.0 <= Config.ItemRepairThreshold);
+
+            bool needToSell = Bot.Character.Inventory.FreeBagSlots < Config.BagSlotsToGoSell
+                              && Bot.Character.Inventory.Items
+                              .Any(e => e.Price > 0 && !Config.ItemSellBlacklist.Contains(e.Name)
+                                      && (Config.SellGrayItems && e.ItemQuality == (int)WowItemQuality.Poor 
+                                      || Config.SellWhiteItems && e.ItemQuality == (int)WowItemQuality.Common
+                                      || Config.SellGreenItems && e.ItemQuality == (int)WowItemQuality.Uncommon
+                                      || Config.SellBlueItems && e.ItemQuality == (int)WowItemQuality.Rare 
+                                      || Config.SellPurpleItems && e.ItemQuality == (int)WowItemQuality.Epic));
+            
+            IWowUnit vendorRepair = null;
+            IWowUnit vendorSell = null;
+
+            if (Mode != BotMode.None && (Bot.Grinding.Profile == null || !Bot.Grinding.Profile.Vendors.Any()))
+                return false;
+
+            switch (Mode)
             {
-                Merchant = repairNpc;
-                return true;
+                case BotMode.Grinding:
+                {
+                    int repairNpcEntryId = Bot.Grinding.Profile.Vendors.FirstOrDefault(e =>
+                        e.Type == NpcType.VendorRepair).EntryId;
+                    vendorRepair = Bot.GetClosestVendorByEntryId(repairNpcEntryId);
+
+                    int sellNpcEntryId = Bot.Grinding.Profile.Vendors.FirstOrDefault(e =>
+                        e.Type == NpcType.VendorRepair || e.Type == NpcType.VendorSellBuy).EntryId;
+                    vendorSell = Bot.GetClosestVendorByEntryId(sellNpcEntryId);
+                    break;
+                }
+                case BotMode.None:
+                    IsRepairNpcNear(out IWowUnit repairNpc);
+                    vendorRepair = repairNpc;
+
+                    IsVendorNpcNear(out IWowUnit sellNpc);
+                    vendorSell = sellNpc;
+                    break;
+                case BotMode.Questing:
+                    break;
+
+                default:
+                    throw new ArgumentOutOfRangeException();
             }
 
-            if (Bot.Character.Inventory.FreeBagSlots < Config.BagSlotsToGoSell
-                && Bot.Character.Inventory.Items.Where(e => e.Price > 0
-                    && !Config.ItemSellBlacklist.Contains(e.Name)
-                    && ((Config.SellGrayItems && e.ItemQuality == (int)WowItemQuality.Poor)
-                        || (Config.SellWhiteItems && e.ItemQuality == (int)WowItemQuality.Common)
-                        || (Config.SellGreenItems && e.ItemQuality == (int)WowItemQuality.Uncommon)
-                        || (Config.SellBlueItems && e.ItemQuality == (int)WowItemQuality.Rare)
-                        || (Config.SellPurpleItems && e.ItemQuality == (int)WowItemQuality.Epic)))
-                   .Any()
-                && IsVendorNpcNear(out IWowUnit sellNpc))
+            if (needToRepair && vendorRepair != null)
             {
-                Merchant = sellNpc;
+                Merchant = vendorRepair;
+                return true;
+            }
+            if (needToSell && vendorSell != null)
+            {
+                Merchant = vendorSell;
                 return true;
             }
 
@@ -1068,8 +1107,8 @@ namespace AmeisenBotX.Core.Logic
 
                 FollowOffset = new()
                 {
-                    X = (((float)Random.NextDouble() * ((float)Config.MinFollowDistance * factor)) - ((float)Config.MinFollowDistance * (0.5f * factor))) * 0.7071f,
-                    Y = (((float)Random.NextDouble() * ((float)Config.MinFollowDistance * factor)) - ((float)Config.MinFollowDistance * (0.5f * factor))) * 0.7071f,
+                    X = ((float)Random.NextDouble() * ((float)Config.MinFollowDistance * factor) - (float)Config.MinFollowDistance * (0.5f * factor)) * 0.7071f,
+                    Y = ((float)Random.NextDouble() * ((float)Config.MinFollowDistance * factor) - (float)Config.MinFollowDistance * (0.5f * factor)) * 0.7071f,
                     Z = 0.0f
                 };
             }
