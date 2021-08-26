@@ -12,10 +12,8 @@
         public const string ElementalMastery = "Elemental Mastery";
         public const string FeralSpirit = "Feral Spirit";
         public const string FlameShock = "Flame Shock";
-        public const string FlametongueBuff = "Flametongue ";
+        public const string FlametongueBuff = "Flametongue";
         public const string FlametongueWeapon = "Flametongue Weapon";
-        public const string FlametoungueBuff = "Flametongue ";
-        public const string FlametoungueWeapon = "Flametongue Weapon";
         public const string HealingWave = "Healing Wave";
         public const string Heroism = "Heroism";
         public const string Hex = "Hex";
@@ -25,8 +23,9 @@
         public const string LightningBolt = "Lightning Bolt";
         public const string LightningShield = "Lightning Shield";
         public const string MaelstromWeapon = "Mealstrom Weapon";
-        public const string NaturesSwiftness = "Natures Swiftness";
+        public const string NaturesSwiftness = "Nature's Swiftness";
         public const string Riptide = "Riptide";
+        public const string RockbiterWeapon = "Rockbiter Weapon";
         public const string ShamanisticRage = "Shamanistic Rage";
         public const string Stormstrike = "Stormstrike";
         public const string Thunderstorm = "Thunderstorm";
