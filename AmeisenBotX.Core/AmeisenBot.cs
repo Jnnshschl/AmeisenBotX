@@ -141,7 +141,7 @@ namespace AmeisenBotX.Core
             Bot.Dungeon = new DefaultDungeonEngine(Bot, Config);
             Bot.Jobs = new DefaultJobEngine(Bot, Config);
             Bot.Quest = new DefaultQuestEngine(Bot);
-            Bot.Grinding = new DefaultGrindingEngine(Bot, Config);
+            Bot.Grinding = new DefaultGrindEngine(Bot, Config);
 
             Bot.PathfindingHandler = new AmeisenNavigationHandler(Config.NavmeshServerIp, Config.NameshServerPort);
             Bot.Movement = new DefaultMovementEngine(Bot, Config);
@@ -504,7 +504,8 @@ namespace AmeisenBotX.Core
             GrindingProfiles = new List<IGrindingProfile>()
             {
                 new UltimateGrinding1To80(),
-                new DurotarGrindTo6()
+                new DurotarGrindTo6(),
+                new DurotarGrindTo10(),
             };
         }
 

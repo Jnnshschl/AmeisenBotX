@@ -1,6 +1,4 @@
-﻿using AmeisenBotX.Common.Math;
-using AmeisenBotX.Core.Engines.Grinding.Objects;
-using AmeisenBotX.Core.Engines.Grinding.Profiles;
+﻿using AmeisenBotX.Core.Engines.Grinding.Profiles;
 
 namespace AmeisenBotX.Core.Engines.Grinding
 {
