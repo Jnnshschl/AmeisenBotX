@@ -10,7 +10,7 @@
         public const string ArcaneTorrent = "Arcane Torrent";             // Blood elf
         public const string EveryManForHimself = "Every Man for Himself"; // Human
         public const string GiftOfTheNaaru = "Gift of the Naaru";         // Draenei
-        public const string StoneformSpell = "Stoneform";                 // Dwarf
+        public const string Stoneform = "Stoneform";                      // Dwarf
         public const string FindTreasure = "Find Treasure";               // Dwarf
         public const string EscapeArtist = "Escape Artist";               // Gnome
         public const string Shadowmeld = "Shadowmeld";                    // Elf
