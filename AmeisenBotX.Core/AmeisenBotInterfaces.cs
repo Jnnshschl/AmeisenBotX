@@ -87,10 +87,10 @@ namespace AmeisenBotX.Core
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public IWowUnit GetClosestVendor()
+        public IWowUnit GetClosestVendorByEntryId(int entryId)
         {
             return Objects.WowObjects.OfType<IWowUnit>()
-                .Where(e => !e.IsDead && e.IsVendor && Db.GetReaction(Player, e) != WowUnitReaction.Hostile)
+                .Where(e => !e.IsDead && e.IsVendor && Db.GetReaction(Player, e) != WowUnitReaction.Hostile && e.EntryId == entryId)
                 .OrderBy(e => e.Position.GetDistance(Player.Position))
                 .FirstOrDefault();
         }

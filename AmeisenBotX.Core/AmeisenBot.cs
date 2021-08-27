@@ -505,7 +505,7 @@ namespace AmeisenBotX.Core
             {
                 new UltimateGrinding1To80(),
                 new DurotarGrindTo6(),
-                new DurotarGrindTo10(),
+                new DurotarGrindTo11(),
             };
         }
 

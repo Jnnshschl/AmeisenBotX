@@ -87,7 +87,7 @@ namespace AmeisenBotX.Core.Engines.Combat.Classes.Jannis
 
             if (SelectTarget(TargetProviderDps))
             {
-                if (CheckForWeaponEnchantment(WowEquipmentSlot.INVSLOT_MAINHAND, Shaman335a.FlametoungueBuff, Shaman335a.FlametoungueWeapon)
+                if (CheckForWeaponEnchantment(WowEquipmentSlot.INVSLOT_MAINHAND, Shaman335a.FlametongueBuff, Shaman335a.FlametongueWeapon)
                     || CheckForWeaponEnchantment(WowEquipmentSlot.INVSLOT_OFFHAND, Shaman335a.WindfuryBuff, Shaman335a.WindfuryWeapon))
                 {
                     return;
@@ -138,7 +138,7 @@ namespace AmeisenBotX.Core.Engines.Combat.Classes.Jannis
                 return;
             }
 
-            if (CheckForWeaponEnchantment(WowEquipmentSlot.INVSLOT_MAINHAND, Shaman335a.FlametoungueBuff, Shaman335a.FlametoungueWeapon)
+            if (CheckForWeaponEnchantment(WowEquipmentSlot.INVSLOT_MAINHAND, Shaman335a.FlametongueBuff, Shaman335a.FlametongueWeapon)
                 || CheckForWeaponEnchantment(WowEquipmentSlot.INVSLOT_OFFHAND, Shaman335a.WindfuryBuff, Shaman335a.WindfuryWeapon))
             {
                 return;

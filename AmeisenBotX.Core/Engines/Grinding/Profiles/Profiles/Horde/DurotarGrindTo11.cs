@@ -5,9 +5,9 @@ using System.Collections.Generic;
 
 namespace AmeisenBotX.Core.Engines.Grinding.Profiles.Profiles.Horde
 {
-    public class DurotarGrindTo10 : IGrindingProfile
+    public class DurotarGrindTo11 : IGrindingProfile
     {
-        public bool RandomizeSpots { get; } = true;
+        public bool RandomizeSpots { get; } = false;
 
         public List<Vendor> Vendors { get; } = new()
         {
@@ -19,16 +19,16 @@ namespace AmeisenBotX.Core.Engines.Grinding.Profiles.Profiles.Horde
         public List<GrindingSpot> Spots { get; } = new()
         {
             // scorpids/boars
-            new GrindingSpot(new Vector3(-678, -4649, 37), 55.0f, 5, 10),
-            new GrindingSpot(new Vector3(-756, -4645, 41), 55.0f, 5, 10),
-            new GrindingSpot(new Vector3(-762, -4732, 32), 55.0f, 5, 10),
+            new GrindingSpot(new Vector3(-678, -4649, 37), 55.0f, 5, 11),
+            new GrindingSpot(new Vector3(-756, -4645, 41), 55.0f, 5, 11),
+            new GrindingSpot(new Vector3(-762, -4732, 32), 55.0f, 5, 11),
             // centaurs
-            new GrindingSpot(new Vector3(-960, -4765, 14), 55.0f, 5, 10),
+            new GrindingSpot(new Vector3(-960, -4765, 14), 55.0f, 5, 11),
         };
 
         public override string ToString()
         {
-            return "[H][Durotar] 5 To 10 Grinding";
+            return "[H][Durotar] 5 To 11 Grinding";
         }
     }
 }

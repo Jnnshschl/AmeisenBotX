@@ -10,6 +10,7 @@ using AmeisenBotX.Logging;
 using AmeisenBotX.Logging.Enums;
 using AmeisenBotX.Wow.Objects;
 using AmeisenBotX.Wow.Objects.Enums;
+using AmeisenBotX.Wow335a.Constants;
 using System;
 using System.Collections.Generic;
 using System.Globalization;
@@ -46,10 +47,15 @@ namespace AmeisenBotX.Core.Engines.Combat.Classes.Bia10
 
             //Load spells, would be nice to have proper SpellManager for extra spell info :/
             KnownSpells = new Dictionary<string, WoWSpell>();
+
+            var healingWaveData = new WoWSpell(40, 0, TimeSpan.FromSeconds(1.5), WoWSpell.WoWSpellSchool.Nature);
+            KnownSpells.Add(Shaman335a.HealingWave, healingWaveData);
             var lightingBoltData = new WoWSpell(30, 0, TimeSpan.FromSeconds(1.5), WoWSpell.WoWSpellSchool.Nature);
-            KnownSpells.Add(DataConstants.ShamanSpells.LightningBolt, lightingBoltData);
+            KnownSpells.Add(Shaman335a.LightningBolt, lightingBoltData);
             var earthShockData = new WoWSpell(25, 0, TimeSpan.FromSeconds(6), WoWSpell.WoWSpellSchool.Nature);
-            KnownSpells.Add(DataConstants.ShamanSpells.EarthShock, earthShockData);
+            KnownSpells.Add(Shaman335a.EarthShock, earthShockData);
+            var rockBitterData = new WoWSpell(0, 0, TimeSpan.FromSeconds(0), WoWSpell.WoWSpellSchool.Nature);
+            KnownSpells.Add(Shaman335a.RockbiterWeapon, rockBitterData);
         }
 
         public Dictionary<string, WoWSpell> KnownSpells { get; set; }
@@ -136,18 +142,17 @@ namespace AmeisenBotX.Core.Engines.Combat.Classes.Bia10
 
             if (IsMelee)
                 Bot.Movement.SetMovementAction(MovementAction.Move, target.Position);
-            else if (!IsInSpellRange(target, DataConstants.ShamanSpells.LightningBolt) 
+            else if (!IsInSpellRange(target, Shaman335a.LightningBolt) 
                      || !Bot.Wow.IsInLineOfSight(Bot.Player.Position, target.Position))
                 Bot.Movement.SetMovementAction(MovementAction.Move, target.Position);
         }
 
         public virtual void Execute()
         {
-            if (Bot.Player.IsCasting)
+            if (Bot.Player.IsCasting && (!Bot.Objects.IsTargetInLineOfSight
+                                         || SpellAbortFunctions.Any(e => e())))
             {
-                if (!Bot.Objects.IsTargetInLineOfSight || SpellAbortFunctions.Any(e => e()))
-                    Bot.Wow.StopCasting();
-
+                Bot.Wow.StopCasting();
                 return;
             }
 
@@ -246,13 +251,18 @@ namespace AmeisenBotX.Core.Engines.Combat.Classes.Bia10
 
         protected bool CheckForWeaponEnchantment(WowEquipmentSlot slot, string enchantmentName, string spellToCastEnchantment)
         {
-            if (!Bot.Character.Equipment.Items.ContainsKey(slot)) return false;
+            if (!Bot.Character.Equipment.Items.ContainsKey(slot))
+                return false;
+
             var itemId = Bot.Character.Equipment.Items[slot].Id;
             if (itemId <= 0) return false;
 
             var item = Bot.Objects.WowObjects.OfType<IWowItem>().FirstOrDefault(e => e.EntryId == itemId);
-            return item != null && !item.GetEnchantmentStrings().Any(e => e.Contains(enchantmentName, StringComparison.OrdinalIgnoreCase))
-                                && TryCastSpell(spellToCastEnchantment, 0, true);
+            if (item == null) return false;
+
+            var enchantNameClean = enchantmentName.Split(" ", 2)[0];
+            return !item.GetEnchantmentStrings().Any(e => e.Contains(enchantNameClean, StringComparison.OrdinalIgnoreCase)) 
+                   && TryCastSpell(spellToCastEnchantment, 0, true);
         }
 
         protected bool HandleDeadPartyMembers(string spellName)

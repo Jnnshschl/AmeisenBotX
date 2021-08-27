@@ -3,6 +3,7 @@ using AmeisenBotX.Core.Engines.Character.Talents.Objects;
 using AmeisenBotX.Core.Engines.Combat.Helpers;
 using AmeisenBotX.Core.Logic.Utils.Auras.Objects;
 using AmeisenBotX.Wow.Objects.Enums;
+using AmeisenBotX.Wow335a.Constants;
 using System.Collections.Generic;
 
 namespace AmeisenBotX.Core.Engines.Combat.Classes.Bia10
@@ -12,18 +13,18 @@ namespace AmeisenBotX.Core.Engines.Combat.Classes.Bia10
         public ShamanElemental(AmeisenBotInterfaces bot) : base(bot)
         {
             // my buffs
-            MyAuraManager.Jobs.Add(new KeepActiveAuraJob(bot.Db, DataConstants.ShamanSpells.LightningShield, () =>
-                Bot.Player.ManaPercentage > 60.0 && TryCastSpell(DataConstants.ShamanSpells.LightningShield, 0, true)));
-            MyAuraManager.Jobs.Add(new KeepActiveAuraJob(bot.Db, DataConstants.ShamanSpells.WaterShield, () =>
-                Bot.Player.ManaPercentage < 20.0 && TryCastSpell(DataConstants.ShamanSpells.WaterShield, 0, true)));
+            MyAuraManager.Jobs.Add(new KeepActiveAuraJob(bot.Db, Shaman335a.LightningShield, () =>
+                Bot.Player.ManaPercentage > 60.0 && TryCastSpell(Shaman335a.LightningShield, 0, true)));
+            MyAuraManager.Jobs.Add(new KeepActiveAuraJob(bot.Db, Shaman335a.WaterShield, () =>
+                Bot.Player.ManaPercentage < 20.0 && TryCastSpell(Shaman335a.WaterShield, 0, true)));
             // enemy debuffs
-            TargetAuraManager.Jobs.Add(new KeepActiveAuraJob(bot.Db, DataConstants.ShamanSpells.FlameShock, () =>
-                TryCastSpell(DataConstants.ShamanSpells.FlameShock, Bot.Wow.TargetGuid, true)));
+            TargetAuraManager.Jobs.Add(new KeepActiveAuraJob(bot.Db, Shaman335a.FlameShock, () =>
+                TryCastSpell(Shaman335a.FlameShock, Bot.Wow.TargetGuid, true)));
             // interupts
             InterruptManager.InterruptSpells = new SortedList<int, InterruptManager.CastInterruptFunction>
             {
-                { 0, x => TryCastSpell(DataConstants.ShamanSpells.WindShear, x.Guid, true) },
-                { 1, x => TryCastSpell(DataConstants.ShamanSpells.Hex, x.Guid, true) }
+                { 0, x => TryCastSpell(Shaman335a.WindShear, x.Guid, true) },
+                { 1, x => TryCastSpell(Shaman335a.Hex, x.Guid, true) }
             };
         }
         public override string Version => "1.0";
@@ -65,21 +66,21 @@ namespace AmeisenBotX.Core.Engines.Combat.Classes.Bia10
             base.Execute();
 
             if (Bot.Player.HealthPercentage < HealSelfPercentage)
-                TryCastSpell(DataConstants.ShamanSpells.HealingWave, Bot.Wow.PlayerGuid, true);
-            if (IsInSpellRange(Bot.Target, DataConstants.ShamanSpells.EarthShock))
-                TryCastSpell(DataConstants.ShamanSpells.EarthShock, Bot.Target.Guid, true);
-            if (IsInSpellRange(Bot.Target, DataConstants.ShamanSpells.LightningBolt))
-                TryCastSpell(DataConstants.ShamanSpells.LightningBolt, Bot.Target.Guid, true);
+                TryCastSpell(Shaman335a.HealingWave, Bot.Wow.PlayerGuid, true);
+            if (IsInSpellRange(Bot.Target, Shaman335a.EarthShock))
+                TryCastSpell(Shaman335a.EarthShock, Bot.Target.Guid, true);
+            if (IsInSpellRange(Bot.Target, Shaman335a.LightningBolt))
+                TryCastSpell(Shaman335a.LightningBolt, Bot.Target.Guid, true);
         }
 
         public override void OutOfCombatExecute()
         {
             base.OutOfCombatExecute();
 
-            if (HandleDeadPartyMembers(DataConstants.ShamanSpells.AncestralSpirit))
+            if (HandleDeadPartyMembers(Shaman335a.AncestralSpirit))
                 return;
             if (CheckForWeaponEnchantment(WowEquipmentSlot.INVSLOT_MAINHAND,
-                DataConstants.ShamanSpells.FlametongueBuff, DataConstants.ShamanSpells.FlametongueWeapon))
+                Shaman335a.RockbiterWeapon, Shaman335a.RockbiterWeapon))
                 return;
 
             HexedTarget = false;
