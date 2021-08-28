@@ -20,7 +20,7 @@ namespace AmeisenBotX.Core.Engines.Grinding
             Bot = bot;
             Config = config;
 
-            RootSelector = new Selector //TODO: mount/dismount
+            RootSelector = new Selector
             (
                 () => Profile == null,
                 new Leaf(ReportNoProfile),
@@ -147,7 +147,7 @@ namespace AmeisenBotX.Core.Engines.Grinding
 
         private bool ThreatsNearby()
         {
-            IEnumerable<IWowUnit> enemiesFightingMe = Bot.GetEnemiesInCombatWithMe<IWowUnit>(Bot.Player.Position,40)
+            IEnumerable<IWowUnit> enemiesFightingMe = Bot.GetEnemiesInCombatWithMe<IWowUnit>(Bot.Player.Position, 40)
                 .OrderBy(e => e.Position.GetDistance2D(Bot.Player.Position))
                 .ToList();
             IEnumerable<IWowUnit> enemiesTargetingMe = Bot.GetEnemiesTargetingMe<IWowUnit>(Bot.Player.Position, 40)

@@ -127,18 +127,17 @@ namespace AmeisenBotX.Core
         public IEnumerable<T> GetEnemiesInCombatWithMe<T>(Vector3 position, float distance)
             where T : IWowUnit
         {
-            return GetNearEnemies<T>(position, distance)                             // is hostile
-                .Where(e => e.IsInCombat && (e.IsTaggedByMe || !e.IsTaggedByOther) // needs to be in combat and tagged by us or no one else
-                           || e.TargetGuid == Player.Guid);                          // targets us
+            return GetNearEnemies<T>(position, distance)     // is hostile
+                .Where(e => e.IsInCombat                   // needs to be in combat
+                           && e.TargetGuid == Player.Guid);  // targets us
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public IEnumerable<T> GetEnemiesTargetingMe<T>(Vector3 position, float distance)
             where T : IWowUnit
         {
-            return GetNearEnemies<T>(position, distance)           // is hostile
-                .Where(e => e.IsTaggedByMe || !e.IsTaggedByOther // needs to be in combat and tagged by us or no one else
-                           || e.TargetGuid == Player.Guid);        // targets us
+            return GetNearEnemies<T>(position, distance)      // is hostile
+                .Where(e =>  e.TargetGuid == Player.Guid);  // targets us
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
