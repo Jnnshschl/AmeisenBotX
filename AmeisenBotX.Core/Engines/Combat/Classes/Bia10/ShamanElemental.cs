@@ -59,18 +59,13 @@ namespace AmeisenBotX.Core.Engines.Combat.Classes.Bia10
         public override bool WalkBehindEnemy => false;
 
         private bool HexedTarget { get; set; }
-        private const int HealSelfPercentage = 60;
 
         public override void Execute()
         {
             base.Execute();
 
-            if (Bot.Player.HealthPercentage < HealSelfPercentage)
-                TryCastSpell(Shaman335a.HealingWave, Bot.Wow.PlayerGuid, true);
-            if (IsInSpellRange(Bot.Target, Shaman335a.EarthShock))
-                TryCastSpell(Shaman335a.EarthShock, Bot.Target.Guid, true);
-            if (IsInSpellRange(Bot.Target, Shaman335a.LightningBolt))
-                TryCastSpell(Shaman335a.LightningBolt, Bot.Target.Guid, true);
+            var spellName = SelectSpell(out var targetGuid);
+            var spellCast = TryCastSpell(spellName, targetGuid);
         }
 
         public override void OutOfCombatExecute()
