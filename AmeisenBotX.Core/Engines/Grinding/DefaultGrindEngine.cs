@@ -20,7 +20,7 @@ namespace AmeisenBotX.Core.Engines.Grinding
             Bot = bot;
             Config = config;
 
-            RootSelector = new Selector //TODO: mount/dismount
+            RootSelector = new Selector
             (
                 () => Profile == null,
                 new Leaf(ReportNoProfile),
@@ -34,18 +34,23 @@ namespace AmeisenBotX.Core.Engines.Grinding
                         new Leaf(GoToNpcAndSell),
                         new Selector
                         (
-                            () => TargetsNearby(),
+                            () => ThreatsNearby(),
+                            new Leaf(FightTarget),
                             new Selector
                             (
-                                () => SelectTarget(),
-                                new Leaf(FightTarget),
-                                new Leaf(() => BtStatus.Failed)
-                            ),
-                            new Leaf(MoveToNextGrindNode)
+                                () => TargetsNearby(),
+                                new Selector
+                                (
+                                    () => SelectTarget(),
+                                    new Leaf(FightTarget),
+                                    new Leaf(() => BtStatus.Failed)
+                                ),
+                                new Leaf(MoveToNextGrindNode)
+                            )
                         )
-                   )
-                )
-            );
+                     )
+                 )
+             );
 
             GrindingTree = new Tree
             (
@@ -140,6 +145,37 @@ namespace AmeisenBotX.Core.Engines.Grinding
             return BtStatus.Success;
         }
 
+        private bool ThreatsNearby()
+        {
+            IEnumerable<IWowUnit> enemiesFightingMe = Bot.GetEnemiesInCombatWithMe<IWowUnit>(Bot.Player.Position, 40)
+                .OrderBy(e => e.Position.GetDistance2D(Bot.Player.Position))
+                .ToList();
+            IEnumerable<IWowUnit> enemiesTargetingMe = Bot.GetEnemiesTargetingMe<IWowUnit>(Bot.Player.Position, 40)
+                .OrderBy(e => e.Position.GetDistance2D(Bot.Player.Position))
+                .ToList();
+            IEnumerable<IWowUnit> enemiesAround = Bot.GetNearEnemies<IWowUnit>(Bot.Player.Position, 40)
+                .OrderBy(e => e.Position.GetDistance2D(Bot.Player.Position))
+                .ToList();
+
+            if (enemiesFightingMe.Any())
+            {
+                Bot.Wow.ChangeTarget(enemiesFightingMe.FirstOrDefault().Guid);
+                return true;
+            }
+            if (enemiesTargetingMe.Any())
+            {
+                Bot.Wow.ChangeTarget(enemiesTargetingMe.FirstOrDefault().Guid);
+                return true;
+            }
+            if (enemiesAround.Any())
+            {
+                Bot.Wow.ChangeTarget(enemiesAround.FirstOrDefault().Guid);
+                return true;
+            }
+
+            return false;
+        }
+
         private bool TargetsNearby()
         {
             GrindingSpot nearestGrindSpot = Profile.Spots
@@ -181,7 +217,8 @@ namespace AmeisenBotX.Core.Engines.Grinding
             Bot.CombatClass.OutOfCombatExecute();
 
             List<GrindingSpot> spots = Profile.Spots.Where(e =>
-                Bot.Player.Level >= e.MinLevel && Bot.Player.Level <= e.MaxLevel).ToList();
+                Bot.Player.Level >= e.MinLevel && Bot.Player.Level <= e.MaxLevel)
+                .ToList();
 
             if (spots.Count == 0)
                 spots.AddRange(Profile.Spots.Where(e =>
