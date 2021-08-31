@@ -96,19 +96,19 @@ namespace AmeisenBotX.Core
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public IWowUnit GetClosestQuestGiverByDisplayId(Vector3 position, IEnumerable<int> displayIds, bool onlyQuestgivers = true)
+        public IWowUnit GetClosestQuestGiverByDisplayId(Vector3 position, IEnumerable<int> displayIds, bool onlyQuestGivers = true)
         {
             return Objects.WowObjects.OfType<IWowUnit>()
-                .Where(e => !e.IsDead && (!onlyQuestgivers || e.IsQuestgiver) && displayIds.Contains(e.DisplayId))
+                .Where(e => !e.IsDead && (!onlyQuestGivers || e.IsQuestgiver) && displayIds.Contains(e.DisplayId))
                 .OrderBy(e => e.Position.GetDistance(position))
                 .FirstOrDefault();
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public IWowUnit GetClosestQuestGiverByNpcId(Vector3 position, IEnumerable<int> npcIds, bool onlyQuestgivers = true)
+        public IWowUnit GetClosestQuestGiverByNpcId(Vector3 position, IEnumerable<int> npcIds, bool onlyQuestGivers = true)
         {
             return Objects.WowObjects.OfType<IWowUnit>()
-                .Where(e => !e.IsDead && (!onlyQuestgivers || e.IsQuestgiver) && npcIds.Contains(BotUtils.GuidToNpcId(e.Guid)))
+                .Where(e => !e.IsDead && (!onlyQuestGivers || e.IsQuestgiver) && npcIds.Contains(BotUtils.GuidToNpcId(e.Guid)))
                 .OrderBy(e => e.Position.GetDistance(position))
                 .FirstOrDefault();
         }
@@ -117,9 +117,9 @@ namespace AmeisenBotX.Core
         public IEnumerable<T> GetEnemiesInCombatWithParty<T>(Vector3 position, float distance)
             where T : IWowUnit
         {
-            return GetNearEnemies<T>(position, distance)                                   // is hostile
-                .Where(e => e.IsInCombat && (e.IsTaggedByMe || !e.IsTaggedByOther)       // needs to be in combat and tagged by us or no one else
-                         || e.TargetGuid == Player.Guid                                    // targets us
+            return GetNearEnemies<T>(position, distance)                            // is hostile
+                .Where(e => e.IsInCombat && (e.IsTaggedByMe || !e.IsTaggedByOther)  // needs to be in combat and tagged by us or no one else
+                         || e.TargetGuid == Player.Guid                             // targets us
                          || Objects.Partymembers.Any(x => x.Guid == e.TargetGuid)); // targets a party member
         }
 
@@ -128,25 +128,25 @@ namespace AmeisenBotX.Core
             where T : IWowUnit
         {
             return GetNearEnemiesOrNeutrals<T>(position, distance) // is hostile/neutral
-                .Where(e => e.IsInCombat                         // needs to be in combat
-                            && e.TargetGuid == Player.Guid);       // targets us
+                .Where(e => e.IsInCombat                           // needs to be in combat
+                         && e.TargetGuid == Player.Guid);          // targets us
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public IEnumerable<T> GetEnemiesInCombatWithMe<T>(Vector3 position, float distance)
             where T : IWowUnit
         {
-            return GetNearEnemies<T>(position, distance)    // is hostile
+            return GetNearEnemies<T>(position, distance)  // is hostile
                 .Where(e => e.IsInCombat                  // needs to be in combat
-                           && e.TargetGuid == Player.Guid); // targets us
+                         && e.TargetGuid == Player.Guid); // targets us
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public IEnumerable<T> GetEnemiesTargetingMe<T>(Vector3 position, float distance)
             where T : IWowUnit
         {
-            return GetNearEnemies<T>(position, distance)     // is hostile
-                .Where(e =>  e.TargetGuid == Player.Guid); // targets us
+            return GetNearEnemies<T>(position, distance)  // is hostile
+                .Where(e => e.TargetGuid == Player.Guid); // targets us
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -168,8 +168,8 @@ namespace AmeisenBotX.Core
         public IEnumerable<T> GetEnemiesTargetingPartyMembers<T>(Vector3 position, float distance) 
             where T : IWowUnit
         {
-            return GetNearEnemies<T>(position, distance)                                  // is hostile
-                .Where(e => e.IsInCombat                                                // is in combat
+            return GetNearEnemies<T>(position, distance)                           // is hostile
+                .Where(e => e.IsInCombat                                           // is in combat
                          && (Objects.Partymembers.Any(x => x.Guid == e.TargetGuid) // is targeting a partymember
                          || Objects.PartyPets.Any(x => x.Guid == e.TargetGuid)));  // is targeting a pet in party
         }
@@ -179,9 +179,9 @@ namespace AmeisenBotX.Core
             where T : IWowUnit
         {
             return Objects.WowObjects.OfType<T>()
-                .Where(e => !e.IsDead && !e.IsNotAttackable                        // is alive and attackable
+                .Where(e => !e.IsDead && !e.IsNotAttackable                      // is alive and attackable
                          && Db.GetReaction(Player, e) == WowUnitReaction.Hostile // is hostile
-                         && e.Position.GetDistance(position) < distance);            // is in range
+                         && e.Position.GetDistance(position) < distance);        // is in range
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -189,9 +189,9 @@ namespace AmeisenBotX.Core
             where T : IWowUnit
         {
             return Objects.WowObjects.OfType<T>()
-                .Where(e => !e.IsDead && !e.IsNotAttackable                          // is alive and attackable
-                          && Db.GetReaction(Player, e) != WowUnitReaction.Friendly // is hostile/neutral
-                          && e.Position.GetDistance(position) < distance);             // is in range
+                .Where(e => !e.IsDead && !e.IsNotAttackable                       // is alive and attackable
+                         && Db.GetReaction(Player, e) != WowUnitReaction.Friendly // is hostile/neutral
+                         && e.Position.GetDistance(position) < distance);         // is in range
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -199,9 +199,9 @@ namespace AmeisenBotX.Core
             where T : IWowUnit
         {
             return Objects.WowObjects.OfType<T>()
-                .Where(e => !e.IsDead && !e.IsNotAttackable                         // is alive and attackable
+                .Where(e => !e.IsDead && !e.IsNotAttackable                       // is alive and attackable
                          && Db.GetReaction(Player, e) == WowUnitReaction.Friendly // is hostile
-                         && e.Position.GetDistance(position) < distance);             // is in range
+                         && e.Position.GetDistance(position) < distance);         // is in range
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -209,7 +209,7 @@ namespace AmeisenBotX.Core
             where T : IWowUnit
         {
             return Objects.Partymembers.OfType<T>()
-                .Where(e => !e.IsDead && !e.IsNotAttackable             // is alive and attackable
+                .Where(e => !e.IsDead && !e.IsNotAttackable               // is alive and attackable
                          && e.Position.GetDistance(position) < distance); // is in range
         }
 
