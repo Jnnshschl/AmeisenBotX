@@ -9,8 +9,8 @@ namespace AmeisenBotX.Core.Engines.Quest.Quests.TheBarrens.Crossroads
     {
         public QTheZhevra(AmeisenBotInterfaces bot)
             : base(bot, 845, "The Zhevra", 10, 1,
-                () => (bot.GetClosestQuestgiverByNpcId(bot.Player.Position, new List<int> { 3338 }), new Vector3(-482.48f, -2670.19f, 97.52f)),
-                () => (bot.GetClosestQuestgiverByNpcId(bot.Player.Position, new List<int> { 3338 }), new Vector3(-482.48f, -2670.19f, 97.52f)),
+                () => (bot.GetClosestQuestGiverByNpcId(bot.Player.Position, new List<int> { 3338 }), new Vector3(-482.48f, -2670.19f, 97.52f)),
+                () => (bot.GetClosestQuestGiverByNpcId(bot.Player.Position, new List<int> { 3338 }), new Vector3(-482.48f, -2670.19f, 97.52f)),
                 new List<IQuestObjective>()
                 {
                     new QuestObjectiveChain(new List<IQuestObjective>()

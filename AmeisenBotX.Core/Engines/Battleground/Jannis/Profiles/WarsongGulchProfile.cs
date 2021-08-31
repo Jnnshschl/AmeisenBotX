@@ -282,7 +282,7 @@ namespace AmeisenBotX.Core.Engines.Battleground.Jannis.Profiles
 
         private bool IsAnyBuffNearMe(float distance)
         {
-            return Bot.GetClosestGameobjectByDisplayId(Bot.Player.Position, new List<int>() { 5991, 5995, 5931 })?.Position.GetDistance(Bot.Player.Position) < distance;
+            return Bot.GetClosestGameObjectByDisplayId(Bot.Player.Position, new List<int>() { 5991, 5995, 5931 })?.Position.GetDistance(Bot.Player.Position) < distance;
         }
 
         private bool IsFlagNear()
@@ -352,7 +352,7 @@ namespace AmeisenBotX.Core.Engines.Battleground.Jannis.Profiles
 
         private BtStatus MoveToNearestBuff(CtfBlackboard blackboard)
         {
-            IWowGameobject buffObject = Bot.GetClosestGameobjectByDisplayId(Bot.Player.Position, new List<int>() { 5991, 5995, 5931 });
+            IWowGameobject buffObject = Bot.GetClosestGameObjectByDisplayId(Bot.Player.Position, new List<int>() { 5991, 5995, 5931 });
 
             if (buffObject != null
                 && buffObject.Position.GetDistance(Bot.Player.Position) > 3.0)

@@ -9,8 +9,8 @@ namespace AmeisenBotX.Core.Engines.Quest.Quests.TheBarrens.Crossroads
     {
         public QRaptorThieves(AmeisenBotInterfaces bot)
             : base(bot, 869, "Raptor Thieves", 9, 1,
-                () => (bot.GetClosestQuestgiverByNpcId(bot.Player.Position, new List<int> { 3464 }), new Vector3(-435.95f, -2639.21f, 96.36f)),
-                () => (bot.GetClosestQuestgiverByNpcId(bot.Player.Position, new List<int> { 3464 }), new Vector3(-435.95f, -2639.21f, 96.36f)),
+                () => (bot.GetClosestQuestGiverByNpcId(bot.Player.Position, new List<int> { 3464 }), new Vector3(-435.95f, -2639.21f, 96.36f)),
+                () => (bot.GetClosestQuestGiverByNpcId(bot.Player.Position, new List<int> { 3464 }), new Vector3(-435.95f, -2639.21f, 96.36f)),
                 new List<IQuestObjective>()
                 {
                     new QuestObjectiveChain(new List<IQuestObjective>()

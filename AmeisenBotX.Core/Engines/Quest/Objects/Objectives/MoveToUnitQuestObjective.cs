@@ -42,7 +42,7 @@ namespace AmeisenBotX.Core.Engines.Quest.Units.Unitives
                 return;
             }
 
-            IWowUnit = Bot.GetClosestQuestgiverByDisplayId(Bot.Player.Position, UnitDisplayIds);
+            IWowUnit = Bot.GetClosestQuestGiverByDisplayId(Bot.Player.Position, UnitDisplayIds);
 
             if (IWowUnit != null)
             {

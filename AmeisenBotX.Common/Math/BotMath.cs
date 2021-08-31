@@ -6,6 +6,8 @@ namespace AmeisenBotX.Common.Math
 {
     public static class BotMath
     {
+        public const float MAX_ANGLE = MathF.PI * 2.0f;
+
         public static Vector3 CalculatePositionAround(Vector3 position, float rotation, float angle, float distance = 2.0f)
         {
             float x = position.X + MathF.Cos(rotation + angle) * distance;
@@ -27,8 +29,6 @@ namespace AmeisenBotX.Common.Math
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static float ClampAngles(float angle)
         {
-            const float MAX_ANGLE = MathF.PI * 2.0f;
-
             switch (angle)
             {
                 case < 0.0f:

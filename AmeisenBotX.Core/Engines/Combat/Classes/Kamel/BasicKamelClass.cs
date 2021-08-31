@@ -369,7 +369,7 @@ namespace AmeisenBotX.Core.Engines.Combat.Classes.Kamel
         {
             if (TargetSelectEvent.Run())
             {
-                IWowUnit nearTargetToTank = Bot.GetEnemiesTargetingPartymembers<IWowUnit>(Bot.Player.Position, 60)
+                IWowUnit nearTargetToTank = Bot.GetEnemiesTargetingPartyMembers<IWowUnit>(Bot.Player.Position, 60)
                 .Where(e => e.IsInCombat && !e.IsNotAttackable && e.Type != WowObjectType.Player && Bot.Db.GetUnitName(Bot.Target, out string name) && name != "The Lich King" && name != "Anub'Rekhan" && !(Bot.Objects.MapId == WowMapId.DrakTharonKeep && e.CurrentlyChannelingSpellId == 47346))
                 .OrderBy(e => e.Position.GetDistance(Bot.Player.Position))
                 .FirstOrDefault();

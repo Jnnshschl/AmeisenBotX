@@ -41,7 +41,7 @@ namespace AmeisenBotX.Core.Engines.Quest.Objects.Objectives
                 return;
             }
 
-            IWowGameobject = Bot.GetClosestGameobjectByDisplayId(Bot.Player.Position, ObjectDisplayIds);
+            IWowGameobject = Bot.GetClosestGameObjectByDisplayId(Bot.Player.Position, ObjectDisplayIds);
 
             if (IWowGameobject != null)
             {
