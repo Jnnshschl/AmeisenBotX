@@ -9,8 +9,8 @@ namespace AmeisenBotX.Core.Engines.Quest.Quests.TheBarrens.Crossroads
     {
         public QSouthseaFreebooters(AmeisenBotInterfaces bot)
             : base(bot, 887, "Southsea Freebooters", 9, 1,
-                () => (bot.GetClosestQuestgiverByNpcId(bot.Player.Position, new List<int> { 3391 }), new Vector3(-835.56f, -3728.66f, 26.37f)),
-                () => (bot.GetClosestQuestgiverByNpcId(bot.Player.Position, new List<int> { 3391 }), new Vector3(-835.56f, -3728.66f, 26.37f)),
+                () => (bot.GetClosestQuestGiverByNpcId(bot.Player.Position, new List<int> { 3391 }), new Vector3(-835.56f, -3728.66f, 26.37f)),
+                () => (bot.GetClosestQuestGiverByNpcId(bot.Player.Position, new List<int> { 3391 }), new Vector3(-835.56f, -3728.66f, 26.37f)),
                 new List<IQuestObjective>()
                 {
                     new QuestObjectiveChain(new List<IQuestObjective>()

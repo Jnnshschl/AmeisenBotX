@@ -9,8 +9,8 @@ namespace AmeisenBotX.Core.Engines.Quest.Quests.Durotar.RazorHill
     {
         public QEncroachment(AmeisenBotInterfaces bot)
             : base(bot, 837, "Encroachment", 6, 1,
-                () => (bot.GetClosestQuestgiverByNpcId(bot.Player.Position, new List<int> { 3139 }), new Vector3(274.99f, -4709.30f, 17.57f)),
-                () => (bot.GetClosestQuestgiverByNpcId(bot.Player.Position, new List<int> { 3139 }), new Vector3(274.99f, -4709.30f, 17.57f)),
+                () => (bot.GetClosestQuestGiverByNpcId(bot.Player.Position, new List<int> { 3139 }), new Vector3(274.99f, -4709.30f, 17.57f)),
+                () => (bot.GetClosestQuestGiverByNpcId(bot.Player.Position, new List<int> { 3139 }), new Vector3(274.99f, -4709.30f, 17.57f)),
                 new List<IQuestObjective>()
                 {
                     new QuestObjectiveChain(new List<IQuestObjective>()

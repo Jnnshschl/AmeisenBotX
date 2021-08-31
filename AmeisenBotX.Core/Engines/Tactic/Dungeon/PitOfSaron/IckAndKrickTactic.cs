@@ -38,7 +38,7 @@ namespace AmeisenBotX.Core.Engines.Tactic.Dungeon.PitOfSaron
             preventMovement = false;
             allowAttacking = true;
 
-            IWowUnit wowUnit = Bot.GetClosestQuestgiverByDisplayId(Bot.Player.Position, IckDisplayId, false);
+            IWowUnit wowUnit = Bot.GetClosestQuestGiverByDisplayId(Bot.Player.Position, IckDisplayId, false);
 
             if (wowUnit != null)
             {

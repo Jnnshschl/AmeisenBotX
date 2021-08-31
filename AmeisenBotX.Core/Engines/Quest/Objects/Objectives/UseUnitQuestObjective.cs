@@ -41,7 +41,7 @@ namespace AmeisenBotX.Core.Engines.Quest.Objects.Objectives
         {
             if (Finished || Bot.Player.IsCasting) { return; }
 
-            IWowUnit = Bot.GetClosestQuestgiverByDisplayId(Bot.Player.Position, ObjectDisplayIds, QuestgiversOnly);
+            IWowUnit = Bot.GetClosestQuestGiverByDisplayId(Bot.Player.Position, ObjectDisplayIds, QuestgiversOnly);
 
             if (IWowUnit != null)
             {

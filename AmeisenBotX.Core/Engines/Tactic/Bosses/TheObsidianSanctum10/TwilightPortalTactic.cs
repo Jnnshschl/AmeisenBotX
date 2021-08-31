@@ -35,7 +35,7 @@ namespace AmeisenBotX.Core.Engines.Tactic.Bosses.TheObsidianDungeon
         {
             if (role == WowRole.Dps)
             {
-                IWowUnit wowUnit = Bot.GetClosestQuestgiverByDisplayId(Bot.Player.Position, DragonDisplayId, false);
+                IWowUnit wowUnit = Bot.GetClosestQuestGiverByDisplayId(Bot.Player.Position, DragonDisplayId, false);
                 IWowGameobject portal = NearestPortal;
 
                 if (wowUnit != null)

@@ -181,42 +181,48 @@ namespace AmeisenBotX.Core.Engines.Combat.Classes.Bia10
             // -------------- >
             switch (Bot.Player.Race)
             {
+                // -------- Alliance -------- >
                 case WowRace.Human:
                     if (Bot.Player.IsDazed || Bot.Player.IsFleeing || Bot.Player.IsInfluenced || Bot.Player.IsPossessed)
-                        if (ValidateSpell(Racials335a.EveryManForHimself))
-                            TryCastSpell(Racials335a.EveryManForHimself, Bot.Player.Guid);
+                        if (ValidateSpell(Racials335a.EveryManForHimself, false))
+                            TryCastSpell(Racials335a.EveryManForHimself, Bot.Player.Guid, false, 0);
                     break;
-                case WowRace.Orc:
+                case WowRace.Gnome:
+                    break;
+                case WowRace.Draenei:
+                    if (Bot.Player.HealthPercentage < 50.0)
+                        if (ValidateSpell(Racials335a.GiftOfTheNaaru, false))
+                            TryCastSpell(Racials335a.GiftOfTheNaaru, Bot.Player.Guid, false, 0);
                     break;
                 case WowRace.Dwarf:
                     if (Bot.Player.HealthPercentage < 50.0)
-                        if (ValidateSpell(Racials335a.Stoneform))
-                            TryCastSpell(Racials335a.Stoneform, Bot.Player.Guid);
+                        if (ValidateSpell(Racials335a.Stoneform, false))
+                            TryCastSpell(Racials335a.Stoneform, Bot.Player.Guid, false, 0);
                     break;
                 case WowRace.Nightelf:
+                    break;
+                // -------- Horde -------- >
+                case WowRace.Orc:
+                    if (Bot.Player.HealthPercentage < 50.0
+                        && Bot.GetEnemiesOrNeutralsInCombatWithMe<IWowUnit>(Bot.Player.Position, 10).Count() > 2)
+                        if (ValidateSpell(Racials335a.BloodFury, false))
+                            TryCastSpell(Racials335a.BloodFury, Bot.Player.Guid, false, 0);
                     break;
                 case WowRace.Undead:
                     break;
                 case WowRace.Tauren:
                     if (Bot.Player.HealthPercentage < 50.0
-                        && Bot.GetEnemiesInCombatWithMe<IWowUnit>(Bot.Player.Position, 10).Count() > 2)
-                        if (ValidateSpell(Racials335a.WarStomp))
-                            TryCastSpell(Racials335a.WarStomp, Bot.Player.Guid);
-                    break;
-                case WowRace.Gnome:
+                        && Bot.GetEnemiesOrNeutralsInCombatWithMe<IWowUnit>(Bot.Player.Position, 10).Count() > 2)
+                        if (ValidateSpell(Racials335a.WarStomp, false))
+                            TryCastSpell(Racials335a.WarStomp, Bot.Player.Guid, false, 0);
                     break;
                 case WowRace.Troll:
                     if (Bot.Player.ManaPercentage > 45.0
-                        && Bot.GetEnemiesInCombatWithMe<IWowUnit>(Bot.Player.Position, 10).Count() > 2)
-                        if (ValidateSpell(Racials335a.Berserking))
-                            TryCastSpell(Racials335a.Berserking, Bot.Player.Guid);
+                        && Bot.GetEnemiesOrNeutralsInCombatWithMe<IWowUnit>(Bot.Player.Position, 10).Count() > 2)
+                        if (ValidateSpell(Racials335a.Berserking, false))
+                            TryCastSpell(Racials335a.Berserking, Bot.Player.Guid, false, 0);
                     break;
                 case WowRace.Bloodelf:
-                    break;
-                case WowRace.Draenei:
-                    if (Bot.Player.HealthPercentage < 50.0)
-                        if (ValidateSpell(Racials335a.GiftOfTheNaaru))
-                            TryCastSpell(Racials335a.GiftOfTheNaaru, Bot.Player.Guid);
                     break;
 
                 default:
@@ -294,19 +300,19 @@ namespace AmeisenBotX.Core.Engines.Combat.Classes.Bia10
         protected string SelectSpell(out ulong targetGuid)
         {
             if (Bot.Player.HealthPercentage < DataConstants.HealSelfPercentage
-                && ValidateSpell(Shaman335a.HealingWave))
+                && ValidateSpell(Shaman335a.HealingWave, true))
             {
                 targetGuid = Bot.Player.Guid;
                 return Shaman335a.HealingWave;
             }
             if (IsInSpellRange(Bot.Target, Shaman335a.EarthShock)
-                && ValidateSpell(Shaman335a.EarthShock))
+                && ValidateSpell(Shaman335a.EarthShock, true))
             {
                 targetGuid = Bot.Target.Guid;
                 return Shaman335a.EarthShock;
             }
             if (IsInSpellRange(Bot.Target, Shaman335a.LightningBolt)
-                && ValidateSpell(Shaman335a.LightningBolt))
+                && ValidateSpell(Shaman335a.LightningBolt, true))
             {
                 targetGuid = Bot.Target.Guid;
                 return Shaman335a.LightningBolt;
@@ -316,11 +322,11 @@ namespace AmeisenBotX.Core.Engines.Combat.Classes.Bia10
             return string.Empty;
         }
 
-        private bool ValidateSpell(string spellName)
+        private bool ValidateSpell(string spellName, bool checkGCD)
         {
             if (!Bot.Character.SpellBook.IsSpellKnown(spellName) || !Bot.Objects.IsTargetInLineOfSight)
                 return false;
-            if (CooldownManager.IsSpellOnCooldown(spellName) || IsGCD())
+            if (CooldownManager.IsSpellOnCooldown(spellName) || checkGCD && IsGCD())
                 return false;
 
             return !Bot.Player.IsCasting;
@@ -334,7 +340,7 @@ namespace AmeisenBotX.Core.Engines.Combat.Classes.Bia10
 
         private bool IsGCD() => DateTime.Now.Subtract(LastGCD).TotalSeconds < GCDTime;
 
-        protected bool TryCastSpell(string spellName, ulong guid, bool needsResource = false)
+        protected bool TryCastSpell(string spellName, ulong guid, bool needsResource = false, double GCD = 1.5)
         {
             var spell = Bot.Character.SpellBook.GetSpellByName(spellName);
 
@@ -358,8 +364,9 @@ namespace AmeisenBotX.Core.Engines.Combat.Classes.Bia10
             }
 
             if (!CastSpell(spellName, isTargetMyself)) return false;
+            if (GCD == 0) return true;
 
-            SetGCD(1.5);
+            SetGCD(GCD);
             return true;
         }
 
