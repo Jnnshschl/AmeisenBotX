@@ -36,9 +36,9 @@ namespace AmeisenBotX.Core.Engines.Combat.Classes.Bia10
         public override IItemComparator ItemComparator { get; set; } =
             new BasicIntellectComparator(null, new List<WowWeaponType>
             {
-                WowWeaponType.ONEHANDED_AXES,
-                WowWeaponType.ONEHANDED_MACES,
-                WowWeaponType.ONEHANDED_SWORDS
+                WowWeaponType.TWOHANDED_AXES,
+                WowWeaponType.TWOHANDED_MACES,
+                WowWeaponType.TWOHANDED_SWORDS
             });
 
         public IEnumerable<int> BlacklistedTargetDisplayIds { get; set; }
@@ -46,7 +46,6 @@ namespace AmeisenBotX.Core.Engines.Combat.Classes.Bia10
 
         public override WowClass WowClass => WowClass.Shaman;
         public override WowRole Role => WowRole.Dps;
-        public Dictionary<string, dynamic> C { get; set; }
 
         public override TalentTree Talents { get; } = new()
         {
@@ -57,8 +56,6 @@ namespace AmeisenBotX.Core.Engines.Combat.Classes.Bia10
 
         public override bool UseAutoAttacks => true;
         public override bool WalkBehindEnemy => false;
-
-        private bool HexedTarget { get; set; }
 
         public override void Execute()
         {
@@ -77,8 +74,6 @@ namespace AmeisenBotX.Core.Engines.Combat.Classes.Bia10
             if (CheckForWeaponEnchantment(WowEquipmentSlot.INVSLOT_MAINHAND,
                 Shaman335a.RockbiterWeapon, Shaman335a.RockbiterWeapon))
                 return;
-
-            HexedTarget = false;
         }
     }
 }

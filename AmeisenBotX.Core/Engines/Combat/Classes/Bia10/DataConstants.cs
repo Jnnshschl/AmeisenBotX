@@ -1,10 +1,8 @@
-﻿using System;
-
-namespace AmeisenBotX.Core.Engines.Combat.Classes.Bia10
+﻿namespace AmeisenBotX.Core.Engines.Combat.Classes.Bia10
 {
     public static class DataConstants
     {
-        public const float MAX_ANGLE = MathF.PI * 2.0f;
+        internal const int HealSelfPercentage = 60;
 
         public static readonly int[] usableHealingItems = {
             // food
