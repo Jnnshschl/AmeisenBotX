@@ -695,7 +695,7 @@ namespace AmeisenBotX.Core.Logic
             unit = Bot.Objects.WowObjects.OfType<IWowUnit>()
                     .FirstOrDefault(e => e.GetType() != typeof(IWowPlayer)
                                          && !e.IsDead
-                                         && e.IsRepairVendor
+                                         && e.IsRepairer
                 && Bot.Db.GetReaction(Bot.Player, e) != WowUnitReaction.Hostile
                 && Bot.Player.DistanceTo(e) <= Config.RepairNpcSearchRadius);
 

@@ -44,7 +44,7 @@ namespace AmeisenBotX.Wow.Objects
 
         bool IsCasting => CurrentlyCastingSpellId > 0 || CurrentlyChannelingSpellId > 0;
 
-        bool IsClasstrainer => NpcFlags[(int)WowUnitNpcFlags.ClassTrainer];
+        bool IsClassTrainer => NpcFlags[(int)WowUnitNpcFlags.ClassTrainer];
 
         bool IsConfused => UnitFlags[(int)WowUnitFlags.Confused];
 
@@ -56,17 +56,17 @@ namespace AmeisenBotX.Wow.Objects
 
         bool IsFleeing => UnitFlags[(int)WowUnitFlags.Fleeing];
 
-        bool IsFlightmaster => NpcFlags[(int)WowUnitNpcFlags.Flightmaster];
+        bool IsFlightMaster => NpcFlags[(int)WowUnitNpcFlags.FlightMaster];
 
         bool IsFoodVendor => NpcFlags[(int)WowUnitNpcFlags.FoodVendor];
 
-        bool IsGeneralGoodsVendor => NpcFlags[(int)WowUnitNpcFlags.GeneralGoodsVendor];
+        bool IsAmmoVendor => NpcFlags[(int)WowUnitNpcFlags.AmmoVendor];
 
         bool IsGossip => NpcFlags[(int)WowUnitNpcFlags.Gossip];
 
         bool IsGuard => NpcFlags[(int)WowUnitNpcFlags.Guard];
 
-        bool IsGuildbanker => NpcFlags[(int)WowUnitNpcFlags.Guildbanker];
+        bool IsGuildBanker => NpcFlags[(int)WowUnitNpcFlags.GuildBanker];
 
         bool IsInCombat => UnitFlags[(int)WowUnitFlags.Combat];
 
@@ -110,7 +110,7 @@ namespace AmeisenBotX.Wow.Objects
 
         bool IsReferAFriendLinked => UnitFlagsDynamic[(int)WowUnitDynamicFlags.ReferAFriendLinked];
 
-        bool IsRepairVendor => NpcFlags[(int)WowUnitNpcFlags.RepairVendor];
+        bool IsRepairer => NpcFlags[(int)WowUnitNpcFlags.Repairer];
 
         bool IsSilenced => UnitFlags[(int)WowUnitFlags.Silenced];
 
@@ -122,13 +122,13 @@ namespace AmeisenBotX.Wow.Objects
 
         bool IsSpellclick => NpcFlags[(int)WowUnitNpcFlags.Spellclick];
 
-        bool IsSpiritguide => NpcFlags[(int)WowUnitNpcFlags.Spiritguide];
+        bool IsSpiritGuide => NpcFlags[(int)WowUnitNpcFlags.SpiritGuide];
 
-        bool IsSpirithealer => NpcFlags[(int)WowUnitNpcFlags.Spirithealer];
+        bool IsSpiritHealer => NpcFlags[(int)WowUnitNpcFlags.SpiritHealer];
 
-        bool IsStablemaster => NpcFlags[(int)WowUnitNpcFlags.Stablemaster];
+        bool IsStableMaster => NpcFlags[(int)WowUnitNpcFlags.StableMaster];
 
-        bool IsTabarddesigner => NpcFlags[(int)WowUnitNpcFlags.Tabarddesigner];
+        bool IsTabardDesigner => NpcFlags[(int)WowUnitNpcFlags.TabardDesigner];
 
         bool IsTaggedByMe => UnitFlagsDynamic[(int)WowUnitDynamicFlags.TaggedByMe];
 
