@@ -34,18 +34,23 @@ namespace AmeisenBotX.Core.Engines.Grinding
                         new Leaf(GoToNpcAndSell),
                         new Selector
                         (
-                            () => ThreatsNearby(),
-                            new Leaf(FightTarget),
-                            new Selector
+                            () => NeedToDismount(),
+                            new Leaf(Dismount),
+                            new Selector 
                             (
-                                () => TargetsNearby(),
+                                () => ThreatsNearby(),
+                                new Leaf(FightTarget),
                                 new Selector
                                 (
-                                    () => SelectTarget(),
-                                    new Leaf(FightTarget),
-                                    new Leaf(() => BtStatus.Failed)
-                                ),
-                                new Leaf(MoveToNextGrindNode)
+                                    () => TargetsNearby(),
+                                    new Selector
+                                    (
+                                        () => SelectTarget(),
+                                        new Leaf(FightTarget),
+                                        new Leaf(() => BtStatus.Failed)
+                                    ),
+                                    new Leaf(MoveToNextGrindNode)
+                                )
                             )
                         )
                      )
@@ -142,6 +147,17 @@ namespace AmeisenBotX.Core.Engines.Grinding
                 Bot.Movement.StopMovement();
             }
 
+            return BtStatus.Success;
+        }
+
+        private bool NeedToDismount()
+        {
+            return Bot.Player.IsInCombat && Bot.Player.IsMounted;
+        }
+
+        private BtStatus Dismount()
+        {
+            Bot.Wow.DismissCompanion("MOUNT");
             return BtStatus.Success;
         }
 

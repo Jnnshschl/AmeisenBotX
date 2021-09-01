@@ -677,7 +677,7 @@ namespace AmeisenBotX.Core
 
         private void OnMerchantShow(long timestamp, List<string> args)
         {
-            if (Config.AutoRepair && Bot.Target.IsRepairVendor)
+            if (Config.AutoRepair && Bot.Target.IsRepairer)
             {
                 Bot.Wow.RepairAllItems();
             }
@@ -737,7 +737,7 @@ namespace AmeisenBotX.Core
                 }
 
                 // Remember Repair Vendors
-                foreach (IWowUnit unit in wowUnits.Where(e => e.IsRepairVendor))
+                foreach (IWowUnit unit in wowUnits.Where(e => e.IsRepairer))
                 {
                     Bot.Db.CachePoi(Bot.Objects.MapId, PoiType.Repair, unit.Position);
                 }
