@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace AmeisenBotX.Wow.Objects.Enums
+namespace AmeisenBotX.Wow.Objects.Flags
 {
     [Flags]
     public enum WowAuraFlags

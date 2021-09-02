@@ -44,12 +44,12 @@ namespace AmeisenBotX.Wow.Objects
 
         public bool IsDynoject()
         {
-            return Type == WowObjectType.Dynobject;
+            return Type == WowObjectType.DynamicObject;
         }
 
         public bool IsGameobject()
         {
-            return Type == WowObjectType.Gameobject;
+            return Type == WowObjectType.GameObject;
         }
 
         public bool IsInRange(IWowObject b, float range)

@@ -13,7 +13,7 @@ namespace AmeisenBotX.Wow335a.Objects
     {
         public WowDynobject335a(IntPtr baseAddress, IntPtr descriptorAddress) : base(baseAddress, descriptorAddress)
         {
-            Type = WowObjectType.Dynobject;
+            Type = WowObjectType.DynamicObject;
         }
 
         public ulong Caster { get; set; }

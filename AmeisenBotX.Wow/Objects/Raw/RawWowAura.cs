@@ -1,4 +1,4 @@
-﻿using AmeisenBotX.Wow.Objects.Enums;
+﻿using AmeisenBotX.Wow.Objects.Flags;
 using System.Runtime.InteropServices;
 
 namespace AmeisenBotX.Wow.Objects

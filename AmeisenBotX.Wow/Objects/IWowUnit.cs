@@ -1,4 +1,5 @@
 ﻿using AmeisenBotX.Memory;
+using AmeisenBotX.Wow.Objects.Flags;
 using AmeisenBotX.Wow.Objects.Enums;
 using AmeisenBotX.Wow.Offsets;
 using System.Collections.Generic;
@@ -134,7 +135,7 @@ namespace AmeisenBotX.Wow.Objects
 
         bool IsTaggedByOther => UnitFlagsDynamic[(int)WowUnitDynamicFlags.TaggedByOther];
 
-        bool IsTappedByThreat => UnitFlagsDynamic[(int)WowUnitDynamicFlags.TappedByThreat];
+        bool IsTappedByAllThreatList => UnitFlagsDynamic[(int)WowUnitDynamicFlags.IsTappedByAllThreatList];
 
         bool IsTotem => UnitFlags[(int)WowUnitFlags.Totem];
 
@@ -164,7 +165,7 @@ namespace AmeisenBotX.Wow.Objects
 
         BitVector32 NpcFlags { get; }
 
-        WowPowertype PowerType { get; }
+        WowPowerType PowerType { get; }
 
         WowRace Race { get; }
 
