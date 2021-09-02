@@ -1,8 +1,8 @@
 ﻿namespace AmeisenBotX.Wow.Objects.Enums
 {
-    public enum WowGameobjectType
+    public enum WowGameObjectType
     {
-        Door,
+        Door = 0,
         Button,
         QuestGiver,
         Chest,

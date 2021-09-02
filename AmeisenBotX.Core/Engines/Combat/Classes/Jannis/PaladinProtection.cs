@@ -32,7 +32,7 @@ namespace AmeisenBotX.Core.Engines.Combat.Classes.Jannis
 
         public override bool IsMelee => true;
 
-        public override IItemComparator ItemComparator { get; set; } = new BasicArmorComparator(null, new() { WowWeaponType.TWOHANDED_SWORDS, WowWeaponType.TWOHANDED_MACES, WowWeaponType.TWOHANDED_AXES });
+        public override IItemComparator ItemComparator { get; set; } = new BasicArmorComparator(null, new() { WowWeaponType.SwordTwoHand, WowWeaponType.MaceTwoHand, WowWeaponType.AxeTwoHand });
 
         public override WowRole Role => WowRole.Tank;
 

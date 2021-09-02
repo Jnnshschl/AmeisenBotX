@@ -1,6 +1,6 @@
 ﻿namespace AmeisenBotX.Wow.Objects.Enums
 {
-    public enum WowHerbId : int
+    public enum WowHerbId
     {
         AddersTongue = 8084,
         AncientLichen = 6967,

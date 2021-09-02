@@ -33,8 +33,8 @@ namespace AmeisenBotX.Core.Engines.Combat.Classes.Jannis
 
         public override IItemComparator ItemComparator { get; set; } = new BasicComparator
         (
-            new() { WowArmorType.SHIELDS },
-            new() { WowWeaponType.ONEHANDED_SWORDS, WowWeaponType.ONEHANDED_MACES, WowWeaponType.ONEHANDED_AXES },
+            new() { WowArmorType.Shield },
+            new() { WowWeaponType.Sword, WowWeaponType.Mace, WowWeaponType.Axe },
             new Dictionary<string, double>()
             {
                 { "ITEM_MOD_CRIT_RATING_SHORT", 1.2 },

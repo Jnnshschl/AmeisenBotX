@@ -46,7 +46,7 @@ namespace AmeisenBotX.Core.Logic.Idle.Actions
 
             IWowGameobject seat = Bot.Objects.WowObjects.OfType<IWowGameobject>()
                 .OrderBy(e => e.Position.GetDistance(originPos))
-                .FirstOrDefault(e => e.GameobjectType == WowGameobjectType.Chair
+                .FirstOrDefault(e => e.GameObjectType == WowGameObjectType.Chair
                     // make sure no one sits on the chair besides ourself
                     && !Bot.Objects.WowObjects.OfType<IWowUnit>()
                         .Where(e => e.Guid != Bot.Wow.PlayerGuid)

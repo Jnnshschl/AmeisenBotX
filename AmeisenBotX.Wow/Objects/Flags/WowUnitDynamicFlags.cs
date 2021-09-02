@@ -3,7 +3,7 @@
 namespace AmeisenBotX.Wow.Objects.Flags
 {
     [Flags]
-    public enum WowUnitDynamicFlags : int
+    public enum WowUnitDynamicFlags
     {
         None = 0x0,
         Lootable = 0x1,

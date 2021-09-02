@@ -1,6 +1,6 @@
 ﻿namespace AmeisenBotX.Wow.Objects.Enums
 {
-    public enum WowClickToMoveType : int
+    public enum WowClickToMoveType
     {
         Attack = 16,
         AttackGuid = 11,

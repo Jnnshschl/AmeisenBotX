@@ -102,8 +102,8 @@ namespace AmeisenBotX.Test
 
             Assert.AreEqual((int)WowEquipmentSlot.NOT_EQUIPABLE, item0.EquipSlot);
 
-            Assert.AreEqual(WowArmorType.CLOTH, ((WowArmor)item1).ArmorType);
-            Assert.AreEqual(WowWeaponType.GUNS, ((WowWeapon)item2).WeaponType);
+            Assert.AreEqual(WowArmorType.Cloth, ((WowArmor)item1).ArmorType);
+            Assert.AreEqual(WowWeaponType.Gun, ((WowWeapon)item2).WeaponType);
         }
 
         [TestMethod]

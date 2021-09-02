@@ -3,7 +3,7 @@
 namespace AmeisenBotX.Wow.Objects.Flags
 {
     [Flags]
-    public enum WowUnit2Flags : int
+    public enum WowUnit2Flags
     {
         FeignDeath = 0x1,
         NoModel = 0x2,

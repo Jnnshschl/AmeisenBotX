@@ -1,8 +1,8 @@
 ﻿namespace AmeisenBotX.Wow.Objects.Enums
 {
-    public enum WowClass : int
+    public enum WowClass
     {
-        Unknown = -1,
+        None = 0,
         Warrior = 1,
         Paladin = 2,
         Hunter = 3,

@@ -1,6 +1,6 @@
 ﻿namespace AmeisenBotX.Wow.Objects.Enums
 {
-    public enum WowRace : int
+    public enum WowRace
     {
         Unknown = -1,
         None,

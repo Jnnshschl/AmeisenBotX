@@ -3,7 +3,7 @@
 namespace AmeisenBotX.Wow.Objects.Flags
 {
     [Flags]
-    public enum WowUnitNpcFlags : int
+    public enum WowUnitNpcFlags
     {
         None = 0x0,               // HEX: 0x0000 0000 - DEC: 0
         Gossip = 0x1,             // HEX: 0x0000 0001 - DEC: 1

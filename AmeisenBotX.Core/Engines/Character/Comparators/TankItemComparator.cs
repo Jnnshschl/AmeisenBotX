@@ -42,7 +42,7 @@ namespace AmeisenBotX.Core.Engines.Character.Comparators
             if (slot.Equals(WowEquipmentSlot.INVSLOT_OFFHAND))
             {
                 // shields
-                if (item.GetType() == typeof(WowArmor) && ((WowArmor)item).ArmorType.Equals(WowArmorType.SHIELDS))
+                if (item.GetType() == typeof(WowArmor) && ((WowArmor)item).ArmorType.Equals(WowArmorType.Shield))
                 {
                     if (item.Stats.TryGetValue("RESISTANCE0_NAME", out string armorString) && double.TryParse(armorString, System.Globalization.NumberStyles.Any, CultureInfo.InvariantCulture, out double armor))
                     {
@@ -73,7 +73,7 @@ namespace AmeisenBotX.Core.Engines.Character.Comparators
             else if (slot.Equals(WowEquipmentSlot.INVSLOT_MAINHAND))
             {
                 // swords
-                if (item.GetType() == typeof(WowWeapon) && ((WowWeapon)item).WeaponType.Equals(WowWeaponType.ONEHANDED_SWORDS))
+                if (item.GetType() == typeof(WowWeapon) && ((WowWeapon)item).WeaponType.Equals(WowWeaponType.Sword))
                 {
                     if (item.Stats.TryGetValue("ITEM_MOD_STRENGTH_SHORT", out string strengthString) && double.TryParse(strengthString, System.Globalization.NumberStyles.Any, CultureInfo.InvariantCulture, out double strength))
                     {

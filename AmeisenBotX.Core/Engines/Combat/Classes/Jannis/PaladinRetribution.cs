@@ -31,7 +31,7 @@ namespace AmeisenBotX.Core.Engines.Combat.Classes.Jannis
 
         public override bool IsMelee => true;
 
-        public override IItemComparator ItemComparator { get; set; } = new BasicStrengthComparator(new() { WowArmorType.SHIELDS }, new() { WowWeaponType.ONEHANDED_AXES, WowWeaponType.ONEHANDED_MACES, WowWeaponType.ONEHANDED_SWORDS });
+        public override IItemComparator ItemComparator { get; set; } = new BasicStrengthComparator(new() { WowArmorType.Shield }, new() { WowWeaponType.Axe, WowWeaponType.Mace, WowWeaponType.Sword });
 
         public override WowRole Role => WowRole.Dps;
 
