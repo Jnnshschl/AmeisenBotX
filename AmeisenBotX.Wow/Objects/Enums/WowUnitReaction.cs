@@ -2,12 +2,13 @@
 {
     public enum WowUnitReaction
     {
-        Wtf = -2,
-        Trash = -1,
-        HostileGuard = 0,
+        Hated = 0,
         Hostile = 1,
-        Unknown = 2,
+        Unfriendly = 2,
         Neutral = 3,
-        Friendly = 4
+        Friendly = 4,
+        Honored = 5,
+        Revered = 6,
+        Exalted = 7
     }
 }

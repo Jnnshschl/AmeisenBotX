@@ -4,6 +4,7 @@ using AmeisenBotX.Core.Engines.Movement.Enums;
 using AmeisenBotX.Wow.Cache.Enums;
 using AmeisenBotX.Wow.Objects;
 using AmeisenBotX.Wow.Objects.Enums;
+using AmeisenBotX.Wow.Objects.Flags;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -132,7 +133,7 @@ namespace AmeisenBotX.Core.Logic.Idle.Actions
             {
                 Bot.Wow.CastSpell("Fishing");
             }
-            else if (fishingBobber.Flags[(int)WowGameobjectFlags.DoesNotDespawn])
+            else if (fishingBobber.Flags[(int)WowGameobjectFlags.NoDespawn])
             {
                 Bot.Wow.InteractWithObject(fishingBobber.BaseAddress);
                 Bot.Wow.LootEverything();

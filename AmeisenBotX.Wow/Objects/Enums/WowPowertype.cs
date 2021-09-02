@@ -1,12 +1,15 @@
 ﻿namespace AmeisenBotX.Wow.Objects.Enums
 {
-    public enum WowPowertype
+    public enum WowPowerType
     {
-        Unknown = -1,
+        Health = -2,
         Mana = 0,
         Rage = 1,
+        Focus = 2,
         Energy = 3,
+        Happiness = 4,
         Runes = 5,
-        Runeenergy = 6
+        RunicPower = 6,
+        Unknown = 7
     }
 }

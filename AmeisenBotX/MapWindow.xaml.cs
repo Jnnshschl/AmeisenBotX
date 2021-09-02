@@ -494,7 +494,7 @@ namespace AmeisenBotX
 
                 Brush selectedBrush = unit.IsDead ? DeadBrush : AmeisenBot.Bot.Db.GetReaction(AmeisenBot.Bot.Player, unit) switch
                 {
-                    WowUnitReaction.HostileGuard => EnemyBrush,
+                    WowUnitReaction.Hated => EnemyBrush,
                     WowUnitReaction.Hostile => EnemyBrush,
                     WowUnitReaction.Neutral => NeutralBrush,
                     WowUnitReaction.Friendly => FriendBrush,

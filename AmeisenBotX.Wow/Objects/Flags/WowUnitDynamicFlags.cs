@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace AmeisenBotX.Wow.Objects.Enums
+namespace AmeisenBotX.Wow.Objects.Flags
 {
     [Flags]
     public enum WowUnitDynamicFlags : int
@@ -13,6 +13,6 @@ namespace AmeisenBotX.Wow.Objects.Enums
         SpecialInfo = 0x10,
         Dead = 0x20,
         ReferAFriendLinked = 0x40,
-        TappedByThreat = 0x80,
+        IsTappedByAllThreatList = 0x80,
     }
 }

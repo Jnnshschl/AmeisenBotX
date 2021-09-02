@@ -74,7 +74,7 @@ namespace AmeisenBotX.Wow335a.Objects
 
         public BitVector32 NpcFlags => RawWowUnit.NpcFlags;
 
-        public WowPowertype PowerType => (WowPowertype)RawWowUnit.PowerType;
+        public WowPowerType PowerType => (WowPowerType)RawWowUnit.PowerType;
 
         public WowRace Race => (WowRace)RawWowUnit.Race;
 
