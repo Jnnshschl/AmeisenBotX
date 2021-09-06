@@ -2,13 +2,18 @@
 
 namespace AmeisenBotX.Wow.Objects.Enums
 {
-    [Flags]
     public enum WowDispelTypes
     {
-        None = 0,
-        Curse = 1 << 0,
-        Disease = 1 << 1,
-        Magic = 1 << 2,
-        Poison = 1 << 3
-    }
+		None = 0,
+		Magic = 1,
+		Curse = 2,
+		Disease = 3,
+		Poison = 4,
+		Stealth = 5,
+		Invisibility = 6,
+		All = 7,
+		SpecialNpcOnly = 8,
+		Enrage = 9,
+		ZgTrinkets = 10
+	}
 }

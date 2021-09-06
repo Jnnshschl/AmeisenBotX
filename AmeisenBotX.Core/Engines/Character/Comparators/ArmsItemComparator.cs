@@ -53,7 +53,7 @@ namespace AmeisenBotX.Core.Engines.Character.Comparators
             else if (slot.Equals(WowEquipmentSlot.INVSLOT_MAINHAND))
             {
                 // axes
-                if (item.GetType() == typeof(WowWeapon) && Bot.Player.IsAlliance() ? (((WowWeapon)item).WeaponType.Equals(WowWeaponType.TWOHANDED_AXES) || ((WowWeapon)item).WeaponType.Equals(WowWeaponType.ONEHANDED_AXES)) : (((WowWeapon)item).WeaponType.Equals(WowWeaponType.TWOHANDED_MACES) || ((WowWeapon)item).WeaponType.Equals(WowWeaponType.ONEHANDED_MACES)))
+                if (item.GetType() == typeof(WowWeapon) && Bot.Player.IsAlliance() ? (((WowWeapon)item).WeaponType.Equals(WowWeaponType.AxeTwoHand) || ((WowWeapon)item).WeaponType.Equals(WowWeaponType.Axe)) : (((WowWeapon)item).WeaponType.Equals(WowWeaponType.MaceTwoHand) || ((WowWeapon)item).WeaponType.Equals(WowWeaponType.Mace)))
                 {
                     if (item.Stats.TryGetValue("ITEM_MOD_ATTACK_POWER_SHORT", out string attackString) && double.TryParse(attackString, System.Globalization.NumberStyles.Any, CultureInfo.InvariantCulture, out double attack))
                     {

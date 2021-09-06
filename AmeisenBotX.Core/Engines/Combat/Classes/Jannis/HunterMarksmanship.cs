@@ -49,7 +49,7 @@ namespace AmeisenBotX.Core.Engines.Combat.Classes.Jannis
 
         public override bool IsMelee => false;
 
-        public override IItemComparator ItemComparator { get; set; } = new BasicIntellectComparator(new() { WowArmorType.SHIELDS });
+        public override IItemComparator ItemComparator { get; set; } = new BasicIntellectComparator(new() { WowArmorType.Shield });
 
         public override WowRole Role => WowRole.Dps;
 

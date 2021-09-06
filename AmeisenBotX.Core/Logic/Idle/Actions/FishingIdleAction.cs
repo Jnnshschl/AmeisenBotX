@@ -55,7 +55,7 @@ namespace AmeisenBotX.Core.Logic.Idle.Actions
                     // do i have the fishing skill
                     && Bot.Character.Skills.Any(e => e.Key.Contains("fishing", StringComparison.OrdinalIgnoreCase))
                     // do i have a fishing pole in my inventory or equipped
-                    && (Bot.Character.Inventory.Items.OfType<WowWeapon>().Any(e => e.WeaponType == WowWeaponType.FISHING_POLES)
+                    && (Bot.Character.Inventory.Items.OfType<WowWeapon>().Any(e => e.WeaponType == WowWeaponType.FishingPole)
                         || IsFishingRodEquipped())
                     // do i know any fishing spot around here
                     && Bot.Db.TryGetPointsOfInterest(Bot.Objects.MapId, PoiType.FishingSpot, Bot.Player.Position, 256.0f, out IEnumerable<Vector3> pois);
@@ -103,7 +103,7 @@ namespace AmeisenBotX.Core.Logic.Idle.Actions
             if (!IsFishingRodEquipped())
             {
                 IWowInventoryItem fishingRod = Bot.Character.Inventory.Items.OfType<WowWeapon>()
-                    .FirstOrDefault(e => e.WeaponType == WowWeaponType.FISHING_POLES);
+                    .FirstOrDefault(e => e.WeaponType == WowWeaponType.FishingPole);
 
                 if (fishingRod != null)
                 {
@@ -112,7 +112,7 @@ namespace AmeisenBotX.Core.Logic.Idle.Actions
             }
 
             IWowGameobject fishingBobber = Bot.Objects.WowObjects.OfType<IWowGameobject>()
-                .FirstOrDefault(e => e.GameobjectType == WowGameobjectType.FishingBobber && e.CreatedBy == Bot.Wow.PlayerGuid);
+                .FirstOrDefault(e => e.GameObjectType == WowGameObjectType.FishingBobber && e.CreatedBy == Bot.Wow.PlayerGuid);
 
             if (!Started)
             {
@@ -133,7 +133,7 @@ namespace AmeisenBotX.Core.Logic.Idle.Actions
             {
                 Bot.Wow.CastSpell("Fishing");
             }
-            else if (fishingBobber.Flags[(int)WowGameobjectFlags.NoDespawn])
+            else if (fishingBobber.Flags[(int)WowGameObjectFlags.NoDespawn])
             {
                 Bot.Wow.InteractWithObject(fishingBobber.BaseAddress);
                 Bot.Wow.LootEverything();
@@ -143,7 +143,7 @@ namespace AmeisenBotX.Core.Logic.Idle.Actions
         private bool IsFishingRodEquipped()
         {
             return (Bot.Character.Equipment.Items[WowEquipmentSlot.INVSLOT_MAINHAND] != null
-                && ((WowWeapon)Bot.Character.Equipment.Items[WowEquipmentSlot.INVSLOT_MAINHAND]).WeaponType == WowWeaponType.FISHING_POLES);
+                && ((WowWeapon)Bot.Character.Equipment.Items[WowEquipmentSlot.INVSLOT_MAINHAND]).WeaponType == WowWeaponType.FishingPole);
         }
     }
 }

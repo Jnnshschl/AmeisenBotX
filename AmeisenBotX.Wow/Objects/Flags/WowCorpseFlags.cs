@@ -3,7 +3,7 @@
 namespace AmeisenBotX.Wow.Objects.Flags
 {
     [Flags]
-    public enum WowCorpseFlags : int
+    public enum WowCorpseFlags
     {
         None = 0x0,
         Bones = 0x1,

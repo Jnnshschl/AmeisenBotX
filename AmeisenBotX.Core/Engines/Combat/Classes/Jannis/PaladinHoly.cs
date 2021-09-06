@@ -68,7 +68,7 @@ namespace AmeisenBotX.Core.Engines.Combat.Classes.Jannis
         public override IItemComparator ItemComparator { get; set; } = new BasicComparator
         (
             null,
-            new() { WowWeaponType.TWOHANDED_AXES, WowWeaponType.TWOHANDED_MACES, WowWeaponType.TWOHANDED_SWORDS },
+            new() { WowWeaponType.AxeTwoHand, WowWeaponType.MaceTwoHand, WowWeaponType.SwordTwoHand },
             new Dictionary<string, double>()
             {
                 { "ITEM_MOD_CRIT_RATING_SHORT", 0.88 },

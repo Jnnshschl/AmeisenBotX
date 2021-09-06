@@ -1,6 +1,6 @@
 ﻿namespace AmeisenBotX.Wow.Objects.Enums
 {
-    public enum WowRollType : int
+    public enum WowRollType
     {
         Pass = 0,
         Need = 1,

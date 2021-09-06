@@ -295,7 +295,7 @@ namespace AmeisenBotX.Core.Engines.Battleground.Jannis.Profiles
             if (Bot.Player.IsAlliance())
             {
                 IWowGameobject obj = Bot.Objects.WowObjects.OfType<IWowGameobject>()
-                                    .Where(e => e.GameobjectType == WowGameobjectType.Door && e.DisplayId == 411)
+                                    .Where(e => e.GameObjectType == WowGameObjectType.Door && e.DisplayId == 411)
                                     .FirstOrDefault();
 
                 return obj == null || obj.Bytes0 == 0;
@@ -303,7 +303,7 @@ namespace AmeisenBotX.Core.Engines.Battleground.Jannis.Profiles
             else
             {
                 IWowGameobject obj = Bot.Objects.WowObjects.OfType<IWowGameobject>()
-                                    .Where(e => e.GameobjectType == WowGameobjectType.Door && e.DisplayId == 850)
+                                    .Where(e => e.GameObjectType == WowGameObjectType.Door && e.DisplayId == 850)
                                     .FirstOrDefault();
 
                 return obj == null || obj.Bytes0 == 0;

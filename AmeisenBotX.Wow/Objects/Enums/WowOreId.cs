@@ -1,6 +1,6 @@
 ﻿namespace AmeisenBotX.Wow.Objects.Enums
 {
-    public enum WowOreId : int
+    public enum WowOreId
     {
         Adamantite = 6798,
         Cobalt = 7881,

@@ -36,9 +36,9 @@ namespace AmeisenBotX.Core.Engines.Combat.Classes.Bia10
         public override IItemComparator ItemComparator { get; set; } =
             new BasicIntellectComparator(null, new List<WowWeaponType>
             {
-                WowWeaponType.TWOHANDED_AXES,
-                WowWeaponType.TWOHANDED_MACES,
-                WowWeaponType.TWOHANDED_SWORDS
+                WowWeaponType.AxeTwoHand,
+                WowWeaponType.MaceTwoHand,
+                WowWeaponType.SwordTwoHand
             });
 
         public IEnumerable<int> BlacklistedTargetDisplayIds { get; set; }

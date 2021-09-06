@@ -71,7 +71,7 @@ namespace AmeisenBotX.Core.Logic.Idle.Actions
                     Bot.Movement.StopMovement();
 
                     IWowGameobject mailbox = Bot.Objects.WowObjects.OfType<IWowGameobject>()
-                        .FirstOrDefault(e => e.GameobjectType == WowGameobjectType.Mailbox && e.Position.GetDistance(CurrentMailbox) < 1.0f);
+                        .FirstOrDefault(e => e.GameObjectType == WowGameObjectType.Mailbox && e.Position.GetDistance(CurrentMailbox) < 1.0f);
 
                     if (mailbox != null)
                     {

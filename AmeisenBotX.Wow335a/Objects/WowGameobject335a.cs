@@ -28,7 +28,7 @@ namespace AmeisenBotX.Wow335a.Objects
 
         public BitVector32 Flags { get; set; }
 
-        public WowGameobjectType GameobjectType { get; set; }
+        public WowGameObjectType GameObjectType { get; set; }
 
         public int Level { get; set; }
 
@@ -44,7 +44,7 @@ namespace AmeisenBotX.Wow335a.Objects
             if (memoryApi.Read(DescriptorAddress + WowObjectDescriptor.EndOffset, out WowGameobjectDescriptor objPtr)
                 && memoryApi.Read(IntPtr.Add(BaseAddress, (int)offsetList.WowGameobjectPosition), out Vector3 position))
             {
-                GameobjectType = (WowGameobjectType)objPtr.GameobjectBytes1;
+                GameObjectType = (WowGameObjectType)objPtr.GameobjectBytes1;
                 CreatedBy = objPtr.CreatedBy;
                 Bytes0 = objPtr.GameobjectBytes0;
                 DisplayId = objPtr.DisplayId;

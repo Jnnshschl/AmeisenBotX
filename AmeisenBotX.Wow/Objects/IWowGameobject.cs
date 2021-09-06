@@ -15,7 +15,7 @@ namespace AmeisenBotX.Wow.Objects
 
         BitVector32 Flags { get; }
 
-        WowGameobjectType GameobjectType { get; }
+        WowGameObjectType GameObjectType { get; }
 
         int Level { get; }
     }

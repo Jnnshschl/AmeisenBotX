@@ -51,7 +51,6 @@ namespace AmeisenBotX.Utils
                 WowClass.Shaman => shamanPrimaryBrush,
                 WowClass.Warlock => warlockPrimaryBrush,
                 WowClass.Warrior => warriorPrimaryBrush,
-                WowClass.Unknown => unknownBrush,
                 _ => unknownBrush,
             };
         }

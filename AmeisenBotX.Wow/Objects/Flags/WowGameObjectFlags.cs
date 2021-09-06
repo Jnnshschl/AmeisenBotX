@@ -3,7 +3,7 @@
 namespace AmeisenBotX.Wow.Objects.Flags
 {
     [Flags]
-    public enum WowGameobjectFlags : int
+    public enum WowGameObjectFlags
     {
         InUse = 0x1,                  // HEX: 0x0000 0001 - DEC: 1
         Locked = 0x2,                 // HEX: 0x0000 0002 - DEC: 2

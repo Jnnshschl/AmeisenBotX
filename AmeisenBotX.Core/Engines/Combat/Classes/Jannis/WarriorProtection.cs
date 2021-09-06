@@ -37,23 +37,23 @@ namespace AmeisenBotX.Core.Engines.Combat.Classes.Jannis
 
         public override IItemComparator ItemComparator { get; set; } = new BasicStaminaComparator(new()
         {
-            WowArmorType.IDOLS,
-            WowArmorType.LIBRAMS,
-            WowArmorType.SIGILS,
-            WowArmorType.TOTEMS,
-            WowArmorType.CLOTH,
-            WowArmorType.LEATHER
+            WowArmorType.Idol,
+            WowArmorType.Libram,
+            WowArmorType.Sigil,
+            WowArmorType.Totem,
+            WowArmorType.Cloth,
+            WowArmorType.Leather
         }, new()
         {
-            WowWeaponType.TWOHANDED_SWORDS,
-            WowWeaponType.TWOHANDED_MACES,
-            WowWeaponType.TWOHANDED_AXES,
-            WowWeaponType.MISCELLANEOUS,
-            WowWeaponType.STAVES,
-            WowWeaponType.POLEARMS,
-            WowWeaponType.THROWN,
-            WowWeaponType.WANDS,
-            WowWeaponType.DAGGERS
+            WowWeaponType.SwordTwoHand,
+            WowWeaponType.MaceTwoHand,
+            WowWeaponType.AxeTwoHand,
+            WowWeaponType.Misc,
+            WowWeaponType.Staff,
+            WowWeaponType.Polearm,
+            WowWeaponType.Thrown,
+            WowWeaponType.Wand,
+            WowWeaponType.Dagger
         });
 
         public override WowRole Role => WowRole.Tank;

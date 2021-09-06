@@ -19,6 +19,7 @@ namespace AmeisenBotX.Core
                 WowItemQuality.Epic => "#a335ee",
                 WowItemQuality.Legendary => "#ff8000",
                 WowItemQuality.Artifact => "#e6cc80",
+                WowItemQuality.Heirloom => "#bed3e5",
                 _ => "#ffffff",
             };
         }
