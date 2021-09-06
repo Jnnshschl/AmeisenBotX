@@ -14,12 +14,17 @@ namespace AmeisenBotX.Core.Engines.Combat.Classes.Bia10
         {
             // my buffs
             MyAuraManager.Jobs.Add(new KeepActiveAuraJob(bot.Db, Shaman335a.LightningShield, () =>
-                Bot.Player.ManaPercentage > 60.0 && TryCastSpell(Shaman335a.LightningShield, 0, true)));
+                Bot.Player.ManaPercentage > 60.0 
+                && ValidateSpell(Shaman335a.LightningShield, true)
+                && TryCastSpell(Shaman335a.LightningShield, 0, true)));
             MyAuraManager.Jobs.Add(new KeepActiveAuraJob(bot.Db, Shaman335a.WaterShield, () =>
-                Bot.Player.ManaPercentage < 20.0 && TryCastSpell(Shaman335a.WaterShield, 0, true)));
+                Bot.Player.ManaPercentage < 20.0
+                && ValidateSpell(Shaman335a.WaterShield, true)
+                && TryCastSpell(Shaman335a.WaterShield, 0, true)));
             // enemy debuffs
             TargetAuraManager.Jobs.Add(new KeepActiveAuraJob(bot.Db, Shaman335a.FlameShock, () =>
-                TryCastSpell(Shaman335a.FlameShock, Bot.Wow.TargetGuid, true)));
+                ValidateSpell(Shaman335a.FlameShock, true) 
+                && TryCastSpell(Shaman335a.FlameShock, Bot.Wow.TargetGuid, true)));
             // interupts
             InterruptManager.InterruptSpells = new SortedList<int, InterruptManager.CastInterruptFunction>
             {
@@ -71,9 +76,28 @@ namespace AmeisenBotX.Core.Engines.Combat.Classes.Bia10
 
             if (HandleDeadPartyMembers(Shaman335a.AncestralSpirit))
                 return;
+
+            var enchSpellName = DecideWeaponEnchantment(out var enchantName);
             if (CheckForWeaponEnchantment(WowEquipmentSlot.INVSLOT_MAINHAND,
-                Shaman335a.RockbiterWeapon, Shaman335a.RockbiterWeapon))
+                enchantName, enchSpellName))
                 return;
+        }
+
+        private string DecideWeaponEnchantment(out string enchantName)
+        {
+            if (Bot.Character.SpellBook.IsSpellKnown(Shaman335a.FlametongueWeapon))
+            {
+                enchantName = Shaman335a.FlametongueBuff;
+                return Shaman335a.FlametongueWeapon;
+            }
+            if (Bot.Character.SpellBook.IsSpellKnown(Shaman335a.RockbiterWeapon))
+            {
+                enchantName = Shaman335a.RockbiterBuff;
+                return Shaman335a.RockbiterWeapon;
+            }
+
+            enchantName = string.Empty;
+            return string.Empty;
         }
     }
 }

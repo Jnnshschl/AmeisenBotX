@@ -25,6 +25,7 @@
         public const string MaelstromWeapon = "Mealstrom Weapon";
         public const string NaturesSwiftness = "Nature's Swiftness";
         public const string Riptide = "Riptide";
+        public const string RockbiterBuff = "Rockbiter";
         public const string RockbiterWeapon = "Rockbiter Weapon";
         public const string ShamanisticRage = "Shamanistic Rage";
         public const string Stormstrike = "Stormstrike";

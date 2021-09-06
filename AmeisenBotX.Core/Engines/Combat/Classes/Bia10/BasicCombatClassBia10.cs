@@ -41,52 +41,6 @@ namespace AmeisenBotX.Core.Engines.Combat.Classes.Bia10
                 { "HealthItemThreshold", 30.0 },
                 { "ManaItemThreshold", 30.0 }
             };
-
-            //Load spells, would be nice to have proper SpellManager for extra spell info :/
-            KnownSpells = new Dictionary<string, WoWSpell>();
-
-            var healingWaveData = new WoWSpell(40, 0, TimeSpan.FromSeconds(1.5), WoWSpell.WoWSpellSchool.Nature);
-            KnownSpells.Add(Shaman335a.HealingWave, healingWaveData);
-            var lightingBoltData = new WoWSpell(30, 0, TimeSpan.FromSeconds(1.5), WoWSpell.WoWSpellSchool.Nature);
-            KnownSpells.Add(Shaman335a.LightningBolt, lightingBoltData);
-            var earthShockData = new WoWSpell(25, 0, TimeSpan.FromSeconds(6), WoWSpell.WoWSpellSchool.Nature);
-            KnownSpells.Add(Shaman335a.EarthShock, earthShockData);
-            var rockBitterData = new WoWSpell(0, 0, TimeSpan.FromSeconds(0), WoWSpell.WoWSpellSchool.Nature);
-            KnownSpells.Add(Shaman335a.RockbiterWeapon, rockBitterData);
-        }
-
-        public Dictionary<string, WoWSpell> KnownSpells { get; set; }
-
-        public class WoWSpell
-        {
-            [Flags]
-            public enum WoWSpellSchool
-            {
-                None = 0,
-                Physical = 1,
-                Holy = 2,
-                Fire = 4,
-                Nature = 8,
-                Frost = 16,
-                Shadow = 32,
-                Arcane = 64,
-            }
-
-            public Guid Id;
-            public int MaxRange;
-            public int MinRange;
-            public TimeSpan Cooldown;
-            public TimeSpan CastTime;
-            public WoWSpellSchool SchoolType;
-
-            public WoWSpell(int maxRange, int minRange, TimeSpan castTime, WoWSpellSchool schoolType)
-            {
-                Id = new Guid();
-                MaxRange = maxRange;
-                MinRange = minRange;
-                CastTime = castTime;
-                SchoolType = schoolType;
-            }
         }
 
         public string Author => "Bia10";
@@ -124,7 +78,9 @@ namespace AmeisenBotX.Core.Engines.Combat.Classes.Bia10
             if (string.IsNullOrEmpty(spellName)) return false;
             if (unit == null) return false;
 
-            var spell = KnownSpells[spellName]; // would be nice: SpellManager.KnownSpells[spellName]
+            var spell = Bot.Character.SpellBook.GetSpellByName(spellName);
+            if (spell == null) return false;
+
             if (spell.MinRange == 0 && spell.MaxRange == 0 || spell.MaxRange == 0)
                 return Bot.Player.IsInMeleeRange(unit);
 
@@ -137,8 +93,8 @@ namespace AmeisenBotX.Core.Engines.Combat.Classes.Bia10
             var target = Bot.Target;
             if (target == null) return;
 
-            /* TODO: either IsInMeleeRange or IsAutoAttacking is bugged investigate
-            if (Bot.Player.IsInMeleeRange(Bot.Target) && !Bot.Player.IsAutoAttacking)
+            /*
+            if (Bot.Player.Position.GetDistance(Bot.Target.Position) < 5.0f && !Bot.Player.IsAutoAttacking)
             {
                 if (Bot.Player.IsCasting)
                 {
@@ -322,7 +278,7 @@ namespace AmeisenBotX.Core.Engines.Combat.Classes.Bia10
             return string.Empty;
         }
 
-        private bool ValidateSpell(string spellName, bool checkGCD)
+        public bool ValidateSpell(string spellName, bool checkGCD)
         {
             if (!Bot.Character.SpellBook.IsSpellKnown(spellName) || !Bot.Objects.IsTargetInLineOfSight)
                 return false;

@@ -11,7 +11,7 @@ namespace AmeisenBotX.Core.Engines.Grinding.Profiles.Profiles.Horde
 
         public List<Vendor> Vendors { get; } = new()
         {
-            new Vendor("", 3158, 1, new Vector3(-565.428f, -4214.2f, 41.59f), NpcType.VendorSellBuy)
+            new Vendor("Duokna", 3158, 1, new Vector3(-565.428f, -4214.2f, 41.59f), NpcType.VendorSellBuy)
         };
 
         public List<Trainer> Trainers { get; }
