@@ -929,13 +929,14 @@ namespace AmeisenBotX.Core.Logic
             {
                 case BotMode.Grinding:
                 {
-                    int repairNpcEntryId = Bot.Grinding.Profile.Vendors.FirstOrDefault(e =>
-                        e.Type == NpcType.VendorRepair).EntryId;
-                    vendorRepair = Bot.GetClosestVendorByEntryId(repairNpcEntryId);
+                    Vendor repairNpcEntry = Bot.Grinding.Profile.Vendors.FirstOrDefault(e => e.Type == NpcType.VendorRepair);
+                    if (repairNpcEntry != null)
+                        vendorRepair = Bot.GetClosestVendorByEntryId(repairNpcEntry.EntryId); 
 
-                    int sellNpcEntryId = Bot.Grinding.Profile.Vendors.FirstOrDefault(e =>
-                        e.Type == NpcType.VendorRepair || e.Type == NpcType.VendorSellBuy).EntryId;
-                    vendorSell = Bot.GetClosestVendorByEntryId(sellNpcEntryId);
+                    Vendor sellNpcEntry = Bot.Grinding.Profile.Vendors.FirstOrDefault(e => e.Type == NpcType.VendorRepair || e.Type == NpcType.VendorSellBuy);
+                    if (sellNpcEntry != null)
+                        vendorSell = Bot.GetClosestVendorByEntryId(sellNpcEntry.EntryId);
+
                     break;
                 }
                 case BotMode.None:
