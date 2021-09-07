@@ -5,6 +5,8 @@ namespace AmeisenBotX.Core.Engines.Character.Inventory.Objects
 {
     public class WowWeapon : WowBasicItem
     {
+        public WowWeaponType WeaponType { get; set; }
+
         public WowWeapon(WowBasicItem wowBasicItem) : base(wowBasicItem)
         {
             Id = wowBasicItem.Id;
@@ -24,10 +26,61 @@ namespace AmeisenBotX.Core.Engines.Character.Inventory.Objects
             Durability = wowBasicItem.Durability;
             MaxDurability = wowBasicItem.MaxDurability;
             EquipLocation = wowBasicItem.EquipLocation;
-            // TODO: this will need fix :]
-            WeaponType = Enum.TryParse(Subtype.Replace("-", string.Empty), out WowWeaponType armorType) ? armorType : WowWeaponType.Misc;
+            WeaponType = Enum.TryParse(GetWeaponTypeName(Subtype), out WowWeaponType weaponType) 
+                ? weaponType : WowWeaponType.Misc;
         }
 
-        public WowWeaponType WeaponType { get; set; }
+        private string GetWeaponTypeName(string subType)
+        {
+            if (subType.StartsWith("Main Hand"))
+            {
+                subType = subType.Replace("Main Hand", "");
+
+                if (subType.EndsWith("s"))
+                    subType = subType.Remove(subType.Length - 1);
+
+                return subType;
+            } 
+            else if (subType.StartsWith("Off Hand"))
+            {
+                subType = subType.Replace("Off Hand", "");
+
+                if (subType.EndsWith("s"))
+                    subType = subType.Remove(subType.Length - 1);
+
+                return subType;
+            }
+            else if (subType.StartsWith("One-Handed"))
+            {
+                subType = subType.Replace("One-Handed", "");
+
+                if (subType.EndsWith("s"))
+                    subType = subType.Remove(subType.Length - 1);
+
+                return subType;
+            }
+            else if (subType.StartsWith("One-Hand"))
+            {
+                subType = subType.Replace("One-Hand", "");
+
+                if (subType.EndsWith("s"))
+                    subType = subType.Remove(subType.Length - 1);
+
+                return subType;
+            }
+
+            if (subType.Contains("-"))
+            {
+                string handedness = subType.Replace("-", string.Empty).Split(" ", 2)[0];
+                string weaponType = subType.Replace("-", string.Empty).Split(" ", 2)[1];
+
+                if (weaponType.EndsWith("s"))
+                    weaponType = weaponType.Remove(weaponType.Length - 1);
+
+                return weaponType + handedness;
+            }
+
+            return string.Empty;
+        }
     }
 }

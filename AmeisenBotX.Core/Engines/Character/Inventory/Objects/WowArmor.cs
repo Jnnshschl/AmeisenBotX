@@ -5,6 +5,8 @@ namespace AmeisenBotX.Core.Engines.Character.Inventory.Objects
 {
     public class WowArmor : WowBasicItem
     {
+        public WowArmorType ArmorType { get; private set; }
+
         public WowArmor(WowBasicItem wowBasicItem) : base(wowBasicItem)
         {
             Id = wowBasicItem.Id;
@@ -24,9 +26,8 @@ namespace AmeisenBotX.Core.Engines.Character.Inventory.Objects
             Durability = wowBasicItem.Durability;
             MaxDurability = wowBasicItem.MaxDurability;
             EquipLocation = wowBasicItem.EquipLocation;
-            ArmorType = Enum.TryParse(Subtype, out WowArmorType armorType) ? armorType : WowArmorType.Misc;
+            ArmorType = Enum.TryParse(Subtype, out WowArmorType armorType) 
+                ? armorType : WowArmorType.Misc;
         }
-
-        public WowArmorType ArmorType { get; private set; }
     }
 }
