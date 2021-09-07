@@ -204,7 +204,8 @@ namespace AmeisenBotX.Core.Engines.Character
 
         public void UpdateBags()
         {
-            IEnumerable<IWowInventoryItem> container = Inventory.Items.Where(item => item.Type.Equals("container", StringComparison.CurrentCultureIgnoreCase));
+            IEnumerable<IWowInventoryItem> container = Inventory.Items.Where(item => 
+            item.Type.Equals("container", StringComparison.CurrentCultureIgnoreCase));
 
             if (container.Any())
             {
@@ -239,7 +240,11 @@ namespace AmeisenBotX.Core.Engines.Character
                     continue;
                 }
 
-                IEnumerable<IWowInventoryItem> itemsLikeEquipped = Inventory.Items.Where(e => !string.IsNullOrWhiteSpace(e.EquipLocation) && SlotToEquipLocation((int)slot).Contains(e.EquipLocation, StringComparison.OrdinalIgnoreCase)).OrderByDescending(e => e.ItemLevel).ToList();
+                IEnumerable<IWowInventoryItem> itemsLikeEquipped = Inventory.Items.Where(e =>
+                !string.IsNullOrWhiteSpace(e.EquipLocation) && SlotToEquipLocation((int)slot)
+                .Contains(e.EquipLocation, StringComparison.OrdinalIgnoreCase))
+                .OrderByDescending(e => e.ItemLevel)
+                .ToList();
 
                 if (itemsLikeEquipped.Any())
                 {
@@ -262,8 +267,10 @@ namespace AmeisenBotX.Core.Engines.Character
                     {
                         IWowInventoryItem itemToEquip = itemsLikeEquipped.First();
 
-                        if ((string.Equals(itemToEquip.Type, "Armor", StringComparison.OrdinalIgnoreCase) && IsAbleToUseArmor((WowArmor)itemToEquip))
-                            || (string.Equals(itemToEquip.Type, "Weapon", StringComparison.OrdinalIgnoreCase) && IsAbleToUseWeapon((WowWeapon)itemToEquip)))
+                        if ((string.Equals(itemToEquip.Type, "Armor", StringComparison.OrdinalIgnoreCase) 
+                            && IsAbleToUseArmor((WowArmor)itemToEquip))
+                            || (string.Equals(itemToEquip.Type, "Weapon", StringComparison.OrdinalIgnoreCase) 
+                            && IsAbleToUseWeapon((WowWeapon)itemToEquip)))
                         {
                             AmeisenLogger.I.Log("Equipment", $"Equipping \"{itemToEquip}\"", LogLevel.Verbose);
                             Wow.EquipItem(itemToEquip.Name);

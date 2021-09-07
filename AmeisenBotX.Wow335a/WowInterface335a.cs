@@ -259,7 +259,7 @@ namespace AmeisenBotX.Wow335a
 
         public void CofirmStaticPopup()
         {
-            LuaDoString($"ConfirmBindOnUse();StaticPopup_Hide(\"AUTOEQUIP_BIND\");StaticPopup_Hide(\"EQUIP_BIND\");StaticPopup_Hide(\"USE_BIND\")");
+            LuaDoString($"EquipPendingItem(0);ConfirmBindOnUse();StaticPopup_Hide(\"AUTOEQUIP_BIND\");StaticPopup_Hide(\"EQUIP_BIND\");StaticPopup_Hide(\"USE_BIND\")");
         }
 
         public void CompleteQuest()
