@@ -34,7 +34,7 @@ namespace AmeisenBotX.Wow335a.Objects
 
         public override string ToString()
         {
-            return $"GameObject: [{EntryId}] ({(Enum.IsDefined(typeof(WowGameobjectDisplayId), DisplayId) ? ((WowGameobjectDisplayId)DisplayId).ToString() : DisplayId.ToString(CultureInfo.InvariantCulture))}:{DisplayId})";
+            return $"GameObject: [{EntryId}] ({(Enum.IsDefined(typeof(WowGameObjectDisplayId), DisplayId) ? ((WowGameObjectDisplayId)DisplayId).ToString() : DisplayId.ToString(CultureInfo.InvariantCulture))}:{DisplayId})";
         }
 
         public override void Update(IMemoryApi memoryApi, IOffsetList offsetList)

@@ -11,6 +11,7 @@ using AmeisenBotX.Logging.Enums;
 using AmeisenBotX.Memory;
 using AmeisenBotX.Wow;
 using AmeisenBotX.Wow.Objects;
+using AmeisenBotX.Wow.Objects.Constants;
 using AmeisenBotX.Wow.Objects.Enums;
 using System;
 using System.Collections;
@@ -59,7 +60,10 @@ namespace AmeisenBotX.Core.Engines.Character
 
         private IWowInterface Wow { get; }
 
-        public void ClickToMove(Vector3 pos, ulong guid, WowClickToMoveType clickToMoveType = WowClickToMoveType.Move, float turnSpeed = 20.9f, float distance = 0.5f)
+        public void ClickToMove(Vector3 pos, ulong guid, 
+            WowClickToMoveType clickToMoveType = WowClickToMoveType.Move,
+            float turnSpeed = 20.9f, // where is this magic number from?
+            float distance = WowCTMDistance.MoveDistance)
         {
             if (float.IsInfinity(pos.X) || float.IsNaN(pos.X) || MathF.Abs(pos.X) > 17066.6656
                 || float.IsInfinity(pos.Y) || float.IsNaN(pos.Y) || MathF.Abs(pos.Y) > 17066.6656
