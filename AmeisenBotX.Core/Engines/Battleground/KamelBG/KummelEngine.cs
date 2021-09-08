@@ -184,11 +184,15 @@ namespace AmeisenBotX.Core.Engines.Battleground.KamelBG
 
         private IWowObject GetFlagObject()
         {
-            WowGameobjectDisplayId targetFlag = hasFlag ? (Bot.Player.IsHorde() ? WowGameobjectDisplayId.WsgHordeFlag : WowGameobjectDisplayId.WsgAllianceFlag) : (Bot.Player.IsHorde() ? WowGameobjectDisplayId.WsgAllianceFlag : WowGameobjectDisplayId.WsgHordeFlag);
+            WowGameObjectDisplayId targetFlag = hasFlag 
+                ? (Bot.Player.IsHorde() ? WowGameObjectDisplayId.WsgHordeFlag : WowGameObjectDisplayId.WsgAllianceFlag)
+                : (Bot.Player.IsHorde() ? WowGameObjectDisplayId.WsgAllianceFlag : WowGameObjectDisplayId.WsgHordeFlag);
+           
             List<IWowGameobject> flagObjectList = Bot.Objects.WowObjects
                 .OfType<IWowGameobject>() // only WowGameobjects
-                .Where(x => Enum.IsDefined(typeof(WowGameobjectDisplayId), x.DisplayId)
-                         && targetFlag == (WowGameobjectDisplayId)x.DisplayId).ToList();
+                .Where(x => Enum.IsDefined(typeof(WowGameObjectDisplayId), x.DisplayId)
+                         && targetFlag == (WowGameObjectDisplayId)x.DisplayId).ToList();
+
             if (flagObjectList.Count > 0)
             {
                 return flagObjectList[0];

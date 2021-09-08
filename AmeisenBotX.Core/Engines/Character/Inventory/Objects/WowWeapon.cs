@@ -30,7 +30,7 @@ namespace AmeisenBotX.Core.Engines.Character.Inventory.Objects
                 ? weaponType : WowWeaponType.Misc;
         }
 
-        private string GetWeaponTypeName(string subType)
+        private static string GetWeaponTypeName(string subType)
         {
             if (subType.StartsWith("Main Hand"))
             {

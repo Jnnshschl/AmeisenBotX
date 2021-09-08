@@ -512,7 +512,8 @@ namespace AmeisenBotX.Core.Engines.Battleground.Jannis.Profiles
 
                     JBgBlackboard.NearFlags = Bot.Objects.WowObjects
                                                  .OfType<IWowGameobject>()
-                                                 .Where(e => e.DisplayId == (int)WowGameobjectDisplayId.WsgAllianceFlag || e.DisplayId == (int)WowGameobjectDisplayId.WsgHordeFlag)
+                                                 .Where(e => e.DisplayId == (int)WowGameObjectDisplayId.WsgAllianceFlag 
+                                                          || e.DisplayId == (int)WowGameObjectDisplayId.WsgHordeFlag)
                                                  .ToList();
                 }
             }
