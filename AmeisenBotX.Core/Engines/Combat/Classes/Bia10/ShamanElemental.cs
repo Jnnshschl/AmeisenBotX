@@ -23,7 +23,8 @@ namespace AmeisenBotX.Core.Engines.Combat.Classes.Bia10
                 && TryCastSpell(Shaman335a.WaterShield, 0, true)));
             // enemy debuffs
             TargetAuraManager.Jobs.Add(new KeepActiveAuraJob(bot.Db, Shaman335a.FlameShock, () =>
-                ValidateSpell(Shaman335a.FlameShock, true) 
+                Bot.Target?.HealthPercentage >= 5
+                && ValidateSpell(Shaman335a.FlameShock, true)
                 && TryCastSpell(Shaman335a.FlameShock, Bot.Wow.TargetGuid, true)));
             // interupts
             InterruptManager.InterruptSpells = new SortedList<int, InterruptManager.CastInterruptFunction>
