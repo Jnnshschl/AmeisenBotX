@@ -261,7 +261,8 @@ namespace AmeisenBotX.Core.Engines.Combat.Classes.Bia10
                 targetGuid = Bot.Player.Guid;
                 return Shaman335a.HealingWave;
             }
-            if (IsInSpellRange(Bot.Target, Shaman335a.EarthShock)
+            if (Bot.Target?.HealthPercentage >= 3
+                && IsInSpellRange(Bot.Target, Shaman335a.EarthShock)
                 && ValidateSpell(Shaman335a.EarthShock, true))
             {
                 targetGuid = Bot.Target.Guid;
