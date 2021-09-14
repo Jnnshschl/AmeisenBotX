@@ -40,7 +40,7 @@ namespace AmeisenBotX.Core.Engines.Combat.Classes.Bia10
         public override bool IsMelee => false;
 
         public override IItemComparator ItemComparator { get; set; } =
-            new BasicIntellectComparator(null, new List<WowWeaponType>
+            new ShamanElementalComparator(null, new List<WowWeaponType>
             {
                 WowWeaponType.AxeTwoHand,
                 WowWeaponType.MaceTwoHand,
