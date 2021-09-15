@@ -238,6 +238,8 @@ namespace AmeisenBotX.Wow
 
         void SelectGossipAvailableQuest(int gossipId);
 
+        void SelectGossipOptionSimple(int i);
+
         void SelectGossipOption(int i);
 
         void SelectQuestByNameOrGossipId(string name, int gossipId, bool isAvailable);

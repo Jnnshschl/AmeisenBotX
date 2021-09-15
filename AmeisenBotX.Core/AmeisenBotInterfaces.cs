@@ -11,6 +11,7 @@ using AmeisenBotX.Core.Engines.Movement;
 using AmeisenBotX.Core.Engines.Movement.Pathfinding;
 using AmeisenBotX.Core.Engines.Quest;
 using AmeisenBotX.Core.Engines.Tactic;
+using AmeisenBotX.Core.Engines.Test;
 using AmeisenBotX.Memory;
 using AmeisenBotX.RconClient;
 using AmeisenBotX.Wow;
@@ -42,6 +43,8 @@ namespace AmeisenBotX.Core
         public IDungeonEngine Dungeon { get; set; }
 
         public IGrindingEngine Grinding { get; set; }
+
+        public ITestEngine Test { get; set; }
 
         public IJobEngine Jobs { get; set; }
 
@@ -91,6 +94,15 @@ namespace AmeisenBotX.Core
         {
             return Objects.WowObjects.OfType<IWowUnit>()
                 .Where(e => !e.IsDead && e.IsVendor && Db.GetReaction(Player, e) != WowUnitReaction.Hostile && e.EntryId == entryId)
+                .OrderBy(e => e.Position.GetDistance(Player.Position))
+                .FirstOrDefault();
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public IWowUnit GetClosestTrainerByEntryId(int entryId)
+        {
+            return Objects.WowObjects.OfType<IWowUnit>()
+                .Where(e => !e.IsDead && e.IsTrainer && Db.GetReaction(Player, e) != WowUnitReaction.Hostile && e.EntryId == entryId)
                 .OrderBy(e => e.Position.GetDistance(Player.Position))
                 .FirstOrDefault();
         }

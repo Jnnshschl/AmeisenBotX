@@ -577,6 +577,7 @@ namespace AmeisenBotX
             comboboxStateOverride.Items.Add(BotMode.None);
             comboboxStateOverride.Items.Add(BotMode.Grinding);
             comboboxStateOverride.Items.Add(BotMode.Questing);
+            comboboxStateOverride.Items.Add(BotMode.Testing);
 
             comboboxStateOverride.SelectedIndex = 0;
 
