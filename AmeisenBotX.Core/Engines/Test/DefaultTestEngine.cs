@@ -9,25 +9,23 @@ namespace AmeisenBotX.Core.Engines.Test
     public class DefaultTestEngine : ITestEngine
     {
         private const int trainerEntryId = 3173;
-        private readonly IWowUnit trainer;
+        private IWowUnit trainer;
 
         public DefaultTestEngine(AmeisenBotInterfaces bot, AmeisenBotConfig config)
         {
             Bot = bot;
             Config = config;
 
-            trainer = Bot.GetClosestTrainerByEntryId(trainerEntryId);
-
             RootSelector = new Selector
             (
                 () => trainer != null,
                 new Selector
                 (
-                    () => Bot.Wow.UiIsVisible("GossipFrame", "MerchantFrame"),
+                    () => Bot.Wow.UiIsVisible("GossipFrame"),
                     new Leaf(SelectTraining),
                     new Leaf(OpenTrainer)
                 ),
-                new Leaf(Fail)
+                new Leaf(GetTrainer)
             );
 
             TestTree = new Tree
@@ -48,6 +46,15 @@ namespace AmeisenBotX.Core.Engines.Test
             TestTree.Tick();
         }
 
+        private BtStatus GetTrainer()
+        {
+            if (Bot.GetClosestTrainerByEntryId(trainerEntryId) == null)
+                return BtStatus.Failed;
+
+            trainer = Bot.GetClosestTrainerByEntryId(trainerEntryId);
+            return BtStatus.Success;
+        }
+
         private BtStatus OpenTrainer()
         {
             if (Bot == null || trainer == null)
@@ -59,7 +66,7 @@ namespace AmeisenBotX.Core.Engines.Test
             if (!BotMath.IsFacing(Bot.Objects.Player.Position, Bot.Objects.Player.Rotation, trainer.Position, 0.5f))
                 Bot.Wow.FacePosition(Bot.Objects.Player.BaseAddress, Bot.Player.Position, trainer.Position);
 
-            if (Bot.Wow.UiIsVisible("GossipFrame", "MerchantFrame"))
+            if (Bot.Wow.UiIsVisible("GossipFrame"))
                 return BtStatus.Success;
 
             Bot.Wow.InteractWithUnit(trainer.BaseAddress);
@@ -71,12 +78,12 @@ namespace AmeisenBotX.Core.Engines.Test
             if (!trainer.IsGossip) 
                 return BtStatus.Failed;
 
-            // TODO: resolve this mess??
-            // Bot.Wow.SelectGossipOptionSimple(1);             does nothing
-            // LuaDoString from devTools SelectGossipOption(1); learn skills frame
-            // Bot.Wow.SelectGossipOption(1);                   unlearns talents frame
+            // gossip 1 train skills
+            // gossip 2 unlearn talents
 
-            return BtStatus.Success;
+             Bot.Wow.SelectGossipOptionSimple(1);
+
+             return BtStatus.Success;
         }
         
         private static BtStatus Fail()

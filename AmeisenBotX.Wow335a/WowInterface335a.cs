@@ -783,7 +783,7 @@ namespace AmeisenBotX.Wow335a
 
         public void SelectGossipOptionSimple(int gossipId)
         {
-            LuaDoString($"SelectGossipOption({gossipId}))");
+            LuaDoString($"SelectGossipOption({gossipId})");
         }
 
         public void SelectGossipOption(int gossipId)
