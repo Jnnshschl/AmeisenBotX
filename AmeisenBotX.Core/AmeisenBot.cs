@@ -26,6 +26,7 @@ using AmeisenBotX.Core.Engines.Quest.Profiles;
 using AmeisenBotX.Core.Engines.Quest.Profiles.Shino;
 using AmeisenBotX.Core.Engines.Quest.Profiles.StartAreas;
 using AmeisenBotX.Core.Engines.Tactic;
+using AmeisenBotX.Core.Engines.Test;
 using AmeisenBotX.Core.Logic;
 using AmeisenBotX.Core.Logic.Routines;
 using AmeisenBotX.Logging;
@@ -142,6 +143,7 @@ namespace AmeisenBotX.Core
             Bot.Jobs = new DefaultJobEngine(Bot, Config);
             Bot.Quest = new DefaultQuestEngine(Bot);
             Bot.Grinding = new DefaultGrindEngine(Bot, Config);
+            Bot.Test = new DefaultTestEngine(Bot, Config);
 
             Bot.PathfindingHandler = new AmeisenNavigationHandler(Config.NavmeshServerIp, Config.NameshServerPort);
             Bot.Movement = new DefaultMovementEngine(Bot, Config);

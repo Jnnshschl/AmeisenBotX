@@ -781,9 +781,14 @@ namespace AmeisenBotX.Wow335a
             LuaDoString($"SelectGossipAvailableQuest({gossipId})");
         }
 
+        public void SelectGossipOptionSimple(int gossipId)
+        {
+            LuaDoString($"SelectGossipOption({gossipId})");
+        }
+
         public void SelectGossipOption(int gossipId)
         {
-            LuaDoString($"SelectGossipOption(max({gossipId},GetNumGossipOptions()))");
+            LuaDoString($"SelectGossipOption(max({gossipId}, GetNumGossipOptions()))");
         }
 
         public void SelectQuestByNameOrGossipId(string questName, int gossipId, bool isAvailableQuest)

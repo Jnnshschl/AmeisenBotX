@@ -179,6 +179,13 @@ namespace AmeisenBotX.Core.Logic
                 (NeedToEat, new Leaf(Eat))
             );
 
+            INode testingNode = new Waterfall
+            (
+                new Leaf(() => { Bot.Test.Execute(); return BtStatus.Success; }),
+                (() => Bot.Player.IsDead, new Leaf(Dead)),
+                (() => Bot.Player.IsGhost, openworldGhostNode)
+            );
+
             INode openworldNode = new Waterfall
             (
                 // do idle stuff as fallback
@@ -260,7 +267,8 @@ namespace AmeisenBotX.Core.Logic
                             (() => Bot.Objects.MapId.IsRaidMap(), raidNode),
                             // handle open world modes
                             (() => Mode == BotMode.Grinding, grindingNode),
-                            (() => Mode == BotMode.Questing, questingNode)
+                            (() => Mode == BotMode.Questing, questingNode),
+                            (() => Mode == BotMode.Testing, testingNode)
                         )
                     ),
                     // we are most likely in the loading screen or player/objects are null
