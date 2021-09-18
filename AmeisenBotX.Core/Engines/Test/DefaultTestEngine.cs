@@ -3,6 +3,7 @@ using AmeisenBotX.BehaviorTree.Enums;
 using AmeisenBotX.BehaviorTree.Objects;
 using AmeisenBotX.Common.Math;
 using AmeisenBotX.Wow.Objects;
+using System;
 
 namespace AmeisenBotX.Core.Engines.Test
 {
@@ -22,7 +23,12 @@ namespace AmeisenBotX.Core.Engines.Test
                 new Selector
                 (
                     () => Bot.Wow.UiIsVisible("GossipFrame"),
-                    new Leaf(SelectTraining),
+                    new Selector
+                    (
+                        () => SelectedTraining(),
+                        new Leaf(TrainAll),
+                        new Leaf(Fail)
+                    ),
                     new Leaf(OpenTrainer)
                 ),
                 new Leaf(GetTrainer)
@@ -73,19 +79,37 @@ namespace AmeisenBotX.Core.Engines.Test
             return BtStatus.Success;
         }
 
-        private BtStatus SelectTraining()
+        public bool SelectedTraining()
         {
-            if (!trainer.IsGossip) 
-                return BtStatus.Failed;
+            if (!trainer.IsGossip)
+                return false;
 
             // gossip 1 train skills
             // gossip 2 unlearn talents
+            // quest gossip from trainer??
 
-             Bot.Wow.SelectGossipOptionSimple(1);
+            string[] gossipTypes = Bot.Wow.GetGossipTypes();
 
-             return BtStatus.Success;
+            for (int i = 0; i < gossipTypes.Length; ++i)
+            {
+                if (!gossipTypes[i].Equals("trainer", StringComparison.OrdinalIgnoreCase))
+                    continue;
+
+                // +1 is due to implicit conversion between lua array (indexed at 1 not 0) and c# array
+                Bot.Wow.SelectGossipOptionSimple(i + 1);
+                return true;
+            }
+
+            return false;
         }
-        
+
+        private BtStatus TrainAll()
+        {
+            Bot.Wow.ClickOnTrainButton();
+
+            return BtStatus.Success;
+        }
+
         private static BtStatus Fail()
         {
             return BtStatus.Failed;

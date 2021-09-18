@@ -346,7 +346,10 @@ namespace AmeisenBotX.Wow335a
                 ExecuteLuaAndRead(BotUtils.ObfuscateLua("{v:0}=\"\"function {v:1}(...)for a=1,select(\"#\",...),2 do {v:0}={v:0}..select(a+1,...)..\";\"end end;{v:1}(GetGossipOptions())"), out string result);
                 return result.Split(';', StringSplitOptions.RemoveEmptyEntries);
             }
-            catch { }
+            catch
+            {
+                // ignored
+            }
 
             return Array.Empty<string>();
         }
@@ -667,11 +670,10 @@ namespace AmeisenBotX.Wow335a
             return false;
         }
 
-        public int LuaGetGossipOptionCount()
+        public int LuaGetGossipOptionsCount()
         {
             return ExecuteLuaInt(BotUtils.ObfuscateLua("{v:0}=GetNumGossipOptions()"));
         }
-
         public string LuaGetItemBySlot(int itemslot)
         {
             return ExecuteLuaAndRead(BotUtils.ObfuscateLua($"{{v:8}}={itemslot};{{v:0}}='noItem';{{v:1}}=GetInventoryItemID('player',{{v:8}});{{v:2}}=GetInventoryItemCount('player',{{v:8}});{{v:3}}=GetInventoryItemQuality('player',{{v:8}});{{v:4}},{{v:5}}=GetInventoryItemDurability({{v:8}});{{v:6}},{{v:7}}=GetInventoryItemCooldown('player',{{v:8}});{{v:9}},{{v:10}},{{v:11}},{{v:12}},{{v:13}},{{v:14}},{{v:15}},{{v:16}},{{v:17}},{{v:18}},{{v:19}}=GetItemInfo(GetInventoryItemLink('player',{{v:8}}));{{v:0}}='{{'..'\"id\": \"'..tostring({{v:1}} or 0)..'\",'..'\"count\": \"'..tostring({{v:2}} or 0)..'\",'..'\"quality\": \"'..tostring({{v:3}} or 0)..'\",'..'\"curDurability\": \"'..tostring({{v:4}} or 0)..'\",'..'\"maxDurability\": \"'..tostring({{v:5}} or 0)..'\",'..'\"cooldownStart\": \"'..tostring({{v:6}} or 0)..'\",'..'\"cooldownEnd\": '..tostring({{v:7}} or 0)..','..'\"name\": \"'..tostring({{v:9}} or 0)..'\",'..'\"link\": \"'..tostring({{v:10}} or 0)..'\",'..'\"level\": \"'..tostring({{v:12}} or 0)..'\",'..'\"minLevel\": \"'..tostring({{v:13}} or 0)..'\",'..'\"type\": \"'..tostring({{v:14}} or 0)..'\",'..'\"subtype\": \"'..tostring({{v:15}} or 0)..'\",'..'\"maxStack\": \"'..tostring({{v:16}} or 0)..'\",'..'\"equipslot\": \"'..tostring({{v:17}} or 0)..'\",'..'\"sellprice\": \"'..tostring({{v:19}} or 0)..'\"'..'}}';"), out string result) ? result : string.Empty;
@@ -702,7 +704,7 @@ namespace AmeisenBotX.Wow335a
             LuaDoString("for i=1,2 do EjectPassengerFromSeat(i) end");
         }
 
-        public void LuaLearnAllAvaiableSpells()
+        public void ClickOnTrainButton()
         {
             LuaDoString("LoadAddOn\"Blizzard_TrainerUI\"f=ClassTrainerTrainButton;f.e=0;if f:GetScript\"OnUpdate\"then f:SetScript(\"OnUpdate\",nil)else f:SetScript(\"OnUpdate\",function(f,a)f.e=f.e+a;if f.e>.01 then f.e=0;f:Click()end end)end");
         }
@@ -789,6 +791,28 @@ namespace AmeisenBotX.Wow335a
         public void SelectGossipOption(int gossipId)
         {
             LuaDoString($"SelectGossipOption(max({gossipId}, GetNumGossipOptions()))");
+        }
+
+        public void BuyTrainerService(int serviceIndex)
+        {
+            LuaDoString($"BuyTrainerService({serviceIndex})");
+        }
+
+        public int GetTrainerServicesCount()
+        {
+            return ExecuteLuaInt(BotUtils.ObfuscateLua("{v:0}=GetNumTrainerServices()"));
+        }
+
+        public void GetTrainerServiceInfo(int serviceIndex)
+        {
+            // todo: returns name, rank, category, expanded
+            LuaDoString($"GetTrainerServiceInfo({serviceIndex})");
+        }
+
+        public void GetTrainerServiceCost(int serviceIndex)
+        {
+            // todo: returns moneyCost, talentCost, professionCost
+            LuaDoString($"GetTrainerServiceCost({serviceIndex})");
         }
 
         public void SelectQuestByNameOrGossipId(string questName, int gossipId, bool isAvailableQuest)
