@@ -290,5 +290,7 @@ namespace AmeisenBotX.Wow
         void UseInventoryItem(WowEquipmentSlot equipmentSlot);
 
         void UseItemByName(string name);
+
+        void ClickOnTrainButton();
     }
 }
