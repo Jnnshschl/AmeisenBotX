@@ -164,6 +164,7 @@ namespace AmeisenBotX.Core.Logic
                 (() => Bot.Player.IsGhost, openworldGhostNode),
                 (NeedToFight, openworldCombatNode),
                 (NeedToRepairOrSell, new Leaf(SpeakWithMerchant)),
+                (NeedToTrainSpells, new Leaf(SpeakWithClassTrainer)),
                 (NeedToLoot, new Leaf(LootNearUnits)),
                 (NeedToEat, new Leaf(Eat))
             );
@@ -341,6 +342,8 @@ namespace AmeisenBotX.Core.Logic
         private TimegatedEvent LootTryEvent { get; }
 
         private IWowUnit Merchant { get; set; }
+
+        private IWowUnit ClassTrainer { get; set; }
 
         private TimegatedEvent NpcInteractionEvent { get; }
 
@@ -911,6 +914,75 @@ namespace AmeisenBotX.Core.Logic
             }
 
             return UnitsToLoot.Count > 0;
+        }
+
+        private bool NeedToTrainSpells()
+        {
+            IWowUnit classTrainer = null;
+            Trainer profileTrainer = null;
+
+            if (Bot.Grinding.Profile != null)
+                profileTrainer = Bot.Grinding.Profile.Trainers.FirstOrDefault(e =>
+                    e.Type == NpcType.ClassTrainer && e.SubType == DecideClassTrainer(Bot.Player.Class));
+
+            if (profileTrainer != null)
+                classTrainer = Bot.GetClosestTrainerByEntryId(profileTrainer.EntryId);
+
+            if (classTrainer == null) 
+                return false;
+
+            ClassTrainer = classTrainer;
+            return Bot.Character.LastLevelTrained != 0 && Bot.Character.LastLevelTrained < Bot.Player.Level;
+        }
+
+        public static NpcSubType DecideClassTrainer(WowClass myClass)
+        {
+            switch (myClass)
+            {
+                case WowClass.Warrior:
+                    return NpcSubType.WarriorTrainer;
+                case WowClass.Paladin:
+                    return NpcSubType.PaladinTrainer;
+                case WowClass.Hunter:
+                    return NpcSubType.HunterTrainer;
+                case WowClass.Rogue:
+                    return NpcSubType.RougeTrainer;
+                case WowClass.Priest:
+                    return NpcSubType.PriestTrainer;
+                case WowClass.Deathknight:
+                    return NpcSubType.DeathKnightTrainer;
+                case WowClass.Shaman:
+                    return NpcSubType.ShamanTrainer;
+                case WowClass.Mage:
+                    return NpcSubType.MageTrainer;
+                case WowClass.Warlock:
+                    return NpcSubType.WarlockTrainer;
+                case WowClass.Druid:
+                    return NpcSubType.DruidTrainer;
+
+                default:
+                    throw new ArgumentOutOfRangeException();
+            }
+        }
+
+        private BtStatus SpeakWithClassTrainer()
+        {
+            if (ClassTrainer == null) 
+                return BtStatus.Failed;
+
+            if (Bot.Player.Position.GetDistance(ClassTrainer.Position) > 3.0f)
+            {
+                Bot.Movement.SetMovementAction(MovementAction.Move, ClassTrainer.Position);
+                return BtStatus.Success;
+            }
+
+            Bot.Movement.StopMovement();
+
+            if (!NpcInteractionEvent.Run()) 
+                return BtStatus.Failed;
+
+            SpeakToClassTrainerRoutine.Run(Bot, ClassTrainer);
+            return BtStatus.Success;
         }
 
         private bool NeedToRepairOrSell()

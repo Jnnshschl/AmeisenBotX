@@ -692,6 +692,15 @@ namespace AmeisenBotX.Core
             }
         }
 
+        private void OnClassTrainerShow(long timestamp, List<string> args)
+        {
+            // todo: Config.TrainSpells 
+            if (!Bot.Target.IsClassTrainer) return;
+
+            TrainAllSpellsRoutine.Run(Bot, Config);
+            Bot.Character.LastLevelTrained = Bot.Player.Level;
+        }
+
         private void OnObjectUpdateComplete(IEnumerable<IWowObject> wowObjects)
         {
             if (Config.CachePointsOfInterest && PoiCacheEvent.Run())
@@ -1066,7 +1075,9 @@ namespace AmeisenBotX.Core
             Bot.Wow.Events.Subscribe("CHARACTER_POINTS_CHANGED", OnTalentPointsChange);
             Bot.Wow.Events.Subscribe("COMBAT_LOG_EVENT_UNFILTERED", Bot.CombatLog.Parse);
 
+            // NPC Events
             Bot.Wow.Events.Subscribe("MERCHANT_SHOW", OnMerchantShow);
+            Bot.Wow.Events.Subscribe("TRAINER_SHOW", OnClassTrainerShow);
         }
     }
 }

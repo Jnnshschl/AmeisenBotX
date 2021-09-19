@@ -11,10 +11,13 @@ namespace AmeisenBotX.Core.Engines.Grinding.Profiles.Profiles.Horde
 
         public List<Vendor> Vendors { get; } = new()
         {
-            new Vendor("Duokna", 3158, 1, new Vector3(-565.428f, -4214.2f, 41.59f), NpcType.VendorSellBuy)
+            new Vendor("Duokna", 3158, 1, new Vector3(-565.42f, -4214.2f, 41.59f), NpcType.VendorSellBuy)
         };
 
-        public List<Trainer> Trainers { get; }
+        public List<Trainer> Trainers { get; } = new()
+        {
+            new Trainer("Ken'jai", 3707, 1, new Vector3(-617.39f, -4202.4f, 38.13f), NpcType.ClassTrainer, NpcSubType.PriestTrainer)
+        };
 
         public List<GrindingSpot> Spots { get; } = new()
         {

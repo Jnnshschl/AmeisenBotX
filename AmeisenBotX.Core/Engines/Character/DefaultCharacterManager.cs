@@ -28,14 +28,15 @@ namespace AmeisenBotX.Core.Engines.Character
             Wow = wowInterface;
             MemoryApi = memoryApi;
 
-            Inventory = new(Wow);
-            Equipment = new(Wow);
-            SpellBook = new(Wow);
-            TalentManager = new(Wow);
+            Inventory = new CharacterInventory(Wow);
+            Equipment = new CharacterEquipment(Wow);
+            SpellBook = new SpellBook(Wow);
+            TalentManager = new TalentManager(Wow);
+            LastLevelTrained = 0;
             ItemComparator = new ItemLevelComparator();
-            Skills = new();
+            Skills = new Dictionary<string, (int, int)>();
 
-            ItemSlotsToSkip = new();
+            ItemSlotsToSkip = new List<WowEquipmentSlot>();
         }
 
         public CharacterEquipment Equipment { get; }
@@ -55,6 +56,8 @@ namespace AmeisenBotX.Core.Engines.Character
         public SpellBook SpellBook { get; }
 
         public TalentManager TalentManager { get; }
+
+        public int LastLevelTrained { get; set; }
 
         private IMemoryApi MemoryApi { get; }
 
@@ -84,7 +87,7 @@ namespace AmeisenBotX.Core.Engines.Character
             MemoryApi.Write(Wow.Offsets.ClickToMoveX, pos);
         }
 
-        public Dictionary<int, int> GetConsumeables()
+        public Dictionary<int, int> GetConsumables()
         {
             return Inventory.Items.OfType<WowConsumable>().GroupBy(e => e.Id).ToDictionary(e => e.Key, e => e.Count());
         }
@@ -155,7 +158,7 @@ namespace AmeisenBotX.Core.Engines.Character
 
             if (IsAbleToUseItem(item))
             {
-                if (GetItemsByEquiplocation(item.EquipLocation, out List<IWowInventoryItem> matchedItems, out _))
+                if (GetItemsByEquipLocation(item.EquipLocation, out List<IWowInventoryItem> matchedItems, out _))
                 {
                     // if we dont have an item in the slot or if we only have 3 of 4 bags
                     if (matchedItems.Count == 0)
@@ -184,7 +187,7 @@ namespace AmeisenBotX.Core.Engines.Character
         public void Jump()
         {
             AmeisenLogger.I.Log("Movement", $"Jumping", LogLevel.Verbose);
-            Task.Run(() => BotUtils.SendKey(MemoryApi.Process.MainWindowHandle, new((int)KeyCodes.Space), 500, 1000));
+            Task.Run(() => BotUtils.SendKey(MemoryApi.Process.MainWindowHandle, new IntPtr((int)KeyCodes.Space), 500, 1000));
         }
 
         public void MoveToPosition(Vector3 pos, float turnSpeed = 20.9f, float distance = 0.1f)
@@ -317,12 +320,12 @@ namespace AmeisenBotX.Core.Engines.Character
             };
         }
 
-        private bool GetItemsByEquiplocation(string equiplocation, out List<IWowInventoryItem> matchedItems, out int expectedItemCount)
+        private bool GetItemsByEquipLocation(string equipLocation, out List<IWowInventoryItem> matchedItems, out int expectedItemCount)
         {
             expectedItemCount = 1;
-            matchedItems = new();
+            matchedItems = new List<IWowInventoryItem>();
 
-            switch (equiplocation)
+            switch (equipLocation)
             {
                 case "INVTYPE_AMMO": TryAddItem(WowEquipmentSlot.INVSLOT_AMMO, matchedItems); break;
                 case "INVTYPE_HEAD": TryAddItem(WowEquipmentSlot.INVSLOT_HEAD, matchedItems); break;
