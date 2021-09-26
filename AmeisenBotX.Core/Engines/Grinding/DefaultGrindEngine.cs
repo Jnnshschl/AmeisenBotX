@@ -6,6 +6,7 @@ using AmeisenBotX.Core.Engines.Grinding.Objects;
 using AmeisenBotX.Core.Engines.Grinding.Profiles;
 using AmeisenBotX.Core.Engines.Movement.Enums;
 using AmeisenBotX.Core.Engines.Npc;
+using AmeisenBotX.Core.Logic;
 using AmeisenBotX.Wow.Objects;
 using System;
 using System.Collections.Generic;
@@ -25,43 +26,54 @@ namespace AmeisenBotX.Core.Engines.Grinding
                 () => Profile == null,
                 new Leaf(ReportNoProfile),
                 new Selector
-                (
-                    () => NeedToRepair(),
-                    new Leaf(GoToNpcAndRepair),
-                    new Selector
                     (
-                        () => NeedToSell(),
-                        new Leaf(GoToNpcAndSell),
+                        () => Bot.Character.LastLevelTrained == 0,
+                        new Leaf(InitLastTrainingLevel),
                         new Selector
-                        (
-                            () => NeedToDismount(),
-                            new Leaf(Dismount),
-                            new Selector 
                             (
-                                () => ThreatsNearby(),
-                                new Leaf(FightTarget),
+                                () => NeedToRepair(),
+                                new Leaf(GoToNpcAndRepair),
                                 new Selector
                                 (
-                                    () => TargetsNearby(),
+                                    () => NeedToSell(),
+                                    new Leaf(GoToNpcAndSell),
                                     new Selector
                                     (
-                                        () => SelectTarget(),
-                                        new Leaf(FightTarget),
-                                        new Leaf(() => BtStatus.Failed)
-                                    ),
-                                    new Leaf(MoveToNextGrindNode)
-                                )
-                            )
-                        )
-                     )
-                 )
-             );
+                                        () => NeedToDismount(),
+                                        new Leaf(Dismount),
+                                        new Selector
+                                        (
+                                            () => NeedToTrainSpells(),
+                                            new Leaf(GoToNpcAndTrain),
+                                            new Selector
+                                            (
+                                                () => ThreatsNearby(),
+                                                new Leaf(FightTarget),
+                                                new Selector
+                                                (
+                                                    () => TargetsNearby(),
+                                                    new Selector
+                                                    (
+                                                        () => SelectTarget(),
+                                                        new Leaf(FightTarget),
+                                                        new Leaf(() => BtStatus.Failed)
+                                                    ),
+                                                    new Leaf(MoveToNextGrindNode)
+                                                )
+                                            )
+                                       )
+                                  )
+                              )
+                         )
+                    )
+            );
 
             GrindingTree = new Tree
             (
                 RootSelector
             );
         }
+
         public AmeisenBotInterfaces Bot { get; }
 
         public AmeisenBotConfig Config { get; }
@@ -158,6 +170,35 @@ namespace AmeisenBotX.Core.Engines.Grinding
         private BtStatus Dismount()
         {
             Bot.Wow.DismissCompanion("MOUNT");
+            return BtStatus.Success;
+        }
+
+        private bool NeedToTrainSpells()
+        {
+            return Bot.Character.LastLevelTrained != 0 && Bot.Character.LastLevelTrained < Bot.Player.Level;
+        }
+
+        private BtStatus GoToNpcAndTrain()
+        {
+            List<Trainer> profileTrainers = Profile.Trainers;
+            if (!profileTrainers.Any()) return BtStatus.Failed;
+
+            Trainer firstTrainer = profileTrainers
+                .Where(e => e.Type == NpcType.ClassTrainer && e.SubType == AmeisenBotLogic.DecideClassTrainer(Bot.Player.Class))
+                .OrderBy(e => e.Position.GetDistance(Bot.Player.Position))
+                .FirstOrDefault();
+            if (firstTrainer == null) return BtStatus.Failed;
+
+            if (firstTrainer.Position.GetDistance(Bot.Player.Position) > 5.0f)
+            {
+                Bot.Movement.SetMovementAction(MovementAction.Move, firstTrainer.Position);
+                return BtStatus.Ongoing;
+            }
+            if (firstTrainer.Position.GetDistance(Bot.Player.Position) < 5.0f)
+            {
+                Bot.Movement.StopMovement();
+            }
+
             return BtStatus.Success;
         }
 
@@ -283,6 +324,15 @@ namespace AmeisenBotX.Core.Engines.Grinding
                 return BtStatus.Failed;
 
             Bot.CombatClass.Execute();
+            return BtStatus.Success;
+        }
+
+        private BtStatus InitLastTrainingLevel()
+        {
+            if (Bot.Character.LastLevelTrained != 0)
+                return BtStatus.Failed;
+
+            Bot.Character.LastLevelTrained = Bot.Player.Level;
             return BtStatus.Success;
         }
 
