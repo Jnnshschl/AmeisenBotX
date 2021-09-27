@@ -2,6 +2,7 @@
 using AmeisenBotX.Common.Utils;
 using AmeisenBotX.Core.Engines.Movement.Enums;
 using AmeisenBotX.Core.Engines.Movement.Pathfinding.Objects;
+using AmeisenBotX.Core.Managers.Character.Inventory.Objects;
 using AmeisenBotX.Wow.Objects;
 using AmeisenBotX.Wow.Objects.Enums;
 using System;
@@ -42,8 +43,9 @@ namespace AmeisenBotX.Core.Engines.Quest.Objects.Objectives
                 int amount = Killed;
                 if (CollectQuestItem)
                 {
-                    Character.Inventory.Objects.IWowInventoryItem inventoryItem =
+                    IWowInventoryItem inventoryItem = 
                         Bot.Character.Inventory.Items.Find(item => item.Id == QuestItemId);
+
                     if (inventoryItem != null)
                     {
                         amount = inventoryItem.Count;

@@ -1,5 +1,5 @@
 ﻿using AmeisenBotX.Core;
-using AmeisenBotX.Core.Engines.Character.Inventory.Objects;
+using AmeisenBotX.Core.Managers.Character.Inventory.Objects;
 using AmeisenBotX.Wow.Objects.Enums;
 using System.Windows;
 using System.Windows.Controls;

@@ -1,6 +1,7 @@
 ﻿using AmeisenBotX.Common.Math;
 using AmeisenBotX.Common.Utils;
 using AmeisenBotX.Core.Engines.Movement.Enums;
+using AmeisenBotX.Core.Managers.Character.Inventory.Objects;
 using AmeisenBotX.Wow.Objects;
 using System;
 using System.Collections.Generic;
@@ -33,7 +34,7 @@ namespace AmeisenBotX.Core.Engines.Quest.Objects.Objectives
                     return 100.0;
                 }
 
-                Character.Inventory.Objects.IWowInventoryItem inventoryItem = Bot.Character.Inventory.Items.Find(item => item.Id == ItemId);
+                IWowInventoryItem inventoryItem = Bot.Character.Inventory.Items.Find(item => item.Id == ItemId);
                 return inventoryItem != null ? Math.Min(100.0 * ((float)inventoryItem.Count) / ((float)WantedItemAmount), 100.0) : 0.0;
             }
         }

@@ -1,20 +1,25 @@
 ﻿using AmeisenBotX.Common.Math;
 using AmeisenBotX.Core.Engines.Grinding.Objects;
-using AmeisenBotX.Core.Engines.Npc;
+using AmeisenBotX.Core.Objects.Mail;
+using AmeisenBotX.Core.Objects.Npc;
+using AmeisenBotX.Wow.Objects.Enums;
 using System.Collections.Generic;
 
 namespace AmeisenBotX.Core.Engines.Grinding.Profiles.Profiles.Horde
 {
     public class BarrensGrindTo17 : IGrindingProfile
     {
-        public bool RandomizeSpots { get; } = false;
+        public bool RandomizeSpots => false;
 
         public List<Vendor> Vendors { get; } = new()
         {
-            new Vendor("Nargal Deatheye", 3479, 1, new Vector3(-356.99f, -2568.86f, 95.78f), NpcType.VendorRepair)
+            new Vendor("Nargal Deatheye", 3479,
+                WowMapId.Kalimdor, WowZoneId.TheCrossroads, new Vector3(-356.99f, -2568.86f, 95.78f),
+                NpcType.VendorRepair)
         };
 
         public List<Trainer> Trainers { get; }
+        public List<Mailbox> Mailboxes { get; }
 
         public List<GrindingSpot> Spots { get; } = new()
         {

@@ -4,7 +4,7 @@ using AmeisenBotX.Core.Engines.Dungeon.Objects;
 using AmeisenBotX.Wow.Objects.Enums;
 using System.Collections.Generic;
 
-namespace AmeisenBotX.Core.Engines.Jobs.Profiles
+namespace AmeisenBotX.Core.Engines.Dungeon.Profiles
 {
     public interface IDungeonProfile
     {

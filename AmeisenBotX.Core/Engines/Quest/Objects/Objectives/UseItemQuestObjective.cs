@@ -1,4 +1,4 @@
-﻿using AmeisenBotX.Core.Engines.Character.Inventory.Objects;
+﻿using AmeisenBotX.Core.Managers.Character.Inventory.Objects;
 using System.Linq;
 
 namespace AmeisenBotX.Core.Engines.Quest.Objects.Objectives

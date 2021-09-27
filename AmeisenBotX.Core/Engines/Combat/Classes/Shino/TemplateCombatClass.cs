@@ -1,7 +1,7 @@
 ﻿using AmeisenBotX.Common.Math;
-using AmeisenBotX.Core.Engines.Character.Spells.Objects;
 using AmeisenBotX.Core.Engines.Combat.Classes.Jannis;
 using AmeisenBotX.Core.Engines.Movement.Enums;
+using AmeisenBotX.Core.Managers.Character.Spells.Objects;
 using AmeisenBotX.Wow.Objects;
 using AmeisenBotX.Wow.Objects.Enums;
 using AmeisenBotX.Wow335a.Constants;

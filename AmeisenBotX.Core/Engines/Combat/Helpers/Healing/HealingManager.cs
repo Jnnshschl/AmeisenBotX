@@ -1,5 +1,5 @@
 ﻿using AmeisenBotX.Common.Utils;
-using AmeisenBotX.Core.Engines.Character.Spells.Objects;
+using AmeisenBotX.Core.Managers.Character.Spells.Objects;
 using AmeisenBotX.Wow.Objects;
 using System;
 using System.Collections.Generic;

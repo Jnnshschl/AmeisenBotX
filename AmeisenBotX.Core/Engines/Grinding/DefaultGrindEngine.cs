@@ -5,8 +5,8 @@ using AmeisenBotX.Common.Math;
 using AmeisenBotX.Core.Engines.Grinding.Objects;
 using AmeisenBotX.Core.Engines.Grinding.Profiles;
 using AmeisenBotX.Core.Engines.Movement.Enums;
-using AmeisenBotX.Core.Engines.Npc;
 using AmeisenBotX.Core.Logic;
+using AmeisenBotX.Core.Objects.Npc;
 using AmeisenBotX.Wow.Objects;
 using System;
 using System.Collections.Generic;
@@ -175,7 +175,11 @@ namespace AmeisenBotX.Core.Engines.Grinding
 
         private bool NeedToTrainSpells()
         {
-            return Bot.Character.LastLevelTrained != 0 && Bot.Character.LastLevelTrained < Bot.Player.Level;
+            bool levelGreaterThenLastTrained = Bot.Character.LastLevelTrained != 0 
+                                               && Bot.Character.LastLevelTrained < Bot.Player.Level;
+            bool hasMoney = Bot.Character.Money > 10;
+
+            return levelGreaterThenLastTrained && hasMoney;
         }
 
         private BtStatus GoToNpcAndTrain()

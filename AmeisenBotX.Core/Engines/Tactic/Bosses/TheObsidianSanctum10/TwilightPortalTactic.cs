@@ -6,7 +6,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 
-namespace AmeisenBotX.Core.Engines.Tactic.Bosses.TheObsidianDungeon
+namespace AmeisenBotX.Core.Engines.Tactic.Bosses.TheObsidianSanctum10
 {
     public class TwilightPortalTactic : ITactic
     {

@@ -1,9 +1,9 @@
-﻿using AmeisenBotX.Core.Engines.Character;
-using AmeisenBotX.Core.Engines.Character.Comparators;
-using AmeisenBotX.Core.Engines.Character.Spells.Objects;
-using AmeisenBotX.Core.Engines.Character.Talents.Objects;
-using AmeisenBotX.Core.Logic.CombatClasses.Shino;
+﻿using AmeisenBotX.Core.Logic.CombatClasses.Shino;
 using AmeisenBotX.Core.Logic.Utils.Auras.Objects;
+using AmeisenBotX.Core.Managers.Character;
+using AmeisenBotX.Core.Managers.Character.Comparators;
+using AmeisenBotX.Core.Managers.Character.Spells.Objects;
+using AmeisenBotX.Core.Managers.Character.Talents.Objects;
 using AmeisenBotX.Wow.Objects.Enums;
 using AmeisenBotX.Wow335a.Constants;
 using System.Collections.Generic;

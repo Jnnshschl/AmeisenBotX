@@ -1,5 +1,5 @@
 ﻿using AmeisenBotX.Core.Engines.Dungeon.Objects;
-using AmeisenBotX.Core.Engines.Jobs.Profiles;
+using AmeisenBotX.Core.Engines.Dungeon.Profiles;
 using AmeisenBotX.Wow.Objects.Enums;
 using System.Collections.Generic;
 

@@ -1,5 +1,5 @@
-﻿using AmeisenBotX.Core.Engines.Character.Inventory;
-using AmeisenBotX.Core.Engines.Character.Inventory.Objects;
+﻿using AmeisenBotX.Core.Managers.Character.Inventory;
+using AmeisenBotX.Core.Managers.Character.Inventory.Objects;
 using AmeisenBotX.Wow.Objects.Enums;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using System.Collections.Generic;

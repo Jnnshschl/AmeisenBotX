@@ -1,8 +1,6 @@
 ﻿using AmeisenBotX.Common.Math;
 using AmeisenBotX.Common.Utils;
 using AmeisenBotX.Core.Engines.Battleground;
-using AmeisenBotX.Core.Engines.Character;
-using AmeisenBotX.Core.Engines.Chat;
 using AmeisenBotX.Core.Engines.Combat.Classes;
 using AmeisenBotX.Core.Engines.Dungeon;
 using AmeisenBotX.Core.Engines.Grinding;
@@ -12,6 +10,8 @@ using AmeisenBotX.Core.Engines.Movement.Pathfinding;
 using AmeisenBotX.Core.Engines.Quest;
 using AmeisenBotX.Core.Engines.Tactic;
 using AmeisenBotX.Core.Engines.Test;
+using AmeisenBotX.Core.Managers.Character;
+using AmeisenBotX.Core.Managers.Chat;
 using AmeisenBotX.Memory;
 using AmeisenBotX.RconClient;
 using AmeisenBotX.Wow;
