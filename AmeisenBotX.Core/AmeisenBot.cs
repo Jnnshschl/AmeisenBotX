@@ -5,10 +5,6 @@ using AmeisenBotX.Core.Engines.Battleground;
 using AmeisenBotX.Core.Engines.Battleground.einTyp;
 using AmeisenBotX.Core.Engines.Battleground.Jannis;
 using AmeisenBotX.Core.Engines.Battleground.KamelBG;
-using AmeisenBotX.Core.Engines.Character;
-using AmeisenBotX.Core.Engines.Character.Inventory;
-using AmeisenBotX.Core.Engines.Character.Inventory.Objects;
-using AmeisenBotX.Core.Engines.Chat;
 using AmeisenBotX.Core.Engines.Combat.Classes;
 using AmeisenBotX.Core.Engines.Dungeon;
 using AmeisenBotX.Core.Engines.Grinding;
@@ -29,6 +25,10 @@ using AmeisenBotX.Core.Engines.Tactic;
 using AmeisenBotX.Core.Engines.Test;
 using AmeisenBotX.Core.Logic;
 using AmeisenBotX.Core.Logic.Routines;
+using AmeisenBotX.Core.Managers.Character;
+using AmeisenBotX.Core.Managers.Character.Inventory;
+using AmeisenBotX.Core.Managers.Character.Inventory.Objects;
+using AmeisenBotX.Core.Managers.Chat;
 using AmeisenBotX.Logging;
 using AmeisenBotX.Logging.Enums;
 using AmeisenBotX.Memory;
@@ -488,7 +488,7 @@ namespace AmeisenBotX.Core
             IEnumerable<Type> combatClassTypes = AppDomain.CurrentDomain.GetAssemblies()
                 .SelectMany(x => x.GetTypes())
                 .Where(x => x.GetInterfaces().Contains(typeof(ICombatClass)))
-                .Where(x => x.Namespace.Contains(combatClassNamespace));
+                .Where(x => x.Namespace != null && x.Namespace.Contains(combatClassNamespace));
 
             List<ICombatClass> combatClassInstances = new();
 

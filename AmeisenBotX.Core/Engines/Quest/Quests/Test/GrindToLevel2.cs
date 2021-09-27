@@ -3,7 +3,7 @@ using AmeisenBotX.Core.Engines.Quest.Objects.Objectives;
 using AmeisenBotX.Core.Engines.Quest.Objects.Quests;
 using System.Collections.Generic;
 
-namespace AmeisenBotX.Core.Engines.Quest.Quests.StartArea.ValleyOfStrength
+namespace AmeisenBotX.Core.Engines.Quest.Quests.Test
 {
     internal class GrindToLevel2 : GrindingBotQuest
     {

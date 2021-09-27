@@ -1,11 +1,11 @@
 ﻿using AmeisenBotX.Common.Math;
 using AmeisenBotX.Common.Utils;
-using AmeisenBotX.Core.Engines.Character.Comparators;
-using AmeisenBotX.Core.Engines.Character.Talents.Objects;
 using AmeisenBotX.Core.Engines.Combat.Helpers;
 using AmeisenBotX.Core.Engines.Combat.Helpers.Aura;
 using AmeisenBotX.Core.Engines.Combat.Helpers.Targets;
 using AmeisenBotX.Core.Engines.Movement.Enums;
+using AmeisenBotX.Core.Managers.Character.Comparators;
+using AmeisenBotX.Core.Managers.Character.Talents.Objects;
 using AmeisenBotX.Logging;
 using AmeisenBotX.Logging.Enums;
 using AmeisenBotX.Wow.Objects;
@@ -251,32 +251,6 @@ namespace AmeisenBotX.Core.Engines.Combat.Classes.Bia10
 
             ResurrectionTargets.Add(name, DateTime.Now + TimeSpan.FromSeconds(10));
             return TryCastSpell(spellName, player.Guid, true);
-        }
-
-        protected string SelectSpell(out ulong targetGuid)
-        {
-            if (Bot.Player.HealthPercentage < DataConstants.HealSelfPercentage
-                && ValidateSpell(Shaman335a.HealingWave, true))
-            {
-                targetGuid = Bot.Player.Guid;
-                return Shaman335a.HealingWave;
-            }
-            if (Bot.Target?.HealthPercentage >= 3
-                && IsInSpellRange(Bot.Target, Shaman335a.EarthShock)
-                && ValidateSpell(Shaman335a.EarthShock, true))
-            {
-                targetGuid = Bot.Target.Guid;
-                return Shaman335a.EarthShock;
-            }
-            if (IsInSpellRange(Bot.Target, Shaman335a.LightningBolt)
-                && ValidateSpell(Shaman335a.LightningBolt, true))
-            {
-                targetGuid = Bot.Target.Guid;
-                return Shaman335a.LightningBolt;
-            }
-
-            targetGuid = 9999999;
-            return string.Empty;
         }
 
         public bool ValidateSpell(string spellName, bool checkGCD)

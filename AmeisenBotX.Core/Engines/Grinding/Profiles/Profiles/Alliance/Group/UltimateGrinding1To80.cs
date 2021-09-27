@@ -1,5 +1,6 @@
 ﻿using AmeisenBotX.Core.Engines.Grinding.Objects;
-using AmeisenBotX.Core.Engines.Npc;
+using AmeisenBotX.Core.Objects.Mail;
+using AmeisenBotX.Core.Objects.Npc;
 using System.Collections.Generic;
 
 namespace AmeisenBotX.Core.Engines.Grinding.Profiles.Profiles.Alliance.Group
@@ -11,6 +12,8 @@ namespace AmeisenBotX.Core.Engines.Grinding.Profiles.Profiles.Alliance.Group
         public List<Vendor> Vendors { get; }
 
         public List<Trainer> Trainers { get; }
+
+        public List<Mailbox> Mailboxes { get; }
 
         public List<GrindingSpot> Spots { get; } = new()
         {

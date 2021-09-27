@@ -1,7 +1,7 @@
-﻿using AmeisenBotX.Core.Engines.Character.Comparators;
-using AmeisenBotX.Core.Engines.Character.Talents.Objects;
-using AmeisenBotX.Core.Engines.Combat.Helpers;
+﻿using AmeisenBotX.Core.Engines.Combat.Helpers;
 using AmeisenBotX.Core.Logic.Utils.Auras.Objects;
+using AmeisenBotX.Core.Managers.Character.Comparators;
+using AmeisenBotX.Core.Managers.Character.Talents.Objects;
 using AmeisenBotX.Wow.Objects.Enums;
 using AmeisenBotX.Wow335a.Constants;
 using System.Collections.Generic;
@@ -100,5 +100,32 @@ namespace AmeisenBotX.Core.Engines.Combat.Classes.Bia10
             enchantName = string.Empty;
             return string.Empty;
         }
+
+        private string SelectSpell(out ulong targetGuid)
+        {
+            if (Bot.Player.HealthPercentage < DataConstants.HealSelfPercentage
+                && ValidateSpell(Shaman335a.HealingWave, true))
+            {
+                targetGuid = Bot.Player.Guid;
+                return Shaman335a.HealingWave;
+            }
+            if (Bot.Target?.HealthPercentage >= 3
+                && IsInSpellRange(Bot.Target, Shaman335a.EarthShock)
+                && ValidateSpell(Shaman335a.EarthShock, true))
+            {
+                targetGuid = Bot.Target.Guid;
+                return Shaman335a.EarthShock;
+            }
+            if (IsInSpellRange(Bot.Target, Shaman335a.LightningBolt)
+                && ValidateSpell(Shaman335a.LightningBolt, true))
+            {
+                targetGuid = Bot.Target.Guid;
+                return Shaman335a.LightningBolt;
+            }
+
+            targetGuid = 9999999;
+            return string.Empty;
+        }
+
     }
 }
