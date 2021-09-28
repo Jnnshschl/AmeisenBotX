@@ -113,7 +113,85 @@
                         <SolidColorBrush Color="{DynamicResource DarkForeground}" />
                     </Border.BorderBrush>
                     <Grid>
-                        <ListView x:Name="listviewNearWowObjects" Background="{x:Null}" BorderBrush="{x:Null}" Foreground="White" FontFamily="Bahnschrift Light" />
+                        <TabControl x:Name="tabControlNearWowObjects" Margin="4,4,4,4" Background="{x:Null}" BorderBrush="{x:Null}" BorderThickness="0">
+                            <TabItem Header="Items" Background="{x:Null}" Foreground="White" BorderBrush="{x:Null}" BorderThickness="0">
+                                <Border BorderThickness="0,1,0,0" Margin="0,-3,0,0">
+                                    <Border.BorderBrush>
+                                        <SolidColorBrush Color="{DynamicResource DarkForeground}" />
+                                    </Border.BorderBrush>
+                                    <Grid>
+                                        <ListView x:Name="listViewItems" Background="{x:Null}" BorderBrush="{x:Null}" Foreground="White" FontFamily="Bahnschrift Light">
+                                        </ListView>
+                                    </Grid>
+                                </Border>
+                            </TabItem>
+                            <TabItem Header="Containers" Background="{x:Null}" Foreground="White" BorderBrush="{x:Null}" BorderThickness="0">
+                                <Border BorderThickness="0,1,0,0" Margin="0,-3,0,0">
+                                    <Border.BorderBrush>
+                                        <SolidColorBrush Color="{DynamicResource DarkForeground}" />
+                                    </Border.BorderBrush>
+                                    <Grid>
+                                        <ListView x:Name="listViewContainers" Background="{x:Null}" BorderBrush="{x:Null}" Foreground="White" FontFamily="Bahnschrift Light">
+                                        </ListView>
+                                    </Grid>
+                                </Border>
+                            </TabItem>
+                            <TabItem Header="Units" Background="{x:Null}" Foreground="White" BorderBrush="{x:Null}" BorderThickness="0">
+                                <Border BorderThickness="0,1,0,0" Margin="0,-3,0,0">
+                                    <Border.BorderBrush>
+                                        <SolidColorBrush Color="{DynamicResource DarkForeground}" />
+                                    </Border.BorderBrush>
+                                    <Grid>
+                                        <ListView x:Name="listViewUnits" Background="{x:Null}" BorderBrush="{x:Null}" Foreground="White" FontFamily="Bahnschrift Light">
+                                        </ListView>
+                                    </Grid>
+                                </Border>
+                            </TabItem>
+                            <TabItem Header="Players" Background="{x:Null}" Foreground="White" BorderBrush="{x:Null}" BorderThickness="0">
+                                <Border BorderThickness="0,1,0,0" Margin="0,-3,0,0">
+                                    <Border.BorderBrush>
+                                        <SolidColorBrush Color="{DynamicResource DarkForeground}" />
+                                    </Border.BorderBrush>
+                                    <Grid>
+                                        <ListView x:Name="listViewPlayers" Background="{x:Null}" BorderBrush="{x:Null}" Foreground="White" FontFamily="Bahnschrift Light">
+                                        </ListView>
+                                    </Grid>
+                                </Border>
+                            </TabItem>
+                            <TabItem Header="GameObjects" Background="{x:Null}" Foreground="White" BorderBrush="{x:Null}" BorderThickness="0">
+                                <Border BorderThickness="0,1,0,0" Margin="0,-3,0,0">
+                                    <Border.BorderBrush>
+                                        <SolidColorBrush Color="{DynamicResource DarkForeground}" />
+                                    </Border.BorderBrush>
+                                    <Grid>
+                                        <ListView x:Name="listViewGameObjects" Background="{x:Null}" BorderBrush="{x:Null}" Foreground="White" FontFamily="Bahnschrift Light">
+                                        </ListView>
+                                    </Grid>
+                                </Border>
+                            </TabItem>
+                            <TabItem Header="DynamicObjects" Background="{x:Null}" Foreground="White" BorderBrush="{x:Null}" BorderThickness="0">
+                                <Border BorderThickness="0,1,0,0" Margin="0,-3,0,0">
+                                    <Border.BorderBrush>
+                                        <SolidColorBrush Color="{DynamicResource DarkForeground}" />
+                                    </Border.BorderBrush>
+                                    <Grid>
+                                        <ListView x:Name="listViewDynamicObjects" Background="{x:Null}" BorderBrush="{x:Null}" Foreground="White" FontFamily="Bahnschrift Light">
+                                        </ListView>
+                                    </Grid>
+                                </Border>
+                            </TabItem>
+                            <TabItem Header="Corpses" Background="{x:Null}" Foreground="White" BorderBrush="{x:Null}" BorderThickness="0">
+                                <Border BorderThickness="0,1,0,0" Margin="0,-3,0,0">
+                                    <Border.BorderBrush>
+                                        <SolidColorBrush Color="{DynamicResource DarkForeground}" />
+                                    </Border.BorderBrush>
+                                    <Grid>
+                                        <ListView x:Name="listViewCorpses" Background="{x:Null}" BorderBrush="{x:Null}" Foreground="White" FontFamily="Bahnschrift Light">
+                                        </ListView>
+                                    </Grid>
+                                </Border>
+                            </TabItem>
+                        </TabControl>
                     </Grid>
                 </Border>
             </TabItem>
