@@ -180,6 +180,7 @@
                                     </Grid>
                                 </Border>
                             </TabItem>
+
                             <TabItem Header="Corpses" Background="{x:Null}" Foreground="White" BorderBrush="{x:Null}" BorderThickness="0">
                                 <Border BorderThickness="0,1,0,0" Margin="0,-3,0,0">
                                     <Border.BorderBrush>
@@ -187,6 +188,28 @@
                                     </Border.BorderBrush>
                                     <Grid>
                                         <ListView x:Name="listViewCorpses" Background="{x:Null}" BorderBrush="{x:Null}" Foreground="White" FontFamily="Bahnschrift Light">
+                                        </ListView>
+                                    </Grid>
+                                </Border>
+                            </TabItem>
+                            <TabItem Header="AiGroups" Background="{x:Null}" Foreground="White" BorderBrush="{x:Null}" BorderThickness="0">
+                                <Border BorderThickness="0,1,0,0" Margin="0,-3,0,0">
+                                    <Border.BorderBrush>
+                                        <SolidColorBrush Color="{DynamicResource DarkForeground}" />
+                                    </Border.BorderBrush>
+                                    <Grid>
+                                        <ListView x:Name="listViewAiGroups" Background="{x:Null}" BorderBrush="{x:Null}" Foreground="White" FontFamily="Bahnschrift Light">
+                                        </ListView>
+                                    </Grid>
+                                </Border>
+                            </TabItem>
+                            <TabItem Header="AreaTriggers" Background="{x:Null}" Foreground="White" BorderBrush="{x:Null}" BorderThickness="0">
+                                <Border BorderThickness="0,1,0,0" Margin="0,-3,0,0">
+                                    <Border.BorderBrush>
+                                        <SolidColorBrush Color="{DynamicResource DarkForeground}" />
+                                    </Border.BorderBrush>
+                                    <Grid>
+                                        <ListView x:Name="listViewAreaTriggers" Background="{x:Null}" BorderBrush="{x:Null}" Foreground="White" FontFamily="Bahnschrift Light">
                                         </ListView>
                                     </Grid>
                                 </Border>

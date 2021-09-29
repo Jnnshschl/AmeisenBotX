@@ -14,14 +14,14 @@ namespace AmeisenBotX.Core.Engines.Grinding.Profiles.Profiles.Horde
         public List<Vendor> Vendors { get; } = new()
         {
             new Vendor("Duokna", 3158,
-                WowMapId.Kalimdor, WowZoneId.ValleyofTrials, new Vector3(-565.42f, -4214.2f, 41.59f),
+                WowMapId.Kalimdor, WowZoneId.ValleyofTrials, new Vector3(-565, -4214, 41),
                 NpcType.VendorSellBuy)
         };
 
         public List<Trainer> Trainers { get; } = new()
         {
             new Trainer("Ken'jai", 3707,
-                WowMapId.Kalimdor, WowZoneId.ValleyofTrials, new Vector3(-617.39f, -4202.4f, 38.13f),
+                WowMapId.Kalimdor, WowZoneId.ValleyofTrials, new Vector3(-617, -4202, 38),
                 NpcType.ClassTrainer, NpcSubType.PriestTrainer)
         };
 

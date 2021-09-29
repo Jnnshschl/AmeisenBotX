@@ -5,13 +5,15 @@ namespace AmeisenBotX.Core.Objects.Mail
 {
     public class Mailbox
     {
+        public int EntryId;
         public WowMapId MapId;
         public WowZoneId ZoneId;
         public Vector3 Position;
         public readonly MailboxFactionType FactionType;
 
-        public Mailbox(WowMapId mapId, WowZoneId zoneId, Vector3 position, MailboxFactionType factionType)
+        public Mailbox(int entryId, WowMapId mapId, WowZoneId zoneId, Vector3 position, MailboxFactionType factionType)
         {
+            EntryId = entryId;
             MapId = mapId;
             ZoneId = zoneId;
             Position = position;

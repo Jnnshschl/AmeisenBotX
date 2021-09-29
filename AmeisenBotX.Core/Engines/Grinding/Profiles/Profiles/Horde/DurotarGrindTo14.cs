@@ -14,7 +14,7 @@ namespace AmeisenBotX.Core.Engines.Grinding.Profiles.Profiles.Horde
         public List<Vendor> Vendors { get; } = new()
         {
             new Vendor("Wuark", 3167,
-                WowMapId.Kalimdor, WowZoneId.RazorHill, new Vector3(358.12f, -4706.73f, 14.39f),
+                WowMapId.Kalimdor, WowZoneId.RazorHill, new Vector3(358, -4706, 14),
                 NpcType.VendorRepair)
         };
 
@@ -22,7 +22,8 @@ namespace AmeisenBotX.Core.Engines.Grinding.Profiles.Profiles.Horde
 
         public List<Mailbox> Mailboxes { get; } = new()
         {
-            new Mailbox(WowMapId.Kalimdor, WowZoneId.RazorHill, new Vector3(322.40f, -4706.9f, 14.68f),
+            new Mailbox(143981,
+                WowMapId.Kalimdor, WowZoneId.RazorHill, new Vector3(322, -4706, 14),
                 MailboxFactionType.Horde)
         };
 
