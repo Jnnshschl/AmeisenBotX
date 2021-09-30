@@ -1,7 +1,8 @@
-﻿namespace AmeisenBotX.Core.Objects.Npc
+﻿namespace AmeisenBotX.Core.Objects.Enums
 {
     public enum NpcSubType
     {
+        None = -1,
         // Class trainers
         DeathKnightTrainer = 0,
         DruidTrainer = 1,

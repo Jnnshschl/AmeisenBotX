@@ -6,7 +6,8 @@ using AmeisenBotX.Core.Engines.Grinding.Objects;
 using AmeisenBotX.Core.Engines.Grinding.Profiles;
 using AmeisenBotX.Core.Engines.Movement.Enums;
 using AmeisenBotX.Core.Logic;
-using AmeisenBotX.Core.Objects.Npc;
+using AmeisenBotX.Core.Objects;
+using AmeisenBotX.Core.Objects.Enums;
 using AmeisenBotX.Wow.Objects;
 using System;
 using System.Collections.Generic;
@@ -115,8 +116,8 @@ namespace AmeisenBotX.Core.Engines.Grinding
         private BtStatus GoToNpcAndRepair()
         {
             List<Vector3> repairNpcsPos = (
-                from vendor in Profile.Vendors 
-                where vendor.Type == NpcType.VendorRepair 
+                from vendor in Profile.NpcsOfInterest
+                where vendor.Type == NpcType.VendorRepair
                 select vendor.Position).ToList();
 
             Vector3 repairNpc = repairNpcsPos.OrderBy(e => e.GetDistance(Bot.Player.Position)).First();
@@ -140,10 +141,10 @@ namespace AmeisenBotX.Core.Engines.Grinding
 
         private BtStatus GoToNpcAndSell()
         {
-            List<Vendor> profileVendors = Profile.Vendors;
+            List<Npc> profileVendors = Profile.NpcsOfInterest;
             if (!profileVendors.Any()) return BtStatus.Failed;
 
-            Vendor firstVendor = profileVendors
+            Npc firstVendor = profileVendors
                 .Where(e => e.Type is NpcType.VendorSellBuy or NpcType.VendorRepair)
                 .OrderBy(e => e.Position.GetDistance(Bot.Player.Position))
                 .FirstOrDefault();
@@ -184,10 +185,10 @@ namespace AmeisenBotX.Core.Engines.Grinding
 
         private BtStatus GoToNpcAndTrain()
         {
-            List<Trainer> profileTrainers = Profile.Trainers;
+            List<Npc> profileTrainers = Profile.NpcsOfInterest;
             if (!profileTrainers.Any()) return BtStatus.Failed;
 
-            Trainer firstTrainer = profileTrainers
+            Npc firstTrainer = profileTrainers
                 .Where(e => e.Type == NpcType.ClassTrainer && e.SubType == AmeisenBotLogic.DecideClassTrainer(Bot.Player.Class))
                 .OrderBy(e => e.Position.GetDistance(Bot.Player.Position))
                 .FirstOrDefault();

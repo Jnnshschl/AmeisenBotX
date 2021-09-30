@@ -1,31 +1,17 @@
 ﻿using AmeisenBotX.Common.Math;
 using AmeisenBotX.Core.Engines.Grinding.Objects;
-using AmeisenBotX.Core.Objects.Mail;
-using AmeisenBotX.Core.Objects.Npc;
-using AmeisenBotX.Wow.Objects.Enums;
+using AmeisenBotX.Core.Objects;
 using System.Collections.Generic;
 
-namespace AmeisenBotX.Core.Engines.Grinding.Profiles.Profiles.Horde
+namespace AmeisenBotX.Core.Engines.Grinding.Profiles.Horde
 {
     public class DurotarGrindTo6 : IGrindingProfile
     {
         public bool RandomizeSpots => true;
 
-        public List<Vendor> Vendors { get; } = new()
-        {
-            new Vendor("Duokna", 3158,
-                WowMapId.Kalimdor, WowZoneId.ValleyofTrials, new Vector3(-565, -4214, 41),
-                NpcType.VendorSellBuy)
-        };
+        public List<Npc> NpcsOfInterest { get; }
 
-        public List<Trainer> Trainers { get; } = new()
-        {
-            new Trainer("Ken'jai", 3707,
-                WowMapId.Kalimdor, WowZoneId.ValleyofTrials, new Vector3(-617, -4202, 38),
-                NpcType.ClassTrainer, NpcSubType.PriestTrainer)
-        };
-
-        public List<Mailbox> Mailboxes { get; }
+        public List<InteractableObject> ObjectsOfInterest { get; }
 
         public List<GrindingSpot> Spots { get; } = new()
         {
