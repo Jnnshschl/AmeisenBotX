@@ -367,6 +367,11 @@ namespace AmeisenBotX
                     }
                     break;
 
+                case MainTab.Lua:
+                    break;
+                case MainTab.Events:
+                    break;
+
                 default:
                     throw new ArgumentOutOfRangeException();
             }
@@ -396,7 +401,7 @@ namespace AmeisenBotX
             for (int i = 0; i < posComponents.Length; i++)
                 cleanComponents[i] = posComponents[i].Split(".")[0];
 
-            string finalPosStr = "new Vector(" + cleanComponents[0] + ", " + cleanComponents[1] + ", " + cleanComponents[2] + ")";
+            string finalPosStr = "new Vector3(" + cleanComponents[0] + ", " + cleanComponents[1] + ", " + cleanComponents[2] + ")";
             Clipboard.SetDataObject(entryId + ", " + finalPosStr);
         }
 
@@ -408,7 +413,9 @@ namespace AmeisenBotX
             CacheNames,
             CacheReactions,
             CacheSpellNames,
-            NearWowObjects
+            NearWowObjects,
+            Lua,
+            Events
         }
 
         private enum NearWowObjectsTab

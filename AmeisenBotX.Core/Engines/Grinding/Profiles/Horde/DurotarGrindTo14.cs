@@ -11,7 +11,12 @@ namespace AmeisenBotX.Core.Engines.Grinding.Profiles.Horde
     {
         public bool RandomizeSpots => false;
 
-        public List<Npc> NpcsOfInterest { get; }
+        public List<Npc> NpcsOfInterest { get; } = new()
+        {
+            new Npc("Wuark", 3167,
+                WowMapId.Kalimdor, WowZoneId.RazorHill, new Vector3(358, -4706, 14),
+                NpcType.VendorRepair),
+        };
 
         public List<InteractableObject> ObjectsOfInterest { get; } = new()
         {

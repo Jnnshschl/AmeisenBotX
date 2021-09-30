@@ -105,7 +105,40 @@ namespace AmeisenBotX.Core.Engines.Combat.Classes.Bia10
                 Bot.Wow.StartAutoAttack();
             }*/
 
-            if (!IsInSpellRange(target, Shaman335a.LightningBolt)
+            var spellToCheck = string.Empty;
+            var charClass = Bot.Player.Class;
+            switch (charClass)
+            {
+                case WowClass.None:
+                    break;
+                case WowClass.Warrior:
+                    break;
+                case WowClass.Paladin:
+                    break;
+                case WowClass.Hunter:
+                    break;
+                case WowClass.Rogue:
+                    break;
+                case WowClass.Priest:
+                    spellToCheck = Priest335a.Smite;
+                    break;
+                case WowClass.Deathknight:
+                    break;
+                case WowClass.Shaman:
+                    spellToCheck = Shaman335a.LightningBolt;
+                    break;
+                case WowClass.Mage:
+                    break;
+                case WowClass.Warlock:
+                    break;
+                case WowClass.Druid:
+                    break;
+
+                default:
+                    throw new ArgumentOutOfRangeException();
+            }
+
+            if (!IsInSpellRange(target, spellToCheck)
                 || !Bot.Wow.IsInLineOfSight(Bot.Player.Position, target.Position))
                 Bot.Movement.SetMovementAction(MovementAction.Move, target.Position);
         }
