@@ -1,4 +1,5 @@
-﻿using AmeisenBotX.Core.Managers.Character.Comparators;
+﻿using AmeisenBotX.Core.Logic.Utils.Auras.Objects;
+using AmeisenBotX.Core.Managers.Character.Comparators;
 using AmeisenBotX.Core.Managers.Character.Talents.Objects;
 using AmeisenBotX.Wow.Objects.Enums;
 using AmeisenBotX.Wow335a.Constants;
@@ -10,6 +11,15 @@ namespace AmeisenBotX.Core.Engines.Combat.Classes.Bia10
     {
         public PriestShadow(AmeisenBotInterfaces bot) : base(bot)
         {
+            MyAuraManager.Jobs.Add(new KeepActiveAuraJob(bot.Db, Priest335a.PowerWordFortitude, () =>
+                Bot.Player.ManaPercentage > 60.0
+                && ValidateSpell(Priest335a.PowerWordFortitude, true)
+                && TryCastSpell(Priest335a.PowerWordFortitude, Bot.Player.Guid, true)));
+
+            TargetAuraManager.Jobs.Add(new KeepActiveAuraJob(bot.Db, Priest335a.ShadowWordPain, () =>
+                Bot.Target?.HealthPercentage >= 5
+                && ValidateSpell(Priest335a.ShadowWordPain, true)
+                && TryCastSpell(Priest335a.ShadowWordPain, Bot.Wow.TargetGuid, true)));
         }
 
         public override string Version => "1.0";
