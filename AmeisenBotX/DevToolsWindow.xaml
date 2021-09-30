@@ -3,7 +3,6 @@
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
-        xmlns:local="clr-namespace:AmeisenBotX"
         mc:Ignorable="d"
         Title="Settings" Height="390" Width="686" MinHeight="390" MinWidth="686" WindowStyle="None" AllowsTransparency="True" BorderThickness="1" ResizeMode="CanResizeWithGrip" Icon="icon.png" MouseLeftButtonDown="Window_MouseLeftButtonDown">
     <Window.BorderBrush>
@@ -180,7 +179,6 @@
                                     </Grid>
                                 </Border>
                             </TabItem>
-
                             <TabItem Header="Corpses" Background="{x:Null}" Foreground="White" BorderBrush="{x:Null}" BorderThickness="0">
                                 <Border BorderThickness="0,1,0,0" Margin="0,-3,0,0">
                                     <Border.BorderBrush>

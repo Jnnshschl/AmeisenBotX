@@ -14,7 +14,7 @@ using System.Windows.Input;
 
 namespace AmeisenBotX
 {
-    public partial class DevToolsWindow : Window
+    public partial class DevToolsWindow
     {
         public DevToolsWindow(AmeisenBot ameisenBot)
         {
@@ -23,7 +23,7 @@ namespace AmeisenBotX
             InitializeComponent();
         }
 
-        public AmeisenBot AmeisenBot { get; private set; }
+        private AmeisenBot AmeisenBot { get; }
 
         private void ButtonEventClear_Click(object sender, RoutedEventArgs e)
         {
@@ -179,9 +179,11 @@ namespace AmeisenBotX
                     {
                         listviewCacheReactions.Items.Clear();
 
+                        // todo: resolve ... name = mapIdPair implies enum WowMapId not int
                         foreach (KeyValuePair<int, Dictionary<int, WowUnitReaction>> mapIdPair in AmeisenBot.Bot.Db.AllReactions()
                             .OrderBy(e => e.Key))
                         {
+                            // todo: same ... typePair as enum? or intPair as int?
                             foreach (KeyValuePair<int, WowUnitReaction> typePair in mapIdPair.Value
                                 .OrderBy(e => e.Key))
                             {

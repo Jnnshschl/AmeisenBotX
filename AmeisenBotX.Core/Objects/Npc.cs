@@ -1,19 +1,21 @@
 ﻿using AmeisenBotX.Common.Math;
+using AmeisenBotX.Core.Objects.Enums;
 using AmeisenBotX.Wow.Objects.Enums;
 
-namespace AmeisenBotX.Core.Objects.Npc
+namespace AmeisenBotX.Core.Objects
 {
-    public class Trainer
+    public class Npc
     {
         public string Name;
-        public int EntryId;
+        public readonly int EntryId;
         public WowMapId MapId;
         public WowZoneId ZoneId;
         public Vector3 Position;
         public readonly NpcType Type;
         public readonly NpcSubType SubType;
 
-        public Trainer(string name, int entryId, WowMapId mapId, WowZoneId zoneId, Vector3 position, NpcType type, NpcSubType subType)
+        public Npc(string name, int entryId, WowMapId mapId, WowZoneId zoneId, Vector3 position,
+            NpcType type, NpcSubType subType = NpcSubType.None)
         {
             Name = name;
             EntryId = entryId;
