@@ -14,7 +14,7 @@ namespace AmeisenBotX.Core.Engines.Grinding.Profiles.Profiles.Horde
         public List<Vendor> Vendors { get; } = new()
         {
             new Vendor("Trayexir", 10369,
-                WowMapId.Kalimdor, WowZoneId.SenjinVillage, new Vector3(-769.15f, -4948.53f, 22.84f),
+                WowMapId.Kalimdor, WowZoneId.SenjinVillage, new Vector3(-769, -4948, 22),
                 NpcType.VendorRepair)
         };
 
