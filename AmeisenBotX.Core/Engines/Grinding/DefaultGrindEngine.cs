@@ -178,20 +178,24 @@ namespace AmeisenBotX.Core.Engines.Grinding
         {
             bool levelGreaterThenLastTrained = Bot.Character.LastLevelTrained != 0 
                                                && Bot.Character.LastLevelTrained < Bot.Player.Level;
+
             bool hasMoney = Bot.Character.Money > 10;
 
-            return levelGreaterThenLastTrained && hasMoney;
+            Npc trainer = Profile.NpcsOfInterest?
+                .Where(e => e.Type == NpcType.ClassTrainer && e.SubType == AmeisenBotLogic.DecideClassTrainer(Bot.Player.Class))
+                .OrderBy(e => e.Position.GetDistance(Bot.Player.Position))
+                .FirstOrDefault();
+
+            return trainer != null && levelGreaterThenLastTrained && hasMoney ;
         }
 
         private BtStatus GoToNpcAndTrain()
         {
-            List<Npc> profileTrainers = Profile.NpcsOfInterest;
-            if (!profileTrainers.Any()) return BtStatus.Failed;
-
-            Npc firstTrainer = profileTrainers
+            Npc firstTrainer = Profile.NpcsOfInterest?
                 .Where(e => e.Type == NpcType.ClassTrainer && e.SubType == AmeisenBotLogic.DecideClassTrainer(Bot.Player.Class))
                 .OrderBy(e => e.Position.GetDistance(Bot.Player.Position))
                 .FirstOrDefault();
+
             if (firstTrainer == null) return BtStatus.Failed;
 
             if (firstTrainer.Position.GetDistance(Bot.Player.Position) > 5.0f)

@@ -1,6 +1,8 @@
 ﻿using AmeisenBotX.Common.Math;
 using AmeisenBotX.Core.Engines.Grinding.Objects;
 using AmeisenBotX.Core.Objects;
+using AmeisenBotX.Core.Objects.Enums;
+using AmeisenBotX.Wow.Objects.Enums;
 using System.Collections.Generic;
 
 namespace AmeisenBotX.Core.Engines.Grinding.Profiles.Horde
@@ -9,7 +11,12 @@ namespace AmeisenBotX.Core.Engines.Grinding.Profiles.Horde
     {
         public bool RandomizeSpots => false;
 
-        public List<Npc> NpcsOfInterest { get; }
+        public List<Npc> NpcsOfInterest { get; } = new()
+        {
+            new Npc("Trayexir", 10369,
+                WowMapId.Kalimdor, WowZoneId.SenjinVillage, new Vector3(-769, -4948, 22),
+                NpcType.VendorRepair)
+        };
 
         public List<InteractableObject> ObjectsOfInterest { get; }
 
