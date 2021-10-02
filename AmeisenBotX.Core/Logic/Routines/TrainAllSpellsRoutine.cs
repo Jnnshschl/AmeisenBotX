@@ -7,6 +7,7 @@
             // this can fail for myriad of reasons like not having enough money to buy service, or npc getting rekt/trainerFrame bugging out
             // this basically assumes unlimited cash supply and stable trainer frame open while executing
             bot.Wow.ClickOnTrainButton();
+            bot.Wow.ClearTarget();
         }
     }
 }

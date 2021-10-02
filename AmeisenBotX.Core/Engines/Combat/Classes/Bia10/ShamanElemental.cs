@@ -79,9 +79,7 @@ namespace AmeisenBotX.Core.Engines.Combat.Classes.Bia10
                 return;
 
             var enchSpellName = DecideWeaponEnchantment(out var enchantName);
-            if (CheckForWeaponEnchantment(WowEquipmentSlot.INVSLOT_MAINHAND,
-                enchantName, enchSpellName))
-                return;
+            CheckForWeaponEnchantment(WowEquipmentSlot.INVSLOT_MAINHAND, enchantName, enchSpellName);
         }
 
         private string DecideWeaponEnchantment(out string enchantName)

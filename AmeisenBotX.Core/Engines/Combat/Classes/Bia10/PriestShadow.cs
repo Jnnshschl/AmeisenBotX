@@ -60,28 +60,17 @@ namespace AmeisenBotX.Core.Engines.Combat.Classes.Bia10
         public override void OutOfCombatExecute()
         {
             base.OutOfCombatExecute();
-
-            if (HandleDeadPartyMembers(Shaman335a.AncestralSpirit))
-                return;
+            HandleDeadPartyMembers(Priest335a.Resurrection);
         }
 
         private string SelectSpell(out ulong targetGuid)
         {
-            /*if (Bot.Player.HealthPercentage < DataConstants.HealSelfPercentage
-                && ValidateSpell(Shaman335a.HealingWave, true))
+            if (Bot.Player.HealthPercentage < DataConstants.HealSelfPercentage
+                && ValidateSpell(Priest335a.LesserHeal, true))
             {
                 targetGuid = Bot.Player.Guid;
-                return Shaman335a.HealingWave;
+                return Priest335a.LesserHeal;
             }
-            if (Bot.Target?.HealthPercentage >= 3
-                && IsInSpellRange(Bot.Target, Shaman335a.EarthShock)
-                && ValidateSpell(Shaman335a.EarthShock, true))
-            {
-                targetGuid = Bot.Target.Guid;
-                return Shaman335a.EarthShock;
-            }*/
-
-
             if (IsInSpellRange(Bot.Target, Priest335a.Smite)
                 && ValidateSpell(Priest335a.Smite, true))
             {

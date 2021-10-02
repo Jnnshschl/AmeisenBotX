@@ -106,8 +106,7 @@ namespace AmeisenBotX.Core.Engines.Combat.Classes.Bia10
             }*/
 
             var spellToCheck = string.Empty;
-            var charClass = Bot.Player.Class;
-            switch (charClass)
+            switch (Bot.Player.Class)
             {
                 case WowClass.None:
                     break;
@@ -320,11 +319,16 @@ namespace AmeisenBotX.Core.Engines.Combat.Classes.Bia10
             if (!isTargetMyself && target != null && !BotMath.IsFacing(Bot.Player.Position, Bot.Player.Rotation, target.Position))
                 Bot.Wow.FacePosition(Bot.Player.BaseAddress, Bot.Player.Position, target.Position);
 
-            if (spell.CastTime > 0)
+            switch (spell.CastTime)
             {
-                // stop pending movement if we cast something
-                Bot.Movement.PreventMovement(TimeSpan.FromMilliseconds(spell.CastTime));
-                CheckFacing(target);
+                case 0:
+                    Bot.Movement.PreventMovement(TimeSpan.FromMilliseconds(400));
+                    CheckFacing(target);
+                    break;
+                case > 0:
+                    Bot.Movement.PreventMovement(TimeSpan.FromMilliseconds(spell.CastTime));
+                    CheckFacing(target);
+                    break;
             }
 
             if (!CastSpell(spellName, isTargetMyself)) return false;

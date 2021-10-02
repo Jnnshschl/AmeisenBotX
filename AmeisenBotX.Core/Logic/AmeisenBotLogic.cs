@@ -923,7 +923,7 @@ namespace AmeisenBotX.Core.Logic
             Npc profileTrainer = null;
 
             if (Bot.Grinding.Profile != null)
-                profileTrainer = Bot.Grinding.Profile.NpcsOfInterest.FirstOrDefault(e =>
+                profileTrainer = Bot.Grinding.Profile.NpcsOfInterest?.FirstOrDefault(e =>
                     e.Type == NpcType.ClassTrainer && e.SubType == DecideClassTrainer(Bot.Player.Class));
 
             if (profileTrainer != null)
@@ -994,16 +994,16 @@ namespace AmeisenBotX.Core.Logic
             bool needToSell = Bot.Character.Inventory.FreeBagSlots < Config.BagSlotsToGoSell
                               && Bot.Character.Inventory.Items
                               .Any(e => e.Price > 0 && !Config.ItemSellBlacklist.Contains(e.Name)
-                                      && (Config.SellGrayItems && e.ItemQuality == (int)WowItemQuality.Poor 
+                                      && (Config.SellGrayItems && e.ItemQuality == (int)WowItemQuality.Poor
                                       || Config.SellWhiteItems && e.ItemQuality == (int)WowItemQuality.Common
                                       || Config.SellGreenItems && e.ItemQuality == (int)WowItemQuality.Uncommon
-                                      || Config.SellBlueItems && e.ItemQuality == (int)WowItemQuality.Rare 
+                                      || Config.SellBlueItems && e.ItemQuality == (int)WowItemQuality.Rare
                                       || Config.SellPurpleItems && e.ItemQuality == (int)WowItemQuality.Epic));
             
             IWowUnit vendorRepair = null;
             IWowUnit vendorSell = null;
 
-            if (Mode != BotMode.None && (Bot.Grinding.Profile == null || !Bot.Grinding.Profile.NpcsOfInterest.Any()))
+            if (Mode != BotMode.None && Bot.Grinding.Profile?.NpcsOfInterest == null)
                 return false;
 
             switch (Mode)
@@ -1014,7 +1014,7 @@ namespace AmeisenBotX.Core.Logic
                     if (repairNpcEntry != null)
                         vendorRepair = Bot.GetClosestVendorByEntryId(repairNpcEntry.EntryId); 
 
-                    Npc sellNpcEntry = Bot.Grinding.Profile.NpcsOfInterest.FirstOrDefault(e => e.Type == NpcType.VendorRepair || e.Type == NpcType.VendorSellBuy);
+                    Npc sellNpcEntry = Bot.Grinding.Profile.NpcsOfInterest.FirstOrDefault(e => e.Type is NpcType.VendorRepair or NpcType.VendorSellBuy);
                     if (sellNpcEntry != null)
                         vendorSell = Bot.GetClosestVendorByEntryId(sellNpcEntry.EntryId);
 
