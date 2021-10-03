@@ -274,8 +274,7 @@ namespace AmeisenBotX
 
         private void ButtonToggleRendering_Click(object sender, RoutedEventArgs e)
         {
-            RenderState = !RenderState;
-            AmeisenBot.Bot.Wow.SetRenderState(RenderState);
+            float threat = AmeisenBot.Bot.Threat.Get(AmeisenBot.Bot.Player.Position);
         }
 
         private void ComboboxStateOverride_SelectionChanged(object sender, System.Windows.Controls.SelectionChangedEventArgs e)

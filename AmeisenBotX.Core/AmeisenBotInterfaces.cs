@@ -13,6 +13,7 @@ using AmeisenBotX.Core.Engines.Tactic;
 using AmeisenBotX.Core.Engines.Test;
 using AmeisenBotX.Core.Managers.Character;
 using AmeisenBotX.Core.Managers.Chat;
+using AmeisenBotX.Core.Managers.Threat;
 using AmeisenBotX.Memory;
 using AmeisenBotX.RconClient;
 using AmeisenBotX.Wow;
@@ -72,6 +73,8 @@ namespace AmeisenBotX.Core
         public IWowUnit Target => Objects.Target;
 
         public ITestEngine Test { get; set; }
+
+        public ThreatManager Threat { get; set; }
 
         public IWowInterface Wow { get; set; }
 

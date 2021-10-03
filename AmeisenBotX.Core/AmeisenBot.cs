@@ -30,6 +30,7 @@ using AmeisenBotX.Core.Managers.Character;
 using AmeisenBotX.Core.Managers.Character.Inventory;
 using AmeisenBotX.Core.Managers.Character.Inventory.Objects;
 using AmeisenBotX.Core.Managers.Chat;
+using AmeisenBotX.Core.Managers.Threat;
 using AmeisenBotX.Logging;
 using AmeisenBotX.Logging.Enums;
 using AmeisenBotX.Memory;
@@ -145,6 +146,7 @@ namespace AmeisenBotX.Core
             Bot.Quest = new DefaultQuestEngine(Bot);
             Bot.Grinding = new DefaultGrindEngine(Bot, Config);
             Bot.Pvp = new DefaultPvpEngine(Bot, Config);
+            Bot.Threat = new ThreatManager(Bot, Config);
             Bot.Test = new DefaultTestEngine(Bot, Config);
 
             Bot.PathfindingHandler = new AmeisenNavigationHandler(Config.NavmeshServerIp, Config.NameshServerPort);

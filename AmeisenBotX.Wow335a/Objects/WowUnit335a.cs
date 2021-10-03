@@ -148,6 +148,12 @@ namespace AmeisenBotX.Wow335a.Objects
             return Array.Empty<RawWowAura>();
         }
 
+        public float AggroRangeTo(IWowUnit other)
+        {
+            float range = 20.0f + (other.Level - Level);
+            return MathF.Max(5.0f, MathF.Min(45.0f, range));
+        }
+
         public bool HasBuffById(int spellId)
         {
             return Auras != null && Auras.Any(e => e.SpellId == spellId);

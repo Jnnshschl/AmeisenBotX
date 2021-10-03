@@ -11,15 +11,11 @@ namespace AmeisenBotX.Core.Engines.PvP
             Bot = bot;
             Config = config;
 
-            INode mainNode = new Annotator
+            INode mainNode = new Waterfall
             (
-                new Leaf(() => { Bot.Memory.Read(Bot.Wow.Offsets.BattlegroundStatus, out int q); QueueStatus = q; return BtStatus.Success; }),
-                new Waterfall
-                (
-                    new Leaf(() => BtStatus.Ongoing),
-                    (() => QueueStatus == 0, new Leaf(QueueForBattlegrounds))
-                    // (() => QueueStatus == 2, new Leaf(() => { Bot.Wow.AcceptBattlegroundInvite(); return BtStatus.Success; }))
-                )
+                new Leaf(() => BtStatus.Ongoing),
+                (() => QueueStatus == 0, new Leaf(QueueForBattlegrounds))
+            //  (() => QueueStatus == 2, new Leaf(() => { Bot.Wow.AcceptBattlegroundInvite(); return BtStatus.Success; }))
             );
 
             Bt = new(mainNode);
@@ -35,18 +31,27 @@ namespace AmeisenBotX.Core.Engines.PvP
 
         public void Execute()
         {
+            UpdatePvpQueueStatus();
             Bt.Tick();
         }
 
         private BtStatus QueueForBattlegrounds()
         {
-            // TODO: fix this fucntion
+            // TODO: fix this function
             // Bot.Wow.LuaQueueBattlegroundByName("Warsong Gulch");
 
             Bot.Wow.ClickUiElement("BattlegroundType2");
             Bot.Wow.ClickUiElement("PVPBattlegroundFrameJoinButton");
 
             return BtStatus.Success;
+        }
+
+        private void UpdatePvpQueueStatus()
+        {
+            if (Bot.Memory.Read(Bot.Wow.Offsets.BattlegroundStatus, out int q))
+            {
+                QueueStatus = q;
+            }
         }
     }
 }
