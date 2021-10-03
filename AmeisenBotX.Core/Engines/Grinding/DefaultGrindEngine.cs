@@ -248,10 +248,13 @@ namespace AmeisenBotX.Core.Engines.Grinding
                 .Where(e => e.Position.GetDistance(Bot.Player.Position) <= e.Radius)
                 .OrderBy(e => e.Position.GetDistance2D(Bot.Player.Position))
                 .FirstOrDefault();
+
             if (nearestGrindSpot == null) return false;
 
             IEnumerable<IWowUnit> nearUnits = Bot.GetNearEnemiesOrNeutrals<IWowUnit>(nearestGrindSpot.Position, nearestGrindSpot.Radius)
-                .Where(e => UnitWithinGrindSpotLvlLimit(e, nearestGrindSpot) && ObjectWithinGrindSpotRadius(e, nearestGrindSpot))
+                .Where(e => UnitWithinGrindSpotLvlLimit(e, nearestGrindSpot) 
+                                && ObjectWithinGrindSpotRadius(e, nearestGrindSpot) 
+                                && e.Health > 10)
                 .OrderBy(e => e.Position.GetDistance2D(Bot.Player.Position));
 
             return nearUnits.Any();

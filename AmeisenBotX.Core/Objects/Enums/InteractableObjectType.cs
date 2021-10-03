@@ -6,5 +6,6 @@
         Forge,
         Anvil,
         Fire,
+        Container
     }
 }
