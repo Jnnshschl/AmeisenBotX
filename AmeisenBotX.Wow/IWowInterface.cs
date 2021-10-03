@@ -112,6 +112,8 @@ namespace AmeisenBotX.Wow
 
         void ClickOnTerrain(Vector3 position);
 
+        void ClickOnTrainButton();
+
         /// <summary>
         /// Performs a click on the given ui element.
         /// </summary>
@@ -224,6 +226,8 @@ namespace AmeisenBotX.Wow
         /// <returns>Whether the code was executed or not</returns>
         bool LuaDoString(string lua);
 
+        void LuaQueueBattlegroundByName(string bgName);
+
         void QueryQuestsCompleted();
 
         void RepairAllItems();
@@ -238,9 +242,9 @@ namespace AmeisenBotX.Wow
 
         void SelectGossipAvailableQuest(int gossipId);
 
-        void SelectGossipOptionSimple(int i);
-
         void SelectGossipOption(int i);
+
+        void SelectGossipOptionSimple(int i);
 
         void SelectQuestByNameOrGossipId(string name, int gossipId, bool isAvailable);
 
@@ -290,7 +294,5 @@ namespace AmeisenBotX.Wow
         void UseInventoryItem(WowEquipmentSlot equipmentSlot);
 
         void UseItemByName(string name);
-
-        void ClickOnTrainButton();
     }
 }

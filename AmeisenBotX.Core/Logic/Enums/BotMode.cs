@@ -5,6 +5,7 @@
         None,
         Questing,
         Grinding,
+        PvP,
         Testing
     }
 }

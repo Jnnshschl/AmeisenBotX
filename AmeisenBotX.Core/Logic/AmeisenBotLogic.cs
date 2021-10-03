@@ -40,7 +40,8 @@ namespace AmeisenBotX.Core.Logic
             FirstStart = true;
             Random = new();
 
-            Mode = BotMode.None;
+            // Mode = BotMode.None;
+            Mode = BotMode.PvP;
 
             IdleActionManager = new(new List<IIdleAction>()
             {
@@ -180,6 +181,11 @@ namespace AmeisenBotX.Core.Logic
                 (NeedToEat, new Leaf(Eat))
             );
 
+            INode pvpNode = new Waterfall
+            (
+                new Leaf(() => { Bot.Pvp.Execute(); return BtStatus.Success; })
+            );
+
             INode testingNode = new Waterfall
             (
                 new Leaf(() => { Bot.Test.Execute(); return BtStatus.Success; }),
@@ -208,7 +214,7 @@ namespace AmeisenBotX.Core.Logic
             (
                 IsBattlegroundFinished,
                 // leave battleground once it is finished
-                new Leaf(() => { Bot.Wow.LeaveBattleground(); Bot.Battleground.Leave(); return BtStatus.Success; }),
+                new Leaf(() => { Bot.Wow.LeaveBattleground(); Bot.Battleground.Reset(); return BtStatus.Success; }),
                 // TODO: run bg engine here
                 new Leaf(() => { Bot.Battleground.Execute(); return BtStatus.Success; })
             );
@@ -269,6 +275,7 @@ namespace AmeisenBotX.Core.Logic
                             // handle open world modes
                             (() => Mode == BotMode.Grinding, grindingNode),
                             (() => Mode == BotMode.Questing, questingNode),
+                            (() => Mode == BotMode.PvP, pvpNode),
                             (() => Mode == BotMode.Testing, testingNode)
                         )
                     ),

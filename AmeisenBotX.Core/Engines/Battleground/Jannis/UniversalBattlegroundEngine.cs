@@ -20,20 +20,20 @@ namespace AmeisenBotX.Core.Engines.Battleground.Jannis
 
         private AmeisenBotInterfaces Bot { get; }
 
-        public void Enter()
-        {
-            TryLoadProfile();
-        }
-
         public void Execute()
         {
-            Bot.CombatClass.OutOfCombatExecute();
+            if (Profile == null)
+            {
+                TryLoadProfile();
+            }
 
+            Bot.CombatClass.OutOfCombatExecute();
             Profile?.Execute();
         }
 
-        public void Leave()
+        public void Reset()
         {
+            Profile = null;
         }
 
         public override string ToString()

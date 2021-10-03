@@ -33,7 +33,7 @@ namespace AmeisenBotX.Core.Engines.Battleground.Jannis
 
         public int MyTeamScore { get; set; }
 
-        public List<IWowGameobject> NearFlags { get; set; }
+        public IEnumerable<IWowGameobject> NearFlags { get; set; }
 
         private Action UpdateAction { get; }
 
