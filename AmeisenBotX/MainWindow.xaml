@@ -255,7 +255,7 @@
                 <SolidColorBrush Color="{DynamicResource DarkBorder}" />
             </Label.Foreground>
         </Label>
-        <Button x:Name="buttonDebug" Content="Toggle Render" Margin="206,0,0,30" Click="ButtonToggleRendering_Click" BorderThickness="1,0,0,1" Padding="1" HorizontalAlignment="Left" Width="71" FontFamily="Bahnschrift Light" FontSize="10" Style="{DynamicResource ButtonStyleDark}" Height="16" VerticalAlignment="Bottom">
+        <Button x:Name="buttonDebug" Content="Debug" Margin="0,0,18,4" Click="ButtonToggleRendering_Click" BorderThickness="1,1,1,1" Padding="1" FontFamily="Bahnschrift Light" FontSize="10" Style="{DynamicResource ButtonStyleDark}" Height="16" VerticalAlignment="Bottom" HorizontalAlignment="Right" Width="71">
             <Button.Foreground>
                 <SolidColorBrush Color="{DynamicResource DarkForeground}" />
             </Button.Foreground>

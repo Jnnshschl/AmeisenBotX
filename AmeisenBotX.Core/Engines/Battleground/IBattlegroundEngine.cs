@@ -8,10 +8,8 @@
 
         string Name { get; }
 
-        void Enter();
-
         void Execute();
 
-        void Leave();
+        void Reset();
     }
 }

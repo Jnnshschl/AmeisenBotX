@@ -17,6 +17,7 @@ using AmeisenBotX.Core.Engines.Jobs.Profiles.Gathering;
 using AmeisenBotX.Core.Engines.Jobs.Profiles.Gathering.Jannis;
 using AmeisenBotX.Core.Engines.Movement;
 using AmeisenBotX.Core.Engines.Movement.Pathfinding;
+using AmeisenBotX.Core.Engines.PvP;
 using AmeisenBotX.Core.Engines.Quest;
 using AmeisenBotX.Core.Engines.Quest.Profiles;
 using AmeisenBotX.Core.Engines.Quest.Profiles.Shino;
@@ -29,6 +30,7 @@ using AmeisenBotX.Core.Managers.Character;
 using AmeisenBotX.Core.Managers.Character.Inventory;
 using AmeisenBotX.Core.Managers.Character.Inventory.Objects;
 using AmeisenBotX.Core.Managers.Chat;
+using AmeisenBotX.Core.Managers.Threat;
 using AmeisenBotX.Logging;
 using AmeisenBotX.Logging.Enums;
 using AmeisenBotX.Memory;
@@ -143,6 +145,8 @@ namespace AmeisenBotX.Core
             Bot.Jobs = new DefaultJobEngine(Bot, Config);
             Bot.Quest = new DefaultQuestEngine(Bot);
             Bot.Grinding = new DefaultGrindEngine(Bot, Config);
+            Bot.Pvp = new DefaultPvpEngine(Bot, Config);
+            Bot.Threat = new ThreatManager(Bot, Config);
             Bot.Test = new DefaultTestEngine(Bot, Config);
 
             Bot.PathfindingHandler = new AmeisenNavigationHandler(Config.NavmeshServerIp, Config.NameshServerPort);

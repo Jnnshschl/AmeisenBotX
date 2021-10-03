@@ -299,7 +299,7 @@ namespace AmeisenBotX.Core.Engines.Battleground.einTyp
             }
         }
 
-        public void Leave()
+        public void Reset()
         {
         }
 

@@ -153,14 +153,7 @@ namespace AmeisenBotX.Core.Engines.Battleground.Jannis.Profiles
         {
             if (WsgDataset == null)
             {
-                if (Bot.Player.IsAlliance())
-                {
-                    WsgDataset = new AllianceWsgDataset();
-                }
-                else
-                {
-                    WsgDataset = new HordeWsgDataset();
-                }
+                WsgDataset = Bot.Player.IsAlliance() ? new AllianceWsgDataset() : new HordeWsgDataset();
             }
 
             BehaviorTree.Tick();
@@ -202,9 +195,21 @@ namespace AmeisenBotX.Core.Engines.Battleground.Jannis.Profiles
                 {
                     Bot.Movement.SetMovementAction(MovementAction.Move, weakestPlayer.Position);
                 }
-                else if (ActionEvent.Run())
+                else if (Bot.Player.TargetGuid != 0)
                 {
-                    // StateMachine.Get<StateCombat>().Mode = CombatMode.Force;
+                    WowUnitReaction reaction = Bot.Wow.GetReaction(Bot.Target.BaseAddress, Bot.Player.BaseAddress);
+
+                    if (reaction is WowUnitReaction.Hostile or WowUnitReaction.Neutral)
+                    {
+                        Bot.CombatClass.Execute();
+                    }
+                    else
+                    {
+                        Bot.Wow.ChangeTarget(weakestPlayer.Guid);
+                    }
+                }
+                else
+                {
                     Bot.Wow.ChangeTarget(weakestPlayer.Guid);
                 }
             }
@@ -236,9 +241,21 @@ namespace AmeisenBotX.Core.Engines.Battleground.Jannis.Profiles
                     {
                         Bot.Movement.SetMovementAction(MovementAction.Move, nearEnemy.Position);
                     }
-                    else if (ActionEvent.Run())
+                    else if (Bot.Player.TargetGuid != 0)
                     {
-                        // StateMachine.Get<StateCombat>().Mode = CombatMode.Force;
+                        WowUnitReaction reaction = Bot.Wow.GetReaction(Bot.Target.BaseAddress, Bot.Player.BaseAddress);
+
+                        if (reaction is WowUnitReaction.Hostile or WowUnitReaction.Neutral)
+                        {
+                            Bot.CombatClass.Execute();
+                        }
+                        else
+                        {
+                            Bot.Wow.ChangeTarget(nearEnemy.Guid);
+                        }
+                    }
+                    else
+                    {
                         Bot.Wow.ChangeTarget(nearEnemy.Guid);
                     }
                 }
@@ -294,16 +311,14 @@ namespace AmeisenBotX.Core.Engines.Battleground.Jannis.Profiles
             if (Bot.Player.IsAlliance())
             {
                 IWowGameobject obj = Bot.Objects.WowObjects.OfType<IWowGameobject>()
-                                    .Where(e => e.GameObjectType == WowGameObjectType.Door && e.DisplayId == 411)
-                                    .FirstOrDefault();
+                                    .FirstOrDefault(e => e.GameObjectType == WowGameObjectType.Door && e.DisplayId == 411);
 
                 return obj == null || obj.Bytes0 == 0;
             }
             else
             {
                 IWowGameobject obj = Bot.Objects.WowObjects.OfType<IWowGameobject>()
-                                    .Where(e => e.GameObjectType == WowGameObjectType.Door && e.DisplayId == 850)
-                                    .FirstOrDefault();
+                                    .FirstOrDefault(e => e.GameObjectType == WowGameObjectType.Door && e.DisplayId == 850);
 
                 return obj == null || obj.Bytes0 == 0;
             }
@@ -313,7 +328,6 @@ namespace AmeisenBotX.Core.Engines.Battleground.Jannis.Profiles
         {
             if (JBgBlackboard.EnemyTeamFlagCarrier == null)
             {
-                // StateMachine.Get<StateCombat>().Mode = CombatMode.Allowed;
                 return BtStatus.Success;
             }
 
@@ -324,9 +338,21 @@ namespace AmeisenBotX.Core.Engines.Battleground.Jannis.Profiles
             {
                 Bot.Movement.SetMovementAction(MovementAction.Move, BotUtils.MoveAhead(JBgBlackboard.EnemyTeamFlagCarrier.Position, JBgBlackboard.EnemyTeamFlagCarrier.Rotation, 1.0f));
             }
-            else if (ActionEvent.Run())
+            else if (Bot.Player.TargetGuid != 0)
             {
-                // StateMachine.Get<StateCombat>().Mode = CombatMode.Force;
+                WowUnitReaction reaction = Bot.Wow.GetReaction(Bot.Target.BaseAddress, Bot.Player.BaseAddress);
+
+                if (reaction is WowUnitReaction.Hostile or WowUnitReaction.Neutral)
+                {
+                    Bot.CombatClass.Execute();
+                }
+                else
+                {
+                    Bot.Wow.ChangeTarget(JBgBlackboard.EnemyTeamFlagCarrier.Guid);
+                }
+            }
+            else
+            {
                 Bot.Wow.ChangeTarget(JBgBlackboard.EnemyTeamFlagCarrier.Guid);
             }
 
@@ -341,7 +367,7 @@ namespace AmeisenBotX.Core.Engines.Battleground.Jannis.Profiles
             {
                 Bot.Movement.SetMovementAction(MovementAction.Move, WsgDataset.EnemyBasePosition);
             }
-            else
+            else if (JBgBlackboard.NearFlags != null)
             {
                 return UseNearestFlag(blackboard);
             }
@@ -392,9 +418,21 @@ namespace AmeisenBotX.Core.Engines.Battleground.Jannis.Profiles
                     {
                         Bot.Movement.SetMovementAction(MovementAction.Move, nearEnemy.Position);
                     }
-                    else if (ActionEvent.Run())
+                    else if (Bot.Player.TargetGuid != 0)
                     {
-                        // StateMachine.Get<StateCombat>().Mode = CombatMode.Force;
+                        WowUnitReaction reaction = Bot.Wow.GetReaction(Bot.Target.BaseAddress, Bot.Player.BaseAddress);
+
+                        if (reaction is WowUnitReaction.Hostile or WowUnitReaction.Neutral)
+                        {
+                            Bot.CombatClass.Execute();
+                        }
+                        else
+                        {
+                            Bot.Wow.ChangeTarget(nearEnemy.Guid);
+                        }
+                    }
+                    else
+                    {
                         Bot.Wow.ChangeTarget(nearEnemy.Guid);
                     }
                 }
@@ -413,14 +451,7 @@ namespace AmeisenBotX.Core.Engines.Battleground.Jannis.Profiles
 
                 if (LosCheckEvent.Run())
                 {
-                    if (Bot.Wow.IsInLineOfSight(Bot.Player.Position, position, 2.0f))
-                    {
-                        InLos = true;
-                    }
-                    else
-                    {
-                        InLos = false;
-                    }
+                    InLos = Bot.Wow.IsInLineOfSight(Bot.Player.Position, position, 2.0f);
                 }
 
                 if (zDiff < -4.0 && InLos) // target is below us and in line of sight, just run down
@@ -446,77 +477,60 @@ namespace AmeisenBotX.Core.Engines.Battleground.Jannis.Profiles
             {
                 if (Bot.Wow.ExecuteLuaAndRead(BotUtils.ObfuscateLua($"{{v:0}}=\"{{\"_,stateA,textA,_,_,_,_,_,_,_,_,_=GetWorldStateUIInfo(2)_,stateH,textH,_,_,_,_,_,_,_,_,_=GetWorldStateUIInfo(3)flagXA,flagYA=GetBattlefieldFlagPosition(1)flagXH,flagYH=GetBattlefieldFlagPosition(2){{v:0}}={{v:0}}..\"\\\"allianceState\\\" : \\\"\"..stateA..\"\\\",\"{{v:0}}={{v:0}}..\"\\\"allianceText\\\" : \\\"\"..textA..\"\\\",\"{{v:0}}={{v:0}}..\"\\\"hordeState\\\" : \\\"\"..stateH..\"\\\",\"{{v:0}}={{v:0}}..\"\\\"hordeText\\\" : \\\"\"..textH..\"\\\",\"{{v:0}}={{v:0}}..\"\\\"allianceFlagX\\\" : \\\"\"..flagXA..\"\\\",\"{{v:0}}={{v:0}}..\"\\\"allianceFlagY\\\" : \\\"\"..flagYA..\"\\\",\"{{v:0}}={{v:0}}..\"\\\"hordeFlagX\\\" : \\\"\"..flagXH..\"\\\",\"{{v:0}}={{v:0}}..\"\\\"hordeFlagY\\\" : \\\"\"..flagYH..\"\\\"\"{{v:0}}={{v:0}}..\"}}\""), out string result))
                 {
-                    dynamic bgState = JsonSerializer.Deserialize<dynamic>(result, new() { AllowTrailingCommas = true, NumberHandling = JsonNumberHandling.AllowReadingFromString });
+                    Dictionary<string, dynamic> bgState = JsonSerializer.Deserialize<JsonElement>(result, new() { AllowTrailingCommas = true, NumberHandling = JsonNumberHandling.AllowReadingFromString }).ToDyn();
+
+                    string[] splittedScoreH = ((string)bgState["hordeText"]).Split('/');
+                    string[] splittedScoreA = ((string)bgState["allianceText"]).Split('/');
+
+                    float allianceFlagX = float.Parse((string)bgState["allianceFlagX"], NumberStyles.Any) * 100.0f;
+                    float allianceFlagY = float.Parse((string)bgState["allianceFlagY"], NumberStyles.Any) * 100.0f;
+
+                    float hordeFlagX = float.Parse((string)bgState["hordeFlagX"], NumberStyles.Any) * 100.0f;
+                    float hordeFlagY = float.Parse((string)bgState["hordeFlagY"], NumberStyles.Any) * 100.0f;
 
                     if (Bot.Player.IsAlliance())
                     {
-                        string[] splittedScoreA = ((string)bgState.allianceText).Split('/');
-                        JBgBlackboard.MyTeamScore = int.Parse(splittedScoreA[0], CultureInfo.InvariantCulture);
-                        JBgBlackboard.MyTeamMaxScore = int.Parse(splittedScoreA[1], CultureInfo.InvariantCulture);
+                        JBgBlackboard.MyTeamScore = int.Parse(splittedScoreA[0]);
+                        JBgBlackboard.MyTeamMaxScore = int.Parse(splittedScoreA[1]);
 
-                        string[] splittedScoreH = ((string)bgState.hordeText).Split('/');
-                        JBgBlackboard.EnemyTeamScore = int.Parse(splittedScoreH[0], CultureInfo.InvariantCulture);
-                        JBgBlackboard.EnemyTeamMaxScore = int.Parse(splittedScoreH[1], CultureInfo.InvariantCulture);
+                        JBgBlackboard.EnemyTeamScore = int.Parse(splittedScoreH[0]);
+                        JBgBlackboard.EnemyTeamMaxScore = int.Parse(splittedScoreH[1]);
 
-                        JBgBlackboard.MyTeamHasFlag = int.Parse((string)bgState.allianceState, CultureInfo.InvariantCulture) == 2;
-                        JBgBlackboard.EnemyTeamHasFlag = int.Parse((string)bgState.hordeState, CultureInfo.InvariantCulture) == 2;
+                        JBgBlackboard.MyTeamHasFlag = int.Parse((string)bgState["allianceState"]) == 2;
+                        JBgBlackboard.EnemyTeamHasFlag = int.Parse((string)bgState["hordeState"]) == 2;
 
-                        JBgBlackboard.MyTeamFlagPos = new
-                        (
-                            float.Parse((string)bgState.allianceFlagX, NumberStyles.Any, CultureInfo.InvariantCulture) * 100.0f,
-                            float.Parse((string)bgState.allianceFlagY, NumberStyles.Any, CultureInfo.InvariantCulture) * 100.0f,
-                            0f
-                        );
-
-                        JBgBlackboard.EnemyTeamFlagPos = new
-                        (
-                            float.Parse((string)bgState.hordeFlagX, NumberStyles.Any, CultureInfo.InvariantCulture) * 100.0f,
-                            float.Parse((string)bgState.hordeFlagY, NumberStyles.Any, CultureInfo.InvariantCulture) * 100.0f,
-                            0f
-                        );
+                        JBgBlackboard.MyTeamFlagPos = new(allianceFlagX, allianceFlagY, 0.0f);
+                        JBgBlackboard.EnemyTeamFlagPos = new(hordeFlagX, hordeFlagY, 0.0f);
 
                         JBgBlackboard.MyTeamFlagCarrier = Bot.Objects.WowObjects.OfType<IWowPlayer>().FirstOrDefault(e => e.HasBuffById(23333));
                         JBgBlackboard.EnemyTeamFlagCarrier = Bot.Objects.WowObjects.OfType<IWowPlayer>().FirstOrDefault(e => e.HasBuffById(23335));
                     }
                     else
                     {
-                        string[] splittedScoreH = ((string)bgState.hordeText).Split('/');
-                        JBgBlackboard.MyTeamScore = int.Parse(splittedScoreH[0], CultureInfo.InvariantCulture);
-                        JBgBlackboard.MyTeamMaxScore = int.Parse(splittedScoreH[1], CultureInfo.InvariantCulture);
+                        JBgBlackboard.MyTeamScore = int.Parse(splittedScoreH[0]);
+                        JBgBlackboard.MyTeamMaxScore = int.Parse(splittedScoreH[1]);
 
-                        string[] splittedScoreA = ((string)bgState.allianceText).Split('/');
-                        JBgBlackboard.EnemyTeamScore = int.Parse(splittedScoreA[0], CultureInfo.InvariantCulture);
-                        JBgBlackboard.EnemyTeamMaxScore = int.Parse(splittedScoreA[1], CultureInfo.InvariantCulture);
+                        JBgBlackboard.EnemyTeamScore = int.Parse(splittedScoreA[0]);
+                        JBgBlackboard.EnemyTeamMaxScore = int.Parse(splittedScoreA[1]);
 
-                        JBgBlackboard.MyTeamHasFlag = int.Parse((string)bgState.hordeState, CultureInfo.InvariantCulture) == 2;
-                        JBgBlackboard.EnemyTeamHasFlag = int.Parse((string)bgState.allianceState, CultureInfo.InvariantCulture) == 2;
+                        JBgBlackboard.MyTeamHasFlag = int.Parse((string)bgState["hordeState"]) == 2;
+                        JBgBlackboard.EnemyTeamHasFlag = int.Parse((string)bgState["allianceState"]) == 2;
 
-                        JBgBlackboard.MyTeamFlagPos = new
-                        (
-                            float.Parse((string)bgState.hordeFlagX, NumberStyles.Any, CultureInfo.InvariantCulture) * 100.0f,
-                            float.Parse((string)bgState.hordeFlagY, NumberStyles.Any, CultureInfo.InvariantCulture) * 100.0f,
-                            0f
-                        );
-
-                        JBgBlackboard.EnemyTeamFlagPos = new
-                        (
-                            float.Parse((string)bgState.allianceFlagX, NumberStyles.Any, CultureInfo.InvariantCulture) * 100.0f,
-                            float.Parse((string)bgState.allianceFlagY, NumberStyles.Any, CultureInfo.InvariantCulture) * 100.0f,
-                            0f
-                        );
+                        JBgBlackboard.MyTeamFlagPos = new(hordeFlagX, hordeFlagY, 0.0f);
+                        JBgBlackboard.EnemyTeamFlagPos = new(allianceFlagX, allianceFlagY, 0.0f);
 
                         JBgBlackboard.MyTeamFlagCarrier = Bot.Objects.WowObjects.OfType<IWowPlayer>().FirstOrDefault(e => e.HasBuffById(23335));
                         JBgBlackboard.EnemyTeamFlagCarrier = Bot.Objects.WowObjects.OfType<IWowPlayer>().FirstOrDefault(e => e.HasBuffById(23333));
                     }
 
-                    JBgBlackboard.NearFlags = Bot.Objects.WowObjects
-                                                 .OfType<IWowGameobject>()
-                                                 .Where(e => e.DisplayId == (int)WowGameObjectDisplayId.WsgAllianceFlag 
-                                                          || e.DisplayId == (int)WowGameObjectDisplayId.WsgHordeFlag)
-                                                 .ToList();
+                    JBgBlackboard.NearFlags = Bot.Objects.WowObjects.OfType<IWowGameobject>()
+                                                 .Where(e => e.DisplayId == (int)WowGameObjectDisplayId.WsgAllianceFlag
+                                                          || e.DisplayId == (int)WowGameObjectDisplayId.WsgHordeFlag);
                 }
             }
-            catch { }
+            catch (Exception ex)
+            {
+            }
         }
 
         private BtStatus UseNearestFlag(CtfBlackboard blackboard)

@@ -198,7 +198,7 @@ namespace AmeisenBotX.Core.Engines.Battleground.KamelBG
             }
         }
 
-        public void Leave()
+        public void Reset()
         {
         }
     }

@@ -1,6 +1,6 @@
 ﻿using AmeisenBotX.Memory;
-using AmeisenBotX.Wow.Objects.Flags;
 using AmeisenBotX.Wow.Objects.Enums;
+using AmeisenBotX.Wow.Objects.Flags;
 using AmeisenBotX.Wow.Offsets;
 using System.Collections.Generic;
 using System.Collections.Specialized;
@@ -35,6 +35,8 @@ namespace AmeisenBotX.Wow.Objects
 
         double HealthPercentage { get; }
 
+        bool IsAmmoVendor => NpcFlags[(int)WowUnitNpcFlags.AmmoVendor];
+
         bool IsAuctioneer => NpcFlags[(int)WowUnitNpcFlags.Auctioneer];
 
         bool IsAutoAttacking { get; }
@@ -60,8 +62,6 @@ namespace AmeisenBotX.Wow.Objects
         bool IsFlightMaster => NpcFlags[(int)WowUnitNpcFlags.FlightMaster];
 
         bool IsFoodVendor => NpcFlags[(int)WowUnitNpcFlags.FoodVendor];
-
-        bool IsAmmoVendor => NpcFlags[(int)WowUnitNpcFlags.AmmoVendor];
 
         bool IsGossip => NpcFlags[(int)WowUnitNpcFlags.Gossip];
 
@@ -197,6 +197,8 @@ namespace AmeisenBotX.Wow.Objects
         {
             return unit != null && !unit.IsNotAttackable;
         }
+
+        float AggroRangeTo(IWowUnit other);
 
         bool HasBuffById(int spellId);
 
