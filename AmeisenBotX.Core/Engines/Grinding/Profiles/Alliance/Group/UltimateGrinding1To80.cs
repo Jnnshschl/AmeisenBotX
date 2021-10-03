@@ -1,19 +1,16 @@
 ﻿using AmeisenBotX.Core.Engines.Grinding.Objects;
-using AmeisenBotX.Core.Objects.Mail;
-using AmeisenBotX.Core.Objects.Npc;
+using AmeisenBotX.Core.Objects;
 using System.Collections.Generic;
 
-namespace AmeisenBotX.Core.Engines.Grinding.Profiles.Profiles.Alliance.Group
+namespace AmeisenBotX.Core.Engines.Grinding.Profiles.Alliance.Group
 {
     public class UltimateGrinding1To80 : IGrindingProfile
     {
-        public bool RandomizeSpots { get; } = true;
+        public bool RandomizeSpots => true;
 
-        public List<Vendor> Vendors { get; }
+        public List<Npc> NpcsOfInterest { get; }
 
-        public List<Trainer> Trainers { get; }
-
-        public List<Mailbox> Mailboxes { get; }
+        public List<InteractableObject> ObjectsOfInterest { get; }
 
         public List<GrindingSpot> Spots { get; } = new()
         {

@@ -105,7 +105,39 @@ namespace AmeisenBotX.Core.Engines.Combat.Classes.Bia10
                 Bot.Wow.StartAutoAttack();
             }*/
 
-            if (!IsInSpellRange(target, Shaman335a.LightningBolt)
+            var spellToCheck = string.Empty;
+            switch (Bot.Player.Class)
+            {
+                case WowClass.None:
+                    break;
+                case WowClass.Warrior:
+                    break;
+                case WowClass.Paladin:
+                    break;
+                case WowClass.Hunter:
+                    break;
+                case WowClass.Rogue:
+                    break;
+                case WowClass.Priest:
+                    spellToCheck = Priest335a.Smite;
+                    break;
+                case WowClass.Deathknight:
+                    break;
+                case WowClass.Shaman:
+                    spellToCheck = Shaman335a.LightningBolt;
+                    break;
+                case WowClass.Mage:
+                    break;
+                case WowClass.Warlock:
+                    break;
+                case WowClass.Druid:
+                    break;
+
+                default:
+                    throw new ArgumentOutOfRangeException();
+            }
+
+            if (!IsInSpellRange(target, spellToCheck)
                 || !Bot.Wow.IsInLineOfSight(Bot.Player.Position, target.Position))
                 Bot.Movement.SetMovementAction(MovementAction.Move, target.Position);
         }
@@ -287,11 +319,16 @@ namespace AmeisenBotX.Core.Engines.Combat.Classes.Bia10
             if (!isTargetMyself && target != null && !BotMath.IsFacing(Bot.Player.Position, Bot.Player.Rotation, target.Position))
                 Bot.Wow.FacePosition(Bot.Player.BaseAddress, Bot.Player.Position, target.Position);
 
-            if (spell.CastTime > 0)
+            switch (spell.CastTime)
             {
-                // stop pending movement if we cast something
-                Bot.Movement.PreventMovement(TimeSpan.FromMilliseconds(spell.CastTime));
-                CheckFacing(target);
+                case 0:
+                    Bot.Movement.PreventMovement(TimeSpan.FromMilliseconds(400));
+                    CheckFacing(target);
+                    break;
+                case > 0:
+                    Bot.Movement.PreventMovement(TimeSpan.FromMilliseconds(spell.CastTime));
+                    CheckFacing(target);
+                    break;
             }
 
             if (!CastSpell(spellName, isTargetMyself)) return false;

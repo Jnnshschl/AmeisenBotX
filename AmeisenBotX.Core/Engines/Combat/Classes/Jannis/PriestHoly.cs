@@ -18,7 +18,7 @@ namespace AmeisenBotX.Core.Engines.Combat.Classes.Jannis
 
             SpellUsageHealDict = new Dictionary<int, string>()
             {
-                { 0, Priest335a.Heal },
+                { 0, Priest335a.LesserHeal },
                 { 100, Priest335a.FlashHeal },
                 { 5000, Priest335a.GreaterHeal },
             };

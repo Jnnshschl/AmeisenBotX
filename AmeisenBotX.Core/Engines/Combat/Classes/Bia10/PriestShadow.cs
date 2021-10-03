@@ -1,4 +1,5 @@
-﻿using AmeisenBotX.Core.Managers.Character.Comparators;
+﻿using AmeisenBotX.Core.Logic.Utils.Auras.Objects;
+using AmeisenBotX.Core.Managers.Character.Comparators;
 using AmeisenBotX.Core.Managers.Character.Talents.Objects;
 using AmeisenBotX.Wow.Objects.Enums;
 using AmeisenBotX.Wow335a.Constants;
@@ -10,6 +11,15 @@ namespace AmeisenBotX.Core.Engines.Combat.Classes.Bia10
     {
         public PriestShadow(AmeisenBotInterfaces bot) : base(bot)
         {
+            MyAuraManager.Jobs.Add(new KeepActiveAuraJob(bot.Db, Priest335a.PowerWordFortitude, () =>
+                Bot.Player.ManaPercentage > 60.0
+                && ValidateSpell(Priest335a.PowerWordFortitude, true)
+                && TryCastSpell(Priest335a.PowerWordFortitude, Bot.Player.Guid, true)));
+
+            TargetAuraManager.Jobs.Add(new KeepActiveAuraJob(bot.Db, Priest335a.ShadowWordPain, () =>
+                Bot.Target?.HealthPercentage >= 5
+                && ValidateSpell(Priest335a.ShadowWordPain, true)
+                && TryCastSpell(Priest335a.ShadowWordPain, Bot.Wow.TargetGuid, true)));
         }
 
         public override string Version => "1.0";
@@ -50,28 +60,17 @@ namespace AmeisenBotX.Core.Engines.Combat.Classes.Bia10
         public override void OutOfCombatExecute()
         {
             base.OutOfCombatExecute();
-
-            if (HandleDeadPartyMembers(Shaman335a.AncestralSpirit))
-                return;
+            HandleDeadPartyMembers(Priest335a.Resurrection);
         }
 
         private string SelectSpell(out ulong targetGuid)
         {
-            /*if (Bot.Player.HealthPercentage < DataConstants.HealSelfPercentage
-                && ValidateSpell(Shaman335a.HealingWave, true))
+            if (Bot.Player.HealthPercentage < DataConstants.HealSelfPercentage
+                && ValidateSpell(Priest335a.LesserHeal, true))
             {
                 targetGuid = Bot.Player.Guid;
-                return Shaman335a.HealingWave;
+                return Priest335a.LesserHeal;
             }
-            if (Bot.Target?.HealthPercentage >= 3
-                && IsInSpellRange(Bot.Target, Shaman335a.EarthShock)
-                && ValidateSpell(Shaman335a.EarthShock, true))
-            {
-                targetGuid = Bot.Target.Guid;
-                return Shaman335a.EarthShock;
-            }*/
-
-
             if (IsInSpellRange(Bot.Target, Priest335a.Smite)
                 && ValidateSpell(Priest335a.Smite, true))
             {

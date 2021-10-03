@@ -1,26 +1,24 @@
 ﻿using AmeisenBotX.Common.Math;
 using AmeisenBotX.Core.Engines.Grinding.Objects;
-using AmeisenBotX.Core.Objects.Mail;
-using AmeisenBotX.Core.Objects.Npc;
+using AmeisenBotX.Core.Objects;
+using AmeisenBotX.Core.Objects.Enums;
 using AmeisenBotX.Wow.Objects.Enums;
 using System.Collections.Generic;
 
-namespace AmeisenBotX.Core.Engines.Grinding.Profiles.Profiles.Horde
+namespace AmeisenBotX.Core.Engines.Grinding.Profiles.Horde
 {
     public class DurotarGrindTo11 : IGrindingProfile
     {
         public bool RandomizeSpots => false;
 
-        public List<Vendor> Vendors { get; } = new()
+        public List<Npc> NpcsOfInterest { get; } = new()
         {
-            new Vendor("Trayexir", 10369,
-                WowMapId.Kalimdor, WowZoneId.SenjinVillage, new Vector3(-769.15f, -4948.53f, 22.84f),
+            new Npc("Trayexir", 10369,
+                WowMapId.Kalimdor, WowZoneId.SenjinVillage, new Vector3(-769, -4948, 22),
                 NpcType.VendorRepair)
         };
 
-        public List<Trainer> Trainers { get; }
-
-        public List<Mailbox> Mailboxes { get; }
+        public List<InteractableObject> ObjectsOfInterest { get; }
 
         public List<GrindingSpot> Spots { get; } = new()
         {

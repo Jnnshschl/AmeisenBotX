@@ -16,11 +16,11 @@ namespace AmeisenBotX.Core.Engines.Combat.Classes.Bia10
             MyAuraManager.Jobs.Add(new KeepActiveAuraJob(bot.Db, Shaman335a.LightningShield, () =>
                 Bot.Player.ManaPercentage > 60.0 
                 && ValidateSpell(Shaman335a.LightningShield, true)
-                && TryCastSpell(Shaman335a.LightningShield, 0, true)));
+                && TryCastSpell(Shaman335a.LightningShield, Bot.Player.Guid, true)));
             MyAuraManager.Jobs.Add(new KeepActiveAuraJob(bot.Db, Shaman335a.WaterShield, () =>
                 Bot.Player.ManaPercentage < 20.0
                 && ValidateSpell(Shaman335a.WaterShield, true)
-                && TryCastSpell(Shaman335a.WaterShield, 0, true)));
+                && TryCastSpell(Shaman335a.WaterShield, Bot.Player.Guid, true)));
             // enemy debuffs
             TargetAuraManager.Jobs.Add(new KeepActiveAuraJob(bot.Db, Shaman335a.FlameShock, () =>
                 Bot.Target?.HealthPercentage >= 5
@@ -79,9 +79,7 @@ namespace AmeisenBotX.Core.Engines.Combat.Classes.Bia10
                 return;
 
             var enchSpellName = DecideWeaponEnchantment(out var enchantName);
-            if (CheckForWeaponEnchantment(WowEquipmentSlot.INVSLOT_MAINHAND,
-                enchantName, enchSpellName))
-                return;
+            CheckForWeaponEnchantment(WowEquipmentSlot.INVSLOT_MAINHAND, enchantName, enchSpellName);
         }
 
         private string DecideWeaponEnchantment(out string enchantName)

@@ -9,7 +9,7 @@
         public const string FlashHeal = "Flash Heal";
         public const string GreaterHeal = "Greater Heal";
         public const string GuardianSpirit = "Guardian Spirit";
-        public const string Heal = "Lesser Heal";
+        public const string LesserHeal = "Lesser Heal";
         public const string HolyShock = "Holy Shock";
         public const string HymnOfHope = "Hymn of Hope";
         public const string InnerFire = "Inner Fire";
