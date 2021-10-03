@@ -153,14 +153,7 @@ namespace AmeisenBotX.Core.Engines.Battleground.Jannis.Profiles
         {
             if (WsgDataset == null)
             {
-                if (Bot.Player.IsAlliance())
-                {
-                    WsgDataset = new AllianceWsgDataset();
-                }
-                else
-                {
-                    WsgDataset = new HordeWsgDataset();
-                }
+                WsgDataset = Bot.Player.IsAlliance() ? new AllianceWsgDataset() : new HordeWsgDataset();
             }
 
             BehaviorTree.Tick();
@@ -202,9 +195,21 @@ namespace AmeisenBotX.Core.Engines.Battleground.Jannis.Profiles
                 {
                     Bot.Movement.SetMovementAction(MovementAction.Move, weakestPlayer.Position);
                 }
-                else if (ActionEvent.Run())
+                else if (Bot.Player.TargetGuid != 0)
                 {
-                    // StateMachine.Get<StateCombat>().Mode = CombatMode.Force;
+                    WowUnitReaction reaction = Bot.Wow.GetReaction(Bot.Target.BaseAddress, Bot.Player.BaseAddress);
+
+                    if (reaction is WowUnitReaction.Hostile or WowUnitReaction.Neutral)
+                    {
+                        Bot.CombatClass.Execute();
+                    }
+                    else
+                    {
+                        Bot.Wow.ChangeTarget(weakestPlayer.Guid);
+                    }
+                }
+                else
+                {
                     Bot.Wow.ChangeTarget(weakestPlayer.Guid);
                 }
             }
@@ -236,9 +241,21 @@ namespace AmeisenBotX.Core.Engines.Battleground.Jannis.Profiles
                     {
                         Bot.Movement.SetMovementAction(MovementAction.Move, nearEnemy.Position);
                     }
-                    else if (ActionEvent.Run())
+                    else if (Bot.Player.TargetGuid != 0)
                     {
-                        // StateMachine.Get<StateCombat>().Mode = CombatMode.Force;
+                        WowUnitReaction reaction = Bot.Wow.GetReaction(Bot.Target.BaseAddress, Bot.Player.BaseAddress);
+
+                        if (reaction is WowUnitReaction.Hostile or WowUnitReaction.Neutral)
+                        {
+                            Bot.CombatClass.Execute();
+                        }
+                        else
+                        {
+                            Bot.Wow.ChangeTarget(nearEnemy.Guid);
+                        }
+                    }
+                    else
+                    {
                         Bot.Wow.ChangeTarget(nearEnemy.Guid);
                     }
                 }
@@ -294,16 +311,14 @@ namespace AmeisenBotX.Core.Engines.Battleground.Jannis.Profiles
             if (Bot.Player.IsAlliance())
             {
                 IWowGameobject obj = Bot.Objects.WowObjects.OfType<IWowGameobject>()
-                                    .Where(e => e.GameObjectType == WowGameObjectType.Door && e.DisplayId == 411)
-                                    .FirstOrDefault();
+                                    .FirstOrDefault(e => e.GameObjectType == WowGameObjectType.Door && e.DisplayId == 411);
 
                 return obj == null || obj.Bytes0 == 0;
             }
             else
             {
                 IWowGameobject obj = Bot.Objects.WowObjects.OfType<IWowGameobject>()
-                                    .Where(e => e.GameObjectType == WowGameObjectType.Door && e.DisplayId == 850)
-                                    .FirstOrDefault();
+                                    .FirstOrDefault(e => e.GameObjectType == WowGameObjectType.Door && e.DisplayId == 850);
 
                 return obj == null || obj.Bytes0 == 0;
             }
@@ -313,7 +328,6 @@ namespace AmeisenBotX.Core.Engines.Battleground.Jannis.Profiles
         {
             if (JBgBlackboard.EnemyTeamFlagCarrier == null)
             {
-                // StateMachine.Get<StateCombat>().Mode = CombatMode.Allowed;
                 return BtStatus.Success;
             }
 
@@ -324,9 +338,21 @@ namespace AmeisenBotX.Core.Engines.Battleground.Jannis.Profiles
             {
                 Bot.Movement.SetMovementAction(MovementAction.Move, BotUtils.MoveAhead(JBgBlackboard.EnemyTeamFlagCarrier.Position, JBgBlackboard.EnemyTeamFlagCarrier.Rotation, 1.0f));
             }
-            else if (ActionEvent.Run())
+            else if (Bot.Player.TargetGuid != 0)
             {
-                // StateMachine.Get<StateCombat>().Mode = CombatMode.Force;
+                WowUnitReaction reaction = Bot.Wow.GetReaction(Bot.Target.BaseAddress, Bot.Player.BaseAddress);
+
+                if (reaction is WowUnitReaction.Hostile or WowUnitReaction.Neutral)
+                {
+                    Bot.CombatClass.Execute();
+                }
+                else
+                {
+                    Bot.Wow.ChangeTarget(JBgBlackboard.EnemyTeamFlagCarrier.Guid);
+                }
+            }
+            else
+            {
                 Bot.Wow.ChangeTarget(JBgBlackboard.EnemyTeamFlagCarrier.Guid);
             }
 
@@ -392,9 +418,21 @@ namespace AmeisenBotX.Core.Engines.Battleground.Jannis.Profiles
                     {
                         Bot.Movement.SetMovementAction(MovementAction.Move, nearEnemy.Position);
                     }
-                    else if (ActionEvent.Run())
+                    else if (Bot.Player.TargetGuid != 0)
                     {
-                        // StateMachine.Get<StateCombat>().Mode = CombatMode.Force;
+                        WowUnitReaction reaction = Bot.Wow.GetReaction(Bot.Target.BaseAddress, Bot.Player.BaseAddress);
+
+                        if (reaction is WowUnitReaction.Hostile or WowUnitReaction.Neutral)
+                        {
+                            Bot.CombatClass.Execute();
+                        }
+                        else
+                        {
+                            Bot.Wow.ChangeTarget(nearEnemy.Guid);
+                        }
+                    }
+                    else
+                    {
                         Bot.Wow.ChangeTarget(nearEnemy.Guid);
                     }
                 }
@@ -413,14 +451,7 @@ namespace AmeisenBotX.Core.Engines.Battleground.Jannis.Profiles
 
                 if (LosCheckEvent.Run())
                 {
-                    if (Bot.Wow.IsInLineOfSight(Bot.Player.Position, position, 2.0f))
-                    {
-                        InLos = true;
-                    }
-                    else
-                    {
-                        InLos = false;
-                    }
+                    InLos = Bot.Wow.IsInLineOfSight(Bot.Player.Position, position, 2.0f);
                 }
 
                 if (zDiff < -4.0 && InLos) // target is below us and in line of sight, just run down

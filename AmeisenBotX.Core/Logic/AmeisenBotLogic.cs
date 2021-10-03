@@ -41,8 +41,8 @@ namespace AmeisenBotX.Core.Logic
             FirstStart = true;
             Random = new();
 
-            // Mode = BotMode.None;
-            Mode = BotMode.PvP;
+            Mode = BotMode.None;
+            // Mode = BotMode.PvP;
 
             IdleActionManager = new(new List<IIdleAction>()
             {

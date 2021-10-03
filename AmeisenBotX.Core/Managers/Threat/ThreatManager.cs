@@ -4,8 +4,6 @@ using AmeisenBotX.Wow.Objects.Enums;
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace AmeisenBotX.Core.Managers.Threat
 {
@@ -26,7 +24,7 @@ namespace AmeisenBotX.Core.Managers.Threat
 
         /// <summary>
         /// This method tries to calculate how dangerous a position is for us.
-        /// 
+        ///
         /// Range: 0.0f (Nothing) -> 100.0f (Deadly)
         /// </summary>
         /// <param name="position">Position to check</param>
