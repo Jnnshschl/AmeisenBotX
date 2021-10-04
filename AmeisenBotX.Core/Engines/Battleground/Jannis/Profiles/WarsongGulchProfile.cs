@@ -59,6 +59,7 @@ namespace AmeisenBotX.Core.Engines.Battleground.Jannis.Profiles
                 new Selector<CtfBlackboard>
                 (
                     (b) => b.MyTeamFlagCarrier != null && b.MyTeamFlagCarrier.Guid == Bot.Wow.PlayerGuid,
+                    // i'm the flag carrier
                     new Leaf<CtfBlackboard>((b) => MoveToPosition(WsgDataset.OwnBasePosition)),
                     new Selector<CtfBlackboard>
                     (
@@ -81,7 +82,16 @@ namespace AmeisenBotX.Core.Engines.Battleground.Jannis.Profiles
                         new Leaf<CtfBlackboard>((b) => MoveToPosition(WsgDataset.FlagHidingSpot)),
                         new Leaf<CtfBlackboard>((b) => MoveToPosition(WsgDataset.OwnBasePosition))
                     ),
-                    KillEnemyFlagCarrierSelector
+                    new Selector<CtfBlackboard>
+                    (
+                        (b) => b.MyTeamFlagCarrier != null
+                            && b.MyTeamFlagCarrier.DistanceTo(Bot.Player) < 50.0f
+                            && Bot.GetNearFriends<IWowPlayer>(b.MyTeamFlagCarrier.Position, 25.0f).Count() < 2,
+                        // assist our flag carrier
+                        new Leaf<CtfBlackboard>((b) => MoveToPosition(b.MyTeamFlagCarrier.Position)),
+                        // go kill other flag carrier
+                        KillEnemyFlagCarrierSelector
+                    )
                 )
             );
 
@@ -104,7 +114,6 @@ namespace AmeisenBotX.Core.Engines.Battleground.Jannis.Profiles
                          )
                      )
                  ),
-                 // TODO: add random amount to Y to spread the players around the gate
                  new Leaf<CtfBlackboard>((b) => MoveToPosition(WsgDataset.GatePosition))
             );
 
@@ -118,9 +127,13 @@ namespace AmeisenBotX.Core.Engines.Battleground.Jannis.Profiles
 
         private interface IWsgDataset
         {
+            static readonly List<int> BuffDisplayIds = new() { 5991, 5995, 5931 };
+
             Vector3 EnemyBasePosition { get; }
 
             Vector3 EnemyBasePositionMapCoords { get; }
+
+            Vector3 EnemyGraveyardPosition { get; }
 
             Vector3 FlagHidingSpot { get; }
 
@@ -130,7 +143,7 @@ namespace AmeisenBotX.Core.Engines.Battleground.Jannis.Profiles
 
             Vector3 OwnBasePositionMapCoords { get; }
 
-            static readonly List<int> BuffDisplayIds = new() { 5991, 5995, 5931 };
+            Vector3 OwnGraveyardPosition { get; }
         }
 
         public BehaviorTree<CtfBlackboard> BehaviorTree { get; }
@@ -176,8 +189,7 @@ namespace AmeisenBotX.Core.Engines.Battleground.Jannis.Profiles
             }
 
             // check whether i'm part of the closest x (memberCount) members to the flag carrier
-            int index = Bot.Objects.Partymembers
-                            .OfType<IWowPlayer>()
+            int index = Bot.Objects.Partymembers.OfType<IWowPlayer>()
                             .Where(e => e.Guid != blackboard.MyTeamFlagCarrier.Guid)
                             .OrderBy(e => e.Position.GetDistance(Bot.Player.Position))
                             .Select((player, id) => new { Player = player, Index = id })
@@ -192,7 +204,7 @@ namespace AmeisenBotX.Core.Engines.Battleground.Jannis.Profiles
 
             if (weakestPlayer != null)
             {
-                InitiateCombat();
+                InitiateCombat(weakestPlayer);
                 return BtStatus.Success;
             }
 
@@ -207,7 +219,7 @@ namespace AmeisenBotX.Core.Engines.Battleground.Jannis.Profiles
 
                 if (nearEnemy != null)
                 {
-                    InitiateCombat();
+                    InitiateCombat(nearEnemy);
                 }
             }
 
@@ -245,9 +257,20 @@ namespace AmeisenBotX.Core.Engines.Battleground.Jannis.Profiles
             return BtStatus.Success;
         }
 
-        private void InitiateCombat()
+        private void InitiateCombat(IWowUnit unit)
         {
-            if (Bot.Target != null && !CommonRoutines.MoveToTarget(Bot, Bot.Target.Position, Bot.CombatClass.IsMelee ? 3.0f : 28.0f, MovementAction.Chase))
+            if (Bot.Target == null)
+            {
+                Bot.Wow.ChangeTarget(unit.Guid);
+                return;
+            }
+
+            MovementAction action = Bot.Player.DistanceTo(WsgDataset.OwnGraveyardPosition) < 24.0f
+                || Bot.Player.DistanceTo(WsgDataset.EnemyGraveyardPosition) < 24.0f
+                    ? MovementAction.DirectMove
+                    : MovementAction.Chase;
+
+            if (!CommonRoutines.MoveToTarget(Bot, Bot.Target.Position, Bot.CombatClass.IsMelee ? 3.0f : 28.0f, action))
             {
                 Bot.CombatClass.Execute();
             }
@@ -289,7 +312,7 @@ namespace AmeisenBotX.Core.Engines.Battleground.Jannis.Profiles
                 return BtStatus.Failed;
             }
 
-            InitiateCombat();
+            InitiateCombat(JBgBlackboard.EnemyTeamFlagCarrier);
             return BtStatus.Ongoing;
         }
 
@@ -320,7 +343,7 @@ namespace AmeisenBotX.Core.Engines.Battleground.Jannis.Profiles
 
                 if (nearEnemy != null)
                 {
-                    InitiateCombat();
+                    InitiateCombat(nearEnemy);
                     return BtStatus.Success;
                 }
 
@@ -330,7 +353,7 @@ namespace AmeisenBotX.Core.Engines.Battleground.Jannis.Profiles
             return BtStatus.Ongoing;
         }
 
-        private BtStatus MoveToPosition(Vector3 position, float minDistance = 2.5f)
+        private BtStatus MoveToPosition(Vector3 position, float minDistance = 3.5f)
         {
             double distance = Bot.Player.Position.GetDistance(position);
 
@@ -342,7 +365,14 @@ namespace AmeisenBotX.Core.Engines.Battleground.Jannis.Profiles
                 }
 
                 float zDiff = position.Z - Bot.Player.Position.Z;
-                Bot.Movement.SetMovementAction(zDiff < -4.0 && InLos ? MovementAction.DirectMove : MovementAction.Move, position);
+
+                MovementAction action = (zDiff < -4.0 && InLos)
+                    || Bot.Player.DistanceTo(WsgDataset.OwnGraveyardPosition) < 24.0f
+                    || Bot.Player.DistanceTo(WsgDataset.EnemyGraveyardPosition) < 24.0f
+                        ? MovementAction.DirectMove
+                        : MovementAction.Move;
+
+                Bot.Movement.SetMovementAction(action, position);
 
                 return BtStatus.Ongoing;
             }
@@ -436,13 +466,17 @@ namespace AmeisenBotX.Core.Engines.Battleground.Jannis.Profiles
 
             public Vector3 EnemyBasePositionMapCoords { get; } = new(53, 90, 0);
 
+            public Vector3 EnemyGraveyardPosition { get; } = new(1415, 1555, 343);
+
             public Vector3 FlagHidingSpot { get; } = new(1519, 1467, 374);
 
-            public Vector3 GatePosition { get; } = new(1494, 1457, 343);
+            public Vector3 GatePosition { get; } = new(1494, 1457 + (float)((new Random().NextDouble() * 16.0f) - 8.0f), 343);
 
             public Vector3 OwnBasePosition { get; } = new(1539, 1481, 352);
 
             public Vector3 OwnBasePositionMapCoords { get; } = new(49, 15, 0);
+
+            public Vector3 OwnGraveyardPosition { get; } = new(1029, 1387, 340);
         }
 
         private class HordeWsgDataset : IWsgDataset
@@ -451,13 +485,17 @@ namespace AmeisenBotX.Core.Engines.Battleground.Jannis.Profiles
 
             public Vector3 EnemyBasePositionMapCoords { get; } = new(49, 15, 0);
 
+            public Vector3 EnemyGraveyardPosition { get; } = new(1029, 1387, 340);
+
             public Vector3 FlagHidingSpot { get; } = new(949, 1449, 367);
 
-            public Vector3 GatePosition { get; } = new(951, 1459, 342);
+            public Vector3 GatePosition { get; private set; } = new(951, 1459 + (float)((new Random().NextDouble() * 16.0f) - 8.0f), 342);
 
             public Vector3 OwnBasePosition { get; } = new(916, 1434, 346);
 
             public Vector3 OwnBasePositionMapCoords { get; } = new(53, 90, 0);
+
+            public Vector3 OwnGraveyardPosition { get; } = new(1415, 1555, 343);
         }
     }
 }

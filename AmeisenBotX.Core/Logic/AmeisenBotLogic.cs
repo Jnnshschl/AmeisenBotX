@@ -216,7 +216,9 @@ namespace AmeisenBotX.Core.Logic
                 new Leaf(() => { Bot.Battleground.Execute(); return BtStatus.Success; }),
                 // leave battleground once it is finished
                 (IsBattlegroundFinished, new Leaf(() => { Bot.Wow.LeaveBattleground(); Bot.Battleground.Reset(); return BtStatus.Success; })),
-                (() => Bot.Player.IsDead, new Leaf(Dead))
+                (() => Bot.Player.IsDead, new Leaf(Dead)),
+                (NeedToFight, openworldCombatNode),
+                (NeedToEat, new Leaf(Eat))
             );
 
             INode dungeonNode = new Waterfall
