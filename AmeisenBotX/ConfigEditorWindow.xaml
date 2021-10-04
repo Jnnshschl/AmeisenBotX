@@ -853,7 +853,7 @@
                                 <SolidColorBrush Color="{DynamicResource DarkBackground}" />
                             </RadioButton.Background>
                         </RadioButton>
-                        <RadioButton x:Name="checkboxCustomCombatClass" Content="Custom CombatClass" GroupName="CombatClass" HorizontalAlignment="Left" Margin="3,55,0,0" VerticalAlignment="Top" TabIndex="15" IsChecked="False" Style="{DynamicResource RadioButtonStyleDark}" Checked="CheckboxCustomCombatClass_Checked" FontFamily="Bahnschrift Light" Width="180" VerticalContentAlignment="Bottom">
+                        <RadioButton x:Name="checkboxCustomCombatClass" Content="Custom CombatClass (Broken)" GroupName="CombatClass" HorizontalAlignment="Left" Margin="3,55,0,0" VerticalAlignment="Top" TabIndex="15" IsChecked="False" Style="{DynamicResource RadioButtonStyleDark}" Checked="CheckboxCustomCombatClass_Checked" FontFamily="Bahnschrift Light" Width="190" VerticalContentAlignment="Bottom" IsEnabled="False">
                             <RadioButton.Foreground>
                                 <SolidColorBrush Color="{DynamicResource DarkForeground}" />
                             </RadioButton.Foreground>

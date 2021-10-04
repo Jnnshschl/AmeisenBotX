@@ -486,13 +486,13 @@ namespace AmeisenBotX.Core
 
         private void InitCombatClasses()
         {
-            // Get search namespace
             string combatClassNamespace = "AmeisenBotX.Core.Engines.Combat.Classes";
 
             IEnumerable<Type> combatClassTypes = AppDomain.CurrentDomain.GetAssemblies()
                 .SelectMany(x => x.GetTypes())
-                .Where(x => x.GetInterfaces().Contains(typeof(ICombatClass)))
-                .Where(x => x.Namespace != null && x.Namespace.Contains(combatClassNamespace));
+                .Where(x => x.GetInterfaces().Contains(typeof(ICombatClass))
+                         && x.Namespace != null
+                         && x.Namespace.Contains(combatClassNamespace));
 
             List<ICombatClass> combatClassInstances = new();
 
@@ -500,7 +500,6 @@ namespace AmeisenBotX.Core
             combatClassInstances.AddRange(combatClassTypes.Where(x => x.GetConstructor(new Type[] { typeof(AmeisenBotInterfaces) }) != null)
                 .Select(x => (ICombatClass)Activator.CreateInstance(x, Bot)));
 
-            // Set combat classes
             CombatClasses = combatClassInstances;
         }
 
