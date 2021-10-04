@@ -4,6 +4,7 @@ using AmeisenBotX.BehaviorTree.Objects;
 using AmeisenBotX.Common.Math;
 using AmeisenBotX.Common.Utils;
 using AmeisenBotX.Core.Engines.Movement.Enums;
+using AmeisenBotX.Core.Logic.Routines;
 using AmeisenBotX.Wow.Objects;
 using AmeisenBotX.Wow.Objects.Enums;
 using System;
@@ -93,7 +94,7 @@ namespace AmeisenBotX.Core.Engines.Battleground.Jannis.Profiles
                      new Leaf<CtfBlackboard>(UseNearestFlag),
                      new Selector<CtfBlackboard>
                      (
-                         (b) => IsAnyBuffNearMe(16.0f),
+                         (b) => IsAnyBuffNearMeAndNoOneElseUsingIt(16.0f),
                          new Leaf<CtfBlackboard>(MoveToNearestBuff),
                          new Selector<CtfBlackboard>
                          (
@@ -103,6 +104,7 @@ namespace AmeisenBotX.Core.Engines.Battleground.Jannis.Profiles
                          )
                      )
                  ),
+                 // TODO: add random amount to Y to spread the players around the gate
                  new Leaf<CtfBlackboard>((b) => MoveToPosition(WsgDataset.GatePosition))
             );
 
@@ -127,6 +129,8 @@ namespace AmeisenBotX.Core.Engines.Battleground.Jannis.Profiles
             Vector3 OwnBasePosition { get; }
 
             Vector3 OwnBasePositionMapCoords { get; }
+
+            static readonly List<int> BuffDisplayIds = new() { 5991, 5995, 5931 };
         }
 
         public BehaviorTree<CtfBlackboard> BehaviorTree { get; }
@@ -188,78 +192,25 @@ namespace AmeisenBotX.Core.Engines.Battleground.Jannis.Profiles
 
             if (weakestPlayer != null)
             {
-                float distance = weakestPlayer.Position.GetDistance(Bot.Player.Position);
-                float threshold = Bot.CombatClass.IsMelee ? 3.0f : 28.0f;
-
-                if (distance > threshold)
-                {
-                    Bot.Movement.SetMovementAction(MovementAction.Move, weakestPlayer.Position);
-                }
-                else if (Bot.Player.TargetGuid != 0)
-                {
-                    WowUnitReaction reaction = Bot.Wow.GetReaction(Bot.Target.BaseAddress, Bot.Player.BaseAddress);
-
-                    if (reaction is WowUnitReaction.Hostile or WowUnitReaction.Neutral)
-                    {
-                        Bot.CombatClass.Execute();
-                    }
-                    else
-                    {
-                        Bot.Wow.ChangeTarget(weakestPlayer.Guid);
-                    }
-                }
-                else
-                {
-                    Bot.Wow.ChangeTarget(weakestPlayer.Guid);
-                }
-            }
-            else
-            {
-                return BtStatus.Failed;
+                InitiateCombat();
+                return BtStatus.Success;
             }
 
-            return BtStatus.Ongoing;
+            return BtStatus.Failed;
         }
 
         private BtStatus DefendOwnBase(CtfBlackboard blackboard)
         {
-            double distance = Bot.Player.Position.GetDistance(WsgDataset.OwnBasePosition);
-
-            if (distance > 16.0)
-            {
-                Bot.Movement.SetMovementAction(MovementAction.Move, WsgDataset.OwnBasePosition);
-            }
-            else
+            if (!CommonRoutines.MoveToTarget(Bot, WsgDataset.OwnBasePosition, 16.0f))
             {
                 IWowUnit nearEnemy = Bot.GetNearEnemies<IWowUnit>(WsgDataset.OwnBasePosition, 16.0f).FirstOrDefault();
 
                 if (nearEnemy != null)
                 {
-                    float distanceToEnemy = Bot.Player.Position.GetDistance(nearEnemy.Position);
-
-                    if (distanceToEnemy > 2.0f)
-                    {
-                        Bot.Movement.SetMovementAction(MovementAction.Move, nearEnemy.Position);
-                    }
-                    else if (Bot.Player.TargetGuid != 0)
-                    {
-                        WowUnitReaction reaction = Bot.Wow.GetReaction(Bot.Target.BaseAddress, Bot.Player.BaseAddress);
-
-                        if (reaction is WowUnitReaction.Hostile or WowUnitReaction.Neutral)
-                        {
-                            Bot.CombatClass.Execute();
-                        }
-                        else
-                        {
-                            Bot.Wow.ChangeTarget(nearEnemy.Guid);
-                        }
-                    }
-                    else
-                    {
-                        Bot.Wow.ChangeTarget(nearEnemy.Guid);
-                    }
+                    InitiateCombat();
                 }
             }
+
             return BtStatus.Ongoing;
         }
 
@@ -290,15 +241,22 @@ namespace AmeisenBotX.Core.Engines.Battleground.Jannis.Profiles
                 Bot.Movement.SetMovementAction(MovementAction.Flee, nearestEnemy.Position, nearestEnemy.Rotation);
                 return BtStatus.Ongoing;
             }
-            else
+
+            return BtStatus.Success;
+        }
+
+        private void InitiateCombat()
+        {
+            if (Bot.Target != null && !CommonRoutines.MoveToTarget(Bot, Bot.Target.Position, Bot.CombatClass.IsMelee ? 3.0f : 28.0f, MovementAction.Chase))
             {
-                return BtStatus.Success;
+                Bot.CombatClass.Execute();
             }
         }
 
-        private bool IsAnyBuffNearMe(float distance)
+        private bool IsAnyBuffNearMeAndNoOneElseUsingIt(float distance)
         {
-            return Bot.GetClosestGameObjectByDisplayId(Bot.Player.Position, new List<int>() { 5991, 5995, 5931 })?.Position.GetDistance(Bot.Player.Position) < distance;
+            IWowGameobject buff = Bot.GetClosestGameObjectByDisplayId(Bot.Player.Position, IWsgDataset.BuffDisplayIds);
+            return buff != null && buff.Position.GetDistance(Bot.Player.Position) < distance && !Bot.GetNearPartyMembers<IWowPlayer>(buff.Position, 8.0f).Any();
         }
 
         private bool IsFlagNear()
@@ -328,68 +286,25 @@ namespace AmeisenBotX.Core.Engines.Battleground.Jannis.Profiles
         {
             if (JBgBlackboard.EnemyTeamFlagCarrier == null)
             {
-                return BtStatus.Success;
+                return BtStatus.Failed;
             }
 
-            float distance = Bot.Player.Position.GetDistance(JBgBlackboard.EnemyTeamFlagCarrier.Position);
-            float threshold = Bot.CombatClass.IsMelee ? 3.0f : 28.0f;
-
-            if (distance > threshold && !Bot.Player.IsCasting)
-            {
-                Bot.Movement.SetMovementAction(MovementAction.Move, BotUtils.MoveAhead(JBgBlackboard.EnemyTeamFlagCarrier.Position, JBgBlackboard.EnemyTeamFlagCarrier.Rotation, 1.0f));
-            }
-            else if (Bot.Player.TargetGuid != 0)
-            {
-                WowUnitReaction reaction = Bot.Wow.GetReaction(Bot.Target.BaseAddress, Bot.Player.BaseAddress);
-
-                if (reaction is WowUnitReaction.Hostile or WowUnitReaction.Neutral)
-                {
-                    Bot.CombatClass.Execute();
-                }
-                else
-                {
-                    Bot.Wow.ChangeTarget(JBgBlackboard.EnemyTeamFlagCarrier.Guid);
-                }
-            }
-            else
-            {
-                Bot.Wow.ChangeTarget(JBgBlackboard.EnemyTeamFlagCarrier.Guid);
-            }
-
+            InitiateCombat();
             return BtStatus.Ongoing;
         }
 
         private BtStatus MoveToEnemyBaseAndGetFlag(CtfBlackboard blackboard)
         {
-            float distance = Bot.Player.Position.GetDistance(WsgDataset.EnemyBasePosition);
-
-            if (distance > 2.0f)
-            {
-                Bot.Movement.SetMovementAction(MovementAction.Move, WsgDataset.EnemyBasePosition);
-            }
-            else if (JBgBlackboard.NearFlags != null)
-            {
-                return UseNearestFlag(blackboard);
-            }
-
-            return BtStatus.Ongoing;
+            return !CommonRoutines.MoveToTarget(Bot, WsgDataset.EnemyBasePosition, 2.0f) && JBgBlackboard.NearFlags != null
+                ? UseNearestFlag(blackboard)
+                : BtStatus.Ongoing;
         }
 
         private BtStatus MoveToNearestBuff(CtfBlackboard blackboard)
         {
-            IWowGameobject buffObject = Bot.GetClosestGameObjectByDisplayId(Bot.Player.Position, new List<int>() { 5991, 5995, 5931 });
+            IWowGameobject buffObject = Bot.GetClosestGameObjectByDisplayId(Bot.Player.Position, IWsgDataset.BuffDisplayIds);
 
-            if (buffObject != null
-                && buffObject.Position.GetDistance(Bot.Player.Position) > 3.0)
-            {
-                Bot.Movement.SetMovementAction(MovementAction.Move, buffObject.Position);
-            }
-            else
-            {
-                return BtStatus.Failed;
-            }
-
-            return BtStatus.Ongoing;
+            return buffObject == null || !CommonRoutines.MoveToTarget(Bot, buffObject.Position, 3.0f) ? BtStatus.Failed : BtStatus.Ongoing;
         }
 
         private BtStatus MoveToOwnFlagCarrierAndHelp()
@@ -399,43 +314,17 @@ namespace AmeisenBotX.Core.Engines.Battleground.Jannis.Profiles
                 return BtStatus.Failed;
             }
 
-            float distance = Bot.Player.Position.GetDistance(JBgBlackboard.MyTeamFlagCarrier.Position);
-
-            if (distance > 4.0f)
-            {
-                Bot.Movement.SetMovementAction(MovementAction.Move, JBgBlackboard.MyTeamFlagCarrier.Position);
-            }
-            else
+            if (!CommonRoutines.MoveToTarget(Bot, JBgBlackboard.MyTeamFlagCarrier.Position, 5.0f))
             {
                 IWowUnit nearEnemy = Bot.GetNearEnemies<IWowUnit>(JBgBlackboard.MyTeamFlagCarrier.Position, 32.0f).FirstOrDefault();
 
                 if (nearEnemy != null)
                 {
-                    float distanceToEnemy = Bot.Player.Position.GetDistance(nearEnemy.Position);
-                    float threshold = Bot.CombatClass.IsMelee ? 3.0f : 28.0f;
-
-                    if (distanceToEnemy > threshold)
-                    {
-                        Bot.Movement.SetMovementAction(MovementAction.Move, nearEnemy.Position);
-                    }
-                    else if (Bot.Player.TargetGuid != 0)
-                    {
-                        WowUnitReaction reaction = Bot.Wow.GetReaction(Bot.Target.BaseAddress, Bot.Player.BaseAddress);
-
-                        if (reaction is WowUnitReaction.Hostile or WowUnitReaction.Neutral)
-                        {
-                            Bot.CombatClass.Execute();
-                        }
-                        else
-                        {
-                            Bot.Wow.ChangeTarget(nearEnemy.Guid);
-                        }
-                    }
-                    else
-                    {
-                        Bot.Wow.ChangeTarget(nearEnemy.Guid);
-                    }
+                    InitiateCombat();
+                    return BtStatus.Success;
                 }
+
+                return BtStatus.Failed;
             }
 
             return BtStatus.Ongoing;
@@ -447,28 +336,18 @@ namespace AmeisenBotX.Core.Engines.Battleground.Jannis.Profiles
 
             if (distance > minDistance)
             {
-                float zDiff = position.Z - Bot.Player.Position.Z;
-
                 if (LosCheckEvent.Run())
                 {
                     InLos = Bot.Wow.IsInLineOfSight(Bot.Player.Position, position, 2.0f);
                 }
 
-                if (zDiff < -4.0 && InLos) // target is below us and in line of sight, just run down
-                {
-                    Bot.Movement.SetMovementAction(MovementAction.DirectMove, position);
-                }
-                else
-                {
-                    Bot.Movement.SetMovementAction(MovementAction.Move, position);
-                }
+                float zDiff = position.Z - Bot.Player.Position.Z;
+                Bot.Movement.SetMovementAction(zDiff < -4.0 && InLos ? MovementAction.DirectMove : MovementAction.Move, position);
 
                 return BtStatus.Ongoing;
             }
-            else
-            {
-                return BtStatus.Success;
-            }
+
+            return BtStatus.Success;
         }
 
         private void UpdateBattlegroundInfo()
@@ -539,23 +418,16 @@ namespace AmeisenBotX.Core.Engines.Battleground.Jannis.Profiles
 
             if (nearestFlag != null)
             {
-                float distance = Bot.Player.Position.GetDistance(nearestFlag.Position);
-
-                if (distance > 4.0f)
-                {
-                    Bot.Movement.SetMovementAction(MovementAction.Move, nearestFlag.Position);
-                }
-                else if (ActionEvent.Run())
+                if (!CommonRoutines.MoveToTarget(Bot, nearestFlag.Position, 4.0f) && ActionEvent.Run())
                 {
                     Bot.Wow.InteractWithObject(nearestFlag.BaseAddress);
+                    return BtStatus.Success;
                 }
-            }
-            else
-            {
-                return BtStatus.Failed;
+
+                return BtStatus.Ongoing;
             }
 
-            return BtStatus.Ongoing;
+            return BtStatus.Failed;
         }
 
         private class AllianceWsgDataset : IWsgDataset

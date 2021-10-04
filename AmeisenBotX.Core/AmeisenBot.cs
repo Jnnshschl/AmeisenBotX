@@ -488,7 +488,7 @@ namespace AmeisenBotX.Core
         {
             // Get search namespace
             string combatClassNamespace = "AmeisenBotX.Core.Engines.Combat.Classes";
-            
+
             IEnumerable<Type> combatClassTypes = AppDomain.CurrentDomain.GetAssemblies()
                 .SelectMany(x => x.GetTypes())
                 .Where(x => x.GetInterfaces().Contains(typeof(ICombatClass)))
@@ -615,6 +615,15 @@ namespace AmeisenBotX.Core
             AmeisenLogger.I.Log("AmeisenBot", $"OnBattlegroundStatusChanged: {s}");
         }
 
+        private void OnClassTrainerShow(long timestamp, List<string> args)
+        {
+            // todo: Config.TrainSpells
+            if (!Bot.Target.IsClassTrainer) return;
+
+            TrainAllSpellsRoutine.Run(Bot, Config);
+            Bot.Character.LastLevelTrained = Bot.Player.Level;
+        }
+
         private void OnEquipmentChanged(long timestamp, List<string> args)
         {
             if (EquipmentUpdateEvent.Run())
@@ -694,15 +703,6 @@ namespace AmeisenBotX.Core
             {
                 SellItemsRoutine.Run(Bot, Config);
             }
-        }
-
-        private void OnClassTrainerShow(long timestamp, List<string> args)
-        {
-            // todo: Config.TrainSpells 
-            if (!Bot.Target.IsClassTrainer) return;
-
-            TrainAllSpellsRoutine.Run(Bot, Config);
-            Bot.Character.LastLevelTrained = Bot.Player.Level;
         }
 
         private void OnObjectUpdateComplete(IEnumerable<IWowObject> wowObjects)

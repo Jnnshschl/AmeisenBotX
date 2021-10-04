@@ -102,7 +102,9 @@ namespace AmeisenBotX.Core.Engines.Movement
                             && !Bot.Player.IsMounted
                             && Bot.Player.IsOutdoors
                             && Bot.Character.Mounts != null
-                            && Bot.Character.Mounts.Any())
+                            && Bot.Character.Mounts.Any()
+                            // wsg flags
+                            && !Bot.Player.HasBuffById(Bot.Player.IsAlliance() ? 23333 : 23335))
                         {
                             MountUp();
                             TriedToMountUp = true;

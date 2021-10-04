@@ -211,13 +211,12 @@ namespace AmeisenBotX.Core.Logic
 
             // SPECIAL ENVIRONMENTS -----------------------------
 
-            INode battlegroundNode = new Selector
+            INode battlegroundNode = new Waterfall
             (
-                IsBattlegroundFinished,
+                new Leaf(() => { Bot.Battleground.Execute(); return BtStatus.Success; }),
                 // leave battleground once it is finished
-                new Leaf(() => { Bot.Wow.LeaveBattleground(); Bot.Battleground.Reset(); return BtStatus.Success; }),
-                // TODO: run bg engine here
-                new Leaf(() => { Bot.Battleground.Execute(); return BtStatus.Success; })
+                (IsBattlegroundFinished, new Leaf(() => { Bot.Wow.LeaveBattleground(); Bot.Battleground.Reset(); return BtStatus.Success; })),
+                (() => Bot.Player.IsDead, new Leaf(Dead))
             );
 
             INode dungeonNode = new Waterfall
@@ -325,6 +324,8 @@ namespace AmeisenBotX.Core.Logic
 
         private TimegatedEvent CharacterUpdateEvent { get; }
 
+        private IWowUnit ClassTrainer { get; set; }
+
         private AmeisenBotConfig Config { get; }
 
         private DateTime DungeonDiedTimestamp { get; set; }
@@ -351,8 +352,6 @@ namespace AmeisenBotX.Core.Logic
 
         private IWowUnit Merchant { get; set; }
 
-        private IWowUnit ClassTrainer { get; set; }
-
         private TimegatedEvent NpcInteractionEvent { get; }
 
         private TimegatedEvent OffsetCheckEvent { get; }
@@ -376,6 +375,45 @@ namespace AmeisenBotX.Core.Logic
         private Queue<ulong> UnitsToLoot { get; }
 
         private TimegatedEvent UpdateFood { get; }
+
+        public static NpcSubType DecideClassTrainer(WowClass myClass)
+        {
+            switch (myClass)
+            {
+                case WowClass.Warrior:
+                    return NpcSubType.WarriorTrainer;
+
+                case WowClass.Paladin:
+                    return NpcSubType.PaladinTrainer;
+
+                case WowClass.Hunter:
+                    return NpcSubType.HunterTrainer;
+
+                case WowClass.Rogue:
+                    return NpcSubType.RougeTrainer;
+
+                case WowClass.Priest:
+                    return NpcSubType.PriestTrainer;
+
+                case WowClass.Deathknight:
+                    return NpcSubType.DeathKnightTrainer;
+
+                case WowClass.Shaman:
+                    return NpcSubType.ShamanTrainer;
+
+                case WowClass.Mage:
+                    return NpcSubType.MageTrainer;
+
+                case WowClass.Warlock:
+                    return NpcSubType.WarlockTrainer;
+
+                case WowClass.Druid:
+                    return NpcSubType.DruidTrainer;
+
+                default:
+                    throw new ArgumentOutOfRangeException();
+            }
+        }
 
         public void ChangeMode(BotMode mode)
         {
@@ -867,10 +905,10 @@ namespace AmeisenBotX.Core.Logic
             }
 
             return Bot.Player.HealthPercentage < Config.EatUntilPercent
-                   && (Food.Any(e => Enum.IsDefined(typeof(WowFood), e.Id)) 
+                   && (Food.Any(e => Enum.IsDefined(typeof(WowFood), e.Id))
                        || Food.Any(e => Enum.IsDefined(typeof(WowRefreshment), e.Id)))
                 || Bot.Player.MaxMana > 0 && Bot.Player.ManaPercentage < Config.DrinkUntilPercent
-                   && (Food.Any(e => Enum.IsDefined(typeof(WowWater), e.Id)) 
+                   && (Food.Any(e => Enum.IsDefined(typeof(WowWater), e.Id))
                        || Food.Any(e => Enum.IsDefined(typeof(WowRefreshment), e.Id)));
         }
 
@@ -924,75 +962,6 @@ namespace AmeisenBotX.Core.Logic
             return UnitsToLoot.Count > 0;
         }
 
-        private bool NeedToTrainSpells()
-        {
-            IWowUnit classTrainer = null;
-            Npc profileTrainer = null;
-
-            if (Bot.Grinding.Profile != null)
-                profileTrainer = Bot.Grinding.Profile.NpcsOfInterest?.FirstOrDefault(e =>
-                    e.Type == NpcType.ClassTrainer && e.SubType == DecideClassTrainer(Bot.Player.Class));
-
-            if (profileTrainer != null)
-                classTrainer = Bot.GetClosestTrainerByEntryId(profileTrainer.EntryId);
-
-            if (classTrainer == null) 
-                return false;
-
-            ClassTrainer = classTrainer;
-            return Bot.Character.LastLevelTrained != 0 && Bot.Character.LastLevelTrained < Bot.Player.Level;
-        }
-
-        public static NpcSubType DecideClassTrainer(WowClass myClass)
-        {
-            switch (myClass)
-            {
-                case WowClass.Warrior:
-                    return NpcSubType.WarriorTrainer;
-                case WowClass.Paladin:
-                    return NpcSubType.PaladinTrainer;
-                case WowClass.Hunter:
-                    return NpcSubType.HunterTrainer;
-                case WowClass.Rogue:
-                    return NpcSubType.RougeTrainer;
-                case WowClass.Priest:
-                    return NpcSubType.PriestTrainer;
-                case WowClass.Deathknight:
-                    return NpcSubType.DeathKnightTrainer;
-                case WowClass.Shaman:
-                    return NpcSubType.ShamanTrainer;
-                case WowClass.Mage:
-                    return NpcSubType.MageTrainer;
-                case WowClass.Warlock:
-                    return NpcSubType.WarlockTrainer;
-                case WowClass.Druid:
-                    return NpcSubType.DruidTrainer;
-
-                default:
-                    throw new ArgumentOutOfRangeException();
-            }
-        }
-
-        private BtStatus SpeakWithClassTrainer()
-        {
-            if (ClassTrainer == null) 
-                return BtStatus.Failed;
-
-            if (Bot.Player.Position.GetDistance(ClassTrainer.Position) > 3.0f)
-            {
-                Bot.Movement.SetMovementAction(MovementAction.Move, ClassTrainer.Position);
-                return BtStatus.Success;
-            }
-
-            Bot.Movement.StopMovement();
-
-            if (!NpcInteractionEvent.Run()) 
-                return BtStatus.Failed;
-
-            SpeakToClassTrainerRoutine.Run(Bot, ClassTrainer);
-            return BtStatus.Success;
-        }
-
         private bool NeedToRepairOrSell()
         {
             bool needToRepair = Bot.Character.Equipment.Items.Any(e =>
@@ -1006,7 +975,7 @@ namespace AmeisenBotX.Core.Logic
                                       || Config.SellGreenItems && e.ItemQuality == (int)WowItemQuality.Uncommon
                                       || Config.SellBlueItems && e.ItemQuality == (int)WowItemQuality.Rare
                                       || Config.SellPurpleItems && e.ItemQuality == (int)WowItemQuality.Epic));
-            
+
             IWowUnit vendorRepair = null;
             IWowUnit vendorSell = null;
 
@@ -1016,17 +985,17 @@ namespace AmeisenBotX.Core.Logic
             switch (Mode)
             {
                 case BotMode.Grinding:
-                {
-                    Npc repairNpcEntry = Bot.Grinding.Profile.NpcsOfInterest.FirstOrDefault(e => e.Type == NpcType.VendorRepair);
-                    if (repairNpcEntry != null)
-                        vendorRepair = Bot.GetClosestVendorByEntryId(repairNpcEntry.EntryId); 
+                    {
+                        Npc repairNpcEntry = Bot.Grinding.Profile.NpcsOfInterest.FirstOrDefault(e => e.Type == NpcType.VendorRepair);
+                        if (repairNpcEntry != null)
+                            vendorRepair = Bot.GetClosestVendorByEntryId(repairNpcEntry.EntryId);
 
-                    Npc sellNpcEntry = Bot.Grinding.Profile.NpcsOfInterest.FirstOrDefault(e => e.Type is NpcType.VendorRepair or NpcType.VendorSellBuy);
-                    if (sellNpcEntry != null)
-                        vendorSell = Bot.GetClosestVendorByEntryId(sellNpcEntry.EntryId);
+                        Npc sellNpcEntry = Bot.Grinding.Profile.NpcsOfInterest.FirstOrDefault(e => e.Type is NpcType.VendorRepair or NpcType.VendorSellBuy);
+                        if (sellNpcEntry != null)
+                            vendorSell = Bot.GetClosestVendorByEntryId(sellNpcEntry.EntryId);
 
-                    break;
-                }
+                        break;
+                    }
                 case BotMode.None:
                     IsRepairNpcNear(out IWowUnit repairNpc);
                     vendorRepair = repairNpc;
@@ -1034,6 +1003,7 @@ namespace AmeisenBotX.Core.Logic
                     IsVendorNpcNear(out IWowUnit sellNpc);
                     vendorSell = sellNpc;
                     break;
+
                 case BotMode.Questing:
                     break;
 
@@ -1053,6 +1023,25 @@ namespace AmeisenBotX.Core.Logic
             }
 
             return false;
+        }
+
+        private bool NeedToTrainSpells()
+        {
+            IWowUnit classTrainer = null;
+            Npc profileTrainer = null;
+
+            if (Bot.Grinding.Profile != null)
+                profileTrainer = Bot.Grinding.Profile.NpcsOfInterest?.FirstOrDefault(e =>
+                    e.Type == NpcType.ClassTrainer && e.SubType == DecideClassTrainer(Bot.Player.Class));
+
+            if (profileTrainer != null)
+                classTrainer = Bot.GetClosestTrainerByEntryId(profileTrainer.EntryId);
+
+            if (classTrainer == null)
+                return false;
+
+            ClassTrainer = classTrainer;
+            return Bot.Character.LastLevelTrained != 0 && Bot.Character.LastLevelTrained < Bot.Player.Level;
         }
 
         private BtStatus RunToCorpseAndRetrieveIt()
@@ -1098,6 +1087,26 @@ namespace AmeisenBotX.Core.Logic
             }
 
             return false;
+        }
+
+        private BtStatus SpeakWithClassTrainer()
+        {
+            if (ClassTrainer == null)
+                return BtStatus.Failed;
+
+            if (Bot.Player.Position.GetDistance(ClassTrainer.Position) > 3.0f)
+            {
+                Bot.Movement.SetMovementAction(MovementAction.Move, ClassTrainer.Position);
+                return BtStatus.Success;
+            }
+
+            Bot.Movement.StopMovement();
+
+            if (!NpcInteractionEvent.Run())
+                return BtStatus.Failed;
+
+            SpeakToClassTrainerRoutine.Run(Bot, ClassTrainer);
+            return BtStatus.Success;
         }
 
         private BtStatus SpeakWithMerchant()
