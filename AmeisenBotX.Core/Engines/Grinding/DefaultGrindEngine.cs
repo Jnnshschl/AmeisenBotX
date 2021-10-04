@@ -122,7 +122,7 @@ namespace AmeisenBotX.Core.Engines.Grinding
             if (Bot.Target == null)
                 return BtStatus.Failed;
 
-            Bot.CombatClass.Execute();
+            Bot.CombatClass?.Execute();
             return BtStatus.Success;
         }
 
@@ -204,7 +204,7 @@ namespace AmeisenBotX.Core.Engines.Grinding
 
         private BtStatus MoveToNextGrindNode()
         {
-            Bot.CombatClass.OutOfCombatExecute();
+            Bot.CombatClass?.OutOfCombatExecute();
 
             List<GrindingSpot> spots = Profile.Spots.Where(e =>
                 Bot.Player.Level >= e.MinLevel && Bot.Player.Level <= e.MaxLevel)

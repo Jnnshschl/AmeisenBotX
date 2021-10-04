@@ -53,7 +53,7 @@ namespace AmeisenBotX.Core.Engines.Battleground.KamelBG
 
         public void Execute()
         {
-            Bot.CombatClass.OutOfCombatExecute();
+            Bot.CombatClass?.OutOfCombatExecute();
             if (Bot.Player.IsCasting)
             {
                 return;

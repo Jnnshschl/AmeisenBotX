@@ -104,7 +104,7 @@ namespace AmeisenBotX.Core.Logic
                 (
                     // combatclass handles movement itself or has no target
                     () => Bot.CombatClass.HandlesMovement || Bot.Target == null,
-                    new Leaf(() => { Bot.CombatClass.Execute(); return BtStatus.Success; }),
+                    new Leaf(() => { Bot.CombatClass?.Execute(); return BtStatus.Success; }),
                     new Selector
                     (
                         // check whether we need to move
@@ -113,7 +113,7 @@ namespace AmeisenBotX.Core.Logic
                         new Waterfall
                         (
                             // fallback, run to the target unit
-                            new Leaf(() => { Bot.CombatClass.Execute(); return BtStatus.Success; }),
+                            new Leaf(() => { Bot.CombatClass?.Execute(); return BtStatus.Success; }),
                             // dps logic
                             (
                                 () => Bot.CombatClass.Role == WowRole.Dps,
@@ -124,13 +124,13 @@ namespace AmeisenBotX.Core.Logic
                                     (
                                         () => !Bot.Player.IsInMeleeRange(Bot.Target),
                                         new Leaf(() => MoveToPosition(Bot.Target.Position)),
-                                        new Leaf(() => { Bot.CombatClass.Execute(); return BtStatus.Success; })
+                                        new Leaf(() => { Bot.CombatClass?.Execute(); return BtStatus.Success; })
                                     ),
                                     new Selector
                                     (
                                         () => Bot.Player.DistanceTo(Bot.Target) > 26.5f + Bot.Target.CombatReach,
                                         new Leaf(() => MoveToPosition(Bot.Target.Position)),
-                                        new Leaf(() => { Bot.CombatClass.Execute(); return BtStatus.Success; })
+                                        new Leaf(() => { Bot.CombatClass?.Execute(); return BtStatus.Success; })
                                     )
                                 )
                             ),
@@ -141,7 +141,7 @@ namespace AmeisenBotX.Core.Logic
                                 (
                                     () => !Bot.Player.IsInMeleeRange(Bot.Target),
                                     new Leaf(() => MoveToPosition(Bot.Target.Position)),
-                                    new Leaf(() => { Bot.CombatClass.Execute(); return BtStatus.Success; })
+                                    new Leaf(() => { Bot.CombatClass?.Execute(); return BtStatus.Success; })
                                 )
                             ),
                             // heal logic
@@ -151,7 +151,7 @@ namespace AmeisenBotX.Core.Logic
                                 (
                                     () => Bot.Player.DistanceTo(Bot.Target) > 23.5f + Bot.Target.CombatReach,
                                     new Leaf(() => MoveToPosition(Bot.Target.Position)),
-                                    new Leaf(() => { Bot.CombatClass.Execute(); return BtStatus.Success; })
+                                    new Leaf(() => { Bot.CombatClass?.Execute(); return BtStatus.Success; })
                                 )
                             )
                         )
@@ -728,8 +728,7 @@ namespace AmeisenBotX.Core.Logic
 
         private BtStatus Idle()
         {
-            Bot.CombatClass.OutOfCombatExecute();
-
+            Bot.CombatClass?.OutOfCombatExecute();
             return BtStatus.Success;
         }
 

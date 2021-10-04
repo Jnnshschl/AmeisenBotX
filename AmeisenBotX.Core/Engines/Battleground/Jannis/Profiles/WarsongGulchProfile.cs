@@ -272,7 +272,7 @@ namespace AmeisenBotX.Core.Engines.Battleground.Jannis.Profiles
 
             if (!CommonRoutines.MoveToTarget(Bot, Bot.Target.Position, Bot.CombatClass.IsMelee ? 3.0f : 28.0f, action))
             {
-                Bot.CombatClass.Execute();
+                Bot.CombatClass?.Execute();
             }
         }
 
