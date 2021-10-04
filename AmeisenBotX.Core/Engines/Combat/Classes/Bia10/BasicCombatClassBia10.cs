@@ -9,6 +9,7 @@ using AmeisenBotX.Core.Managers.Character.Talents.Objects;
 using AmeisenBotX.Logging;
 using AmeisenBotX.Logging.Enums;
 using AmeisenBotX.Wow.Objects;
+using AmeisenBotX.Wow.Objects.Constants;
 using AmeisenBotX.Wow.Objects.Enums;
 using AmeisenBotX.Wow335a.Constants;
 using System;
@@ -93,17 +94,23 @@ namespace AmeisenBotX.Core.Engines.Combat.Classes.Bia10
             var target = Bot.Target;
             if (target == null) return;
 
-            /*
-            if (Bot.Player.Position.GetDistance(Bot.Target.Position) < 5.0f && !Bot.Player.IsAutoAttacking)
+            switch (IsMelee)
             {
-                if (Bot.Player.IsCasting)
+                case true when Bot.Player.Position.GetDistance(Bot.Target.Position) <= WowClickToMoveDistance.AttackGuid:
                 {
-                    Bot.Wow.StopCasting();
-                    Bot.Wow.StartAutoAttack();
-                    return;
+                    if (Bot.Player.IsCasting)
+                        Bot.Wow.StopCasting();
+
+                    Bot.Wow.StopClickToMove();
+                    Bot.Movement.Reset();
+                    Bot.Wow.InteractWithUnit(target.BaseAddress);
+                    break;
                 }
-                Bot.Wow.StartAutoAttack();
-            }*/
+
+                case true when Bot.Player.Position.GetDistance(Bot.Target.Position) > WowClickToMoveDistance.AttackGuid:
+                    Bot.Movement.SetMovementAction(MovementAction.Move, target.Position);
+                    break;
+            }
 
             var spellToCheck = string.Empty;
             switch (Bot.Player.Class)
@@ -111,6 +118,7 @@ namespace AmeisenBotX.Core.Engines.Combat.Classes.Bia10
                 case WowClass.None:
                     break;
                 case WowClass.Warrior:
+                    spellToCheck = Warrior335a.HeroicStrike;
                     break;
                 case WowClass.Paladin:
                     break;
@@ -303,12 +311,41 @@ namespace AmeisenBotX.Core.Engines.Combat.Classes.Bia10
 
         private bool IsGCD() => DateTime.Now.Subtract(LastGCD).TotalSeconds < GCDTime;
 
-        protected bool TryCastSpell(string spellName, ulong guid, bool needsResource = false, double GCD = 1.5)
+        protected bool TryCastSpell(string spellName, ulong guid, bool needsResource = true, double GCD = 1.5)
         {
             var spell = Bot.Character.SpellBook.GetSpellByName(spellName);
-
             if (spell == null) return false;
-            if (needsResource && spell.Costs > Bot.Player.Mana) return false;
+
+            if (needsResource)
+            {
+                switch (Bot.Player.PowerType)
+                {
+                    case WowPowerType.Health:
+                        break;
+                    case WowPowerType.Mana:
+                        if (spell.Costs > Bot.Player.Mana) return false;
+                        break;
+                    case WowPowerType.Rage:
+                        if (spell.Costs > Bot.Player.Rage) return false;
+                        break;
+                    case WowPowerType.Focus:
+                        break;
+                    case WowPowerType.Energy:
+                        break;
+                    case WowPowerType.Happiness:
+                        break;
+                    case WowPowerType.Runes:
+                        break;
+                    case WowPowerType.RunicPower:
+                        break;
+                    case WowPowerType.Unknown:
+                        break;
+
+                    default:
+                        throw new ArgumentOutOfRangeException();
+                }
+            }
+
             if (!ValidateTarget(guid, out var target, out var needToSwitchTarget)) return false;
             if (target != null && !IsInSpellRange(target, spellName)) return false;
 
@@ -322,8 +359,9 @@ namespace AmeisenBotX.Core.Engines.Combat.Classes.Bia10
             switch (spell.CastTime)
             {
                 case 0:
-                    Bot.Movement.PreventMovement(TimeSpan.FromMilliseconds(400));
+                    Bot.Movement.PreventMovement(TimeSpan.FromMilliseconds(300));
                     CheckFacing(target);
+                    GCD += 0.1; // some timing is off with casting after instant cast spells
                     break;
                 case > 0:
                     Bot.Movement.PreventMovement(TimeSpan.FromMilliseconds(spell.CastTime));

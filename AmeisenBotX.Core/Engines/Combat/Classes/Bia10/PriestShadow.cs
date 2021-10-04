@@ -4,6 +4,7 @@ using AmeisenBotX.Core.Managers.Character.Talents.Objects;
 using AmeisenBotX.Wow.Objects.Enums;
 using AmeisenBotX.Wow335a.Constants;
 using System.Collections.Generic;
+using System.Linq;
 
 namespace AmeisenBotX.Core.Engines.Combat.Classes.Bia10
 {
@@ -15,6 +16,11 @@ namespace AmeisenBotX.Core.Engines.Combat.Classes.Bia10
                 Bot.Player.ManaPercentage > 60.0
                 && ValidateSpell(Priest335a.PowerWordFortitude, true)
                 && TryCastSpell(Priest335a.PowerWordFortitude, Bot.Player.Guid, true)));
+            MyAuraManager.Jobs.Add(new KeepActiveAuraJob(bot.Db, Priest335a.PowerWordShield, () =>
+                Bot.Player.Auras.All(e => Bot.Db.GetSpellName(e.SpellId) != "Weakened Soul") 
+                && Bot.Player.ManaPercentage > 60.0
+                && ValidateSpell(Priest335a.PowerWordShield, true)
+                && TryCastSpell(Priest335a.PowerWordShield, Bot.Player.Guid, true)));
 
             TargetAuraManager.Jobs.Add(new KeepActiveAuraJob(bot.Db, Priest335a.ShadowWordPain, () =>
                 Bot.Target?.HealthPercentage >= 5
@@ -70,6 +76,12 @@ namespace AmeisenBotX.Core.Engines.Combat.Classes.Bia10
             {
                 targetGuid = Bot.Player.Guid;
                 return Priest335a.LesserHeal;
+            }
+            if (IsInSpellRange(Bot.Target, Priest335a.MindBlast)
+                && ValidateSpell(Priest335a.MindBlast, true))
+            {
+                targetGuid = Bot.Target.Guid;
+                return Priest335a.MindBlast;
             }
             if (IsInSpellRange(Bot.Target, Priest335a.Smite)
                 && ValidateSpell(Priest335a.Smite, true))

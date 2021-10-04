@@ -20,10 +20,12 @@ namespace AmeisenBotX.Core.Engines.Grinding.Profiles.Horde
             new Npc("Ken'jai", 3707,
                 WowMapId.Kalimdor, WowZoneId.ValleyofTrials, new Vector3(-617, -4202, 38),
                 NpcType.ClassTrainer, NpcSubType.PriestTrainer),
-
             new Npc("Shikrik", 3157,
                 WowMapId.Kalimdor, WowZoneId.ValleyofTrials, new Vector3(-623, -4203, 38),
-                NpcType.ClassTrainer, NpcSubType.ShamanTrainer)
+                NpcType.ClassTrainer, NpcSubType.ShamanTrainer),
+            new Npc("Frang", 3145,
+                WowMapId.Kalimdor, WowZoneId.ValleyofTrials, new Vector3(-629, -4228, 38),
+                NpcType.ClassTrainer, NpcSubType.WarriorTrainer)
         };
 
         public List<InteractableObject> ObjectsOfInterest { get; } = new()

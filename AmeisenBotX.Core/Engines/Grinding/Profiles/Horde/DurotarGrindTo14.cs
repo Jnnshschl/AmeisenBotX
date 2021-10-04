@@ -16,13 +16,33 @@ namespace AmeisenBotX.Core.Engines.Grinding.Profiles.Horde
             new Npc("Wuark", 3167,
                 WowMapId.Kalimdor, WowZoneId.RazorHill, new Vector3(358, -4706, 14),
                 NpcType.VendorRepair),
+
+            new Npc("Tai'jin", 3706,
+                WowMapId.Kalimdor, WowZoneId.RazorHill, new Vector3(294, -4831, 10),
+                NpcType.ClassTrainer, NpcSubType.PriestTrainer),
+            new Npc("Tarshaw Jaggedscar", 3169,
+                WowMapId.Kalimdor, WowZoneId.RazorHill, new Vector3(311, -4827, 9),
+                NpcType.ClassTrainer, NpcSubType.WarriorTrainer),
+            new Npc("Swart", 3173,
+                WowMapId.Kalimdor, WowZoneId.RazorHill, new Vector3(307, -4839, 10),
+                NpcType.ClassTrainer, NpcSubType.ShamanTrainer)
         };
 
         public List<InteractableObject> ObjectsOfInterest { get; } = new()
         {
             new InteractableObject(143981,
                 WowMapId.Kalimdor, WowZoneId.RazorHill, new Vector3(322, -4706, 14),
-                InteractableObjectType.Mailbox, MailboxFactionType.Horde)
+                InteractableObjectType.Mailbox, MailboxFactionType.Horde),
+
+            new InteractableObject(106318,
+                WowMapId.Kalimdor, WowZoneId.RazorHill, new Vector3(421, -4252, 26),
+                InteractableObjectType.Container),
+            new InteractableObject(106318,
+                WowMapId.Kalimdor, WowZoneId.RazorHill, new Vector3(426, -4280, 29),
+                InteractableObjectType.Container),
+            new InteractableObject(106318,
+                WowMapId.Kalimdor, WowZoneId.RazorHill, new Vector3(440, -4214, 25),
+                InteractableObjectType.Container)
         };
 
         public List<GrindingSpot> Spots { get; } = new()
