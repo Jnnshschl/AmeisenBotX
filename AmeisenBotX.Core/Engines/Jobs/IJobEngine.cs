@@ -5,8 +5,6 @@ namespace AmeisenBotX.Core.Engines.Jobs
 {
     public interface IJobEngine
     {
-        bool GeneratedPathToNode { get; }
-
         List<ulong> NodeBlacklist { get; set; }
 
         IJobProfile Profile { get; set; }

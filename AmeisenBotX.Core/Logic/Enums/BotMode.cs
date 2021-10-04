@@ -3,9 +3,10 @@
     public enum BotMode
     {
         None,
-        Questing,
         Grinding,
+        Jobs,
         PvP,
+        Questing,
         Testing
     }
 }

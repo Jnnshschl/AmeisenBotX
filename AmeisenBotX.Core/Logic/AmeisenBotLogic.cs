@@ -159,6 +159,17 @@ namespace AmeisenBotX.Core.Logic
                 )
             );
 
+            INode jobsNode = new Waterfall
+            (
+                new Leaf(() => { Bot.Jobs.Execute(); return BtStatus.Success; }),
+                (() => Bot.Player.IsDead, new Leaf(Dead)),
+                (() => Bot.Player.IsGhost, openworldGhostNode),
+                (() => !Bot.Player.IsMounted && NeedToFight(), openworldCombatNode),
+                (NeedToRepairOrSell, new Leaf(SpeakWithMerchant)),
+                // (NeedToLoot, new Leaf(LootNearUnits)),
+                (NeedToEat, new Leaf(Eat))
+            );
+
             INode grindingNode = new Waterfall
             (
                 new Leaf(() => { Bot.Grinding.Execute(); return BtStatus.Success; }),
@@ -276,6 +287,7 @@ namespace AmeisenBotX.Core.Logic
                             (() => Bot.Objects.MapId.IsRaidMap(), raidNode),
                             // handle open world modes
                             (() => Mode == BotMode.Grinding, grindingNode),
+                            (() => Mode == BotMode.Jobs, jobsNode),
                             (() => Mode == BotMode.Questing, questingNode),
                             (() => Mode == BotMode.PvP, pvpNode),
                             (() => Mode == BotMode.Testing, testingNode)
@@ -378,43 +390,21 @@ namespace AmeisenBotX.Core.Logic
 
         private TimegatedEvent UpdateFood { get; }
 
-        public static NpcSubType DecideClassTrainer(WowClass myClass)
+        public static NpcSubType DecideClassTrainer(WowClass wowClass)
         {
-            switch (myClass)
+            return wowClass switch
             {
-                case WowClass.Warrior:
-                    return NpcSubType.WarriorTrainer;
-
-                case WowClass.Paladin:
-                    return NpcSubType.PaladinTrainer;
-
-                case WowClass.Hunter:
-                    return NpcSubType.HunterTrainer;
-
-                case WowClass.Rogue:
-                    return NpcSubType.RougeTrainer;
-
-                case WowClass.Priest:
-                    return NpcSubType.PriestTrainer;
-
-                case WowClass.Deathknight:
-                    return NpcSubType.DeathKnightTrainer;
-
-                case WowClass.Shaman:
-                    return NpcSubType.ShamanTrainer;
-
-                case WowClass.Mage:
-                    return NpcSubType.MageTrainer;
-
-                case WowClass.Warlock:
-                    return NpcSubType.WarlockTrainer;
-
-                case WowClass.Druid:
-                    return NpcSubType.DruidTrainer;
-
-                default:
-                    throw new ArgumentOutOfRangeException();
-            }
+                WowClass.Warrior => NpcSubType.WarriorTrainer,
+                WowClass.Paladin => NpcSubType.PaladinTrainer,
+                WowClass.Hunter => NpcSubType.HunterTrainer,
+                WowClass.Rogue => NpcSubType.RougeTrainer,
+                WowClass.Priest => NpcSubType.PriestTrainer,
+                WowClass.Deathknight => NpcSubType.DeathKnightTrainer,
+                WowClass.Shaman => NpcSubType.ShamanTrainer,
+                WowClass.Mage => NpcSubType.MageTrainer,
+                WowClass.Warlock => NpcSubType.WarlockTrainer,
+                WowClass.Druid => NpcSubType.DruidTrainer,
+            };
         }
 
         public void ChangeMode(BotMode mode)
