@@ -79,6 +79,12 @@ namespace AmeisenBotX.Core.Engines.Movement
 
         public void Execute()
         {
+            if (!IsAllowedToMove)
+            {
+                Bot.Movement.StopMovement();
+                return;
+            }
+
             if (IsUnstucking && UnstuckTarget.GetDistance(Bot.Player.Position) < 2.0f)
             {
                 IsUnstucking = false;
@@ -112,7 +118,7 @@ namespace AmeisenBotX.Core.Engines.Movement
                     }
 
                     // we need to move to the node
-                    if (IsAllowedToMove && !Bot.Player.IsCasting)
+                    if (!Bot.Player.IsCasting)
                     {
                         PlayerVehicle.Update(MoveCharacter, Status, currentNode);
                     }
@@ -132,38 +138,10 @@ namespace AmeisenBotX.Core.Engines.Movement
             }
         }
 
-        public bool TryGetPath(Vector3 position, out IEnumerable<Vector3> path, float maxDistance = 5.0f)
-        {
-            // dont search a path into aoe effects
-            if (AvoidAoeStuff(position, out Vector3 newPosition))
-            {
-                position = newPosition;
-            }
-
-            path = Bot.PathfindingHandler.GetPath((int)Bot.Objects.MapId, Bot.Player.Position, position);
-
-            if (path != null && path.Any())
-            {
-                Vector3 lastNode = path.LastOrDefault();
-
-                if (lastNode == default)
-                {
-                    return false;
-                }
-
-                // TODO: handle incomplete paths, disabled for now
-                // double distance = lastNode.GetDistance(position);
-                // return distance < maxDistance;
-
-                return true;
-            }
-
-            return false;
-        }
-
         public void PreventMovement(TimeSpan timeSpan)
         {
             StopMovement();
+            Bot.Wow.LuaDoString("MoveForwardStop();MoveBackwardStop();MoveAndSteerStop();");
             MovementBlockedUntil = DateTime.UtcNow + timeSpan;
         }
 
@@ -213,6 +191,35 @@ namespace AmeisenBotX.Core.Engines.Movement
         {
             Reset();
             Bot.Wow.StopClickToMove();
+        }
+
+        public bool TryGetPath(Vector3 position, out IEnumerable<Vector3> path, float maxDistance = 5.0f)
+        {
+            // dont search a path into aoe effects
+            if (AvoidAoeStuff(position, out Vector3 newPosition))
+            {
+                position = newPosition;
+            }
+
+            path = Bot.PathfindingHandler.GetPath((int)Bot.Objects.MapId, Bot.Player.Position, position);
+
+            if (path != null && path.Any())
+            {
+                Vector3 lastNode = path.LastOrDefault();
+
+                if (lastNode == default)
+                {
+                    return false;
+                }
+
+                // TODO: handle incomplete paths, disabled for now
+                // double distance = lastNode.GetDistance(position);
+                // return distance < maxDistance;
+
+                return true;
+            }
+
+            return false;
         }
 
         private bool AvoidAoeStuff(Vector3 position, out Vector3 newPosition)

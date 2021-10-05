@@ -41,15 +41,6 @@ namespace AmeisenBotX.Core.Engines.Movement
         void Execute();
 
         /// <summary>
-        /// Determine wheter a position can be reached by the player.
-        /// </summary>
-        /// <param name="position">Target position</param>
-        /// <param name="path">The resulting path if the target position can be reached</param>
-        /// <param name="maxDistance">Max distance to the target position</param>
-        /// <returns>True if it can be reached, false if not</returns>
-        bool TryGetPath(Vector3 position, out IEnumerable<Vector3> path, float maxDistance = 1.0f);
-
-        /// <summary>
         /// Prevent movement for a specified time.
         /// </summary>
         /// <param name="timeSpan">How long should movement be prevented</param>
@@ -73,5 +64,14 @@ namespace AmeisenBotX.Core.Engines.Movement
         /// Stop the bots current movement.
         /// </summary>
         void StopMovement();
+
+        /// <summary>
+        /// Determine wheter a position can be reached by the player.
+        /// </summary>
+        /// <param name="position">Target position</param>
+        /// <param name="path">The resulting path if the target position can be reached</param>
+        /// <param name="maxDistance">Max distance to the target position</param>
+        /// <returns>True if it can be reached, false if not</returns>
+        bool TryGetPath(Vector3 position, out IEnumerable<Vector3> path, float maxDistance = 1.0f);
     }
 }

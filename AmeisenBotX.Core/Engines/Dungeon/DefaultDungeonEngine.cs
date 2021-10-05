@@ -111,6 +111,11 @@ namespace AmeisenBotX.Core.Engines.Dungeon
         {
             if (Profile != null)
             {
+                if (Bot.Objects.MapId != Profile.MapId)
+                {
+                    Profile = null;
+                }
+
                 BehaviorTree.Tick();
             }
             else

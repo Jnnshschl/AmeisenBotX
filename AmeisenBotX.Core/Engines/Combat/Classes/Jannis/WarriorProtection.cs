@@ -1,4 +1,6 @@
-﻿using AmeisenBotX.Common.Utils;
+﻿using AmeisenBotX.Common.Math;
+using AmeisenBotX.Common.Utils;
+using AmeisenBotX.Core.Engines.Movement.Enums;
 using AmeisenBotX.Core.Logic.Utils.Auras.Objects;
 using AmeisenBotX.Core.Managers.Character.Comparators;
 using AmeisenBotX.Core.Managers.Character.Talents.Objects;
@@ -20,7 +22,7 @@ namespace AmeisenBotX.Core.Engines.Combat.Classes.Jannis
 
             InterruptManager.InterruptSpells = new()
             {
-                { 0, (x) => (TryCastSpellWarrior(Warrior335a.ShieldBash, Warrior335a.DefensiveStance, x.Guid, true)) },
+                { 0, (x) => TryCastSpellWarrior(Warrior335a.ShieldBash, Warrior335a.DefensiveStance, x.Guid, true) },
                 { 1, (x) => TryCastSpell(Warrior335a.ConcussionBlow, x.Guid, true) }
             };
 
@@ -31,7 +33,7 @@ namespace AmeisenBotX.Core.Engines.Combat.Classes.Jannis
 
         public override string DisplayName => "Warrior Protection";
 
-        public override bool HandlesMovement => false;
+        public override bool HandlesMovement => true;
 
         public override bool IsMelee => true;
 
@@ -102,7 +104,7 @@ namespace AmeisenBotX.Core.Engines.Combat.Classes.Jannis
 
         public override string Version => "1.1";
 
-        public override bool WalkBehindEnemy => true;
+        public override bool WalkBehindEnemy => false;
 
         public override WowClass WowClass => WowClass.Warrior;
 
@@ -122,7 +124,28 @@ namespace AmeisenBotX.Core.Engines.Combat.Classes.Jannis
                     return;
                 }
 
-                double distanceToTarget = Bot.Target.Position.GetDistance(Bot.Player.Position);
+                float distanceToTarget = Bot.Target.Position.GetDistance(Bot.Player.Position);
+                IWowUnit targetOfTarget = Bot.GetWowObjectByGuid<IWowUnit>(Bot.Target.TargetGuid);
+
+                if (targetOfTarget != null && targetOfTarget.Guid == Bot.Player.Guid)
+                {
+                    // if we have aggro, pull the unit to the best tanking spot
+                    Vector3 bestTankingSpot = Bot.Objects.CenterPartyPosition;
+                    float distanceToBestTankingSpot = Bot.Player.DistanceTo(bestTankingSpot);
+
+                    if (distanceToBestTankingSpot > 3.0f)
+                    {
+                        Bot.Movement.SetMovementAction(MovementAction.Move, Bot.Target.Position);
+                    }
+                }
+                else
+                {
+                    // target is not targeting us, we need to get aggro
+                    if (distanceToTarget > 3.0f)
+                    {
+                        Bot.Movement.SetMovementAction(MovementAction.Chase, Bot.Target.Position);
+                    }
+                }
 
                 if (distanceToTarget > 8.0)
                 {
@@ -134,10 +157,9 @@ namespace AmeisenBotX.Core.Engines.Combat.Classes.Jannis
                 else
                 {
                     if (Bot.Player.Rage > 40
-                        && HeroicStrikeEvent.Run()
-                        && TryCastSpell(Warrior335a.HeroicStrike, Bot.Wow.TargetGuid, true))
+                        && HeroicStrikeEvent.Run())
                     {
-                        // do not return, hehe xd
+                        TryCastSpell(Warrior335a.HeroicStrike, Bot.Wow.TargetGuid, true);
                     }
 
                     int nearEnemies = Bot.GetNearEnemies<IWowUnit>(Bot.Player.Position, 10.0f).Count();
@@ -149,9 +171,8 @@ namespace AmeisenBotX.Core.Engines.Combat.Classes.Jannis
                     }
 
                     if (Bot.Target.TargetGuid != Bot.Wow.PlayerGuid
-                        && (Bot.Objects.WowObjects.OfType<IWowUnit>().Where(e => Bot.Target.Position.GetDistance(e.Position) < 10.0).Count() > 3
-                            && TryCastSpell(Warrior335a.ChallengingShout, 0, true))
-                        || TryCastSpellWarrior(Warrior335a.Taunt, Warrior335a.DefensiveStance, Bot.Wow.TargetGuid))
+                        && ((Bot.GetEnemiesInCombatWithMe<IWowUnit>(Bot.Player.Position, 12.0f).Count(e => Bot.Target.Position.GetDistance(e.Position) < 10.0) > 3 && TryCastSpell(Warrior335a.ChallengingShout, 0, true))
+                            || TryCastSpellWarrior(Warrior335a.Taunt, Warrior335a.DefensiveStance, Bot.Wow.TargetGuid)))
                     {
                         return;
                     }

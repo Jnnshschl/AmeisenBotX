@@ -303,7 +303,12 @@ namespace AmeisenBotX.Core.Logic
                         )
                     ),
                     // we are most likely in the loading screen or player/objects are null
-                    new Leaf(() => BtStatus.Success)
+                    new Leaf(() =>
+                    {
+                        // make sure we dont run after we leave the loadingscreen
+                        Bot.Movement.StopMovement();
+                        return BtStatus.Success;
+                    })
                 )
             );
 
