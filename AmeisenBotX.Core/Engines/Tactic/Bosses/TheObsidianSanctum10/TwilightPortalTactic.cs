@@ -1,4 +1,5 @@
-﻿using AmeisenBotX.Common.Utils;
+﻿using AmeisenBotX.Common.Math;
+using AmeisenBotX.Common.Utils;
 using AmeisenBotX.Core.Engines.Movement.Enums;
 using AmeisenBotX.Wow.Objects;
 using AmeisenBotX.Wow.Objects.Enums;
@@ -21,7 +22,13 @@ namespace AmeisenBotX.Core.Engines.Tactic.Bosses.TheObsidianSanctum10
             };
         }
 
+        public Vector3 Area { get; } = new(3243, 541, 59);
+
+        public float AreaRadius { get; } = 1024.0f;
+
         public Dictionary<string, dynamic> Configureables { get; private set; }
+
+        public WowMapId MapId { get; } = WowMapId.TheObsidianSanctum;
 
         private static List<int> DragonDisplayId { get; } = new() { 27421, 27039 };
 

@@ -1,27 +1,46 @@
-﻿using AmeisenBotX.Wow.Objects.Enums;
+﻿using AmeisenBotX.Core.Engines.Tactic.Bosses.Naxxramas10;
+using AmeisenBotX.Core.Engines.Tactic.Bosses.TheObsidianSanctum10;
+using AmeisenBotX.Wow.Objects.Enums;
 using System.Collections.Generic;
 
 namespace AmeisenBotX.Core.Engines.Tactic
 {
     public class DefaultTacticEngine : ITacticEngine
     {
-        public DefaultTacticEngine()
+        public DefaultTacticEngine(AmeisenBotInterfaces bot)
         {
-            Tactics = new();
+            Bot = bot;
+
+            Tactics = new()
+            {
+                {
+                    WowMapId.Naxxramas,
+                    new()
+                    {
+                        { 1, new AnubRhekan10Tactic(Bot) }
+                    }
+                },
+                {
+                    WowMapId.TheObsidianSanctum,
+                    new()
+                    {
+                        { 1, new TwilightPortalTactic(Bot) }
+                    }
+                },
+            };
         }
 
-        private SortedList<int, ITactic> Tactics { get; set; }
+        private AmeisenBotInterfaces Bot { get; }
 
-        public bool Execute(WowRole role, bool isMelee, out bool preventMovement, out bool allowAttacking)
+        private Dictionary<WowMapId, SortedList<int, ITactic>> Tactics { get; set; }
+
+        public bool Execute(out bool preventMovement, out bool allowAttacking)
         {
-            if (Tactics.Count > 0)
+            foreach (ITactic tactic in Tactics[Bot.Objects.MapId].Values)
             {
-                foreach (ITactic tactic in Tactics.Values)
+                if (tactic.IsInArea(Bot.Player.Position) && tactic.ExecuteTactic(Bot.CombatClass.Role, Bot.CombatClass.IsMelee, out preventMovement, out allowAttacking))
                 {
-                    if (tactic.ExecuteTactic(role, isMelee, out preventMovement, out allowAttacking))
-                    {
-                        return true;
-                    }
+                    return true;
                 }
             }
 
@@ -33,16 +52,6 @@ namespace AmeisenBotX.Core.Engines.Tactic
         public bool HasTactics()
         {
             return Tactics.Count > 0;
-        }
-
-        public void LoadTactics(params ITactic[] tactics)
-        {
-            Tactics = new();
-
-            for (int i = 0; i < tactics.Length; ++i)
-            {
-                Tactics.Add(i, tactics[i]);
-            }
         }
 
         public void Reset()

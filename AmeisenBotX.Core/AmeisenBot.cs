@@ -114,7 +114,7 @@ namespace AmeisenBotX.Core
             Logic = new AmeisenBotLogic(Config, Bot);
 
             Bot.Chat = new DefaultChatManager(Config, ProfileFolder);
-            Bot.Tactic = new DefaultTacticEngine();
+            Bot.Tactic = new DefaultTacticEngine(Bot);
 
             // load the wow specific interface based on file version (build number)
             Bot.Wow = FileVersionInfo.GetVersionInfo(config.PathToWowExe).FilePrivatePart switch

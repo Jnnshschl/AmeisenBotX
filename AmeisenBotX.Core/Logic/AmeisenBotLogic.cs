@@ -251,8 +251,15 @@ namespace AmeisenBotX.Core.Logic
                     new Leaf(() => { Bot.Dungeon.Execute(); return BtStatus.Success; })
                 ),
                 (() => Bot.Player.IsDead, new Leaf(DeadDungeon)),
-                //TODO: implement specialized dungeon combat logic
-                (NeedToFight, combatNode),
+                (
+                    NeedToFight,
+                    new Selector
+                    (
+                        NeedToFollowTactic,
+                        new Leaf(() => { return BtStatus.Success; }),
+                        combatNode
+                    )
+                ),
                 (NeedToLoot, new Leaf(LootNearUnits)),
                 (NeedToEat, new Leaf(Eat))
             );
@@ -262,12 +269,19 @@ namespace AmeisenBotX.Core.Logic
                 new Selector
                 (
                     () => Config.DungeonUsePartyMode && NeedToFollow(),
-                    // just follow when we use party mode in dungeon
+                    // just follow when we use party mode in raid
                     new Leaf(Follow),
                     new Leaf(() => { Bot.Dungeon.Execute(); return BtStatus.Success; })
                 ),
-                //TODO: implement specialized raid combat logic
-                (NeedToFight, combatNode),
+                (
+                    NeedToFight,
+                    new Selector
+                    (
+                        NeedToFollowTactic,
+                        new Leaf(() => { return BtStatus.Success; }),
+                        combatNode
+                    )
+                ),
                 (NeedToLoot, new Leaf(LootNearUnits)),
                 (NeedToEat, new Leaf(Eat))
             );
@@ -740,6 +754,21 @@ namespace AmeisenBotX.Core.Logic
                     && e.Position.GetDistance(Bot.Player.Position) < Config.LootUnitsRadius);
         }
 
+        private bool NeedToFollowTactic()
+        {
+            if (Bot.Tactic.Execute(out bool handlesMovement, out bool allowAttacking))
+            {
+                // if (preventMovement)
+                // {
+                //     Bot.Movement.PreventMovement(TimeSpan.FromMilliseconds(Config.StateMachineTickMs));
+                // }
+
+                return !allowAttacking;
+            }
+
+            return false;
+        }
+
         private BtStatus Idle()
         {
             Bot.CombatClass?.OutOfCombatExecute();
@@ -951,16 +980,11 @@ namespace AmeisenBotX.Core.Logic
 
         private bool NeedToLoot()
         {
-            IEnumerable<IWowUnit> units = GetLootableUnits();
-
-            if (units.Any())
+            foreach (IWowUnit unit in GetLootableUnits())
             {
-                foreach (IWowUnit unit in units)
+                if (!UnitsLooted.Contains(unit.Guid) && !UnitsToLoot.Contains(unit.Guid))
                 {
-                    if (!UnitsLooted.Contains(unit.Guid) && !UnitsToLoot.Contains(unit.Guid))
-                    {
-                        UnitsToLoot.Enqueue(unit.Guid);
-                    }
+                    UnitsToLoot.Enqueue(unit.Guid);
                 }
             }
 

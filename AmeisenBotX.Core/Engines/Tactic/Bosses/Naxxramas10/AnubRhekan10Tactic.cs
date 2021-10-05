@@ -21,13 +21,19 @@ namespace AmeisenBotX.Core.Engines.Tactic.Bosses.Naxxramas10
             };
         }
 
+        public Vector3 Area { get; } = new(3273, -3476, 287);
+
+        public float AreaRadius { get; } = 120.0f;
+
         public Dictionary<string, dynamic> Configureables { get; private set; }
 
         public DateTime LocustSwarmActivated { get; private set; }
 
-        private static List<int> AddsDisplayIds { get; } = new List<int> { 14698, 27943 };
+        public WowMapId MapId { get; } = WowMapId.Naxxramas;
 
-        private static List<int> AnubRhekanDisplayId { get; } = new List<int> { 15931 };
+        private static List<int> AddsDisplayIds { get; } = new() { 14698, 27943 };
+
+        private static List<int> AnubRhekanDisplayId { get; } = new() { 15931 };
 
         private AmeisenBotInterfaces Bot { get; }
 
@@ -35,13 +41,11 @@ namespace AmeisenBotX.Core.Engines.Tactic.Bosses.Naxxramas10
 
         private bool LocustSwarmActive => (LocustSwarmActivated + TimeSpan.FromSeconds(20)) > DateTime.UtcNow;
 
-        private bool MeleeDpsIsMovingToMid { get; set; } = false;
-
-        private Vector3 MiddleSpot { get; } = new Vector3(3274, -3476, 287);
+        private bool MeleeDpsIsMovingToMid { get; set; }
 
         private bool TankingIsUsingA { get; set; } = true;
 
-        private List<Vector3> TankingKitingRouteA { get; } = new List<Vector3>()
+        private List<Vector3> TankingKitingRouteA { get; } = new()
         {
             new Vector3(3323, -3497, 287),
             new Vector3(3312, -3514, 287),
@@ -53,7 +57,7 @@ namespace AmeisenBotX.Core.Engines.Tactic.Bosses.Naxxramas10
             new Vector3(3220, -3484, 287),
         };
 
-        private List<Vector3> TankingKitingRouteB { get; } = new List<Vector3>()
+        private List<Vector3> TankingKitingRouteB { get; } = new()
         {
             new Vector3(3223, -3455, 287),
             new Vector3(3235, -3437, 287),
@@ -67,20 +71,19 @@ namespace AmeisenBotX.Core.Engines.Tactic.Bosses.Naxxramas10
 
         private Queue<Vector3> TankingPathQueue { get; }
 
-        private Vector3 TankingSpotA { get; } = new Vector3(3325, -3486, 287);
+        private Vector3 TankingSpotA { get; } = new(3325, -3486, 287);
 
-        private Vector3 TankingSpotB { get; } = new Vector3(3222, -3464, 287);
+        private Vector3 TankingSpotB { get; } = new(3222, -3464, 287);
 
-        private bool TankIsKiting { get; set; } = false;
+        private bool TankIsKiting { get; set; }
 
-        public bool ExecuteTactic(WowRole role, bool isMelee, out bool preventMovement, out bool allowAttacking)
+        public bool ExecuteTactic(WowRole role, bool isMelee, out bool handlesMovement, out bool allowAttacking)
         {
             return role switch
             {
-                WowRole.Tank => DoTank(out preventMovement, out allowAttacking),
-                WowRole.Heal => DoDpsHeal(false, out preventMovement, out allowAttacking),
-                WowRole.Dps => DoDpsHeal(isMelee, out preventMovement, out allowAttacking),
-                _ => throw new NotImplementedException(), // should never happen
+                WowRole.Tank => DoTank(out handlesMovement, out allowAttacking),
+                WowRole.Heal => DoDpsHeal(false, out handlesMovement, out allowAttacking),
+                WowRole.Dps => DoDpsHeal(isMelee, out handlesMovement, out allowAttacking),
             };
         }
 
@@ -114,11 +117,11 @@ namespace AmeisenBotX.Core.Engines.Tactic.Bosses.Naxxramas10
                     {
                         if (ImpaleDodgePos == Vector3.Zero)
                         {
-                            float angle = new Random().NextDouble() > 0.5 ? MathF.PI + (MathF.PI / 2f) : MathF.PI - (MathF.PI / 2f);
-                            ImpaleDodgePos = BotMath.CalculatePositionAround(Bot.Player.Position, Bot.Player.Rotation, angle, 2f);
+                            float angle = new Random().NextDouble() > 0.5 ? MathF.PI + (MathF.PI / 2.0f) : MathF.PI - (MathF.PI / 2.0f);
+                            ImpaleDodgePos = BotMath.CalculatePositionAround(Bot.Player.Position, Bot.Player.Rotation, angle, 2.0f);
                         }
 
-                        Bot.Movement.SetMovementAction(MovementAction.DirectMove, ImpaleDodgePos, 0);
+                        Bot.Movement.SetMovementAction(MovementAction.DirectMove, ImpaleDodgePos);
                         return true;
                     }
                     else
@@ -126,9 +129,9 @@ namespace AmeisenBotX.Core.Engines.Tactic.Bosses.Naxxramas10
                         ImpaleDodgePos = Vector3.Zero;
                     }
 
-                    Vector3 targetPosition = BotUtils.MoveAhead(MiddleSpot, wowUnit.Position, -30.0f);
+                    Vector3 targetPosition = BotUtils.MoveAhead(Area, wowUnit.Position, -30.0f);
 
-                    if (!LocustSwarmActive && Bot.Player.Position.GetDistance(MiddleSpot) > 6.0)
+                    if (!LocustSwarmActive && Bot.Player.Position.GetDistance(Area) > 6.0f)
                     {
                         Bot.Movement.SetMovementAction(MovementAction.Move, targetPosition);
                         return true;
@@ -138,9 +141,9 @@ namespace AmeisenBotX.Core.Engines.Tactic.Bosses.Naxxramas10
                 {
                     if (MeleeDpsIsMovingToMid)
                     {
-                        if (Bot.Player.Position.GetDistance(MiddleSpot) > 24.0)
+                        if (Bot.Player.Position.GetDistance(Area) > 24.0f)
                         {
-                            Bot.Movement.SetMovementAction(MovementAction.Move, MiddleSpot);
+                            Bot.Movement.SetMovementAction(MovementAction.Move, Area);
                             return true;
                         }
                         else
@@ -187,9 +190,9 @@ namespace AmeisenBotX.Core.Engines.Tactic.Bosses.Naxxramas10
                     {
                         Vector3 tankingSpot = TankingIsUsingA ? TankingSpotA : TankingSpotB;
 
-                        if (Bot.Player.Position.GetDistance2D(tankingSpot) > 2.0)
+                        if (Bot.Player.Position.GetDistance(tankingSpot) > 6.0f)
                         {
-                            Bot.Movement.SetMovementAction(MovementAction.DirectMove, tankingSpot, 0);
+                            Bot.Movement.SetMovementAction(MovementAction.DirectMove, tankingSpot);
                         }
                     }
                     else
@@ -207,9 +210,9 @@ namespace AmeisenBotX.Core.Engines.Tactic.Bosses.Naxxramas10
                         {
                             Vector3 targetPosition = TankingPathQueue.Peek();
 
-                            if (targetPosition.GetDistance2D(Bot.Player.Position) > 2.0)
+                            if (targetPosition.GetDistance2D(Bot.Player.Position) > 2.0f)
                             {
-                                Bot.Movement.SetMovementAction(MovementAction.DirectMove, targetPosition, 0);
+                                Bot.Movement.SetMovementAction(MovementAction.DirectMove, targetPosition);
                             }
                             else
                             {
