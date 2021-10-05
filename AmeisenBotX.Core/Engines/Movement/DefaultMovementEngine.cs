@@ -141,7 +141,7 @@ namespace AmeisenBotX.Core.Engines.Movement
         public void PreventMovement(TimeSpan timeSpan)
         {
             StopMovement();
-            Bot.Wow.LuaDoString("MoveForwardStop();MoveBackwardStop();MoveAndSteerStop();");
+            Bot.Wow.LuaDoString("MoveForwardStop();MoveBackwardStart();MoveBackwardStop();MoveAndSteerStop();");
             MovementBlockedUntil = DateTime.UtcNow + timeSpan;
         }
 
