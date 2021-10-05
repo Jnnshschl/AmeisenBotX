@@ -101,7 +101,8 @@ namespace AmeisenBotX
                 Config.AutoChangeRealmlist = checkboxAutoChangeRealmlist.IsChecked.GetValueOrDefault(false);
                 Config.AutocloseWow = checkboxAutocloseWow.IsChecked.GetValueOrDefault(false);
                 Config.AutoDisableRender = checkboxAutoDisableRendering.IsChecked.GetValueOrDefault(false);
-                Config.AutoDodgeAoeSpells = checkboxAvoidAoe.IsChecked.GetValueOrDefault(false);
+                Config.AoeDetectionAvoid = checkboxAvoidAoe.IsChecked.GetValueOrDefault(false);
+                Config.AoeDetectionIncludePlayers = checkboxAvoidAoePlayers.IsChecked.GetValueOrDefault(false);
                 Config.AutojoinBg = checkboxAutoJoinBg.IsChecked.GetValueOrDefault(false);
                 Config.AutojoinLfg = checkboxAutoJoinLfg.IsChecked.GetValueOrDefault(false);
                 Config.AutoLogin = checkboxAutoLogin.IsChecked.GetValueOrDefault(false);
@@ -393,7 +394,8 @@ namespace AmeisenBotX
             checkboxAutoRepair.IsChecked = Config.AutoRepair;
             checkboxAutoStartWow.IsChecked = Config.AutostartWow;
             checkboxAutoTalkToQuestgivers.IsChecked = Config.AutoTalkToNearQuestgivers;
-            checkboxAvoidAoe.IsChecked = Config.AutoDodgeAoeSpells;
+            checkboxAvoidAoe.IsChecked = Config.AoeDetectionAvoid;
+            checkboxAvoidAoePlayers.IsChecked = Config.AoeDetectionIncludePlayers;
             checkboxBattlegroundUsePartyMode.IsChecked = Config.BattlegroundUsePartyMode;
             checkboxBuiltinCombatClass.IsChecked = Config.UseBuiltInCombatClass;
             checkboxDungeonUsePartyMode.IsChecked = Config.DungeonUsePartyMode;

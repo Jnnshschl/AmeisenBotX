@@ -79,7 +79,7 @@ namespace AmeisenBotX.Core
         public IWowInterface Wow { get; set; }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public IEnumerable<IWowDynobject> GetAoeSpells(Vector3 position, bool onlyEnemy = true, float extends = 2.0f)
+        public IEnumerable<IWowDynobject> GetAoeSpells(Vector3 position, bool onlyEnemy = false, float extends = 2.0f)
         {
             return Objects.WowObjects.OfType<IWowDynobject>()
                 .Where(e => e.Position.GetDistance(position) < e.Radius + extends

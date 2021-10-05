@@ -132,7 +132,7 @@ namespace AmeisenBotX.Core.Engines.Movement
             }
         }
 
-        public bool IsPositionReachable(Vector3 position, out IEnumerable<Vector3> path, float maxDistance = 5.0f)
+        public bool TryGetPath(Vector3 position, out IEnumerable<Vector3> path, float maxDistance = 5.0f)
         {
             // dont search a path into aoe effects
             if (AvoidAoeStuff(position, out Vector3 newPosition))
@@ -184,7 +184,7 @@ namespace AmeisenBotX.Core.Engines.Movement
                     Status = state;
                     DistanceMovedJumpCheck();
                 }
-                else if (FindPathEvent.Run() && IsPositionReachable(position, out IEnumerable<Vector3> path))
+                else if (FindPathEvent.Run() && TryGetPath(position, out IEnumerable<Vector3> path))
                 {
                     // if its a new path, we can try to mount again
                     if (path.Last().GetDistance(LastTargetPosition) > 10.0f)
@@ -215,39 +215,42 @@ namespace AmeisenBotX.Core.Engines.Movement
             Bot.Wow.StopClickToMove();
         }
 
-        private static Vector3 GetPositionOutsideOfAoeSpells(Vector3 targetPosition, IEnumerable<(Vector3 position, float radius)> aoeSpells)
-        {
-            if (aoeSpells.Any())
-            {
-                // build mean position and move away x meters from it
-                // x is the biggest distance we have to move
-                Vector3 meanAoePos = BotMath.GetMeanPosition(aoeSpells.Select(e => e.position));
-                float distanceToMove = aoeSpells.Max(e => e.radius);
-
-                // get average angle to produce the outgoing angle
-                float outgoingAngle = aoeSpells.Average(e => BotMath.GetFacingAngle(e.position, meanAoePos));
-
-                // "repell" the position from the aoe spell
-                return BotUtils.MoveAhead(targetPosition, outgoingAngle, distanceToMove + 1.5f);
-            }
-
-            return targetPosition;
-        }
-
         private bool AvoidAoeStuff(Vector3 position, out Vector3 newPosition)
         {
-            List<(Vector3 position, float radius)> places = new(PlacesToAvoid);
-            places.AddRange(Bot.GetAoeSpells(position)
-                .Where(e => Bot.GetWowObjectByGuid<IWowUnit>(e.Caster)?.Type == WowObjectType.Unit)
-                .Select(e => (e.Position, e.Radius)));
-
-            if (places.Any())
+            // TODO: avoid dodgeing player aoe spells in sactuaries, this may looks suspect
+            if (Config.AoeDetectionAvoid)
             {
-                newPosition = GetPositionOutsideOfAoeSpells(position, places);
-                return true;
+                // add places to avoid, these are for example blocked zones
+                List<(Vector3 position, float radius)> places = new(PlacesToAvoid);
+
+                // add all aoe spells
+                IEnumerable<IWowDynobject> aoeEffects = Bot.GetAoeSpells(position, true, Config.AoeDetectionExtends);
+
+                if (!Config.AoeDetectionIncludePlayers)
+                {
+                    aoeEffects = aoeEffects.Where(e => Bot.GetWowObjectByGuid<IWowUnit>(e.Caster)?.Type == WowObjectType.Unit);
+                }
+
+                places.AddRange(aoeEffects.Select(e => (e.Position, e.Radius)));
+
+                if (places.Any())
+                {
+                    // build mean position and move away x meters from it
+                    // x is the biggest distance we have to move
+                    Vector3 meanAoePos = BotMath.GetMeanPosition(places.Select(e => e.position));
+                    float distanceToMove = places.Max(e => e.radius) + Config.AoeDetectionExtends;
+
+                    // claculate the repell direction to move away from the aoe effects
+                    Vector3 repellDirection = position - meanAoePos;
+                    repellDirection.Normalize();
+
+                    // "repell" the position from the aoe spell
+                    newPosition = meanAoePos + (repellDirection * distanceToMove);
+                    return true;
+                }
             }
 
-            newPosition = position;
+            newPosition = default;
             return false;
         }
 

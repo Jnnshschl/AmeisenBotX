@@ -1567,5 +1567,6 @@
         HellfireBasin = 3955,
         TheShadowStair = 3956,
         ShatariOutpost = 3957,
+        TheFrozenHalls = 4862,
     }
 }

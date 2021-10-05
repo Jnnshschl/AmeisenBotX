@@ -83,13 +83,13 @@ namespace AmeisenBotX.Core.Logic
                 new Leaf(RunToCorpseAndRetrieveIt)
             );
 
-            INode openworldCombatNode = new Selector
+            INode combatNode = new Selector
             (
                 () => Bot.CombatClass == null,
                 // start autoattacking if we have no combat class loaded
                 new Selector
                 (
-                    () => !Bot.Player.IsInMeleeRange(Bot.Target),
+                    () => Bot.Target != null && !Bot.Player.IsInMeleeRange(Bot.Target),
                     new Leaf(() => MoveToPosition(Bot.Target.Position)),
                     new Selector
                     (
@@ -105,6 +105,7 @@ namespace AmeisenBotX.Core.Logic
                     // combatclass handles movement itself or has no target
                     () => Bot.CombatClass.HandlesMovement || Bot.Target == null,
                     new Leaf(() => { Bot.CombatClass?.Execute(); return BtStatus.Success; }),
+                    // default combat movement logic
                     new Selector
                     (
                         // check whether we need to move
@@ -112,7 +113,7 @@ namespace AmeisenBotX.Core.Logic
                         new Leaf(() => MoveToPosition(Bot.Target.Position)),
                         new Waterfall
                         (
-                            // fallback, run to the target unit
+                            // unsupported role
                             new Leaf(() => { Bot.CombatClass?.Execute(); return BtStatus.Success; }),
                             // dps logic
                             (
@@ -164,7 +165,7 @@ namespace AmeisenBotX.Core.Logic
                 new Leaf(() => { Bot.Jobs.Execute(); return BtStatus.Success; }),
                 (() => Bot.Player.IsDead, new Leaf(Dead)),
                 (() => Bot.Player.IsGhost, openworldGhostNode),
-                (() => !Bot.Player.IsMounted && NeedToFight(), openworldCombatNode),
+                (() => !Bot.Player.IsMounted && NeedToFight(), combatNode),
                 (NeedToRepairOrSell, new Leaf(SpeakWithMerchant)),
                 // (NeedToLoot, new Leaf(LootNearUnits)),
                 (NeedToEat, new Leaf(Eat))
@@ -175,7 +176,7 @@ namespace AmeisenBotX.Core.Logic
                 new Leaf(() => { Bot.Grinding.Execute(); return BtStatus.Success; }),
                 (() => Bot.Player.IsDead, new Leaf(Dead)),
                 (() => Bot.Player.IsGhost, openworldGhostNode),
-                (NeedToFight, openworldCombatNode),
+                (NeedToFight, combatNode),
                 (NeedToRepairOrSell, new Leaf(SpeakWithMerchant)),
                 (NeedToTrainSpells, new Leaf(SpeakWithClassTrainer)),
                 (NeedToLoot, new Leaf(LootNearUnits)),
@@ -187,7 +188,7 @@ namespace AmeisenBotX.Core.Logic
                 new Leaf(() => { Bot.Quest.Execute(); return BtStatus.Success; }),
                 (() => Bot.Player.IsDead, new Leaf(Dead)),
                 (() => Bot.Player.IsGhost, openworldGhostNode),
-                (NeedToFight, openworldCombatNode),
+                (NeedToFight, combatNode),
                 (NeedToRepairOrSell, new Leaf(SpeakWithMerchant)),
                 (NeedToLoot, new Leaf(LootNearUnits)),
                 (NeedToEat, new Leaf(Eat))
@@ -195,7 +196,13 @@ namespace AmeisenBotX.Core.Logic
 
             INode pvpNode = new Waterfall
             (
-                new Leaf(() => { Bot.Pvp.Execute(); return BtStatus.Success; })
+                new Leaf(() => { Bot.Pvp.Execute(); return BtStatus.Success; }),
+                (() => Bot.Player.IsDead, new Leaf(Dead)),
+                (() => Bot.Player.IsGhost, openworldGhostNode),
+                (NeedToFight, combatNode),
+                (NeedToRepairOrSell, new Leaf(SpeakWithMerchant)),
+                (NeedToLoot, new Leaf(LootNearUnits)),
+                (NeedToEat, new Leaf(Eat))
             );
 
             INode testingNode = new Waterfall
@@ -212,7 +219,7 @@ namespace AmeisenBotX.Core.Logic
                 // handle main open world states
                 (() => Bot.Player.IsDead, new Leaf(Dead)),
                 (() => Bot.Player.IsGhost, openworldGhostNode),
-                (NeedToFight, openworldCombatNode),
+                (NeedToFight, combatNode),
                 (NeedToRepairOrSell, new Leaf(SpeakWithMerchant)),
                 (NeedToLoot, new Leaf(LootNearUnits)),
                 (NeedToEat, new Leaf(Eat)),
@@ -227,8 +234,10 @@ namespace AmeisenBotX.Core.Logic
                 new Leaf(() => { Bot.Battleground.Execute(); return BtStatus.Success; }),
                 // leave battleground once it is finished
                 (IsBattlegroundFinished, new Leaf(() => { Bot.Wow.LeaveBattleground(); Bot.Battleground.Reset(); return BtStatus.Success; })),
+                // only handle dead state here, ghost should only be a problem
+                // on AV as the graveyard might get lost while we are a ghost
                 (() => Bot.Player.IsDead, new Leaf(Dead)),
-                (NeedToFight, openworldCombatNode),
+                (NeedToFight, combatNode),
                 (NeedToEat, new Leaf(Eat))
             );
 
@@ -243,7 +252,7 @@ namespace AmeisenBotX.Core.Logic
                 ),
                 (() => Bot.Player.IsDead, new Leaf(DeadDungeon)),
                 //TODO: implement specialized dungeon combat logic
-                (NeedToFight, openworldCombatNode),
+                (NeedToFight, combatNode),
                 (NeedToLoot, new Leaf(LootNearUnits)),
                 (NeedToEat, new Leaf(Eat))
             );
@@ -258,7 +267,7 @@ namespace AmeisenBotX.Core.Logic
                     new Leaf(() => { Bot.Dungeon.Execute(); return BtStatus.Success; })
                 ),
                 //TODO: implement specialized raid combat logic
-                (NeedToFight, openworldCombatNode),
+                (NeedToFight, combatNode),
                 (NeedToLoot, new Leaf(LootNearUnits)),
                 (NeedToEat, new Leaf(Eat))
             );

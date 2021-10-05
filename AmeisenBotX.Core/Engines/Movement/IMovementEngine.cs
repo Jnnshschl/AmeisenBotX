@@ -47,7 +47,7 @@ namespace AmeisenBotX.Core.Engines.Movement
         /// <param name="path">The resulting path if the target position can be reached</param>
         /// <param name="maxDistance">Max distance to the target position</param>
         /// <returns>True if it can be reached, false if not</returns>
-        bool IsPositionReachable(Vector3 position, out IEnumerable<Vector3> path, float maxDistance = 1.0f);
+        bool TryGetPath(Vector3 position, out IEnumerable<Vector3> path, float maxDistance = 1.0f);
 
         /// <summary>
         /// Prevent movement for a specified time.
