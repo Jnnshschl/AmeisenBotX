@@ -106,11 +106,10 @@ namespace AmeisenBotX.Core
                 Directory.CreateDirectory(dataFolder);
             }
 
-            Storage = new(dataFolder, new List<string>() { "AmeisenBotX.Core.Engines.Combat.Classes." });
-
             // start initializing the wow interface
             Bot = new();
             Bot.Memory = new XMemory();
+            Bot.Storage = new(dataFolder, new List<string>() { "AmeisenBotX.Core.Engines.Combat.Classes." });
 
             Logic = new AmeisenBotLogic(Config, Bot);
 
@@ -172,6 +171,8 @@ namespace AmeisenBotX.Core
 
             AmeisenLogger.I.Log("AmeisenBot", "Loading Profiles", LogLevel.Verbose);
             LoadProfiles();
+
+            Bot.Storage.LoadAll();
 
             if (Config.RconEnabled)
             {
@@ -282,8 +283,6 @@ namespace AmeisenBotX.Core
 
         private LockedTimer StateMachineTimer { get; set; }
 
-        private StorageManager Storage { get; set; }
-
         private bool TalentUpdateRunning { get; set; }
 
         /// <summary>
@@ -294,7 +293,7 @@ namespace AmeisenBotX.Core
             IsRunning = false;
             AmeisenLogger.I.Log("AmeisenBot", "Stopping", LogLevel.Debug);
 
-            Storage.SaveAll();
+            Bot.Storage.SaveAll();
 
             if (Config.SaveWowWindowPosition)
             {
@@ -369,7 +368,7 @@ namespace AmeisenBotX.Core
         /// <param name="newConfig">New config to load</param>
         public void ReloadConfig(AmeisenBotConfig newConfig)
         {
-            Storage.SaveAll();
+            Bot.Storage.SaveAll();
 
             bool oldRconState = Config.RconEnabled;
 
@@ -388,7 +387,7 @@ namespace AmeisenBotX.Core
                 StateMachineTimer.OnTick -= RconClientTimerTick;
             }
 
-            Storage.LoadAll();
+            Bot.Storage.LoadAll();
         }
 
         /// <summary>
@@ -426,7 +425,7 @@ namespace AmeisenBotX.Core
                     StateMachineTimer.OnTick += RconClientTimerTick;
                 }
 
-                Storage.LoadAll();
+                Bot.Storage.LoadAll();
 
                 AmeisenLogger.I.Log("AmeisenBot", "Setup done", LogLevel.Debug);
                 OnStatusChanged?.Invoke();
@@ -576,17 +575,16 @@ namespace AmeisenBotX.Core
                 LoadCustomCombatClass();
             }
 
-            if (Bot.CombatClass != null)
-            {
-                Storage.Storeables.Add(Bot.CombatClass);
-                Storage.LoadAll();
-            }
-
             // if a combatclass specified an ItemComparator
             // use it instead of the default one
             if (Bot.CombatClass?.ItemComparator != null)
             {
                 Bot.Character.ItemComparator = Bot.CombatClass.ItemComparator;
+
+                if (Bot.CombatClass is IStoreable s)
+                {
+                    Bot.Storage.Register(s);
+                }
             }
 
             Bot.Battleground = LoadClassByName(BattlegroundEngines, Config.BattlegroundEngine);

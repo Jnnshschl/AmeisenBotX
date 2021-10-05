@@ -267,7 +267,7 @@ namespace AmeisenBotX
         private void ButtonToggleRendering_Click(object sender, RoutedEventArgs e)
         {
             // float threat = AmeisenBot.Bot.Threat.Get(AmeisenBot.Bot.Player.Position);
-            AmeisenBot.Bot.Wow.LuaDoString("MoveBackwardStart();MoveBackwardStop();");
+            AmeisenBot.Bot.Wow.StopClickToMove();
         }
 
         private void ComboboxStateOverride_SelectionChanged(object sender, System.Windows.Controls.SelectionChangedEventArgs e)

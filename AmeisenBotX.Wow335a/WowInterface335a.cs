@@ -892,6 +892,9 @@ namespace AmeisenBotX.Wow335a
         {
             if (IsClickToMoveActive())
             {
+                // TODO: find better fix for spinning bug
+                LuaDoString("MoveBackwardStart();MoveBackwardStop();");
+
                 Hook.CallObjectFunction(Player.BaseAddress, OffsetList.FunctionPlayerClickToMoveStop, null, false, out _);
             }
         }

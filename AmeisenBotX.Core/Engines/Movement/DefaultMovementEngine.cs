@@ -141,7 +141,6 @@ namespace AmeisenBotX.Core.Engines.Movement
         public void PreventMovement(TimeSpan timeSpan)
         {
             StopMovement();
-            Bot.Wow.LuaDoString("MoveForwardStop();MoveBackwardStart();MoveBackwardStop();MoveAndSteerStop();");
             MovementBlockedUntil = DateTime.UtcNow + timeSpan;
         }
 
@@ -190,7 +189,13 @@ namespace AmeisenBotX.Core.Engines.Movement
         public void StopMovement()
         {
             Reset();
-            Bot.Wow.StopClickToMove();
+
+            if (Bot.Player != null && Bot.Wow.IsClickToMoveActive())
+            {
+                Bot.Character.MoveToPosition(Bot.Player.Position, 20.9f, 0.5f);
+            }
+
+            // Bot.Wow.StopClickToMove();
         }
 
         public bool TryGetPath(Vector3 position, out IEnumerable<Vector3> path, float maxDistance = 5.0f)

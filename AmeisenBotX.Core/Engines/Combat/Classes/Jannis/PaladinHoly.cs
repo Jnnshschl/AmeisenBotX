@@ -245,12 +245,7 @@ namespace AmeisenBotX.Core.Engines.Combat.Classes.Jannis
                 return true;
             }
 
-            if (HealingManager.Tick())
-            {
-                return true;
-            }
-
-            return false;
+            return HealingManager.Tick();
         }
     }
 }

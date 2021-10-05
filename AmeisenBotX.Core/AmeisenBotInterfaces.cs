@@ -1,4 +1,5 @@
 ﻿using AmeisenBotX.Common.Math;
+using AmeisenBotX.Common.Storage;
 using AmeisenBotX.Common.Utils;
 using AmeisenBotX.Core.Engines.Battleground;
 using AmeisenBotX.Core.Engines.Combat.Classes;
@@ -67,6 +68,8 @@ namespace AmeisenBotX.Core
         public IQuestEngine Quest { get; set; }
 
         public AmeisenBotRconClient Rcon { get; set; }
+
+        public StorageManager Storage { get; set; }
 
         public ITacticEngine Tactic { get; set; }
 

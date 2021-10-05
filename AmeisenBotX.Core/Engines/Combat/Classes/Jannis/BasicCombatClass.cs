@@ -1,4 +1,5 @@
 ﻿using AmeisenBotX.Common.Math;
+using AmeisenBotX.Common.Storage;
 using AmeisenBotX.Common.Utils;
 using AmeisenBotX.Core.Engines.Combat.Helpers;
 using AmeisenBotX.Core.Engines.Combat.Helpers.Aura;
@@ -21,7 +22,7 @@ using System.Text.Json;
 
 namespace AmeisenBotX.Core.Engines.Combat.Classes.Jannis
 {
-    public abstract class BasicCombatClass : ICombatClass
+    public abstract class BasicCombatClass : ICombatClass, IStoreable
     {
         private readonly int[] useableHealingItems = new int[]
         {
@@ -335,7 +336,7 @@ namespace AmeisenBotX.Core.Engines.Combat.Classes.Jannis
 
                 if (groupPlayers.Any())
                 {
-                    IWowPlayer player = groupPlayers.FirstOrDefault(e => Bot.Db.GetUnitName(e, out string name) && !RessurrectionTargets.ContainsKey(name) || RessurrectionTargets[name] < DateTime.Now);
+                    IWowPlayer player = groupPlayers.FirstOrDefault(e => (Bot.Db.GetUnitName(e, out string name) && !RessurrectionTargets.ContainsKey(name)) || RessurrectionTargets[name] < DateTime.Now);
 
                     if (player != null)
                     {
@@ -425,7 +426,7 @@ namespace AmeisenBotX.Core.Engines.Combat.Classes.Jannis
 
         protected bool TryCastSpell(string spellName, ulong guid, bool needsResource = false, int currentResourceAmount = 0, bool forceTargetSwitch = false)
         {
-            if (!Bot.Character.SpellBook.IsSpellKnown(spellName) || ((guid != 0 && guid != Bot.Wow.PlayerGuid) && !Bot.Objects.IsTargetInLineOfSight)) { return false; }
+            if (!Bot.Character.SpellBook.IsSpellKnown(spellName) || (guid != 0 && guid != Bot.Wow.PlayerGuid && !Bot.Objects.IsTargetInLineOfSight)) { return false; }
 
             if (ValidateTarget(guid, out IWowUnit target, out bool needToSwitchTarget))
             {
@@ -476,7 +477,7 @@ namespace AmeisenBotX.Core.Engines.Combat.Classes.Jannis
 
         protected bool TryCastSpellDk(string spellName, ulong guid, bool needsRuneenergy = false, bool needsBloodrune = false, bool needsFrostrune = false, bool needsUnholyrune = false, bool forceTargetSwitch = false)
         {
-            if (!Bot.Character.SpellBook.IsSpellKnown(spellName) || ((guid != 0 && guid != Bot.Wow.PlayerGuid) && !Bot.Objects.IsTargetInLineOfSight)) { return false; }
+            if (!Bot.Character.SpellBook.IsSpellKnown(spellName) || (guid != 0 && guid != Bot.Wow.PlayerGuid && !Bot.Objects.IsTargetInLineOfSight)) { return false; }
 
             if (ValidateTarget(guid, out IWowUnit target, out bool needToSwitchTarget))
             {
@@ -520,7 +521,7 @@ namespace AmeisenBotX.Core.Engines.Combat.Classes.Jannis
 
         protected bool TryCastSpellRogue(string spellName, ulong guid, bool needsEnergy = false, bool needsCombopoints = false, int requiredCombopoints = 1, bool forceTargetSwitch = false)
         {
-            if (!Bot.Character.SpellBook.IsSpellKnown(spellName) || ((guid != 0 && guid != Bot.Wow.PlayerGuid) && !Bot.Objects.IsTargetInLineOfSight)) { return false; }
+            if (!Bot.Character.SpellBook.IsSpellKnown(spellName) || (guid != 0 && guid != Bot.Wow.PlayerGuid && !Bot.Objects.IsTargetInLineOfSight)) { return false; }
 
             if (ValidateTarget(guid, out IWowUnit target, out bool needToSwitchTarget))
             {
@@ -561,7 +562,7 @@ namespace AmeisenBotX.Core.Engines.Combat.Classes.Jannis
 
         protected bool TryCastSpellWarrior(string spellName, string requiredStance, ulong guid, bool needsResource = false, int currentResourceAmount = 0, bool forceTargetSwitch = false)
         {
-            if (!Bot.Character.SpellBook.IsSpellKnown(spellName) || ((guid != 0 && guid != Bot.Wow.PlayerGuid) && !Bot.Objects.IsTargetInLineOfSight)) { return false; }
+            if (!Bot.Character.SpellBook.IsSpellKnown(spellName) || (guid != 0 && guid != Bot.Wow.PlayerGuid && !Bot.Objects.IsTargetInLineOfSight)) { return false; }
 
             if (ValidateTarget(guid, out IWowUnit target, out bool needToSwitchTarget))
             {

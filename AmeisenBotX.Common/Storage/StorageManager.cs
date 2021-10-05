@@ -24,14 +24,19 @@ namespace AmeisenBotX.Common.Storage
             Storeables = new();
         }
 
-        public List<IStoreable> Storeables { get; private set; }
-
         private string BasePath { get; }
 
         private IEnumerable<string> PartsToRemove { get; }
 
+        private List<IStoreable> Storeables { get; set; }
+
         public void Load(IStoreable s)
         {
+            if (!Storeables.Contains(s))
+            {
+                Register(s);
+            }
+
             string fullPath = BuildPath(s);
 
             try
@@ -59,8 +64,18 @@ namespace AmeisenBotX.Common.Storage
             }
         }
 
+        public void Register(IStoreable s)
+        {
+            Storeables.Add(s);
+        }
+
         public void Save(IStoreable s)
         {
+            if (!Storeables.Contains(s))
+            {
+                Register(s);
+            }
+
             string fullPath = BuildPath(s);
 
             try

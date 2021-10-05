@@ -46,7 +46,6 @@ namespace AmeisenBotX.Core.Engines.Tactic.Bosses.TheObsidianSanctum10
                         allowAttacking = false;
 
                         UsePortal(portal);
-
                         return true;
                     }
                 }
@@ -56,7 +55,6 @@ namespace AmeisenBotX.Core.Engines.Tactic.Bosses.TheObsidianSanctum10
                     allowAttacking = false;
 
                     UsePortal(portal);
-
                     return true;
                 }
             }
