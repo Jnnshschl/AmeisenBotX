@@ -79,6 +79,12 @@ namespace AmeisenBotX.Core.Engines.Movement
 
         public void Execute()
         {
+            if (!IsAllowedToMove)
+            {
+                Bot.Movement.StopMovement();
+                return;
+            }
+
             if (IsUnstucking && UnstuckTarget.GetDistance(Bot.Player.Position) < 2.0f)
             {
                 IsUnstucking = false;
@@ -102,7 +108,9 @@ namespace AmeisenBotX.Core.Engines.Movement
                             && !Bot.Player.IsMounted
                             && Bot.Player.IsOutdoors
                             && Bot.Character.Mounts != null
-                            && Bot.Character.Mounts.Any())
+                            && Bot.Character.Mounts.Any()
+                            // wsg flags
+                            && !Bot.Player.HasBuffById(Bot.Player.IsAlliance() ? 23333 : 23335))
                         {
                             MountUp();
                             TriedToMountUp = true;
@@ -110,7 +118,7 @@ namespace AmeisenBotX.Core.Engines.Movement
                     }
 
                     // we need to move to the node
-                    if (IsAllowedToMove && !Bot.Player.IsCasting)
+                    if (!Bot.Player.IsCasting)
                     {
                         PlayerVehicle.Update(MoveCharacter, Status, currentNode);
                     }
@@ -130,7 +138,67 @@ namespace AmeisenBotX.Core.Engines.Movement
             }
         }
 
-        public bool IsPositionReachable(Vector3 position, out IEnumerable<Vector3> path, float maxDistance = 5.0f)
+        public void PreventMovement(TimeSpan timeSpan)
+        {
+            StopMovement();
+            MovementBlockedUntil = DateTime.UtcNow + timeSpan;
+        }
+
+        public void Reset()
+        {
+            PathQueue.Clear();
+            Status = MovementAction.None;
+            TriedToMountUp = false;
+        }
+
+        public bool SetMovementAction(MovementAction state, Vector3 position, float rotation = 0.0f)
+        {
+            if (IsAllowedToMove && (PathQueue.Count == 0 || RefreshPathEvent.Ready))
+            {
+                if (state == MovementAction.DirectMove || Bot.Player.IsFlying || Bot.Player.IsUnderwater)
+                {
+                    Bot.Character.MoveToPosition(IsUnstucking ? UnstuckTarget : position);
+                    Status = state;
+                    DistanceMovedJumpCheck();
+                }
+                else if (FindPathEvent.Run() && TryGetPath(position, out IEnumerable<Vector3> path))
+                {
+                    // if its a new path, we can try to mount again
+                    if (path.Last().GetDistance(LastTargetPosition) > 10.0f)
+                    {
+                        TriedToMountUp = false;
+                    }
+
+                    PathQueue.Clear();
+
+                    foreach (Vector3 node in path)
+                    {
+                        PathQueue.Enqueue(node);
+                    }
+
+                    RefreshPathEvent.Run();
+                    Status = state;
+                    LastTargetPosition = path.Last();
+                    return true;
+                }
+            }
+
+            return false;
+        }
+
+        public void StopMovement()
+        {
+            Reset();
+
+            if (Bot.Player != null && Bot.Wow.IsClickToMoveActive())
+            {
+                Bot.Character.MoveToPosition(Bot.Player.Position, 20.9f, 0.5f);
+            }
+
+            // Bot.Wow.StopClickToMove();
+        }
+
+        public bool TryGetPath(Vector3 position, out IEnumerable<Vector3> path, float maxDistance = 5.0f)
         {
             // dont search a path into aoe effects
             if (AvoidAoeStuff(position, out Vector3 newPosition))
@@ -159,93 +227,42 @@ namespace AmeisenBotX.Core.Engines.Movement
             return false;
         }
 
-        public void PreventMovement(TimeSpan timeSpan)
+        private bool AvoidAoeStuff(Vector3 position, out Vector3 newPosition)
         {
-            StopMovement();
-            MovementBlockedUntil = DateTime.UtcNow + timeSpan;
-        }
-
-        public void Reset()
-        {
-            PathQueue.Clear();
-            Status = MovementAction.None;
-            TriedToMountUp = false;
-        }
-
-        public bool SetMovementAction(MovementAction state, Vector3 position, float rotation = 0.0f)
-        {
-            if (IsAllowedToMove && (PathQueue.Count == 0 || RefreshPathEvent.Ready))
+            // TODO: avoid dodgeing player aoe spells in sactuaries, this may looks suspect
+            if (Config.AoeDetectionAvoid)
             {
-                if (state == MovementAction.DirectMove || Bot.Player.IsFlying || Bot.Player.IsUnderwater)
+                // add places to avoid, these are for example blocked zones
+                List<(Vector3 position, float radius)> places = new(PlacesToAvoid);
+
+                // add all aoe spells
+                IEnumerable<IWowDynobject> aoeEffects = Bot.GetAoeSpells(position, true, Config.AoeDetectionExtends);
+
+                if (!Config.AoeDetectionIncludePlayers)
                 {
-                    Bot.Character.MoveToPosition(IsUnstucking ? UnstuckTarget : position);
-                    Status = state;
-                    DistanceMovedJumpCheck();
+                    aoeEffects = aoeEffects.Where(e => Bot.GetWowObjectByGuid<IWowUnit>(e.Caster)?.Type == WowObjectType.Unit);
                 }
-                else if (FindPathEvent.Run() && IsPositionReachable(position, out IEnumerable<Vector3> path))
+
+                places.AddRange(aoeEffects.Select(e => (e.Position, e.Radius)));
+
+                if (places.Any())
                 {
-                    // if its a new path, we can try to mount again
-                    if (path.Last().GetDistance(LastTargetPosition) > 10.0f)
-                    {
-                        TriedToMountUp = false;
-                    }
+                    // build mean position and move away x meters from it
+                    // x is the biggest distance we have to move
+                    Vector3 meanAoePos = BotMath.GetMeanPosition(places.Select(e => e.position));
+                    float distanceToMove = places.Max(e => e.radius) + Config.AoeDetectionExtends;
 
-                    PathQueue.Clear();
+                    // claculate the repell direction to move away from the aoe effects
+                    Vector3 repellDirection = position - meanAoePos;
+                    repellDirection.Normalize();
 
-                    foreach (Vector3 node in path)
-                    {
-                        PathQueue.Enqueue(node);
-                    }
-
-                    RefreshPathEvent.Run();
-                    Status = state;
-                    LastTargetPosition = path.Last();
+                    // "repell" the position from the aoe spell
+                    newPosition = meanAoePos + (repellDirection * distanceToMove);
                     return true;
                 }
             }
 
-            return false;
-        }
-
-        public void StopMovement()
-        {
-            Reset();
-            Bot.Wow.StopClickToMove();
-        }
-
-        private static Vector3 GetPositionOutsideOfAoeSpells(Vector3 targetPosition, IEnumerable<(Vector3 position, float radius)> aoeSpells)
-        {
-            if (aoeSpells.Any())
-            {
-                // build mean position and move away x meters from it
-                // x is the biggest distance we have to move
-                Vector3 meanAoePos = BotMath.GetMeanPosition(aoeSpells.Select(e => e.position));
-                float distanceToMove = aoeSpells.Max(e => e.radius);
-
-                // get average angle to produce the outgoing angle
-                float outgoingAngle = aoeSpells.Average(e => BotMath.GetFacingAngle(e.position, meanAoePos));
-
-                // "repell" the position from the aoe spell
-                return BotUtils.MoveAhead(targetPosition, outgoingAngle, distanceToMove + 1.5f);
-            }
-
-            return targetPosition;
-        }
-
-        private bool AvoidAoeStuff(Vector3 position, out Vector3 newPosition)
-        {
-            List<(Vector3 position, float radius)> places = new(PlacesToAvoid);
-            places.AddRange(Bot.GetAoeSpells(position)
-                .Where(e => Bot.GetWowObjectByGuid<IWowUnit>(e.Caster)?.Type == WowObjectType.Unit)
-                .Select(e => (e.Position, e.Radius)));
-
-            if (places.Any())
-            {
-                newPosition = GetPositionOutsideOfAoeSpells(position, places);
-                return true;
-            }
-
-            newPosition = position;
+            newPosition = default;
             return false;
         }
 

@@ -11,6 +11,12 @@ namespace AmeisenBotX.Core
     {
         public int AntiAfkMs { get; set; } = 1000;
 
+        public bool AoeDetectionAvoid { get; set; } = false;
+
+        public float AoeDetectionExtends { get; set; } = 1.0f;
+
+        public bool AoeDetectionIncludePlayers { get; set; } = false;
+
         public bool AutoAcceptQuests { get; set; } = true;
 
         public bool AutoChangeRealmlist { get; set; } = true;
@@ -18,8 +24,6 @@ namespace AmeisenBotX.Core
         public bool AutocloseWow { get; set; } = true;
 
         public bool AutoDisableRender { get; set; } = false;
-
-        public bool AutoDodgeAoeSpells { get; set; } = false;
 
         public bool AutojoinBg { get; set; } = true;
 

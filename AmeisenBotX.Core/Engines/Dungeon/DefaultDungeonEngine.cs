@@ -111,6 +111,11 @@ namespace AmeisenBotX.Core.Engines.Dungeon
         {
             if (Profile != null)
             {
+                if (Bot.Objects.MapId != Profile.MapId)
+                {
+                    Profile = null;
+                }
+
                 BehaviorTree.Tick();
             }
             else
@@ -305,15 +310,18 @@ namespace AmeisenBotX.Core.Engines.Dungeon
         {
             Profile = profile;
 
-            DungeonNode closestNode = profile.Nodes.OrderBy(e => e.Position.GetDistance(Bot.Player.Position)).FirstOrDefault();
-            int closestNodeIndex = profile.Nodes.IndexOf(closestNode);
-
-            for (int i = closestNodeIndex; i < profile.Nodes.Count; ++i)
+            if (Profile != null)
             {
-                CurrentNodes.Enqueue(profile.Nodes[i]);
-            }
+                DungeonNode closestNode = profile.Nodes.OrderBy(e => e.Position.GetDistance(Bot.Player.Position)).FirstOrDefault();
+                int closestNodeIndex = profile.Nodes.IndexOf(closestNode);
 
-            Bot.CombatClass.PriorityTargetDisplayIds = profile.PriorityUnits;
+                for (int i = closestNodeIndex; i < profile.Nodes.Count; ++i)
+                {
+                    CurrentNodes.Enqueue(profile.Nodes[i]);
+                }
+
+                Bot.CombatClass.PriorityTargetDisplayIds = profile.PriorityUnits;
+            }
         }
 
         private BtStatus MoveToPosition(Vector3 position, float minDistance = 2.5f, MovementAction movementAction = MovementAction.Move)

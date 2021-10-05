@@ -212,6 +212,11 @@ namespace AmeisenBotX.Wow335a
             LuaDoString("ConfirmSummon();StaticPopup_Hide(\"CONFIRM_SUMMON\")");
         }
 
+        public void BuyTrainerService(int serviceIndex)
+        {
+            LuaDoString($"BuyTrainerService({serviceIndex})");
+        }
+
         public void CallCompanion(int index, string type)
         {
             LuaDoString($"CallCompanion(\"{type}\", {index})");
@@ -240,6 +245,11 @@ namespace AmeisenBotX.Wow335a
         public void ClickOnTerrain(Vector3 position)
         {
             Hook.ClickOnTerrain(position);
+        }
+
+        public void ClickOnTrainButton()
+        {
+            LuaDoString("LoadAddOn\"Blizzard_TrainerUI\"f=ClassTrainerTrainButton;f.e=0;if f:GetScript\"OnUpdate\"then f:SetScript(\"OnUpdate\",nil)else f:SetScript(\"OnUpdate\",function(f,a)f.e=f.e+a;if f.e>.01 then f.e=0;f:Click()end end)end");
         }
 
         public void ClickUiElement(string elementName)
@@ -521,6 +531,23 @@ namespace AmeisenBotX.Wow335a
             return ExecuteLuaAndRead(BotUtils.ObfuscateLua("{v:0}=\"\"{v:4}=GetNumTalentTabs();for g=1,{v:4} do {v:1}=GetNumTalents(g)for h=1,{v:1} do a,b,c,d,{v:2},{v:3},e,f=GetTalentInfo(g,h){v:0}={v:0}..a..\";\"..g..\";\"..h..\";\"..{v:2}..\";\"..{v:3};if h<{v:1} then {v:0}={v:0}..\"|\"end end;if g<{v:4} then {v:0}={v:0}..\"|\"end end"), out string result) ? result : string.Empty;
         }
 
+        public void GetTrainerServiceCost(int serviceIndex)
+        {
+            // todo: returns moneyCost, talentCost, professionCost
+            LuaDoString($"GetTrainerServiceCost({serviceIndex})");
+        }
+
+        public void GetTrainerServiceInfo(int serviceIndex)
+        {
+            // todo: returns name, rank, category, expanded
+            LuaDoString($"GetTrainerServiceInfo({serviceIndex})");
+        }
+
+        public int GetTrainerServicesCount()
+        {
+            return ExecuteLuaInt(BotUtils.ObfuscateLua("{v:0}=GetNumTrainerServices()"));
+        }
+
         /// <summary>
         /// Check if the string is casting or channeling a spell
         /// </summary>
@@ -674,6 +701,7 @@ namespace AmeisenBotX.Wow335a
         {
             return ExecuteLuaInt(BotUtils.ObfuscateLua("{v:0}=GetNumGossipOptions()"));
         }
+
         public string LuaGetItemBySlot(int itemslot)
         {
             return ExecuteLuaAndRead(BotUtils.ObfuscateLua($"{{v:8}}={itemslot};{{v:0}}='noItem';{{v:1}}=GetInventoryItemID('player',{{v:8}});{{v:2}}=GetInventoryItemCount('player',{{v:8}});{{v:3}}=GetInventoryItemQuality('player',{{v:8}});{{v:4}},{{v:5}}=GetInventoryItemDurability({{v:8}});{{v:6}},{{v:7}}=GetInventoryItemCooldown('player',{{v:8}});{{v:9}},{{v:10}},{{v:11}},{{v:12}},{{v:13}},{{v:14}},{{v:15}},{{v:16}},{{v:17}},{{v:18}},{{v:19}}=GetItemInfo(GetInventoryItemLink('player',{{v:8}}));{{v:0}}='{{'..'\"id\": \"'..tostring({{v:1}} or 0)..'\",'..'\"count\": \"'..tostring({{v:2}} or 0)..'\",'..'\"quality\": \"'..tostring({{v:3}} or 0)..'\",'..'\"curDurability\": \"'..tostring({{v:4}} or 0)..'\",'..'\"maxDurability\": \"'..tostring({{v:5}} or 0)..'\",'..'\"cooldownStart\": \"'..tostring({{v:6}} or 0)..'\",'..'\"cooldownEnd\": '..tostring({{v:7}} or 0)..','..'\"name\": \"'..tostring({{v:9}} or 0)..'\",'..'\"link\": \"'..tostring({{v:10}} or 0)..'\",'..'\"level\": \"'..tostring({{v:12}} or 0)..'\",'..'\"minLevel\": \"'..tostring({{v:13}} or 0)..'\",'..'\"type\": \"'..tostring({{v:14}} or 0)..'\",'..'\"subtype\": \"'..tostring({{v:15}} or 0)..'\",'..'\"maxStack\": \"'..tostring({{v:16}} or 0)..'\",'..'\"equipslot\": \"'..tostring({{v:17}} or 0)..'\",'..'\"sellprice\": \"'..tostring({{v:19}} or 0)..'\"'..'}}';"), out string result) ? result : string.Empty;
@@ -702,11 +730,6 @@ namespace AmeisenBotX.Wow335a
         public void LuaKickNpcsOutOfVehicle()
         {
             LuaDoString("for i=1,2 do EjectPassengerFromSeat(i) end");
-        }
-
-        public void ClickOnTrainButton()
-        {
-            LuaDoString("LoadAddOn\"Blizzard_TrainerUI\"f=ClassTrainerTrainButton;f.e=0;if f:GetScript\"OnUpdate\"then f:SetScript(\"OnUpdate\",nil)else f:SetScript(\"OnUpdate\",function(f,a)f.e=f.e+a;if f.e>.01 then f.e=0;f:Click()end end)end");
         }
 
         public void LuaQueueBattlegroundByName(string bgName)
@@ -783,36 +806,14 @@ namespace AmeisenBotX.Wow335a
             LuaDoString($"SelectGossipAvailableQuest({gossipId})");
         }
 
-        public void SelectGossipOptionSimple(int gossipId)
-        {
-            LuaDoString($"SelectGossipOption({gossipId})");
-        }
-
         public void SelectGossipOption(int gossipId)
         {
             LuaDoString($"SelectGossipOption(max({gossipId}, GetNumGossipOptions()))");
         }
 
-        public void BuyTrainerService(int serviceIndex)
+        public void SelectGossipOptionSimple(int gossipId)
         {
-            LuaDoString($"BuyTrainerService({serviceIndex})");
-        }
-
-        public int GetTrainerServicesCount()
-        {
-            return ExecuteLuaInt(BotUtils.ObfuscateLua("{v:0}=GetNumTrainerServices()"));
-        }
-
-        public void GetTrainerServiceInfo(int serviceIndex)
-        {
-            // todo: returns name, rank, category, expanded
-            LuaDoString($"GetTrainerServiceInfo({serviceIndex})");
-        }
-
-        public void GetTrainerServiceCost(int serviceIndex)
-        {
-            // todo: returns moneyCost, talentCost, professionCost
-            LuaDoString($"GetTrainerServiceCost({serviceIndex})");
+            LuaDoString($"SelectGossipOption({gossipId})");
         }
 
         public void SelectQuestByNameOrGossipId(string questName, int gossipId, bool isAvailableQuest)
@@ -891,6 +892,9 @@ namespace AmeisenBotX.Wow335a
         {
             if (IsClickToMoveActive())
             {
+                // TODO: find better fix for spinning bug
+                LuaDoString("MoveBackwardStart();MoveBackwardStop();");
+
                 Hook.CallObjectFunction(Player.BaseAddress, OffsetList.FunctionPlayerClickToMoveStop, null, false, out _);
             }
         }

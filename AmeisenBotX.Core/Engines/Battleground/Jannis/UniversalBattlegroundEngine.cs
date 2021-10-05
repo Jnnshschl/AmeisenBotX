@@ -27,7 +27,7 @@ namespace AmeisenBotX.Core.Engines.Battleground.Jannis
                 TryLoadProfile();
             }
 
-            Bot.CombatClass.OutOfCombatExecute();
+            Bot.CombatClass?.OutOfCombatExecute();
             Profile?.Execute();
         }
 

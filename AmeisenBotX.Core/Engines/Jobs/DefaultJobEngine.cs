@@ -30,8 +30,6 @@ namespace AmeisenBotX.Core.Engines.Jobs
             NodeBlacklist = new();
         }
 
-        public bool GeneratedPathToNode { get; set; }
-
         public List<ulong> NodeBlacklist { get; set; }
 
         public IJobProfile Profile { get; set; }
@@ -62,7 +60,6 @@ namespace AmeisenBotX.Core.Engines.Jobs
         {
             AmeisenLogger.I.Log("JobEngine", $"Entering JobEngine", LogLevel.Verbose);
             CheckForPathRecovering = true;
-            GeneratedPathToNode = false;
         }
 
         public void Execute()
@@ -106,8 +103,7 @@ namespace AmeisenBotX.Core.Engines.Jobs
 
             if (SellActionsNeeded > 0)
             {
-                IWowGameobject mailboxNode = Bot.Objects.WowObjects
-                    .OfType<IWowGameobject>()
+                IWowGameobject mailboxNode = Bot.Objects.WowObjects.OfType<IWowGameobject>()
                     .Where(x => Enum.IsDefined(typeof(MailBox), x.DisplayId)
                             && x.Position.GetDistance(Bot.Player.Position) < 15)
                     .OrderBy(x => x.Position.GetDistance(Bot.Player.Position))
@@ -129,7 +125,8 @@ namespace AmeisenBotX.Core.Engines.Jobs
                             int usedItems = 0;
                             foreach (IWowInventoryItem item in Bot.Character.Inventory.Items)
                             {
-                                if (Config.ItemSellBlacklist.Contains(item.Name) || item.Name.Contains("Mining Pick", StringComparison.OrdinalIgnoreCase))
+                                if (Config.ItemSellBlacklist.Contains(item.Name)
+                                    || item.Name.Contains("Mining Pick", StringComparison.OrdinalIgnoreCase))
                                 {
                                     continue;
                                 }
@@ -168,8 +165,7 @@ namespace AmeisenBotX.Core.Engines.Jobs
                 // search for nodes
                 int miningSkill = Bot.Character.Skills.ContainsKey("Mining") ? Bot.Character.Skills["Mining"].Item1 : 0;
 
-                IWowGameobject nearestNode = Bot.Objects.WowObjects
-                    .OfType<IWowGameobject>()
+                IWowGameobject nearestNode = Bot.Objects.WowObjects.OfType<IWowGameobject>()
                     .Where(e => !NodeBlacklist.Contains(e.Guid)
                              && Enum.IsDefined(typeof(WowOreId), e.DisplayId)
                              && miningProfile.OreTypes.Contains((WowOreId)e.DisplayId)
@@ -200,8 +196,6 @@ namespace AmeisenBotX.Core.Engines.Jobs
                 else
                 {
                     // if no node was found, follow the path
-                    GeneratedPathToNode = false;
-
                     Vector3 currentNode = miningProfile.Path[CurrentNodeCounter];
                     Bot.Movement.SetMovementAction(MovementAction.Move, currentNode);
 
@@ -227,7 +221,13 @@ namespace AmeisenBotX.Core.Engines.Jobs
                 double distanceToNode = Bot.Player.Position.GetDistance(SelectedPosition);
                 IWowGameobject node = Bot.GetWowObjectByGuid<IWowGameobject>(SelectedGuid);
 
-                if (distanceToNode < 3)
+                if (node == null)
+                {
+                    // if we are 20m or less near the node and its still not loaded, we can ignore it
+                    SelectedPosition = default;
+                    SelectedGuid = 0;
+                }
+                else if (distanceToNode < 3.0f)
                 {
                     if (Bot.Player.IsMounted)
                     {
@@ -237,7 +237,7 @@ namespace AmeisenBotX.Core.Engines.Jobs
 
                     Bot.Movement.StopMovement();
 
-                    if (MiningEvent.Run()) // limit the executions
+                    if (MiningEvent.Run())
                     {
                         if (Bot.Memory.Read(Bot.Wow.Offsets.LootWindowOpen, out byte lootOpen)
                             && lootOpen > 0)
@@ -253,31 +253,15 @@ namespace AmeisenBotX.Core.Engines.Jobs
                     CheckForPathRecovering = true;
                     NodeTryCounter = 0;
                 }
-                else if (distanceToNode < 20.0 && node == null)
+                else if (!Bot.Movement.SetMovementAction(MovementAction.Move, node.Position))
                 {
-                    // if we are 20m or less near the node and its still not loaded, we can ignore it
-                    SelectedPosition = default;
-                    SelectedGuid = 0;
-                }
-                else
-                {
-                    if (GeneratedPathToNode && BlacklistEvent.Run())
+                    if (NodeTryCounter > 2)
                     {
-                        if (!Bot.Movement.SetMovementAction(MovementAction.Move, node.Position))
-                        {
-                            if (NodeTryCounter > 2)
-                            {
-                                NodeBlacklist.Add(node.Guid);
-                                NodeTryCounter = 0;
-                            }
-
-                            ++NodeTryCounter;
-                        }
-                        else
-                        {
-                            GeneratedPathToNode = true;
-                        }
+                        NodeBlacklist.Add(node.Guid);
+                        NodeTryCounter = 0;
                     }
+
+                    ++NodeTryCounter;
                 }
             }
         }

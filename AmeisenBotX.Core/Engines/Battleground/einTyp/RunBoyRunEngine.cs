@@ -48,7 +48,7 @@ namespace AmeisenBotX.Core.Engines.Battleground.einTyp
         {
             if (!IsGateOpen())
             {
-                Bot.CombatClass.OutOfCombatExecute();
+                Bot.CombatClass?.OutOfCombatExecute();
                 return;
             }
 
@@ -122,7 +122,7 @@ namespace AmeisenBotX.Core.Engines.Battleground.einTyp
                         Bot.Movement.SetMovementAction(Movement.Enums.MovementAction.Move, isHorde ? baseAlly : baseHord);
                     }
 
-                    Bot.CombatClass.OutOfCombatExecute();
+                    Bot.CombatClass?.OutOfCombatExecute();
                 }
                 else
                 {
@@ -173,7 +173,7 @@ namespace AmeisenBotX.Core.Engines.Battleground.einTyp
                             Bot.Movement.SetMovementAction(Movement.Enums.MovementAction.Move, isHorde ? baseHord : baseAlly);
                         }
 
-                        Bot.CombatClass.OutOfCombatExecute();
+                        Bot.CombatClass?.OutOfCombatExecute();
                     }
                 }
             }
@@ -215,7 +215,7 @@ namespace AmeisenBotX.Core.Engines.Battleground.einTyp
                         return;
                     }
                 }
-                Bot.CombatClass.OutOfCombatExecute();
+                Bot.CombatClass?.OutOfCombatExecute();
             }
             else if (enemyTeamHasFlag)
             {
@@ -239,7 +239,7 @@ namespace AmeisenBotX.Core.Engines.Battleground.einTyp
                     {
                         // go outside!
                         Bot.Movement.SetMovementAction(Movement.Enums.MovementAction.Move, isHorde ? baseAlly : baseHord);
-                        Bot.CombatClass.OutOfCombatExecute();
+                        Bot.CombatClass?.OutOfCombatExecute();
                     }
                 }
                 else
@@ -260,7 +260,7 @@ namespace AmeisenBotX.Core.Engines.Battleground.einTyp
                             return;
                         }
                     }
-                    Bot.CombatClass.OutOfCombatExecute();
+                    Bot.CombatClass?.OutOfCombatExecute();
                 }
             }
             else
@@ -283,7 +283,7 @@ namespace AmeisenBotX.Core.Engines.Battleground.einTyp
                 {
                     // go outside!
                     Bot.Movement.SetMovementAction(Movement.Enums.MovementAction.Move, isHorde ? baseAlly : baseHord);
-                    Bot.CombatClass.OutOfCombatExecute();
+                    Bot.CombatClass?.OutOfCombatExecute();
                 }
             }
             if (Bot.Movement.Status == Movement.Enums.MovementAction.None)
@@ -295,7 +295,7 @@ namespace AmeisenBotX.Core.Engines.Battleground.einTyp
                     // StateMachine.Get<StateCombat>().Mode = CombatMode.Force;
                     return;
                 }
-                Bot.CombatClass.OutOfCombatExecute();
+                Bot.CombatClass?.OutOfCombatExecute();
             }
         }
 

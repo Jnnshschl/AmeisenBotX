@@ -20,13 +20,17 @@ namespace AmeisenBotX.Core.Engines.Tactic.Dungeon.ForgeOfSouls
             };
         }
 
-        public static Vector3 MidPosition { get; } = new Vector3(5662, 2507, 709);
+        public Vector3 Area { get; } = new(5662, 2507, 709);
+
+        public float AreaRadius { get; } = 120.0f;
 
         public AmeisenBotInterfaces Bot { get; }
 
         public Dictionary<string, dynamic> Configureables { get; private set; }
 
-        private static List<int> DevourerOfSoulsDisplayId { get; } = new List<int> { 30148, 30149, 30150 };
+        public WowMapId MapId { get; } = WowMapId.TheForgeOfSouls;
+
+        private static List<int> DevourerOfSoulsDisplayId { get; } = new() { 30148, 30149, 30150 };
 
         public bool ExecuteTactic(WowRole role, bool isMelee, out bool preventMovement, out bool allowAttacking)
         {
@@ -55,7 +59,7 @@ namespace AmeisenBotX.Core.Engines.Tactic.Dungeon.ForgeOfSouls
 
                 if (role == WowRole.Tank)
                 {
-                    Vector3 modifiedCenterPosition = BotUtils.MoveAhead(MidPosition, BotMath.GetFacingAngle(Bot.Objects.CenterPartyPosition, MidPosition), 8.0f);
+                    Vector3 modifiedCenterPosition = BotUtils.MoveAhead(Area, BotMath.GetFacingAngle(Bot.Objects.CenterPartyPosition, Area), 8.0f);
                     float distanceToMid = Bot.Player.Position.GetDistance(modifiedCenterPosition);
 
                     if (wowUnit.TargetGuid == Bot.Wow.PlayerGuid)

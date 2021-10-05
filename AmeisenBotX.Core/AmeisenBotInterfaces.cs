@@ -1,4 +1,5 @@
 ﻿using AmeisenBotX.Common.Math;
+using AmeisenBotX.Common.Storage;
 using AmeisenBotX.Common.Utils;
 using AmeisenBotX.Core.Engines.Battleground;
 using AmeisenBotX.Core.Engines.Combat.Classes;
@@ -68,6 +69,8 @@ namespace AmeisenBotX.Core
 
         public AmeisenBotRconClient Rcon { get; set; }
 
+        public StorageManager Storage { get; set; }
+
         public ITacticEngine Tactic { get; set; }
 
         public IWowUnit Target => Objects.Target;
@@ -79,7 +82,7 @@ namespace AmeisenBotX.Core
         public IWowInterface Wow { get; set; }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public IEnumerable<IWowDynobject> GetAoeSpells(Vector3 position, bool onlyEnemy = true, float extends = 2.0f)
+        public IEnumerable<IWowDynobject> GetAoeSpells(Vector3 position, bool onlyEnemy = false, float extends = 2.0f)
         {
             return Objects.WowObjects.OfType<IWowDynobject>()
                 .Where(e => e.Position.GetDistance(position) < e.Radius + extends
