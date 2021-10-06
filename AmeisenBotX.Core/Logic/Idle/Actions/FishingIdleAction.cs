@@ -19,6 +19,11 @@ namespace AmeisenBotX.Core.Logic.Idle.Actions
             Rnd = new Random();
         }
 
+        public override string ToString()
+        {
+            return $"{(AutopilotOnly ? "(🤖) " : "")}Go Fishing";
+        }
+
         public bool AutopilotOnly => true;
 
         public AmeisenBotInterfaces Bot { get; }

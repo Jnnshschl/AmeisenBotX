@@ -7,13 +7,16 @@ namespace AmeisenBotX.Core.Logic.Idle
 {
     public class IdleActionManager
     {
-        public IdleActionManager(IEnumerable<IIdleAction> idleActions)
+        public IdleActionManager(AmeisenBotConfig config, IEnumerable<IIdleAction> idleActions)
         {
+            Config = config;
             IdleActions = idleActions;
 
             Rnd = new();
             LastActions = new();
         }
+
+        private AmeisenBotConfig Config { get; }
 
         public TimeSpan Cooldown { get; private set; }
 
@@ -54,7 +57,8 @@ namespace AmeisenBotX.Core.Logic.Idle
             {
                 IEnumerable<IIdleAction> filteredActions = IdleActions.Where
                 (
-                    e => (!e.AutopilotOnly || autopilotEnabled)
+                    e => Config.IdleActionsEnabled.TryGetValue(e.ToString(), out bool b) && b
+                      && (!e.AutopilotOnly || autopilotEnabled)
                       && DateTime.Now > e.Cooldown
                 );
 

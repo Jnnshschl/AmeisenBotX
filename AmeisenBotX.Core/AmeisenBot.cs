@@ -25,6 +25,7 @@ using AmeisenBotX.Core.Engines.Quest.Profiles.StartAreas;
 using AmeisenBotX.Core.Engines.Tactic;
 using AmeisenBotX.Core.Engines.Test;
 using AmeisenBotX.Core.Logic;
+using AmeisenBotX.Core.Logic.Idle.Actions;
 using AmeisenBotX.Core.Logic.Routines;
 using AmeisenBotX.Core.Managers.Character;
 using AmeisenBotX.Core.Managers.Character.Inventory;
@@ -110,6 +111,18 @@ namespace AmeisenBotX.Core
             Bot = new();
             Bot.Memory = new XMemory();
             Bot.Storage = new(dataFolder, new List<string>() { "AmeisenBotX.Core.Engines.Combat.Classes." });
+
+            Bot.IdleActions = new(Config, new List<IIdleAction>()
+            {
+                new AuctionHouseIdleAction(Bot),
+                new CheckMailsIdleAction(Bot),
+                new FishingIdleAction(Bot),
+                new LookAroundIdleAction(Bot),
+                new LookAtGroupIdleAction(Bot),
+                new RandomEmoteIdleAction(Bot),
+                new SitByCampfireIdleAction(Bot),
+                new SitToChairIdleAction(Bot, Config.MinFollowDistance),
+            });
 
             Logic = new AmeisenBotLogic(Config, Bot);
 

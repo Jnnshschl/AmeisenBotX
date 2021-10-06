@@ -20,6 +20,10 @@
         <Color x:Key="TextAccent">#FFFF0050</Color>
         <Color x:Key="CheckBoxHoverBorder">#FFFF0050</Color>
 
+        <Style x:Key="noHeaderStyle" TargetType="{x:Type GridViewColumnHeader}">
+            <Setter Property="Visibility" Value="Collapsed" />
+        </Style>
+
         <Style x:Key="ScrollBarLineButton" TargetType="{x:Type RepeatButton}">
             <Setter Property="SnapsToDevicePixels" Value="True" />
             <Setter Property="OverridesDefaultStyle" Value="true" />

@@ -16,6 +16,11 @@ namespace AmeisenBotX.Core.Logic.Idle.Actions
             Rnd = new Random();
         }
 
+        public override string ToString()
+        {
+            return $"{(AutopilotOnly ? "(🤖) " : "")}Go to Auctionhouse";
+        }
+
         public bool AutopilotOnly => true;
 
         public DateTime Cooldown { get; set; }

@@ -37,6 +37,11 @@ namespace AmeisenBotX.Core.Logic.Idle.Actions
             Rnd = new Random();
         }
 
+        public override string ToString()
+        {
+            return $"{(AutopilotOnly ? "(🤖) " : "")}Random Emote";
+        }
+
         public bool AutopilotOnly => false;
 
         public AmeisenBotInterfaces Bot { get; }

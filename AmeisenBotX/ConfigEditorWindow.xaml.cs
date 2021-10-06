@@ -2,6 +2,8 @@
 using AmeisenBotX.Common.Keyboard.Objects;
 using AmeisenBotX.Core;
 using AmeisenBotX.Core.Engines.Battleground;
+using AmeisenBotX.Core.Logic.Idle.Actions;
+using AmeisenBotX.Utils;
 using AmeisenBotX.Views;
 using Microsoft.Win32;
 using System;
@@ -12,8 +14,11 @@ using System.Linq;
 using System.Net;
 using System.Text.RegularExpressions;
 using System.Windows;
+using System.Windows.Controls;
+using System.Windows.Controls.Primitives;
 using System.Windows.Input;
 using System.Windows.Media;
+using System.Windows.Shapes;
 
 namespace AmeisenBotX
 {
@@ -43,6 +48,8 @@ namespace AmeisenBotX
             NormalBorderBrush.Freeze();
             ErrorBorderBrush.Freeze();
         }
+
+        public List<IdleActionWrapper> IdleActionItems { get; set; }
 
         public AmeisenBot AmeisenBot { get; private set; }
 
@@ -203,6 +210,13 @@ namespace AmeisenBotX
                     }
                 }
 
+                Config.IdleActionsEnabled.Clear();
+
+                foreach (IdleActionWrapper x in IdleActionItems)
+                {
+                    Config.IdleActionsEnabled.Add(x.Name, x.IsEnabled);
+                }
+
                 SaveConfig = true;
                 Close();
             }
@@ -248,7 +262,7 @@ namespace AmeisenBotX
 
             if (openFileDialog.ShowDialog().GetValueOrDefault(false))
             {
-                textboxRconImage.Text = $"data:image/{Path.GetExtension(openFileDialog.FileName).ToUpperInvariant()};base64,{Convert.ToBase64String(File.ReadAllBytes(openFileDialog.FileName))}";
+                textboxRconImage.Text = $"data:image/{System.IO.Path.GetExtension(openFileDialog.FileName).ToUpperInvariant()};base64,{Convert.ToBase64String(File.ReadAllBytes(openFileDialog.FileName))}";
                 ChangedSomething = true;
             }
         }
@@ -492,6 +506,22 @@ namespace AmeisenBotX
                 comboboxStartStopBotBindingAltKey.Text = KeyCodes.None.ToString();
                 comboboxStartStopBotBindingKey.Text = KeyCodes.None.ToString();
             }
+
+            // Idle Actions
+            IdleActionItems = new();
+
+            foreach (IIdleAction x in AmeisenBot.Bot.IdleActions.IdleActions)
+            {
+                bool state = Config.IdleActionsEnabled.TryGetValue(x.ToString(), out bool b) && b;
+
+                IdleActionItems.Add(new()
+                {
+                    Name = x.ToString(),
+                    IsEnabled = state
+                });
+            }
+
+            listviewIdleActions.ItemsSource = IdleActionItems;
 
             ChangedSomething = false;
         }
@@ -890,6 +920,31 @@ namespace AmeisenBotX
             }
 
             LoadConfigToUi();
+        }
+
+        private void GridViewColumnHeader_Loaded(object sender, RoutedEventArgs e)
+        {
+            GridViewColumnHeader columnHeader = sender as GridViewColumnHeader;
+
+            if (columnHeader.Template.FindName("HeaderBorder", columnHeader) is Border HeaderBorder)
+            {
+                HeaderBorder.Background = HeaderBorder.Background;
+            }
+
+            if (columnHeader.Template.FindName("HeaderHoverBorder", columnHeader) is Border HeaderHoverBorder)
+            {
+                HeaderHoverBorder.BorderBrush = HeaderHoverBorder.BorderBrush;
+            }
+
+            if (columnHeader.Template.FindName("UpperHighlight", columnHeader) is Rectangle UpperHighlight)
+            {
+                UpperHighlight.Visibility = UpperHighlight.Visibility;
+            }
+
+            if (columnHeader.Template.FindName("PART_HeaderGripper", columnHeader) is Thumb PART_HeaderGripper)
+            {
+                PART_HeaderGripper.Background = PART_HeaderGripper.Background;
+            }
         }
 
         private void Window_MouseLeftButtonDown(object sender, MouseButtonEventArgs e)

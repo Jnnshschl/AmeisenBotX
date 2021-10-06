@@ -44,18 +44,6 @@ namespace AmeisenBotX.Core.Logic
             Mode = BotMode.None;
             // Mode = BotMode.PvP;
 
-            IdleActionManager = new(new List<IIdleAction>()
-            {
-                new AuctionHouseIdleAction(bot),
-                new CheckMailsIdleAction(bot),
-                new FishingIdleAction(bot),
-                new LookAroundIdleAction(bot),
-                new LookAtGroupIdleAction(bot),
-                new RandomEmoteIdleAction(bot),
-                new SitByCampfireIdleAction(bot),
-                new SitToChairIdleAction(bot, Config.MinFollowDistance),
-            });
-
             AntiAfkEvent = new(TimeSpan.FromMilliseconds(1200));
             CharacterUpdateEvent = new(TimeSpan.FromMilliseconds(5000));
             EatBlockEvent = new(TimeSpan.FromMilliseconds(30000));
@@ -224,7 +212,7 @@ namespace AmeisenBotX.Core.Logic
                 (NeedToLoot, new Leaf(LootNearUnits)),
                 (NeedToEat, new Leaf(Eat)),
                 (NeedToFollow, new Leaf(Follow)),
-                (() => Config.IdleActions && IdleActionEvent.Run(), new Leaf(() => { IdleActionManager.Tick(Config.Autopilot); return BtStatus.Success; }))
+                (() => Config.IdleActions && IdleActionEvent.Run(), new Leaf(() => { Bot.IdleActions.Tick(Config.Autopilot); return BtStatus.Success; }))
             );
 
             // SPECIAL ENVIRONMENTS -----------------------------
@@ -383,8 +371,6 @@ namespace AmeisenBotX.Core.Logic
         private IEnumerable<IWowInventoryItem> Food { get; set; }
 
         private TimegatedEvent IdleActionEvent { get; }
-
-        private IdleActionManager IdleActionManager { get; }
 
         private TimegatedEvent LoginAttemptEvent { get; }
 

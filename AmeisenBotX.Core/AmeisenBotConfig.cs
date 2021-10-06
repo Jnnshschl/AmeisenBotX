@@ -21,6 +21,8 @@ namespace AmeisenBotX.Core
 
         public bool AutoChangeRealmlist { get; set; } = true;
 
+        public Dictionary<string, bool> IdleActionsEnabled { get; set; } = new();
+
         public bool AutocloseWow { get; set; } = true;
 
         public bool AutoDisableRender { get; set; } = false;
