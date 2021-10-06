@@ -691,7 +691,7 @@ namespace AmeisenBotX.Core
 
         private void OnMerchantShow(long timestamp, List<string> args)
         {
-            if (Config.AutoRepair && Bot.Target.IsRepairer)
+            if (Config.AutoRepair && Bot.Target != null && Bot.Target.IsRepairer)
             {
                 Bot.Wow.RepairAllItems();
             }
