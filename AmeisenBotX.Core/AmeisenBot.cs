@@ -110,7 +110,20 @@ namespace AmeisenBotX.Core
             // start initializing the wow interface
             Bot = new();
             Bot.Memory = new XMemory();
-            Bot.Storage = new(dataFolder, new List<string>() { "AmeisenBotX.Core.Engines.Combat.Classes." });
+
+            // load the wow specific interface based on file version (build number)
+            Bot.Wow = FileVersionInfo.GetVersionInfo(Config.PathToWowExe).FilePrivatePart switch
+            {
+                12340 => new WowInterface335a(Bot.Memory),
+                _ => throw new ArgumentException("Unsupported wow version", nameof(Config)),
+            };
+
+            Bot.Storage = new(dataFolder, new List<string>()
+            {
+                // strings to strip from class names
+                "AmeisenBotX.Core.Engines.Combat.Classes.",
+                "AmeisenBotX.Core.Engines.Tactic."
+            });
 
             Bot.IdleActions = new(Config, new List<IIdleAction>()
             {
@@ -128,13 +141,6 @@ namespace AmeisenBotX.Core
 
             Bot.Chat = new DefaultChatManager(Config, ProfileFolder);
             Bot.Tactic = new DefaultTacticEngine(Bot);
-
-            // load the wow specific interface based on file version (build number)
-            Bot.Wow = FileVersionInfo.GetVersionInfo(config.PathToWowExe).FilePrivatePart switch
-            {
-                12340 => new WowInterface335a(Bot.Memory),
-                _ => throw new ArgumentException("Unsupported wow version", nameof(config)),
-            };
 
             Bot.Wow.OnStaticPopup += OnStaticPopup;
             Bot.Wow.OnBattlegroundStatus += OnBattlegroundStatusChanged;

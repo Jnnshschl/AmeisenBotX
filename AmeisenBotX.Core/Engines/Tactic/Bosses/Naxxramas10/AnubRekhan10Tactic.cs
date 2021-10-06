@@ -1,4 +1,5 @@
 ﻿using AmeisenBotX.Common.Math;
+using AmeisenBotX.Common.Storage;
 using AmeisenBotX.Common.Utils;
 using AmeisenBotX.Core.Engines.Movement.Enums;
 using AmeisenBotX.Wow.Objects;
@@ -6,10 +7,11 @@ using AmeisenBotX.Wow.Objects.Enums;
 using AmeisenBotX.Wow335a.Constants.Raids.Wotlk.Naxxramas;
 using System;
 using System.Collections.Generic;
+using System.Text.Json;
 
 namespace AmeisenBotX.Core.Engines.Tactic.Bosses.Naxxramas10
 {
-    public class AnubRekhan10Tactic : ITactic
+    public class AnubRekhan10Tactic : ITactic, IStoreable
     {
         public AnubRekhan10Tactic(AmeisenBotInterfaces bot)
         {
@@ -86,6 +88,16 @@ namespace AmeisenBotX.Core.Engines.Tactic.Bosses.Naxxramas10
                 WowRole.Heal => DoDpsHeal(false, out handlesMovement, out allowAttacking),
                 WowRole.Dps => DoDpsHeal(isMelee, out handlesMovement, out allowAttacking),
             };
+        }
+
+        public void Load(Dictionary<string, JsonElement> objects)
+        {
+            if (objects.ContainsKey("Configureables")) { Configureables = objects["Configureables"].ToDyn(); }
+        }
+
+        public Dictionary<string, object> Save()
+        {
+            return new() { { "Configureables", Configureables } };
         }
 
         private bool DoDpsHeal(bool isMelee, out bool handlesMovement, out bool allowAttacking)

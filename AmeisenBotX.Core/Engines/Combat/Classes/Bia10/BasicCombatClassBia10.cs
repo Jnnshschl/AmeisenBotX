@@ -37,7 +37,7 @@ namespace AmeisenBotX.Core.Engines.Combat.Classes.Bia10
 
             EventCheckFacing = new TimegatedEvent(TimeSpan.FromMilliseconds(500));
 
-            Configurables = new Dictionary<string, dynamic>
+            Configureables = new Dictionary<string, dynamic>
             {
                 { "HealthItemThreshold", 30.0 },
                 { "ManaItemThreshold", 30.0 }
@@ -49,7 +49,7 @@ namespace AmeisenBotX.Core.Engines.Combat.Classes.Bia10
         public abstract string DisplayName { get; }
         public IEnumerable<int> BlacklistedTargetDisplayIds { get; set; }
         public IEnumerable<int> PriorityTargetDisplayIds { get; set; }
-        public Dictionary<string, dynamic> Configurables { get; set; }
+        public Dictionary<string, dynamic> Configureables { get; set; }
         public CooldownManager CooldownManager { get; private set; }
         public TimegatedEvent EventCheckFacing { get; set; }
         public GroupAuraManager GroupAuraManager { get; private set; }
@@ -229,7 +229,7 @@ namespace AmeisenBotX.Core.Engines.Combat.Classes.Bia10
 
         public virtual void Load(Dictionary<string, JsonElement> objects)
         {
-            if (objects.ContainsKey("Configureables")) { Configurables = objects["Configureables"].ToDyn(); }
+            if (objects.ContainsKey("Configureables")) { Configureables = objects["Configureables"].ToDyn(); }
         }
 
         public virtual void OutOfCombatExecute()
@@ -246,7 +246,7 @@ namespace AmeisenBotX.Core.Engines.Combat.Classes.Bia10
         }
 
         public virtual Dictionary<string, object> Save() =>
-            new() { { "Configureables", Configurables } };
+            new() { { "Configureables", Configureables } };
 
         public override string ToString() =>
             $"[{WowClass}] [{Role}] {DisplayName} ({Author})";
