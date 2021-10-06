@@ -2,7 +2,7 @@
 {
     public class WowProjectile : WowBasicItem
     {
-        public WowProjectile(WowBasicItem wowBasicItem) : base(wowBasicItem)
+        public WowProjectile(IWowInventoryItem wowBasicItem) : base(wowBasicItem)
         {
             Id = wowBasicItem.Id;
             BagId = wowBasicItem.BagId;

@@ -1,26 +1,25 @@
-﻿using System;
-using System.Collections;
-using System.Collections.Generic;
-using System.Linq;
-using AmeisenBotX.Core.Managers.Character.Inventory.Objects;
+﻿using AmeisenBotX.Core.Managers.Character.Inventory.Objects;
 using AmeisenBotX.Logging;
 using AmeisenBotX.Logging.Enums;
 using AmeisenBotX.Wow;
 using AmeisenBotX.Wow.Objects;
 using AmeisenBotX.Wow.Objects.Enums;
+using System;
+using System.Collections;
+using System.Collections.Generic;
+using System.Linq;
 
 namespace AmeisenBotX.Core.Managers.Character.Inventory
 {
     public class CharacterEquipment
     {
         private readonly object queryLock = new();
-        private Dictionary<WowEquipmentSlot, IWowInventoryItem> items;
+        private readonly Dictionary<WowEquipmentSlot, IWowInventoryItem> items;
 
         public CharacterEquipment(IWowInterface wowInterface)
         {
             Wow = wowInterface;
-
-            Items = new();
+            Items = new Dictionary<WowEquipmentSlot, IWowInventoryItem>();
         }
 
         public float AverageItemLevel { get; private set; }
@@ -34,7 +33,7 @@ namespace AmeisenBotX.Core.Managers.Character.Inventory
                     return items;
                 }
             }
-            set
+            private init
             {
                 lock (queryLock)
                 {
@@ -47,27 +46,22 @@ namespace AmeisenBotX.Core.Managers.Character.Inventory
 
         public bool HasEnchantment(WowEquipmentSlot slot, int enchantmentId)
         {
-            if (Items.ContainsKey(slot) && Items[slot].Id > 0)
-            {
-                IWowItem item = Wow.ObjectProvider.WowObjects.OfType<IWowItem>().FirstOrDefault(e => e.EntryId == Items[slot].Id);
+            if (!Items.ContainsKey(slot) || Items[slot].Id <= 0) 
+                return false;
 
-                if (item != null && item.ItemEnchantments.Any(e => e.Id == enchantmentId))
-                {
-                    return true;
-                }
-            }
+            IWowItem item = Wow.ObjectProvider.WowObjects.OfType<IWowItem>()
+                .FirstOrDefault(e => e.EntryId == Items[slot].Id);
 
-            return false;
+            return item != null && item.ItemEnchantments.Any(e =>
+                e.Id == enchantmentId);
         }
 
         public void Update()
         {
             string resultJson = Wow.GetEquipmentItems();
 
-            if (string.IsNullOrWhiteSpace(resultJson))
-            {
+            if (string.IsNullOrWhiteSpace(resultJson)) 
                 return;
-            }
 
             try
             {
@@ -79,11 +73,8 @@ namespace AmeisenBotX.Core.Managers.Character.Inventory
                     {
                         Items.Clear();
 
-                        for (int i = 0; i < rawEquipment.Count; ++i)
-                        {
-                            IWowInventoryItem item = ItemFactory.BuildSpecificItem(rawEquipment[i]);
-                            Items.Add((WowEquipmentSlot)item.EquipSlot, item);
-                        }
+                        foreach (var item in rawEquipment.Select(ItemFactory.BuildSpecificItem))
+                            Items.Add((WowEquipmentSlot)((IWowInventoryItem)item).EquipSlot, item);
                     }
                 }
 
@@ -102,9 +93,9 @@ namespace AmeisenBotX.Core.Managers.Character.Inventory
 
             IList enumValues = Enum.GetValues(typeof(WowEquipmentSlot));
 
-            for (int i = 0; i < enumValues.Count; ++i)
+            foreach (var enumValue in enumValues)
             {
-                WowEquipmentSlot slot = (WowEquipmentSlot)enumValues[i];
+                WowEquipmentSlot slot = (WowEquipmentSlot)enumValue;
 
                 if (slot is WowEquipmentSlot.CONTAINER_BAG_1
                     or WowEquipmentSlot.CONTAINER_BAG_2
@@ -118,10 +109,8 @@ namespace AmeisenBotX.Core.Managers.Character.Inventory
                     continue;
                 }
 
-                if (Items.ContainsKey(slot))
-                {
+                if (Items.ContainsKey(slot)) 
                     itemLevel += Items[slot].ItemLevel;
-                }
 
                 ++count;
             }
