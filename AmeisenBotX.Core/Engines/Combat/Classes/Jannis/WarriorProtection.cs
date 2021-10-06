@@ -125,25 +125,29 @@ namespace AmeisenBotX.Core.Engines.Combat.Classes.Jannis
                 }
 
                 float distanceToTarget = Bot.Target.Position.GetDistance(Bot.Player.Position);
-                IWowUnit targetOfTarget = Bot.GetWowObjectByGuid<IWowUnit>(Bot.Target.TargetGuid);
 
-                if (targetOfTarget != null && targetOfTarget.Guid == Bot.Player.Guid)
+                if (!Bot.Tactic.PreventMovement)
                 {
-                    // if we have aggro, pull the unit to the best tanking spot
-                    Vector3 bestTankingSpot = Bot.Objects.CenterPartyPosition;
-                    float distanceToBestTankingSpot = Bot.Player.DistanceTo(bestTankingSpot);
+                    IWowUnit targetOfTarget = Bot.GetWowObjectByGuid<IWowUnit>(Bot.Target.TargetGuid);
 
-                    if (distanceToBestTankingSpot > 3.0f)
+                    if (targetOfTarget != null && targetOfTarget.Guid == Bot.Player.Guid)
                     {
-                        Bot.Movement.SetMovementAction(MovementAction.Move, Bot.Target.Position);
+                        // if we have aggro, pull the unit to the best tanking spot
+                        Vector3 bestTankingSpot = Bot.Objects.CenterPartyPosition;
+                        float distanceToBestTankingSpot = Bot.Player.DistanceTo(bestTankingSpot);
+
+                        if (distanceToBestTankingSpot > 3.0f)
+                        {
+                            Bot.Movement.SetMovementAction(MovementAction.Move, Bot.Target.Position);
+                        }
                     }
-                }
-                else
-                {
-                    // target is not targeting us, we need to get aggro
-                    if (distanceToTarget > 3.0f)
+                    else
                     {
-                        Bot.Movement.SetMovementAction(MovementAction.Chase, Bot.Target.Position);
+                        // target is not targeting us, we need to get aggro
+                        if (distanceToTarget > 3.0f)
+                        {
+                            Bot.Movement.SetMovementAction(MovementAction.Chase, Bot.Target.Position);
+                        }
                     }
                 }
 

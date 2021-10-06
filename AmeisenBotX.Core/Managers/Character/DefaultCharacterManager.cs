@@ -1,9 +1,4 @@
-﻿using System;
-using System.Collections;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
-using AmeisenBotX.Common.Keyboard.Enums;
+﻿using AmeisenBotX.Common.Keyboard.Enums;
 using AmeisenBotX.Common.Math;
 using AmeisenBotX.Common.Utils;
 using AmeisenBotX.Core.Managers.Character.Comparators;
@@ -18,6 +13,11 @@ using AmeisenBotX.Wow;
 using AmeisenBotX.Wow.Objects;
 using AmeisenBotX.Wow.Objects.Constants;
 using AmeisenBotX.Wow.Objects.Enums;
+using System;
+using System.Collections;
+using System.Collections.Generic;
+using System.Linq;
+using System.Threading.Tasks;
 
 namespace AmeisenBotX.Core.Managers.Character
 {
@@ -47,6 +47,8 @@ namespace AmeisenBotX.Core.Managers.Character
 
         public List<WowEquipmentSlot> ItemSlotsToSkip { get; set; }
 
+        public int LastLevelTrained { get; set; }
+
         public int Money { get; private set; }
 
         public IEnumerable<WowMount> Mounts { get; private set; }
@@ -57,13 +59,11 @@ namespace AmeisenBotX.Core.Managers.Character
 
         public TalentManager TalentManager { get; }
 
-        public int LastLevelTrained { get; set; }
-
         private IMemoryApi MemoryApi { get; }
 
         private IWowInterface Wow { get; }
 
-        public void ClickToMove(Vector3 pos, ulong guid, 
+        public void ClickToMove(Vector3 pos, ulong guid,
             WowClickToMoveType clickToMoveType = WowClickToMoveType.Move,
             float turnSpeed = 20.9f, // where is this magic number from?
             float distance = WowClickToMoveDistance.Move)
@@ -211,7 +211,7 @@ namespace AmeisenBotX.Core.Managers.Character
 
         public void UpdateBags()
         {
-            IEnumerable<IWowInventoryItem> container = Inventory.Items.Where(item => 
+            IEnumerable<IWowInventoryItem> container = Inventory.Items.Where(item =>
             item.Type.Equals("container", StringComparison.CurrentCultureIgnoreCase));
 
             if (container.Any())
@@ -274,9 +274,9 @@ namespace AmeisenBotX.Core.Managers.Character
                     {
                         IWowInventoryItem itemToEquip = itemsLikeEquipped.First();
 
-                        if ((string.Equals(itemToEquip.Type, "Armor", StringComparison.OrdinalIgnoreCase) 
+                        if ((string.Equals(itemToEquip.Type, "Armor", StringComparison.OrdinalIgnoreCase)
                             && IsAbleToUseArmor((WowArmor)itemToEquip))
-                            || (string.Equals(itemToEquip.Type, "Weapon", StringComparison.OrdinalIgnoreCase) 
+                            || (string.Equals(itemToEquip.Type, "Weapon", StringComparison.OrdinalIgnoreCase)
                             && IsAbleToUseWeapon((WowWeapon)itemToEquip)))
                         {
                             AmeisenLogger.I.Log("Equipment", $"Equipping \"{itemToEquip}\"", LogLevel.Verbose);

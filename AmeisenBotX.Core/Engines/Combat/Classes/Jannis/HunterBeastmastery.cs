@@ -197,7 +197,7 @@ namespace AmeisenBotX.Core.Engines.Combat.Classes.Jannis
                             return;
                         }
                     }
-                    else if (distanceToTarget > (Bot.Target.IsPlayer() ? Configurables["ChaseDistancePlayer"] : Configurables["ChaseDistanceUnit"]))
+                    else if (!Bot.Tactic.PreventMovement && distanceToTarget > (Bot.Target.IsPlayer() ? Configurables["ChaseDistancePlayer"] : Configurables["ChaseDistanceUnit"]))
                     {
                         if (!Bot.Target.Auras.Any(e => Bot.Db.GetSpellName(e.SpellId) == Hunter335a.ConcussiveShot)
                             && !Bot.Target.Auras.Any(e => Bot.Db.GetSpellName(e.SpellId) == "Frost Trap Aura")
@@ -212,27 +212,30 @@ namespace AmeisenBotX.Core.Engines.Combat.Classes.Jannis
                     }
 
                     // nothing to do, run away
-                    if (DateTime.UtcNow - TimeSpan.FromMilliseconds(Configurables["FleeActionCooldown"]) > LastSpellCast)
+                    if (!Bot.Tactic.PreventMovement)
                     {
-                        if (RunningAway)
+                        if (DateTime.UtcNow - TimeSpan.FromMilliseconds(Configurables["FleeActionCooldown"]) > LastSpellCast)
                         {
-                            if (distanceToTarget < (Bot.Target.IsPlayer() ? Configurables["KitingEndDistancePlayer"] : Configurables["KitingEndDistanceUnit"]))
+                            if (RunningAway)
                             {
-                                Bot.Movement.SetMovementAction(MovementAction.Flee, Bot.Target.Position, Bot.Target.Rotation);
+                                if (distanceToTarget < (Bot.Target.IsPlayer() ? Configurables["KitingEndDistancePlayer"] : Configurables["KitingEndDistanceUnit"]))
+                                {
+                                    Bot.Movement.SetMovementAction(MovementAction.Flee, Bot.Target.Position, Bot.Target.Rotation);
+                                }
+                                else
+                                {
+                                    RunningAway = false;
+                                }
                             }
-                            else
+                            else if (distanceToTarget < (Bot.Target.IsPlayer() ? Configurables["KitingStartDistancePlayer"] : Configurables["KitingStartDistanceUnit"]))
                             {
-                                RunningAway = false;
+                                RunningAway = true;
                             }
                         }
-                        else if (distanceToTarget < (Bot.Target.IsPlayer() ? Configurables["KitingStartDistancePlayer"] : Configurables["KitingStartDistanceUnit"]))
+                        else
                         {
-                            RunningAway = true;
+                            Bot.Movement.Reset();
                         }
-                    }
-                    else
-                    {
-                        Bot.Movement.Reset();
                     }
                 }
             }

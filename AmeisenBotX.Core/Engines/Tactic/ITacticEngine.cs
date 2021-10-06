@@ -1,13 +1,11 @@
-﻿using AmeisenBotX.Wow.Objects.Enums;
-
-namespace AmeisenBotX.Core.Engines.Tactic
+﻿namespace AmeisenBotX.Core.Engines.Tactic
 {
     public interface ITacticEngine
     {
-        bool Execute(out bool preventMovement, out bool allowAttacking);
+        bool AllowAttacking { get; }
 
-        bool HasTactics();
+        bool PreventMovement { get; }
 
-        void Reset();
+        bool Execute();
     }
 }

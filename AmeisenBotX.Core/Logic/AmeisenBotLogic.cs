@@ -102,8 +102,8 @@ namespace AmeisenBotX.Core.Logic
                 // run combat class logic
                 new Selector
                 (
-                    // combatclass handles movement itself or has no target
-                    () => Bot.CombatClass.HandlesMovement || Bot.Target == null,
+                    // combatclass handles movement itself or has no target or tactic handle the movement
+                    () => Bot.CombatClass.HandlesMovement || Bot.Target == null || Bot.Tactic.PreventMovement,
                     new Leaf(() => { Bot.CombatClass?.Execute(); return BtStatus.Success; }),
                     // default combat movement logic
                     new Selector
@@ -661,7 +661,7 @@ namespace AmeisenBotX.Core.Logic
                 }
             }
 
-            if (!ArePartymembersInFight && DateTime.UtcNow - DungeonDiedTimestamp > TimeSpan.FromSeconds(30)
+            if ((!ArePartymembersInFight && DateTime.UtcNow - DungeonDiedTimestamp > TimeSpan.FromSeconds(30))
                 || Bot.Objects.Partymembers.Any(e => !e.IsDead
                     && (e.Class == WowClass.Paladin || e.Class == WowClass.Druid || e.Class == WowClass.Priest || e.Class == WowClass.Shaman)))
             {
@@ -752,21 +752,6 @@ namespace AmeisenBotX.Core.Logic
                 .Where(e => e.IsLootable
                     && !UnitsLooted.Contains(e.Guid)
                     && e.Position.GetDistance(Bot.Player.Position) < Config.LootUnitsRadius);
-        }
-
-        private bool NeedToFollowTactic()
-        {
-            if (Bot.Tactic.Execute(out bool handlesMovement, out bool allowAttacking))
-            {
-                // if (preventMovement)
-                // {
-                //     Bot.Movement.PreventMovement(TimeSpan.FromMilliseconds(Config.StateMachineTickMs));
-                // }
-
-                return !allowAttacking;
-            }
-
-            return false;
         }
 
         private BtStatus Idle()
@@ -971,6 +956,11 @@ namespace AmeisenBotX.Core.Logic
             }
 
             return false;
+        }
+
+        private bool NeedToFollowTactic()
+        {
+            return Bot.Tactic.Execute() && !Bot.Tactic.AllowAttacking;
         }
 
         private bool NeedToLogin()
@@ -1234,8 +1224,8 @@ namespace AmeisenBotX.Core.Logic
 
                 FollowOffset = new()
                 {
-                    X = ((float)Random.NextDouble() * ((float)Config.MinFollowDistance * factor) - (float)Config.MinFollowDistance * (0.5f * factor)) * 0.7071f,
-                    Y = ((float)Random.NextDouble() * ((float)Config.MinFollowDistance * factor) - (float)Config.MinFollowDistance * (0.5f * factor)) * 0.7071f,
+                    X = ((float)Random.NextDouble() * ((float)Config.MinFollowDistance * factor) - ((float)Config.MinFollowDistance * (0.5f * factor))) * 0.7071f,
+                    Y = ((float)Random.NextDouble() * ((float)Config.MinFollowDistance * factor) - ((float)Config.MinFollowDistance * (0.5f * factor))) * 0.7071f,
                     Z = 0.0f
                 };
             }

@@ -670,11 +670,11 @@ namespace AmeisenBotX.Core.Engines.Combat.Classes.Jannis
 
             if (angleDiff < 0)
             {
-                angleDiff += BotMath.MAX_ANGLE;
+                angleDiff += BotMath.DOUBLE_PI;
             }
-            else if (angleDiff > BotMath.MAX_ANGLE)
+            else if (angleDiff > BotMath.DOUBLE_PI)
             {
-                angleDiff -= BotMath.MAX_ANGLE;
+                angleDiff -= BotMath.DOUBLE_PI;
             }
 
             if (angleDiff > 1.0)

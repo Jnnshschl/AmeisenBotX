@@ -4,6 +4,7 @@ using AmeisenBotX.Common.Keyboard.Objects;
 using AmeisenBotX.Common.Math;
 using AmeisenBotX.Common.Utils;
 using AmeisenBotX.Core;
+using AmeisenBotX.Core.Engines.Movement.Enums;
 using AmeisenBotX.Core.Logic;
 using AmeisenBotX.Core.Logic.Enums;
 using AmeisenBotX.Logging;
@@ -267,7 +268,6 @@ namespace AmeisenBotX
         private void ButtonToggleRendering_Click(object sender, RoutedEventArgs e)
         {
             // float threat = AmeisenBot.Bot.Threat.Get(AmeisenBot.Bot.Player.Position);
-            AmeisenBot.Bot.Wow.StopClickToMove();
         }
 
         private void ComboboxStateOverride_SelectionChanged(object sender, System.Windows.Controls.SelectionChangedEventArgs e)

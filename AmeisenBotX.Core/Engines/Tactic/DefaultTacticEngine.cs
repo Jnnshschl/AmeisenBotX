@@ -17,7 +17,7 @@ namespace AmeisenBotX.Core.Engines.Tactic
                     WowMapId.Naxxramas,
                     new()
                     {
-                        { 1, new AnubRhekan10Tactic(Bot) }
+                        { 1, new AnubRekhan10Tactic(Bot) }
                     }
                 },
                 {
@@ -30,22 +30,28 @@ namespace AmeisenBotX.Core.Engines.Tactic
             };
         }
 
+        public bool AllowAttacking { get; private set; }
+
+        public bool PreventMovement { get; private set; }
+
         private AmeisenBotInterfaces Bot { get; }
 
         private Dictionary<WowMapId, SortedList<int, ITactic>> Tactics { get; set; }
 
-        public bool Execute(out bool preventMovement, out bool allowAttacking)
+        public bool Execute()
         {
             foreach (ITactic tactic in Tactics[Bot.Objects.MapId].Values)
             {
-                if (tactic.IsInArea(Bot.Player.Position) && tactic.ExecuteTactic(Bot.CombatClass.Role, Bot.CombatClass.IsMelee, out preventMovement, out allowAttacking))
+                if (tactic.IsInArea(Bot.Player.Position) && tactic.ExecuteTactic(Bot.CombatClass.Role, Bot.CombatClass.IsMelee, out bool preventMovement, out bool allowAttacking))
                 {
+                    PreventMovement = preventMovement;
+                    AllowAttacking = allowAttacking;
                     return true;
                 }
             }
 
-            preventMovement = false;
-            allowAttacking = true;
+            PreventMovement = false;
+            AllowAttacking = true;
             return false;
         }
 
