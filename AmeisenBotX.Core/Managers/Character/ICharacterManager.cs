@@ -1,5 +1,4 @@
-﻿using System.Collections.Generic;
-using AmeisenBotX.Common.Math;
+﻿using AmeisenBotX.Common.Math;
 using AmeisenBotX.Core.Managers.Character.Comparators;
 using AmeisenBotX.Core.Managers.Character.Inventory;
 using AmeisenBotX.Core.Managers.Character.Inventory.Objects;
@@ -7,6 +6,7 @@ using AmeisenBotX.Core.Managers.Character.Spells;
 using AmeisenBotX.Core.Managers.Character.Talents;
 using AmeisenBotX.Wow.Objects;
 using AmeisenBotX.Wow.Objects.Enums;
+using System.Collections.Generic;
 
 namespace AmeisenBotX.Core.Managers.Character
 {
