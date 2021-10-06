@@ -65,11 +65,15 @@ namespace AmeisenBotX.Core
 
         public string CustomCombatClassFile { get; set; } = string.Empty;
 
-        public double DrinkUntilPercent { get; set; } = 75;
+        public double DrinkStartPercent { get; set; } = 65.0;
+
+        public double DrinkUntilPercent { get; set; } = 85.0;
 
         public bool DungeonUsePartyMode { get; set; } = false;
 
-        public double EatUntilPercent { get; set; } = 75;
+        public double EatStartPercent { get; set; } = 65.0;
+
+        public double EatUntilPercent { get; set; } = 85.0;
 
         public int EventPullMs { get; set; } = 500;
 
@@ -223,5 +227,7 @@ namespace AmeisenBotX.Core
         public string Username { get; set; } = string.Empty;
 
         public Rect WowWindowRect { get; set; } = new Rect() { Left = -1, Top = -1, Right = -1, Bottom = -1 };
+        public float EatDrinkAbortFollowPartyDistance { get; set; } = 25.0f;
+        public bool EatDrinkAbortFollowParty { get; set; } = true;
     }
 }

@@ -97,12 +97,12 @@ namespace AmeisenBotX
                 ConfigName = textboxConfigName.Text.Trim();
 
                 Config.AntiAfkMs = int.Parse(textboxAntiAfk.Text, CultureInfo.InvariantCulture);
+                Config.AoeDetectionAvoid = checkboxAvoidAoe.IsChecked.GetValueOrDefault(false);
+                Config.AoeDetectionIncludePlayers = checkboxAvoidAoePlayers.IsChecked.GetValueOrDefault(false);
                 Config.AutoAcceptQuests = checkboxAutoAcceptQuests.IsChecked.GetValueOrDefault(false);
                 Config.AutoChangeRealmlist = checkboxAutoChangeRealmlist.IsChecked.GetValueOrDefault(false);
                 Config.AutocloseWow = checkboxAutocloseWow.IsChecked.GetValueOrDefault(false);
                 Config.AutoDisableRender = checkboxAutoDisableRendering.IsChecked.GetValueOrDefault(false);
-                Config.AoeDetectionAvoid = checkboxAvoidAoe.IsChecked.GetValueOrDefault(false);
-                Config.AoeDetectionIncludePlayers = checkboxAvoidAoePlayers.IsChecked.GetValueOrDefault(false);
                 Config.AutojoinBg = checkboxAutoJoinBg.IsChecked.GetValueOrDefault(false);
                 Config.AutojoinLfg = checkboxAutoJoinLfg.IsChecked.GetValueOrDefault(false);
                 Config.AutoLogin = checkboxAutoLogin.IsChecked.GetValueOrDefault(false);
@@ -116,18 +116,22 @@ namespace AmeisenBotX
                 Config.BuiltInCombatClassName = comboboxBuiltInCombatClass.SelectedItem != null ? comboboxBuiltInCombatClass.SelectedItem.ToString() : string.Empty;
                 Config.CharacterSlot = int.Parse(textboxCharacterSlot.Text, CultureInfo.InvariantCulture);
                 Config.CustomCombatClassFile = textboxCombatClassFile.Text;
-                Config.DrinkUntilPercent = (float)sliderDrinkUntil.Value;
+                Config.DrinkStartPercent = sliderDrinkStart.Value;
+                Config.DrinkUntilPercent = sliderDrinkUntil.Value;
                 Config.DungeonUsePartyMode = checkboxDungeonUsePartyMode.IsChecked.GetValueOrDefault(false);
-                Config.EatUntilPercent = (float)sliderEatUntil.Value;
+                Config.EatDrinkAbortFollowParty = checkboxEatDrinkPartyFollowAbort.IsChecked.GetValueOrDefault(false);
+                Config.EatDrinkAbortFollowPartyDistance = (float)sliderEatDrinkPartyFollowAbort.Value;
+                Config.EatStartPercent = sliderEatStart.Value;
+                Config.EatUntilPercent = sliderEatUntil.Value;
                 Config.EventPullMs = int.Parse(textboxEventPull.Text, CultureInfo.InvariantCulture);
                 Config.FollowGroupLeader = checkboxFollowGroupLeader.IsChecked.GetValueOrDefault(false);
                 Config.FollowGroupMembers = checkboxGroupMembers.IsChecked.GetValueOrDefault(false);
                 Config.FollowPositionDynamic = checkboxDynamicPosition.IsChecked.GetValueOrDefault(false);
                 Config.FollowSpecificCharacter = checkboxFollowSpecificCharacter.IsChecked.GetValueOrDefault(false);
                 Config.Friends = textboxFriends.Text;
-                Config.IgnoreCombatWhileMounted = checkboxIgnoreCombatMounted.IsChecked.GetValueOrDefault(false);
                 Config.IdleActions = checkboxIdleActions.IsChecked.GetValueOrDefault(false);
-                Config.ItemRepairThreshold = (float)sliderRepair.Value;
+                Config.IgnoreCombatWhileMounted = checkboxIgnoreCombatMounted.IsChecked.GetValueOrDefault(false);
+                Config.ItemRepairThreshold = sliderRepair.Value;
                 Config.ItemSellBlacklist = new(textboxItemSellBlacklist.Text.Split(",", StringSplitOptions.RemoveEmptyEntries));
                 Config.JobEngineMailHeader = textboxMailHeader.Text;
                 Config.JobEngineMailReceiver = textboxMailReceiver.Text;
@@ -166,9 +170,9 @@ namespace AmeisenBotX
                 Config.SellGreenItems = checkboxSellGreenItems.IsChecked.GetValueOrDefault(false);
                 Config.SellPurpleItems = checkboxSellPurpleItems.IsChecked.GetValueOrDefault(false);
                 Config.SellWhiteItems = checkboxSellWhiteItems.IsChecked.GetValueOrDefault(false);
-                Config.StayCloseToGroupInCombat = checkboxStayCloseToGroupInCombat.IsChecked.GetValueOrDefault(false);
                 Config.SpecificCharacterToFollow = textboxFollowSpecificCharacterName.Text;
                 Config.StateMachineTickMs = int.Parse(textboxStatemachineTick.Text, CultureInfo.InvariantCulture);
+                Config.StayCloseToGroupInCombat = checkboxStayCloseToGroupInCombat.IsChecked.GetValueOrDefault(false);
                 Config.SupportRange = (float)sliderAssistRange.Value;
                 Config.UseBuiltInCombatClass = checkboxBuiltinCombatClass.IsChecked.GetValueOrDefault(true);
                 Config.UseMounts = checkboxUseMounts.IsChecked.GetValueOrDefault(false);
@@ -181,10 +185,10 @@ namespace AmeisenBotX
                 Config.MovementSettings.MaxAccelerationCombat = (float)sliderMaxAccelerationCombat.Value / 100.0f;
                 Config.MovementSettings.MaxSteering = (float)sliderMaxSteeringNormal.Value / 100.0f;
                 Config.MovementSettings.MaxVelocity = (float)sliderMaxVelocity.Value;
-                Config.MovementSettings.WaypointCheckThresholdMounted = (float)sliderWaypointThresholdMount.Value;
+                Config.MovementSettings.WaypointCheckThresholdMounted = sliderWaypointThresholdMount.Value;
                 Config.MovementSettings.MaxSteeringCombat = (float)sliderMaxSteeringCombat.Value / 100.0f;
                 Config.MovementSettings.SeperationDistance = (float)sliderPlayerSeperationDistance.Value;
-                Config.MovementSettings.WaypointCheckThreshold = (float)sliderWaypointThreshold.Value;
+                Config.MovementSettings.WaypointCheckThreshold = sliderWaypointThreshold.Value;
 
                 if (Enum.TryParse(comboboxStartStopBotBindingAltKey.Text.ToString(), out KeyCodes mod)
                     && Enum.TryParse(comboboxStartStopBotBindingKey.Text.ToString(), out KeyCodes key))
@@ -400,6 +404,7 @@ namespace AmeisenBotX
             checkboxBuiltinCombatClass.IsChecked = Config.UseBuiltInCombatClass;
             checkboxDungeonUsePartyMode.IsChecked = Config.DungeonUsePartyMode;
             checkboxDynamicPosition.IsChecked = Config.FollowPositionDynamic;
+            checkboxEatDrinkPartyFollowAbort.IsChecked = Config.EatDrinkAbortFollowParty;
             checkboxEnableRcon.IsChecked = Config.RconEnabled;
             checkboxEnableRconScreenshots.IsChecked = Config.RconSendScreenshots;
             checkboxFollowGroupLeader.IsChecked = Config.FollowGroupLeader;
@@ -428,7 +433,10 @@ namespace AmeisenBotX
             comboboxBattlegroundEngine.Text = Config.BattlegroundEngine;
             comboboxBuiltInCombatClass.Text = Config.BuiltInCombatClassName;
             sliderAssistRange.Value = Config.SupportRange;
+            sliderDrinkStart.Value = Config.DrinkStartPercent;
             sliderDrinkUntil.Value = Config.DrinkUntilPercent;
+            sliderEatDrinkPartyFollowAbort.Value = Config.EatDrinkAbortFollowPartyDistance;
+            sliderEatStart.Value = Config.EatStartPercent;
             sliderEatUntil.Value = Config.EatUntilPercent;
             sliderLootRadius.Value = Math.Round(Config.LootUnitsRadius);
             sliderMaxFollowDistance.Value = Config.MaxFollowDistance;
@@ -503,11 +511,38 @@ namespace AmeisenBotX
             }
         }
 
+        private void SliderDrinkStart_ValueChanged(object sender, RoutedPropertyChangedEventArgs<double> e)
+        {
+            if (WindowLoaded)
+            {
+                labelDrinkStart.Content = $"Drink Start: {Math.Round(e.NewValue)} %";
+                ChangedSomething = true;
+            }
+        }
+
         private void SliderDrinkUntil_ValueChanged(object sender, RoutedPropertyChangedEventArgs<double> e)
         {
             if (WindowLoaded)
             {
                 labelDrinkUntil.Content = $"Drink Until: {Math.Round(e.NewValue)} %";
+                ChangedSomething = true;
+            }
+        }
+
+        private void SliderEatDrinkPartyFollowAbort_ValueChanged(object sender, RoutedPropertyChangedEventArgs<double> e)
+        {
+            if (WindowLoaded)
+            {
+                labelEatDrinkPartyFollowAbort.Content = $"Abort Distance: {Math.Round(e.NewValue)}m";
+                ChangedSomething = true;
+            }
+        }
+
+        private void SliderEatStart_ValueChanged(object sender, RoutedPropertyChangedEventArgs<double> e)
+        {
+            if (WindowLoaded)
+            {
+                labelEatStart.Content = $"Eat Start: {Math.Round(e.NewValue)} %";
                 ChangedSomething = true;
             }
         }

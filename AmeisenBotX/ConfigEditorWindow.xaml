@@ -37,7 +37,7 @@
             </Rectangle.Fill>
         </Rectangle>
         <TabControl Margin="10,33,10,10" Background="{x:Null}" BorderBrush="{x:Null}" BorderThickness="0">
-            <TabItem x:Name="tabitemGeneral" Header="General" Background="{x:Null}" Foreground="White" BorderBrush="{x:Null}" BorderThickness="0">
+            <TabItem x:Name="tabitemGeneral" Header="💡 General" Background="{x:Null}" Foreground="White" BorderBrush="{x:Null}" BorderThickness="0">
                 <Border BorderThickness="0,1,0,0" Margin="0,-3,0,0">
                     <Border.BorderBrush>
                         <SolidColorBrush Color="{DynamicResource DarkForeground}" />
@@ -266,7 +266,7 @@
                     </Grid>
                 </Border>
             </TabItem>
-            <TabItem x:Name="tabitemGameplay" Header="Gameplay" Background="{x:Null}" BorderBrush="{x:Null}" Foreground="White">
+            <TabItem x:Name="tabitemGameplay" Header="🕹️ Gameplay" Background="{x:Null}" BorderBrush="{x:Null}" Foreground="White">
                 <Border BorderThickness="0,1,0,0" Margin="0,-3,0,0">
                     <Border.BorderBrush>
                         <SolidColorBrush Color="{DynamicResource DarkForeground}" />
@@ -530,7 +530,7 @@
                     </Grid>
                 </Border>
             </TabItem>
-            <TabItem x:Name="tabitemMovement" Header="Movement" Background="{x:Null}" BorderBrush="{x:Null}" Foreground="White">
+            <TabItem x:Name="tabitemMovement" Header="🧭 Movement" Background="{x:Null}" BorderBrush="{x:Null}" Foreground="White">
                 <Border BorderThickness="0,1,0,0" Margin="0,-3,0,0">
                     <Border.BorderBrush>
                         <SolidColorBrush Color="{DynamicResource DarkForeground}" />
@@ -619,7 +619,7 @@
                     </Grid>
                 </Border>
             </TabItem>
-            <TabItem x:Name="tabitemMounts" Header="Mounts" Background="{x:Null}" BorderBrush="{x:Null}" Foreground="White">
+            <TabItem x:Name="tabitemMounts" Header="🐢 Mounts" Background="{x:Null}" BorderBrush="{x:Null}" Foreground="White">
                 <Border BorderThickness="0,1,0,0" Margin="0,-3,0,0">
                     <Border.BorderBrush>
                         <SolidColorBrush Color="{DynamicResource DarkForeground}" />
@@ -696,7 +696,7 @@
                     </Grid>
                 </Border>
             </TabItem>
-            <TabItem x:Name="tabitemSelling" Header="Selling" Background="{x:Null}" BorderBrush="{x:Null}" Foreground="White">
+            <TabItem x:Name="tabitemSelling" Header="💵 Selling" Background="{x:Null}" BorderBrush="{x:Null}" Foreground="White">
                 <Border BorderThickness="0,1,0,0" Margin="0,-3,0,0">
                     <Border.BorderBrush>
                         <SolidColorBrush Color="{DynamicResource DarkForeground}" />
@@ -823,13 +823,13 @@
                     </Grid>
                 </Border>
             </TabItem>
-            <TabItem x:Name="tabitemFood" Header="Food" Background="{x:Null}" BorderBrush="{x:Null}" Foreground="White">
+            <TabItem x:Name="tabitemFood" Header="🍇 Food" Background="{x:Null}" BorderBrush="{x:Null}" Foreground="White">
                 <Border BorderThickness="0,1,0,0" Margin="0,-3,0,0">
                     <Border.BorderBrush>
                         <SolidColorBrush Color="{DynamicResource DarkForeground}" />
                     </Border.BorderBrush>
                     <Grid>
-                        <Label x:Name="labelFollowing2" Content="Food" HorizontalAlignment="Left" VerticalAlignment="Top" FontFamily="Bahnschrift Light" Margin="4,4,0,0" BorderThickness="0,0,0,1" Width="180" Padding="0,5,5,5">
+                        <Label x:Name="labelFollowing2" Content="Thresholds" HorizontalAlignment="Left" VerticalAlignment="Top" FontFamily="Bahnschrift Light" Margin="4,4,0,0" BorderThickness="0,0,0,1" Width="180" Padding="0,5,5,5">
                             <Label.BorderBrush>
                                 <SolidColorBrush Color="{DynamicResource DarkAccent1}" />
                             </Label.BorderBrush>
@@ -837,22 +837,56 @@
                                 <SolidColorBrush Color="{DynamicResource DarkForeground}" />
                             </Label.Foreground>
                         </Label>
-                        <Label x:Name="labelEatUntil" Content="Eat Until:" HorizontalAlignment="Left" VerticalAlignment="Top" FontFamily="Bahnschrift Light" Margin="4,35,0,0" Padding="0,5,5,5">
+                        <Label x:Name="labelEatUntil" Content="Eat Until:" HorizontalAlignment="Left" VerticalAlignment="Top" FontFamily="Bahnschrift Light" Margin="4,130,0,0" Padding="0,5,5,5">
                             <Label.Foreground>
                                 <SolidColorBrush Color="{DynamicResource DarkForeground}" />
                             </Label.Foreground>
                         </Label>
-                        <Slider x:Name="sliderEatUntil" HorizontalAlignment="Left" Margin="4,60,0,0" VerticalAlignment="Top" Width="180" Maximum="100" SmallChange="1" Style="{DynamicResource SliderStyleDark}" ValueChanged="SliderEatUntil_ValueChanged" FontFamily="Bahnschrift Light" />
-                        <Label x:Name="labelDrinkUntil" Content="Drink Until:" HorizontalAlignment="Left" VerticalAlignment="Top" FontFamily="Bahnschrift Light" Margin="4,83,0,0" Padding="0,5,5,5">
+                        <Slider x:Name="sliderEatUntil" HorizontalAlignment="Left" Margin="4,155,0,0" VerticalAlignment="Top" Width="180" Maximum="100" SmallChange="1" Style="{DynamicResource SliderStyleDark}" ValueChanged="SliderEatUntil_ValueChanged" FontFamily="Bahnschrift Light" />
+                        <Label x:Name="labelDrinkUntil" Content="Drink Until:" HorizontalAlignment="Left" VerticalAlignment="Top" FontFamily="Bahnschrift Light" Margin="4,178,0,0" Padding="0,5,5,5">
                             <Label.Foreground>
                                 <SolidColorBrush Color="{DynamicResource DarkForeground}" />
                             </Label.Foreground>
                         </Label>
-                        <Slider x:Name="sliderDrinkUntil" HorizontalAlignment="Left" Margin="4,108,0,0" VerticalAlignment="Top" Width="180" Maximum="100" SmallChange="1" Style="{DynamicResource SliderStyleDark}" ValueChanged="SliderDrinkUntil_ValueChanged" FontFamily="Bahnschrift Light" />
+                        <Slider x:Name="sliderDrinkUntil" HorizontalAlignment="Left" Margin="4,203,0,0" VerticalAlignment="Top" Width="180" Maximum="100" SmallChange="1" Style="{DynamicResource SliderStyleDark}" ValueChanged="SliderDrinkUntil_ValueChanged" FontFamily="Bahnschrift Light" />
+                        <Label x:Name="labelEatStart" Content="Eat Start:" HorizontalAlignment="Left" VerticalAlignment="Top" FontFamily="Bahnschrift Light" Margin="4,34,0,0" Padding="0,5,5,5">
+                            <Label.Foreground>
+                                <SolidColorBrush Color="{DynamicResource DarkForeground}" />
+                            </Label.Foreground>
+                        </Label>
+                        <Slider x:Name="sliderEatStart" HorizontalAlignment="Left" Margin="4,59,0,0" VerticalAlignment="Top" Width="180" Maximum="100" SmallChange="1" Style="{DynamicResource SliderStyleDark}" ValueChanged="SliderEatStart_ValueChanged" FontFamily="Bahnschrift Light" />
+                        <Label x:Name="labelDrinkStart" Content="Drink Start:" HorizontalAlignment="Left" VerticalAlignment="Top" FontFamily="Bahnschrift Light" Margin="4,82,0,0" Padding="0,5,5,5">
+                            <Label.Foreground>
+                                <SolidColorBrush Color="{DynamicResource DarkForeground}" />
+                            </Label.Foreground>
+                        </Label>
+                        <Slider x:Name="sliderDrinkStart" HorizontalAlignment="Left" Margin="4,107,0,0" VerticalAlignment="Top" Width="180" Maximum="100" SmallChange="1" Style="{DynamicResource SliderStyleDark}" ValueChanged="SliderDrinkStart_ValueChanged" FontFamily="Bahnschrift Light" />
+                        <Label x:Name="labelItemBlacklist_Copy" Content="Party" HorizontalAlignment="Left" VerticalAlignment="Top" FontFamily="Bahnschrift Light" Margin="244,4,0,0" BorderBrush="{DynamicResource Button.MouseOver.Border}" BorderThickness="0,0,0,1" Width="180" Padding="0,5,5,5">
+                            <Label.Foreground>
+                                <SolidColorBrush Color="{DynamicResource DarkForeground}" />
+                            </Label.Foreground>
+                        </Label>
+                        <CheckBox x:Name="checkboxEatDrinkPartyFollowAbort" Content="Abort when Party runs away" HorizontalAlignment="Left" Margin="243,35,0,0" VerticalAlignment="Top" Checked="CheckboxAutoStartWow_Checked" Unchecked="CheckboxAutoStartWow_Unchecked" TabIndex="5" Style="{DynamicResource CheckBoxStyleDark}" FontFamily="Bahnschrift Light" IsChecked="True" VerticalContentAlignment="Bottom">
+                            <CheckBox.Foreground>
+                                <SolidColorBrush Color="{DynamicResource DarkForeground}" />
+                            </CheckBox.Foreground>
+                            <CheckBox.BorderBrush>
+                                <SolidColorBrush Color="{DynamicResource DarkBorder}" />
+                            </CheckBox.BorderBrush>
+                            <CheckBox.Background>
+                                <SolidColorBrush Color="{DynamicResource DarkBackground}" />
+                            </CheckBox.Background>
+                        </CheckBox>
+                        <Label x:Name="labelEatDrinkPartyFollowAbort" Content="Abort Distance:" HorizontalAlignment="Left" VerticalAlignment="Top" FontFamily="Bahnschrift Light" Margin="244,55,0,0" Padding="0,5,5,5">
+                            <Label.Foreground>
+                                <SolidColorBrush Color="{DynamicResource DarkForeground}" />
+                            </Label.Foreground>
+                        </Label>
+                        <Slider x:Name="sliderEatDrinkPartyFollowAbort" HorizontalAlignment="Left" Margin="244,80,0,0" VerticalAlignment="Top" Width="180" Maximum="100" SmallChange="1" Style="{DynamicResource SliderStyleDark}" ValueChanged="SliderEatDrinkPartyFollowAbort_ValueChanged" FontFamily="Bahnschrift Light" />
                     </Grid>
                 </Border>
             </TabItem>
-            <TabItem x:Name="tabitemCombat" Header="Combat" Background="{x:Null}" BorderBrush="{x:Null}" Foreground="White">
+            <TabItem x:Name="tabitemCombat" Header="⚔️ Combat" Background="{x:Null}" BorderBrush="{x:Null}" Foreground="White">
                 <Border BorderThickness="0,1,0,0" Margin="0,-3,0,0">
                     <Border.BorderBrush>
                         <SolidColorBrush Color="{DynamicResource DarkForeground}" />
@@ -922,7 +956,7 @@
                     </Grid>
                 </Border>
             </TabItem>
-            <TabItem x:Name="tabitemJobs" Header="Jobs" Background="{x:Null}" BorderBrush="{x:Null}" Foreground="White">
+            <TabItem x:Name="tabitemJobs" Header="⛏️ Jobs" Background="{x:Null}" BorderBrush="{x:Null}" Foreground="White">
                 <Border BorderThickness="0,1,0,0" Margin="0,-3,0,0">
                     <Border.BorderBrush>
                         <SolidColorBrush Color="{DynamicResource DarkForeground}" />
@@ -987,7 +1021,7 @@
                     </Grid>
                 </Border>
             </TabItem>
-            <TabItem x:Name="tabitemBattleground" Header="Battleground" Background="{x:Null}" BorderBrush="{x:Null}" Foreground="White">
+            <TabItem x:Name="tabitemBattleground" Header="🛡️ Battleground" Background="{x:Null}" BorderBrush="{x:Null}" Foreground="White">
                 <Border BorderThickness="0,1,0,0" Margin="0,-3,0,0">
                     <Border.BorderBrush>
                         <SolidColorBrush Color="{DynamicResource DarkForeground}" />
@@ -1037,7 +1071,7 @@
                     </Grid>
                 </Border>
             </TabItem>
-            <TabItem x:Name="tabitemDungeon" Header="Dungeon" Background="{x:Null}" BorderBrush="{x:Null}" Foreground="White">
+            <TabItem x:Name="tabitemDungeon" Header="🔦 Dungeon" Background="{x:Null}" BorderBrush="{x:Null}" Foreground="White">
                 <Border BorderThickness="0,1,0,0" Margin="0,-3,0,0">
                     <Border.BorderBrush>
                         <SolidColorBrush Color="{DynamicResource DarkForeground}" />
@@ -1076,7 +1110,7 @@
                     </Grid>
                 </Border>
             </TabItem>
-            <TabItem x:Name="tabitemMisc_Copy" Header="Rcon" Background="{x:Null}" BorderBrush="{x:Null}" Foreground="White">
+            <TabItem x:Name="tabitemMisc_Copy" Header="📡 Rcon" Background="{x:Null}" BorderBrush="{x:Null}" Foreground="White">
                 <Border BorderThickness="0,1,0,0" Margin="0,-3,0,0">
                     <Border.BorderBrush>
                         <SolidColorBrush Color="{DynamicResource DarkForeground}" />
@@ -1206,7 +1240,7 @@
                     </Grid>
                 </Border>
             </TabItem>
-            <TabItem x:Name="tabitemMisc" Header="Misc" Background="{x:Null}" BorderBrush="{x:Null}" Foreground="White">
+            <TabItem x:Name="tabitemMisc" Header="⚙️ Misc" Background="{x:Null}" BorderBrush="{x:Null}" Foreground="White">
                 <Border BorderThickness="0,1,0,0" Margin="0,-3,0,0">
                     <Border.BorderBrush>
                         <SolidColorBrush Color="{DynamicResource DarkForeground}" />

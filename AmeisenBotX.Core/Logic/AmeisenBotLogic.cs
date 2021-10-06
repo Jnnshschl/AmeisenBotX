@@ -910,10 +910,20 @@ namespace AmeisenBotX.Core.Logic
 
             // when we are in a group an they move too far away, abort eating
             // and dont start eating for 30s
-            if (Bot.Objects.PartymemberGuids.Any() && Bot.Player.DistanceTo(Bot.Objects.CenterPartyPosition) > 25.0f)
+            if (Config.EatDrinkAbortFollowParty && Bot.Objects.PartymemberGuids.Any() && Bot.Player.DistanceTo(Bot.Objects.CenterPartyPosition) > Config.EatDrinkAbortFollowPartyDistance)
             {
                 EatBlockEvent.Run();
                 return false;
+            }
+
+            bool isEating = Bot.Player.Auras.Any(e => Bot.Db.GetSpellName(e.SpellId) == "Food");
+            bool isDrinking = Bot.Player.Auras.Any(e => Bot.Db.GetSpellName(e.SpellId) == "Drink");
+
+            // still eating/drinking, wait until threshold is reached
+            if ((isEating && Bot.Player.HealthPercentage < Config.EatUntilPercent)
+                || (isDrinking && Bot.Player.MaxMana > 0 && Bot.Player.ManaPercentage < Config.DrinkUntilPercent))
+            {
+                return true;
             }
 
             if (UpdateFood.Run())
