@@ -420,10 +420,10 @@ namespace AmeisenBotX.Core.Engines.Combat.Classes.Bia10
             switch (angleDiff)
             {
                 case < 0:
-                    angleDiff += BotMath.MAX_ANGLE;
+                    angleDiff += BotMath.DOUBLE_PI;
                     break;
-                case > BotMath.MAX_ANGLE:
-                    angleDiff -= BotMath.MAX_ANGLE;
+                case > BotMath.DOUBLE_PI:
+                    angleDiff -= BotMath.DOUBLE_PI;
                     break;
             }
 

@@ -8,7 +8,8 @@ namespace AmeisenBotX.Common.Math
     {
         public const float M_SQRT1_2 = 0.707106781186547524401f;
         public const float M_SQRT2 = 1.41421356237309504880f;
-        public const float MAX_ANGLE = MathF.PI * 2.0f;
+        public const float DOUBLE_PI = MathF.PI * 2.0f;
+        public const float HALF_PI = MathF.PI / 2.0f;
 
         public static Vector3 CalculatePositionAround(Vector3 position, float rotation, float angle, float distance = 2.0f)
         {
@@ -34,11 +35,11 @@ namespace AmeisenBotX.Common.Math
             switch (angle)
             {
                 case < 0.0f:
-                    angle += MAX_ANGLE;
+                    angle += DOUBLE_PI;
                     break;
 
-                case > MAX_ANGLE:
-                    angle -= MAX_ANGLE;
+                case > DOUBLE_PI:
+                    angle -= DOUBLE_PI;
                     break;
             }
 

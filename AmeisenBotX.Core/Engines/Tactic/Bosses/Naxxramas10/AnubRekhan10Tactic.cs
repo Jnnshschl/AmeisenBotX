@@ -3,14 +3,15 @@ using AmeisenBotX.Common.Utils;
 using AmeisenBotX.Core.Engines.Movement.Enums;
 using AmeisenBotX.Wow.Objects;
 using AmeisenBotX.Wow.Objects.Enums;
+using AmeisenBotX.Wow335a.Constants.Raids.Wotlk.Naxxramas;
 using System;
 using System.Collections.Generic;
 
 namespace AmeisenBotX.Core.Engines.Tactic.Bosses.Naxxramas10
 {
-    public class AnubRhekan10Tactic : ITactic
+    public class AnubRekhan10Tactic : ITactic
     {
-        public AnubRhekan10Tactic(AmeisenBotInterfaces bot)
+        public AnubRekhan10Tactic(AmeisenBotInterfaces bot)
         {
             Bot = bot;
             TankingPathQueue = new();
@@ -33,7 +34,7 @@ namespace AmeisenBotX.Core.Engines.Tactic.Bosses.Naxxramas10
 
         private static List<int> AddsDisplayIds { get; } = new() { 14698, 27943 };
 
-        private static List<int> AnubRhekanDisplayId { get; } = new() { 15931 };
+        private static List<int> AnubRekhanDisplayId { get; } = new() { 15931 };
 
         private AmeisenBotInterfaces Bot { get; }
 
@@ -42,8 +43,6 @@ namespace AmeisenBotX.Core.Engines.Tactic.Bosses.Naxxramas10
         private bool LocustSwarmActive => (LocustSwarmActivated + TimeSpan.FromSeconds(20)) > DateTime.UtcNow;
 
         private bool MeleeDpsIsMovingToMid { get; set; }
-
-        private bool TankingIsUsingA { get; set; } = true;
 
         private List<Vector3> TankingKitingRouteA { get; } = new()
         {
@@ -77,6 +76,8 @@ namespace AmeisenBotX.Core.Engines.Tactic.Bosses.Naxxramas10
 
         private bool TankIsKiting { get; set; }
 
+        private bool TankIsUsingA { get; set; } = true;
+
         public bool ExecuteTactic(WowRole role, bool isMelee, out bool handlesMovement, out bool allowAttacking)
         {
             return role switch
@@ -89,18 +90,18 @@ namespace AmeisenBotX.Core.Engines.Tactic.Bosses.Naxxramas10
 
         private bool DoDpsHeal(bool isMelee, out bool handlesMovement, out bool allowAttacking)
         {
-            IWowUnit wowUnit = Bot.GetClosestQuestGiverByDisplayId(Bot.Player.Position, AnubRhekanDisplayId, false);
+            IWowUnit anubrekhan = Bot.GetClosestQuestGiverByDisplayId(Bot.Player.Position, AnubRekhanDisplayId, false);
 
-            if (wowUnit != null)
+            if (anubrekhan != null)
             {
                 handlesMovement = true;
                 allowAttacking = true;
 
                 // Locust Swarm
-                if (wowUnit.CurrentlyCastingSpellId == 28785)
+                if (anubrekhan.CurrentlyCastingSpellId == AnubRekhan335a.LocustSwarmSpellId)
                 {
                     LocustSwarmActivated = DateTime.UtcNow;
-                    Bot.CombatClass.BlacklistedTargetDisplayIds = AnubRhekanDisplayId;
+                    Bot.CombatClass.BlacklistedTargetDisplayIds = AnubRekhanDisplayId;
 
                     MeleeDpsIsMovingToMid = true;
                 }
@@ -112,8 +113,7 @@ namespace AmeisenBotX.Core.Engines.Tactic.Bosses.Naxxramas10
 
                 if (!isMelee)
                 {
-                    // Impale
-                    if (wowUnit.CurrentlyCastingSpellId == 28783)
+                    if (anubrekhan.CurrentlyCastingSpellId == AnubRekhan335a.ImpaleSpellId)
                     {
                         if (ImpaleDodgePos == Vector3.Zero)
                         {
@@ -129,7 +129,7 @@ namespace AmeisenBotX.Core.Engines.Tactic.Bosses.Naxxramas10
                         ImpaleDodgePos = Vector3.Zero;
                     }
 
-                    Vector3 targetPosition = BotUtils.MoveAhead(Area, wowUnit.Position, -30.0f);
+                    Vector3 targetPosition = BotUtils.MoveAhead(Area, anubrekhan.Position, -30.0f);
 
                     if (!LocustSwarmActive && Bot.Player.Position.GetDistance(Area) > 6.0f)
                     {
@@ -165,34 +165,57 @@ namespace AmeisenBotX.Core.Engines.Tactic.Bosses.Naxxramas10
 
         private bool DoTank(out bool handlesMovement, out bool allowAttacking)
         {
-            IWowUnit wowUnit = Bot.GetClosestQuestGiverByDisplayId(Bot.Player.Position, AnubRhekanDisplayId, false);
+            handlesMovement = false;
+            allowAttacking = true;
 
-            if (wowUnit != null && wowUnit.TargetGuid == Bot.Wow.PlayerGuid)
+            IWowUnit anubrekhan = Bot.GetClosestQuestGiverByDisplayId(Bot.Player.Position, AnubRekhanDisplayId, false);
+
+            if (anubrekhan != null)
             {
                 if (Configureables["isOffTank"] == true)
                 {
                     // offtank should only focus adds
-                    Bot.CombatClass.BlacklistedTargetDisplayIds = AnubRhekanDisplayId;
+                    Bot.CombatClass.BlacklistedTargetDisplayIds = AnubRekhanDisplayId;
                 }
                 else
                 {
                     Bot.CombatClass.BlacklistedTargetDisplayIds = AddsDisplayIds;
-                    handlesMovement = true;
-                    allowAttacking = true;
 
                     // Locust Swarm
-                    if (wowUnit.CurrentlyCastingSpellId == 28785)
+                    if (anubrekhan.CurrentlyCastingSpellId == AnubRekhan335a.LocustSwarmSpellId)
                     {
                         TankIsKiting = true;
                     }
 
                     if (!TankIsKiting)
                     {
-                        Vector3 tankingSpot = TankingIsUsingA ? TankingSpotA : TankingSpotB;
-
-                        if (Bot.Player.Position.GetDistance(tankingSpot) > 6.0f)
+                        if (anubrekhan.TargetGuid == Bot.Wow.PlayerGuid)
                         {
-                            Bot.Movement.SetMovementAction(MovementAction.DirectMove, tankingSpot);
+                            Vector3 tankingSpot = TankIsUsingA ? TankingSpotA : TankingSpotB;
+
+                            if (Bot.Player.DistanceTo(tankingSpot) > 10.0f)
+                            {
+                                Bot.Movement.SetMovementAction(MovementAction.DirectMove, tankingSpot);
+                                handlesMovement = true;
+                            }
+                            else
+                            {
+                                if (anubrekhan.CurrentlyCastingSpellId == AnubRekhan335a.ImpaleSpellId)
+                                {
+                                    if (ImpaleDodgePos == Vector3.Zero)
+                                    {
+                                        float angle = MathF.PI + new Random().NextDouble() > 0.5 ? BotMath.HALF_PI : -BotMath.HALF_PI;
+                                        ImpaleDodgePos = BotMath.CalculatePositionAround(Bot.Player.Position, Bot.Player.Rotation, angle, 5.0f);
+                                    }
+
+                                    Bot.Movement.SetMovementAction(MovementAction.DirectMove, ImpaleDodgePos);
+                                    return true;
+                                }
+                                else
+                                {
+                                    ImpaleDodgePos = Vector3.Zero;
+                                }
+                            }
                         }
                     }
                     else
@@ -201,7 +224,7 @@ namespace AmeisenBotX.Core.Engines.Tactic.Bosses.Naxxramas10
 
                         if (TankingPathQueue.Count == 0)
                         {
-                            foreach (Vector3 v in TankingIsUsingA ? TankingKitingRouteA : TankingKitingRouteB)
+                            foreach (Vector3 v in TankIsUsingA ? TankingKitingRouteA : TankingKitingRouteB)
                             {
                                 TankingPathQueue.Enqueue(v);
                             }
@@ -213,6 +236,7 @@ namespace AmeisenBotX.Core.Engines.Tactic.Bosses.Naxxramas10
                             if (targetPosition.GetDistance2D(Bot.Player.Position) > 2.0f)
                             {
                                 Bot.Movement.SetMovementAction(MovementAction.DirectMove, targetPosition);
+                                handlesMovement = true;
                             }
                             else
                             {
@@ -221,7 +245,7 @@ namespace AmeisenBotX.Core.Engines.Tactic.Bosses.Naxxramas10
                                 if (TankingPathQueue.Count == 0)
                                 {
                                     TankIsKiting = false;
-                                    TankingIsUsingA = !TankingIsUsingA;
+                                    TankIsUsingA = !TankIsUsingA;
                                 }
                             }
                         }
@@ -231,8 +255,6 @@ namespace AmeisenBotX.Core.Engines.Tactic.Bosses.Naxxramas10
                 }
             }
 
-            handlesMovement = false;
-            allowAttacking = true;
             return false;
         }
     }
