@@ -56,6 +56,7 @@ namespace AmeisenBotX.Core.Logic
             PartymembersFightEvent = new(TimeSpan.FromMilliseconds(1000));
             RenderSwitchEvent = new(TimeSpan.FromMilliseconds(1000));
             UpdateFood = new(TimeSpan.FromMilliseconds(1000));
+            UnitsLootedCleanupEvent = new(TimeSpan.FromMilliseconds(1000));
 
             UnitsLooted = new();
             UnitsToLoot = new();
