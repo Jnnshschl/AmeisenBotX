@@ -1,8 +1,10 @@
-﻿using AmeisenBotX.Core.Managers.Character.Comparators;
+﻿using AmeisenBotX.Core.Logic.Utils.Auras.Objects;
+using AmeisenBotX.Core.Managers.Character.Comparators;
 using AmeisenBotX.Core.Managers.Character.Talents.Objects;
 using AmeisenBotX.Wow.Objects.Enums;
 using AmeisenBotX.Wow335a.Constants;
 using System.Collections.Generic;
+using System.Linq;
 
 namespace AmeisenBotX.Core.Engines.Combat.Classes.Bia10
 {
@@ -10,6 +12,16 @@ namespace AmeisenBotX.Core.Engines.Combat.Classes.Bia10
     {
         public WarrirorFurry(AmeisenBotInterfaces bot) : base(bot)
         {
+            MyAuraManager.Jobs.Add(new KeepActiveAuraJob(bot.Db, Warrior335a.BattleShout, () =>
+                Bot.Player.Auras.All(e => Bot.Db.GetSpellName(e.SpellId) != Warrior335a.BattleShout)
+                && Bot.Player.Rage > 10.0
+                && ValidateSpell(Warrior335a.BattleShout, true)
+                && TryCastSpell(Warrior335a.BattleShout, Bot.Player.Guid)));
+
+            TargetAuraManager.Jobs.Add(new KeepActiveAuraJob(bot.Db, Warrior335a.Rend, () =>
+                Bot.Target?.HealthPercentage >= 5
+                && ValidateSpell(Warrior335a.Rend, true)
+                && TryCastSpell(Warrior335a.Rend, Bot.Wow.TargetGuid)));
         }
 
         public override string Version => "1.0";
@@ -44,7 +56,7 @@ namespace AmeisenBotX.Core.Engines.Combat.Classes.Bia10
             base.Execute();
 
             var spellName = SelectSpell(out var targetGuid);
-            var spellCast = TryCastSpell(spellName, targetGuid);
+            TryCastSpell(spellName, targetGuid);
         }
 
         public override void OutOfCombatExecute()
@@ -54,6 +66,12 @@ namespace AmeisenBotX.Core.Engines.Combat.Classes.Bia10
 
         private string SelectSpell(out ulong targetGuid)
         {
+            if (IsInSpellRange(Bot.Target, Warrior335a.Charge)
+                && ValidateSpell(Warrior335a.Charge, true))
+            {
+                targetGuid = Bot.Target.Guid;
+                return Warrior335a.Charge;
+            }
             if (IsInSpellRange(Bot.Target, Warrior335a.HeroicStrike)
                 && ValidateSpell(Warrior335a.HeroicStrike, true))
             {

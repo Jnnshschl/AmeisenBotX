@@ -15,17 +15,21 @@ namespace AmeisenBotX.Core.Engines.Combat.Classes.Bia10
             MyAuraManager.Jobs.Add(new KeepActiveAuraJob(bot.Db, Priest335a.PowerWordFortitude, () =>
                 Bot.Player.ManaPercentage > 60.0
                 && ValidateSpell(Priest335a.PowerWordFortitude, true)
-                && TryCastSpell(Priest335a.PowerWordFortitude, Bot.Player.Guid, true)));
+                && TryCastSpell(Priest335a.PowerWordFortitude, Bot.Player.Guid)));
             MyAuraManager.Jobs.Add(new KeepActiveAuraJob(bot.Db, Priest335a.PowerWordShield, () =>
                 Bot.Player.Auras.All(e => Bot.Db.GetSpellName(e.SpellId) != "Weakened Soul") 
                 && Bot.Player.ManaPercentage > 60.0
                 && ValidateSpell(Priest335a.PowerWordShield, true)
-                && TryCastSpell(Priest335a.PowerWordShield, Bot.Player.Guid, true)));
+                && TryCastSpell(Priest335a.PowerWordShield, Bot.Player.Guid)));
+            MyAuraManager.Jobs.Add(new KeepActiveAuraJob(bot.Db, Priest335a.InnerFire, () =>  
+                Bot.Player.ManaPercentage > 60.0
+                && ValidateSpell(Priest335a.InnerFire, true)
+                && TryCastSpell(Priest335a.InnerFire, Bot.Player.Guid)));
 
             TargetAuraManager.Jobs.Add(new KeepActiveAuraJob(bot.Db, Priest335a.ShadowWordPain, () =>
                 Bot.Target?.HealthPercentage >= 5
                 && ValidateSpell(Priest335a.ShadowWordPain, true)
-                && TryCastSpell(Priest335a.ShadowWordPain, Bot.Wow.TargetGuid, true)));
+                && TryCastSpell(Priest335a.ShadowWordPain, Bot.Wow.TargetGuid)));
         }
 
         public override string Version => "1.0";
@@ -60,7 +64,7 @@ namespace AmeisenBotX.Core.Engines.Combat.Classes.Bia10
             base.Execute();
 
             var spellName = SelectSpell(out var targetGuid);
-            var spellCast = TryCastSpell(spellName, targetGuid);
+            TryCastSpell(spellName, targetGuid);
         }
 
         public override void OutOfCombatExecute()

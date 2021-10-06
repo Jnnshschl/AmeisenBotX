@@ -101,6 +101,7 @@ namespace AmeisenBotX.Core.Engines.Combat.Classes.Bia10
                     if (Bot.Player.IsCasting)
                         Bot.Wow.StopCasting();
 
+                    // todo: kinda buggy
                     Bot.Wow.StopClickToMove();
                     Bot.Movement.Reset();
                     Bot.Wow.InteractWithUnit(target.BaseAddress);
