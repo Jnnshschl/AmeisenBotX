@@ -16,8 +16,6 @@ namespace AmeisenBotX.Core.Logic.Idle
             LastActions = new();
         }
 
-        private AmeisenBotConfig Config { get; }
-
         public TimeSpan Cooldown { get; private set; }
 
         public DateTime ExecuteUntil { get; private set; }
@@ -27,6 +25,8 @@ namespace AmeisenBotX.Core.Logic.Idle
         public DateTime LastActionExecuted { get; private set; }
 
         public List<KeyValuePair<DateTime, IIdleAction>> LastActions { get; private set; }
+
+        private AmeisenBotConfig Config { get; }
 
         private IIdleAction CurrentAction { get; set; }
 

@@ -49,8 +49,6 @@ namespace AmeisenBotX
             ErrorBorderBrush.Freeze();
         }
 
-        public List<IdleActionWrapper> IdleActionItems { get; set; }
-
         public AmeisenBot AmeisenBot { get; private set; }
 
         public bool Cancel { get; set; }
@@ -62,6 +60,8 @@ namespace AmeisenBotX
         public string ConfigName { get; private set; }
 
         public string DataDir { get; }
+
+        public List<IdleActionWrapper> IdleActionItems { get; set; }
 
         public bool NewConfig { get; }
 
@@ -396,6 +396,31 @@ namespace AmeisenBotX
                         ChangedSomething = true;
                     }
                 }
+            }
+        }
+
+        private void GridViewColumnHeader_Loaded(object sender, RoutedEventArgs e)
+        {
+            GridViewColumnHeader columnHeader = sender as GridViewColumnHeader;
+
+            if (columnHeader.Template.FindName("HeaderBorder", columnHeader) is Border HeaderBorder)
+            {
+                HeaderBorder.Background = HeaderBorder.Background;
+            }
+
+            if (columnHeader.Template.FindName("HeaderHoverBorder", columnHeader) is Border HeaderHoverBorder)
+            {
+                HeaderHoverBorder.BorderBrush = HeaderHoverBorder.BorderBrush;
+            }
+
+            if (columnHeader.Template.FindName("UpperHighlight", columnHeader) is Rectangle UpperHighlight)
+            {
+                UpperHighlight.Visibility = UpperHighlight.Visibility;
+            }
+
+            if (columnHeader.Template.FindName("PART_HeaderGripper", columnHeader) is Thumb PART_HeaderGripper)
+            {
+                PART_HeaderGripper.Background = PART_HeaderGripper.Background;
             }
         }
 
@@ -920,31 +945,6 @@ namespace AmeisenBotX
             }
 
             LoadConfigToUi();
-        }
-
-        private void GridViewColumnHeader_Loaded(object sender, RoutedEventArgs e)
-        {
-            GridViewColumnHeader columnHeader = sender as GridViewColumnHeader;
-
-            if (columnHeader.Template.FindName("HeaderBorder", columnHeader) is Border HeaderBorder)
-            {
-                HeaderBorder.Background = HeaderBorder.Background;
-            }
-
-            if (columnHeader.Template.FindName("HeaderHoverBorder", columnHeader) is Border HeaderHoverBorder)
-            {
-                HeaderHoverBorder.BorderBrush = HeaderHoverBorder.BorderBrush;
-            }
-
-            if (columnHeader.Template.FindName("UpperHighlight", columnHeader) is Rectangle UpperHighlight)
-            {
-                UpperHighlight.Visibility = UpperHighlight.Visibility;
-            }
-
-            if (columnHeader.Template.FindName("PART_HeaderGripper", columnHeader) is Thumb PART_HeaderGripper)
-            {
-                PART_HeaderGripper.Background = PART_HeaderGripper.Background;
-            }
         }
 
         private void Window_MouseLeftButtonDown(object sender, MouseButtonEventArgs e)

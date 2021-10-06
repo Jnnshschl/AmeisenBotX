@@ -48,6 +48,8 @@ namespace AmeisenBotX.Core
 
         public IGrindingEngine Grinding { get; set; }
 
+        public IdleActionManager IdleActions { get; set; }
+
         public IJobEngine Jobs { get; set; }
 
         public IWowUnit LastTarget => Objects.LastTarget;
@@ -71,8 +73,6 @@ namespace AmeisenBotX.Core
         public AmeisenBotRconClient Rcon { get; set; }
 
         public StorageManager Storage { get; set; }
-
-        public IdleActionManager IdleActions { get; set; }
 
         public ITacticEngine Tactic { get; set; }
 

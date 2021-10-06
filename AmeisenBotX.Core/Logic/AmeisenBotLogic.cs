@@ -5,8 +5,6 @@ using AmeisenBotX.Common.Math;
 using AmeisenBotX.Common.Utils;
 using AmeisenBotX.Core.Engines.Movement.Enums;
 using AmeisenBotX.Core.Logic.Enums;
-using AmeisenBotX.Core.Logic.Idle;
-using AmeisenBotX.Core.Logic.Idle.Actions;
 using AmeisenBotX.Core.Logic.Routines;
 using AmeisenBotX.Core.Logic.StaticDeathRoutes;
 using AmeisenBotX.Core.Managers.Character.Inventory.Objects;
@@ -400,6 +398,8 @@ namespace AmeisenBotX.Core.Logic
         private Tree Tree { get; }
 
         private List<ulong> UnitsLooted { get; }
+
+        private TimegatedEvent UnitsLootedCleanupEvent { get; }
 
         private Queue<ulong> UnitsToLoot { get; }
 
@@ -964,8 +964,6 @@ namespace AmeisenBotX.Core.Logic
         {
             return Bot.Memory.Read(Bot.Wow.Offsets.IsIngame, out int isIngame) && isIngame == 0;
         }
-
-        private TimegatedEvent UnitsLootedCleanupEvent { get; }
 
         private bool NeedToLoot()
         {

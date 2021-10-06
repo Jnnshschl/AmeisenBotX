@@ -21,8 +21,6 @@ namespace AmeisenBotX.Core
 
         public bool AutoChangeRealmlist { get; set; } = true;
 
-        public Dictionary<string, bool> IdleActionsEnabled { get; set; } = new();
-
         public bool AutocloseWow { get; set; } = true;
 
         public bool AutoDisableRender { get; set; } = false;
@@ -100,6 +98,8 @@ namespace AmeisenBotX.Core
         public Dictionary<string, Keybind> Hotkeys { get; set; } = new();
 
         public bool IdleActions { get; set; } = false;
+
+        public Dictionary<string, bool> IdleActionsEnabled { get; set; } = new();
 
         public bool IgnoreCombatWhileMounted { get; set; } = true;
 

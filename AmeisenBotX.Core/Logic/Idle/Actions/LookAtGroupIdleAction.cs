@@ -13,11 +13,6 @@ namespace AmeisenBotX.Core.Logic.Idle.Actions
             Rnd = new Random();
         }
 
-        public override string ToString()
-        {
-            return $"{(AutopilotOnly ? "(🤖) " : "")}Look at Group";
-        }
-
         public bool AutopilotOnly => false;
 
         public AmeisenBotInterfaces Bot { get; }
@@ -50,6 +45,11 @@ namespace AmeisenBotX.Core.Logic.Idle.Actions
             {
                 Bot.Wow.FacePosition(Bot.Player.BaseAddress, Bot.Player.Position, randomPartymember.Position * ((float)Rnd.NextDouble() / 10.0f));
             }
+        }
+
+        public override string ToString()
+        {
+            return $"{(AutopilotOnly ? "(🤖) " : "")}Look at Group";
         }
     }
 }

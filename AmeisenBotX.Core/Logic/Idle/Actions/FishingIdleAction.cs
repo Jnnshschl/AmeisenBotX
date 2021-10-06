@@ -19,11 +19,6 @@ namespace AmeisenBotX.Core.Logic.Idle.Actions
             Rnd = new Random();
         }
 
-        public override string ToString()
-        {
-            return $"{(AutopilotOnly ? "(🤖) " : "")}Go Fishing";
-        }
-
         public bool AutopilotOnly => true;
 
         public AmeisenBotInterfaces Bot { get; }
@@ -143,6 +138,11 @@ namespace AmeisenBotX.Core.Logic.Idle.Actions
                 Bot.Wow.InteractWithObject(fishingBobber.BaseAddress);
                 Bot.Wow.LootEverything();
             }
+        }
+
+        public override string ToString()
+        {
+            return $"{(AutopilotOnly ? "(🤖) " : "")}Go Fishing";
         }
 
         private bool IsFishingRodEquipped()

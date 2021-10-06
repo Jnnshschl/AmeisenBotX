@@ -37,11 +37,6 @@ namespace AmeisenBotX.Core.Logic.Idle.Actions
             Rnd = new Random();
         }
 
-        public override string ToString()
-        {
-            return $"{(AutopilotOnly ? "(🤖) " : "")}Random Emote";
-        }
-
         public bool AutopilotOnly => false;
 
         public AmeisenBotInterfaces Bot { get; }
@@ -88,6 +83,11 @@ namespace AmeisenBotX.Core.Logic.Idle.Actions
             {
                 Bot.Wow.SendChatMessage($"/{Emotes[Rnd.Next(0, Emotes.Count)]}");
             }
+        }
+
+        public override string ToString()
+        {
+            return $"{(AutopilotOnly ? "(🤖) " : "")}Random Emote";
         }
     }
 }

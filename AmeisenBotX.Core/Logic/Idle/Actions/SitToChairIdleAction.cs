@@ -15,11 +15,6 @@ namespace AmeisenBotX.Core.Logic.Idle.Actions
             MaxDistance = maxDistance;
         }
 
-        public override string ToString()
-        {
-            return $"{(AutopilotOnly ? "(🤖) " : "")}Sit to Chairs";
-        }
-
         public bool AutopilotOnly => false;
 
         public AmeisenBotInterfaces Bot { get; }
@@ -83,6 +78,11 @@ namespace AmeisenBotX.Core.Logic.Idle.Actions
                     SatDown = true;
                 }
             }
+        }
+
+        public override string ToString()
+        {
+            return $"{(AutopilotOnly ? "(🤖) " : "")}Sit to Chairs";
         }
     }
 }
