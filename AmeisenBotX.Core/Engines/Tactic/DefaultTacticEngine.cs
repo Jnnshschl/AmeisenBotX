@@ -40,13 +40,16 @@ namespace AmeisenBotX.Core.Engines.Tactic
 
         public bool Execute()
         {
-            foreach (ITactic tactic in Tactics[Bot.Objects.MapId].Values)
+            if (Tactics.ContainsKey(Bot.Objects.MapId))
             {
-                if (tactic.IsInArea(Bot.Player.Position) && tactic.ExecuteTactic(Bot.CombatClass.Role, Bot.CombatClass.IsMelee, out bool preventMovement, out bool allowAttacking))
+                foreach (ITactic tactic in Tactics[Bot.Objects.MapId].Values)
                 {
-                    PreventMovement = preventMovement;
-                    AllowAttacking = allowAttacking;
-                    return true;
+                    if (tactic.IsInArea(Bot.Player.Position) && tactic.ExecuteTactic(Bot.CombatClass.Role, Bot.CombatClass.IsMelee, out bool preventMovement, out bool allowAttacking))
+                    {
+                        PreventMovement = preventMovement;
+                        AllowAttacking = allowAttacking;
+                        return true;
+                    }
                 }
             }
 

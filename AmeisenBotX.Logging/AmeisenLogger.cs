@@ -29,9 +29,9 @@ namespace AmeisenBotX.Logging
             LockedTimer logFileWriter = new(1000, LogFileWriterTick);
         }
 
-        public event Action<string, string, LogLevel> OnLogRaw;
-
         public event Action<LogLevel, string> OnLog;
+
+        public event Action<string, string, LogLevel> OnLogRaw;
 
         public static AmeisenLogger I
         {

@@ -151,6 +151,12 @@ namespace AmeisenBotX.Core.Engines.Movement
             TriedToMountUp = false;
         }
 
+        public void DirectMove(Vector3 position)
+        {
+            Bot.Character.MoveToPosition(position, 20.9f, 0.5f);
+            // PlayerVehicle.Update((x) => Bot.Character.MoveToPosition(x, 20.9f, 0.5f), MovementAction.Follow, position);
+        }
+
         public bool SetMovementAction(MovementAction state, Vector3 position, float rotation = 0.0f)
         {
             if (IsAllowedToMove && (PathQueue.Count == 0 || RefreshPathEvent.Ready))

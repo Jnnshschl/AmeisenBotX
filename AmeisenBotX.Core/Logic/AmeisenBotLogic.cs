@@ -65,7 +65,7 @@ namespace AmeisenBotX.Core.Logic
             (
                 () => CanUseStaticPaths(),
                 // prefer static paths
-                new Leaf(() => MoveToPosition(StaticRoute.GetNextPoint(Bot.Player.Position))),
+                new Leaf(() => { Bot.Movement.DirectMove(StaticRoute.GetNextPoint(Bot.Player.Position)); return BtStatus.Success; }),
                 // run to corpse by position
                 new Leaf(RunToCorpseAndRetrieveIt)
             );
@@ -621,11 +621,11 @@ namespace AmeisenBotX.Core.Logic
 
         private BtStatus Dead()
         {
+            SearchedStaticRoutes = false;
+
             if (Config.ReleaseSpirit || Bot.Objects.MapId.IsBattlegroundMap())
             {
                 Bot.Wow.RepopMe();
-
-                SearchedStaticRoutes = false;
                 return BtStatus.Success;
             }
 
