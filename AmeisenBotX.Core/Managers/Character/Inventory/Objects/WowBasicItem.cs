@@ -9,29 +9,28 @@ namespace AmeisenBotX.Core.Managers.Character.Inventory.Objects
         {
         }
 
-        public WowBasicItem(WowBasicItem item)
+        protected WowBasicItem(IWowInventoryItem item)
         {
-            if (item != null)
-            {
-                BagId = item.BagId;
-                BagSlot = item.BagSlot;
-                Count = item.Count;
-                Durability = item.Durability;
-                EquipLocation = item.EquipLocation;
-                EquipSlot = item.EquipSlot;
-                Id = item.Id;
-                ItemLevel = item.ItemLevel;
-                ItemLink = item.ItemLink;
-                ItemQuality = item.ItemQuality;
-                MaxDurability = item.MaxDurability;
-                MaxStack = item.MaxStack;
-                Name = item.Name;
-                Price = item.Price;
-                RequiredLevel = item.RequiredLevel;
-                Stats = item.Stats;
-                Subtype = item.Subtype;
-                Type = item.Type;
-            }
+            if (item == null) return;
+
+            BagId = item.BagId;
+            BagSlot = item.BagSlot;
+            Count = item.Count;
+            Durability = item.Durability;
+            EquipLocation = item.EquipLocation;
+            EquipSlot = item.EquipSlot;
+            Id = item.Id;
+            ItemLevel = item.ItemLevel;
+            ItemLink = item.ItemLink;
+            ItemQuality = item.ItemQuality;
+            MaxDurability = item.MaxDurability;
+            MaxStack = item.MaxStack;
+            Name = item.Name;
+            Price = item.Price;
+            RequiredLevel = item.RequiredLevel;
+            Stats = item.Stats;
+            Subtype = item.Subtype;
+            Type = item.Type;
         }
 
         [JsonPropertyName("bagid")]
@@ -88,9 +87,7 @@ namespace AmeisenBotX.Core.Managers.Character.Inventory.Objects
         [JsonPropertyName("type")]
         public string Type { get; set; }
 
-        public override string ToString()
-        {
-            return $"[{BagId}][{BagSlot}] - [{ItemQuality}][{Type}] {Name} (ilvl. {ItemLevel} | lvl.{RequiredLevel} | {Subtype} | {Price})";
-        }
+        public override string ToString() =>
+            $"[{BagId}][{BagSlot}] - [{ItemQuality}][{Type}] {Name} (ilvl. {ItemLevel} | lvl.{RequiredLevel} | {Subtype} | {Price})";
     }
 }

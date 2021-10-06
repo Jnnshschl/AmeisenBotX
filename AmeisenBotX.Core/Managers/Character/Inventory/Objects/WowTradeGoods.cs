@@ -1,8 +1,8 @@
 ﻿namespace AmeisenBotX.Core.Managers.Character.Inventory.Objects
 {
-    public class WowTradegood : WowBasicItem
+    public class WowTradeGoods : WowBasicItem
     {
-        public WowTradegood(WowBasicItem wowBasicItem) : base(wowBasicItem)
+        public WowTradeGoods(IWowInventoryItem wowBasicItem) : base(wowBasicItem)
         {
             Id = wowBasicItem.Id;
             BagId = wowBasicItem.BagId;

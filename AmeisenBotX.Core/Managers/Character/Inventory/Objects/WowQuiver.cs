@@ -2,7 +2,7 @@
 {
     public class WowQuiver : WowBasicItem
     {
-        public WowQuiver(WowBasicItem wowBasicItem) : base(wowBasicItem)
+        public WowQuiver(IWowInventoryItem wowBasicItem) : base(wowBasicItem)
         {
             Id = wowBasicItem.Id;
             BagId = wowBasicItem.BagId;
