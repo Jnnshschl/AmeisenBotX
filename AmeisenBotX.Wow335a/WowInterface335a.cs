@@ -604,7 +604,7 @@ namespace AmeisenBotX.Wow335a
         {
             start.Z += heightAdjust;
             end.Z += heightAdjust;
-            return Hook.TraceLine(start, end);
+            return Hook.TraceLine(start, end, (uint)WowWorldFrameHit.LineOfSight);
         }
 
         public bool IsRuneReady(int runeId)

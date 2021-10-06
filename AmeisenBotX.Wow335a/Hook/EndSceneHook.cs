@@ -517,7 +517,7 @@ namespace AmeisenBotX.Wow335a.Hook
             });
         }
 
-        public bool TraceLine(Vector3 start, Vector3 end, uint flags = 0x120171)
+        public bool TraceLine(Vector3 start, Vector3 end, uint flags)
         {
             if (Memory.AllocateMemory(40, out IntPtr tracelineCodecave))
             {
