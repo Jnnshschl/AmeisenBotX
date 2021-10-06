@@ -268,6 +268,11 @@ namespace AmeisenBotX
         private void ButtonToggleRendering_Click(object sender, RoutedEventArgs e)
         {
             // float threat = AmeisenBot.Bot.Threat.Get(AmeisenBot.Bot.Player.Position);
+
+            if (AmeisenBot.Bot.Target != null)
+            {
+                bool inLos = AmeisenBot.Bot.Wow.IsInLineOfSight(AmeisenBot.Bot.Player.Position, AmeisenBot.Bot.Target.Position);
+            }
         }
 
         private void ComboboxStateOverride_SelectionChanged(object sender, System.Windows.Controls.SelectionChangedEventArgs e)
