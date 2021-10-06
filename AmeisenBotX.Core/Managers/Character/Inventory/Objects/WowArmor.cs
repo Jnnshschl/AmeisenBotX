@@ -26,6 +26,10 @@ namespace AmeisenBotX.Core.Managers.Character.Inventory.Objects
             Durability = wowBasicItem.Durability;
             MaxDurability = wowBasicItem.MaxDurability;
             EquipLocation = wowBasicItem.EquipLocation;
+
+            if (Subtype.EndsWith("s"))
+                Subtype = Subtype.Remove(Subtype.Length - 1);
+
             ArmorType = Enum.TryParse(Subtype, out WowArmorType armorType) 
                 ? armorType : WowArmorType.Misc;
         }
