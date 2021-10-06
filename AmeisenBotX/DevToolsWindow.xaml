@@ -4,7 +4,7 @@
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         mc:Ignorable="d"
-        Title="Settings" Height="390" Width="686" MinHeight="390" MinWidth="686" WindowStyle="None" AllowsTransparency="True" BorderThickness="1" ResizeMode="CanResizeWithGrip" Icon="icon.png" MouseLeftButtonDown="Window_MouseLeftButtonDown">
+        Title="Settings" Height="390" Width="720" MinHeight="390" MinWidth="720" WindowStyle="None" AllowsTransparency="True" BorderThickness="1" ResizeMode="CanResizeWithGrip" Icon="icon.png" MouseLeftButtonDown="Window_MouseLeftButtonDown" Loaded="Window_Loaded">
     <Window.BorderBrush>
         <SolidColorBrush Color="{DynamicResource DarkAccent1}" />
     </Window.BorderBrush>
@@ -45,7 +45,7 @@
             </Rectangle.Fill>
         </Rectangle>
         <TabControl x:Name="tabcontrolMain" Margin="10,33,10,10" Background="{x:Null}" BorderBrush="{x:Null}" BorderThickness="0" SelectionChanged="TabControlMain_SelectionChanged">
-            <TabItem x:Name="tabitemCachePoi" Header="POI" Background="{x:Null}" Foreground="White" BorderBrush="{x:Null}" BorderThickness="0">
+            <TabItem x:Name="tabitemCachePoi" Header="💡 POI" Background="{x:Null}" Foreground="White" BorderBrush="{x:Null}" BorderThickness="0">
                 <Border BorderThickness="0,1,0,0" Margin="0,-3,0,0">
                     <Border.BorderBrush>
                         <SolidColorBrush Color="{DynamicResource DarkForeground}" />
@@ -55,7 +55,7 @@
                     </Grid>
                 </Border>
             </TabItem>
-            <TabItem x:Name="tabitemCacheOre" Header="Ore" Background="{x:Null}" Foreground="White" BorderBrush="{x:Null}" BorderThickness="0">
+            <TabItem x:Name="tabitemCacheOre" Header="⛏️ Ore" Background="{x:Null}" Foreground="White" BorderBrush="{x:Null}" BorderThickness="0">
                 <Border BorderThickness="0,1,0,0" Margin="0,-3,0,0">
                     <Border.BorderBrush>
                         <SolidColorBrush Color="{DynamicResource DarkForeground}" />
@@ -65,7 +65,7 @@
                     </Grid>
                 </Border>
             </TabItem>
-            <TabItem x:Name="tabitemCacheHerb" Header="Herb" Background="{x:Null}" Foreground="White" BorderBrush="{x:Null}" BorderThickness="0">
+            <TabItem x:Name="tabitemCacheHerb" Header="🌿 Herb" Background="{x:Null}" Foreground="White" BorderBrush="{x:Null}" BorderThickness="0">
                 <Border BorderThickness="0,1,0,0" Margin="0,-3,0,0">
                     <Border.BorderBrush>
                         <SolidColorBrush Color="{DynamicResource DarkForeground}" />
@@ -75,7 +75,7 @@
                     </Grid>
                 </Border>
             </TabItem>
-            <TabItem x:Name="tabitemCacheNames" Header="Names" Background="{x:Null}" Foreground="White" BorderBrush="{x:Null}" BorderThickness="0">
+            <TabItem x:Name="tabitemCacheNames" Header="📦 Names" Background="{x:Null}" Foreground="White" BorderBrush="{x:Null}" BorderThickness="0">
                 <Border BorderThickness="0,1,0,0" Margin="0,-3,0,0">
                     <Border.BorderBrush>
                         <SolidColorBrush Color="{DynamicResource DarkForeground}" />
@@ -86,7 +86,7 @@
                     </Grid>
                 </Border>
             </TabItem>
-            <TabItem x:Name="tabitemCacheReactions" Header="Reactions" Background="{x:Null}" Foreground="White" BorderBrush="{x:Null}" BorderThickness="0">
+            <TabItem x:Name="tabitemCacheReactions" Header="😀 Reactions" Background="{x:Null}" Foreground="White" BorderBrush="{x:Null}" BorderThickness="0">
                 <Border BorderThickness="0,1,0,0" Margin="0,-3,0,0">
                     <Border.BorderBrush>
                         <SolidColorBrush Color="{DynamicResource DarkForeground}" />
@@ -96,7 +96,7 @@
                     </Grid>
                 </Border>
             </TabItem>
-            <TabItem x:Name="tabitemCacheSpellnames" Header="Spellnames" Background="{x:Null}" Foreground="White" BorderBrush="{x:Null}" BorderThickness="0">
+            <TabItem x:Name="tabitemCacheSpellnames" Header="✨ Spellnames" Background="{x:Null}" Foreground="White" BorderBrush="{x:Null}" BorderThickness="0">
                 <Border BorderThickness="0,1,0,0" Margin="0,-3,0,0">
                     <Border.BorderBrush>
                         <SolidColorBrush Color="{DynamicResource DarkForeground}" />
@@ -106,7 +106,7 @@
                     </Grid>
                 </Border>
             </TabItem>
-            <TabItem x:Name="tabitemNearWowObjects" Header="Near WowObjects" Background="{x:Null}" Foreground="White" BorderBrush="{x:Null}" BorderThickness="0" KeyDown="ListViewNearWowObjects_KeyDown">
+            <TabItem x:Name="tabitemNearWowObjects" Header="🗺️ WowObjects" Background="{x:Null}" Foreground="White" BorderBrush="{x:Null}" BorderThickness="0" KeyDown="ListViewNearWowObjects_KeyDown">
                 <Border BorderThickness="0,1,0,0" Margin="0,-3,0,0">
                     <Border.BorderBrush>
                         <SolidColorBrush Color="{DynamicResource DarkForeground}" />
@@ -216,7 +216,7 @@
                     </Grid>
                 </Border>
             </TabItem>
-            <TabItem x:Name="tabitemLua" Header="LUA" Background="{x:Null}" Foreground="White" BorderBrush="{x:Null}" BorderThickness="0">
+            <TabItem x:Name="tabitemLua" Header="⚗️ LUA" Background="{x:Null}" Foreground="White" BorderBrush="{x:Null}" BorderThickness="0">
                 <Border BorderThickness="0,1,0,0" Margin="0,-3,0,0">
                     <Border.BorderBrush>
                         <SolidColorBrush Color="{DynamicResource DarkForeground}" />
@@ -268,7 +268,7 @@
                     </Grid>
                 </Border>
             </TabItem>
-            <TabItem x:Name="tabitemEvent" Header="Events" Background="{x:Null}" Foreground="White" BorderBrush="{x:Null}" BorderThickness="0">
+            <TabItem x:Name="tabitemEvent" Header="🧮 Events" Background="{x:Null}" Foreground="White" BorderBrush="{x:Null}" BorderThickness="0">
                 <Border BorderThickness="0,1,0,0" Margin="0,-3,0,0">
                     <Border.BorderBrush>
                         <SolidColorBrush Color="{DynamicResource DarkForeground}" />
@@ -325,6 +325,37 @@
                                 <SolidColorBrush Color="{DynamicResource DarkForeground}" />
                             </Button.Foreground>
                         </Button>
+                    </Grid>
+                </Border>
+            </TabItem>
+            <TabItem x:Name="tabitemLogs" Header="📜 Logs" Background="{x:Null}" Foreground="White" BorderBrush="{x:Null}" BorderThickness="0">
+                <Border BorderThickness="0,1,0,0" Margin="0,-3,0,0">
+                    <Border.BorderBrush>
+                        <SolidColorBrush Color="{DynamicResource DarkForeground}" />
+                    </Border.BorderBrush>
+                    <Grid>
+                        <TextBox x:Name="textboxLogs" IsReadOnly="True" Margin="10,37,10,10" TextWrapping="NoWrap" FontFamily="Consolas" BorderThickness="0,0,0,0" TabIndex="1" Style="{DynamicResource TextBoxStyleDark}">
+                            <TextBox.BorderBrush>
+                                <SolidColorBrush Color="{DynamicResource DarkBorder}" />
+                            </TextBox.BorderBrush>
+                            <TextBox.Foreground>
+                                <SolidColorBrush Color="{DynamicResource DarkForeground}" />
+                            </TextBox.Foreground>
+                            <TextBox.Background>
+                                <SolidColorBrush Color="{DynamicResource DarkBackground}" />
+                            </TextBox.Background>
+                        </TextBox>
+                        <ComboBox x:Name="comboboxLoglevels" HorizontalAlignment="Left" Margin="10,10,0,0" VerticalAlignment="Top" Width="120" Style="{DynamicResource ComboBoxStyleDark}">
+                            <ComboBox.Foreground>
+                                <SolidColorBrush Color="{DynamicResource DarkForeground}"/>
+                            </ComboBox.Foreground>
+                            <ComboBox.BorderBrush>
+                                <SolidColorBrush Color="{DynamicResource DarkBorder}"/>
+                            </ComboBox.BorderBrush>
+                            <ComboBox.Background>
+                                <SolidColorBrush Color="{DynamicResource DarkBackground}"/>
+                            </ComboBox.Background>
+                        </ComboBox>
                     </Grid>
                 </Border>
             </TabItem>

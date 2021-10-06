@@ -29,6 +29,10 @@ namespace AmeisenBotX.Logging
             LockedTimer logFileWriter = new(1000, LogFileWriterTick);
         }
 
+        public event Action<string, string, LogLevel> OnLogRaw;
+
+        public event Action<LogLevel, string> OnLog;
+
         public static AmeisenLogger I
         {
             get
@@ -93,7 +97,12 @@ namespace AmeisenBotX.Logging
             {
                 lock (stringBuilderLock)
                 {
-                    StringBuilder.AppendLine($"[{DateTime.UtcNow.ToLongTimeString()}] {$"[{logLevel}]",-9} {$"[{tag}]",-24} {log}");
+                    OnLogRaw?.Invoke(tag, log, logLevel);
+
+                    string line = $"[{DateTime.UtcNow.ToLongTimeString()}] {$"[{logLevel}]",-9} {$"[{tag}]",-24} {log}";
+
+                    StringBuilder.AppendLine(line);
+                    OnLog?.Invoke(logLevel, line);
                 }
             }
         }
