@@ -964,8 +964,20 @@ namespace AmeisenBotX.Core.Logic
             return Bot.Memory.Read(Bot.Wow.Offsets.IsIngame, out int isIngame) && isIngame == 0;
         }
 
+        private TimegatedEvent UnitsLootedCleanupEvent { get; }
+
         private bool NeedToLoot()
         {
+            if (UnitsLootedCleanupEvent.Run())
+            {
+                UnitsLooted.RemoveAll((guid) =>
+                {
+                    // remove unit from looted list when its gone or seen alive
+                    IWowUnit unit = Bot.GetWowObjectByGuid<IWowUnit>(guid);
+                    return unit != null && !unit.IsDead;
+                });
+            }
+
             foreach (IWowUnit unit in GetLootableUnits())
             {
                 if (!UnitsLooted.Contains(unit.Guid) && !UnitsToLoot.Contains(unit.Guid))
