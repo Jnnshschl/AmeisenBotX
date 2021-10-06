@@ -1,22 +1,22 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using AmeisenBotX.Core.Managers.Character.Inventory.Objects;
+﻿using AmeisenBotX.Core.Managers.Character.Inventory.Objects;
 using AmeisenBotX.Logging;
 using AmeisenBotX.Logging.Enums;
 using AmeisenBotX.Wow;
+using System;
+using System.Collections.Generic;
+using System.Linq;
 
 namespace AmeisenBotX.Core.Managers.Character.Inventory
 {
     public class CharacterInventory
     {
         private readonly object queryLock = new();
-        private List<IWowInventoryItem> items;
+        private readonly List<IWowInventoryItem> items;
 
         public CharacterInventory(IWowInterface wowInterface)
         {
             Wow = wowInterface;
-            Items = new();
+            Items = new List<IWowInventoryItem>();
         }
 
         public int FreeBagSlots { get; private set; }
@@ -30,7 +30,7 @@ namespace AmeisenBotX.Core.Managers.Character.Inventory
                     return items;
                 }
             }
-            set
+            private init
             {
                 lock (queryLock)
                 {
@@ -44,9 +44,7 @@ namespace AmeisenBotX.Core.Managers.Character.Inventory
         public void DestroyItemByName(string name, StringComparison stringComparison = StringComparison.OrdinalIgnoreCase)
         {
             if (!HasItemByName(name, stringComparison))
-            {
                 return;
-            }
 
             Wow.DeleteItemByName(name);
         }
@@ -65,17 +63,15 @@ namespace AmeisenBotX.Core.Managers.Character.Inventory
             {
                 List<WowBasicItem> basicItems = ItemFactory.ParseItemList(resultJson);
 
-                if (basicItems != null && basicItems.Count > 0)
-                {
-                    lock (queryLock)
-                    {
-                        Items.Clear();
+                if (basicItems is not { Count: > 0 })
+                    return;
 
-                        for (int i = 0; i < basicItems.Count; ++i)
-                        {
-                            Items.Add(ItemFactory.BuildSpecificItem(basicItems[i]));
-                        }
-                    }
+                lock (queryLock)
+                {
+                    Items.Clear();
+
+                    foreach (var basicItem in basicItems)
+                        Items.Add(ItemFactory.BuildSpecificItem(basicItem));
                 }
             }
             catch (Exception e)

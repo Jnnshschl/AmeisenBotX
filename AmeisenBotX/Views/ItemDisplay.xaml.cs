@@ -33,7 +33,7 @@ namespace AmeisenBotX.Views
             else if (WowItem.GetType() == typeof(WowQuestItem)) { labelIcon.Content = "💡"; }
             else if (WowItem.GetType() == typeof(WowReagent)) { labelIcon.Content = "🧪"; }
             else if (WowItem.GetType() == typeof(WowRecipe)) { labelIcon.Content = "📜"; }
-            else if (WowItem.GetType() == typeof(WowTradegood)) { labelIcon.Content = "📦"; }
+            else if (WowItem.GetType() == typeof(WowTradeGoods)) { labelIcon.Content = "📦"; }
             else if (WowItem.GetType() == typeof(WowMiscellaneousItem)) { labelIcon.Content = "📦"; }
             else { labelIcon.Content = "❓"; }
 

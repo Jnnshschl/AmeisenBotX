@@ -1,13 +1,13 @@
-﻿using System;
-using AmeisenBotX.Wow.Objects.Enums;
+﻿using AmeisenBotX.Wow.Objects.Enums;
+using System;
 
 namespace AmeisenBotX.Core.Managers.Character.Inventory.Objects
 {
     public class WowArmor : WowBasicItem
     {
-        public WowArmorType ArmorType { get; private set; }
+        public WowArmorType ArmorType { get; }
 
-        public WowArmor(WowBasicItem wowBasicItem) : base(wowBasicItem)
+        public WowArmor(IWowInventoryItem wowBasicItem) : base(wowBasicItem)
         {
             Id = wowBasicItem.Id;
             BagId = wowBasicItem.BagId;
