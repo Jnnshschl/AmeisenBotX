@@ -483,7 +483,7 @@
                                 <SolidColorBrush Color="{DynamicResource DarkBackground}" />
                             </CheckBox.Background>
                         </CheckBox>
-                        <ListView x:Name="listviewIdleActions" Margin="244,161,235,10" HorizontalAlignment="Stretch" BorderThickness="1,0,0,1">
+                        <ListView x:Name="listviewIdleActions" Margin="244,161,235,23" BorderThickness="1,0,0,1">
                             <ListView.Foreground>
                                 <SolidColorBrush Color="{DynamicResource DarkForeground}"/>
                             </ListView.Foreground>
@@ -542,6 +542,11 @@
                         <Label x:Name="labelFps_Copy2" Content="Idle" HorizontalAlignment="Left" VerticalAlignment="Top" FontFamily="Bahnschrift Light" Margin="244,111,0,0" BorderBrush="{DynamicResource Button.MouseOver.Border}" BorderThickness="0,0,0,1" Width="180" Padding="0,5,5,5">
                             <Label.Foreground>
                                 <SolidColorBrush Color="{DynamicResource DarkForeground}" />
+                            </Label.Foreground>
+                        </Label>
+                        <Label Content="(🤖) will only run in AutoPilot mode..." HorizontalAlignment="Left" Margin="244,343,0,0" VerticalAlignment="Top" Padding="0" FontSize="9" FontStyle="Italic">
+                            <Label.Foreground>
+                                <SolidColorBrush Color="{DynamicResource DarkBorder}" />
                             </Label.Foreground>
                         </Label>
                     </Grid>
