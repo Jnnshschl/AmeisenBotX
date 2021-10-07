@@ -173,6 +173,14 @@ namespace AmeisenBotX.Wow.Objects
 
         double RagePercentage { get; }
 
+        int Resource => Class switch
+        {
+            WowClass.Deathknight => Runeenergy,
+            WowClass.Rogue => Energy,
+            WowClass.Warrior => Rage,
+            _ => Mana,
+        };
+
         float Rotation { get; }
 
         int Runeenergy { get; }
@@ -203,6 +211,8 @@ namespace AmeisenBotX.Wow.Objects
         bool HasBuffById(int spellId);
 
         bool IsInMeleeRange(IWowUnit wowUnit);
+
+        float MeleeRangeTo(IWowUnit wowUnit);
 
         string ReadName(IMemoryApi memoryApi, IOffsetList offsetList);
     }

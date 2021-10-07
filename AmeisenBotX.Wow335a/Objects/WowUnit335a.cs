@@ -162,7 +162,12 @@ namespace AmeisenBotX.Wow335a.Objects
         public bool IsInMeleeRange(IWowUnit wowUnit)
         {
             // TODO: figure out real way to use combat reach
-            return wowUnit != null && Position.GetDistance(wowUnit.Position) < 2.75f;
+            return wowUnit != null && Position.GetDistance(wowUnit.Position) < MeleeRangeTo(wowUnit);
+        }
+
+        public float MeleeRangeTo(IWowUnit wowUnit)
+        {
+            return wowUnit != null ? (wowUnit.CombatReach + CombatReach) * 0.95f : 0.0f;
         }
 
         public virtual string ReadName(IMemoryApi memoryApi, IOffsetList offsetList)

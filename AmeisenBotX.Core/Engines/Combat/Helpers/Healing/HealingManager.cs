@@ -1,5 +1,7 @@
 ﻿using AmeisenBotX.Common.Utils;
 using AmeisenBotX.Core.Managers.Character.Spells.Objects;
+using AmeisenBotX.Logging;
+using AmeisenBotX.Logging.Enums;
 using AmeisenBotX.Wow.Objects;
 using System;
 using System.Collections.Generic;
@@ -102,10 +104,11 @@ namespace AmeisenBotX.Core.Engines.Combat.Helpers.Healing
         /// Call this to determine wheter it would be useful to cancel
         /// the current cast, if overhealing would be too much or not.
         /// </summary>
+        /// <param name="isTargetMyself">Spell casted on myself</param>
         /// <returns>True if you should cancel the cast, false if not</returns>
-        public bool ShouldAbortCasting()
+        public bool ShouldAbortCasting(bool isTargetMyself)
         {
-            IWowUnit target = Bot.Target ?? Bot.Player;
+            IWowUnit target = Bot.Target == null || isTargetMyself ? Bot.Player : Bot.Target;
             int spellId = Bot.Player.CurrentlyCastingSpellId > 0 ? Bot.Player.CurrentlyCastingSpellId : Bot.Player.CurrentlyChannelingSpellId;
 
             if (spellId > 0)
@@ -115,10 +118,12 @@ namespace AmeisenBotX.Core.Engines.Combat.Helpers.Healing
                 if (SpellHealing.ContainsKey(castingSpell))
                 {
                     int missingHealth = target.MaxHealth - target.Health;
+                    int expectedHeal = (int)(SpellHealing[castingSpell] * OverhealingStopThreshold);
 
                     // if the cast would be more than x% overheal, stop it
-                    if (missingHealth < SpellHealing[castingSpell] * OverhealingStopThreshold)
+                    if (missingHealth < expectedHeal)
                     {
+                        AmeisenLogger.I.Log("HealingManager", $"Abort cast due to overhealing: {missingHealth} < {expectedHeal}", LogLevel.Verbose);
                         return true;
                     }
                 }
