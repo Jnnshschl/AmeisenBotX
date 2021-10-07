@@ -50,7 +50,8 @@ namespace AmeisenBotX.Core.Engines.Movement
         /// Prevent movement for a specified time.
         /// </summary>
         /// <param name="timeSpan">How long should movement be prevented</param>
-        void PreventMovement(TimeSpan timeSpan);
+        /// <param name="preventMovementType">Special movement blocker that may get freed early (example: when cast is aborted)</param>
+        void PreventMovement(TimeSpan timeSpan, PreventMovementType preventMovementType = PreventMovementType.Hard);
 
         /// <summary>
         /// Drop the current target position and path.

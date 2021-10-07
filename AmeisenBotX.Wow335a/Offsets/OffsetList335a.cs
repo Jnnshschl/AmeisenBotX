@@ -23,8 +23,6 @@ namespace AmeisenBotX.Wow335a.Offsets
 
         public IntPtr CameraPointer { get; } = new(0xB7436C);
 
-        public IntPtr CharacterSlotSelected { get; } = new(0xAC436C);
-
         public IntPtr ClickToMoveAction { get; } = new(0xCA11D8 + 0x1C);
 
         public IntPtr ClickToMoveDistance { get; } = new(0xCA11D8 + 0xC);
@@ -50,10 +48,6 @@ namespace AmeisenBotX.Wow335a.Offsets
         public IntPtr CurrentlyChannelingSpellId { get; } = new(0xA80);
 
         public IntPtr CurrentObjectManager { get; } = new(0x2ED0);
-
-        public IntPtr CvarMaxFps { get; } = new(0xC5DF7C);
-
-        public IntPtr CvarMaxFpsBk { get; } = new(0xC5DF7C);
 
         public IntPtr EndSceneOffset { get; } = new(0xA8); // maybe use 0xAC, clear function, leads to many crashes
 
@@ -86,8 +80,6 @@ namespace AmeisenBotX.Wow335a.Offsets
         public IntPtr FunctionUnitGetReaction { get; } = new(0x7251C0);
 
         public IntPtr FunctionUnitOnRightClick { get; } = new(0x731260);
-
-        public IntPtr FunctionUnitSendMovementPacket { get; } = new(0x7413F0);
 
         public IntPtr FunctionUnitSetFacing { get; } = new(0x72EA50);
 
@@ -128,8 +120,6 @@ namespace AmeisenBotX.Wow335a.Offsets
         public IntPtr PlayerBase { get; } = new(0xD38AE4);
 
         public IntPtr PlayerGuid { get; } = new(0xCA1238);
-
-        public IntPtr PlayerName { get; } = new(0xC79D18);
 
         public IntPtr RaidGroupStart { get; } = new(0xBEB568);
 

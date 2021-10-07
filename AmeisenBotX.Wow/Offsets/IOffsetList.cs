@@ -22,8 +22,6 @@ namespace AmeisenBotX.Wow.Offsets
 
         IntPtr CameraPointer { get; }
 
-        IntPtr CharacterSlotSelected { get; }
-
         IntPtr ClickToMoveAction { get; }
 
         IntPtr ClickToMoveDistance { get; }
@@ -49,10 +47,6 @@ namespace AmeisenBotX.Wow.Offsets
         IntPtr CurrentlyChannelingSpellId { get; }
 
         IntPtr CurrentObjectManager { get; }
-
-        IntPtr CvarMaxFps { get; }
-
-        IntPtr CvarMaxFpsBk { get; }
 
         IntPtr EndSceneOffset { get; }
 
@@ -85,8 +79,6 @@ namespace AmeisenBotX.Wow.Offsets
         IntPtr FunctionUnitGetReaction { get; }
 
         IntPtr FunctionUnitOnRightClick { get; }
-
-        IntPtr FunctionUnitSendMovementPacket { get; }
 
         IntPtr FunctionUnitSetFacing { get; }
 
@@ -127,8 +119,6 @@ namespace AmeisenBotX.Wow.Offsets
         IntPtr PlayerBase { get; }
 
         IntPtr PlayerGuid { get; }
-
-        IntPtr PlayerName { get; }
 
         IntPtr RaidGroupStart { get; }
 

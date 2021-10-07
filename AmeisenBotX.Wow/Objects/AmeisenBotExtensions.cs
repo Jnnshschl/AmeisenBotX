@@ -1,6 +1,6 @@
 ﻿using AmeisenBotX.Wow.Objects.Enums;
 
-namespace AmeisenBotX.Core
+namespace AmeisenBotX.Wow.Objects
 {
     /// <summary>
     /// Collection of extensions to mainly enums at the moment.

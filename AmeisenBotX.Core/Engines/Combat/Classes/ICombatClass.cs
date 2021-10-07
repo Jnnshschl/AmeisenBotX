@@ -18,11 +18,6 @@ namespace AmeisenBotX.Core.Engines.Combat.Classes
         IEnumerable<int> BlacklistedTargetDisplayIds { get; set; }
 
         /// <summary>
-        /// Dynamic config values specific for your combat class.
-        /// </summary>
-        Dictionary<string, dynamic> Configureables { get; set; }
-
-        /// <summary>
         /// Short description how this class is going to play or what it needs.
         /// </summary>
         string Description { get; }

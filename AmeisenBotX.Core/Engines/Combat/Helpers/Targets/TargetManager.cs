@@ -12,7 +12,6 @@ namespace AmeisenBotX.Core.Engines.Combat.Helpers.Targets
         {
             TargetSelectionLogic = targetSelectionLogic;
             TargetSwitchEvent = new(minTargetSwitchTime);
-            PriorityTargets = new List<int>();
         }
 
         public IEnumerable<int> BlacklistedTargets { get => TargetSelectionLogic.BlacklistedTargets; set => TargetSelectionLogic.BlacklistedTargets = value; }

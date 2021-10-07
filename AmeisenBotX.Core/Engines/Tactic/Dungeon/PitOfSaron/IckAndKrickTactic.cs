@@ -15,7 +15,7 @@ namespace AmeisenBotX.Core.Engines.Tactic.Dungeon.PitOfSaron
         {
             Bot = bot;
 
-            Configureables = new()
+            Configurables = new()
             {
                 { "isOffTank", false },
             };
@@ -27,7 +27,7 @@ namespace AmeisenBotX.Core.Engines.Tactic.Dungeon.PitOfSaron
 
         public DateTime ChasingActivated { get; private set; }
 
-        public Dictionary<string, dynamic> Configureables { get; private set; }
+        public Dictionary<string, dynamic> Configurables { get; private set; }
 
         public WowMapId MapId { get; } = WowMapId.PitOfSaron;
 

@@ -18,12 +18,6 @@ namespace AmeisenBotX.Core.Engines.Combat.Helpers.Targets.Logics
 
         public IEnumerable<int> PriorityTargets { get; set; }
 
-        public void Reset()
-        {
-            BlacklistedTargets = null;
-            PriorityTargets = null;
-        }
-
         public abstract bool SelectTarget(out IEnumerable<IWowUnit> wowUnit);
 
         protected bool IsBlacklisted(IWowUnit wowUnit)

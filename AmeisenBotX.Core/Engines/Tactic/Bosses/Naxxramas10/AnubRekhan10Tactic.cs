@@ -7,28 +7,22 @@ using AmeisenBotX.Wow.Objects.Enums;
 using AmeisenBotX.Wow335a.Constants.Raids.Wotlk.Naxxramas;
 using System;
 using System.Collections.Generic;
-using System.Text.Json;
 
 namespace AmeisenBotX.Core.Engines.Tactic.Bosses.Naxxramas10
 {
-    public class AnubRekhan10Tactic : ITactic, IStoreable
+    public class AnubRekhan10Tactic : SimpleConfigurable, ITactic
     {
         public AnubRekhan10Tactic(AmeisenBotInterfaces bot)
         {
             Bot = bot;
             TankingPathQueue = new();
 
-            Configureables = new()
-            {
-                { "isOffTank", false },
-            };
+            Configurables.TryAdd("isOffTank", false);
         }
 
         public Vector3 Area { get; } = new(3273, -3476, 287);
 
         public float AreaRadius { get; } = 120.0f;
-
-        public Dictionary<string, dynamic> Configureables { get; private set; }
 
         public DateTime LocustSwarmActivated { get; private set; }
 
@@ -88,16 +82,6 @@ namespace AmeisenBotX.Core.Engines.Tactic.Bosses.Naxxramas10
                 WowRole.Heal => DoDpsHeal(false, out handlesMovement, out allowAttacking),
                 WowRole.Dps => DoDpsHeal(isMelee, out handlesMovement, out allowAttacking),
             };
-        }
-
-        public void Load(Dictionary<string, JsonElement> objects)
-        {
-            if (objects.ContainsKey("Configureables")) { Configureables = objects["Configureables"].ToDyn(); }
-        }
-
-        public Dictionary<string, object> Save()
-        {
-            return new() { { "Configureables", Configureables } };
         }
 
         private bool DoDpsHeal(bool isMelee, out bool handlesMovement, out bool allowAttacking)
@@ -184,7 +168,7 @@ namespace AmeisenBotX.Core.Engines.Tactic.Bosses.Naxxramas10
 
             if (anubrekhan != null)
             {
-                if (Configureables["isOffTank"] == true)
+                if (Configurables["isOffTank"] == true)
                 {
                     // offtank should only focus adds
                     Bot.CombatClass.BlacklistedTargetDisplayIds = AnubRekhanDisplayId;

@@ -133,10 +133,13 @@ namespace AmeisenBotX.Core.Engines.Combat.Classes.Jannis
                     if (targetOfTarget != null && targetOfTarget.Guid == Bot.Player.Guid)
                     {
                         // if we have aggro, pull the unit to the best tanking spot
-                        Vector3 bestTankingSpot = Bot.Objects.CenterPartyPosition;
+                        Vector3 direction = Bot.Player.Position - Bot.Objects.CenterPartyPosition;
+                        direction.Normalize();
+
+                        Vector3 bestTankingSpot = Bot.Objects.CenterPartyPosition + (direction * 12.0f);
                         float distanceToBestTankingSpot = Bot.Player.DistanceTo(bestTankingSpot);
 
-                        if (distanceToBestTankingSpot > 3.0f)
+                        if (distanceToBestTankingSpot > 4.0f)
                         {
                             Bot.Movement.SetMovementAction(MovementAction.Move, Bot.Target.Position);
                         }
@@ -144,7 +147,7 @@ namespace AmeisenBotX.Core.Engines.Combat.Classes.Jannis
                     else
                     {
                         // target is not targeting us, we need to get aggro
-                        if (distanceToTarget > 3.0f)
+                        if (distanceToTarget > Bot.Player.MeleeRangeTo(Bot.Target))
                         {
                             Bot.Movement.SetMovementAction(MovementAction.Chase, Bot.Target.Position);
                         }
@@ -208,8 +211,7 @@ namespace AmeisenBotX.Core.Engines.Combat.Classes.Jannis
                         return;
                     }
 
-                    if (TryCastSpell(Warrior335a.BerserkerRage, 0, true)
-                        || TryCastSpell(Warrior335a.ShieldSlam, Bot.Wow.TargetGuid, true)
+                    if (TryCastSpell(Warrior335a.ShieldSlam, Bot.Wow.TargetGuid, true)
                         || TryCastSpell(Warrior335a.MockingBlow, Bot.Wow.TargetGuid, true)
                         || ((nearEnemies > 2 || Bot.Player.Rage > 40)
                             && TryCastSpell(Warrior335a.Shockwave, Bot.Wow.TargetGuid, true))

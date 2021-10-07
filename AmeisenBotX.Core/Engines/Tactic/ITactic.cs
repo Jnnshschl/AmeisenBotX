@@ -10,7 +10,7 @@ namespace AmeisenBotX.Core.Engines.Tactic
 
         float AreaRadius { get; }
 
-        Dictionary<string, dynamic> Configureables { get; }
+        Dictionary<string, dynamic> Configurables { get; }
 
         WowMapId MapId { get; }
 
