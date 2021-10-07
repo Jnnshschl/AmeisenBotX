@@ -77,6 +77,12 @@ namespace AmeisenBotX.Core.Engines.Movement
             PlacesToAvoidList.RemoveAll(e => now > e.until);
         }
 
+        public void DirectMove(Vector3 position)
+        {
+            Bot.Character.MoveToPosition(position, 20.9f, 0.5f);
+            // PlayerVehicle.Update((x) => Bot.Character.MoveToPosition(x, 20.9f, 0.5f), MovementAction.Follow, position);
+        }
+
         public void Execute()
         {
             if (!IsAllowedToMove)

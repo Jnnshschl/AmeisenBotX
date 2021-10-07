@@ -46,5 +46,10 @@ namespace AmeisenBotX.Core.Logic.Idle.Actions
                 Bot.Wow.FacePosition(Bot.Player.BaseAddress, Bot.Player.Position, randomPartymember.Position * ((float)Rnd.NextDouble() / 10.0f));
             }
         }
+
+        public override string ToString()
+        {
+            return $"{(AutopilotOnly ? "(🤖) " : "")}Look at Group";
+        }
     }
 }

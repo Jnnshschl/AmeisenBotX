@@ -49,7 +49,7 @@ namespace AmeisenBotX.Core.Logic.Idle.Actions
             }
 
             IWowGameobject nearCampfire = Bot.Objects.WowObjects.OfType<IWowGameobject>()
-                .FirstOrDefault(e => e.DisplayId == (int)WowGameObjectDisplayId.CookingCampfire 
+                .FirstOrDefault(e => e.DisplayId == (int)WowGameObjectDisplayId.CookingCampfire
                                   && Bot.Objects.PartymemberGuids.Contains(e.CreatedBy));
 
             if (nearCampfire != null && !SatDown)
@@ -63,6 +63,11 @@ namespace AmeisenBotX.Core.Logic.Idle.Actions
                 Bot.Wow.CastSpell("Basic Campfire");
                 PlacedCampfire = true;
             }
+        }
+
+        public override string ToString()
+        {
+            return $"{(AutopilotOnly ? "(🤖) " : "")}Place Campfire";
         }
     }
 }

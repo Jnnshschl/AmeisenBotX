@@ -36,6 +36,12 @@ namespace AmeisenBotX.Core.Engines.Movement
         void AvoidPlace(Vector3 position, float radius, TimeSpan timeSpan);
 
         /// <summary>
+        /// Move without validation/pathfinding.
+        /// </summary>
+        /// <param name="position">target position</param>
+        void DirectMove(Vector3 position);
+
+        /// <summary>
         /// Poll this on a regular basis to execute the movement.
         /// </summary>
         void Execute();

@@ -5,8 +5,6 @@ using AmeisenBotX.Common.Math;
 using AmeisenBotX.Common.Utils;
 using AmeisenBotX.Core.Engines.Movement.Enums;
 using AmeisenBotX.Core.Logic.Enums;
-using AmeisenBotX.Core.Logic.Idle;
-using AmeisenBotX.Core.Logic.Idle.Actions;
 using AmeisenBotX.Core.Logic.Routines;
 using AmeisenBotX.Core.Logic.StaticDeathRoutes;
 using AmeisenBotX.Core.Managers.Character.Inventory.Objects;
@@ -44,18 +42,6 @@ namespace AmeisenBotX.Core.Logic
             Mode = BotMode.None;
             // Mode = BotMode.PvP;
 
-            IdleActionManager = new(new List<IIdleAction>()
-            {
-                new AuctionHouseIdleAction(bot),
-                new CheckMailsIdleAction(bot),
-                new FishingIdleAction(bot),
-                new LookAroundIdleAction(bot),
-                new LookAtGroupIdleAction(bot),
-                new RandomEmoteIdleAction(bot),
-                new SitByCampfireIdleAction(bot),
-                new SitToChairIdleAction(bot, Config.MinFollowDistance),
-            });
-
             AntiAfkEvent = new(TimeSpan.FromMilliseconds(1200));
             CharacterUpdateEvent = new(TimeSpan.FromMilliseconds(5000));
             EatBlockEvent = new(TimeSpan.FromMilliseconds(30000));
@@ -68,6 +54,7 @@ namespace AmeisenBotX.Core.Logic
             PartymembersFightEvent = new(TimeSpan.FromMilliseconds(1000));
             RenderSwitchEvent = new(TimeSpan.FromMilliseconds(1000));
             UpdateFood = new(TimeSpan.FromMilliseconds(1000));
+            UnitsLootedCleanupEvent = new(TimeSpan.FromMilliseconds(1000));
 
             UnitsLooted = new();
             UnitsToLoot = new();
@@ -78,7 +65,7 @@ namespace AmeisenBotX.Core.Logic
             (
                 () => CanUseStaticPaths(),
                 // prefer static paths
-                new Leaf(() => MoveToPosition(StaticRoute.GetNextPoint(Bot.Player.Position))),
+                new Leaf(() => { Bot.Movement.DirectMove(StaticRoute.GetNextPoint(Bot.Player.Position)); return BtStatus.Success; }),
                 // run to corpse by position
                 new Leaf(RunToCorpseAndRetrieveIt)
             );
@@ -224,7 +211,7 @@ namespace AmeisenBotX.Core.Logic
                 (NeedToLoot, new Leaf(LootNearUnits)),
                 (NeedToEat, new Leaf(Eat)),
                 (NeedToFollow, new Leaf(Follow)),
-                (() => Config.IdleActions && IdleActionEvent.Run(), new Leaf(() => { IdleActionManager.Tick(Config.Autopilot); return BtStatus.Success; }))
+                (() => Config.IdleActions && IdleActionEvent.Run(), new Leaf(() => { Bot.IdleActions.Tick(Config.Autopilot); return BtStatus.Success; }))
             );
 
             // SPECIAL ENVIRONMENTS -----------------------------
@@ -384,8 +371,6 @@ namespace AmeisenBotX.Core.Logic
 
         private TimegatedEvent IdleActionEvent { get; }
 
-        private IdleActionManager IdleActionManager { get; }
-
         private TimegatedEvent LoginAttemptEvent { get; }
 
         private int LootTry { get; set; }
@@ -413,6 +398,8 @@ namespace AmeisenBotX.Core.Logic
         private Tree Tree { get; }
 
         private List<ulong> UnitsLooted { get; }
+
+        private TimegatedEvent UnitsLootedCleanupEvent { get; }
 
         private Queue<ulong> UnitsToLoot { get; }
 
@@ -634,11 +621,11 @@ namespace AmeisenBotX.Core.Logic
 
         private BtStatus Dead()
         {
+            SearchedStaticRoutes = false;
+
             if (Config.ReleaseSpirit || Bot.Objects.MapId.IsBattlegroundMap())
             {
                 Bot.Wow.RepopMe();
-
-                SearchedStaticRoutes = false;
                 return BtStatus.Success;
             }
 
@@ -910,10 +897,20 @@ namespace AmeisenBotX.Core.Logic
 
             // when we are in a group an they move too far away, abort eating
             // and dont start eating for 30s
-            if (Bot.Objects.PartymemberGuids.Any() && Bot.Player.DistanceTo(Bot.Objects.CenterPartyPosition) > 25.0f)
+            if (Config.EatDrinkAbortFollowParty && Bot.Objects.PartymemberGuids.Any() && Bot.Player.DistanceTo(Bot.Objects.CenterPartyPosition) > Config.EatDrinkAbortFollowPartyDistance)
             {
                 EatBlockEvent.Run();
                 return false;
+            }
+
+            bool isEating = Bot.Player.Auras.Any(e => Bot.Db.GetSpellName(e.SpellId) == "Food");
+            bool isDrinking = Bot.Player.Auras.Any(e => Bot.Db.GetSpellName(e.SpellId) == "Drink");
+
+            // still eating/drinking, wait until threshold is reached
+            if ((isEating && Bot.Player.HealthPercentage < Config.EatUntilPercent)
+                || (isDrinking && Bot.Player.MaxMana > 0 && Bot.Player.ManaPercentage < Config.DrinkUntilPercent))
+            {
+                return true;
             }
 
             if (UpdateFood.Run())
@@ -970,6 +967,16 @@ namespace AmeisenBotX.Core.Logic
 
         private bool NeedToLoot()
         {
+            if (UnitsLootedCleanupEvent.Run())
+            {
+                UnitsLooted.RemoveAll((guid) =>
+                {
+                    // remove unit from looted list when its gone or seen alive
+                    IWowUnit unit = Bot.GetWowObjectByGuid<IWowUnit>(guid);
+                    return unit != null && !unit.IsDead;
+                });
+            }
+
             foreach (IWowUnit unit in GetLootableUnits())
             {
                 if (!UnitsLooted.Contains(unit.Guid) && !UnitsToLoot.Contains(unit.Guid))

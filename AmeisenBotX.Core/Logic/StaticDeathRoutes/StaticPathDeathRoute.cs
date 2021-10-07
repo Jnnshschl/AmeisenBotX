@@ -52,7 +52,7 @@ namespace AmeisenBotX.Core.Logic.StaticDeathRoutes
         /// <inheritdoc cref="IStaticDeathRoute.IsUseable(WowMapId, Vector3, Vector3)"/>
         public bool IsUseable(WowMapId mapId, Vector3 start, Vector3 end)
         {
-            return mapId == WowMapId.Northrend && ((start.GetDistance(Path[0]) < 4.0f && end.GetDistance(Path[^1]) < 4.0f) || end.GetDistance(DeathPoint) < 5.0f);
+            return mapId == WowMapId.Northrend && ((start.GetDistance(Path[0]) < 4.0f && end.GetDistance(Path[^1]) < 4.0f) || end.GetDistance2D(DeathPoint) < 5.0f);
         }
     }
 }

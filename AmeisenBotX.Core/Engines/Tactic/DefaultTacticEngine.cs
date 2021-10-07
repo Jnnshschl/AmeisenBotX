@@ -1,5 +1,8 @@
-﻿using AmeisenBotX.Core.Engines.Tactic.Bosses.Naxxramas10;
+﻿using AmeisenBotX.Common.Storage;
+using AmeisenBotX.Core.Engines.Tactic.Bosses.Naxxramas10;
 using AmeisenBotX.Core.Engines.Tactic.Bosses.TheObsidianSanctum10;
+using AmeisenBotX.Core.Engines.Tactic.Dungeon.ForgeOfSouls;
+using AmeisenBotX.Core.Engines.Tactic.Dungeon.PitOfSaron;
 using AmeisenBotX.Wow.Objects.Enums;
 using System.Collections.Generic;
 
@@ -13,21 +16,40 @@ namespace AmeisenBotX.Core.Engines.Tactic
 
             Tactics = new()
             {
+                // wotlk dungeons
                 {
-                    WowMapId.Naxxramas,
+                    WowMapId.TheForgeOfSouls,
                     new()
                     {
-                        { 1, new AnubRekhan10Tactic(Bot) }
+                        { 0, new BronjahmTactic(Bot) },
+                        { 1, new DevourerOfSoulsTactic(Bot) }
                     }
+                },
+                {
+                    WowMapId.PitOfSaron,
+                    new() { { 0, new IckAndKrickTactic(Bot) } }
+                },
+                // wotlk raids
+                {
+                    WowMapId.Naxxramas,
+                    new() { { 0, new AnubRekhan10Tactic(Bot) } }
                 },
                 {
                     WowMapId.TheObsidianSanctum,
-                    new()
-                    {
-                        { 1, new TwilightPortalTactic(Bot) }
-                    }
+                    new() { { 0, new TwilightPortalTactic(Bot) } }
                 },
             };
+
+            foreach (SortedList<int, ITactic> instances in Tactics.Values)
+            {
+                foreach (ITactic tactic in instances.Values)
+                {
+                    if (tactic is IStoreable s)
+                    {
+                        Bot.Storage.Register(s);
+                    }
+                }
+            }
         }
 
         public bool AllowAttacking { get; private set; }
@@ -40,29 +62,22 @@ namespace AmeisenBotX.Core.Engines.Tactic
 
         public bool Execute()
         {
-            foreach (ITactic tactic in Tactics[Bot.Objects.MapId].Values)
+            if (Tactics.ContainsKey(Bot.Objects.MapId))
             {
-                if (tactic.IsInArea(Bot.Player.Position) && tactic.ExecuteTactic(Bot.CombatClass.Role, Bot.CombatClass.IsMelee, out bool preventMovement, out bool allowAttacking))
+                foreach (ITactic tactic in Tactics[Bot.Objects.MapId].Values)
                 {
-                    PreventMovement = preventMovement;
-                    AllowAttacking = allowAttacking;
-                    return true;
+                    if (tactic.IsInArea(Bot.Player.Position) && tactic.ExecuteTactic(Bot.CombatClass.Role, Bot.CombatClass.IsMelee, out bool preventMovement, out bool allowAttacking))
+                    {
+                        PreventMovement = preventMovement;
+                        AllowAttacking = allowAttacking;
+                        return true;
+                    }
                 }
             }
 
             PreventMovement = false;
             AllowAttacking = true;
             return false;
-        }
-
-        public bool HasTactics()
-        {
-            return Tactics.Count > 0;
-        }
-
-        public void Reset()
-        {
-            Tactics.Clear();
         }
     }
 }

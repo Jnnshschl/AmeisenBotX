@@ -95,5 +95,10 @@ namespace AmeisenBotX.Core.Logic.Idle.Actions
                 }
             }
         }
+
+        public override string ToString()
+        {
+            return $"{(AutopilotOnly ? "(🤖) " : "")}Go to Auctionhouse";
+        }
     }
 }

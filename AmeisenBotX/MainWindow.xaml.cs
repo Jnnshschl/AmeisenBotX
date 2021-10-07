@@ -4,7 +4,6 @@ using AmeisenBotX.Common.Keyboard.Objects;
 using AmeisenBotX.Common.Math;
 using AmeisenBotX.Common.Utils;
 using AmeisenBotX.Core;
-using AmeisenBotX.Core.Engines.Movement.Enums;
 using AmeisenBotX.Core.Logic;
 using AmeisenBotX.Core.Logic.Enums;
 using AmeisenBotX.Logging;

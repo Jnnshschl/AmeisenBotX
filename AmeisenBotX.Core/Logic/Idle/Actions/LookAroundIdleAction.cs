@@ -36,5 +36,10 @@ namespace AmeisenBotX.Core.Logic.Idle.Actions
             float modificationFactor = ((float)Rnd.NextDouble() - 0.5f) / ((float)Rnd.NextDouble() * 5.0f);
             Bot.Wow.SetFacing(Bot.Player.BaseAddress, Bot.Player.Rotation + modificationFactor);
         }
+
+        public override string ToString()
+        {
+            return $"{(AutopilotOnly ? "(🤖) " : "")}Look Around";
+        }
     }
 }

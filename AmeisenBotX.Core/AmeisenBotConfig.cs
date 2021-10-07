@@ -65,11 +65,19 @@ namespace AmeisenBotX.Core
 
         public string CustomCombatClassFile { get; set; } = string.Empty;
 
-        public double DrinkUntilPercent { get; set; } = 75;
+        public double DrinkStartPercent { get; set; } = 65.0;
+
+        public double DrinkUntilPercent { get; set; } = 85.0;
 
         public bool DungeonUsePartyMode { get; set; } = false;
 
-        public double EatUntilPercent { get; set; } = 75;
+        public bool EatDrinkAbortFollowParty { get; set; } = true;
+
+        public float EatDrinkAbortFollowPartyDistance { get; set; } = 25.0f;
+
+        public double EatStartPercent { get; set; } = 65.0;
+
+        public double EatUntilPercent { get; set; } = 85.0;
 
         public int EventPullMs { get; set; } = 500;
 
@@ -90,6 +98,8 @@ namespace AmeisenBotX.Core
         public Dictionary<string, Keybind> Hotkeys { get; set; } = new();
 
         public bool IdleActions { get; set; } = false;
+
+        public Dictionary<string, bool> IdleActionsEnabled { get; set; } = new();
 
         public bool IgnoreCombatWhileMounted { get; set; } = true;
 

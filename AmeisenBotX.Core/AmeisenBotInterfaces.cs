@@ -12,6 +12,7 @@ using AmeisenBotX.Core.Engines.PvP;
 using AmeisenBotX.Core.Engines.Quest;
 using AmeisenBotX.Core.Engines.Tactic;
 using AmeisenBotX.Core.Engines.Test;
+using AmeisenBotX.Core.Logic.Idle;
 using AmeisenBotX.Core.Managers.Character;
 using AmeisenBotX.Core.Managers.Chat;
 using AmeisenBotX.Core.Managers.Threat;
@@ -46,6 +47,8 @@ namespace AmeisenBotX.Core
         public IDungeonEngine Dungeon { get; set; }
 
         public IGrindingEngine Grinding { get; set; }
+
+        public IdleActionManager IdleActions { get; set; }
 
         public IJobEngine Jobs { get; set; }
 

@@ -7,8 +7,9 @@ namespace AmeisenBotX.Core.Logic.Idle
 {
     public class IdleActionManager
     {
-        public IdleActionManager(IEnumerable<IIdleAction> idleActions)
+        public IdleActionManager(AmeisenBotConfig config, IEnumerable<IIdleAction> idleActions)
         {
+            Config = config;
             IdleActions = idleActions;
 
             Rnd = new();
@@ -24,6 +25,8 @@ namespace AmeisenBotX.Core.Logic.Idle
         public DateTime LastActionExecuted { get; private set; }
 
         public List<KeyValuePair<DateTime, IIdleAction>> LastActions { get; private set; }
+
+        private AmeisenBotConfig Config { get; }
 
         private IIdleAction CurrentAction { get; set; }
 
@@ -54,7 +57,8 @@ namespace AmeisenBotX.Core.Logic.Idle
             {
                 IEnumerable<IIdleAction> filteredActions = IdleActions.Where
                 (
-                    e => (!e.AutopilotOnly || autopilotEnabled)
+                    e => Config.IdleActionsEnabled.TryGetValue(e.ToString(), out bool b) && b
+                      && (!e.AutopilotOnly || autopilotEnabled)
                       && DateTime.Now > e.Cooldown
                 );
 

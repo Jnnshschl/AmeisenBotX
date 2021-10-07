@@ -1,6 +1,8 @@
 ﻿using AmeisenBotX.Common.Math;
 using AmeisenBotX.Common.Utils;
 using AmeisenBotX.Core;
+using AmeisenBotX.Logging;
+using AmeisenBotX.Logging.Enums;
 using AmeisenBotX.Wow.Cache.Enums;
 using AmeisenBotX.Wow.Objects;
 using AmeisenBotX.Wow.Objects.Enums;
@@ -19,11 +21,66 @@ namespace AmeisenBotX
         public DevToolsWindow(AmeisenBot ameisenBot)
         {
             AmeisenBot = ameisenBot;
-
             InitializeComponent();
         }
 
+        private enum MainTab
+        {
+            CachePoi = 0,
+            CacheOre,
+            CacheHerb,
+            CacheNames,
+            CacheReactions,
+            CacheSpellNames,
+            NearWowObjects,
+            Lua,
+            Events,
+            Logs
+        }
+
+        private enum NearWowObjectsTab
+        {
+            Unselected = -1,
+            Items,
+            Containers,
+            Units,
+            Players,
+            GameObjects,
+            DynamicObjects,
+            Corpses,
+            AiGroups,
+            AreaTriggers
+        }
+
         private AmeisenBot AmeisenBot { get; }
+
+        private static void CopyDataOfNearestObject(ItemsControl listView)
+        {
+            ItemCollection listItems = listView.Items;
+            if (listItems.Count == 0) return;
+
+            object firstItem = listItems[0];
+            if (firstItem == null) return;
+
+            string dataString = firstItem.ToString();
+            if (string.IsNullOrEmpty(dataString) || string.IsNullOrWhiteSpace(dataString))
+                return;
+
+            string[] splitByGuid = dataString.Split(" Guid:", 2);
+            string entryId = splitByGuid[0].Replace("EntryId: ", string.Empty);
+
+            string[] splitByPos = dataString.Split("Pos: [", 2);
+            string[] splitByBrace = splitByPos[1].Split("]", 2);
+
+            string[] posComponents = splitByBrace[0].Split(", ");
+            string[] cleanComponents = { "", "", "" };
+
+            for (int i = 0; i < posComponents.Length; i++)
+                cleanComponents[i] = posComponents[i].Split(".")[0];
+
+            string finalPosStr = "new Vector3(" + cleanComponents[0] + ", " + cleanComponents[1] + ", " + cleanComponents[2] + ")";
+            Clipboard.SetDataObject(entryId + ", " + finalPosStr);
+        }
 
         private void ButtonEventClear_Click(object sender, RoutedEventArgs e)
         {
@@ -42,6 +99,7 @@ namespace AmeisenBotX
 
         private void ButtonExit_Click(object sender, RoutedEventArgs e)
         {
+            AmeisenLogger.I.OnLog -= OnLog;
             Hide();
         }
 
@@ -56,6 +114,11 @@ namespace AmeisenBotX
             AmeisenBot.Bot.Wow.LuaDoString(textboxLuaCode.Text);
         }
 
+        private void ButtonRefresh_Click(object sender, RoutedEventArgs e)
+        {
+            RefreshActiveData();
+        }
+
         private void ListViewNearWowObjects_KeyDown(object sender, KeyEventArgs e)
         {
             if (e.Key != Key.C) return;
@@ -64,29 +127,38 @@ namespace AmeisenBotX
             {
                 case NearWowObjectsTab.Unselected:
                     break;
+
                 case NearWowObjectsTab.Items:
                     CopyDataOfNearestObject(listViewItems);
                     break;
+
                 case NearWowObjectsTab.Containers:
                     CopyDataOfNearestObject(listViewContainers);
                     break;
+
                 case NearWowObjectsTab.Units:
                     CopyDataOfNearestObject(listViewUnits);
                     break;
+
                 case NearWowObjectsTab.Players:
                     CopyDataOfNearestObject(listViewPlayers);
                     break;
+
                 case NearWowObjectsTab.GameObjects:
                     CopyDataOfNearestObject(listViewGameObjects);
                     break;
+
                 case NearWowObjectsTab.DynamicObjects:
                     CopyDataOfNearestObject(listViewDynamicObjects);
                     break;
+
                 case NearWowObjectsTab.Corpses:
                     CopyDataOfNearestObject(listViewCorpses);
                     break;
+
                 case NearWowObjectsTab.AiGroups:
                     break;
+
                 case NearWowObjectsTab.AreaTriggers:
                     break;
 
@@ -95,19 +167,22 @@ namespace AmeisenBotX
             }
         }
 
-        private void ButtonRefresh_Click(object sender, RoutedEventArgs e)
+        private void OnLog(LogLevel loglevel, string log)
         {
-            RefreshActiveData();
-        }
+            Dispatcher.InvokeAsync(() =>
+            {
+                try
+                {
+                    if (loglevel > (LogLevel)comboboxLoglevels.SelectedItem)
+                    {
+                        return;
+                    }
 
-        private void TabControlMain_SelectionChanged(object sender, SelectionChangedEventArgs e)
-        {
-            RefreshActiveData();
-        }
-
-        private void Window_MouseLeftButtonDown(object sender, MouseButtonEventArgs e)
-        {
-            DragMove();
+                    textboxLogs.AppendText($"{log}\n");
+                    textboxLogs.ScrollToEnd();
+                }
+                catch { }
+            });
         }
 
         private void OnWowEventFired(long timestamp, List<string> args)
@@ -208,6 +283,7 @@ namespace AmeisenBotX
                     {
                         case NearWowObjectsTab.Unselected:
                             break;
+
                         case NearWowObjectsTab.Items:
                             {
                                 listViewItems.Items.Clear();
@@ -369,7 +445,11 @@ namespace AmeisenBotX
 
                 case MainTab.Lua:
                     break;
+
                 case MainTab.Events:
+                    break;
+
+                case MainTab.Logs:
                     break;
 
                 default:
@@ -377,59 +457,25 @@ namespace AmeisenBotX
             }
         }
 
-        private static void CopyDataOfNearestObject(ItemsControl listView)
+        private void TabControlMain_SelectionChanged(object sender, SelectionChangedEventArgs e)
         {
-            ItemCollection listItems = listView.Items;
-            if (listItems.Count == 0) return;
-
-            object firstItem = listItems[0];
-            if (firstItem == null) return;
-
-            string dataString = firstItem.ToString();
-            if (string.IsNullOrEmpty(dataString) || string.IsNullOrWhiteSpace(dataString))
-                return;
-
-            string[] splitByGuid = dataString.Split(" Guid:", 2);
-            string entryId = splitByGuid[0].Replace("EntryId: ", string.Empty);
-
-            string[] splitByPos = dataString.Split("Pos: [", 2);
-            string[] splitByBrace = splitByPos[1].Split("]", 2);
-
-            string[] posComponents = splitByBrace[0].Split(", ");
-            string[] cleanComponents = { "", "", "" };
-
-            for (int i = 0; i < posComponents.Length; i++)
-                cleanComponents[i] = posComponents[i].Split(".")[0];
-
-            string finalPosStr = "new Vector3(" + cleanComponents[0] + ", " + cleanComponents[1] + ", " + cleanComponents[2] + ")";
-            Clipboard.SetDataObject(entryId + ", " + finalPosStr);
+            RefreshActiveData();
         }
 
-        private enum MainTab
+        private void Window_Loaded(object sender, RoutedEventArgs e)
         {
-            CachePoi = 0,
-            CacheOre,
-            CacheHerb,
-            CacheNames,
-            CacheReactions,
-            CacheSpellNames,
-            NearWowObjects,
-            Lua,
-            Events
+            foreach (LogLevel l in Enum.GetValues(typeof(LogLevel)))
+            {
+                comboboxLoglevels.Items.Add(l);
+            }
+
+            comboboxLoglevels.SelectedItem = AmeisenLogger.I.ActiveLogLevel;
+            AmeisenLogger.I.OnLog += OnLog;
         }
 
-        private enum NearWowObjectsTab
+        private void Window_MouseLeftButtonDown(object sender, MouseButtonEventArgs e)
         {
-            Unselected = -1,
-            Items,
-            Containers,
-            Units,
-            Players,
-            GameObjects,
-            DynamicObjects,
-            Corpses,
-            AiGroups,
-            AreaTriggers
+            DragMove();
         }
     }
 }
