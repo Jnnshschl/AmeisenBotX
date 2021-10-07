@@ -25,6 +25,11 @@ namespace AmeisenBotX.Core.Engines.Combat.Classes.Bia10
                 Bot.Player.ManaPercentage > 60.0
                 && ValidateSpell(Priest335a.InnerFire, true)
                 && TryCastSpell(Priest335a.InnerFire, Bot.Player.Guid)));
+            MyAuraManager.Jobs.Add(new KeepActiveAuraJob(bot.Db, Priest335a.Renew, () =>
+                Bot.Player.Auras.All(e => Bot.Db.GetSpellName(e.SpellId) != Priest335a.Renew)
+                && Bot.Player.HealthPercentage < 85 && Bot.Player.ManaPercentage > 65.0
+                && ValidateSpell(Priest335a.Renew, true)
+                && TryCastSpell(Priest335a.Renew, Bot.Player.Guid)));
 
             TargetAuraManager.Jobs.Add(new KeepActiveAuraJob(bot.Db, Priest335a.ShadowWordPain, () =>
                 Bot.Target?.HealthPercentage >= 5

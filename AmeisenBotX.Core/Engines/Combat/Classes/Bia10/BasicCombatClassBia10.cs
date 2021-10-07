@@ -200,8 +200,8 @@ namespace AmeisenBotX.Core.Engines.Combat.Classes.Bia10
                     break;
                 // -------- Horde -------- >
                 case WowRace.Orc:
-                    if (Bot.Player.HealthPercentage < 50.0
-                        && Bot.GetEnemiesOrNeutralsInCombatWithMe<IWowUnit>(Bot.Player.Position, 10).Count() > 2)
+                    if (Bot.Player.HealthPercentage < 50.0 
+                        && Bot.GetEnemiesOrNeutralsInCombatWithMe<IWowUnit>(Bot.Player.Position, 10).Count() >= 2)
                         if (ValidateSpell(Racials335a.BloodFury, false))
                             TryCastSpell(Racials335a.BloodFury, Bot.Player.Guid, false, 0);
                     break;
@@ -209,13 +209,13 @@ namespace AmeisenBotX.Core.Engines.Combat.Classes.Bia10
                     break;
                 case WowRace.Tauren:
                     if (Bot.Player.HealthPercentage < 50.0
-                        && Bot.GetEnemiesOrNeutralsInCombatWithMe<IWowUnit>(Bot.Player.Position, 10).Count() > 2)
+                        && Bot.GetEnemiesOrNeutralsInCombatWithMe<IWowUnit>(Bot.Player.Position, 10).Count() >= 2)
                         if (ValidateSpell(Racials335a.WarStomp, false))
                             TryCastSpell(Racials335a.WarStomp, Bot.Player.Guid, false, 0);
                     break;
                 case WowRace.Troll:
                     if (Bot.Player.ManaPercentage > 45.0
-                        && Bot.GetEnemiesOrNeutralsInCombatWithMe<IWowUnit>(Bot.Player.Position, 10).Count() > 2)
+                        && Bot.GetEnemiesOrNeutralsInCombatWithMe<IWowUnit>(Bot.Player.Position, 10).Count() >= 2)
                         if (ValidateSpell(Racials335a.Berserking, false))
                             TryCastSpell(Racials335a.Berserking, Bot.Player.Guid, false, 0);
                     break;
