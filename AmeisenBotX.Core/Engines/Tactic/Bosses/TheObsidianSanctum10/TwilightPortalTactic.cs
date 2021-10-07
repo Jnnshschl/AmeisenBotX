@@ -16,7 +16,7 @@ namespace AmeisenBotX.Core.Engines.Tactic.Bosses.TheObsidianSanctum10
             Bot = bot;
             PortalClickEvent = new(TimeSpan.FromSeconds(1));
 
-            Configureables = new()
+            Configurables = new()
             {
                 { "isOffTank", false },
             };
@@ -26,7 +26,7 @@ namespace AmeisenBotX.Core.Engines.Tactic.Bosses.TheObsidianSanctum10
 
         public float AreaRadius { get; } = 1024.0f;
 
-        public Dictionary<string, dynamic> Configureables { get; private set; }
+        public Dictionary<string, dynamic> Configurables { get; private set; }
 
         public WowMapId MapId { get; } = WowMapId.TheObsidianSanctum;
 

@@ -10,14 +10,14 @@ using System.Collections.Generic;
 
 namespace AmeisenBotX.Core.Engines.Tactic.Bosses.Naxxramas10
 {
-    public class AnubRekhan10Tactic : SimpleConfigureable, ITactic
+    public class AnubRekhan10Tactic : SimpleConfigurable, ITactic
     {
         public AnubRekhan10Tactic(AmeisenBotInterfaces bot)
         {
             Bot = bot;
             TankingPathQueue = new();
 
-            Configureables.TryAdd("isOffTank", false);
+            Configurables.TryAdd("isOffTank", false);
         }
 
         public Vector3 Area { get; } = new(3273, -3476, 287);
@@ -168,7 +168,7 @@ namespace AmeisenBotX.Core.Engines.Tactic.Bosses.Naxxramas10
 
             if (anubrekhan != null)
             {
-                if (Configureables["isOffTank"] == true)
+                if (Configurables["isOffTank"] == true)
                 {
                     // offtank should only focus adds
                     Bot.CombatClass.BlacklistedTargetDisplayIds = AnubRekhanDisplayId;

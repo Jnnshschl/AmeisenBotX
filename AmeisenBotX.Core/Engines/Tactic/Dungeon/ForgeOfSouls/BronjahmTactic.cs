@@ -14,7 +14,7 @@ namespace AmeisenBotX.Core.Engines.Tactic.Dungeon.ForgeOfSouls
         {
             Bot = bot;
 
-            Configureables = new()
+            Configurables = new()
             {
                 { "isOffTank", false },
             };
@@ -26,7 +26,7 @@ namespace AmeisenBotX.Core.Engines.Tactic.Dungeon.ForgeOfSouls
 
         public AmeisenBotInterfaces Bot { get; }
 
-        public Dictionary<string, dynamic> Configureables { get; private set; }
+        public Dictionary<string, dynamic> Configurables { get; private set; }
 
         public WowMapId MapId { get; } = WowMapId.TheForgeOfSouls;
 

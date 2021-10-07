@@ -19,14 +19,14 @@ namespace AmeisenBotX.Core.Engines.Combat.Classes.Jannis
     {
         public PaladinHoly(AmeisenBotInterfaces bot) : base(bot)
         {
-            Configureables.TryAdd("AttackInGroups", true);
-            Configureables.TryAdd("AttackInGroupsUntilManaPercent", 85.0);
-            Configureables.TryAdd("AttackInGroupsCloseCombat", false);
-            Configureables.TryAdd("BeaconOfLightSelfHealth", 85.0);
-            Configureables.TryAdd("BeaconOfLightPartyHealth", 85.0);
-            Configureables.TryAdd("DivinePleaMana", 60.0);
-            Configureables.TryAdd("DivineIlluminationManaAbove", 20.0);
-            Configureables.TryAdd("DivineIlluminationManaUntil", 50.0);
+            Configurables.TryAdd("AttackInGroups", true);
+            Configurables.TryAdd("AttackInGroupsUntilManaPercent", 85.0);
+            Configurables.TryAdd("AttackInGroupsCloseCombat", false);
+            Configurables.TryAdd("BeaconOfLightSelfHealth", 85.0);
+            Configurables.TryAdd("BeaconOfLightPartyHealth", 85.0);
+            Configurables.TryAdd("DivinePleaMana", 60.0);
+            Configurables.TryAdd("DivineIlluminationManaAbove", 20.0);
+            Configurables.TryAdd("DivineIlluminationManaUntil", 50.0);
 
             MyAuraManager.Jobs.Add(new KeepActiveAuraJob(bot.Db, Paladin335a.BlessingOfWisdom, () => TryCastSpell(Paladin335a.BlessingOfWisdom, Bot.Wow.PlayerGuid, true)));
             MyAuraManager.Jobs.Add(new KeepActiveAuraJob(bot.Db, Paladin335a.DevotionAura, () => TryCastSpell(Paladin335a.DevotionAura, Bot.Wow.PlayerGuid, true)));
@@ -141,14 +141,14 @@ namespace AmeisenBotX.Core.Engines.Combat.Classes.Jannis
         {
             base.Execute();
 
-            if (Bot.Player.ManaPercentage < Configureables["DivineIlluminationManaUntil"]
-               && Bot.Player.ManaPercentage > Configureables["DivineIlluminationManaAbove"]
+            if (Bot.Player.ManaPercentage < Configurables["DivineIlluminationManaUntil"]
+               && Bot.Player.ManaPercentage > Configurables["DivineIlluminationManaAbove"]
                && TryCastSpell(Paladin335a.DivineIllumination, 0, true))
             {
                 return;
             }
 
-            if (Bot.Player.ManaPercentage < Configureables["DivinePleaMana"]
+            if (Bot.Player.ManaPercentage < Configurables["DivinePleaMana"]
                 && TryCastSpell(Paladin335a.DivinePlea, 0, true))
             {
                 return;
@@ -156,7 +156,7 @@ namespace AmeisenBotX.Core.Engines.Combat.Classes.Jannis
 
             if (ChangeBeaconEvent.Ready)
             {
-                if (Bot.Player.HealthPercentage < Configureables["BeaconOfLightSelfHealth"])
+                if (Bot.Player.HealthPercentage < Configurables["BeaconOfLightSelfHealth"])
                 {
                     // keep beacon of light on us to reduce healing ourself
                     if (!Bot.Player.Auras.Any(e => Bot.Db.GetSpellName(e.SpellId) == Paladin335a.BeaconOfLight)
@@ -172,7 +172,7 @@ namespace AmeisenBotX.Core.Engines.Combat.Classes.Jannis
 
                     if (healableTargets.Count() > 1)
                     {
-                        IWowUnit t = healableTargets.Skip(1).FirstOrDefault(e => e.HealthPercentage < Configureables["BeaconOfLightPartyHealth"]);
+                        IWowUnit t = healableTargets.Skip(1).FirstOrDefault(e => e.HealthPercentage < Configurables["BeaconOfLightPartyHealth"]);
 
                         // keep beacon of light on second lowest target
                         if (t != null
@@ -194,7 +194,7 @@ namespace AmeisenBotX.Core.Engines.Combat.Classes.Jannis
             {
                 bool isAlone = !Bot.Objects.Partymembers.Any(e => e.Guid != Bot.Player.Guid);
 
-                if ((isAlone || (Configureables["AttackInGroups"] && Configureables["AttackInGroupsUntilManaPercent"] < Bot.Player.ManaPercentage))
+                if ((isAlone || (Configurables["AttackInGroups"] && Configurables["AttackInGroupsUntilManaPercent"] < Bot.Player.ManaPercentage))
                     && SelectTarget(TargetProviderDps))
                 {
                     if ((Bot.Player.Auras.Any(e => Bot.Db.GetSpellName(e.SpellId) == Paladin335a.SealOfVengeance) || Bot.Player.Auras.Any(e => Bot.Db.GetSpellName(e.SpellId) == Paladin335a.SealOfWisdom))
@@ -209,7 +209,7 @@ namespace AmeisenBotX.Core.Engines.Combat.Classes.Jannis
                     }
 
                     // either we are alone or allowed to go close combat in groups
-                    if (isAlone || Configureables["AttackInGroupsCloseCombat"])
+                    if (isAlone || Configurables["AttackInGroupsCloseCombat"])
                     {
                         if (!Bot.Player.IsAutoAttacking
                             && Bot.Player.IsInMeleeRange(Bot.Target)

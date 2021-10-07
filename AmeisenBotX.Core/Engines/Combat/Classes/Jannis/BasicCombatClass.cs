@@ -21,7 +21,7 @@ using System.Linq;
 
 namespace AmeisenBotX.Core.Engines.Combat.Classes.Jannis
 {
-    public abstract class BasicCombatClass : SimpleConfigureable, ICombatClass
+    public abstract class BasicCombatClass : SimpleConfigurable, ICombatClass
     {
         private readonly int[] useableHealingItems = new int[]
         {
@@ -59,8 +59,8 @@ namespace AmeisenBotX.Core.Engines.Combat.Classes.Jannis
             EventCheckFacing = new(TimeSpan.FromMilliseconds(500));
             EventAutoAttack = new(TimeSpan.FromMilliseconds(500));
 
-            Configureables.TryAdd("HealthItemThreshold", 30.0);
-            Configureables.TryAdd("ManaItemThreshold", 30.0);
+            Configurables.TryAdd("HealthItemThreshold", 30.0);
+            Configurables.TryAdd("ManaItemThreshold", 30.0);
         }
 
         public string Author { get; } = "Jannis";
@@ -209,7 +209,7 @@ namespace AmeisenBotX.Core.Engines.Combat.Classes.Jannis
 
             // Useable items, potions, etc.
             // ---------------------------- >
-            if (Bot.Player.HealthPercentage < Configureables["HealthItemThreshold"])
+            if (Bot.Player.HealthPercentage < Configurables["HealthItemThreshold"])
             {
                 IWowInventoryItem healthItem = Bot.Character.Inventory.Items.FirstOrDefault(e => useableHealingItems.Contains(e.Id));
 
@@ -219,7 +219,7 @@ namespace AmeisenBotX.Core.Engines.Combat.Classes.Jannis
                 }
             }
 
-            if (Bot.Player.ManaPercentage < Configureables["ManaItemThreshold"])
+            if (Bot.Player.ManaPercentage < Configurables["ManaItemThreshold"])
             {
                 IWowInventoryItem manaItem = Bot.Character.Inventory.Items.FirstOrDefault(e => useableManaItems.Contains(e.Id));
 

@@ -41,17 +41,17 @@ namespace AmeisenBotX.Core.Engines.Combat.Classes.Jannis
                 { 1, (x) => TryCastSpell(Hunter335a.Intimidation, x.Guid, true) }
             };
 
-            Configureables.TryAdd("KitingStartDistanceUnit", 10.0f);
-            Configureables.TryAdd("KitingEndDistanceUnit", 12.0f);
-            Configureables.TryAdd("SteadyShotMinDistanceUnit", 12.0f);
-            Configureables.TryAdd("ChaseDistanceUnit", 20.0f);
+            Configurables.TryAdd("KitingStartDistanceUnit", 10.0f);
+            Configurables.TryAdd("KitingEndDistanceUnit", 12.0f);
+            Configurables.TryAdd("SteadyShotMinDistanceUnit", 12.0f);
+            Configurables.TryAdd("ChaseDistanceUnit", 20.0f);
 
-            Configureables.TryAdd("KitingStartDistancePlayer", 8.0f);
-            Configureables.TryAdd("KitingEndDistancePlayer", 22.0f);
-            Configureables.TryAdd("SteadyShotMinDistancePlayer", 22.0f);
-            Configureables.TryAdd("ChaseDistancePlayer", 24.0f);
+            Configurables.TryAdd("KitingStartDistancePlayer", 8.0f);
+            Configurables.TryAdd("KitingEndDistancePlayer", 22.0f);
+            Configurables.TryAdd("SteadyShotMinDistancePlayer", 22.0f);
+            Configurables.TryAdd("ChaseDistancePlayer", 24.0f);
 
-            Configureables.TryAdd("FleeActionCooldown", 400);
+            Configurables.TryAdd("FleeActionCooldown", 400);
         }
 
         public override string Description => "FCFS based CombatClass for the Beastmastery Hunter spec.";
@@ -136,7 +136,7 @@ namespace AmeisenBotX.Core.Engines.Combat.Classes.Jannis
                         return;
                     }
 
-                    if (distanceToTarget < (Bot.Target.IsPlayer() ? Configureables["KitingStartDistancePlayer"] : Configureables["KitingStartDistanceUnit"]))
+                    if (distanceToTarget < (Bot.Target.IsPlayer() ? Configurables["KitingStartDistancePlayer"] : Configurables["KitingStartDistanceUnit"]))
                     {
                         if (ReadyToDisengage
                             && TryCastSpell(Hunter335a.Disengage, 0, true))
@@ -160,7 +160,7 @@ namespace AmeisenBotX.Core.Engines.Combat.Classes.Jannis
                         TryCastSpell(Hunter335a.RaptorStrike, Bot.Wow.TargetGuid, true);
                         TryCastSpell(Hunter335a.MongooseBite, Bot.Wow.TargetGuid, true);
                     }
-                    else if (distanceToTarget < (Bot.Target.IsPlayer() ? Configureables["KitingEndDistancePlayer"] : Configureables["KitingEndDistanceUnit"]))
+                    else if (distanceToTarget < (Bot.Target.IsPlayer() ? Configurables["KitingEndDistancePlayer"] : Configurables["KitingEndDistanceUnit"]))
                     {
                         if (!Bot.Target.Auras.Any(e => Bot.Db.GetSpellName(e.SpellId) == Hunter335a.ConcussiveShot)
                             && !Bot.Target.Auras.Any(e => Bot.Db.GetSpellName(e.SpellId) == "Frost Trap Aura")
@@ -191,13 +191,13 @@ namespace AmeisenBotX.Core.Engines.Combat.Classes.Jannis
                         }
 
                         // only cast when we are far away and disengage is ready
-                        if (distanceToTarget > (Bot.Target.IsPlayer() ? Configureables["SteadyShotMinDistancePlayer"] : Configureables["SteadyShotMinDistanceUnit"])
+                        if (distanceToTarget > (Bot.Target.IsPlayer() ? Configurables["SteadyShotMinDistancePlayer"] : Configurables["SteadyShotMinDistanceUnit"])
                             && TryCastSpell(Hunter335a.SteadyShot, Bot.Wow.TargetGuid, true))
                         {
                             return;
                         }
                     }
-                    else if (!Bot.Tactic.PreventMovement && distanceToTarget > (Bot.Target.IsPlayer() ? Configureables["ChaseDistancePlayer"] : Configureables["ChaseDistanceUnit"]))
+                    else if (!Bot.Tactic.PreventMovement && distanceToTarget > (Bot.Target.IsPlayer() ? Configurables["ChaseDistancePlayer"] : Configurables["ChaseDistanceUnit"]))
                     {
                         if (!Bot.Target.Auras.Any(e => Bot.Db.GetSpellName(e.SpellId) == Hunter335a.ConcussiveShot)
                             && !Bot.Target.Auras.Any(e => Bot.Db.GetSpellName(e.SpellId) == "Frost Trap Aura")
@@ -214,11 +214,11 @@ namespace AmeisenBotX.Core.Engines.Combat.Classes.Jannis
                     // nothing to do, run away
                     if (!Bot.Tactic.PreventMovement)
                     {
-                        if (DateTime.UtcNow - TimeSpan.FromMilliseconds(Configureables["FleeActionCooldown"]) > LastSpellCast)
+                        if (DateTime.UtcNow - TimeSpan.FromMilliseconds(Configurables["FleeActionCooldown"]) > LastSpellCast)
                         {
                             if (RunningAway)
                             {
-                                if (distanceToTarget < (Bot.Target.IsPlayer() ? Configureables["KitingEndDistancePlayer"] : Configureables["KitingEndDistanceUnit"]))
+                                if (distanceToTarget < (Bot.Target.IsPlayer() ? Configurables["KitingEndDistancePlayer"] : Configurables["KitingEndDistanceUnit"]))
                                 {
                                     Bot.Movement.SetMovementAction(MovementAction.Flee, Bot.Target.Position, Bot.Target.Rotation);
                                 }
@@ -227,7 +227,7 @@ namespace AmeisenBotX.Core.Engines.Combat.Classes.Jannis
                                     RunningAway = false;
                                 }
                             }
-                            else if (distanceToTarget < (Bot.Target.IsPlayer() ? Configureables["KitingStartDistancePlayer"] : Configureables["KitingStartDistanceUnit"]))
+                            else if (distanceToTarget < (Bot.Target.IsPlayer() ? Configurables["KitingStartDistancePlayer"] : Configurables["KitingStartDistanceUnit"]))
                             {
                                 RunningAway = true;
                             }

@@ -4,23 +4,23 @@ using System.Text.Json;
 
 namespace AmeisenBotX.Common.Storage
 {
-    public abstract class SimpleConfigureable : IStoreable
+    public abstract class SimpleConfigurable : IStoreable
     {
-        public Dictionary<string, dynamic> Configureables { get; protected set; } = new();
+        public Dictionary<string, dynamic> Configurables { get; protected set; } = new();
 
         public virtual void Load(Dictionary<string, JsonElement> objects)
         {
-            if (objects.ContainsKey("Configureables"))
+            if (objects.ContainsKey("Configurables"))
             {
-                foreach (KeyValuePair<string, dynamic> x in objects["Configureables"].ToDyn())
+                foreach (KeyValuePair<string, dynamic> x in objects["Configurables"].ToDyn())
                 {
-                    if (Configureables.ContainsKey(x.Key))
+                    if (Configurables.ContainsKey(x.Key))
                     {
-                        Configureables[x.Key] = x.Value;
+                        Configurables[x.Key] = x.Value;
                     }
                     else
                     {
-                        Configureables.Add(x.Key, x.Value);
+                        Configurables.Add(x.Key, x.Value);
                     }
                 }
             }
@@ -30,7 +30,7 @@ namespace AmeisenBotX.Common.Storage
         {
             return new()
             {
-                { "Configureables", Configureables }
+                { "Configurables", Configurables }
             };
         }
     }
