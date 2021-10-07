@@ -23,8 +23,8 @@ namespace AmeisenBotX.Core.Engines.Grinding.Profiles.Horde
             new Npc("Shikrik", 3157,
                 WowMapId.Kalimdor, WowZoneId.ValleyofTrials, new Vector3(-623, -4203, 38),
                 NpcType.ClassTrainer, NpcSubType.ShamanTrainer),
-            new Npc("Frang", 3145,
-                WowMapId.Kalimdor, WowZoneId.ValleyofTrials, new Vector3(-629, -4228, 38),
+            new Npc("Frang", 3153,
+                WowMapId.Kalimdor, WowZoneId.ValleyofTrials, new Vector3(-639, -4230, 38),
                 NpcType.ClassTrainer, NpcSubType.WarriorTrainer)
         };
 
@@ -38,12 +38,13 @@ namespace AmeisenBotX.Core.Engines.Grinding.Profiles.Horde
         public List<GrindingSpot> Spots { get; } = new()
         {
             // pigs
-            new GrindingSpot(new Vector3(-546, -4308, 38), 40.0f, 1, 3),
-            new GrindingSpot(new Vector3(-450, -4258, 48), 40.0f, 1, 3),
+            new GrindingSpot(new Vector3(-546, -4308, 38), 45.0f, 1, 3),
+            new GrindingSpot(new Vector3(-450, -4258, 48), 45.0f, 1, 3),
             // scorpids
-            new GrindingSpot(new Vector3(-435, -4154, 52), 48.0f, 2, 7),
-            new GrindingSpot(new Vector3(-379, -4096, 49), 48.0f, 2, 7),
-            new GrindingSpot(new Vector3(-399, -4116, 50), 48.0f, 2, 7)
+            new GrindingSpot(new Vector3(-435, -4154, 52), 55.0f, 2, 7),
+            new GrindingSpot(new Vector3(-379, -4096, 49), 55.0f, 2, 7),
+            new GrindingSpot(new Vector3(-399, -4116, 50), 55.0f, 2, 7),
+            new GrindingSpot(new Vector3(-284, -4179, 51), 55.0f, 2, 7),
         };
 
         public override string ToString()
