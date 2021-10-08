@@ -15,7 +15,11 @@ namespace AmeisenBotX.Core.Engines.Grinding.Profiles.Horde
         {
             new Npc("Trayexir", 10369,
                 WowMapId.Kalimdor, WowZoneId.SenjinVillage, new Vector3(-769, -4948, 22),
-                NpcType.VendorRepair)
+                NpcType.VendorRepair),
+
+            new Npc("Lau'Tiki", 5941,
+                WowMapId.Kalimdor, WowZoneId.SenjinVillage, new Vector3(-1067, -4778, 17),
+                NpcType.ProfessionTrainer, NpcSubType.FishingTrainer)
         };
 
         public List<InteractableObject> ObjectsOfInterest { get; }
