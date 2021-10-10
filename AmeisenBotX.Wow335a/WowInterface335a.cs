@@ -474,7 +474,12 @@ namespace AmeisenBotX.Wow335a
 
             try
             {
-                if (ExecuteLuaAndRead(BotUtils.ObfuscateLua("{v:0}=\"\"{v:1}=GetNumSkillLines()for a=1,{v:1} do local b,c,_,d,_,_,e=GetSkillLineInfo(a)if not c then {v:0}={v:0}..b;if a<{v:1} then {v:0}={v:0}..\":\"..tostring(d or 0)..\"/\"..tostring(e or 0)..\";\"end end end"), out string result))
+                ExecuteLuaAndRead(
+                    BotUtils.ObfuscateLua(
+                        "{v:0}=\"\"{v:1}=GetNumSkillLines()for a=1,{v:1} do local b,c,_,d,_,_,e=GetSkillLineInfo(a)if not c then {v:0}={v:0}..b;if a<{v:1} then {v:0}={v:0}..\":\"..tostring(d or 0)..\"/\"..tostring(e or 0)..\";\"end end end"),
+                    out string result);
+
+                if (!string.IsNullOrEmpty(result))
                 {
                     IEnumerable<string> skills = new List<string>(result.Split(';')).Select(s => s.Trim());
 
@@ -491,7 +496,10 @@ namespace AmeisenBotX.Wow335a
                     }
                 }
             }
-            catch { }
+            catch
+            {
+                // ignored
+            }
 
             return parsedSkills;
         }

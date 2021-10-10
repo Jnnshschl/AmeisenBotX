@@ -634,7 +634,7 @@ namespace AmeisenBotX.Core
         private void OnClassTrainerShow(long timestamp, List<string> args)
         {
             // todo: Config.TrainSpells
-            if (!Bot.Target.IsClassTrainer) return;
+            if (!Bot.Target.IsClassTrainer && !Bot.Target.IsProfessionTrainer) return;
 
             TrainAllSpellsRoutine.Run(Bot, Config);
             Bot.Character.LastLevelTrained = Bot.Player.Level;

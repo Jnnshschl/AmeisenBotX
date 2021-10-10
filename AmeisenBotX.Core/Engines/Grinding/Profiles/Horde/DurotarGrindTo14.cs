@@ -25,7 +25,11 @@ namespace AmeisenBotX.Core.Engines.Grinding.Profiles.Horde
                 NpcType.ClassTrainer, NpcSubType.WarriorTrainer),
             new Npc("Swart", 3173,
                 WowMapId.Kalimdor, WowZoneId.RazorHill, new Vector3(307, -4839, 10),
-                NpcType.ClassTrainer, NpcSubType.ShamanTrainer)
+                NpcType.ClassTrainer, NpcSubType.ShamanTrainer),
+
+            new Npc("Rawrk", 5943,
+                WowMapId.Kalimdor, WowZoneId.RazorHill, new Vector3(330, -4826, 10),
+                NpcType.ProfessionTrainer, NpcSubType.FirstAidTrainer)
         };
 
         public List<InteractableObject> ObjectsOfInterest { get; } = new()

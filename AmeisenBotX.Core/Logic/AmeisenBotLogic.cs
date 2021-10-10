@@ -166,6 +166,7 @@ namespace AmeisenBotX.Core.Logic
                 (NeedToFight, combatNode),
                 (NeedToRepairOrSell, new Leaf(SpeakWithMerchant)),
                 (NeedToTrainSpells, new Leaf(SpeakWithClassTrainer)),
+                (NeedToTrainSecondarySkills, new Leaf(SpeakWithProfessionTrainer)), 
                 (NeedToLoot, new Leaf(LootNearUnits)),
                 (NeedToEat, new Leaf(Eat))
             );
@@ -354,6 +355,8 @@ namespace AmeisenBotX.Core.Logic
         private TimegatedEvent CharacterUpdateEvent { get; }
 
         private IWowUnit ClassTrainer { get; set; }
+
+        private IWowUnit ProfessionTrainer { get; set; }
 
         private AmeisenBotConfig Config { get; }
 
@@ -1031,6 +1034,12 @@ namespace AmeisenBotX.Core.Logic
 
                 case BotMode.Questing:
                     break;
+                case BotMode.PvP:
+                    break;
+                case BotMode.Testing:
+                    break;
+                case BotMode.Jobs:
+                    break;
 
                 default:
                     throw new ArgumentOutOfRangeException();
@@ -1048,6 +1057,36 @@ namespace AmeisenBotX.Core.Logic
             }
 
             return false;
+        }
+
+        private bool NeedToTrainSecondarySkills()
+        {
+            IWowUnit professionTrainer = null;
+            Npc profileTrainer = null;
+
+            if (Bot.Grinding.Profile != null)
+                profileTrainer = Bot.Grinding.Profile.NpcsOfInterest?.FirstOrDefault(e =>
+                    e.Type == NpcType.ProfessionTrainer);
+
+            if (profileTrainer != null)
+            {
+                professionTrainer = profileTrainer.SubType switch
+                {
+                    NpcSubType.FishingTrainer when !Bot.Character.Skills.ContainsKey("Fishing") => Bot
+                        .GetClosestTrainerByEntryId(profileTrainer.EntryId),
+                    NpcSubType.FirstAidTrainer when !Bot.Character.Skills.ContainsKey("FirstAid") => Bot
+                        .GetClosestTrainerByEntryId(profileTrainer.EntryId),
+                    NpcSubType.CookingTrainer when !Bot.Character.Skills.ContainsKey("Cooking") => Bot
+                        .GetClosestTrainerByEntryId(profileTrainer.EntryId),
+                    _ => null
+                };
+            }
+
+            if (professionTrainer == null)
+                return false;
+
+            ProfessionTrainer = professionTrainer;
+            return ProfessionTrainer != null; // todo: Config.LearnSecondarySkills
         }
 
         private bool NeedToTrainSpells()
@@ -1071,21 +1110,17 @@ namespace AmeisenBotX.Core.Logic
 
         private BtStatus RunToCorpseAndRetrieveIt()
         {
-            if (Bot.Memory.Read(Bot.Wow.Offsets.CorpsePosition, out Vector3 corpsePosition))
+            if (!Bot.Memory.Read(Bot.Wow.Offsets.CorpsePosition, out Vector3 corpsePosition))
+                return BtStatus.Failed;
+
+            if (Bot.Player.Position.GetDistance(corpsePosition) > Config.GhostResurrectThreshold)
             {
-                if (Bot.Player.Position.GetDistance(corpsePosition) > Config.GhostResurrectThreshold)
-                {
-                    Bot.Movement.SetMovementAction(MovementAction.Move, corpsePosition);
-                    return BtStatus.Ongoing;
-                }
-                else
-                {
-                    Bot.Wow.RetrieveCorpse();
-                    return BtStatus.Success;
-                }
+                Bot.Movement.SetMovementAction(MovementAction.Move, corpsePosition);
+                return BtStatus.Ongoing;
             }
 
-            return BtStatus.Failed;
+            Bot.Wow.RetrieveCorpse();
+            return BtStatus.Success;
         }
 
         private void SetUlowGfxSettings()
@@ -1100,18 +1135,13 @@ namespace AmeisenBotX.Core.Logic
 
         private bool ShouldIFollowPlayer(IWowUnit playerToFollow)
         {
-            if (playerToFollow != null)
-            {
-                Vector3 pos = Config.FollowPositionDynamic ? playerToFollow.Position + FollowOffset : playerToFollow.Position;
-                double distance = Bot.Player.DistanceTo(pos);
+            if (playerToFollow == null)
+                return false;
 
-                if (distance > Config.MinFollowDistance && distance < Config.MaxFollowDistance)
-                {
-                    return true;
-                }
-            }
+            Vector3 pos = Config.FollowPositionDynamic ? playerToFollow.Position + FollowOffset : playerToFollow.Position;
+            double distance = Bot.Player.DistanceTo(pos);
 
-            return false;
+            return distance > Config.MinFollowDistance && distance < Config.MaxFollowDistance;
         }
 
         private BtStatus SpeakWithClassTrainer()
@@ -1122,7 +1152,7 @@ namespace AmeisenBotX.Core.Logic
             if (Bot.Player.Position.GetDistance(ClassTrainer.Position) > 3.0f)
             {
                 Bot.Movement.SetMovementAction(MovementAction.Move, ClassTrainer.Position);
-                return BtStatus.Success;
+                return BtStatus.Ongoing;
             }
 
             Bot.Movement.StopMovement();
@@ -1134,31 +1164,44 @@ namespace AmeisenBotX.Core.Logic
             return BtStatus.Success;
         }
 
-        private BtStatus SpeakWithMerchant()
+        private BtStatus SpeakWithProfessionTrainer()
         {
-            if (Merchant != null)
+            if (ProfessionTrainer == null)
+                return BtStatus.Failed;
+
+            if (Bot.Player.Position.GetDistance(ProfessionTrainer.Position) > 3.0f)
             {
-                float distance = Bot.Player.Position.GetDistance(Merchant.Position);
-
-                if (distance > 3.0f)
-                {
-                    Bot.Movement.SetMovementAction(MovementAction.Move, Merchant.Position);
-                    return BtStatus.Success;
-                }
-                else
-                {
-                    Bot.Movement.StopMovement();
-
-                    if (NpcInteractionEvent.Run())
-                    {
-                        SpeakToMerchantRoutine.Run(Bot, Merchant);
-                    }
-
-                    return BtStatus.Success;
-                }
+                Bot.Movement.SetMovementAction(MovementAction.Move, ProfessionTrainer.Position);
+                return BtStatus.Ongoing;
             }
 
-            return BtStatus.Failed;
+            Bot.Movement.StopMovement();
+
+            if (!NpcInteractionEvent.Run())
+                return BtStatus.Failed;
+
+            SpeakToClassTrainerRoutine.Run(Bot, ProfessionTrainer);
+            return BtStatus.Success;
+        }
+
+        private BtStatus SpeakWithMerchant()
+        {
+            if (Merchant == null) 
+                return BtStatus.Failed;
+
+            if (Bot.Player.Position.GetDistance(Merchant.Position) > 3.0f)
+            {
+                Bot.Movement.SetMovementAction(MovementAction.Move, Merchant.Position);
+                return BtStatus.Ongoing;
+            }
+
+            Bot.Movement.StopMovement();
+
+            if (!NpcInteractionEvent.Run())
+                return BtStatus.Failed;
+
+            SpeakToMerchantRoutine.Run(Bot, Merchant);
+            return BtStatus.Success;
         }
 
         private BtStatus StartWow()

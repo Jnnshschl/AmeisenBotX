@@ -113,40 +113,23 @@ namespace AmeisenBotX.Core.Engines.Combat.Classes.Bia10
                     break;
             }
 
-            var spellToCheck = string.Empty;
-            switch (Bot.Player.Class)
+            static string SpellToCheck(WowClass wowClass) => wowClass switch
             {
-                case WowClass.None:
-                    break;
-                case WowClass.Warrior:
-                    spellToCheck = Warrior335a.HeroicStrike;
-                    break;
-                case WowClass.Paladin:
-                    break;
-                case WowClass.Hunter:
-                    break;
-                case WowClass.Rogue:
-                    break;
-                case WowClass.Priest:
-                    spellToCheck = Priest335a.Smite;
-                    break;
-                case WowClass.Deathknight:
-                    break;
-                case WowClass.Shaman:
-                    spellToCheck = Shaman335a.LightningBolt;
-                    break;
-                case WowClass.Mage:
-                    break;
-                case WowClass.Warlock:
-                    break;
-                case WowClass.Druid:
-                    break;
+                WowClass.None => string.Empty,
+                WowClass.Warrior => Warrior335a.HeroicStrike,
+                WowClass.Paladin => string.Empty,
+                WowClass.Hunter => string.Empty,
+                WowClass.Rogue => string.Empty,
+                WowClass.Priest => Priest335a.Smite,
+                WowClass.Deathknight => string.Empty,
+                WowClass.Shaman => Shaman335a.LightningBolt,
+                WowClass.Mage => string.Empty,
+                WowClass.Warlock => string.Empty,
+                WowClass.Druid => string.Empty,
+                _ => throw new ArgumentOutOfRangeException(nameof(wowClass), $"Not expected wowClass value: {wowClass}")
+            };
 
-                default:
-                    throw new ArgumentOutOfRangeException();
-            }
-
-            if (!IsInSpellRange(target, spellToCheck)
+            if (!IsInSpellRange(target, SpellToCheck(Bot.Player.Class))
                 || !Bot.Wow.IsInLineOfSight(Bot.Player.Position, target.Position))
                 Bot.Movement.SetMovementAction(MovementAction.Move, target.Position);
         }

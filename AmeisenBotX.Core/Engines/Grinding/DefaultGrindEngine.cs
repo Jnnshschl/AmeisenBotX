@@ -48,21 +48,26 @@ namespace AmeisenBotX.Core.Engines.Grinding
                                             new Leaf(GoToNpcAndTrain),
                                             new Selector
                                             (
-                                                () => ThreatsNearby(),
-                                                new Leaf(FightTarget),
+                                                () => NeedToLearnSecondarySkills(),
+                                                new Leaf(GoToNpcAndLearnSecondarySkills),
                                                 new Selector
                                                 (
-                                                    () => TargetsNearby(),
+                                                    () => ThreatsNearby(),
+                                                    new Leaf(FightTarget),
                                                     new Selector
                                                     (
-                                                        () => SelectTarget(),
-                                                        new Leaf(FightTarget),
-                                                        new Leaf(() => BtStatus.Failed)
-                                                    ),
-                                                    new Leaf(MoveToNextGrindNode)
+                                                        () => TargetsNearby(),
+                                                        new Selector
+                                                        (
+                                                            () => SelectTarget(),
+                                                            new Leaf(FightTarget),
+                                                            new Leaf(() => BtStatus.Failed)
+                                                        ),
+                                                        new Leaf(MoveToNextGrindNode)
+                                                    )
                                                 )
                                             )
-                                       )
+                                        )
                                   )
                               )
                          )
@@ -280,6 +285,70 @@ namespace AmeisenBotX.Core.Engines.Grinding
                 .FirstOrDefault();
 
             return trainer != null && levelGreaterThenLastTrained && hasMoney;
+        }
+
+        private bool NeedToLearnSecondarySkills()
+        {
+            Npc profileTrainer = Profile.NpcsOfInterest?
+                .Where(e => e.Type == NpcType.ProfessionTrainer)
+                .OrderBy(e => e.Position.GetDistance(Bot.Player.Position))
+                .FirstOrDefault();
+
+            IWowUnit professionTrainer = null;
+
+            if (profileTrainer != null)
+            {
+                professionTrainer = profileTrainer.SubType switch
+                {
+                    NpcSubType.FishingTrainer when !Bot.Character.Skills.ContainsKey("Fishing") => Bot
+                        .GetClosestTrainerByEntryId(profileTrainer.EntryId),
+                    NpcSubType.FirstAidTrainer when !Bot.Character.Skills.ContainsKey("FirstAid") => Bot
+                        .GetClosestTrainerByEntryId(profileTrainer.EntryId),
+                    NpcSubType.CookingTrainer when !Bot.Character.Skills.ContainsKey("Cooking") => Bot
+                        .GetClosestTrainerByEntryId(profileTrainer.EntryId),
+                    _ => null
+                };
+            }
+
+            return professionTrainer != null;
+        }
+
+        private BtStatus GoToNpcAndLearnSecondarySkills()
+        {
+            Npc profileTrainer = Profile.NpcsOfInterest?
+                .Where(e => e.Type == NpcType.ProfessionTrainer)
+                .OrderBy(e => e.Position.GetDistance(Bot.Player.Position))
+                .FirstOrDefault();
+
+            IWowUnit professionTrainer = null;
+
+            if (profileTrainer != null)
+            {
+                professionTrainer = profileTrainer.SubType switch
+                {
+                    NpcSubType.FishingTrainer when !Bot.Character.Skills.ContainsKey("Fishing") => Bot
+                        .GetClosestTrainerByEntryId(profileTrainer.EntryId),
+                    NpcSubType.FirstAidTrainer when !Bot.Character.Skills.ContainsKey("FirstAid") => Bot
+                        .GetClosestTrainerByEntryId(profileTrainer.EntryId),
+                    NpcSubType.CookingTrainer when !Bot.Character.Skills.ContainsKey("Cooking") => Bot
+                        .GetClosestTrainerByEntryId(profileTrainer.EntryId),
+                    _ => null
+                };
+            }
+
+            if (professionTrainer == null)
+                return BtStatus.Failed;
+
+            if (professionTrainer.Position.GetDistance(Bot.Player.Position) > 5.0f)
+            {
+                Bot.Movement.SetMovementAction(MovementAction.Move, professionTrainer.Position);
+                return BtStatus.Ongoing;
+            }
+
+            if (professionTrainer.Position.GetDistance(Bot.Player.Position) < 5.0f)
+                Bot.Movement.StopMovement();
+
+            return BtStatus.Success;
         }
 
         private BtStatus ReportNoProfile()
