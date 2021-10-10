@@ -535,16 +535,17 @@ namespace AmeisenBotX
             // Idle Actions
             IdleActionItems = new();
 
-            foreach (IIdleAction x in AmeisenBot.Bot.IdleActions.IdleActions)
-            {
-                bool state = Config.IdleActionsEnabled.TryGetValue(x.ToString(), out bool b) && b;
-
-                IdleActionItems.Add(new()
+            if (AmeisenBot?.Bot.IdleActions.IdleActions != null)
+                foreach (IIdleAction x in AmeisenBot.Bot.IdleActions.IdleActions)
                 {
-                    Name = x.ToString(),
-                    IsEnabled = state
-                });
-            }
+                    bool state = Config.IdleActionsEnabled.TryGetValue(x.ToString(), out bool b) && b;
+
+                    IdleActionItems.Add(new()
+                    {
+                        Name = x.ToString(),
+                        IsEnabled = state
+                    });
+                }
 
             listviewIdleActions.ItemsSource = IdleActionItems;
 
