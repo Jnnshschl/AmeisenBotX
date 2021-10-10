@@ -233,9 +233,9 @@ namespace AmeisenBotX.Core.Logic
             (
                 new Selector
                 (
-                    () => Config.DungeonUsePartyMode && NeedToFollow(),
+                    () => Config.DungeonUsePartyMode,
                     // just follow when we use party mode in dungeon
-                    new Leaf(Follow),
+                    openworldNode,
                     new Leaf(() => { Bot.Dungeon.Execute(); return BtStatus.Success; })
                 ),
                 (() => Bot.Player.IsDead, new Leaf(DeadDungeon)),
