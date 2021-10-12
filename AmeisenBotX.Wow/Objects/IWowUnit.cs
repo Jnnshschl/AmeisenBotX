@@ -159,7 +159,7 @@ namespace AmeisenBotX.Wow.Objects
 
         int MaxRage { get; }
 
-        int MaxRuneenergy { get; }
+        int MaxRunicPower { get; }
 
         int MaxSecondary { get; }
 
@@ -175,7 +175,7 @@ namespace AmeisenBotX.Wow.Objects
 
         int Resource => Class switch
         {
-            WowClass.Deathknight => Runeenergy,
+            WowClass.Deathknight => RunicPower,
             WowClass.Rogue => Energy,
             WowClass.Warrior => Rage,
             _ => Mana,
@@ -183,9 +183,9 @@ namespace AmeisenBotX.Wow.Objects
 
         float Rotation { get; }
 
-        int Runeenergy { get; }
+        int RunicPower { get; }
 
-        double RuneenergyPercentage { get; }
+        double RunicPowerPercentage { get; }
 
         int Secondary { get; }
 

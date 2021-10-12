@@ -224,8 +224,8 @@ namespace AmeisenBotX.Core.Engines.Combat.Classes.Bia10
                 return;
             }
 
-            if (MyAuraManager.Tick(Bot.Player.Auras) || GroupAuraManager.Tick())
-                return;
+            MyAuraManager.Tick(Bot.Player.Auras);
+            GroupAuraManager.Tick();
         }
 
         public virtual Dictionary<string, object> Save() =>
@@ -304,29 +304,12 @@ namespace AmeisenBotX.Core.Engines.Combat.Classes.Bia10
             {
                 switch (Bot.Player.PowerType)
                 {
-                    case WowPowerType.Health:
-                        break;
-                    case WowPowerType.Mana:
-                        if (spell.Costs > Bot.Player.Mana) return false;
-                        break;
-                    case WowPowerType.Rage:
-                        if (spell.Costs > Bot.Player.Rage) return false;
-                        break;
-                    case WowPowerType.Focus:
-                        break;
-                    case WowPowerType.Energy:
-                        break;
-                    case WowPowerType.Happiness:
-                        break;
-                    case WowPowerType.Runes:
-                        break;
-                    case WowPowerType.RunicPower:
-                        break;
-                    case WowPowerType.Unknown:
-                        break;
-
-                    default:
-                        throw new ArgumentOutOfRangeException();
+                    case WowPowerType.Health when (spell.Costs > Bot.Player.Health): return false;
+                    case WowPowerType.Mana when (spell.Costs > Bot.Player.Mana): return false;
+                    case WowPowerType.Rage when (spell.Costs > Bot.Player.Rage): return false;
+                    case WowPowerType.Energy when (spell.Costs > Bot.Player.Energy): return false;
+                    case WowPowerType.RunicPower when (spell.Costs > Bot.Player.RunicPower): return false;
+                    default: throw new ArgumentOutOfRangeException();
                 }
             }
 

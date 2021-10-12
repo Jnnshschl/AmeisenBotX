@@ -379,9 +379,9 @@ namespace AmeisenBotX.Core.Engines.Combat.Classes.Jannis
                 && CastAoeSpell(guid);
         }
 
-        protected bool TryCastAoeSpellDk(string spellName, ulong guid, bool needsRuneenergy = false, bool needsBloodrune = false, bool needsFrostrune = false, bool needsUnholyrune = false, bool forceTargetSwitch = false)
+        protected bool TryCastAoeSpellDk(string spellName, ulong guid, bool needsRunicPower = false, bool needsBloodrune = false, bool needsFrostrune = false, bool needsUnholyrune = false, bool forceTargetSwitch = false)
         {
-            return TryCastSpellDk(spellName, guid, needsRuneenergy, needsBloodrune, needsFrostrune, needsUnholyrune, forceTargetSwitch)
+            return TryCastSpellDk(spellName, guid, needsRunicPower, needsBloodrune, needsFrostrune, needsUnholyrune, forceTargetSwitch)
                 && CastAoeSpell(guid);
         }
 
@@ -410,7 +410,7 @@ namespace AmeisenBotX.Core.Engines.Combat.Classes.Jannis
             return false;
         }
 
-        protected bool TryCastSpellDk(string spellName, ulong guid, bool needsRuneenergy = false, bool needsBloodrune = false, bool needsFrostrune = false, bool needsUnholyrune = false, bool forceTargetSwitch = false)
+        protected bool TryCastSpellDk(string spellName, ulong guid, bool needsRunicPower = false, bool needsBloodrune = false, bool needsFrostrune = false, bool needsUnholyrune = false, bool forceTargetSwitch = false)
         {
             if (!Bot.Character.SpellBook.IsSpellKnown(spellName) || (guid != 0 && guid != Bot.Wow.PlayerGuid && !Bot.Objects.IsTargetInLineOfSight)) { return false; }
 
@@ -420,7 +420,7 @@ namespace AmeisenBotX.Core.Engines.Combat.Classes.Jannis
                 Spell spell = Bot.Character.SpellBook.GetSpellByName(spellName);
                 Dictionary<int, int> runes = Bot.Wow.GetRunesReady();
 
-                if (ValidateSpell(spell, target, Bot.Player.Runeenergy, needsRuneenergy, isTargetMyself)
+                if (ValidateSpell(spell, target, Bot.Player.RunicPower, needsRunicPower, isTargetMyself)
                     && (!needsBloodrune || runes[(int)WowRuneType.Blood] > 0 || runes[(int)WowRuneType.Death] > 0)
                     && (!needsFrostrune || runes[(int)WowRuneType.Frost] > 0 || runes[(int)WowRuneType.Death] > 0)
                     && (!needsUnholyrune || runes[(int)WowRuneType.Unholy] > 0 || runes[(int)WowRuneType.Death] > 0))
