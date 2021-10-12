@@ -233,9 +233,9 @@ namespace AmeisenBotX.Core.Logic
             (
                 new Selector
                 (
-                    () => Config.DungeonUsePartyMode && NeedToFollow(),
+                    () => Config.DungeonUsePartyMode,
                     // just follow when we use party mode in dungeon
-                    new Leaf(Follow),
+                    openworldNode,
                     new Leaf(() => { Bot.Dungeon.Execute(); return BtStatus.Success; })
                 ),
                 (() => Bot.Player.IsDead, new Leaf(DeadDungeon)),
@@ -993,17 +993,16 @@ namespace AmeisenBotX.Core.Logic
 
         private bool NeedToRepairOrSell()
         {
-            bool needToRepair = Bot.Character.Equipment.Items.Any(e =>
-                e.Value.MaxDurability > 0 && e.Value.Durability / (double)e.Value.MaxDurability * 100.0 <= Config.ItemRepairThreshold);
+            bool needToRepair = Bot.Character.Equipment.Items.Any(e => e.Value.MaxDurability > 0 && e.Value.Durability / (double)e.Value.MaxDurability * 100.0 <= Config.ItemRepairThreshold);
 
             bool needToSell = Bot.Character.Inventory.FreeBagSlots < Config.BagSlotsToGoSell
                               && Bot.Character.Inventory.Items
                               .Any(e => e.Price > 0 && !Config.ItemSellBlacklist.Contains(e.Name)
-                                      && (Config.SellGrayItems && e.ItemQuality == (int)WowItemQuality.Poor
-                                      || Config.SellWhiteItems && e.ItemQuality == (int)WowItemQuality.Common
-                                      || Config.SellGreenItems && e.ItemQuality == (int)WowItemQuality.Uncommon
-                                      || Config.SellBlueItems && e.ItemQuality == (int)WowItemQuality.Rare
-                                      || Config.SellPurpleItems && e.ItemQuality == (int)WowItemQuality.Epic));
+                                      && ((Config.SellGrayItems && e.ItemQuality == (int)WowItemQuality.Poor)
+                                      || (Config.SellWhiteItems && e.ItemQuality == (int)WowItemQuality.Common)
+                                      || (Config.SellGreenItems && e.ItemQuality == (int)WowItemQuality.Uncommon)
+                                      || (Config.SellBlueItems && e.ItemQuality == (int)WowItemQuality.Rare)
+                                      || (Config.SellPurpleItems && e.ItemQuality == (int)WowItemQuality.Epic)));
 
             IWowUnit vendorRepair = null;
             IWowUnit vendorSell = null;

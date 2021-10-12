@@ -1,6 +1,8 @@
 ﻿using AmeisenBotX.Common.Utils;
+using AmeisenBotX.Core.Engines.Combat.Helpers.Healing;
 using AmeisenBotX.Core.Logic.Utils.Auras.Objects;
 using AmeisenBotX.Core.Managers.Character.Comparators;
+using AmeisenBotX.Core.Managers.Character.Spells.Objects;
 using AmeisenBotX.Core.Managers.Character.Talents.Objects;
 using AmeisenBotX.Wow.Objects;
 using AmeisenBotX.Wow.Objects.Enums;
@@ -8,6 +10,7 @@ using AmeisenBotX.Wow335a.Constants;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Text.Json;
 
 namespace AmeisenBotX.Core.Engines.Combat.Classes.Jannis
 {
@@ -20,12 +23,37 @@ namespace AmeisenBotX.Core.Engines.Combat.Classes.Jannis
 
             GroupAuraManager.SpellsToKeepActiveOnParty.Add((Druid335a.MarkOfTheWild, (spellName, guid) => TryCastSpell(spellName, guid, true)));
 
+            HealingManager = new(bot, (string spellName, ulong guid) => { return TryCastSpell(spellName, guid); });
+
+            // make sure all new spells get added to the healing manager
+            Bot.Character.SpellBook.OnSpellBookUpdate += () =>
+            {
+                if (Bot.Character.SpellBook.TryGetSpellByName(Druid335a.Nourish, out Spell spellNourish))
+                {
+                    HealingManager.AddSpell(spellNourish);
+                }
+
+                if (Bot.Character.SpellBook.TryGetSpellByName(Druid335a.HealingTouch, out Spell spellHealingTouch))
+                {
+                    HealingManager.AddSpell(spellHealingTouch);
+                }
+
+                if (Bot.Character.SpellBook.TryGetSpellByName(Druid335a.Regrowth, out Spell spellRegrowth))
+                {
+                    HealingManager.AddSpell(spellRegrowth);
+                }
+            };
+
+            SpellAbortFunctions.Add(HealingManager.ShouldAbortCasting);
+
             SwiftmendEvent = new(TimeSpan.FromSeconds(15));
         }
 
         public override string Description => "FCFS based CombatClass for the Druid Restoration spec.";
 
         public override string DisplayName => "Druid Restoration";
+
+        private HealingManager HealingManager { get; }
 
         public override bool HandlesMovement => false;
 
@@ -158,6 +186,40 @@ namespace AmeisenBotX.Core.Engines.Combat.Classes.Jannis
             }
         }
 
+        public override void Load(Dictionary<string, JsonElement> objects)
+        {
+            base.Load(objects);
+
+            if (objects.ContainsKey("HealingManager"))
+            {
+                Dictionary<string, JsonElement> s = objects["HealingManager"].To<Dictionary<string, JsonElement>>();
+
+                if (s.TryGetValue("SpellHealing", out JsonElement j)) { HealingManager.SpellHealing = j.To<Dictionary<string, int>>(); }
+                if (s.TryGetValue("DamageMonitorSeconds", out j)) { HealingManager.DamageMonitorSeconds = j.To<int>(); }
+                if (s.TryGetValue("HealthWeight", out j)) { HealingManager.HealthWeightMod = j.To<float>(); }
+                if (s.TryGetValue("DamageWeight", out j)) { HealingManager.IncomingDamageMod = j.To<float>(); }
+                if (s.TryGetValue("OverhealingStopThreshold", out j)) { HealingManager.OverhealingStopThreshold = j.To<float>(); }
+                if (s.TryGetValue("TargetDyingSeconds", out j)) { HealingManager.TargetDyingSeconds = j.To<int>(); }
+            }
+        }
+
+        public override Dictionary<string, object> Save()
+        {
+            Dictionary<string, object> s = base.Save();
+
+            s.Add("HealingManager", new Dictionary<string, object>()
+            {
+                { "SpellHealing", HealingManager.SpellHealing },
+                { "DamageMonitorSeconds", HealingManager.DamageMonitorSeconds },
+                { "HealthWeight", HealingManager.HealthWeightMod },
+                { "DamageWeight", HealingManager.IncomingDamageMod },
+                { "OverhealingStopThreshold", HealingManager.OverhealingStopThreshold },
+                { "TargetDyingSeconds", HealingManager.TargetDyingSeconds },
+            });
+
+            return s;
+        }
+
         private bool NeedToHealSomeone()
         {
             if (TargetProviderHeal.Get(out IEnumerable<IWowUnit> unitsToHeal))
@@ -210,21 +272,7 @@ namespace AmeisenBotX.Core.Engines.Combat.Classes.Jannis
                     return true;
                 }
 
-                if (target.HealthPercentage < 65.0
-                    && TryCastSpell(Druid335a.Nourish, target.Guid, true))
-                {
-                    return true;
-                }
-
-                if (target.HealthPercentage < 65.0
-                    && TryCastSpell(Druid335a.HealingTouch, target.Guid, true))
-                {
-                    return true;
-                }
-
-                if (target.HealthPercentage < 65.0
-                    && !target.Auras.Any(e => Bot.Db.GetSpellName(e.SpellId) == Druid335a.Regrowth)
-                    && TryCastSpell(Druid335a.Regrowth, target.Guid, true))
+                if (HealingManager.Tick())
                 {
                     return true;
                 }
