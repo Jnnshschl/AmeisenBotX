@@ -119,7 +119,7 @@ namespace AmeisenBotX.Core.Engines.Combat.Classes.Jannis
                     || TryCastSpellDk(Deathknight335a.Obliterate, Bot.Wow.TargetGuid, false, false, true, true)
                     || TryCastSpellDk(Deathknight335a.BloodStrike, Bot.Wow.TargetGuid, false, true)
                     || TryCastSpellDk(Deathknight335a.DeathCoil, Bot.Wow.TargetGuid, true)
-                    || (Bot.Player.Runeenergy > 60
+                    || (Bot.Player.RunicPower > 60
                         && TryCastSpellDk(Deathknight335a.RuneStrike, Bot.Wow.TargetGuid)))
                 {
                     return;

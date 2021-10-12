@@ -62,13 +62,13 @@ namespace AmeisenBotX.Wow335a.Objects
 
         public int MaxRage => RawWowUnit.MaxPower2 / 10;
 
-        public int MaxRuneenergy => RawWowUnit.MaxPower7 / 10;
+        public int MaxRunicPower => RawWowUnit.MaxPower7 / 10;
 
         public int MaxSecondary => Class switch
         {
             WowClass.Warrior => MaxRage,
             WowClass.Rogue => MaxEnergy,
-            WowClass.Deathknight => MaxRuneenergy,
+            WowClass.Deathknight => MaxRunicPower,
             _ => MaxMana,
         };
 
@@ -84,15 +84,15 @@ namespace AmeisenBotX.Wow335a.Objects
 
         public float Rotation { get; set; }
 
-        public int Runeenergy => RawWowUnit.Power7 / 10;
+        public int RunicPower => RawWowUnit.Power7 / 10;
 
-        public double RuneenergyPercentage => BotMath.Percentage(Runeenergy, MaxRuneenergy);
+        public double RunicPowerPercentage => BotMath.Percentage(RunicPower, MaxRunicPower);
 
         public int Secondary => Class switch
         {
             WowClass.Warrior => Rage,
             WowClass.Rogue => Energy,
-            WowClass.Deathknight => Runeenergy,
+            WowClass.Deathknight => RunicPower,
             _ => Mana,
         };
 
@@ -100,7 +100,7 @@ namespace AmeisenBotX.Wow335a.Objects
         {
             WowClass.Warrior => RagePercentage,
             WowClass.Rogue => EnergyPercentage,
-            WowClass.Deathknight => RuneenergyPercentage,
+            WowClass.Deathknight => RunicPowerPercentage,
             _ => ManaPercentage,
         };
 

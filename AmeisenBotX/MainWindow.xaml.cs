@@ -300,7 +300,7 @@ namespace AmeisenBotX
                 switch (player.Class)
                 {
                     case WowClass.Deathknight:
-                        UpdateBotInfo(player.MaxRuneenergy, player.Runeenergy, WowColors.dkPrimaryBrush, WowColors.dkSecondaryBrush);
+                        UpdateBotInfo(player.MaxRunicPower, player.RunicPower, WowColors.dkPrimaryBrush, WowColors.dkSecondaryBrush);
                         break;
 
                     case WowClass.Druid:
