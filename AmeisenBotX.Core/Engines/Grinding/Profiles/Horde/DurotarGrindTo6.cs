@@ -25,7 +25,10 @@ namespace AmeisenBotX.Core.Engines.Grinding.Profiles.Horde
                 NpcType.ClassTrainer, NpcSubType.ShamanTrainer),
             new Npc("Frang", 3153,
                 WowMapId.Kalimdor, WowZoneId.ValleyofTrials, new Vector3(-639, -4230, 38),
-                NpcType.ClassTrainer, NpcSubType.WarriorTrainer)
+                NpcType.ClassTrainer, NpcSubType.WarriorTrainer),
+            new Npc("Mai'ah", 5884,
+                WowMapId.Kalimdor, WowZoneId.ValleyofTrials, new Vector3(-625, -4210, 38),
+                NpcType.ClassTrainer, NpcSubType.MageTrainer)
         };
 
         public List<InteractableObject> ObjectsOfInterest { get; } = new()
