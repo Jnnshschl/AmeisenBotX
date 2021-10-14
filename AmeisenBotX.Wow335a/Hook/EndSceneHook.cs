@@ -1,11 +1,11 @@
 ﻿using AmeisenBotX.Common.Math;
 using AmeisenBotX.Common.Utils;
-using AmeisenBotX.Core.Hook.Modules;
-using AmeisenBotX.Core.Hook.Structs;
 using AmeisenBotX.Logging;
 using AmeisenBotX.Logging.Enums;
 using AmeisenBotX.Memory;
 using AmeisenBotX.Wow.Offsets;
+using AmeisenBotX.Wow335a.Hook.Modules;
+using AmeisenBotX.Wow335a.Hook.Structs;
 using AmeisenBotX.Wow335a.Objects;
 using System;
 using System.Collections.Generic;

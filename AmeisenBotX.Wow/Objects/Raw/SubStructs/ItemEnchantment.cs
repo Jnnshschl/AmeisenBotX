@@ -1,6 +1,6 @@
 ﻿using System.Runtime.InteropServices;
 
-namespace AmeisenBotX.Wow.Objects.SubStructs
+namespace AmeisenBotX.Wow.Objects.Raw.SubStructs
 {
     [StructLayout(LayoutKind.Sequential)]
     public struct ItemEnchantment

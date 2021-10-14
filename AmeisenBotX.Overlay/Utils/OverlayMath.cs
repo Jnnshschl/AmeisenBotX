@@ -1,5 +1,5 @@
 ﻿using AmeisenBotX.Common.Math;
-using AmeisenBotX.Wow.Objects;
+using AmeisenBotX.Wow.Objects.Raw;
 using System;
 using System.Drawing;
 using Rect = AmeisenBotX.Memory.Win32.Rect;

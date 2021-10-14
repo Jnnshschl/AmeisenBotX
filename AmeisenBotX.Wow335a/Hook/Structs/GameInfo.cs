@@ -1,6 +1,6 @@
 ﻿using System.Runtime.InteropServices;
 
-namespace AmeisenBotX.Core.Hook.Structs
+namespace AmeisenBotX.Wow335a.Hook.Structs
 {
     /// <summary>
     /// General game information will be stored in this struct.
