@@ -3,7 +3,7 @@
 namespace AmeisenBotX.Core.Engines.Movement.Pathfinding.Enums
 {
     [Flags]
-    public enum PathRequestFlags
+    public enum PathRequestFlag
     {
         None = 0,
         ChaikinCurve = 1,

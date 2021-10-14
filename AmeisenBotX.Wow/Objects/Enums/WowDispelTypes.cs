@@ -1,6 +1,6 @@
 ﻿namespace AmeisenBotX.Wow.Objects.Enums
 {
-    public enum WowDispelTypes
+    public enum WowDispelType
     {
 		None = 0,
 		Magic = 1,

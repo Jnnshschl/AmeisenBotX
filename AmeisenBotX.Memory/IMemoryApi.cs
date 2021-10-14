@@ -126,7 +126,7 @@ namespace AmeisenBotX.Memory
         /// <param name="memoryProtection">New Protection</param>
         /// <param name="oldMemoryProtection">Old protection</param>
         /// <returns>True if it was successful, false if not</returns>
-        public bool ProtectMemory(IntPtr address, uint size, MemoryProtectionFlags memoryProtection, out MemoryProtectionFlags oldMemoryProtection);
+        public bool ProtectMemory(IntPtr address, uint size, MemoryProtectionFlag memoryProtection, out MemoryProtectionFlag oldMemoryProtection);
 
         /// <summary>
         /// Read an unmanaged type from the processes memory.

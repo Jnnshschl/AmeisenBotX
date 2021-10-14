@@ -3,7 +3,7 @@
 namespace AmeisenBotX.Wow.Objects.Flags
 {
     [Flags]
-    public enum WowUnitFlags : uint
+    public enum WowUnitFlag : uint
     {
         None = 0x0,
         Sitting = 0x1,

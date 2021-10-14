@@ -222,7 +222,7 @@ namespace AmeisenBotX.Core.Managers.Character
         public void Jump()
         {
             AmeisenLogger.I.Log("Movement", $"Jumping", LogLevel.Verbose);
-            Task.Run(() => BotUtils.SendKey(MemoryApi.Process.MainWindowHandle, new IntPtr((int)KeyCodes.Space), 500, 1000));
+            Task.Run(() => BotUtils.SendKey(MemoryApi.Process.MainWindowHandle, new IntPtr((int)KeyCode.Space), 500, 1000));
         }
 
         public void MoveToPosition(Vector3 pos, float turnSpeed = 20.9f, float distance = 0.1f)

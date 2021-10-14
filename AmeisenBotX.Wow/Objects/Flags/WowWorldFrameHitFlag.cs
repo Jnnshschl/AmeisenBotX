@@ -3,7 +3,7 @@
 namespace AmeisenBotX.Wow.Objects.Flags
 {
     [Flags]
-    public enum WowWorldFrameHitFlags : uint
+    public enum WowWorldFrameHitFlag : uint
     {
         HitTestNothing = 0x0,                  // HEX: 0x0000 0000 - DEC: 0
         HitTestBoundingModels = 0x1,           // HEX: 0x0000 0001 - DEC: 1

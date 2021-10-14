@@ -3,7 +3,7 @@
 namespace AmeisenBotX.Common.Keyboard.Enums
 {
     [Flags]
-    public enum KeyCodes
+    public enum KeyCode // todo: rewrite, messy
     {
         A = 0x41,
         Add = 0x6b,

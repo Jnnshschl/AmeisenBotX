@@ -36,115 +36,115 @@ namespace AmeisenBotX.Wow.Objects
 
         double HealthPercentage { get; }
 
-        bool IsAmmoVendor => NpcFlags[(int)WowUnitNpcFlags.AmmoVendor];
+        bool IsAmmoVendor => NpcFlags[(int)WowUnitNpcFlag.AmmoVendor];
 
-        bool IsAuctioneer => NpcFlags[(int)WowUnitNpcFlags.Auctioneer];
+        bool IsAuctioneer => NpcFlags[(int)WowUnitNpcFlag.Auctioneer];
 
         bool IsAutoAttacking { get; }
 
-        bool IsBanker => NpcFlags[(int)WowUnitNpcFlags.Banker];
+        bool IsBanker => NpcFlags[(int)WowUnitNpcFlag.Banker];
 
-        bool IsBattlemaster => NpcFlags[(int)WowUnitNpcFlags.Battlemaster];
+        bool IsBattlemaster => NpcFlags[(int)WowUnitNpcFlag.Battlemaster];
 
         bool IsCasting => CurrentlyCastingSpellId > 0 || CurrentlyChannelingSpellId > 0;
 
-        bool IsClassTrainer => NpcFlags[(int)WowUnitNpcFlags.ClassTrainer];
+        bool IsClassTrainer => NpcFlags[(int)WowUnitNpcFlag.ClassTrainer];
 
-        bool IsConfused => UnitFlags[(int)WowUnitFlags.Confused];
+        bool IsConfused => UnitFlags[(int)WowUnitFlag.Confused];
 
-        bool IsDazed => UnitFlags[(int)WowUnitFlags.Dazed];
+        bool IsDazed => UnitFlags[(int)WowUnitFlag.Dazed];
 
-        bool IsDead => (Health == 0 || UnitFlagsDynamic[(int)WowUnitDynamicFlags.Dead]) && !UnitFlags2[(int)WowUnit2Flags.FeignDeath];
+        bool IsDead => (Health == 0 || UnitFlagsDynamic[(int)WowUnitDynamicFlag.Dead]) && !UnitFlags2[(int)WowUnit2Flag.FeignDeath];
 
-        bool IsDisarmed => UnitFlags[(int)WowUnitFlags.Disarmed];
+        bool IsDisarmed => UnitFlags[(int)WowUnitFlag.Disarmed];
 
-        bool IsFleeing => UnitFlags[(int)WowUnitFlags.Fleeing];
+        bool IsFleeing => UnitFlags[(int)WowUnitFlag.Fleeing];
 
-        bool IsFlightMaster => NpcFlags[(int)WowUnitNpcFlags.FlightMaster];
+        bool IsFlightMaster => NpcFlags[(int)WowUnitNpcFlag.FlightMaster];
 
-        bool IsFoodVendor => NpcFlags[(int)WowUnitNpcFlags.FoodVendor];
+        bool IsFoodVendor => NpcFlags[(int)WowUnitNpcFlag.FoodVendor];
 
-        bool IsGossip => NpcFlags[(int)WowUnitNpcFlags.Gossip];
+        bool IsGossip => NpcFlags[(int)WowUnitNpcFlag.Gossip];
 
-        bool IsGuard => NpcFlags[(int)WowUnitNpcFlags.Guard];
+        bool IsGuard => NpcFlags[(int)WowUnitNpcFlag.Guard];
 
-        bool IsGuildBanker => NpcFlags[(int)WowUnitNpcFlags.GuildBanker];
+        bool IsGuildBanker => NpcFlags[(int)WowUnitNpcFlag.GuildBanker];
 
-        bool IsInCombat => UnitFlags[(int)WowUnitFlags.Combat];
+        bool IsInCombat => UnitFlags[(int)WowUnitFlag.Combat];
 
-        bool IsInfluenced => UnitFlags[(int)WowUnitFlags.Influenced];
+        bool IsInfluenced => UnitFlags[(int)WowUnitFlag.Influenced];
 
-        bool IsInnkeeper => NpcFlags[(int)WowUnitNpcFlags.Innkeeper];
+        bool IsInnkeeper => NpcFlags[(int)WowUnitNpcFlag.Innkeeper];
 
-        bool IsInTaxiFlight => UnitFlags[(int)WowUnitFlags.TaxiFlight];
+        bool IsInTaxiFlight => UnitFlags[(int)WowUnitFlag.TaxiFlight];
 
-        bool IsLootable => UnitFlagsDynamic[(int)WowUnitDynamicFlags.Lootable];
+        bool IsLootable => UnitFlagsDynamic[(int)WowUnitDynamicFlag.Lootable];
 
-        bool IsLooting => UnitFlags[(int)WowUnitFlags.Looting];
+        bool IsLooting => UnitFlags[(int)WowUnitFlag.Looting];
 
-        bool IsMounted => UnitFlags[(int)WowUnitFlags.Mounted];
+        bool IsMounted => UnitFlags[(int)WowUnitFlag.Mounted];
 
-        bool IsNoneNpc => NpcFlags[(int)WowUnitNpcFlags.None];
+        bool IsNoneNpc => NpcFlags[(int)WowUnitNpcFlag.None];
 
-        bool IsNotAttackable => UnitFlags[(int)WowUnitFlags.NotAttackable];
+        bool IsNotAttackable => UnitFlags[(int)WowUnitFlag.NotAttackable];
 
-        bool IsNotSelectable => UnitFlags[(int)WowUnitFlags.NotSelectable];
+        bool IsNotSelectable => UnitFlags[(int)WowUnitFlag.NotSelectable];
 
-        bool IsPetInCombat => UnitFlags[(int)WowUnitFlags.PetInCombat];
+        bool IsPetInCombat => UnitFlags[(int)WowUnitFlag.PetInCombat];
 
-        bool IsPetition => NpcFlags[(int)WowUnitNpcFlags.Petitioner];
+        bool IsPetition => NpcFlags[(int)WowUnitNpcFlag.Petitioner];
 
-        bool IsPlayerControlled => UnitFlags[(int)WowUnitFlags.PlayerControlled];
+        bool IsPlayerControlled => UnitFlags[(int)WowUnitFlag.PlayerControlled];
 
-        bool IsPlusMob => UnitFlags[(int)WowUnitFlags.PlusMob];
+        bool IsPlusMob => UnitFlags[(int)WowUnitFlag.PlusMob];
 
-        bool IsPoisonVendor => NpcFlags[(int)WowUnitNpcFlags.PoisonVendor];
+        bool IsPoisonVendor => NpcFlags[(int)WowUnitNpcFlag.PoisonVendor];
 
-        bool IsPossessed => UnitFlags[(int)WowUnitFlags.Possessed];
+        bool IsPossessed => UnitFlags[(int)WowUnitFlag.Possessed];
 
-        bool IsProfessionTrainer => NpcFlags[(int)WowUnitNpcFlags.ProfessionTrainer];
+        bool IsProfessionTrainer => NpcFlags[(int)WowUnitNpcFlag.ProfessionTrainer];
 
-        bool IsPvpFlagged => UnitFlags[(int)WowUnitFlags.PvPFlagged];
+        bool IsPvpFlagged => UnitFlags[(int)WowUnitFlag.PvPFlagged];
 
-        bool IsQuestgiver => NpcFlags[(int)WowUnitNpcFlags.Questgiver];
+        bool IsQuestgiver => NpcFlags[(int)WowUnitNpcFlag.Questgiver];
 
-        bool IsReagentVendor => NpcFlags[(int)WowUnitNpcFlags.ReagentVendor];
+        bool IsReagentVendor => NpcFlags[(int)WowUnitNpcFlag.ReagentVendor];
 
-        bool IsReferAFriendLinked => UnitFlagsDynamic[(int)WowUnitDynamicFlags.ReferAFriendLinked];
+        bool IsReferAFriendLinked => UnitFlagsDynamic[(int)WowUnitDynamicFlag.ReferAFriendLinked];
 
-        bool IsRepairer => NpcFlags[(int)WowUnitNpcFlags.Repairer];
+        bool IsRepairer => NpcFlags[(int)WowUnitNpcFlag.Repairer];
 
-        bool IsSilenced => UnitFlags[(int)WowUnitFlags.Silenced];
+        bool IsSilenced => UnitFlags[(int)WowUnitFlag.Silenced];
 
-        bool IsSitting => UnitFlags[(int)WowUnitFlags.Sitting];
+        bool IsSitting => UnitFlags[(int)WowUnitFlag.Sitting];
 
-        bool IsSkinnable => UnitFlags[(int)WowUnitFlags.Skinnable];
+        bool IsSkinnable => UnitFlags[(int)WowUnitFlag.Skinnable];
 
-        bool IsSpecialInfo => UnitFlagsDynamic[(int)WowUnitDynamicFlags.SpecialInfo];
+        bool IsSpecialInfo => UnitFlagsDynamic[(int)WowUnitDynamicFlag.SpecialInfo];
 
-        bool IsSpellclick => NpcFlags[(int)WowUnitNpcFlags.Spellclick];
+        bool IsSpellclick => NpcFlags[(int)WowUnitNpcFlag.Spellclick];
 
-        bool IsSpiritGuide => NpcFlags[(int)WowUnitNpcFlags.SpiritGuide];
+        bool IsSpiritGuide => NpcFlags[(int)WowUnitNpcFlag.SpiritGuide];
 
-        bool IsSpiritHealer => NpcFlags[(int)WowUnitNpcFlags.SpiritHealer];
+        bool IsSpiritHealer => NpcFlags[(int)WowUnitNpcFlag.SpiritHealer];
 
-        bool IsStableMaster => NpcFlags[(int)WowUnitNpcFlags.StableMaster];
+        bool IsStableMaster => NpcFlags[(int)WowUnitNpcFlag.StableMaster];
 
-        bool IsTabardDesigner => NpcFlags[(int)WowUnitNpcFlags.TabardDesigner];
+        bool IsTabardDesigner => NpcFlags[(int)WowUnitNpcFlag.TabardDesigner];
 
-        bool IsTaggedByMe => UnitFlagsDynamic[(int)WowUnitDynamicFlags.TaggedByMe];
+        bool IsTaggedByMe => UnitFlagsDynamic[(int)WowUnitDynamicFlag.TaggedByMe];
 
-        bool IsTaggedByOther => UnitFlagsDynamic[(int)WowUnitDynamicFlags.TaggedByOther];
+        bool IsTaggedByOther => UnitFlagsDynamic[(int)WowUnitDynamicFlag.TaggedByOther];
 
-        bool IsTappedByAllThreatList => UnitFlagsDynamic[(int)WowUnitDynamicFlags.IsTappedByAllThreatList];
+        bool IsTappedByAllThreatList => UnitFlagsDynamic[(int)WowUnitDynamicFlag.IsTappedByAllThreatList];
 
-        bool IsTotem => UnitFlags[(int)WowUnitFlags.Totem];
+        bool IsTotem => UnitFlags[(int)WowUnitFlag.Totem];
 
-        bool IsTrackedUnit => UnitFlagsDynamic[(int)WowUnitDynamicFlags.TrackUnit];
+        bool IsTrackedUnit => UnitFlagsDynamic[(int)WowUnitDynamicFlag.TrackUnit];
 
-        bool IsTrainer => NpcFlags[(int)WowUnitNpcFlags.Trainer];
+        bool IsTrainer => NpcFlags[(int)WowUnitNpcFlag.Trainer];
 
-        bool IsVendor => NpcFlags[(int)WowUnitNpcFlags.Vendor];
+        bool IsVendor => NpcFlags[(int)WowUnitNpcFlag.Vendor];
 
         int Level { get; }
 

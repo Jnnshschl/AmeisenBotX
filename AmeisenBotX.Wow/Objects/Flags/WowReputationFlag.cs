@@ -3,7 +3,7 @@
 namespace AmeisenBotX.Wow.Objects.Flags
 {
     [Flags]
-    public enum WowReputationFlags : short
+    public enum WowReputationFlag : short
     {
         None = 0x0,                       // HEX: 0x0000 - DEC: 0
         Visible = 0x1,                    // HEX: 0x0001 - DEC: 1
