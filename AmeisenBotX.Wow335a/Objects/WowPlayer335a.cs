@@ -2,7 +2,7 @@
 using AmeisenBotX.Memory;
 using AmeisenBotX.Wow.Objects;
 using AmeisenBotX.Wow.Objects.Enums;
-using AmeisenBotX.Wow.Objects.SubStructs;
+using AmeisenBotX.Wow.Objects.Raw.SubStructs;
 using AmeisenBotX.Wow.Offsets;
 using AmeisenBotX.Wow335a.Objects.Descriptors;
 using System;

@@ -1,7 +1,7 @@
 ﻿using AmeisenBotX.Common.Math;
 using System.Runtime.InteropServices;
 
-namespace AmeisenBotX.Wow.Objects
+namespace AmeisenBotX.Wow.Objects.Raw
 {
     [StructLayout(LayoutKind.Sequential)]
     public struct RawCameraInfo

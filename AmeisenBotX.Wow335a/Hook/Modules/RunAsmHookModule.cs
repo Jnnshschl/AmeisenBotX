@@ -2,7 +2,7 @@
 using System;
 using System.Collections.Generic;
 
-namespace AmeisenBotX.Core.Hook.Modules
+namespace AmeisenBotX.Wow335a.Hook.Modules
 {
     public abstract class RunAsmHookModule : IHookModule
     {

@@ -1,4 +1,4 @@
-﻿using AmeisenBotX.Core.Logic.Utils.Auras.Objects;
+﻿using AmeisenBotX.Core.Engines.Combat.Helpers.Aura.Objects;
 using AmeisenBotX.Core.Managers.Character.Comparators;
 using AmeisenBotX.Core.Managers.Character.Talents.Objects;
 using AmeisenBotX.Wow.Objects.Enums;

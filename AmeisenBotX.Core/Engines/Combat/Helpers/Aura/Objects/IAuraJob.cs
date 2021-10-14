@@ -1,7 +1,7 @@
-﻿using AmeisenBotX.Wow.Objects;
+﻿using AmeisenBotX.Wow.Objects.Raw;
 using System.Collections.Generic;
 
-namespace AmeisenBotX.Core.Logic.Utils.Auras.Objects
+namespace AmeisenBotX.Core.Engines.Combat.Helpers.Aura.Objects
 {
     public interface IAuraJob
     {

@@ -1,4 +1,4 @@
-﻿using AmeisenBotX.Wow.Objects.SubStructs;
+﻿using AmeisenBotX.Wow.Objects.Raw.SubStructs;
 using System.Collections.Generic;
 
 namespace AmeisenBotX.Wow.Objects

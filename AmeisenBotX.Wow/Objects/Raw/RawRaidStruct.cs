@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using System.Runtime.InteropServices;
 
-namespace AmeisenBotX.Wow.Objects
+namespace AmeisenBotX.Wow.Objects.Raw
 {
     [StructLayout(LayoutKind.Sequential)]
     public struct RawRaidStruct
