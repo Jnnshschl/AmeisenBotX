@@ -123,7 +123,7 @@ namespace AmeisenBotX.Core.Engines.Combat.Classes.Bia10
                 WowClass.Priest => Priest335a.Smite,
                 WowClass.Deathknight => string.Empty,
                 WowClass.Shaman => Shaman335a.LightningBolt,
-                WowClass.Mage => string.Empty,
+                WowClass.Mage => Mage335a.Fireball,
                 WowClass.Warlock => string.Empty,
                 WowClass.Druid => string.Empty,
                 _ => throw new ArgumentOutOfRangeException(nameof(wowClass), $"Not expected wowClass value: {wowClass}")
@@ -309,7 +309,6 @@ namespace AmeisenBotX.Core.Engines.Combat.Classes.Bia10
                     case WowPowerType.Rage when (spell.Costs > Bot.Player.Rage): return false;
                     case WowPowerType.Energy when (spell.Costs > Bot.Player.Energy): return false;
                     case WowPowerType.RunicPower when (spell.Costs > Bot.Player.RunicPower): return false;
-                    default: throw new ArgumentOutOfRangeException();
                 }
             }
 
