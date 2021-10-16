@@ -61,10 +61,8 @@ namespace AmeisenBotX.Wow335a.Events
                             {
                                 List<Action<long, List<string>>> actions = Events[x.Name];
 
-                                for (int i = 0; i < actions.Count; ++i)
-                                {
-                                    actions[i](x.Timestamp, x.Arguments);
-                                }
+                                foreach (Action<long, List<string>> action in actions)
+                                    action(x.Timestamp, x.Arguments);
                             }
                         }
                     }

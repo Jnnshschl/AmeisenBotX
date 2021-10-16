@@ -154,10 +154,8 @@ namespace AmeisenBotX.Memory
             {
                 AmeisenLogger.I.Log("XMemory", $"Freeing all memory Pools...");
 
-                for (int i = 0; i < AllocationPools.Count; ++i)
-                {
-                    VirtualFreeEx(ProcessHandle, AllocationPools[i].Address, 0, AllocationType.Release);
-                }
+                foreach (AllocationPool allocPool in AllocationPools)
+                    VirtualFreeEx(ProcessHandle, allocPool.Address, 0, AllocationType.Release);
 
                 AllocationPools.Clear();
             }

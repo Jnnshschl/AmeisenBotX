@@ -78,15 +78,12 @@ namespace AmeisenBotX.Logging
             {
                 string[] files = Directory.GetFiles(LogFileFolder);
 
-                for (int i = 0; i < files.Length; ++i)
+                foreach (string file in files)
                 {
-                    string file = files[i];
                     FileInfo fileInfo = new(file);
 
                     if (fileInfo.LastAccessTime < DateTime.Now.AddDays(daysToKeep * -1))
-                    {
                         fileInfo.Delete();
-                    }
                 }
             }
         }

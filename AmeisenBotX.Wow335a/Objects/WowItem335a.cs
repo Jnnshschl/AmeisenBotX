@@ -28,13 +28,9 @@ namespace AmeisenBotX.Wow335a.Objects
         {
             List<string> enchantments = new();
 
-            for (int i = 0; i < ItemEnchantments.Count; ++i)
-            {
-                if (WowEnchantmentHelper.TryLookupEnchantment(ItemEnchantments[i].Id, out string text))
-                {
+            foreach (ItemEnchantment itemEnch in ItemEnchantments)
+                if (WowEnchantmentHelper.TryLookupEnchantment(itemEnch.Id, out string text))
                     enchantments.Add(text);
-                }
-            }
 
             return enchantments;
         }
@@ -48,27 +44,27 @@ namespace AmeisenBotX.Wow335a.Objects
         {
             base.Update(memoryApi, offsetList);
 
-            if (memoryApi.Read(DescriptorAddress + WowObjectDescriptor.EndOffset, out WowItemDescriptor objPtr))
-            {
-                Count = objPtr.StackCount;
-                Owner = objPtr.Owner;
+            if (!memoryApi.Read(DescriptorAddress + WowObjectDescriptor.EndOffset,
+                out WowItemDescriptor objPtr)) return;
 
-                ItemEnchantments = new()
-                {
-                    objPtr.Enchantment1,
-                    objPtr.Enchantment2,
-                    objPtr.Enchantment3,
-                    objPtr.Enchantment4,
-                    objPtr.Enchantment5,
-                    objPtr.Enchantment6,
-                    objPtr.Enchantment7,
-                    objPtr.Enchantment8,
-                    objPtr.Enchantment9,
-                    objPtr.Enchantment10,
-                    objPtr.Enchantment11,
-                    objPtr.Enchantment12,
-                };
-            }
+            Count = objPtr.StackCount;
+            Owner = objPtr.Owner;
+
+            ItemEnchantments = new List<ItemEnchantment>
+            {
+                objPtr.Enchantment1,
+                objPtr.Enchantment2,
+                objPtr.Enchantment3,
+                objPtr.Enchantment4,
+                objPtr.Enchantment5,
+                objPtr.Enchantment6,
+                objPtr.Enchantment7,
+                objPtr.Enchantment8,
+                objPtr.Enchantment9,
+                objPtr.Enchantment10,
+                objPtr.Enchantment11,
+                objPtr.Enchantment12,
+            };
         }
     }
 }

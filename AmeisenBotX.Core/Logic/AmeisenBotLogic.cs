@@ -781,13 +781,13 @@ namespace AmeisenBotX.Core.Logic
                     Config.FollowGroupMembers ? Bot.Objects.Partymembers.FirstOrDefault() : null
                 };
 
-                for (int i = 0; i < playersToTry.Length; ++i)
+                foreach (IWowUnit unit in playersToTry)
                 {
-                    if (playersToTry[i] != null && (ignoreRange || ShouldIFollowPlayer(playersToTry[i])))
-                    {
-                        playerToFollow = playersToTry[i];
-                        return true;
-                    }
+                    if (unit == null || (!ignoreRange && !ShouldIFollowPlayer(unit))) 
+                        continue;
+
+                    playerToFollow = unit;
+                    return true;
                 }
             }
 

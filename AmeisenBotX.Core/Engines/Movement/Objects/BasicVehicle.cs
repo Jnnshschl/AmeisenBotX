@@ -224,10 +224,8 @@ namespace AmeisenBotX.Core.Engines.Movement.Objects
 
             List<Vector3> forces = GetForces(movementAction, targetPosition, rotation);
 
-            for (int i = 0; i < forces.Count; ++i)
-            {
-                Velocity += forces[i];
-            }
+            foreach (Vector3 force in forces)
+                Velocity += force;
 
             if (IsOnWaterSurface && Velocity.Z > 0f)
             {
