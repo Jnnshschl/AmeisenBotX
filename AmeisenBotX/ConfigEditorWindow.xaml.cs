@@ -197,8 +197,8 @@ namespace AmeisenBotX
                 Config.MovementSettings.SeperationDistance = (float)sliderPlayerSeperationDistance.Value;
                 Config.MovementSettings.WaypointCheckThreshold = sliderWaypointThreshold.Value;
 
-                if (Enum.TryParse(comboboxStartStopBotBindingAltKey.Text.ToString(), out KeyCodes mod)
-                    && Enum.TryParse(comboboxStartStopBotBindingKey.Text.ToString(), out KeyCodes key))
+                if (Enum.TryParse(comboboxStartStopBotBindingAltKey.Text.ToString(), out KeyCode mod)
+                    && Enum.TryParse(comboboxStartStopBotBindingKey.Text.ToString(), out KeyCode key))
                 {
                     if (!Config.Hotkeys.ContainsKey("StartStop"))
                     {
@@ -523,13 +523,13 @@ namespace AmeisenBotX
             // Load keybinding settings
             if (Config.Hotkeys.TryGetValue("StartStop", out Keybind kv))
             {
-                comboboxStartStopBotBindingAltKey.Text = ((KeyCodes)kv.Mod).ToString();
-                comboboxStartStopBotBindingKey.Text = ((KeyCodes)kv.Key).ToString();
+                comboboxStartStopBotBindingAltKey.Text = ((KeyCode)kv.Mod).ToString();
+                comboboxStartStopBotBindingKey.Text = ((KeyCode)kv.Key).ToString();
             }
             else
             {
-                comboboxStartStopBotBindingAltKey.Text = KeyCodes.None.ToString();
-                comboboxStartStopBotBindingKey.Text = KeyCodes.None.ToString();
+                comboboxStartStopBotBindingAltKey.Text = KeyCode.None.ToString();
+                comboboxStartStopBotBindingKey.Text = KeyCode.None.ToString();
             }
 
             // Idle Actions
@@ -918,24 +918,24 @@ namespace AmeisenBotX
             textboxCombatClassFile.Visibility = Visibility.Hidden;
 
             // add hotkeys to comboboxes
-            foreach (KeyCodes k in Enum.GetValues(typeof(KeyCodes)))
+            foreach (KeyCode k in Enum.GetValues(typeof(KeyCode)))
             {
                 switch (k)
                 {
-                    case KeyCodes.None:
+                    case KeyCode.None:
                         comboboxStartStopBotBindingKey.Items.Add(k.ToString());
                         comboboxStartStopBotBindingAltKey.Items.Add(k.ToString());
                         break;
 
-                    case KeyCodes.LControlKey:
-                    case KeyCodes.RControlKey:
-                    case KeyCodes.LShiftKey:
-                    case KeyCodes.RShiftKey:
-                    case KeyCodes.LWin:
-                    case KeyCodes.RWin:
-                    case KeyCodes.LMenu:
-                    case KeyCodes.RMenu:
-                    case KeyCodes.Alt:
+                    case KeyCode.LControlKey:
+                    case KeyCode.RControlKey:
+                    case KeyCode.LShiftKey:
+                    case KeyCode.RShiftKey:
+                    case KeyCode.LWin:
+                    case KeyCode.RWin:
+                    case KeyCode.LMenu:
+                    case KeyCode.RMenu:
+                    case KeyCode.Alt:
                         comboboxStartStopBotBindingAltKey.Items.Add(k.ToString());
                         break;
 

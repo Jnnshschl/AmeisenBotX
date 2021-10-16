@@ -19,7 +19,7 @@ namespace AmeisenBotX.Core.Engines.Combat.Helpers.Aura
 
         public delegate bool CastSpellOnUnit(string spellName, ulong guid);
 
-        public List<((string, WowDispelTypes), CastSpellOnUnit)> RemoveBadAurasSpells { get; private set; }
+        public List<((string, WowDispelType), CastSpellOnUnit)> RemoveBadAurasSpells { get; private set; }
 
         public List<(string, CastSpellOnUnit)> SpellsToKeepActiveOnParty { get; private set; }
 

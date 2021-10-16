@@ -10,7 +10,7 @@ namespace AmeisenBotX.Common.Keyboard.Objects
         /// <summary>
         /// A virtual-key code. The code must be a value in the range 1 to 254.
         /// </summary>
-        public KeyCodes VirtualCode { get; set; }
+        public KeyCode VirtualCode { get; set; }
 
         /// <summary>
         /// A hardware scan code for the key.

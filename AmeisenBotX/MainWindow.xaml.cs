@@ -287,7 +287,7 @@ namespace AmeisenBotX
         {
             if (AmeisenBot.Config.Hotkeys.TryGetValue("StartStop", out Keybind kv))
             {
-                KeyboardHook.AddHotkey((KeyCodes)kv.Key, (KeyCodes)kv.Mod, StartPause);
+                KeyboardHook.AddHotkey((KeyCode)kv.Key, (KeyCode)kv.Mod, StartPause);
             }
         }
 

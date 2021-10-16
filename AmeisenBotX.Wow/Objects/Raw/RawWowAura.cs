@@ -22,11 +22,11 @@ namespace AmeisenBotX.Wow.Objects.Raw
 
         public uint EndTime { get; set; }
 
-        public bool IsActive => ((WowAuraFlags)Flags).HasFlag(WowAuraFlags.Active);
+        public bool IsActive => ((WowAuraFlag)Flags).HasFlag(WowAuraFlag.Active);
 
-        public bool IsHarmful => ((WowAuraFlags)Flags).HasFlag(WowAuraFlags.Harmful);
+        public bool IsHarmful => ((WowAuraFlag)Flags).HasFlag(WowAuraFlag.Harmful);
 
-        public bool IsPassive => ((WowAuraFlags)Flags).HasFlag(WowAuraFlags.Passive);
+        public bool IsPassive => ((WowAuraFlag)Flags).HasFlag(WowAuraFlag.Passive);
 
         public override string ToString()
         {
