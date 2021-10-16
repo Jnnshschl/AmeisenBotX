@@ -13,10 +13,8 @@ namespace AmeisenBotX.Core.Managers.Character.Talents.Objects
 
             string[] talentSplits = talentString.Split('|');
 
-            for (int i = 0; i < talentSplits.Length; ++i)
+            foreach (string talent in talentSplits)
             {
-                string talent = talentSplits[i];
-
                 if (talent.Length < 4) { continue; }
 
                 string[] items = talent.Split(';');

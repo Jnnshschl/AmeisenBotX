@@ -59,12 +59,7 @@ namespace AmeisenBotX.Core.Engines.Quest.Objects.Quests
             {
                 if (Objectives == null || Objectives.Count == 0) { return 100.0; }
 
-                double totalProgress = 0;
-
-                for (int i = 0; i < Objectives.Count; ++i)
-                {
-                    totalProgress += Objectives[i].Progress;
-                }
+                double totalProgress = Objectives.Sum(questObjective => questObjective.Progress);
 
                 return Math.Round(totalProgress / Objectives.Count, 1);
             }

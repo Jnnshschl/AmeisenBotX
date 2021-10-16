@@ -58,11 +58,11 @@ namespace AmeisenBotX.Core.Managers.Character.Talents
 
             Talent[] wantedTreeValues = wantedTree.Values.ToArray();
 
-            for (int i = 0; i < wantedTreeValues.Length; ++i)
+            foreach (Talent talent in wantedTreeValues)
             {
                 if (talentPoints == 0) { break; }
 
-                Talent wantedTalent = wantedTreeValues[i];
+                Talent wantedTalent = talent;
 
                 if (tree.ContainsKey(wantedTalent.Num))
                 {
