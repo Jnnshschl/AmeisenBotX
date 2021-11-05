@@ -15,6 +15,7 @@
         public const string DeepFreeze = "Deep Freeze";
         public const string Evocation = "Evocation";
         public const string Fireball = "Fireball";
+        public const string FireBlast = "Fire Blast";
         public const string Freeze = "Freeze";
         public const string FrostArmor = "Frost Armor";
         public const string FrostBolt = "Frostbolt";
