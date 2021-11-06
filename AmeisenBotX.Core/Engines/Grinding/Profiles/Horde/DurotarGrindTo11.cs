@@ -17,6 +17,9 @@ namespace AmeisenBotX.Core.Engines.Grinding.Profiles.Horde
                 WowMapId.Kalimdor, WowZoneId.SenjinVillage, new Vector3(-769, -4948, 22),
                 NpcType.VendorRepair),
 
+            new Npc("Un'Thuwa", 5880,
+                WowMapId.Kalimdor, WowZoneId.SenjinVillage, new Vector3(-839, -4939, 20),
+                NpcType.ClassTrainer, NpcSubType.MageTrainer),
             new Npc("Tai'jin", 3706,
                 WowMapId.Kalimdor, WowZoneId.RazorHill, new Vector3(294, -4831, 10),
                 NpcType.ClassTrainer, NpcSubType.PriestTrainer),

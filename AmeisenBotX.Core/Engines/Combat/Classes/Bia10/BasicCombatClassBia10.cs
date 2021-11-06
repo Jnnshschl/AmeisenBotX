@@ -312,31 +312,50 @@ namespace AmeisenBotX.Core.Engines.Combat.Classes.Bia10
                 }
             }
 
-            if (!ValidateTarget(guid, out var target, out var needToSwitchTarget)) return false;
-            if (target != null && !IsInSpellRange(target, spellName)) return false;
-
-            var isTargetMyself = guid == Bot.Player.Guid;
-            if (!isTargetMyself && needToSwitchTarget)
-                Bot.Wow.ChangeTarget(guid);
-
-            if (!isTargetMyself && target != null && !BotMath.IsFacing(Bot.Player.Position, Bot.Player.Rotation, target.Position))
-                Bot.Wow.FacePosition(Bot.Player.BaseAddress, Bot.Player.Position, target.Position);
-
-            switch (spell.CastTime)
+            if (guid != 9999999)
             {
-                case 0:
-                    Bot.Movement.PreventMovement(TimeSpan.FromMilliseconds(300));
-                    CheckFacing(target);
-                    GCD += 0.1; // some timing is off with casting after instant cast spells
-                    break;
-                case > 0:
-                    Bot.Movement.PreventMovement(TimeSpan.FromMilliseconds(spell.CastTime));
-                    CheckFacing(target);
-                    break;
-            }
+                if (!ValidateTarget(guid, out var target, out var needToSwitchTarget)) return false;
+                if (target != null && !IsInSpellRange(target, spellName)) return false;
 
-            if (!CastSpell(spellName, isTargetMyself)) return false;
-            if (GCD == 0) return true;
+                var isTargetMyself = guid == Bot.Player.Guid;
+                if (!isTargetMyself && needToSwitchTarget)
+                    Bot.Wow.ChangeTarget(guid);
+
+                if (!isTargetMyself && target != null && !BotMath.IsFacing(Bot.Player.Position, Bot.Player.Rotation, target.Position))
+                    Bot.Wow.FacePosition(Bot.Player.BaseAddress, Bot.Player.Position, target.Position);
+
+                switch (spell.CastTime)
+                {
+                    case 0:
+                        Bot.Movement.PreventMovement(TimeSpan.FromMilliseconds(300));
+                        CheckFacing(target);
+                        GCD += 0.1; // some timing is off with casting after instant cast spells
+                        break;
+                    case > 0:
+                        Bot.Movement.PreventMovement(TimeSpan.FromMilliseconds(spell.CastTime));
+                        CheckFacing(target);
+                        break;
+                }
+
+                if (!CastSpell(spellName, isTargetMyself)) return false;
+                if (GCD == 0) return true;
+            }
+            else if (guid == 9999999)
+            {
+                switch (spell.CastTime)
+                {
+                    case 0:
+                        Bot.Movement.PreventMovement(TimeSpan.FromMilliseconds(300));
+                        GCD += 0.1; // some timing is off with casting after instant cast spells
+                        break;
+                    case > 0:
+                        Bot.Movement.PreventMovement(TimeSpan.FromMilliseconds(spell.CastTime));
+                        break;
+                }
+
+                if (!CastSpell(spellName, false)) return false;
+                if (GCD == 0) return true;
+            }
 
             SetGCD(GCD);
             return true;
