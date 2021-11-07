@@ -1,9 +1,11 @@
 ﻿using AmeisenBotX.Core.Engines.Combat.Helpers.Aura.Objects;
 using AmeisenBotX.Core.Managers.Character.Comparators;
 using AmeisenBotX.Core.Managers.Character.Talents.Objects;
+using AmeisenBotX.Wow.Objects;
 using AmeisenBotX.Wow.Objects.Enums;
 using AmeisenBotX.Wow335a.Constants;
 using System.Collections.Generic;
+using System.Linq;
 
 namespace AmeisenBotX.Core.Engines.Combat.Classes.Bia10
 {
@@ -72,7 +74,7 @@ namespace AmeisenBotX.Core.Engines.Combat.Classes.Bia10
             }
             if (IsInSpellRange(Bot.Target, Mage335a.Fireball)
                 && ValidateSpell(Mage335a.Fireball, true)
-                && Bot.Player.DistanceTo(Bot.Target) > 30)
+                && !IsInSpellRange(Bot.Target, Mage335a.FrostBolt))
             {
                 targetGuid = Bot.Target.Guid;
                 return Mage335a.Fireball;
@@ -82,6 +84,13 @@ namespace AmeisenBotX.Core.Engines.Combat.Classes.Bia10
             {
                 targetGuid = Bot.Target.Guid;
                 return Mage335a.FrostBolt;
+            }
+            if (Bot.GetEnemiesOrNeutralsInCombatWithMe<IWowUnit>(Bot.Player.Position, 10).Count() >= 2
+                || Bot.GetEnemiesOrNeutralsTargetingMe<IWowUnit>(Bot.Player.Position, 10).Count() >= 2
+                && ValidateSpell(Mage335a.FrostNova, true))
+            {
+                targetGuid = 9999999;
+                return Mage335a.FrostNova;
             }
 
             targetGuid = 9999999;
