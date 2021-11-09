@@ -35,7 +35,8 @@ namespace AmeisenBotX
             NearWowObjects,
             Lua,
             Events,
-            Logs
+            Logs,
+            ClientPatches
         }
 
         private enum NearWowObjectsTab
@@ -443,14 +444,10 @@ namespace AmeisenBotX
                     }
                     break;
 
-                case MainTab.Lua:
-                    break;
-
-                case MainTab.Events:
-                    break;
-
-                case MainTab.Logs:
-                    break;
+                case MainTab.Lua: break;
+                case MainTab.Events: break;
+                case MainTab.Logs: break;
+                case MainTab.ClientPatches: break;
 
                 default:
                     throw new ArgumentOutOfRangeException();
@@ -476,6 +473,36 @@ namespace AmeisenBotX
         private void Window_MouseLeftButtonDown(object sender, MouseButtonEventArgs e)
         {
             DragMove();
+        }
+
+        private void ClimbSteepSlopesChecked(object sender, RoutedEventArgs e)
+        {
+            throw new NotImplementedException();
+        }
+
+        private void ClimbSteepSlopesUnchecked(object sender, RoutedEventArgs e)
+        {
+            throw new NotImplementedException();
+        }
+
+        private void DisableM2CollisionsChecked(object sender, RoutedEventArgs e)
+        {
+            throw new NotImplementedException();
+        }
+
+        private void DisableM2CollisionsUnchecked(object sender, RoutedEventArgs e)
+        {
+            throw new NotImplementedException();
+        }
+
+        private void DisableWMOCollisionsChecked(object sender, RoutedEventArgs e)
+        {
+            throw new NotImplementedException();
+        }
+
+        private void DisableWMOCollisionsUnchecked(object sender, RoutedEventArgs e)
+        {
+            throw new NotImplementedException();
         }
     }
 }
