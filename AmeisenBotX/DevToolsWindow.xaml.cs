@@ -477,12 +477,19 @@ namespace AmeisenBotX
 
         private void ClimbSteepSlopesChecked(object sender, RoutedEventArgs e)
         {
-            throw new NotImplementedException();
+            // Todo: find a better way, multi-level pointer redirection very messy
+            AmeisenBot.Bot.Memory.Read<IntPtr>(AmeisenBot.Bot.Wow.Offsets.StaticPlayer, out var PlayerBase1);
+            AmeisenBot.Bot.Memory.Read<IntPtr>(IntPtr.Add(PlayerBase1, 0x34), out var PlayerBase2);
+            AmeisenBot.Bot.Memory.Read<IntPtr>(IntPtr.Add(PlayerBase2, 0x24), out var PlayerBase);
+            AmeisenBot.Bot.Memory.Write<float>(IntPtr.Add(PlayerBase,  (int)AmeisenBot.Bot.Wow.Offsets.ClimbAngle), 255);
         }
 
         private void ClimbSteepSlopesUnchecked(object sender, RoutedEventArgs e)
         {
-            throw new NotImplementedException();
+            AmeisenBot.Bot.Memory.Read<IntPtr>(AmeisenBot.Bot.Wow.Offsets.StaticPlayer, out var PlayerBase1);
+            AmeisenBot.Bot.Memory.Read<IntPtr>(IntPtr.Add(PlayerBase1, 0x34), out var PlayerBase2);
+            AmeisenBot.Bot.Memory.Read<IntPtr>(IntPtr.Add(PlayerBase2, 0x24), out var PlayerBase);
+            AmeisenBot.Bot.Memory.Write<float>(IntPtr.Add(PlayerBase, (int)AmeisenBot.Bot.Wow.Offsets.ClimbAngle), 1);
         }
 
         private void DisableM2CollisionsChecked(object sender, RoutedEventArgs e)

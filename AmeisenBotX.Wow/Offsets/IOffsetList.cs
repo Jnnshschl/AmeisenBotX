@@ -22,6 +22,12 @@ namespace AmeisenBotX.Wow.Offsets
 
         IntPtr CameraPointer { get; }
 
+        IntPtr CollisionM2C { get; }
+
+        IntPtr CollisionM2S { get; } 
+
+        IntPtr CollisionWMO { get; } 
+
         IntPtr ClickToMoveAction { get; }
 
         IntPtr ClickToMoveDistance { get; }
@@ -37,6 +43,8 @@ namespace AmeisenBotX.Wow.Offsets
         IntPtr ClickToMoveX { get; }
 
         IntPtr ClientConnection { get; }
+
+        IntPtr ClimbAngle { get; }
 
         IntPtr ComboPoints { get; }
 
@@ -129,6 +137,8 @@ namespace AmeisenBotX.Wow.Offsets
         IntPtr Runes { get; }
 
         IntPtr RuneType { get; }
+
+        IntPtr StaticPlayer { get; }
 
         IntPtr TargetGuid { get; }
 
