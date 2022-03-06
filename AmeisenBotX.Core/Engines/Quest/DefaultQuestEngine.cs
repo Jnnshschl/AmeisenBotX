@@ -50,7 +50,7 @@ namespace AmeisenBotX.Core.Engines.Quest
 
                 return;
             }
-            
+
             if (Profile.Quests.Count > 0)
             {
                 IEnumerable<IBotQuest> selectedQuests = Profile.Quests.Peek().Where(e => !e.Returned && !CompletedQuests.Contains(e.Id));

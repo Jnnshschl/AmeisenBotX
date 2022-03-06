@@ -94,7 +94,7 @@ namespace AmeisenBotX.Core.Engines.Combat.Classes.Kamel
         }
 
         public void Load(Dictionary<string, JsonElement> objects)
-        { 
+        {
             Configureables = objects["Configureables"].ToDyn();
         }
 

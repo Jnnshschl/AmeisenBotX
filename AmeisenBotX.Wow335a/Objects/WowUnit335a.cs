@@ -114,7 +114,7 @@ namespace AmeisenBotX.Wow335a.Objects
 
         public BitVector32 UnitFlagsDynamic => RawWowUnit.DynamicFlags;
 
-        protected WowUnitDescriptor RawWowUnit { get; private set; }
+        protected WowUnitDescriptor335a RawWowUnit { get; private set; }
 
         public static IEnumerable<RawWowAura> GetUnitAuras(IMemoryApi memoryApi, IOffsetList offsetList, IntPtr unitBase, out int auraCount)
         {
@@ -191,7 +191,7 @@ namespace AmeisenBotX.Wow335a.Objects
         {
             base.Update(memoryApi, offsetList);
 
-            if (memoryApi.Read(DescriptorAddress + WowObjectDescriptor.EndOffset, out WowUnitDescriptor objPtr))
+            if (memoryApi.Read(DescriptorAddress + WowObjectDescriptor335a.EndOffset, out WowUnitDescriptor335a objPtr))
             {
                 RawWowUnit = objPtr;
             }
@@ -204,7 +204,7 @@ namespace AmeisenBotX.Wow335a.Objects
                 Position = position;
             }
 
-            if (memoryApi.Read(IntPtr.Add(BaseAddress, (int)offsetList.WowUnitRotation), out float rotation))
+            if (memoryApi.Read(IntPtr.Add(BaseAddress, (int)offsetList.WowUnitPosition + 0x10), out float rotation))
             {
                 Rotation = rotation;
             }

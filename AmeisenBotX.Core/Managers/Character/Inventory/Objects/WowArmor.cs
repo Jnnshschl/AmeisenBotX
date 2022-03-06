@@ -30,7 +30,7 @@ namespace AmeisenBotX.Core.Managers.Character.Inventory.Objects
             if (Subtype.EndsWith("s"))
                 Subtype = Subtype.Remove(Subtype.Length - 1);
 
-            ArmorType = Enum.TryParse(Subtype, out WowArmorType armorType) 
+            ArmorType = Enum.TryParse(Subtype, out WowArmorType armorType)
                 ? armorType : WowArmorType.Misc;
         }
     }

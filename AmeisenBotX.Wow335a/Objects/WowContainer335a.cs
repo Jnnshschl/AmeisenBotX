@@ -17,7 +17,7 @@ namespace AmeisenBotX.Wow335a.Objects
 
         public int SlotCount => RawWowContainer.SlotCount;
 
-        protected WowContainerDescriptor RawWowContainer { get; private set; }
+        protected WowContainerDescriptor335a RawWowContainer { get; private set; }
 
         public override string ToString()
         {
@@ -28,7 +28,7 @@ namespace AmeisenBotX.Wow335a.Objects
         {
             base.Update(memoryApi, offsetList);
 
-            if (memoryApi.Read(DescriptorAddress + WowObjectDescriptor.EndOffset, out WowContainerDescriptor obj))
+            if (memoryApi.Read(DescriptorAddress + WowObjectDescriptor335a.EndOffset, out WowContainerDescriptor335a obj))
             {
                 RawWowContainer = obj;
             }

@@ -53,7 +53,7 @@ namespace AmeisenBotX
                         Directory.CreateDirectory(Path.GetDirectoryName(ConfigToLoad));
                     }
 
-                    File.WriteAllText(ConfigToLoad, JsonSerializer.Serialize(configEditor.Config, new() { AllowTrailingCommas = true, NumberHandling = JsonNumberHandling.AllowReadingFromString }));
+                    File.WriteAllText(ConfigToLoad, JsonSerializer.Serialize(configEditor.Config, new JsonSerializerOptions() { AllowTrailingCommas = true, NumberHandling = JsonNumberHandling.AllowReadingFromString }));
                 }
             }
             else

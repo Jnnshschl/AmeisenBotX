@@ -1,9 +1,9 @@
-﻿using System;
+﻿using AmeisenBotX.Core.Managers.Character.Talents.Objects;
+using AmeisenBotX.Wow;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
-using AmeisenBotX.Core.Managers.Character.Talents.Objects;
-using AmeisenBotX.Wow;
 
 namespace AmeisenBotX.Core.Managers.Character.Talents
 {

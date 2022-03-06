@@ -25,5 +25,10 @@
         Taunka,
         NorthrendSkeleton,
         IceTroll,
+        Worgen,
+        Dafuq,
+        PandarenN,
+        PandarenA,
+        PandarenH,
     }
 }

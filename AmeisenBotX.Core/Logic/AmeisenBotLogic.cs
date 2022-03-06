@@ -166,7 +166,7 @@ namespace AmeisenBotX.Core.Logic
                 (NeedToFight, combatNode),
                 (NeedToRepairOrSell, new Leaf(SpeakWithMerchant)),
                 (NeedToTrainSpells, new Leaf(SpeakWithClassTrainer)),
-                (NeedToTrainSecondarySkills, new Leaf(SpeakWithProfessionTrainer)), 
+                (NeedToTrainSecondarySkills, new Leaf(SpeakWithProfessionTrainer)),
                 (NeedToLoot, new Leaf(LootNearUnits)),
                 (NeedToEat, new Leaf(Eat))
             );
@@ -832,7 +832,56 @@ namespace AmeisenBotX.Core.Logic
 
             if (LoginAttemptEvent.Run())
             {
-                Bot.Wow.LuaDoString($"if CinematicFrame and CinematicFrame:IsShown()then StopCinematic()elseif TOSFrame and TOSFrame:IsShown()then TOSAccept:Enable()TOSAccept:Click()elseif ScriptErrors and ScriptErrors:IsShown()then ScriptErrors:Hide()elseif GlueDialog and GlueDialog:IsShown()then if GlueDialog.which=='OKAY'then GlueDialogButton1:Click()end elseif CharCreateRandomizeButton and CharCreateRandomizeButton:IsVisible()then CharacterCreate_Back()elseif RealmList and RealmList:IsVisible()then for a=1,#GetRealmCategories()do local found=false for b=1,GetNumRealms()do if string.lower(GetRealmInfo(a,b))==string.lower('{Config.Realm}')then ChangeRealm(a,b)RealmList:Hide()found=true break end end if found then break end end elseif CharacterSelectUI and CharacterSelectUI:IsVisible()then if string.find(string.lower(GetServerName()),string.lower('{Config.Realm}'))then CharacterSelect_SelectCharacter({Config.CharacterSlot + 1})CharacterSelect_EnterWorld()elseif RealmList and not RealmList:IsVisible()then CharSelectChangeRealmButton:Click()end elseif AccountLoginUI and AccountLoginUI:IsVisible()then DefaultServerLogin('{Config.Username}','{Config.Password}')end");
+                // CharacterSelect_EnterWorld() for whetever reason, the mop client freezes if we call this directly
+
+                string loginLua = @$"
+                    if AccountLoginUI then
+                        AccountLoginUI:Show()
+                    end
+                    if ServerAlertFrame and ServerAlertFrame:IsShown() then
+                        ServerAlertFrame:Hide()
+                    elseif ConnectionHelpFrame and ConnectionHelpFrame:IsShown() then
+                        ConnectionHelpFrame:Hide()
+                        AccountLoginUI:Show()
+                    elseif CinematicFrame and CinematicFrame:IsShown() then
+                        StopCinematic()
+                    elseif TOSFrame and TOSFrame:IsShown() then
+                        TOSAccept:Enable()
+                        TOSAccept:Click()
+                    elseif ScriptErrors and ScriptErrors:IsShown() then
+                        ScriptErrors:Hide()
+                    elseif GlueDialog and GlueDialog:IsShown() then
+                        if GlueDialog.which == ""OKAY"" then
+                            GlueDialogButton1:Click()
+                        end
+                    elseif CharCreateRandomizeButton and CharCreateRandomizeButton:IsVisible() then
+                        CharacterCreate_Back()
+                    elseif RealmList and RealmList:IsVisible() then
+                        for a = 1, #GetRealmCategories() do
+                            local found = false
+                            for b = 1, GetNumRealms() do
+                                if string.lower(GetRealmInfo(a, b)) == string.lower(""{Config.Realm}"") then
+                                    ChangeRealm(a, b)
+                                    RealmList: Hide()
+                                    found = true
+                                    break
+                                end
+                            end
+                            if found then
+                                break
+                            end
+                        end
+                    elseif CharacterSelectUI and CharacterSelectUI:IsVisible() then
+                        if string.find(string.lower(GetServerName()), string.lower(""{Config.Realm}"")) then
+                            CharacterSelect_SelectCharacter({ Config.CharacterSlot + 1})                            
+                            CharSelectEnterWorldButton:Click()
+                        elseif RealmList and not RealmList:IsVisible() then
+                             CharSelectChangeRealmButton:Click()
+                        end
+                    elseif AccountLoginUI and AccountLoginUI:IsVisible() then
+                        DefaultServerLogin(""{Config.Username}"", ""{Config.Password}"")
+                    end";
+                Bot.Wow.LuaDoString(loginLua);
             }
 
             Bot.Wow.SetWorldLoadedCheck(false);
@@ -1186,7 +1235,7 @@ namespace AmeisenBotX.Core.Logic
 
         private BtStatus SpeakWithMerchant()
         {
-            if (Merchant == null) 
+            if (Merchant == null)
                 return BtStatus.Failed;
 
             if (Bot.Player.Position.GetDistance(Merchant.Position) > 3.0f)
@@ -1216,6 +1265,8 @@ namespace AmeisenBotX.Core.Logic
 
                 if (Bot.Memory.Init(p, processHandle, mainThreadHandle))
                 {
+                    Bot.Wow.Offsets.Init(Bot.Memory.Process.MainModule.BaseAddress);
+
                     OnWoWStarted?.Invoke();
 
                     if (Config.SaveWowWindowPosition)
@@ -1242,7 +1293,7 @@ namespace AmeisenBotX.Core.Logic
             {
                 FirstStart = false;
 
-                Bot.Wow.Events.Start();
+                Bot.Wow.Events?.Start();
 
                 Bot.Wow.LuaDoString($"SetCVar(\"maxfps\", {Config.MaxFps});SetCVar(\"maxfpsbk\", {Config.MaxFps})");
                 Bot.Wow.EnableClickToMove();
@@ -1253,7 +1304,7 @@ namespace AmeisenBotX.Core.Logic
                 }
             }
 
-            Bot.Wow.Events.Tick();
+            Bot.Wow.Events?.Tick();
 
             Bot.Movement.Execute();
 

@@ -1,7 +1,7 @@
 <Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-    <TargetFramework>net5.0</TargetFramework>
+    <TargetFramework>net6.0-windows</TargetFramework>
   </PropertyGroup>
 
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|AnyCPU'">
@@ -27,6 +27,7 @@
     <ProjectReference Include="..\AmeisenBotX.Memory\AmeisenBotX.Memory.csproj" />
     <ProjectReference Include="..\AmeisenBotX.RconClient\AmeisenBotX.RconClient.csproj" />
     <ProjectReference Include="..\AmeisenBotX.Wow335a\AmeisenBotX.Wow335a.csproj" />
+    <ProjectReference Include="..\AmeisenBotX.Wow548\AmeisenBotX.Wow548.csproj" />
   </ItemGroup>
 
 </Project>

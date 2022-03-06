@@ -13,7 +13,7 @@ namespace AmeisenBotX.Core.Engines.Combat.Classes.Bia10
         public ShamanElemental(AmeisenBotInterfaces bot) : base(bot)
         {
             MyAuraManager.Jobs.Add(new KeepActiveAuraJob(bot.Db, Shaman335a.LightningShield, () =>
-                Bot.Player.ManaPercentage > 60.0 
+                Bot.Player.ManaPercentage > 60.0
                 && ValidateSpell(Shaman335a.LightningShield, true)
                 && TryCastSpell(Shaman335a.LightningShield, Bot.Player.Guid)));
             MyAuraManager.Jobs.Add(new KeepActiveAuraJob(bot.Db, Shaman335a.WaterShield, () =>

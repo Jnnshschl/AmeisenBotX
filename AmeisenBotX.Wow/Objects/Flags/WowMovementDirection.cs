@@ -25,7 +25,7 @@ namespace AmeisenBotX.Wow.Objects.Flags
         TurnMovement = 0x40000,        // HEX: 0x0004 0000 - DEC: 262144
         // ????                           HEX: 0x0008 0000 - DEC: 524288
         // ????                           HEX: 0x0010 0000 - DEC: 1048576
-        IsCTMing = 0x200000 ,          // HEX: 0x0020 0000 - DEC: 2097152
+        IsCTMing = 0x200000,          // HEX: 0x0020 0000 - DEC: 2097152
         ClickToMove = 0x400000,        // HEX: 0x0040 0000 - DEC: 4194304; Note: Only turns the CTM flag on or off.
     }
 }

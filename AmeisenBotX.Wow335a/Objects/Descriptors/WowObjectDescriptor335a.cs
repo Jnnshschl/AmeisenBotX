@@ -3,7 +3,7 @@
 namespace AmeisenBotX.Wow335a.Objects.Descriptors
 {
     [StructLayout(LayoutKind.Sequential)]
-    public struct WowObjectDescriptor
+    public struct WowObjectDescriptor335a
     {
         public ulong Guid;
         public int Type;

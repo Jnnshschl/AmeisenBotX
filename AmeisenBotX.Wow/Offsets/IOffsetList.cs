@@ -154,8 +154,6 @@ namespace AmeisenBotX.Wow.Offsets
 
         IntPtr WowUnitPosition { get; }
 
-        IntPtr WowUnitRotation { get; }
-
         IntPtr WowUnitSwimFlags { get; }
 
         IntPtr ZoneId { get; }
@@ -163,5 +161,7 @@ namespace AmeisenBotX.Wow.Offsets
         IntPtr ZoneSubText { get; }
 
         IntPtr ZoneText { get; }
+
+        void Init(IntPtr mainModuleBase);
     }
 }

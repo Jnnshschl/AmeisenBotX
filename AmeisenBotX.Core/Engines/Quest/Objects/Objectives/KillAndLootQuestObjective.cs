@@ -43,7 +43,7 @@ namespace AmeisenBotX.Core.Engines.Quest.Objects.Objectives
                 int amount = Killed;
                 if (CollectQuestItem)
                 {
-                    IWowInventoryItem inventoryItem = 
+                    IWowInventoryItem inventoryItem =
                         Bot.Character.Inventory.Items.Find(item => item.Id == QuestItemId);
 
                     if (inventoryItem != null)

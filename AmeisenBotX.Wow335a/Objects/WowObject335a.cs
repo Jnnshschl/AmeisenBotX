@@ -32,7 +32,7 @@ namespace AmeisenBotX.Wow335a.Objects
 
         public WowObjectType Type { get; protected set; }
 
-        protected WowObjectDescriptor RawObject { get; private set; }
+        protected WowObjectDescriptor335a RawObject { get; private set; }
 
         public override string ToString()
         {
@@ -41,7 +41,7 @@ namespace AmeisenBotX.Wow335a.Objects
 
         public virtual void Update(IMemoryApi memoryApi, IOffsetList offsetList)
         {
-            if (DescriptorAddress != IntPtr.Zero && memoryApi.Read(DescriptorAddress, out WowObjectDescriptor obj))
+            if (DescriptorAddress != IntPtr.Zero && memoryApi.Read(DescriptorAddress, out WowObjectDescriptor335a obj))
             {
                 RawObject = obj;
             }

@@ -47,7 +47,7 @@ namespace AmeisenBotX.Wow335a.Objects
         {
             base.Update(memoryApi, offsetList);
 
-            if (memoryApi.Read(DescriptorAddress + WowObjectDescriptor.EndOffset, out WowItemDescriptor objPtr))
+            if (memoryApi.Read(DescriptorAddress + WowObjectDescriptor335a.EndOffset, out WowItemDescriptor335a objPtr))
             {
                 Count = objPtr.StackCount;
                 Owner = objPtr.Owner;

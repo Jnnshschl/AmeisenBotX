@@ -3,7 +3,7 @@
 namespace AmeisenBotX.Wow335a.Objects.Descriptors
 {
     [StructLayout(LayoutKind.Sequential)]
-    public unsafe struct WowDynobjectDescriptor
+    public unsafe struct WowDynobjectDescriptor335a
     {
         public ulong Caster;
         public fixed byte DynobjectBytes[4];

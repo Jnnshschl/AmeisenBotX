@@ -63,7 +63,7 @@ namespace AmeisenBotX.Wow.Cache
 
                 try
                 {
-                    LocalAmeisenBotDb db = JsonSerializer.Deserialize<LocalAmeisenBotDb>(File.ReadAllText(dbFile), new() { AllowTrailingCommas = true, NumberHandling = JsonNumberHandling.AllowReadingFromString });
+                    LocalAmeisenBotDb db = JsonSerializer.Deserialize<LocalAmeisenBotDb>(File.ReadAllText(dbFile), new JsonSerializerOptions() { AllowTrailingCommas = true, NumberHandling = JsonNumberHandling.AllowReadingFromString });
                     db.MemoryApi = memoryApi;
                     db.Wow = wowInterface;
                     return db;

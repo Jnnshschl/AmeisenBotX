@@ -44,6 +44,7 @@ using AmeisenBotX.Wow.Combatlog;
 using AmeisenBotX.Wow.Objects;
 using AmeisenBotX.Wow.Objects.Enums;
 using AmeisenBotX.Wow335a;
+using AmeisenBotX.Wow548;
 using Microsoft.CSharp;
 using System;
 using System.CodeDom.Compiler;
@@ -87,8 +88,13 @@ namespace AmeisenBotX.Core
                 logfilePath = Path.Combine(ProfileFolder, "log/");
             }
 
-            if (!string.IsNullOrWhiteSpace(logfilePath) && Directory.Exists(logfilePath))
+            if (!string.IsNullOrWhiteSpace(logfilePath))
             {
+                if (!Directory.Exists(logfilePath))
+                {
+                    Directory.CreateDirectory(logfilePath);
+                }
+
                 AmeisenLogger.I.ChangeLogFolder(logfilePath);
                 AmeisenLogger.I.ActiveLogLevel = initialLogLevel;
                 AmeisenLogger.I.Start();
@@ -115,6 +121,7 @@ namespace AmeisenBotX.Core
             Bot.Wow = FileVersionInfo.GetVersionInfo(Config.PathToWowExe).FilePrivatePart switch
             {
                 12340 => new WowInterface335a(Bot.Memory),
+                18414 => new WowInterface548(Bot.Memory),
                 _ => throw new ArgumentException("Unsupported wow version", nameof(Config)),
             };
 
@@ -1031,73 +1038,73 @@ namespace AmeisenBotX.Core
             EquipmentUpdateEvent = new(TimeSpan.FromSeconds(1));
 
             // Request Events
-            Bot.Wow.Events.Subscribe("PARTY_INVITE_REQUEST", OnPartyInvitation);
-            Bot.Wow.Events.Subscribe("CONFIRM_SUMMON", OnSummonRequest);
-            Bot.Wow.Events.Subscribe("READY_CHECK", OnReadyCheck);
+            Bot.Wow.Events?.Subscribe("PARTY_INVITE_REQUEST", OnPartyInvitation);
+            Bot.Wow.Events?.Subscribe("CONFIRM_SUMMON", OnSummonRequest);
+            Bot.Wow.Events?.Subscribe("READY_CHECK", OnReadyCheck);
 
             // Loot/Item Events
-            Bot.Wow.Events.Subscribe("LOOT_OPENED", OnLootWindowOpened);
-            Bot.Wow.Events.Subscribe("START_LOOT_ROLL", OnLootRollStarted);
-            Bot.Wow.Events.Subscribe("BAG_UPDATE", OnBagChanged);
-            Bot.Wow.Events.Subscribe("PLAYER_EQUIPMENT_CHANGED", OnEquipmentChanged);
+            Bot.Wow.Events?.Subscribe("LOOT_OPENED", OnLootWindowOpened);
+            Bot.Wow.Events?.Subscribe("START_LOOT_ROLL", OnLootRollStarted);
+            Bot.Wow.Events?.Subscribe("BAG_UPDATE", OnBagChanged);
+            Bot.Wow.Events?.Subscribe("PLAYER_EQUIPMENT_CHANGED", OnEquipmentChanged);
             // Bot.EventHookManager.Subscribe("DELETE_ITEM_CONFIRM", OnConfirmDeleteItem);
 
             // Merchant Events
             // Bot.EventHookManager.Subscribe("MERCHANT_SHOW", OnMerchantShow);
 
             // PvP Events
-            Bot.Wow.Events.Subscribe("UPDATE_BATTLEFIELD_STATUS", OnPvpQueueShow);
-            Bot.Wow.Events.Subscribe("PVPQUEUE_ANYWHERE_SHOW", OnPvpQueueShow);
+            Bot.Wow.Events?.Subscribe("UPDATE_BATTLEFIELD_STATUS", OnPvpQueueShow);
+            Bot.Wow.Events?.Subscribe("PVPQUEUE_ANYWHERE_SHOW", OnPvpQueueShow);
 
             // Dungeon Events
-            Bot.Wow.Events.Subscribe("LFG_ROLE_CHECK_SHOW", OnLfgRoleCheckShow);
-            Bot.Wow.Events.Subscribe("LFG_PROPOSAL_SHOW", OnLfgProposalShow);
+            Bot.Wow.Events?.Subscribe("LFG_ROLE_CHECK_SHOW", OnLfgRoleCheckShow);
+            Bot.Wow.Events?.Subscribe("LFG_PROPOSAL_SHOW", OnLfgProposalShow);
 
             // Quest Events
-            Bot.Wow.Events.Subscribe("QUEST_DETAIL", OnShowQuestFrame);
-            Bot.Wow.Events.Subscribe("QUEST_ACCEPT_CONFIRM", OnQuestAcceptConfirm);
-            Bot.Wow.Events.Subscribe("QUEST_GREETING", OnQuestGreeting);
-            Bot.Wow.Events.Subscribe("QUEST_COMPLETE", OnQuestProgress);
-            Bot.Wow.Events.Subscribe("QUEST_PROGRESS", OnQuestProgress);
-            Bot.Wow.Events.Subscribe("GOSSIP_SHOW", OnQuestGreeting);
+            Bot.Wow.Events?.Subscribe("QUEST_DETAIL", OnShowQuestFrame);
+            Bot.Wow.Events?.Subscribe("QUEST_ACCEPT_CONFIRM", OnQuestAcceptConfirm);
+            Bot.Wow.Events?.Subscribe("QUEST_GREETING", OnQuestGreeting);
+            Bot.Wow.Events?.Subscribe("QUEST_COMPLETE", OnQuestProgress);
+            Bot.Wow.Events?.Subscribe("QUEST_PROGRESS", OnQuestProgress);
+            Bot.Wow.Events?.Subscribe("GOSSIP_SHOW", OnQuestGreeting);
 
             // Trading Events
-            Bot.Wow.Events.Subscribe("TRADE_ACCEPT_UPDATE", OnTradeAcceptUpdate);
+            Bot.Wow.Events?.Subscribe("TRADE_ACCEPT_UPDATE", OnTradeAcceptUpdate);
 
             // Chat Events
-            Bot.Wow.Events.Subscribe("CHAT_MSG_ADDON", (t, a) => Bot.Chat.TryParseMessage(WowChat.ADDON, t, a));
-            Bot.Wow.Events.Subscribe("CHAT_MSG_CHANNEL", (t, a) => Bot.Chat.TryParseMessage(WowChat.CHANNEL, t, a));
-            Bot.Wow.Events.Subscribe("CHAT_MSG_EMOTE", (t, a) => Bot.Chat.TryParseMessage(WowChat.EMOTE, t, a));
-            Bot.Wow.Events.Subscribe("CHAT_MSG_FILTERED", (t, a) => Bot.Chat.TryParseMessage(WowChat.FILTERED, t, a));
-            Bot.Wow.Events.Subscribe("CHAT_MSG_GUILD", (t, a) => Bot.Chat.TryParseMessage(WowChat.GUILD, t, a));
-            Bot.Wow.Events.Subscribe("CHAT_MSG_GUILD_ACHIEVEMENT", (t, a) => Bot.Chat.TryParseMessage(WowChat.GUILD_ACHIEVEMENT, t, a));
-            Bot.Wow.Events.Subscribe("CHAT_MSG_IGNORED", (t, a) => Bot.Chat.TryParseMessage(WowChat.IGNORED, t, a));
-            Bot.Wow.Events.Subscribe("CHAT_MSG_MONSTER_EMOTE", (t, a) => Bot.Chat.TryParseMessage(WowChat.MONSTER_EMOTE, t, a));
-            Bot.Wow.Events.Subscribe("CHAT_MSG_MONSTER_PARTY", (t, a) => Bot.Chat.TryParseMessage(WowChat.MONSTER_PARTY, t, a));
-            Bot.Wow.Events.Subscribe("CHAT_MSG_MONSTER_SAY", (t, a) => Bot.Chat.TryParseMessage(WowChat.MONSTER_SAY, t, a));
-            Bot.Wow.Events.Subscribe("CHAT_MSG_MONSTER_WHISPER", (t, a) => Bot.Chat.TryParseMessage(WowChat.MONSTER_WHISPER, t, a));
-            Bot.Wow.Events.Subscribe("CHAT_MSG_MONSTER_YELL", (t, a) => Bot.Chat.TryParseMessage(WowChat.MONSTER_YELL, t, a));
-            Bot.Wow.Events.Subscribe("CHAT_MSG_OFFICER", (t, a) => Bot.Chat.TryParseMessage(WowChat.OFFICER, t, a));
-            Bot.Wow.Events.Subscribe("CHAT_MSG_PARTY", (t, a) => Bot.Chat.TryParseMessage(WowChat.PARTY, t, a));
-            Bot.Wow.Events.Subscribe("CHAT_MSG_PARTY_LEADER", (t, a) => Bot.Chat.TryParseMessage(WowChat.PARTY_LEADER, t, a));
-            Bot.Wow.Events.Subscribe("CHAT_MSG_RAID", (t, a) => Bot.Chat.TryParseMessage(WowChat.RAID, t, a));
-            Bot.Wow.Events.Subscribe("CHAT_MSG_RAID_BOSS_EMOTE", (t, a) => Bot.Chat.TryParseMessage(WowChat.RAID_BOSS_EMOTE, t, a));
-            Bot.Wow.Events.Subscribe("CHAT_MSG_RAID_BOSS_WHISPER", (t, a) => Bot.Chat.TryParseMessage(WowChat.RAID_BOSS_WHISPER, t, a));
-            Bot.Wow.Events.Subscribe("CHAT_MSG_RAID_LEADER", (t, a) => Bot.Chat.TryParseMessage(WowChat.RAID_LEADER, t, a));
-            Bot.Wow.Events.Subscribe("CHAT_MSG_RAID_WARNING", (t, a) => Bot.Chat.TryParseMessage(WowChat.RAID_WARNING, t, a));
-            Bot.Wow.Events.Subscribe("CHAT_MSG_SAY", (t, a) => Bot.Chat.TryParseMessage(WowChat.SAY, t, a));
-            Bot.Wow.Events.Subscribe("CHAT_MSG_SYSTEM", (t, a) => Bot.Chat.TryParseMessage(WowChat.SYSTEM, t, a));
-            Bot.Wow.Events.Subscribe("CHAT_MSG_TEXT_EMOTE", (t, a) => Bot.Chat.TryParseMessage(WowChat.TEXT_EMOTE, t, a));
-            Bot.Wow.Events.Subscribe("CHAT_MSG_WHISPER", (t, a) => Bot.Chat.TryParseMessage(WowChat.WHISPER, t, a));
-            Bot.Wow.Events.Subscribe("CHAT_MSG_YELL", (t, a) => Bot.Chat.TryParseMessage(WowChat.YELL, t, a));
+            Bot.Wow.Events?.Subscribe("CHAT_MSG_ADDON", (t, a) => Bot.Chat.TryParseMessage(WowChat.ADDON, t, a));
+            Bot.Wow.Events?.Subscribe("CHAT_MSG_CHANNEL", (t, a) => Bot.Chat.TryParseMessage(WowChat.CHANNEL, t, a));
+            Bot.Wow.Events?.Subscribe("CHAT_MSG_EMOTE", (t, a) => Bot.Chat.TryParseMessage(WowChat.EMOTE, t, a));
+            Bot.Wow.Events?.Subscribe("CHAT_MSG_FILTERED", (t, a) => Bot.Chat.TryParseMessage(WowChat.FILTERED, t, a));
+            Bot.Wow.Events?.Subscribe("CHAT_MSG_GUILD", (t, a) => Bot.Chat.TryParseMessage(WowChat.GUILD, t, a));
+            Bot.Wow.Events?.Subscribe("CHAT_MSG_GUILD_ACHIEVEMENT", (t, a) => Bot.Chat.TryParseMessage(WowChat.GUILD_ACHIEVEMENT, t, a));
+            Bot.Wow.Events?.Subscribe("CHAT_MSG_IGNORED", (t, a) => Bot.Chat.TryParseMessage(WowChat.IGNORED, t, a));
+            Bot.Wow.Events?.Subscribe("CHAT_MSG_MONSTER_EMOTE", (t, a) => Bot.Chat.TryParseMessage(WowChat.MONSTER_EMOTE, t, a));
+            Bot.Wow.Events?.Subscribe("CHAT_MSG_MONSTER_PARTY", (t, a) => Bot.Chat.TryParseMessage(WowChat.MONSTER_PARTY, t, a));
+            Bot.Wow.Events?.Subscribe("CHAT_MSG_MONSTER_SAY", (t, a) => Bot.Chat.TryParseMessage(WowChat.MONSTER_SAY, t, a));
+            Bot.Wow.Events?.Subscribe("CHAT_MSG_MONSTER_WHISPER", (t, a) => Bot.Chat.TryParseMessage(WowChat.MONSTER_WHISPER, t, a));
+            Bot.Wow.Events?.Subscribe("CHAT_MSG_MONSTER_YELL", (t, a) => Bot.Chat.TryParseMessage(WowChat.MONSTER_YELL, t, a));
+            Bot.Wow.Events?.Subscribe("CHAT_MSG_OFFICER", (t, a) => Bot.Chat.TryParseMessage(WowChat.OFFICER, t, a));
+            Bot.Wow.Events?.Subscribe("CHAT_MSG_PARTY", (t, a) => Bot.Chat.TryParseMessage(WowChat.PARTY, t, a));
+            Bot.Wow.Events?.Subscribe("CHAT_MSG_PARTY_LEADER", (t, a) => Bot.Chat.TryParseMessage(WowChat.PARTY_LEADER, t, a));
+            Bot.Wow.Events?.Subscribe("CHAT_MSG_RAID", (t, a) => Bot.Chat.TryParseMessage(WowChat.RAID, t, a));
+            Bot.Wow.Events?.Subscribe("CHAT_MSG_RAID_BOSS_EMOTE", (t, a) => Bot.Chat.TryParseMessage(WowChat.RAID_BOSS_EMOTE, t, a));
+            Bot.Wow.Events?.Subscribe("CHAT_MSG_RAID_BOSS_WHISPER", (t, a) => Bot.Chat.TryParseMessage(WowChat.RAID_BOSS_WHISPER, t, a));
+            Bot.Wow.Events?.Subscribe("CHAT_MSG_RAID_LEADER", (t, a) => Bot.Chat.TryParseMessage(WowChat.RAID_LEADER, t, a));
+            Bot.Wow.Events?.Subscribe("CHAT_MSG_RAID_WARNING", (t, a) => Bot.Chat.TryParseMessage(WowChat.RAID_WARNING, t, a));
+            Bot.Wow.Events?.Subscribe("CHAT_MSG_SAY", (t, a) => Bot.Chat.TryParseMessage(WowChat.SAY, t, a));
+            Bot.Wow.Events?.Subscribe("CHAT_MSG_SYSTEM", (t, a) => Bot.Chat.TryParseMessage(WowChat.SYSTEM, t, a));
+            Bot.Wow.Events?.Subscribe("CHAT_MSG_TEXT_EMOTE", (t, a) => Bot.Chat.TryParseMessage(WowChat.TEXT_EMOTE, t, a));
+            Bot.Wow.Events?.Subscribe("CHAT_MSG_WHISPER", (t, a) => Bot.Chat.TryParseMessage(WowChat.WHISPER, t, a));
+            Bot.Wow.Events?.Subscribe("CHAT_MSG_YELL", (t, a) => Bot.Chat.TryParseMessage(WowChat.YELL, t, a));
 
             // Misc Events
-            Bot.Wow.Events.Subscribe("CHARACTER_POINTS_CHANGED", OnTalentPointsChange);
-            Bot.Wow.Events.Subscribe("COMBAT_LOG_EVENT_UNFILTERED", Bot.CombatLog.Parse);
+            Bot.Wow.Events?.Subscribe("CHARACTER_POINTS_CHANGED", OnTalentPointsChange);
+            Bot.Wow.Events?.Subscribe("COMBAT_LOG_EVENT_UNFILTERED", Bot.CombatLog.Parse);
 
             // NPC Events
-            Bot.Wow.Events.Subscribe("MERCHANT_SHOW", OnMerchantShow);
-            Bot.Wow.Events.Subscribe("TRAINER_SHOW", OnClassTrainerShow);
+            Bot.Wow.Events?.Subscribe("MERCHANT_SHOW", OnMerchantShow);
+            Bot.Wow.Events?.Subscribe("TRAINER_SHOW", OnClassTrainerShow);
         }
     }
 }

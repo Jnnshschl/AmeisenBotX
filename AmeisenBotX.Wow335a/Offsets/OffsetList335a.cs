@@ -155,8 +155,6 @@ namespace AmeisenBotX.Wow335a.Offsets
 
         public IntPtr WowUnitPosition { get; } = new(0x798);
 
-        public IntPtr WowUnitRotation { get; } = new(0x7A8);
-
         public IntPtr WowUnitSwimFlags { get; } = new(0xA30);
 
         public IntPtr ZoneId { get; } = new(0xBD080C);
@@ -164,5 +162,10 @@ namespace AmeisenBotX.Wow335a.Offsets
         public IntPtr ZoneSubText { get; } = new(0xBD0784);
 
         public IntPtr ZoneText { get; } = new(0xBD0788);
+
+        public void Init(IntPtr mainModuleBase)
+        {
+            // unused, ASLR not enabled
+        }
     }
 }

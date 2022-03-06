@@ -94,7 +94,7 @@ namespace AmeisenBotX.RconClient
 
             if (dataResponse.IsSuccessStatusCode)
             {
-                PendingActions = JsonSerializer.Deserialize<List<ActionType>>(dataResponse.Content.ReadAsStringAsync().Result, new() { AllowTrailingCommas = true, NumberHandling = JsonNumberHandling.AllowReadingFromString });
+                PendingActions = JsonSerializer.Deserialize<List<ActionType>>(dataResponse.Content.ReadAsStringAsync().Result, new JsonSerializerOptions() { AllowTrailingCommas = true, NumberHandling = JsonNumberHandling.AllowReadingFromString });
                 return true;
             }
             else

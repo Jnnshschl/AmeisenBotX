@@ -3,7 +3,7 @@
 namespace AmeisenBotX.Wow335a.Objects.Descriptors
 {
     [StructLayout(LayoutKind.Sequential)]
-    public unsafe struct WowContainerDescriptor
+    public unsafe struct WowContainerDescriptor335a
     {
         public int SlotCount;
         public fixed byte WowContainerPad[4];

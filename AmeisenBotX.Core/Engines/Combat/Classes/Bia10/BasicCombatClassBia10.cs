@@ -97,16 +97,16 @@ namespace AmeisenBotX.Core.Engines.Combat.Classes.Bia10
             switch (IsMelee)
             {
                 case true when Bot.Player.Position.GetDistance(Bot.Target.Position) <= WowClickToMoveDistance.AttackGuid:
-                {
-                    if (Bot.Player.IsCasting)
-                        Bot.Wow.StopCasting();
+                    {
+                        if (Bot.Player.IsCasting)
+                            Bot.Wow.StopCasting();
 
-                    // todo: kinda buggy
-                    Bot.Wow.StopClickToMove();
-                    Bot.Movement.Reset();
-                    Bot.Wow.InteractWithUnit(target.BaseAddress);
-                    break;
-                }
+                        // todo: kinda buggy
+                        Bot.Wow.StopClickToMove();
+                        Bot.Movement.Reset();
+                        Bot.Wow.InteractWithUnit(target.BaseAddress);
+                        break;
+                    }
 
                 case true when Bot.Player.Position.GetDistance(Bot.Target.Position) > WowClickToMoveDistance.AttackGuid:
                     Bot.Movement.SetMovementAction(MovementAction.Move, target.Position);
@@ -183,7 +183,7 @@ namespace AmeisenBotX.Core.Engines.Combat.Classes.Bia10
                     break;
                 // -------- Horde -------- >
                 case WowRace.Orc:
-                    if (Bot.Player.HealthPercentage < 50.0 
+                    if (Bot.Player.HealthPercentage < 50.0
                         && Bot.GetEnemiesOrNeutralsInCombatWithMe<IWowUnit>(Bot.Player.Position, 10).Count() >= 2)
                         if (ValidateSpell(Racials335a.BloodFury, false))
                             TryCastSpell(Racials335a.BloodFury, Bot.Player.Guid, false, 0);
@@ -219,7 +219,7 @@ namespace AmeisenBotX.Core.Engines.Combat.Classes.Bia10
         {
             if (Bot.Player.IsCasting)
             {
-                if (!Bot.Objects.IsTargetInLineOfSight || SpellAbortFunctions.Any(e => e())) 
+                if (!Bot.Objects.IsTargetInLineOfSight || SpellAbortFunctions.Any(e => e()))
                     Bot.Wow.StopCasting();
                 return;
             }
@@ -254,7 +254,7 @@ namespace AmeisenBotX.Core.Engines.Combat.Classes.Bia10
         {
             var spell = Bot.Character.SpellBook.GetSpellByName(spellName);
             if (spell == null || CooldownManager.IsSpellOnCooldown(spellName)
-                              || spell.Costs >= Bot.Player.Mana) 
+                              || spell.Costs >= Bot.Player.Mana)
                 return false;
 
             var groupPlayers = Bot.Objects.Partymembers

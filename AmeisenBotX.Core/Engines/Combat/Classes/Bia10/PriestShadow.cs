@@ -17,11 +17,11 @@ namespace AmeisenBotX.Core.Engines.Combat.Classes.Bia10
                 && ValidateSpell(Priest335a.PowerWordFortitude, true)
                 && TryCastSpell(Priest335a.PowerWordFortitude, Bot.Player.Guid)));
             MyAuraManager.Jobs.Add(new KeepActiveAuraJob(bot.Db, Priest335a.PowerWordShield, () =>
-                Bot.Player.Auras.All(e => Bot.Db.GetSpellName(e.SpellId) != "Weakened Soul") 
+                Bot.Player.Auras.All(e => Bot.Db.GetSpellName(e.SpellId) != "Weakened Soul")
                 && Bot.Player.ManaPercentage > 60.0
                 && ValidateSpell(Priest335a.PowerWordShield, true)
                 && TryCastSpell(Priest335a.PowerWordShield, Bot.Player.Guid)));
-            MyAuraManager.Jobs.Add(new KeepActiveAuraJob(bot.Db, Priest335a.InnerFire, () =>  
+            MyAuraManager.Jobs.Add(new KeepActiveAuraJob(bot.Db, Priest335a.InnerFire, () =>
                 Bot.Player.ManaPercentage > 60.0
                 && ValidateSpell(Priest335a.InnerFire, true)
                 && TryCastSpell(Priest335a.InnerFire, Bot.Player.Guid)));

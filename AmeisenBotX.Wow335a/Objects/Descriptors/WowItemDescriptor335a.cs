@@ -4,7 +4,7 @@ using System.Runtime.InteropServices;
 namespace AmeisenBotX.Wow335a.Objects.Descriptors
 {
     [StructLayout(LayoutKind.Sequential)]
-    public unsafe struct WowItemDescriptor
+    public unsafe struct WowItemDescriptor335a
     {
         public ulong Owner;
         public ulong Contained;

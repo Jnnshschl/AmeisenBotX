@@ -1,10 +1,10 @@
 ﻿using System.Collections.Specialized;
 using System.Runtime.InteropServices;
 
-namespace AmeisenBotX.Wow335a.Objects.Descriptors
+namespace AmeisenBotX.Wow548.Objects.Descriptors
 {
     [StructLayout(LayoutKind.Sequential)]
-    public unsafe struct WowUnitDescriptor
+    public unsafe struct WowUnitDescriptor548
     {
         public ulong Charm;
         public ulong Summon;
@@ -12,32 +12,34 @@ namespace AmeisenBotX.Wow335a.Objects.Descriptors
         public ulong CharmedBy;
         public ulong SummonedBy;
         public ulong CreatedBy;
+        public ulong DemonCreator;
         public ulong Target;
+        public ulong Battlepet;
         public ulong ChannelObject;
         public int ChannelSpell;
+        public int SummonedByHomeRealm;
         public byte Race;
         public byte Class;
-        public byte Gender;
         public byte PowerType;
+        public byte Gender;
+        public int DisplayPower;
+        public int OverrideDisplayPower;
         public int Health;
         public int Power1;
         public int Power2;
         public int Power3;
         public int Power4;
         public int Power5;
-        public int Power6;
-        public int Power7;
         public int MaxHealth;
         public int MaxPower1;
         public int MaxPower2;
         public int MaxPower3;
         public int MaxPower4;
         public int MaxPower5;
-        public int MaxPower6;
-        public int MaxPower7;
-        public fixed float PowerRegenModifier[7];
-        public fixed float PowerRegenInterruptedModifier[7];
+        public fixed float PowerRegenModifier[5];
+        public fixed float PowerRegenInterruptedModifier[5];
         public int Level;
+        public int EffectiveLevel;
         public int FactionTemplate;
         public fixed int VirtualItemSlotId[3];
         public BitVector32 Flags1;
@@ -54,13 +56,16 @@ namespace AmeisenBotX.Wow335a.Objects.Descriptors
         public float MaxDamage;
         public float MinOffhandDamage;
         public float MaxOffhandDamage;
-        public int Bytes1;
+        public int AnimTier;
         public int PetNumber;
         public int PetNameTimestamp;
         public int PetExperience;
         public int PetNextLevelXp;
-        public BitVector32 DynamicFlags;
-        public float CastSpeed;
+        public float ModCastSpeed;
+        public float ModSpellHaste;
+        public float ModHaste;
+        public float ModRangedHaste;
+        public float ModHasteRegen;
         public int CreatedBySpell;
         public BitVector32 NpcFlags;
         public int NpcEmoteState;
@@ -84,9 +89,10 @@ namespace AmeisenBotX.Wow335a.Objects.Descriptors
         public fixed int ResistanceModsBuffNegative[7];
         public int BaseMana;
         public int BaseHealth;
-        public int Bytes2;
+        public int ShapeshiftForm;
         public int AttackPower;
-        public fixed short AttackPowerMods[2];
+        public int AttackPowerModPos;
+        public int AttackPowerModNeg;
         public float AttackPowerMultiplier;
         public int RangedAttackPower;
         public fixed short RangedAttackPowerMods[2];
@@ -97,8 +103,12 @@ namespace AmeisenBotX.Wow335a.Objects.Descriptors
         public fixed float PowerCostMultiplier[7];
         public float MaxHealthModifier;
         public float HoverHeight;
-        public int WowUnitPadding;
+        public int MinItemLevel;
+        public int MaxItemLevel;
+        public int WildBattlePetLevel;
+        public int BattlePetCompanionNameTimestamp;
+        public int InteractSpellId;
 
-        public static readonly int EndOffset = 568;
+        public static readonly int EndOffset = sizeof(WowObjectDescriptor548) + sizeof(WowUnitDescriptor548);
     }
 }

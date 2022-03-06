@@ -53,8 +53,6 @@ namespace AmeisenBotX.Core.Engines.Combat.Classes.Jannis
 
         public override string DisplayName => "Druid Restoration";
 
-        private HealingManager HealingManager { get; }
-
         public override bool HandlesMovement => false;
 
         public override bool IsMelee => false;
@@ -121,6 +119,8 @@ namespace AmeisenBotX.Core.Engines.Combat.Classes.Jannis
 
         public override WowClass WowClass => WowClass.Druid;
 
+        private HealingManager HealingManager { get; }
+
         private TimegatedEvent SwiftmendEvent { get; }
 
         public override void Execute()
@@ -175,17 +175,6 @@ namespace AmeisenBotX.Core.Engines.Combat.Classes.Jannis
             }
         }
 
-        public override void OutOfCombatExecute()
-        {
-            base.OutOfCombatExecute();
-
-            if (NeedToHealSomeone()
-                || HandleDeadPartymembers(Druid335a.Revive))
-            {
-                return;
-            }
-        }
-
         public override void Load(Dictionary<string, JsonElement> objects)
         {
             base.Load(objects);
@@ -200,6 +189,17 @@ namespace AmeisenBotX.Core.Engines.Combat.Classes.Jannis
                 if (s.TryGetValue("DamageWeight", out j)) { HealingManager.IncomingDamageMod = j.To<float>(); }
                 if (s.TryGetValue("OverhealingStopThreshold", out j)) { HealingManager.OverhealingStopThreshold = j.To<float>(); }
                 if (s.TryGetValue("TargetDyingSeconds", out j)) { HealingManager.TargetDyingSeconds = j.To<int>(); }
+            }
+        }
+
+        public override void OutOfCombatExecute()
+        {
+            base.OutOfCombatExecute();
+
+            if (NeedToHealSomeone()
+                || HandleDeadPartymembers(Druid335a.Revive))
+            {
+                return;
             }
         }
 

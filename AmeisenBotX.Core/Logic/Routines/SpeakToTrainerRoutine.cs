@@ -1,6 +1,6 @@
-﻿using System;
-using AmeisenBotX.Common.Math;
+﻿using AmeisenBotX.Common.Math;
 using AmeisenBotX.Wow.Objects;
+using System;
 
 namespace AmeisenBotX.Core.Logic.Routines
 {

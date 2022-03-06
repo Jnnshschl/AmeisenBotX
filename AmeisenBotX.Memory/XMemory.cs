@@ -346,7 +346,7 @@ namespace AmeisenBotX.Memory
         {
 #if DEBUG
             if (!Initialized) { throw new InvalidOperationException("call Init() before you do anything with this class"); }
-            if (address == IntPtr.Zero) { throw new ArgumentOutOfRangeException(nameof(address), "address must be > 0"); }
+            //if (address == IntPtr.Zero) { throw new ArgumentOutOfRangeException(nameof(address), "address must be > 0"); }
 #endif
             int size = sizeof(T);
 

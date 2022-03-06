@@ -46,7 +46,7 @@ namespace AmeisenBotX.Core.Managers.Character.Inventory
 
         public bool HasEnchantment(WowEquipmentSlot slot, int enchantmentId)
         {
-            if (!Items.ContainsKey(slot) || Items[slot].Id <= 0) 
+            if (!Items.ContainsKey(slot) || Items[slot].Id <= 0)
                 return false;
 
             IWowItem item = Wow.ObjectProvider.WowObjects.OfType<IWowItem>()
@@ -60,7 +60,7 @@ namespace AmeisenBotX.Core.Managers.Character.Inventory
         {
             string resultJson = Wow.GetEquipmentItems();
 
-            if (string.IsNullOrWhiteSpace(resultJson)) 
+            if (string.IsNullOrWhiteSpace(resultJson))
                 return;
 
             try
@@ -109,7 +109,7 @@ namespace AmeisenBotX.Core.Managers.Character.Inventory
                     continue;
                 }
 
-                if (Items.ContainsKey(slot)) 
+                if (Items.ContainsKey(slot))
                     itemLevel += Items[slot].ItemLevel;
 
                 ++count;

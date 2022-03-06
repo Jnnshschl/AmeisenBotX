@@ -3,7 +3,7 @@
 namespace AmeisenBotX.Wow335a.Objects.Descriptors
 {
     [StructLayout(LayoutKind.Sequential)]
-    public unsafe struct WowGameobjectDescriptor
+    public unsafe struct WowGameobjectDescriptor335a
     {
         public ulong CreatedBy;
         public int DisplayId;

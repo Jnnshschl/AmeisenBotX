@@ -44,7 +44,7 @@ namespace AmeisenBotX.Wow335a.Objects
 
         public double XpPercentage => BotMath.Percentage(Xp, NextLevelXp);
 
-        protected WowPlayerDescriptor RawWowPlayer { get; private set; }
+        protected WowPlayerDescriptor335a RawWowPlayer { get; private set; }
 
         public bool IsAlliance()
         {
@@ -113,7 +113,7 @@ namespace AmeisenBotX.Wow335a.Objects
         {
             base.Update(memoryApi, offsetList);
 
-            if (memoryApi.Read(DescriptorAddress + WowObjectDescriptor.EndOffset + WowUnitDescriptor.EndOffset, out WowPlayerDescriptor obj))
+            if (memoryApi.Read(DescriptorAddress + WowObjectDescriptor335a.EndOffset + WowUnitDescriptor335a.EndOffset, out WowPlayerDescriptor335a obj))
             {
                 RawWowPlayer = obj;
 

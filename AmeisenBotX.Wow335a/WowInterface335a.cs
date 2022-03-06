@@ -390,7 +390,7 @@ namespace AmeisenBotX.Wow335a
 
             try
             {
-                return JsonSerializer.Deserialize<List<WowMount>>(mountJson, new() { AllowTrailingCommas = true, NumberHandling = JsonNumberHandling.AllowReadingFromString });
+                return JsonSerializer.Deserialize<List<WowMount>>(mountJson, new JsonSerializerOptions() { AllowTrailingCommas = true, NumberHandling = JsonNumberHandling.AllowReadingFromString });
             }
             catch (Exception e)
             {

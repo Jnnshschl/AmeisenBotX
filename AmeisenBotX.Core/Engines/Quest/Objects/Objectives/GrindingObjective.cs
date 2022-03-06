@@ -49,7 +49,7 @@ namespace AmeisenBotX.Core.Engines.Quest.Objects.Objectives
             {
                 IWowUnit = Bot.Objects.WowObjects
                     .OfType<IWowUnit>()
-                    .Where(e => !e.IsDead && !e.IsNotAttackable 
+                    .Where(e => !e.IsDead && !e.IsNotAttackable
                                     && Bot.Db.GetReaction(Bot.Player, e) != WowUnitReaction.Friendly
                                     && e.Health > 10 // workaround to filter some critters, would be nice e.CreatureType != WoWCreatureType.Critter
                                     && BotMath.SlopeGradientAngle(Bot.Player.Position, e.Position) <= 39.0f) // check if not too steep

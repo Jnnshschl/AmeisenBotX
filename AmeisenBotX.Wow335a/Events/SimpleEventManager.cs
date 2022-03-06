@@ -49,7 +49,7 @@ namespace AmeisenBotX.Wow335a.Events
             {
                 try
                 {
-                    List<WowEvent> events = JsonSerializer.Deserialize<List<WowEvent>>(eventJson, new() { AllowTrailingCommas = true, NumberHandling = JsonNumberHandling.AllowReadingFromString });
+                    List<WowEvent> events = JsonSerializer.Deserialize<List<WowEvent>>(eventJson, new JsonSerializerOptions() { AllowTrailingCommas = true, NumberHandling = JsonNumberHandling.AllowReadingFromString });
 
                     if (events != null && events.Count > 0)
                     {

@@ -1,8 +1,8 @@
-﻿using System;
+﻿using AmeisenBotX.Wow.Objects;
+using AmeisenBotX.Wow.Objects.Enums;
+using System;
 using System.Collections.Generic;
 using System.IO;
-using AmeisenBotX.Wow.Objects;
-using AmeisenBotX.Wow.Objects.Enums;
 
 namespace AmeisenBotX.Core.Managers.Chat
 {

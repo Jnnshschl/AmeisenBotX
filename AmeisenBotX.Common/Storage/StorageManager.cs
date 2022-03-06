@@ -48,7 +48,7 @@ namespace AmeisenBotX.Common.Storage
                     return;
                 }
 
-                s.Load(JsonSerializer.Deserialize<Dictionary<string, JsonElement>>(File.ReadAllText(fullPath), new() { AllowTrailingCommas = true, NumberHandling = JsonNumberHandling.AllowReadingFromString }));
+                s.Load(JsonSerializer.Deserialize<Dictionary<string, JsonElement>>(File.ReadAllText(fullPath), new JsonSerializerOptions() { AllowTrailingCommas = true, NumberHandling = JsonNumberHandling.AllowReadingFromString }));
             }
             catch
             {
@@ -94,7 +94,7 @@ namespace AmeisenBotX.Common.Storage
                     Directory.CreateDirectory(parent);
                 }
 
-                File.WriteAllText(fullPath, JsonSerializer.Serialize(data, new() { WriteIndented = true }));
+                File.WriteAllText(fullPath, JsonSerializer.Serialize(data, new JsonSerializerOptions() { WriteIndented = true }));
             }
             catch
             {

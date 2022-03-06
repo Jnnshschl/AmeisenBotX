@@ -3,7 +3,7 @@
 namespace AmeisenBotX.Wow335a.Objects.Descriptors
 {
     [StructLayout(LayoutKind.Sequential)]
-    public unsafe struct WowCorpseDescriptor
+    public unsafe struct WowCorpseDescriptor335a
     {
         public ulong Owner;
         public ulong Party;

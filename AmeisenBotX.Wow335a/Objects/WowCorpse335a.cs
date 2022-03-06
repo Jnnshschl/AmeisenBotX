@@ -21,7 +21,7 @@ namespace AmeisenBotX.Wow335a.Objects
 
         public ulong Party => RawWowCorpse.Party;
 
-        protected WowCorpseDescriptor RawWowCorpse { get; private set; }
+        protected WowCorpseDescriptor335a RawWowCorpse { get; private set; }
 
         public override string ToString()
         {
@@ -32,7 +32,7 @@ namespace AmeisenBotX.Wow335a.Objects
         {
             base.Update(memoryApi, offsetList);
 
-            if (memoryApi.Read(DescriptorAddress + WowObjectDescriptor.EndOffset, out WowCorpseDescriptor obj))
+            if (memoryApi.Read(DescriptorAddress + WowObjectDescriptor335a.EndOffset, out WowCorpseDescriptor335a obj))
             {
                 RawWowCorpse = obj;
             }

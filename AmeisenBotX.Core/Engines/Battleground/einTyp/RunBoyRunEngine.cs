@@ -27,10 +27,13 @@ namespace AmeisenBotX.Core.Engines.Battleground.einTyp
         {
             Bot = bot;
 
-            bot.Wow.Events.Subscribe("CHAT_MSG_BG_SYSTEM_ALLIANCE", OnFlagAlliance);
-            bot.Wow.Events.Subscribe("CHAT_MSG_BG_SYSTEM_HORDE", OnFlagAlliance);
-            bot.Wow.Events.Subscribe("CHAT_MSG_BG_SYSTEM_NEUTRAL", OnFlagAlliance);
-            bot.Wow.Events.Subscribe("UPDATE_BATTLEFIELD_SCORE", OnFlagAlliance);
+            if (bot.Wow.Events != null)
+            {
+                bot.Wow.Events.Subscribe("CHAT_MSG_BG_SYSTEM_ALLIANCE", OnFlagAlliance);
+                bot.Wow.Events.Subscribe("CHAT_MSG_BG_SYSTEM_HORDE", OnFlagAlliance);
+                bot.Wow.Events.Subscribe("CHAT_MSG_BG_SYSTEM_NEUTRAL", OnFlagAlliance);
+                bot.Wow.Events.Subscribe("UPDATE_BATTLEFIELD_SCORE", OnFlagAlliance);
+            }
         }
 
         public string Author => "einTyp";
@@ -306,9 +309,9 @@ namespace AmeisenBotX.Core.Engines.Battleground.einTyp
         private IWowUnit GetEnemyFlagCarrier()
         {
             List<IWowUnit> flagCarrierList = Bot.Objects.WowObjects.OfType<IWowUnit>().Where(e =>
-            Bot.Db.GetReaction(Bot.Player, e) != WowUnitReaction.Friendly 
-            && Bot.Db.GetReaction(Bot.Player, e) != WowUnitReaction.Neutral 
-            && !e.IsDead && e.Guid != Bot.Wow.PlayerGuid 
+            Bot.Db.GetReaction(Bot.Player, e) != WowUnitReaction.Friendly
+            && Bot.Db.GetReaction(Bot.Player, e) != WowUnitReaction.Neutral
+            && !e.IsDead && e.Guid != Bot.Wow.PlayerGuid
             && e.Auras != null && e.Auras.Any(en =>
             Bot.Db.GetSpellName(en.SpellId).Contains("Flag") || Bot.Db.GetSpellName(en.SpellId).Contains("flag")))
             .ToList();
@@ -345,7 +348,7 @@ namespace AmeisenBotX.Core.Engines.Battleground.einTyp
 
         private IWowObject GetOwnFlagObject()
         {
-            WowGameObjectDisplayId targetFlag = Bot.Player.IsHorde() 
+            WowGameObjectDisplayId targetFlag = Bot.Player.IsHorde()
                 ? WowGameObjectDisplayId.WsgHordeFlag : WowGameObjectDisplayId.WsgAllianceFlag;
 
             List<IWowGameobject> flagObjectList = Bot.Objects.WowObjects

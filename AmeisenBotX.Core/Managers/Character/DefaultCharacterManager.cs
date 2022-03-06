@@ -101,28 +101,28 @@ namespace AmeisenBotX.Core.Managers.Character
         {
             return item?.ArmorType switch
             {
-                WowArmorType.Plate => Skills.Any(e => 
+                WowArmorType.Plate => Skills.Any(e =>
                     e.Key.Equals("Plate Mail", StringComparison.OrdinalIgnoreCase)
                     || e.Key.Equals("Plattenpanzer", StringComparison.OrdinalIgnoreCase)),
-                WowArmorType.Mail => Skills.Any(e => 
+                WowArmorType.Mail => Skills.Any(e =>
                     e.Key.Equals("Mail", StringComparison.OrdinalIgnoreCase)
                     || e.Key.Equals("Panzer", StringComparison.OrdinalIgnoreCase)),
                 WowArmorType.Leather => Skills.Any(e =>
                     e.Key.Equals("Leather", StringComparison.OrdinalIgnoreCase)
                     || e.Key.Equals("Leder", StringComparison.OrdinalIgnoreCase)),
-                WowArmorType.Cloth => Skills.Any(e => 
+                WowArmorType.Cloth => Skills.Any(e =>
                     e.Key.Equals("Cloth", StringComparison.OrdinalIgnoreCase)
                     || e.Key.Equals("Stoff", StringComparison.OrdinalIgnoreCase)),
-                WowArmorType.Totem => Skills.Any(e => 
+                WowArmorType.Totem => Skills.Any(e =>
                     e.Key.Equals("Totem", StringComparison.OrdinalIgnoreCase)
                     || e.Key.Equals("Totem", StringComparison.OrdinalIgnoreCase)),
-                WowArmorType.Libram => Skills.Any(e => 
+                WowArmorType.Libram => Skills.Any(e =>
                     e.Key.Equals("Libram", StringComparison.OrdinalIgnoreCase)
                     || e.Key.Equals("Buchband", StringComparison.OrdinalIgnoreCase)),
                 WowArmorType.Idol => Skills.Any(e =>
                     e.Key.Equals("Idol", StringComparison.OrdinalIgnoreCase)
                     || e.Key.Equals("Götzen", StringComparison.OrdinalIgnoreCase)),
-                WowArmorType.Sigil => Skills.Any(e => 
+                WowArmorType.Sigil => Skills.Any(e =>
                     e.Key.Equals("Sigil", StringComparison.OrdinalIgnoreCase)
                     || e.Key.Equals("Siegel", StringComparison.OrdinalIgnoreCase)),
                 WowArmorType.Shield => Skills.Any(e =>
@@ -135,7 +135,7 @@ namespace AmeisenBotX.Core.Managers.Character
 
         public bool IsAbleToUseItem(IWowInventoryItem item)
         {
-            return string.Equals(item.Type, "Armor", StringComparison.OrdinalIgnoreCase) && IsAbleToUseArmor((WowArmor)item) 
+            return string.Equals(item.Type, "Armor", StringComparison.OrdinalIgnoreCase) && IsAbleToUseArmor((WowArmor)item)
                    || string.Equals(item.Type, "Weapon", StringComparison.OrdinalIgnoreCase) && IsAbleToUseWeapon((WowWeapon)item);
         }
 
@@ -143,8 +143,8 @@ namespace AmeisenBotX.Core.Managers.Character
         {
             return item?.WeaponType switch
             {
-                WowWeaponType.Bow => Skills.Any(e => 
-                    e.Key.Equals("Bows", StringComparison.OrdinalIgnoreCase) 
+                WowWeaponType.Bow => Skills.Any(e =>
+                    e.Key.Equals("Bows", StringComparison.OrdinalIgnoreCase)
                     || e.Key.Equals("Bogen", StringComparison.OrdinalIgnoreCase)),
                 WowWeaponType.Crossbow => Skills.Any(e =>
                     e.Key.Equals("Crossbows", StringComparison.OrdinalIgnoreCase)
@@ -246,7 +246,7 @@ namespace AmeisenBotX.Core.Managers.Character
 
         public void UpdateBags()
         {
-            IEnumerable<IWowInventoryItem> container = Inventory.Items.Where(item => 
+            IEnumerable<IWowInventoryItem> container = Inventory.Items.Where(item =>
                     item.Type.Equals("container", StringComparison.CurrentCultureIgnoreCase))
                 .ToList();
 
@@ -279,7 +279,7 @@ namespace AmeisenBotX.Core.Managers.Character
                     continue;
                 }
 
-                IEnumerable<IWowInventoryItem> itemsLikeEquipped = Inventory.Items.Where(e => 
+                IEnumerable<IWowInventoryItem> itemsLikeEquipped = Inventory.Items.Where(e =>
                         !string.IsNullOrWhiteSpace(e.EquipLocation) && SlotToEquipLocation((int)slot)
                     .Contains(e.EquipLocation, StringComparison.OrdinalIgnoreCase))
                     .OrderByDescending(e => e.ItemLevel)
