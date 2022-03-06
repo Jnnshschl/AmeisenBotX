@@ -302,7 +302,7 @@ namespace AmeisenBotX.Core.Engines.Grinding
                 {
                     NpcSubType.FishingTrainer when !Bot.Character.Skills.ContainsKey("Fishing") => Bot
                         .GetClosestTrainerByEntryId(profileTrainer.EntryId),
-                    NpcSubType.FirstAidTrainer when !Bot.Character.Skills.ContainsKey("FirstAid") => Bot
+                    NpcSubType.FirstAidTrainer when !Bot.Character.Skills.ContainsKey("First Aid") => Bot
                         .GetClosestTrainerByEntryId(profileTrainer.EntryId),
                     NpcSubType.CookingTrainer when !Bot.Character.Skills.ContainsKey("Cooking") => Bot
                         .GetClosestTrainerByEntryId(profileTrainer.EntryId),
@@ -328,7 +328,7 @@ namespace AmeisenBotX.Core.Engines.Grinding
                 {
                     NpcSubType.FishingTrainer when !Bot.Character.Skills.ContainsKey("Fishing") => Bot
                         .GetClosestTrainerByEntryId(profileTrainer.EntryId),
-                    NpcSubType.FirstAidTrainer when !Bot.Character.Skills.ContainsKey("FirstAid") => Bot
+                    NpcSubType.FirstAidTrainer when !Bot.Character.Skills.ContainsKey("First Aid") => Bot
                         .GetClosestTrainerByEntryId(profileTrainer.EntryId),
                     NpcSubType.CookingTrainer when !Bot.Character.Skills.ContainsKey("Cooking") => Bot
                         .GetClosestTrainerByEntryId(profileTrainer.EntryId),

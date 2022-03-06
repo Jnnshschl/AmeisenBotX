@@ -1,4 +1,4 @@
-﻿using AmeisenBotX.Core.Logic.Utils.Auras.Objects;
+﻿using AmeisenBotX.Core.Engines.Combat.Helpers.Aura.Objects;
 using AmeisenBotX.Core.Managers.Character.Comparators;
 using AmeisenBotX.Core.Managers.Character.Talents.Objects;
 using AmeisenBotX.Wow.Objects.Enums;
@@ -116,7 +116,7 @@ namespace AmeisenBotX.Core.Engines.Combat.Classes.Jannis
                     || TryCastSpellDk(Deathknight335a.ScourgeStrike, Bot.Wow.TargetGuid, false, false, true, true)
                     || TryCastSpellDk(Deathknight335a.DeathCoil, Bot.Wow.TargetGuid, true)
                     || TryCastSpellDk(Deathknight335a.SummonGargoyle, Bot.Wow.TargetGuid, true)
-                    || (Bot.Player.Runeenergy > 60
+                    || (Bot.Player.RunicPower > 60
                         && TryCastSpellDk(Deathknight335a.RuneStrike, Bot.Wow.TargetGuid)))
                 {
                     return;

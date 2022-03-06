@@ -20,17 +20,9 @@ namespace AmeisenBotX.Common.Keyboard
 
         private delegate int LowLevelKeyboardProc(int nCode, IntPtr wParam, ref LowLevelKeyboardInput lParam);
 
-        private enum KeyboardState
-        {
-            KeyDown = 0x0100,
-            KeyUp = 0x0101,
-            SysKeyDown = 0x0104,
-            SysKeyUp = 0x0105
-        }
-
         private IntPtr HookPtr { get; set; }
 
-        private List<(KeyCodes, KeyCodes, Action)> Hotkeys { get; }
+        private List<(KeyCode, KeyCode, Action)> Hotkeys { get; }
 
         private LowLevelKeyboardProc KeyboardProc { get; }
 
@@ -40,7 +32,7 @@ namespace AmeisenBotX.Common.Keyboard
         /// <param name="key">Main key to press</param>
         /// <param name="modifier">Modifier key, example: CTRL, ALT, ...</param>
         /// <param name="callback">Action to run when the key is pressed</param>
-        public void AddHotkey(KeyCodes key, KeyCodes modifier, Action callback)
+        public void AddHotkey(KeyCode key, KeyCode modifier, Action callback)
         {
             Hotkeys.Add((key, modifier, callback));
         }
@@ -50,9 +42,9 @@ namespace AmeisenBotX.Common.Keyboard
         /// </summary>
         /// <param name="key">Main key to press</param>
         /// <param name="callback">Action to run when the key is pressed</param>
-        public void AddHotkey(KeyCodes key, Action callback)
+        public void AddHotkey(KeyCode key, Action callback)
         {
-            Hotkeys.Add((key, KeyCodes.None, callback));
+            Hotkeys.Add((key, KeyCode.None, callback));
         }
 
         public void Clear()
@@ -86,7 +78,7 @@ namespace AmeisenBotX.Common.Keyboard
         private static extern int CallNextHookEx(IntPtr hHook, int nCode, IntPtr wParam, ref LowLevelKeyboardInput lParam);
 
         [DllImport("user32", SetLastError = true)]
-        private static extern short GetKeyState(KeyCodes nVirtKey);
+        private static extern short GetKeyState(KeyCode nVirtKey);
 
         [DllImport("kernel32", CharSet = CharSet.Auto, SetLastError = true)]
         private static extern IntPtr GetModuleHandle(string lpModuleName);
@@ -105,9 +97,9 @@ namespace AmeisenBotX.Common.Keyboard
             {
                 if ((KeyboardState)wParamValue is KeyboardState.KeyDown or KeyboardState.SysKeyDown)
                 {
-                    foreach ((KeyCodes key, KeyCodes mod, Action callback) in Hotkeys)
+                    foreach ((KeyCode key, KeyCode mod, Action callback) in Hotkeys)
                     {
-                        if (lParam.VirtualCode == key && (mod == KeyCodes.None || (GetKeyState(mod) & 0x8000) > 0))
+                        if (lParam.VirtualCode == key && (mod == KeyCode.None || (GetKeyState(mod) & 0x8000) > 0))
                         {
                             callback?.Invoke();
                         }

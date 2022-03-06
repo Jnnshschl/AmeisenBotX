@@ -4,7 +4,7 @@ using System;
 using System.Collections.Generic;
 using System.Text;
 
-namespace AmeisenBotX.Core.Hook.Modules
+namespace AmeisenBotX.Wow335a.Hook.Modules
 {
     public class RunLuaHookModule : RunAsmHookModule
     {

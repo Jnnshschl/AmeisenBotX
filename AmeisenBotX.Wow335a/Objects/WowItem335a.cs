@@ -1,7 +1,8 @@
 ﻿using AmeisenBotX.Memory;
 using AmeisenBotX.Wow.Objects;
 using AmeisenBotX.Wow.Objects.Enums;
-using AmeisenBotX.Wow.Objects.SubStructs;
+using AmeisenBotX.Wow.Objects.Raw.Enums;
+using AmeisenBotX.Wow.Objects.Raw.SubStructs;
 using AmeisenBotX.Wow.Offsets;
 using AmeisenBotX.Wow335a.Objects.Descriptors;
 using System;
@@ -27,13 +28,9 @@ namespace AmeisenBotX.Wow335a.Objects
         {
             List<string> enchantments = new();
 
-            for (int i = 0; i < ItemEnchantments.Count; ++i)
-            {
-                if (WowEnchantmentHelper.TryLookupEnchantment(ItemEnchantments[i].Id, out string text))
-                {
+            foreach (ItemEnchantment itemEnch in ItemEnchantments)
+                if (WowEnchantmentHelper.TryLookupEnchantment(itemEnch.Id, out string text))
                     enchantments.Add(text);
-                }
-            }
 
             return enchantments;
         }
@@ -52,7 +49,7 @@ namespace AmeisenBotX.Wow335a.Objects
                 Count = objPtr.StackCount;
                 Owner = objPtr.Owner;
 
-                ItemEnchantments = new()
+                ItemEnchantments = new List<ItemEnchantment>
                 {
                     objPtr.Enchantment1,
                     objPtr.Enchantment2,

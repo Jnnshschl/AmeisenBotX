@@ -89,10 +89,8 @@ namespace AmeisenBotX
 
             string[] directories = Directory.GetDirectories(DataPath);
 
-            for (int i = 0; i < directories.Length; ++i)
-            {
-                comboboxSelectedConfig.Items.Add(Path.GetFileName(directories[i]));
-            }
+            foreach (string str in directories)
+                comboboxSelectedConfig.Items.Add(Path.GetFileName(str));
 
             string[] args = Environment.GetCommandLineArgs();
 

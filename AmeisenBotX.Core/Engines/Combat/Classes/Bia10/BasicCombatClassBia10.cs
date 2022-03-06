@@ -123,7 +123,7 @@ namespace AmeisenBotX.Core.Engines.Combat.Classes.Bia10
                 WowClass.Priest => Priest335a.Smite,
                 WowClass.Deathknight => string.Empty,
                 WowClass.Shaman => Shaman335a.LightningBolt,
-                WowClass.Mage => string.Empty,
+                WowClass.Mage => Mage335a.Fireball,
                 WowClass.Warlock => string.Empty,
                 WowClass.Druid => string.Empty,
                 _ => throw new ArgumentOutOfRangeException(nameof(wowClass), $"Not expected wowClass value: {wowClass}")
@@ -224,8 +224,8 @@ namespace AmeisenBotX.Core.Engines.Combat.Classes.Bia10
                 return;
             }
 
-            if (MyAuraManager.Tick(Bot.Player.Auras) || GroupAuraManager.Tick())
-                return;
+            MyAuraManager.Tick(Bot.Player.Auras);
+            GroupAuraManager.Tick();
         }
 
         public virtual Dictionary<string, object> Save() =>
@@ -304,57 +304,58 @@ namespace AmeisenBotX.Core.Engines.Combat.Classes.Bia10
             {
                 switch (Bot.Player.PowerType)
                 {
-                    case WowPowerType.Health:
-                        break;
-                    case WowPowerType.Mana:
-                        if (spell.Costs > Bot.Player.Mana) return false;
-                        break;
-                    case WowPowerType.Rage:
-                        if (spell.Costs > Bot.Player.Rage) return false;
-                        break;
-                    case WowPowerType.Focus:
-                        break;
-                    case WowPowerType.Energy:
-                        break;
-                    case WowPowerType.Happiness:
-                        break;
-                    case WowPowerType.Runes:
-                        break;
-                    case WowPowerType.RunicPower:
-                        break;
-                    case WowPowerType.Unknown:
-                        break;
-
-                    default:
-                        throw new ArgumentOutOfRangeException();
+                    case WowPowerType.Health when (spell.Costs > Bot.Player.Health): return false;
+                    case WowPowerType.Mana when (spell.Costs > Bot.Player.Mana): return false;
+                    case WowPowerType.Rage when (spell.Costs > Bot.Player.Rage): return false;
+                    case WowPowerType.Energy when (spell.Costs > Bot.Player.Energy): return false;
+                    case WowPowerType.RunicPower when (spell.Costs > Bot.Player.RunicPower): return false;
                 }
             }
 
-            if (!ValidateTarget(guid, out var target, out var needToSwitchTarget)) return false;
-            if (target != null && !IsInSpellRange(target, spellName)) return false;
-
-            var isTargetMyself = guid == Bot.Player.Guid;
-            if (!isTargetMyself && needToSwitchTarget)
-                Bot.Wow.ChangeTarget(guid);
-
-            if (!isTargetMyself && target != null && !BotMath.IsFacing(Bot.Player.Position, Bot.Player.Rotation, target.Position))
-                Bot.Wow.FacePosition(Bot.Player.BaseAddress, Bot.Player.Position, target.Position);
-
-            switch (spell.CastTime)
+            if (guid != 9999999)
             {
-                case 0:
-                    Bot.Movement.PreventMovement(TimeSpan.FromMilliseconds(300));
-                    CheckFacing(target);
-                    GCD += 0.1; // some timing is off with casting after instant cast spells
-                    break;
-                case > 0:
-                    Bot.Movement.PreventMovement(TimeSpan.FromMilliseconds(spell.CastTime));
-                    CheckFacing(target);
-                    break;
-            }
+                if (!ValidateTarget(guid, out var target, out var needToSwitchTarget)) return false;
+                if (target != null && !IsInSpellRange(target, spellName)) return false;
 
-            if (!CastSpell(spellName, isTargetMyself)) return false;
-            if (GCD == 0) return true;
+                var isTargetMyself = guid == Bot.Player.Guid;
+                if (!isTargetMyself && needToSwitchTarget)
+                    Bot.Wow.ChangeTarget(guid);
+
+                if (!isTargetMyself && target != null && !BotMath.IsFacing(Bot.Player.Position, Bot.Player.Rotation, target.Position))
+                    Bot.Wow.FacePosition(Bot.Player.BaseAddress, Bot.Player.Position, target.Position);
+
+                switch (spell.CastTime)
+                {
+                    case 0:
+                        Bot.Movement.PreventMovement(TimeSpan.FromMilliseconds(300));
+                        CheckFacing(target);
+                        GCD += 0.1; // some timing is off with casting after instant cast spells
+                        break;
+                    case > 0:
+                        Bot.Movement.PreventMovement(TimeSpan.FromMilliseconds(spell.CastTime));
+                        CheckFacing(target);
+                        break;
+                }
+
+                if (!CastSpell(spellName, isTargetMyself)) return false;
+                if (GCD == 0) return true;
+            }
+            else if (guid == 9999999)
+            {
+                switch (spell.CastTime)
+                {
+                    case 0:
+                        Bot.Movement.PreventMovement(TimeSpan.FromMilliseconds(300));
+                        GCD += 0.1; // some timing is off with casting after instant cast spells
+                        break;
+                    case > 0:
+                        Bot.Movement.PreventMovement(TimeSpan.FromMilliseconds(spell.CastTime));
+                        break;
+                }
+
+                if (!CastSpell(spellName, false)) return false;
+                if (GCD == 0) return true;
+            }
 
             SetGCD(GCD);
             return true;

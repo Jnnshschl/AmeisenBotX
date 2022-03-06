@@ -1,10 +1,10 @@
 ﻿using AmeisenBotX.Wow.Cache;
-using AmeisenBotX.Wow.Objects;
+using AmeisenBotX.Wow.Objects.Raw;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 
-namespace AmeisenBotX.Core.Logic.Utils.Auras.Objects
+namespace AmeisenBotX.Core.Engines.Combat.Helpers.Aura.Objects
 {
     public class KeepBestActiveAuraJob : IAuraJob
     {

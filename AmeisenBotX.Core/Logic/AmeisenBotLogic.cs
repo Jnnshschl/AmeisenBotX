@@ -781,13 +781,13 @@ namespace AmeisenBotX.Core.Logic
                     Config.FollowGroupMembers ? Bot.Objects.Partymembers.FirstOrDefault() : null
                 };
 
-                for (int i = 0; i < playersToTry.Length; ++i)
+                foreach (IWowUnit unit in playersToTry)
                 {
-                    if (playersToTry[i] != null && (ignoreRange || ShouldIFollowPlayer(playersToTry[i])))
-                    {
-                        playerToFollow = playersToTry[i];
-                        return true;
-                    }
+                    if (unit == null || (!ignoreRange && !ShouldIFollowPlayer(unit))) 
+                        continue;
+
+                    playerToFollow = unit;
+                    return true;
                 }
             }
 
@@ -1123,7 +1123,7 @@ namespace AmeisenBotX.Core.Logic
                 {
                     NpcSubType.FishingTrainer when !Bot.Character.Skills.ContainsKey("Fishing") => Bot
                         .GetClosestTrainerByEntryId(profileTrainer.EntryId),
-                    NpcSubType.FirstAidTrainer when !Bot.Character.Skills.ContainsKey("FirstAid") => Bot
+                    NpcSubType.FirstAidTrainer when !Bot.Character.Skills.ContainsKey("First Aid") => Bot
                         .GetClosestTrainerByEntryId(profileTrainer.EntryId),
                     NpcSubType.CookingTrainer when !Bot.Character.Skills.ContainsKey("Cooking") => Bot
                         .GetClosestTrainerByEntryId(profileTrainer.EntryId),

@@ -129,7 +129,7 @@ namespace AmeisenBotX.Core.Engines.Combat.Classes.Kamel
                 return;
             }
 
-            double playerRunePower = Bot.Objects.Player.Runeenergy;
+            double playerRunePower = Bot.Objects.Player.RunicPower;
             double distanceToTarget = Bot.Objects.Player.Position.GetDistance(target.Position);
             double targetHealthPercent = (target.Health / (double)target.MaxHealth) * 100;
             double playerHealthPercent = (Bot.Objects.Player.Health / (double)Bot.Objects.Player.MaxHealth) * 100.0;

@@ -284,7 +284,7 @@ namespace AmeisenBotX
         {
             if (AmeisenBot.Config.Hotkeys.TryGetValue("StartStop", out Keybind kv))
             {
-                KeyboardHook.AddHotkey((KeyCodes)kv.Key, (KeyCodes)kv.Mod, StartPause);
+                KeyboardHook.AddHotkey((KeyCode)kv.Key, (KeyCode)kv.Mod, StartPause);
             }
         }
 
@@ -299,7 +299,7 @@ namespace AmeisenBotX
                     switch (player.Class)
                     {
                         case WowClass.Deathknight:
-                            UpdateBotInfo(player.MaxRuneenergy, player.Runeenergy, WowColors.dkPrimaryBrush, WowColors.dkSecondaryBrush);
+                            UpdateBotInfo(player.MaxRunicPower, player.RunicPower, WowColors.dkPrimaryBrush, WowColors.dkSecondaryBrush);
                             break;
 
                         case WowClass.Druid:

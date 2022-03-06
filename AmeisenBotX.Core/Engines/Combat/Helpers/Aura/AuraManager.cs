@@ -1,5 +1,5 @@
-﻿using AmeisenBotX.Core.Logic.Utils.Auras.Objects;
-using AmeisenBotX.Wow.Objects;
+﻿using AmeisenBotX.Core.Engines.Combat.Helpers.Aura.Objects;
+using AmeisenBotX.Wow.Objects.Raw;
 using System.Collections.Generic;
 
 namespace AmeisenBotX.Core.Engines.Combat.Helpers.Aura

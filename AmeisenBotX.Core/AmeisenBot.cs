@@ -909,7 +909,7 @@ namespace AmeisenBotX.Core
                     {
                         int currentResource = Bot.Player.Class switch
                         {
-                            WowClass.Deathknight => Bot.Player.Runeenergy,
+                            WowClass.Deathknight => Bot.Player.RunicPower,
                             WowClass.Rogue => Bot.Player.Energy,
                             WowClass.Warrior => Bot.Player.Rage,
                             _ => Bot.Player.Mana,
@@ -917,7 +917,7 @@ namespace AmeisenBotX.Core
 
                         int maxResource = Bot.Player.Class switch
                         {
-                            WowClass.Deathknight => Bot.Player.MaxRuneenergy,
+                            WowClass.Deathknight => Bot.Player.MaxRunicPower,
                             WowClass.Rogue => Bot.Player.MaxEnergy,
                             WowClass.Warrior => Bot.Player.MaxRage,
                             _ => Bot.Player.MaxMana,

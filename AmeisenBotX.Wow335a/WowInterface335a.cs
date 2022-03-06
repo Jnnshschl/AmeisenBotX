@@ -1,6 +1,5 @@
 ﻿using AmeisenBotX.Common.Math;
 using AmeisenBotX.Common.Utils;
-using AmeisenBotX.Core.Hook.Modules;
 using AmeisenBotX.Logging;
 using AmeisenBotX.Logging.Enums;
 using AmeisenBotX.Memory;
@@ -8,9 +7,11 @@ using AmeisenBotX.Wow;
 using AmeisenBotX.Wow.Events;
 using AmeisenBotX.Wow.Objects;
 using AmeisenBotX.Wow.Objects.Enums;
+using AmeisenBotX.Wow.Objects.Flags;
 using AmeisenBotX.Wow.Offsets;
 using AmeisenBotX.Wow335a.Events;
 using AmeisenBotX.Wow335a.Hook;
+using AmeisenBotX.Wow335a.Hook.Modules;
 using AmeisenBotX.Wow335a.Objects;
 using AmeisenBotX.Wow335a.Offsets;
 using System;
@@ -612,7 +613,7 @@ namespace AmeisenBotX.Wow335a
         {
             start.Z += heightAdjust;
             end.Z += heightAdjust;
-            return Hook.TraceLine(start, end, (uint)WowWorldFrameHit.LineOfSight);
+            return Hook.TraceLine(start, end, (uint)WowWorldFrameHitFlag.HitTestLOS);
         }
 
         public bool IsRuneReady(int runeId)

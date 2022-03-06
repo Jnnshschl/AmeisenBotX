@@ -184,6 +184,13 @@ namespace AmeisenBotX.Core
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public IEnumerable<T> GetEnemiesOrNeutralsTargetingMe<T>(Vector3 position, float distance) where T : IWowUnit
+        {
+            return GetNearEnemiesOrNeutrals<T>(position, distance)  // is hostile/neutral
+                .Where(e => e.TargetGuid == Player.Guid); // targets us
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public IEnumerable<T> GetEnemiesTargetingPartyMembers<T>(Vector3 position, float distance) where T : IWowUnit
         {
             return GetNearEnemies<T>(position, distance)                           // is hostile

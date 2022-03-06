@@ -1,4 +1,4 @@
-﻿using AmeisenBotX.Wow.Objects.SubStructs;
+﻿using AmeisenBotX.Wow.Objects.Raw.SubStructs;
 using System.Runtime.InteropServices;
 
 namespace AmeisenBotX.Wow548.Objects.Descriptors

@@ -3,6 +3,7 @@ using AmeisenBotX.Core.Hook.Structs;
 using AmeisenBotX.Memory;
 using AmeisenBotX.Wow.Objects;
 using AmeisenBotX.Wow.Objects.Enums;
+using AmeisenBotX.Wow.Objects.Raw;
 using AmeisenBotX.Wow.Offsets;
 using System.Runtime.CompilerServices;
 using System.Text;

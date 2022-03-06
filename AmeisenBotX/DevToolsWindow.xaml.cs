@@ -35,7 +35,8 @@ namespace AmeisenBotX
             NearWowObjects,
             Lua,
             Events,
-            Logs
+            Logs,
+            ClientPatches
         }
 
         private enum NearWowObjectsTab
@@ -443,14 +444,10 @@ namespace AmeisenBotX
                     }
                     break;
 
-                case MainTab.Lua:
-                    break;
-
-                case MainTab.Events:
-                    break;
-
-                case MainTab.Logs:
-                    break;
+                case MainTab.Lua: break;
+                case MainTab.Events: break;
+                case MainTab.Logs: break;
+                case MainTab.ClientPatches: break;
 
                 default:
                     throw new ArgumentOutOfRangeException();
@@ -476,6 +473,43 @@ namespace AmeisenBotX
         private void Window_MouseLeftButtonDown(object sender, MouseButtonEventArgs e)
         {
             DragMove();
+        }
+
+        private void ClimbSteepSlopesChecked(object sender, RoutedEventArgs e)
+        {
+            // Todo: find a better way, multi-level pointer redirection very messy
+            AmeisenBot.Bot.Memory.Read<IntPtr>(AmeisenBot.Bot.Wow.Offsets.StaticPlayer, out var PlayerBase1);
+            AmeisenBot.Bot.Memory.Read<IntPtr>(IntPtr.Add(PlayerBase1, 0x34), out var PlayerBase2);
+            AmeisenBot.Bot.Memory.Read<IntPtr>(IntPtr.Add(PlayerBase2, 0x24), out var PlayerBase);
+            AmeisenBot.Bot.Memory.Write<float>(IntPtr.Add(PlayerBase,  (int)AmeisenBot.Bot.Wow.Offsets.ClimbAngle), 255);
+        }
+
+        private void ClimbSteepSlopesUnchecked(object sender, RoutedEventArgs e)
+        {
+            AmeisenBot.Bot.Memory.Read<IntPtr>(AmeisenBot.Bot.Wow.Offsets.StaticPlayer, out var PlayerBase1);
+            AmeisenBot.Bot.Memory.Read<IntPtr>(IntPtr.Add(PlayerBase1, 0x34), out var PlayerBase2);
+            AmeisenBot.Bot.Memory.Read<IntPtr>(IntPtr.Add(PlayerBase2, 0x24), out var PlayerBase);
+            AmeisenBot.Bot.Memory.Write<float>(IntPtr.Add(PlayerBase, (int)AmeisenBot.Bot.Wow.Offsets.ClimbAngle), 1);
+        }
+
+        private void DisableM2CollisionsChecked(object sender, RoutedEventArgs e)
+        {
+            throw new NotImplementedException();
+        }
+
+        private void DisableM2CollisionsUnchecked(object sender, RoutedEventArgs e)
+        {
+            throw new NotImplementedException();
+        }
+
+        private void DisableWMOCollisionsChecked(object sender, RoutedEventArgs e)
+        {
+            throw new NotImplementedException();
+        }
+
+        private void DisableWMOCollisionsUnchecked(object sender, RoutedEventArgs e)
+        {
+            throw new NotImplementedException();
         }
     }
 }

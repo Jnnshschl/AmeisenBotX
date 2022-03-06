@@ -101,7 +101,7 @@ namespace AmeisenBotX.Memory
 
                 // we need a new pool
                 int newPoolSize = Math.Max((int)size, INITIAL_POOL_SIZE);
-                IntPtr newPoolAddress = VirtualAllocEx(ProcessHandle, IntPtr.Zero, (uint)newPoolSize, AllocationTypes.Commit, MemoryProtectionFlags.ExecuteReadWrite);
+                IntPtr newPoolAddress = VirtualAllocEx(ProcessHandle, IntPtr.Zero, (uint)newPoolSize, AllocationType.Commit, MemoryProtectionFlag.ExecuteReadWrite);
 
                 if (newPoolAddress != IntPtr.Zero)
                 {
@@ -137,9 +137,9 @@ namespace AmeisenBotX.Memory
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public void FocusWindow(IntPtr windowHandle, Rect rect, bool resizeWindow = true)
         {
-            WindowFlags flags = WindowFlags.AsyncWindowPos | WindowFlags.NoActivate;
+            WindowFlag flags = WindowFlag.AsyncWindowPos | WindowFlag.NoActivate;
 
-            if (!resizeWindow) { flags |= WindowFlags.NoSize; }
+            if (!resizeWindow) { flags |= WindowFlag.NoSize; }
 
             if (rect.Left > 0 && rect.Right > 0 && rect.Top > 0 && rect.Bottom > 0)
             {
@@ -154,10 +154,8 @@ namespace AmeisenBotX.Memory
             {
                 AmeisenLogger.I.Log("XMemory", $"Freeing all memory Pools...");
 
-                for (int i = 0; i < AllocationPools.Count; ++i)
-                {
-                    VirtualFreeEx(ProcessHandle, AllocationPools[i].Address, 0, AllocationTypes.Release);
-                }
+                foreach (AllocationPool allocPool in AllocationPools)
+                    VirtualFreeEx(ProcessHandle, allocPool.Address, 0, AllocationType.Release);
 
                 AllocationPools.Clear();
             }
@@ -181,7 +179,7 @@ namespace AmeisenBotX.Memory
                         AmeisenLogger.I.Log("XMemory", $"Freed {size} bytes in Pool[{i}] at: 0x{address:X}");
 
                         // if (AllocationPools[i].Allocations.Count == 0
-                        //     && VirtualFreeEx(ProcessHandle, AllocationPools[i].Address, 0, AllocationTypes.Release))
+                        //     && VirtualFreeEx(ProcessHandle, AllocationPools[i].Address, 0, AllocationType.Release))
                         // {
                         //     AmeisenLogger.I.Log("XMemory", $"Freed Pool[{i}] with {AllocationPools[i].Size} bytes at: 0x{address:X}");
                         //     AllocationPools.RemoveAt(i);
@@ -259,7 +257,7 @@ namespace AmeisenBotX.Memory
             // reserve initial pool
             if (INITIAL_POOL_SIZE > 0)
             {
-                IntPtr initialPoolAddress = VirtualAllocEx(ProcessHandle, IntPtr.Zero, INITIAL_POOL_SIZE, AllocationTypes.Commit, MemoryProtectionFlags.ExecuteReadWrite);
+                IntPtr initialPoolAddress = VirtualAllocEx(ProcessHandle, IntPtr.Zero, INITIAL_POOL_SIZE, AllocationType.Commit, MemoryProtectionFlag.ExecuteReadWrite);
 
                 if (initialPoolAddress == IntPtr.Zero)
                 {
@@ -291,7 +289,7 @@ namespace AmeisenBotX.Memory
 
                         if (patchMemProtection)
                         {
-                            if (ProtectMemory(address, state.OutputLength, MemoryProtectionFlags.ExecuteReadWrite, out MemoryProtectionFlags oldMemoryProtection))
+                            if (ProtectMemory(address, state.OutputLength, MemoryProtectionFlag.ExecuteReadWrite, out MemoryProtectionFlag oldMemoryProtection))
                             {
                                 bool status = !NtWriteVirtualMemory(ProcessHandle, address, (void*)state.OutputData, (int)state.OutputLength, out _);
                                 ProtectMemory(address, state.OutputLength, oldMemoryProtection, out _);
@@ -313,7 +311,7 @@ namespace AmeisenBotX.Memory
 
         ///<inheritdoc cref="IMemoryApi.ProtectMemory"/>
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public bool ProtectMemory(IntPtr address, uint size, MemoryProtectionFlags memoryProtection, out MemoryProtectionFlags oldMemoryProtection)
+        public bool ProtectMemory(IntPtr address, uint size, MemoryProtectionFlag memoryProtection, out MemoryProtectionFlag oldMemoryProtection)
         {
 #if DEBUG
             if (!Initialized) { throw new InvalidOperationException("call Init() before you do anything with this class"); }
@@ -333,7 +331,7 @@ namespace AmeisenBotX.Memory
 #endif
             uint size = (uint)sizeof(T);
 
-            if (ProtectMemory(address, size, MemoryProtectionFlags.ExecuteReadWrite, out MemoryProtectionFlags oldMemoryProtection))
+            if (ProtectMemory(address, size, MemoryProtectionFlag.ExecuteReadWrite, out MemoryProtectionFlag oldMemoryProtection))
             {
                 Write(address, data);
                 ProtectMemory(address, size, oldMemoryProtection, out _);
@@ -465,7 +463,7 @@ namespace AmeisenBotX.Memory
             {
                 SetParent(Process.MainWindowHandle, mainWindowHandle);
 
-                int style = GetWindowLong(Process.MainWindowHandle, GWL_STYLE) & ~(int)WindowStyles.WS_CAPTION & ~(int)WindowStyles.WS_THICKFRAME;
+                int style = GetWindowLong(Process.MainWindowHandle, GWL_STYLE) & ~(int)WindowStyle.WS_CAPTION & ~(int)WindowStyle.WS_THICKFRAME;
                 SetWindowLong(Process.MainWindowHandle, GWL_STYLE, style);
 
                 ResizeParentWindow(offsetX, offsetY, width, height);
@@ -476,9 +474,9 @@ namespace AmeisenBotX.Memory
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public void SetWindowPosition(IntPtr windowHandle, Rect rect, bool resizeWindow = true)
         {
-            WindowFlags flags = WindowFlags.AsyncWindowPos | WindowFlags.NoZOrder | WindowFlags.NoActivate;
+            WindowFlag flags = WindowFlag.AsyncWindowPos | WindowFlag.NoZOrder | WindowFlag.NoActivate;
 
-            if (!resizeWindow) { flags |= WindowFlags.NoSize; }
+            if (!resizeWindow) { flags |= WindowFlag.NoSize; }
 
             if (rect.Left > 0 && rect.Right > 0 && rect.Top > 0 && rect.Bottom > 0)
             {

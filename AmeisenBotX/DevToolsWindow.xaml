@@ -359,6 +359,20 @@
                     </Grid>
                 </Border>
             </TabItem>
+            <TabItem x:Name="tabitemClientPatches" Header="ClientPatches" Background="{x:Null}" Foreground="White" BorderBrush="{x:Null}" BorderThickness="0">
+                <Border BorderThickness="0,1,0,0" Margin="0,-3,0,0">
+                    <Border.BorderBrush>
+                        <SolidColorBrush Color="{DynamicResource DarkForeground}" />
+                    </Border.BorderBrush>
+                    <Grid>
+                        <TextBlock Text="Warning: The this alters client memory, as such it may introduce bugs or even crashes, also parasitic sub-program 'Warden' will return incorrect memory CRC checks so unless emulated which is outside the scope of this project its detectable!"
+                                   TextWrapping="Wrap" Margin="10,10,10,10" Foreground="#FF990F0F"/>
+                        <CheckBox Content="ClimbSteepSlopes" HorizontalAlignment="Left" Margin="25,65,0,0" VerticalAlignment="Top" Checked="ClimbSteepSlopesChecked" Unchecked="ClimbSteepSlopesUnchecked" Foreground="White"/>
+                        <CheckBox Content="DisableM2Collisions" HorizontalAlignment="Left" Margin="203,65,0,0" VerticalAlignment="Top" Checked="DisableM2CollisionsChecked" Unchecked="DisableM2CollisionsUnchecked" Foreground="White"/>
+                        <CheckBox Content="DisableWMOCollisions" HorizontalAlignment="Left" Margin="203,85,0,0" VerticalAlignment="Top" Checked="DisableWMOCollisionsChecked" Unchecked="DisableWMOCollisionsUnchecked" Foreground="White"/>
+                    </Grid>
+                </Border>
+            </TabItem>
         </TabControl>
     </Grid>
 </Window>

@@ -8,6 +8,7 @@ using AmeisenBotX.Wow;
 using AmeisenBotX.Wow.Events;
 using AmeisenBotX.Wow.Objects;
 using AmeisenBotX.Wow.Objects.Enums;
+using AmeisenBotX.Wow.Objects.Flags;
 using AmeisenBotX.Wow.Offsets;
 using AmeisenBotX.Wow548.Events;
 using AmeisenBotX.Wow548.Hook;
@@ -609,7 +610,7 @@ namespace AmeisenBotX.Wow548
         {
             start.Z += heightAdjust;
             end.Z += heightAdjust;
-            return Hook.TraceLine(start, end, (uint)WowWorldFrameHit.LineOfSight);
+            return Hook.TraceLine(start, end, (uint)WowWorldFrameHitFlag.HitTestLOS);
         }
 
         public bool IsRuneReady(int runeId)

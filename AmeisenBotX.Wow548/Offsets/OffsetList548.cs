@@ -164,6 +164,16 @@ namespace AmeisenBotX.Wow548.Offsets
 
         public IntPtr ZoneText { get; } = new(0x0);
 
+        public IntPtr CollisionM2C { get; } = new(0x0);
+
+        public IntPtr CollisionM2S { get; } = new(0x0);
+
+        public IntPtr CollisionWMO { get; } = new(0x0);
+
+        public IntPtr ClimbAngle { get; } = new(0x0);
+
+        public IntPtr StaticPlayer { get; } = new(0x0);
+
         public void Init(IntPtr mainModuleBase)
         {
 
