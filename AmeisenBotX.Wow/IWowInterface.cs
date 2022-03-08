@@ -42,6 +42,11 @@ namespace AmeisenBotX.Wow
         bool IsReady { get; }
 
         /// <summary>
+        /// Get the current version of wow.
+        /// </summary>
+        WowVersion WowVersion { get; }
+
+        /// <summary>
         /// Shortcut to get the last targets guid.
         /// </summary>
         public ulong LastTargetGuid => ObjectProvider.LastTarget != null ? ObjectProvider.LastTarget.Guid : 0ul;

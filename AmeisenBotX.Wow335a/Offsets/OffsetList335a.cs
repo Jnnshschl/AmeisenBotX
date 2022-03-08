@@ -45,7 +45,7 @@ namespace AmeisenBotX.Wow335a.Offsets
 
         public IntPtr ClientConnection { get; } = new(0xC79CE0);
 
-        public IntPtr ClimbAngle{ get; } = new(0x858);
+        public IntPtr ClimbAngle { get; } = new(0x858);
 
         public IntPtr ComboPoints { get; } = new(0xBD084D);
 

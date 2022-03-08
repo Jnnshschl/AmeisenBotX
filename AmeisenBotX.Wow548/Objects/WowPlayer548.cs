@@ -15,11 +15,6 @@ namespace AmeisenBotX.Wow548.Objects
         private VisibleItemEnchantment[] itemEnchantments;
         private QuestlogEntry[] questlogEntries;
 
-        public WowPlayer548(IntPtr baseAddress, IntPtr descriptorAddress) : base(baseAddress, descriptorAddress)
-        {
-            Type = WowObjectType.Player;
-        }
-
         public int ComboPoints { get; set; }
 
         public bool IsFlying { get; set; }

@@ -1,6 +1,5 @@
 ﻿using AmeisenBotX.Memory;
 using AmeisenBotX.Wow.Objects;
-using AmeisenBotX.Wow.Objects.Enums;
 using AmeisenBotX.Wow.Objects.Raw.Enums;
 using AmeisenBotX.Wow.Objects.Raw.SubStructs;
 using AmeisenBotX.Wow.Offsets;
@@ -13,11 +12,6 @@ namespace AmeisenBotX.Wow335a.Objects
     [Serializable]
     public class WowItem335a : WowObject335a, IWowItem
     {
-        public WowItem335a(IntPtr baseAddress, IntPtr descriptorAddress) : base(baseAddress, descriptorAddress)
-        {
-            Type = WowObjectType.Item;
-        }
-
         public int Count { get; set; }
 
         public List<ItemEnchantment> ItemEnchantments { get; private set; }

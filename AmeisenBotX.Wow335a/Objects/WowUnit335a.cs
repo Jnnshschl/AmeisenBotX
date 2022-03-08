@@ -16,11 +16,6 @@ namespace AmeisenBotX.Wow335a.Objects
     [Serializable]
     public class WowUnit335a : WowObject335a, IWowUnit
     {
-        public WowUnit335a(IntPtr baseAddress, IntPtr descriptorAddress) : base(baseAddress, descriptorAddress)
-        {
-            Type = WowObjectType.Unit;
-        }
-
         public int AuraCount { get; set; }
 
         public IEnumerable<RawWowAura> Auras { get; set; }

@@ -9,6 +9,7 @@
         Friendly = 4,
         Honored = 5,
         Revered = 6,
-        Exalted = 7
+        Exalted = 7,
+        Trash
     }
 }

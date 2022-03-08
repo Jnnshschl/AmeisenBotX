@@ -26,11 +26,7 @@ namespace AmeisenBotX.Wow548.Offsets
 
         public IntPtr ClickToMoveDistance { get; private set; }
 
-        public IntPtr ClickToMoveEnabled { get; } = new(0x0);
-
         public IntPtr ClickToMoveGuid { get; private set; }
-
-        public IntPtr ClickToMovePointer { get; } = new(0x0);
 
         public IntPtr ClickToMoveTurnSpeed { get; private set; }
 
@@ -152,7 +148,7 @@ namespace AmeisenBotX.Wow548.Offsets
 
         public IntPtr WowUnitName2 { get; } = new(0x0);
 
-        public IntPtr WOwUnitCanInterrupt { get; } = new(0xC64);
+        public IntPtr WowUnitCanInterrupt { get; } = new(0xC64);
 
         public IntPtr WowUnitPosition { get; } = new(0x838);
 
@@ -176,7 +172,6 @@ namespace AmeisenBotX.Wow548.Offsets
 
         public void Init(IntPtr mainModuleBase)
         {
-
             // need to add base to offsets because ASLR is enabled
             CameraPointer = IntPtr.Add(mainModuleBase, 0xD64E5C);
 
@@ -194,14 +189,14 @@ namespace AmeisenBotX.Wow548.Offsets
             FunctionGetActivePlayerObject = IntPtr.Add(mainModuleBase, 0x4F84);
             FunctionGetLocalizedText = IntPtr.Add(mainModuleBase, 0x414267);
             FunctionHandleTerrainClick = IntPtr.Add(mainModuleBase, 0x38F129);
-            FunctionIsOutdoors = IntPtr.Add(mainModuleBase, 0x414B53);
+            FunctionIsOutdoors = IntPtr.Add(mainModuleBase, 0x4142AC);
             FunctionLuaDoString = IntPtr.Add(mainModuleBase, 0x4FD12);
             FunctionPlayerClickToMove = IntPtr.Add(mainModuleBase, 0x41FB57);
             FunctionSetTarget = IntPtr.Add(mainModuleBase, 0x8CE880);
             FunctionTraceline = IntPtr.Add(mainModuleBase, 0x5EEF7B);
             FunctionUnitOnRightClick = IntPtr.Add(mainModuleBase, 0x8D0268);
             FunctionUnitSetFacing = IntPtr.Add(mainModuleBase, 0x8A9F78);
-            FunctionUnitGetReaction = IntPtr.Add(mainModuleBase, 0x4A799C);
+            FunctionUnitGetReaction = IntPtr.Add(mainModuleBase, 0x4153C3);
             GameState = IntPtr.Add(mainModuleBase, 0xD65B16);
             IsIngame = IntPtr.Add(mainModuleBase, 0xB935C0);
             IsWorldLoaded = IntPtr.Add(mainModuleBase, 0xAE1A18);

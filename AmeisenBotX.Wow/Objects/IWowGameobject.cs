@@ -18,5 +18,7 @@ namespace AmeisenBotX.Wow.Objects
         WowGameObjectType GameObjectType { get; }
 
         int Level { get; }
+
+        public new WowObjectType Type => WowObjectType.GameObject;
     }
 }

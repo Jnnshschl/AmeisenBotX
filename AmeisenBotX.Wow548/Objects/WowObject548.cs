@@ -1,7 +1,6 @@
 ﻿using AmeisenBotX.Common.Math;
 using AmeisenBotX.Memory;
 using AmeisenBotX.Wow.Objects;
-using AmeisenBotX.Wow.Objects.Enums;
 using AmeisenBotX.Wow.Offsets;
 using AmeisenBotX.Wow548.Objects.Descriptors;
 using System.Collections.Specialized;
@@ -11,16 +10,9 @@ namespace AmeisenBotX.Wow548.Objects
     [Serializable]
     public class WowObject548 : IWowObject
     {
-        public WowObject548(IntPtr baseAddress, IntPtr descriptorAddress)
-        {
-            BaseAddress = baseAddress;
-            DescriptorAddress = descriptorAddress;
-            Type = WowObjectType.None;
-        }
+        public IntPtr BaseAddress { get; private set; }
 
-        public IntPtr BaseAddress { get; }
-
-        public IntPtr DescriptorAddress { get; }
+        public IntPtr DescriptorAddress { get; private set; }
 
         public int EntryId => RawObject.EntryId;
 
@@ -30,15 +22,15 @@ namespace AmeisenBotX.Wow548.Objects
 
         public float Scale => RawObject.Scale;
 
-        public WowObjectType Type { get; protected set; }
-
         public BitVector32 UnitFlagsDynamic => RawObject.DynamicFlags;
 
         protected WowObjectDescriptor548 RawObject { get; private set; }
 
-        public override string ToString()
+        public virtual void Init(IMemoryApi memoryApi, IOffsetList offsetList, IntPtr baseAddress, IntPtr descriptorAddress)
         {
-            return $"Object: {Guid}";
+            BaseAddress = baseAddress;
+            DescriptorAddress = descriptorAddress;
+            Update(memoryApi, offsetList);
         }
 
         public virtual void Update(IMemoryApi memoryApi, IOffsetList offsetList)

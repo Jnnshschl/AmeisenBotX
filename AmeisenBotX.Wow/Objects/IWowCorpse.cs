@@ -1,4 +1,6 @@
-﻿namespace AmeisenBotX.Wow.Objects
+﻿using AmeisenBotX.Wow.Objects.Enums;
+
+namespace AmeisenBotX.Wow.Objects
 {
     public interface IWowCorpse : IWowObject
     {
@@ -7,5 +9,7 @@
         ulong Owner { get; }
 
         ulong Party { get; }
+
+        public new WowObjectType Type => WowObjectType.Corpse;
     }
 }

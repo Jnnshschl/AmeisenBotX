@@ -13,11 +13,6 @@ namespace AmeisenBotX.Wow335a.Objects
     [Serializable]
     public class WowGameobject335a : WowObject335a, IWowGameobject
     {
-        public WowGameobject335a(IntPtr baseAddress, IntPtr descriptorAddress) : base(baseAddress, descriptorAddress)
-        {
-            Type = WowObjectType.GameObject;
-        }
-
         public byte Bytes0 { get; set; }
 
         public ulong CreatedBy { get; set; }

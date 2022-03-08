@@ -1,6 +1,5 @@
 ﻿using AmeisenBotX.Memory;
 using AmeisenBotX.Wow.Objects;
-using AmeisenBotX.Wow.Objects.Enums;
 using AmeisenBotX.Wow.Offsets;
 using AmeisenBotX.Wow548.Objects.Descriptors;
 
@@ -9,11 +8,6 @@ namespace AmeisenBotX.Wow548.Objects
     [Serializable]
     public class WowCorpse548 : WowObject548, IWowCorpse
     {
-        public WowCorpse548(IntPtr baseAddress, IntPtr descriptorAddress) : base(baseAddress, descriptorAddress)
-        {
-            Type = WowObjectType.Corpse;
-        }
-
         public int DisplayId => RawWowCorpse.DisplayId;
 
         public ulong Owner => RawWowCorpse.Owner;

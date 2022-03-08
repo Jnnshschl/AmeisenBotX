@@ -120,8 +120,8 @@ namespace AmeisenBotX.Core
             // load the wow specific interface based on file version (build number)
             Bot.Wow = FileVersionInfo.GetVersionInfo(Config.PathToWowExe).FilePrivatePart switch
             {
-                12340 => new WowInterface335a(Bot.Memory),
-                18414 => new WowInterface548(Bot.Memory),
+                (int)WowVersion.WotLK335a => new WowInterface335a(Bot.Memory),
+                (int)WowVersion.MoP548 => new WowInterface548(Bot.Memory),
                 _ => throw new ArgumentException("Unsupported wow version", nameof(Config)),
             };
 

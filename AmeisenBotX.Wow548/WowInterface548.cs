@@ -1,6 +1,5 @@
 ﻿using AmeisenBotX.Common.Math;
 using AmeisenBotX.Common.Utils;
-using AmeisenBotX.Core.Hook.Modules;
 using AmeisenBotX.Logging;
 using AmeisenBotX.Logging.Enums;
 using AmeisenBotX.Memory;
@@ -10,7 +9,8 @@ using AmeisenBotX.Wow.Objects;
 using AmeisenBotX.Wow.Objects.Enums;
 using AmeisenBotX.Wow.Objects.Flags;
 using AmeisenBotX.Wow.Offsets;
-using AmeisenBotX.Wow548.Events;
+using AmeisenBotX.Wow.Shared.Hook.Modules;
+using AmeisenBotX.Wow.Shared.Lua;
 using AmeisenBotX.Wow548.Hook;
 using AmeisenBotX.Wow548.Objects;
 using AmeisenBotX.Wow548.Offsets;
@@ -56,7 +56,7 @@ namespace AmeisenBotX.Wow548
                 null,
                 memoryApi,
                 Offsets,
-                $"{eventHookOutput}='['function {handlerName}(self,a,...)table.insert({tableName},{{time(),a,{{...}}}})end if {eventHookFrameName}==nil then {tableName}={{}}{eventHookFrameName}=CreateFrame(\"FRAME\"){eventHookFrameName}:SetScript(\"OnEvent\",{handlerName})else for b,c in pairs({tableName})do {eventHookOutput}={eventHookOutput}..'{{'for d,e in pairs(c)do if type(e)==\"table\"then {eventHookOutput}={eventHookOutput}..'\"args\": ['for f,g in pairs(e)do {eventHookOutput}={eventHookOutput}..'\"'..g..'\"'if f<=table.getn(e)then {eventHookOutput}={eventHookOutput}..','end end {eventHookOutput}={eventHookOutput}..']}}'if b<table.getn({tableName})then {eventHookOutput}={eventHookOutput}..','end else if type(e)==\"string\"then {eventHookOutput}={eventHookOutput}..'\"event\": \"'..e..'\",'else {eventHookOutput}={eventHookOutput}..'\"time\": \"'..e..'\",'end end end end end {eventHookOutput}={eventHookOutput}..']'{tableName}={{}}",
+                LuaEventHook.Get(eventHookFrameName, tableName, handlerName, eventHookOutput),
                 eventHookOutput
             ));
 
@@ -90,35 +90,35 @@ namespace AmeisenBotX.Wow548
                 staticPopupsVarName
             ));
 
-            // string battlegroundStatusVarName = BotUtils.FastRandomStringOnlyLetters();
-            // string oldBattlegroundStatus = string.Empty;
-            // 
-            // // module to monitor the battleground (and queue) status.
-            // HookModules.Add(new RunLuaHookModule
-            // (
-            //     (x) =>
-            //     {
-            //         if (x != IntPtr.Zero
-            //             && memoryApi.ReadString(x, Encoding.UTF8, out string s)
-            //             && !string.IsNullOrWhiteSpace(s))
-            //         {
-            //             if (!oldBattlegroundStatus.Equals(s, StringComparison.Ordinal))
-            //             {
-            //                 OnBattlegroundStatus?.Invoke(s);
-            //                 oldBattlegroundStatus = s;
-            //             }
-            //         }
-            //         else
-            //         {
-            //             oldBattlegroundStatus = string.Empty;
-            //         }
-            //     },
-            //     null,
-            //     memoryApi,
-            //     Offsets,
-            //     $"{battlegroundStatusVarName}=\"\"for b=1,MAX_BATTLEFIELD_QUEUES do local c,d,e,f,g,h=GetBattlefieldStatus(b)local i=GetBattlefieldTimeWaited(b)/1000;{battlegroundStatusVarName}={battlegroundStatusVarName}..b..\":\"..tostring(c or\"unknown\")..\":\"..tostring(d or\"unknown\")..\":\"..tostring(e or\"unknown\")..\":\"..tostring(f or\"unknown\")..\":\"..tostring(g or\"unknown\")..\":\"..tostring(h or\"unknown\")..\":\"..tostring(i or\"unknown\")..\";\"end",
-            //     battlegroundStatusVarName
-            // ));
+            string battlegroundStatusVarName = BotUtils.FastRandomStringOnlyLetters();
+            string oldBattlegroundStatus = string.Empty;
+
+            // module to monitor the battleground (and queue) status.
+            HookModules.Add(new RunLuaHookModule
+            (
+                (x) =>
+                {
+                    if (x != IntPtr.Zero
+                        && memoryApi.ReadString(x, Encoding.UTF8, out string s)
+                        && !string.IsNullOrWhiteSpace(s))
+                    {
+                        if (!oldBattlegroundStatus.Equals(s, StringComparison.Ordinal))
+                        {
+                            OnBattlegroundStatus?.Invoke(s);
+                            oldBattlegroundStatus = s;
+                        }
+                    }
+                    else
+                    {
+                        oldBattlegroundStatus = string.Empty;
+                    }
+                },
+                null,
+                memoryApi,
+                Offsets,
+                $"{battlegroundStatusVarName}=\"\"for b=1,2 do local c,d,e,f,g,h=GetBattlefieldStatus(b)local i=GetBattlefieldTimeWaited(b)/1000;{battlegroundStatusVarName}={battlegroundStatusVarName}..b..\":\"..tostring(c or\"unknown\")..\":\"..tostring(d or\"unknown\")..\":\"..tostring(e or\"unknown\")..\":\"..tostring(f or\"unknown\")..\":\"..tostring(g or\"unknown\")..\":\"..tostring(h or\"unknown\")..\":\"..tostring(i or\"unknown\")..\";\"end",
+                battlegroundStatusVarName
+            ));
 
             // module to detect small obstacles that we can jump over
             HookModules.Add(new TracelineJumpHookModule
@@ -165,15 +165,17 @@ namespace AmeisenBotX.Wow548
 
         private SimpleEventManager EventManager { get; }
 
-        private EndSceneHook Hook { get; }
+        private EndSceneHook548 Hook { get; }
 
         private List<IHookModule> HookModules { get; }
 
         private IMemoryApi Memory { get; }
 
-        private ObjectManager ObjectManager { get; }
+        private ObjectManager<WowObject548, WowUnit548, WowPlayer548, WowGameobject548, WowDynobject548, WowItem548, WowCorpse548, WowContainer548> ObjectManager { get; }
 
         private OffsetList548 OffsetList { get; }
+
+        public WowVersion WowVersion { get; } = WowVersion.MoP548;
 
         public void AbandonQuestsNotIn(IEnumerable<string> quests)
         {
@@ -292,7 +294,7 @@ namespace AmeisenBotX.Wow548
 
         public void EnableClickToMove()
         {
-            Hook.EnableClickToMove();
+            // TODO
         }
 
         public void EquipItem(string newItem, int itemSlot = -1)
@@ -468,36 +470,37 @@ namespace AmeisenBotX.Wow548
 
         public Dictionary<string, (int, int)> GetSkills()
         {
+            // TODO: adjust this for mop
             Dictionary<string, (int, int)> parsedSkills = new();
 
-            try
-            {
-                ExecuteLuaAndRead(
-                    BotUtils.ObfuscateLua(
-                        "{v:0}=\"\"{v:1}=GetNumSkillLines()for a=1,{v:1} do local b,c,_,d,_,_,e=GetSkillLineInfo(a)if not c then {v:0}={v:0}..b;if a<{v:1} then {v:0}={v:0}..\":\"..tostring(d or 0)..\"/\"..tostring(e or 0)..\";\"end end end"),
-                    out string result);
-
-                if (!string.IsNullOrEmpty(result))
-                {
-                    IEnumerable<string> skills = new List<string>(result.Split(';')).Select(s => s.Trim());
-
-                    foreach (string x in skills)
-                    {
-                        string[] splittedParts = x.Split(":");
-                        string[] maxSkill = splittedParts[1].Split("/");
-
-                        if (int.TryParse(maxSkill[0], out int currentSkillLevel)
-                            && int.TryParse(maxSkill[1], out int maxSkillLevel))
-                        {
-                            parsedSkills.Add(splittedParts[0], (currentSkillLevel, maxSkillLevel));
-                        }
-                    }
-                }
-            }
-            catch
-            {
-                // ignored
-            }
+            // try
+            // {
+            //     ExecuteLuaAndRead(
+            //         BotUtils.ObfuscateLua(
+            //             "{v:0}=\"\"{v:1}=GetNumSkillLines()for a=1,{v:1} do local b,c,_,d,_,_,e=GetSkillLineInfo(a)if not c then {v:0}={v:0}..b;if a<{v:1} then {v:0}={v:0}..\":\"..tostring(d or 0)..\"/\"..tostring(e or 0)..\";\"end end end"),
+            //         out string result);
+            // 
+            //     if (!string.IsNullOrEmpty(result))
+            //     {
+            //         IEnumerable<string> skills = new List<string>(result.Split(';')).Select(s => s.Trim());
+            // 
+            //         foreach (string x in skills)
+            //         {
+            //             string[] splittedParts = x.Split(":");
+            //             string[] maxSkill = splittedParts[1].Split("/");
+            // 
+            //             if (int.TryParse(maxSkill[0], out int currentSkillLevel)
+            //                 && int.TryParse(maxSkill[1], out int maxSkillLevel))
+            //             {
+            //                 parsedSkills.Add(splittedParts[0], (currentSkillLevel, maxSkillLevel));
+            //             }
+            //         }
+            //     }
+            // }
+            // catch
+            // {
+            //     // ignored
+            // }
 
             return parsedSkills;
         }
@@ -529,12 +532,13 @@ namespace AmeisenBotX.Wow548
 
         public string GetSpells()
         {
-            return ExecuteLuaAndRead(BotUtils.ObfuscateLua("{v:0}='['{v:1}=GetNumSpellTabs()for a=1,{v:1} do {v:2},{v:3},{v:4},{v:5}=GetSpellTabInfo(a)for b={v:4}+1,{v:4}+{v:5} do {v:6},{v:7}=GetSpellName(b,\"BOOKTYPE_SPELL\")if {v:6} then {v:8},{v:9},_,{v:10},_,_,{v:11},{v:12},{v:13}=GetSpellInfo({v:6},{v:7}){v:0}={v:0}..'{'..'\"spellbookName\": \"'..tostring({v:2} or 0)..'\",'..'\"spellbookId\": \"'..tostring(a or 0)..'\",'..'\"name\": \"'..tostring({v:6} or 0)..'\",'..'\"rank\": \"'..tostring({v:9} or 0)..'\",'..'\"castTime\": \"'..tostring({v:11} or 0)..'\",'..'\"minRange\": \"'..tostring({v:12} or 0)..'\",'..'\"maxRange\": \"'..tostring({v:13} or 0)..'\",'..'\"costs\": \"'..tostring({v:10} or 0)..'\"'..'}'if a<{v:1} or b<{v:4}+{v:5} then {v:0}={v:0}..','end end end end;{v:0}={v:0}..']'"), out string result) ? result : string.Empty;
+            return ExecuteLuaAndRead(BotUtils.ObfuscateLua("{v:0}='['{v:1}=GetNumSpellTabs()for a=1,{v:1} do {v:2},{v:3},{v:4},{v:5}=GetSpellTabInfo(a)for b={v:4}+1,{v:4}+{v:5} do {v:6},{v:7}=GetSpellBookItemName(b,\"BOOKTYPE_SPELL\")if {v:6} then {v:8},{v:9},_,{v:10},_,_,{v:11},{v:12},{v:13}=GetSpellInfo({v:6}){v:0}={v:0}..'{'..'\"spellbookName\": \"'..tostring({v:2} or 0)..'\",'..'\"spellbookId\": \"'..tostring(a or 0)..'\",'..'\"name\": \"'..tostring({v:6} or 0)..'\",'..'\"rank\": \"'..tostring({v:9} or 0)..'\",'..'\"castTime\": \"'..tostring({v:11} or 0)..'\",'..'\"minRange\": \"'..tostring({v:12} or 0)..'\",'..'\"maxRange\": \"'..tostring({v:13} or 0)..'\",'..'\"costs\": \"'..tostring({v:10} or 0)..'\"'..'}'if a<{v:1} or b<{v:4}+{v:5} then {v:0}={v:0}..','end end end end;{v:0}={v:0}..']'"), out string result) ? result : string.Empty;
         }
 
         public string GetTalents()
         {
-            return ExecuteLuaAndRead(BotUtils.ObfuscateLua("{v:0}=\"\"{v:4}=GetNumTalentTabs();for g=1,{v:4} do {v:1}=GetNumTalents(g)for h=1,{v:1} do a,b,c,d,{v:2},{v:3},e,f=GetTalentInfo(g,h){v:0}={v:0}..a..\";\"..g..\";\"..h..\";\"..{v:2}..\";\"..{v:3};if h<{v:1} then {v:0}={v:0}..\"|\"end end;if g<{v:4} then {v:0}={v:0}..\"|\"end end"), out string result) ? result : string.Empty;
+            // TODO: adjust this for mop
+            return string.Empty; // ExecuteLuaAndRead(BotUtils.ObfuscateLua("{v:0}=\"\"{v:4}=GetNumTalentTabs();for g=1,{v:4} do {v:1}=GetNumTalents(g)for h=1,{v:1} do a,b,c,d,{v:2},{v:3},e,f=GetTalentInfo(g,h){v:0}={v:0}..a..\";\"..g..\";\"..h..\";\"..{v:2}..\";\"..{v:3};if h<{v:1} then {v:0}={v:0}..\"|\"end end;if g<{v:4} then {v:0}={v:0}..\"|\"end end"), out string result) ? result : string.Empty;
         }
 
         public void GetTrainerServiceCost(int serviceIndex)
@@ -912,7 +916,7 @@ namespace AmeisenBotX.Wow548
                 ObjectManager.UpdateWowObjects();
             }
 
-            // Hook.GameInfoTick();
+            Hook.GameInfoTick();
         }
 
         public bool UiIsVisible(params string[] uiElements)

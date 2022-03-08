@@ -13,11 +13,6 @@ namespace AmeisenBotX.Wow548.Objects
     [Serializable]
     public class WowUnit548 : WowObject548, IWowUnit
     {
-        public WowUnit548(IntPtr baseAddress, IntPtr descriptorAddress) : base(baseAddress, descriptorAddress)
-        {
-            Type = WowObjectType.Unit;
-        }
-
         public int AuraCount { get; set; }
 
         public IEnumerable<RawWowAura> Auras { get; set; }

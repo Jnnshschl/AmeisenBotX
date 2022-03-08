@@ -24,19 +24,15 @@ namespace AmeisenBotX.Wow.Offsets
 
         IntPtr CollisionM2C { get; }
 
-        IntPtr CollisionM2S { get; } 
+        IntPtr CollisionM2S { get; }
 
-        IntPtr CollisionWMO { get; } 
+        IntPtr CollisionWMO { get; }
 
         IntPtr ClickToMoveAction { get; }
 
         IntPtr ClickToMoveDistance { get; }
 
-        IntPtr ClickToMoveEnabled { get; }
-
         IntPtr ClickToMoveGuid { get; }
-
-        IntPtr ClickToMovePointer { get; }
 
         IntPtr ClickToMoveTurnSpeed { get; }
 

@@ -202,6 +202,8 @@ namespace AmeisenBotX.Wow.Objects
 
         BitVector32 UnitFlagsDynamic { get; }
 
+        public new WowObjectType Type => WowObjectType.Unit;
+
         static bool IsValidUnit(IWowUnit unit)
         {
             return unit != null && !unit.IsNotAttackable;

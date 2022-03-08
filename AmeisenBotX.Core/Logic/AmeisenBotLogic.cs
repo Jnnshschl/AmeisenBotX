@@ -15,6 +15,7 @@ using AmeisenBotX.Logging.Enums;
 using AmeisenBotX.Memory.Win32;
 using AmeisenBotX.Wow.Objects;
 using AmeisenBotX.Wow.Objects.Enums;
+using AmeisenBotX.Wow.Shared.Lua;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
@@ -783,7 +784,7 @@ namespace AmeisenBotX.Core.Logic
 
                 foreach (IWowUnit unit in playersToTry)
                 {
-                    if (unit == null || (!ignoreRange && !ShouldIFollowPlayer(unit))) 
+                    if (unit == null || (!ignoreRange && !ShouldIFollowPlayer(unit)))
                         continue;
 
                     playerToFollow = unit;
@@ -832,56 +833,7 @@ namespace AmeisenBotX.Core.Logic
 
             if (LoginAttemptEvent.Run())
             {
-                // CharacterSelect_EnterWorld() for whetever reason, the mop client freezes if we call this directly
-
-                string loginLua = @$"
-                    if AccountLoginUI then
-                        AccountLoginUI:Show()
-                    end
-                    if ServerAlertFrame and ServerAlertFrame:IsShown() then
-                        ServerAlertFrame:Hide()
-                    elseif ConnectionHelpFrame and ConnectionHelpFrame:IsShown() then
-                        ConnectionHelpFrame:Hide()
-                        AccountLoginUI:Show()
-                    elseif CinematicFrame and CinematicFrame:IsShown() then
-                        StopCinematic()
-                    elseif TOSFrame and TOSFrame:IsShown() then
-                        TOSAccept:Enable()
-                        TOSAccept:Click()
-                    elseif ScriptErrors and ScriptErrors:IsShown() then
-                        ScriptErrors:Hide()
-                    elseif GlueDialog and GlueDialog:IsShown() then
-                        if GlueDialog.which == ""OKAY"" then
-                            GlueDialogButton1:Click()
-                        end
-                    elseif CharCreateRandomizeButton and CharCreateRandomizeButton:IsVisible() then
-                        CharacterCreate_Back()
-                    elseif RealmList and RealmList:IsVisible() then
-                        for a = 1, #GetRealmCategories() do
-                            local found = false
-                            for b = 1, GetNumRealms() do
-                                if string.lower(GetRealmInfo(a, b)) == string.lower(""{Config.Realm}"") then
-                                    ChangeRealm(a, b)
-                                    RealmList: Hide()
-                                    found = true
-                                    break
-                                end
-                            end
-                            if found then
-                                break
-                            end
-                        end
-                    elseif CharacterSelectUI and CharacterSelectUI:IsVisible() then
-                        if string.find(string.lower(GetServerName()), string.lower(""{Config.Realm}"")) then
-                            CharacterSelect_SelectCharacter({ Config.CharacterSlot + 1})                            
-                            CharSelectEnterWorldButton:Click()
-                        elseif RealmList and not RealmList:IsVisible() then
-                             CharSelectChangeRealmButton:Click()
-                        end
-                    elseif AccountLoginUI and AccountLoginUI:IsVisible() then
-                        DefaultServerLogin(""{Config.Username}"", ""{Config.Password}"")
-                    end";
-                Bot.Wow.LuaDoString(loginLua);
+                Bot.Wow.LuaDoString(LuaLogin.Get(Config.Username, Config.Password, Config.Realm, Config.CharacterSlot));
             }
 
             Bot.Wow.SetWorldLoadedCheck(false);
@@ -985,9 +937,9 @@ namespace AmeisenBotX.Core.Logic
             if (PartymembersFightEvent.Run())
             {
                 ArePartymembersInFight = Bot.Objects.Partymembers.Any(e => e.IsInCombat && e.DistanceTo(Bot.Player) < Config.SupportRange)
-                    || Bot.Objects.WowObjects.OfType<IWowUnit>().Any(e => (e.IsInCombat && (e.IsTaggedByMe || !e.IsTaggedByOther)
-                        || e.TargetGuid == Bot.Player.Guid
-                        || Bot.Objects.Partymembers.Any(x => x.Guid == e.TargetGuid))
+                    || Bot.Objects.WowObjects.OfType<IWowUnit>().Any(e => e.IsInCombat
+                        && (e.IsTaggedByMe || !e.IsTaggedByOther)
+                        && (e.TargetGuid == Bot.Player.Guid || Bot.Objects.Partymembers.Any(x => x.Guid == e.TargetGuid))
                         && Bot.Wow.GetReaction(Bot.Player.BaseAddress, e.BaseAddress) == WowUnitReaction.Hostile);
             }
 
@@ -1296,7 +1248,7 @@ namespace AmeisenBotX.Core.Logic
                 Bot.Wow.Events?.Start();
 
                 Bot.Wow.LuaDoString($"SetCVar(\"maxfps\", {Config.MaxFps});SetCVar(\"maxfpsbk\", {Config.MaxFps})");
-                Bot.Wow.EnableClickToMove();
+                // Bot.Wow.EnableClickToMove();
 
                 if (Config.AutoSetUlowGfxSettings)
                 {

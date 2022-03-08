@@ -1,7 +1,6 @@
 ﻿using AmeisenBotX.Common.Math;
 using AmeisenBotX.Memory;
 using AmeisenBotX.Wow.Objects;
-using AmeisenBotX.Wow.Objects.Enums;
 using AmeisenBotX.Wow.Offsets;
 using AmeisenBotX.Wow335a.Objects.Descriptors;
 using System;
@@ -11,11 +10,6 @@ namespace AmeisenBotX.Wow335a.Objects
     [Serializable]
     public class WowDynobject335a : WowObject335a, IWowDynobject
     {
-        public WowDynobject335a(IntPtr baseAddress, IntPtr descriptorAddress) : base(baseAddress, descriptorAddress)
-        {
-            Type = WowObjectType.DynamicObject;
-        }
-
         public ulong Caster { get; set; }
 
         public float Radius { get; set; }

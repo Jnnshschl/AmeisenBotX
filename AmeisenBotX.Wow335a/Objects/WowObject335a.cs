@@ -11,16 +11,9 @@ namespace AmeisenBotX.Wow335a.Objects
     [Serializable]
     public class WowObject335a : IWowObject
     {
-        public WowObject335a(IntPtr baseAddress, IntPtr descriptorAddress)
-        {
-            BaseAddress = baseAddress;
-            DescriptorAddress = descriptorAddress;
-            Type = WowObjectType.None;
-        }
+        public IntPtr BaseAddress { get; private set; }
 
-        public IntPtr BaseAddress { get; }
-
-        public IntPtr DescriptorAddress { get; }
+        public IntPtr DescriptorAddress { get; private set; }
 
         public int EntryId => RawObject.EntryId;
 
@@ -37,6 +30,13 @@ namespace AmeisenBotX.Wow335a.Objects
         public override string ToString()
         {
             return $"Object: {Guid}";
+        }
+
+        public virtual void Init(IMemoryApi memoryApi, IOffsetList offsetList, IntPtr baseAddress, IntPtr descriptorAddress)
+        {
+            BaseAddress = baseAddress;
+            DescriptorAddress = descriptorAddress;
+            Update(memoryApi, offsetList);
         }
 
         public virtual void Update(IMemoryApi memoryApi, IOffsetList offsetList)

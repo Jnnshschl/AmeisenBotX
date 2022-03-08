@@ -9,9 +9,9 @@ using AmeisenBotX.Wow.Objects;
 using AmeisenBotX.Wow.Objects.Enums;
 using AmeisenBotX.Wow.Objects.Flags;
 using AmeisenBotX.Wow.Offsets;
-using AmeisenBotX.Wow335a.Events;
+using AmeisenBotX.Wow.Shared.Hook.Modules;
+using AmeisenBotX.Wow.Shared.Lua;
 using AmeisenBotX.Wow335a.Hook;
-using AmeisenBotX.Wow335a.Hook.Modules;
 using AmeisenBotX.Wow335a.Objects;
 using AmeisenBotX.Wow335a.Offsets;
 using System;
@@ -59,7 +59,7 @@ namespace AmeisenBotX.Wow335a
                 null,
                 memoryApi,
                 Offsets,
-                $"{eventHookOutput}='['function {handlerName}(self,a,...)table.insert({tableName},{{time(),a,{{...}}}})end if {eventHookFrameName}==nil then {tableName}={{}}{eventHookFrameName}=CreateFrame(\"FRAME\"){eventHookFrameName}:SetScript(\"OnEvent\",{handlerName})else for b,c in pairs({tableName})do {eventHookOutput}={eventHookOutput}..'{{'for d,e in pairs(c)do if type(e)==\"table\"then {eventHookOutput}={eventHookOutput}..'\"args\": ['for f,g in pairs(e)do {eventHookOutput}={eventHookOutput}..'\"'..g..'\"'if f<=table.getn(e)then {eventHookOutput}={eventHookOutput}..','end end {eventHookOutput}={eventHookOutput}..']}}'if b<table.getn({tableName})then {eventHookOutput}={eventHookOutput}..','end else if type(e)==\"string\"then {eventHookOutput}={eventHookOutput}..'\"event\": \"'..e..'\",'else {eventHookOutput}={eventHookOutput}..'\"time\": \"'..e..'\",'end end end end end {eventHookOutput}={eventHookOutput}..']'{tableName}={{}}",
+                LuaEventHook.Get(eventHookFrameName, tableName, handlerName, eventHookOutput),
                 eventHookOutput
             ));
 
@@ -168,15 +168,17 @@ namespace AmeisenBotX.Wow335a
 
         private SimpleEventManager EventManager { get; }
 
-        private EndSceneHook Hook { get; }
+        private EndSceneHook335a Hook { get; }
 
         private List<IHookModule> HookModules { get; }
 
         private IMemoryApi Memory { get; }
 
-        private ObjectManager ObjectManager { get; }
+        private ObjectManager<WowObject335a, WowUnit335a, WowPlayer335a, WowGameobject335a, WowDynobject335a, WowItem335a, WowCorpse335a, WowContainer335a> ObjectManager { get; }
 
         private OffsetList335a OffsetList { get; }
+
+        public WowVersion WowVersion { get; } = WowVersion.WotLK335a;
 
         public void AbandonQuestsNotIn(IEnumerable<string> quests)
         {
@@ -295,7 +297,7 @@ namespace AmeisenBotX.Wow335a
 
         public void EnableClickToMove()
         {
-            Hook.EnableClickToMove();
+            // TODO
         }
 
         public void EquipItem(string newItem, int itemSlot = -1)

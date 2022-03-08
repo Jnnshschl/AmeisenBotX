@@ -17,11 +17,6 @@ namespace AmeisenBotX.Wow335a.Objects
         private VisibleItemEnchantment[] itemEnchantments;
         private QuestlogEntry[] questlogEntries;
 
-        public WowPlayer335a(IntPtr baseAddress, IntPtr descriptorAddress) : base(baseAddress, descriptorAddress)
-        {
-            Type = WowObjectType.Player;
-        }
-
         public int ComboPoints { get; set; }
 
         public bool IsFlying { get; set; }

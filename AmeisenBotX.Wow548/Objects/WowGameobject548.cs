@@ -12,11 +12,6 @@ namespace AmeisenBotX.Wow548.Objects
     [Serializable]
     public class WowGameobject548 : WowObject548, IWowGameobject
     {
-        public WowGameobject548(IntPtr baseAddress, IntPtr descriptorAddress) : base(baseAddress, descriptorAddress)
-        {
-            Type = WowObjectType.GameObject;
-        }
-
         public byte Bytes0 { get; set; }
 
         public ulong CreatedBy { get; set; }

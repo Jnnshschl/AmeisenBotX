@@ -1,4 +1,5 @@
-﻿using AmeisenBotX.Wow.Objects.Raw.SubStructs;
+﻿using AmeisenBotX.Wow.Objects.Enums;
+using AmeisenBotX.Wow.Objects.Raw.SubStructs;
 using System.Collections.Generic;
 
 namespace AmeisenBotX.Wow.Objects
@@ -11,7 +12,7 @@ namespace AmeisenBotX.Wow.Objects
 
         bool IsGhost { get; }
 
-        bool IsOutdoors { get; }
+        bool IsOutdoors { get; set; }
 
         bool IsSwimming { get; }
 
@@ -26,6 +27,8 @@ namespace AmeisenBotX.Wow.Objects
         int Xp { get; }
 
         double XpPercentage { get; }
+
+        public new WowObjectType Type => WowObjectType.Player;
 
         bool IsAlliance();
 
