@@ -10,9 +10,9 @@ using AmeisenBotX.Wow335a.Constants;
 using System;
 using System.Linq;
 
-namespace AmeisenBotX.Core.Engines.Combat.Classes.Jannis
+namespace AmeisenBotX.Core.Engines.Combat.Classes.Jannis335a
 {
-    public class WarriorProtection : BasicCombatClass
+    public class WarriorProtection : BasicCombatClass335a
     {
         public WarriorProtection(AmeisenBotInterfaces bot) : base(bot)
         {
@@ -31,7 +31,7 @@ namespace AmeisenBotX.Core.Engines.Combat.Classes.Jannis
 
         public override string Description => "Leveling ready CombatClass for the Protection Warrior spec. For Dungeons and Questing";
 
-        public override string DisplayName => "Warrior Protection";
+        public override string DisplayName => "Warrior Protection 3.3.5a";
 
         public override bool HandlesMovement => true;
 

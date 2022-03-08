@@ -5,9 +5,9 @@ using AmeisenBotX.Wow.Objects.Enums;
 using AmeisenBotX.Wow335a.Constants;
 using System.Linq;
 
-namespace AmeisenBotX.Core.Engines.Combat.Classes.Jannis
+namespace AmeisenBotX.Core.Engines.Combat.Classes.Jannis335a
 {
-    public class DeathknightUnholy : BasicCombatClass
+    public class DeathknightUnholy : BasicCombatClass335a
     {
         public DeathknightUnholy(AmeisenBotInterfaces bot) : base(bot)
         {
@@ -26,7 +26,7 @@ namespace AmeisenBotX.Core.Engines.Combat.Classes.Jannis
 
         public override string Description => "FCFS based CombatClass for the Unholy Deathknight spec.";
 
-        public override string DisplayName => "Deathknight Unholy";
+        public override string DisplayName => "Deathknight Unholy 3.3.5a";
 
         public override bool HandlesMovement => false;
 

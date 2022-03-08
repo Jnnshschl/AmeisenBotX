@@ -8,9 +8,9 @@ using AmeisenBotX.Wow335a.Constants;
 using System;
 using System.Linq;
 
-namespace AmeisenBotX.Core.Engines.Combat.Classes.Jannis
+namespace AmeisenBotX.Core.Engines.Combat.Classes.Jannis335a
 {
-    public class WarriorFury : BasicCombatClass
+    public class WarriorFury : BasicCombatClass335a
     {
         public WarriorFury(AmeisenBotInterfaces bot) : base(bot)
         {
@@ -30,7 +30,7 @@ namespace AmeisenBotX.Core.Engines.Combat.Classes.Jannis
 
         public override string Description => "FCFS based CombatClass for the Fury Warrior spec.";
 
-        public override string DisplayName => "Warrior Fury";
+        public override string DisplayName => "Warrior Fury 3.3.5a";
 
         public override bool HandlesMovement => false;
 

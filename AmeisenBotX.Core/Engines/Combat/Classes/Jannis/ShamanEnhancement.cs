@@ -5,9 +5,9 @@ using AmeisenBotX.Wow.Objects.Enums;
 using AmeisenBotX.Wow335a.Constants;
 using System.Linq;
 
-namespace AmeisenBotX.Core.Engines.Combat.Classes.Jannis
+namespace AmeisenBotX.Core.Engines.Combat.Classes.Jannis335a
 {
-    public class ShamanEnhancement : BasicCombatClass
+    public class ShamanEnhancement : BasicCombatClass335a
     {
         public ShamanEnhancement(AmeisenBotInterfaces bot) : base(bot)
         {
@@ -25,7 +25,7 @@ namespace AmeisenBotX.Core.Engines.Combat.Classes.Jannis
 
         public override string Description => "FCFS based CombatClass for the Enhancement Shaman spec.";
 
-        public override string DisplayName => "Shaman Enhancement";
+        public override string DisplayName => "Shaman Enhancement 3.3.5a";
 
         public override bool HandlesMovement => false;
 

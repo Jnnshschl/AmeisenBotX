@@ -19,9 +19,9 @@ using System.Collections.Generic;
 using System.Globalization;
 using System.Linq;
 
-namespace AmeisenBotX.Core.Engines.Combat.Classes.Jannis
+namespace AmeisenBotX.Core.Engines.Combat.Classes.Jannis335a
 {
-    public abstract class BasicCombatClass : SimpleConfigurable, ICombatClass
+    public abstract class BasicCombatClass335a : SimpleConfigurable, ICombatClass
     {
         private readonly int[] useableHealingItems = new int[]
         {
@@ -37,7 +37,7 @@ namespace AmeisenBotX.Core.Engines.Combat.Classes.Jannis
             2245, 3385, 3827, 6149, 13443, 13444, 33448, 22832,
         };
 
-        protected BasicCombatClass(AmeisenBotInterfaces bot)
+        protected BasicCombatClass335a(AmeisenBotInterfaces bot)
         {
             Bot = bot;
 

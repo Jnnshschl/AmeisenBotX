@@ -8,9 +8,9 @@ using AmeisenBotX.Wow335a.Constants;
 using System;
 using System.Linq;
 
-namespace AmeisenBotX.Core.Engines.Combat.Classes.Jannis
+namespace AmeisenBotX.Core.Engines.Combat.Classes.Jannis335a
 {
-    public class DeathknightBlood : BasicCombatClass
+    public class DeathknightBlood : BasicCombatClass335a
     {
         public DeathknightBlood(AmeisenBotInterfaces bot) : base(bot)
         {
@@ -31,7 +31,7 @@ namespace AmeisenBotX.Core.Engines.Combat.Classes.Jannis
 
         public override string Description => "FCFS based CombatClass for the Blood Deathknight spec.";
 
-        public override string DisplayName => "Deathknight Blood";
+        public override string DisplayName => "Deathknight Blood 3.3.5a";
 
         public override bool HandlesMovement => false;
 

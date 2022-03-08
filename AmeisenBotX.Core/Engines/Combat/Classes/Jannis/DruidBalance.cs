@@ -7,9 +7,9 @@ using AmeisenBotX.Wow335a.Constants;
 using System;
 using System.Linq;
 
-namespace AmeisenBotX.Core.Engines.Combat.Classes.Jannis
+namespace AmeisenBotX.Core.Engines.Combat.Classes.Jannis335a
 {
-    public class DruidBalance : BasicCombatClass
+    public class DruidBalance : BasicCombatClass335a
     {
         public DruidBalance(AmeisenBotInterfaces bot) : base(bot)
         {
@@ -33,7 +33,7 @@ namespace AmeisenBotX.Core.Engines.Combat.Classes.Jannis
 
         public override string Description => "FCFS based CombatClass for the Balance (Owl) Druid spec.";
 
-        public override string DisplayName => "Druid Balance";
+        public override string DisplayName => "Druid Balance 3.3.5a";
 
         public override bool HandlesMovement => false;
 

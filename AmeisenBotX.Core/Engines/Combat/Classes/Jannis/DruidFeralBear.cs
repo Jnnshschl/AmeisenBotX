@@ -6,9 +6,9 @@ using AmeisenBotX.Wow.Objects.Enums;
 using AmeisenBotX.Wow335a.Constants;
 using System.Linq;
 
-namespace AmeisenBotX.Core.Engines.Combat.Classes.Jannis
+namespace AmeisenBotX.Core.Engines.Combat.Classes.Jannis335a
 {
-    public class DruidFeralBear : BasicCombatClass
+    public class DruidFeralBear : BasicCombatClass335a
     {
         public DruidFeralBear(AmeisenBotInterfaces bot) : base(bot)
         {
@@ -27,7 +27,7 @@ namespace AmeisenBotX.Core.Engines.Combat.Classes.Jannis
 
         public override string Description => "FCFS based CombatClass for the Feral (Bear) Druid spec.";
 
-        public override string DisplayName => "Druid Feral Bear";
+        public override string DisplayName => "Druid Feral Bear 3.3.5a";
 
         public override bool HandlesMovement => false;
 

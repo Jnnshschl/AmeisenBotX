@@ -7,9 +7,9 @@ using AmeisenBotX.Wow335a.Constants;
 using System.Collections.Generic;
 using System.Linq;
 
-namespace AmeisenBotX.Core.Engines.Combat.Classes.Jannis
+namespace AmeisenBotX.Core.Engines.Combat.Classes.Jannis335a
 {
-    public class ShamanRestoration : BasicCombatClass
+    public class ShamanRestoration : BasicCombatClass335a
     {
         public ShamanRestoration(AmeisenBotInterfaces bot) : base(bot)
         {
@@ -24,7 +24,7 @@ namespace AmeisenBotX.Core.Engines.Combat.Classes.Jannis
 
         public override string Description => "FCFS based CombatClass for the Restoration Shaman spec.";
 
-        public override string DisplayName => "Shaman Restoration";
+        public override string DisplayName => "Shaman Restoration 3.3.5a";
 
         public override bool HandlesMovement => false;
 

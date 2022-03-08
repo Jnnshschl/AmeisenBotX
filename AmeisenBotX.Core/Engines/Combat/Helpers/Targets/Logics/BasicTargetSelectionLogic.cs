@@ -36,7 +36,7 @@ namespace AmeisenBotX.Core.Engines.Combat.Helpers.Targets.Logics
                 && !wowUnit.IsNotAttackable
                 && wowUnit.IsInCombat
                 && !IsBlacklisted(wowUnit)
-                && Bot.Db.GetReaction(wowUnit, Bot.Player) == WowUnitReaction.Hostile
+                && (Bot.Db.GetReaction(wowUnit, Bot.Player) == WowUnitReaction.Hostile || Bot.Db.GetReaction(wowUnit, Bot.Player) == WowUnitReaction.Neutral)
                 && wowUnit.DistanceTo(Bot.Player) < 80.0f;
         }
     }

@@ -5,9 +5,9 @@ using AmeisenBotX.Wow.Objects.Enums;
 using AmeisenBotX.Wow335a.Constants;
 using System.Linq;
 
-namespace AmeisenBotX.Core.Engines.Combat.Classes.Jannis
+namespace AmeisenBotX.Core.Engines.Combat.Classes.Jannis335a
 {
-    public class PaladinProtection : BasicCombatClass
+    public class PaladinProtection : BasicCombatClass335a
     {
         public PaladinProtection(AmeisenBotInterfaces bot) : base(bot)
         {
@@ -26,7 +26,7 @@ namespace AmeisenBotX.Core.Engines.Combat.Classes.Jannis
 
         public override string Description => "FCFS based CombatClass for the Protection Paladin spec.";
 
-        public override string DisplayName => "Paladin Protection";
+        public override string DisplayName => "Paladin Protection 3.3.5a";
 
         public override bool HandlesMovement => false;
 

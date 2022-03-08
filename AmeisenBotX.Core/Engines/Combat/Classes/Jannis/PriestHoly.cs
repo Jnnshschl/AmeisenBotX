@@ -7,9 +7,9 @@ using AmeisenBotX.Wow335a.Constants;
 using System.Collections.Generic;
 using System.Linq;
 
-namespace AmeisenBotX.Core.Engines.Combat.Classes.Jannis
+namespace AmeisenBotX.Core.Engines.Combat.Classes.Jannis335a
 {
-    public class PriestHoly : BasicCombatClass
+    public class PriestHoly : BasicCombatClass335a
     {
         public PriestHoly(AmeisenBotInterfaces bot) : base(bot)
         {
@@ -28,7 +28,7 @@ namespace AmeisenBotX.Core.Engines.Combat.Classes.Jannis
 
         public override string Description => "FCFS based CombatClass for the Holy Priest spec.";
 
-        public override string DisplayName => "Priest Holy";
+        public override string DisplayName => "Priest Holy 3.3.5a";
 
         public override bool HandlesMovement => false;
 

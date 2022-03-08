@@ -1,5 +1,5 @@
 ﻿using AmeisenBotX.Common.Math;
-using AmeisenBotX.Core.Engines.Combat.Classes.Jannis;
+using AmeisenBotX.Core.Engines.Combat.Classes.Jannis335a;
 using AmeisenBotX.Core.Engines.Movement.Enums;
 using AmeisenBotX.Core.Managers.Character.Spells.Objects;
 using AmeisenBotX.Wow.Objects;
@@ -11,7 +11,7 @@ using System.Linq;
 
 namespace AmeisenBotX.Core.Logic.CombatClasses.Shino
 {
-    public abstract class TemplateCombatClass : BasicCombatClass
+    public abstract class TemplateCombatClass : BasicCombatClass335a
     {
         public TemplateCombatClass(AmeisenBotInterfaces bot) : base(bot)
         {

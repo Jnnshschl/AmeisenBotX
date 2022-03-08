@@ -10,9 +10,9 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 
-namespace AmeisenBotX.Core.Engines.Combat.Classes.Jannis
+namespace AmeisenBotX.Core.Engines.Combat.Classes.Jannis335a
 {
-    public class HunterBeastmastery : BasicCombatClass
+    public class HunterBeastmastery : BasicCombatClass335a
     {
         public HunterBeastmastery(AmeisenBotInterfaces bot) : base(bot)
         {
@@ -56,7 +56,7 @@ namespace AmeisenBotX.Core.Engines.Combat.Classes.Jannis
 
         public override string Description => "FCFS based CombatClass for the Beastmastery Hunter spec.";
 
-        public override string DisplayName => "Hunter Beastmastery";
+        public override string DisplayName => "Hunter Beastmastery 3.3.5a";
 
         public override bool HandlesMovement => true;
 

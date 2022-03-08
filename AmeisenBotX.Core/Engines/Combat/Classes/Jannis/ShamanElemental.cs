@@ -6,9 +6,9 @@ using AmeisenBotX.Wow.Objects.Enums;
 using AmeisenBotX.Wow335a.Constants;
 using System.Linq;
 
-namespace AmeisenBotX.Core.Engines.Combat.Classes.Jannis
+namespace AmeisenBotX.Core.Engines.Combat.Classes.Jannis335a
 {
-    public class ShamanElemental : BasicCombatClass
+    public class ShamanElemental : BasicCombatClass335a
     {
         public ShamanElemental(AmeisenBotInterfaces bot) : base(bot)
         {
@@ -26,7 +26,7 @@ namespace AmeisenBotX.Core.Engines.Combat.Classes.Jannis
 
         public override string Description => "FCFS based CombatClass for the Elemental Shaman spec.";
 
-        public override string DisplayName => "Shaman Elemental";
+        public override string DisplayName => "Shaman Elemental 3.3.5a";
 
         public override bool HandlesMovement => false;
 

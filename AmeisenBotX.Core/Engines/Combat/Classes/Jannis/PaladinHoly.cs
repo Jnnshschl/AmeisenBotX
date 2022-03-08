@@ -13,9 +13,9 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text.Json;
 
-namespace AmeisenBotX.Core.Engines.Combat.Classes.Jannis
+namespace AmeisenBotX.Core.Engines.Combat.Classes.Jannis335a
 {
-    public class PaladinHoly : BasicCombatClass
+    public class PaladinHoly : BasicCombatClass335a
     {
         public PaladinHoly(AmeisenBotInterfaces bot) : base(bot)
         {
@@ -68,7 +68,7 @@ namespace AmeisenBotX.Core.Engines.Combat.Classes.Jannis
 
         public override string Description => "Half-Smart CombatClass for the Holy Paladin spec.";
 
-        public override string DisplayName => "Paladin Holy";
+        public override string DisplayName => "Paladin Holy 3.3.5a";
 
         public override bool HandlesMovement => false;
 

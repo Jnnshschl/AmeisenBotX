@@ -4,9 +4,9 @@ using AmeisenBotX.Core.Managers.Character.Talents.Objects;
 using AmeisenBotX.Wow.Objects.Enums;
 using AmeisenBotX.Wow335a.Constants;
 
-namespace AmeisenBotX.Core.Engines.Combat.Classes.Jannis
+namespace AmeisenBotX.Core.Engines.Combat.Classes.Jannis335a
 {
-    public class RogueAssassination : BasicCombatClass
+    public class RogueAssassination : BasicCombatClass335a
     {
         public RogueAssassination(AmeisenBotInterfaces bot) : base(bot)
         {
@@ -21,7 +21,7 @@ namespace AmeisenBotX.Core.Engines.Combat.Classes.Jannis
 
         public override string Description => "FCFS based CombatClass for the Assasination Rogue spec.";
 
-        public override string DisplayName => "[WIP] Rogue Assasination";
+        public override string DisplayName => "[WIP] Rogue Assasination 3.3.5a";
 
         public override bool HandlesMovement => false;
 

@@ -190,7 +190,7 @@ namespace AmeisenBotX.Wow548.Offsets
             FunctionIsOutdoors = IntPtr.Add(mainModuleBase, 0x4142AC);
             FunctionLuaDoString = IntPtr.Add(mainModuleBase, 0x4FD12);
             FunctionPlayerClickToMove = IntPtr.Add(mainModuleBase, 0x41FB57);
-            FunctionSetTarget = IntPtr.Add(mainModuleBase, 0x8CE880);
+            FunctionSetTarget = IntPtr.Add(mainModuleBase, 0x8CE510);
             FunctionTraceline = IntPtr.Add(mainModuleBase, 0x5EEF7B);
             FunctionUnitOnRightClick = IntPtr.Add(mainModuleBase, 0x8D0268);
             FunctionUnitSetFacing = IntPtr.Add(mainModuleBase, 0x41ADE7); // Smooth: 0x41A41F

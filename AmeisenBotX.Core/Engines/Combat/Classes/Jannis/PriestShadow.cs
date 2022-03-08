@@ -4,9 +4,9 @@ using AmeisenBotX.Core.Managers.Character.Talents.Objects;
 using AmeisenBotX.Wow.Objects.Enums;
 using AmeisenBotX.Wow335a.Constants;
 
-namespace AmeisenBotX.Core.Engines.Combat.Classes.Jannis
+namespace AmeisenBotX.Core.Engines.Combat.Classes.Jannis335a
 {
-    public class PriestShadow : BasicCombatClass
+    public class PriestShadow : BasicCombatClass335a
     {
         public PriestShadow(AmeisenBotInterfaces bot) : base(bot)
         {
@@ -24,7 +24,7 @@ namespace AmeisenBotX.Core.Engines.Combat.Classes.Jannis
 
         public override string Description => "FCFS based CombatClass for the Shadow Priest spec.";
 
-        public override string DisplayName => "Priest Shadow";
+        public override string DisplayName => "Priest Shadow 3.3.5a";
 
         public override bool HandlesMovement => false;
 

@@ -9,9 +9,9 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 
-namespace AmeisenBotX.Core.Engines.Combat.Classes.Jannis
+namespace AmeisenBotX.Core.Engines.Combat.Classes.Jannis335a
 {
-    public class WarlockDemonology : BasicCombatClass
+    public class WarlockDemonology : BasicCombatClass335a
     {
         public WarlockDemonology(AmeisenBotInterfaces bot) : base(bot)
         {
@@ -46,7 +46,7 @@ namespace AmeisenBotX.Core.Engines.Combat.Classes.Jannis
 
         public override string Description => "FCFS based CombatClass for the Demonology Warlock spec.";
 
-        public override string DisplayName => "Warlock Demonology";
+        public override string DisplayName => "Warlock Demonology 3.3.5a";
 
         public override bool HandlesMovement => false;
 

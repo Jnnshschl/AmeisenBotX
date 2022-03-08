@@ -7,9 +7,9 @@ using AmeisenBotX.Wow335a.Constants;
 using System.Collections.Generic;
 using System.Linq;
 
-namespace AmeisenBotX.Core.Engines.Combat.Classes.Jannis
+namespace AmeisenBotX.Core.Engines.Combat.Classes.Jannis335a
 {
-    public class PriestDiscipline : BasicCombatClass
+    public class PriestDiscipline : BasicCombatClass335a
     {
         public PriestDiscipline(AmeisenBotInterfaces bot) : base(bot)
         {
@@ -29,7 +29,7 @@ namespace AmeisenBotX.Core.Engines.Combat.Classes.Jannis
 
         public override string Description => "FCFS based CombatClass for the Discipline Priest spec.";
 
-        public override string DisplayName => "Priest Discipline";
+        public override string DisplayName => "Priest Discipline 3.3.5a";
 
         public override bool HandlesMovement => false;
 

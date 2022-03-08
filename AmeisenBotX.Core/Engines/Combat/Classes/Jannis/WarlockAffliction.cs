@@ -9,9 +9,9 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 
-namespace AmeisenBotX.Core.Engines.Combat.Classes.Jannis
+namespace AmeisenBotX.Core.Engines.Combat.Classes.Jannis335a
 {
-    public class WarlockAffliction : BasicCombatClass
+    public class WarlockAffliction : BasicCombatClass335a
     {
         public WarlockAffliction(AmeisenBotInterfaces bot) : base(bot)
         {
@@ -47,7 +47,7 @@ namespace AmeisenBotX.Core.Engines.Combat.Classes.Jannis
 
         public override string Description => "FCFS based CombatClass for the Affliction Warlock spec.";
 
-        public override string DisplayName => "Warlock Affliction";
+        public override string DisplayName => "Warlock Affliction 3.3.5a";
 
         public override bool HandlesMovement => false;
 

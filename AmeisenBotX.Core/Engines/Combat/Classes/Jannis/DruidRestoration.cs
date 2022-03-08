@@ -12,9 +12,9 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text.Json;
 
-namespace AmeisenBotX.Core.Engines.Combat.Classes.Jannis
+namespace AmeisenBotX.Core.Engines.Combat.Classes.Jannis335a
 {
-    public class DruidRestoration : BasicCombatClass
+    public class DruidRestoration : BasicCombatClass335a
     {
         public DruidRestoration(AmeisenBotInterfaces bot) : base(bot)
         {
@@ -51,7 +51,7 @@ namespace AmeisenBotX.Core.Engines.Combat.Classes.Jannis
 
         public override string Description => "FCFS based CombatClass for the Druid Restoration spec.";
 
-        public override string DisplayName => "Druid Restoration";
+        public override string DisplayName => "Druid Restoration 3.3.5a";
 
         public override bool HandlesMovement => false;
 

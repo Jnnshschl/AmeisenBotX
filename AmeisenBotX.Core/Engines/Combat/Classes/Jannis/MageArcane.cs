@@ -6,9 +6,9 @@ using AmeisenBotX.Wow335a.Constants;
 using System;
 using System.Linq;
 
-namespace AmeisenBotX.Core.Engines.Combat.Classes.Jannis
+namespace AmeisenBotX.Core.Engines.Combat.Classes.Jannis335a
 {
-    public class MageArcane : BasicCombatClass
+    public class MageArcane : BasicCombatClass335a
     {
         public MageArcane(AmeisenBotInterfaces bot) : base(bot)
         {
@@ -28,7 +28,7 @@ namespace AmeisenBotX.Core.Engines.Combat.Classes.Jannis
 
         public override string Description => "FCFS based CombatClass for the Arcane Mage spec.";
 
-        public override string DisplayName => "Mage Arcane";
+        public override string DisplayName => "Mage Arcane 3.3.5a";
 
         public override bool HandlesMovement => false;
 
