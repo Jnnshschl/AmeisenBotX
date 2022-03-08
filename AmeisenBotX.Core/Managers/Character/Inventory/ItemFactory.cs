@@ -12,8 +12,14 @@ namespace AmeisenBotX.Core.Managers.Character.Inventory
         public static WowBasicItem BuildSpecificItem(WowBasicItem basicItem)
         {
             if (basicItem == null)
+            {
                 throw new ArgumentNullException(nameof(basicItem), "basicItem cannot be null");
-            if (basicItem.Type == null) return basicItem;
+            }
+
+            if (basicItem.Type == null)
+            {
+                return basicItem;
+            }
 
             return basicItem.Type.ToUpper(CultureInfo.InvariantCulture) switch
             {

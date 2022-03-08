@@ -139,8 +139,6 @@ namespace AmeisenBotX.Wow335a.Offsets
 
         public IntPtr RuneType { get; } = new(0xC24304);
 
-        public IntPtr StaticPlayer { get; } = new(0x00CD87A8);
-
         public IntPtr TargetGuid { get; } = new(0xBD07B0);
 
         public IntPtr TickCount { get; } = new(0xB499A4);
@@ -161,7 +159,7 @@ namespace AmeisenBotX.Wow335a.Offsets
 
         public IntPtr WowUnitName1 { get; } = new(0x964);
 
-        public IntPtr WowUnitName2 { get; } = new(0x05C);
+        public IntPtr WowUnitName2 { get; } = new(0x5C);
 
         public IntPtr WowUnitPosition { get; } = new(0x798);
 

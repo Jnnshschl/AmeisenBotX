@@ -5,11 +5,12 @@ using AmeisenBotX.Logging.Enums;
 using AmeisenBotX.Memory;
 using AmeisenBotX.Wow;
 using AmeisenBotX.Wow.Events;
+using AmeisenBotX.Wow.Hook.Modules;
 using AmeisenBotX.Wow.Objects;
+using AmeisenBotX.Wow.Objects.Constants;
 using AmeisenBotX.Wow.Objects.Enums;
 using AmeisenBotX.Wow.Objects.Flags;
 using AmeisenBotX.Wow.Offsets;
-using AmeisenBotX.Wow.Shared.Hook.Modules;
 using AmeisenBotX.Wow.Shared.Lua;
 using AmeisenBotX.Wow335a.Hook;
 using AmeisenBotX.Wow335a.Objects;
@@ -146,7 +147,7 @@ namespace AmeisenBotX.Wow335a
 
             ObjectManager = new(memoryApi, Offsets);
 
-            Hook = new(memoryApi, Offsets, ObjectManager);
+            Hook = new(memoryApi, Offsets);
             Hook.OnGameInfoPush += ObjectManager.HookManagerOnGameInfoPush;
         }
 
@@ -174,7 +175,7 @@ namespace AmeisenBotX.Wow335a
 
         private IMemoryApi Memory { get; }
 
-        private ObjectManager<WowObject335a, WowUnit335a, WowPlayer335a, WowGameobject335a, WowDynobject335a, WowItem335a, WowCorpse335a, WowContainer335a> ObjectManager { get; }
+        private ObjectManager335a ObjectManager { get; }
 
         private OffsetList335a OffsetList { get; }
 
@@ -917,7 +918,7 @@ namespace AmeisenBotX.Wow335a
                 ObjectManager.UpdateWowObjects();
             }
 
-            Hook.GameInfoTick();
+            Hook.GameInfoTick(ObjectManager.Player, ObjectManager.Target);
         }
 
         public bool UiIsVisible(params string[] uiElements)
@@ -950,6 +951,27 @@ namespace AmeisenBotX.Wow335a
         public void UseItemByName(string itemName)
         {
             LuaSellItemsByName(itemName);
+        }
+
+        public void ClickToMove(Vector3 pos, ulong guid, WowClickToMoveType clickToMoveType = WowClickToMoveType.Move, float turnSpeed = 20.9f, float distance = WowClickToMoveDistance.Move)
+        {
+            if (float.IsInfinity(pos.X) || float.IsNaN(pos.X) || MathF.Abs(pos.X) > 17066.6656
+                || float.IsInfinity(pos.Y) || float.IsNaN(pos.Y) || MathF.Abs(pos.Y) > 17066.6656
+                || float.IsInfinity(pos.Z) || float.IsNaN(pos.Z) || MathF.Abs(pos.Z) > 17066.6656)
+            {
+                return;
+            }
+
+            Memory.Write(Offsets.ClickToMoveTurnSpeed, turnSpeed);
+            Memory.Write(Offsets.ClickToMoveDistance, distance);
+
+            if (guid > 0)
+            {
+                Memory.Write(Offsets.ClickToMoveGuid, guid);
+            }
+
+            Memory.Write(Offsets.ClickToMoveAction, clickToMoveType);
+            Memory.Write(Offsets.ClickToMoveX, pos);
         }
 
         private int ExecuteLuaInt((string, string) cmdVar)

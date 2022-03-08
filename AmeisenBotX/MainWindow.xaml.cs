@@ -266,9 +266,7 @@ namespace AmeisenBotX
 
         private void ButtonToggleRendering_Click(object sender, RoutedEventArgs e)
         {
-            AmeisenBot.Bot.Wow.SetWorldLoadedCheck(true);
-            AmeisenBot.Bot.Wow.LuaDoString("CharacterSelect_EnterWorld()");
-            AmeisenBot.Bot.Wow.SetWorldLoadedCheck(false);
+            // string n = AmeisenBot.Bot.Wow.ObjectProvider.Target.ReadName(AmeisenBot.Bot.Memory, AmeisenBot.Bot.Wow.Offsets);
         }
 
         private void ComboboxStateOverride_SelectionChanged(object sender, System.Windows.Controls.SelectionChangedEventArgs e)

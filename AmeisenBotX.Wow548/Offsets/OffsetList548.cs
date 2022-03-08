@@ -66,7 +66,7 @@ namespace AmeisenBotX.Wow548.Offsets
 
         public IntPtr FunctionPlayerClickToMove { get; private set; }
 
-        public IntPtr FunctionPlayerClickToMoveStop { get; } = new(0x0);
+        public IntPtr FunctionPlayerClickToMoveStop { get; } = new(0x0); // unused
 
         public IntPtr FunctionSetTarget { get; private set; }
 
@@ -106,9 +106,9 @@ namespace AmeisenBotX.Wow548.Offsets
 
         public IntPtr NextObject { get; } = new(0x34);
 
-        public IntPtr PartyLeader { get; } = new(0x0);
+        public IntPtr PartyLeader { get; set; }
 
-        public IntPtr PartyPlayerGuids { get; } = new(0x0);
+        public IntPtr PartyPlayerGuids { get; } = new(0x0);  // unused
 
         public IntPtr PetGuid { get; private set; }
 
@@ -116,9 +116,9 @@ namespace AmeisenBotX.Wow548.Offsets
 
         public IntPtr PlayerGuid { get; private set; }
 
-        public IntPtr RaidGroupStart { get; } = new(0x0);
+        public IntPtr RaidGroupStart { get; } = new(0x0); // unused
 
-        public IntPtr RaidLeader { get; } = new(0x0);
+        public IntPtr RaidLeader { get; } = new(0x0);  // unused
 
         public IntPtr RenderFlags { get; } = new(0x0);
 
@@ -138,21 +138,21 @@ namespace AmeisenBotX.Wow548.Offsets
 
         public IntPtr WowObjectType { get; } = new(0xC);
 
-        public IntPtr WowUnitFlyFlags { get; } = new(0x0);
+        public IntPtr WowUnitFlyFlags { get; } = new(0x38);
 
-        public IntPtr WowUnitFlyFlagsPointer { get; } = new(0x0);
+        public IntPtr WowUnitFlyFlagsPointer { get; } = new(0xEC);
 
-        public IntPtr WowUnitIsAutoAttacking { get; } = new(0x0);
+        public IntPtr WowUnitIsAutoAttacking { get; } = new(0x14EC);
 
-        public IntPtr WowUnitName1 { get; } = new(0x6C);
+        public IntPtr WowUnitName1 { get; } = new(0x9B4);
 
-        public IntPtr WowUnitName2 { get; } = new(0x0);
+        public IntPtr WowUnitName2 { get; } = new(0x6C);
 
         public IntPtr WowUnitCanInterrupt { get; } = new(0xC64);
 
         public IntPtr WowUnitPosition { get; } = new(0x838);
 
-        public IntPtr WowUnitSwimFlags { get; } = new(0x0);
+        public IntPtr WowUnitSwimFlags { get; } = new(0xEC);
 
         public IntPtr ZoneId { get; private set; }
 
@@ -167,8 +167,6 @@ namespace AmeisenBotX.Wow548.Offsets
         public IntPtr CollisionWMO { get; } = new(0x0);
 
         public IntPtr ClimbAngle { get; } = new(0x0);
-
-        public IntPtr StaticPlayer { get; } = new(0x0);
 
         public void Init(IntPtr mainModuleBase)
         {
@@ -195,7 +193,7 @@ namespace AmeisenBotX.Wow548.Offsets
             FunctionSetTarget = IntPtr.Add(mainModuleBase, 0x8CE880);
             FunctionTraceline = IntPtr.Add(mainModuleBase, 0x5EEF7B);
             FunctionUnitOnRightClick = IntPtr.Add(mainModuleBase, 0x8D0268);
-            FunctionUnitSetFacing = IntPtr.Add(mainModuleBase, 0x8A9F78);
+            FunctionUnitSetFacing = IntPtr.Add(mainModuleBase, 0x41ADE7); // Smooth: 0x41A41F
             FunctionUnitGetReaction = IntPtr.Add(mainModuleBase, 0x4153C3);
             GameState = IntPtr.Add(mainModuleBase, 0xD65B16);
             IsIngame = IntPtr.Add(mainModuleBase, 0xB935C0);
@@ -207,6 +205,7 @@ namespace AmeisenBotX.Wow548.Offsets
             PetGuid = IntPtr.Add(mainModuleBase, 0xDD4A00);
             PlayerBase = IntPtr.Add(mainModuleBase, 0xCFF49C);
             PlayerGuid = IntPtr.Add(mainModuleBase, 0xC95E60);
+            PartyLeader = IntPtr.Add(mainModuleBase, 0xDC28EC);
             TargetGuid = IntPtr.Add(mainModuleBase, 0xD65B40);
             TickCount = IntPtr.Add(mainModuleBase, 0xBB2C74);
             ZoneId = IntPtr.Add(mainModuleBase, 0xB595B4);

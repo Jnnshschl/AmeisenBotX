@@ -77,13 +77,23 @@ namespace AmeisenBotX.Core.Logic
                 // start autoattacking if we have no combat class loaded
                 new Selector
                 (
-                    () => Bot.Target != null && !Bot.Player.IsInMeleeRange(Bot.Target),
-                    new Leaf(() => MoveToPosition(Bot.Target.Position)),
+                    () => Bot.Target == null,
+                    new Leaf(() => { Bot.Wow.StartAutoAttack(); return BtStatus.Success; }),
                     new Selector
                     (
-                        () => !Bot.Player.IsAutoAttacking,
-                        new Leaf(() => { Bot.Wow.StartAutoAttack(); return BtStatus.Success; }),
-                        new Leaf(() => { return BtStatus.Success; })
+                        () => !Bot.Player.IsInMeleeRange(Bot.Target),
+                        new Leaf(() => MoveToPosition(Bot.Target.Position)),
+                        new Selector
+                        (
+                            () => !BotMath.IsFacing(Bot.Player.Position, Bot.Player.Rotation, Bot.Target.Position),
+                            new Leaf(() => { Bot.Wow.FacePosition(Bot.Player.BaseAddress, Bot.Player.Position, Bot.Target.Position); return BtStatus.Success; }),
+                            new Selector
+                            (
+                                () => !Bot.Player.IsAutoAttacking,
+                                new Leaf(() => { Bot.Wow.StartAutoAttack(); /*Bot.Wow.StopClickToMove();*/ return BtStatus.Success; }),
+                                new Leaf(() => { return BtStatus.Success; })
+                            )
+                        )
                     )
                 ),
                 // TODO: handle tactics here
@@ -785,7 +795,9 @@ namespace AmeisenBotX.Core.Logic
                 foreach (IWowUnit unit in playersToTry)
                 {
                     if (unit == null || (!ignoreRange && !ShouldIFollowPlayer(unit)))
+                    {
                         continue;
+                    }
 
                     playerToFollow = unit;
                     return true;
@@ -1009,7 +1021,9 @@ namespace AmeisenBotX.Core.Logic
             IWowUnit vendorSell = null;
 
             if (Mode != BotMode.None && Bot.Grinding.Profile?.NpcsOfInterest == null)
+            {
                 return false;
+            }
 
             switch (Mode)
             {
@@ -1017,11 +1031,15 @@ namespace AmeisenBotX.Core.Logic
                     {
                         Npc repairNpcEntry = Bot.Grinding.Profile.NpcsOfInterest.FirstOrDefault(e => e.Type == NpcType.VendorRepair);
                         if (repairNpcEntry != null)
+                        {
                             vendorRepair = Bot.GetClosestVendorByEntryId(repairNpcEntry.EntryId);
+                        }
 
                         Npc sellNpcEntry = Bot.Grinding.Profile.NpcsOfInterest.FirstOrDefault(e => e.Type is NpcType.VendorRepair or NpcType.VendorSellBuy);
                         if (sellNpcEntry != null)
+                        {
                             vendorSell = Bot.GetClosestVendorByEntryId(sellNpcEntry.EntryId);
+                        }
 
                         break;
                     }
@@ -1066,8 +1084,10 @@ namespace AmeisenBotX.Core.Logic
             Npc profileTrainer = null;
 
             if (Bot.Grinding.Profile != null)
+            {
                 profileTrainer = Bot.Grinding.Profile.NpcsOfInterest?.FirstOrDefault(e =>
                     e.Type == NpcType.ProfessionTrainer);
+            }
 
             if (profileTrainer != null)
             {
@@ -1084,7 +1104,9 @@ namespace AmeisenBotX.Core.Logic
             }
 
             if (professionTrainer == null)
+            {
                 return false;
+            }
 
             ProfessionTrainer = professionTrainer;
             return ProfessionTrainer != null; // todo: Config.LearnSecondarySkills
@@ -1096,14 +1118,20 @@ namespace AmeisenBotX.Core.Logic
             Npc profileTrainer = null;
 
             if (Bot.Grinding.Profile != null)
+            {
                 profileTrainer = Bot.Grinding.Profile.NpcsOfInterest?.FirstOrDefault(e =>
                     e.Type == NpcType.ClassTrainer && e.SubType == DecideClassTrainer(Bot.Player.Class));
+            }
 
             if (profileTrainer != null)
+            {
                 classTrainer = Bot.GetClosestTrainerByEntryId(profileTrainer.EntryId);
+            }
 
             if (classTrainer == null)
+            {
                 return false;
+            }
 
             ClassTrainer = classTrainer;
             return Bot.Character.LastLevelTrained != 0 && Bot.Character.LastLevelTrained < Bot.Player.Level;
@@ -1112,7 +1140,9 @@ namespace AmeisenBotX.Core.Logic
         private BtStatus RunToCorpseAndRetrieveIt()
         {
             if (!Bot.Memory.Read(Bot.Wow.Offsets.CorpsePosition, out Vector3 corpsePosition))
+            {
                 return BtStatus.Failed;
+            }
 
             if (Bot.Player.Position.GetDistance(corpsePosition) > Config.GhostResurrectThreshold)
             {
@@ -1126,7 +1156,20 @@ namespace AmeisenBotX.Core.Logic
 
         private void SetUlowGfxSettings()
         {
-            Bot.Wow.LuaDoString("SetCVar(\"gxcolorbits\",\"16\");SetCVar(\"gxdepthbits\",\"16\");SetCVar(\"skycloudlod\",\"0\");SetCVar(\"particledensity\",\"0.3\");SetCVar(\"lod\",\"0\");SetCVar(\"mapshadows\",\"0\");SetCVar(\"maxlights\",\"0\");SetCVar(\"specular\",\"0\");SetCVar(\"waterlod\",\"0\");SetCVar(\"basemip\",\"1\");SetCVar(\"shadowlevel\",\"1\")");
+            Bot.Wow.LuaDoString
+            (
+                @"pcall(SetCVar,""gxcolorbits"",""16"");
+                pcall(SetCVar,""gxdepthbits"",""16"");
+                pcall(SetCVar,""skycloudlod"",""0"");
+                pcall(SetCVar,""particledensity"",""0.3"");
+                pcall(SetCVar,""lod"",""0"");
+                pcall(SetCVar,""mapshadows"",""0"");
+                pcall(SetCVar,""maxlights"",""0"");
+                pcall(SetCVar,""specular"",""0"");
+                pcall(SetCVar,""waterlod"",""0"");
+                pcall(SetCVar,""basemip"",""1"");
+                pcall(SetCVar,""shadowlevel"",""1"")"
+            );
         }
 
         private BtStatus SetupWowInterface()
@@ -1137,7 +1180,9 @@ namespace AmeisenBotX.Core.Logic
         private bool ShouldIFollowPlayer(IWowUnit playerToFollow)
         {
             if (playerToFollow == null)
+            {
                 return false;
+            }
 
             Vector3 pos = Config.FollowPositionDynamic ? playerToFollow.Position + FollowOffset : playerToFollow.Position;
             double distance = Bot.Player.DistanceTo(pos);
@@ -1148,7 +1193,9 @@ namespace AmeisenBotX.Core.Logic
         private BtStatus SpeakWithClassTrainer()
         {
             if (ClassTrainer == null)
+            {
                 return BtStatus.Failed;
+            }
 
             if (Bot.Player.Position.GetDistance(ClassTrainer.Position) > 3.0f)
             {
@@ -1159,7 +1206,9 @@ namespace AmeisenBotX.Core.Logic
             Bot.Movement.StopMovement();
 
             if (!NpcInteractionEvent.Run())
+            {
                 return BtStatus.Failed;
+            }
 
             SpeakToClassTrainerRoutine.Run(Bot, ClassTrainer);
             return BtStatus.Success;
@@ -1168,7 +1217,9 @@ namespace AmeisenBotX.Core.Logic
         private BtStatus SpeakWithProfessionTrainer()
         {
             if (ProfessionTrainer == null)
+            {
                 return BtStatus.Failed;
+            }
 
             if (Bot.Player.Position.GetDistance(ProfessionTrainer.Position) > 3.0f)
             {
@@ -1179,7 +1230,9 @@ namespace AmeisenBotX.Core.Logic
             Bot.Movement.StopMovement();
 
             if (!NpcInteractionEvent.Run())
+            {
                 return BtStatus.Failed;
+            }
 
             SpeakToClassTrainerRoutine.Run(Bot, ProfessionTrainer);
             return BtStatus.Success;
@@ -1188,7 +1241,9 @@ namespace AmeisenBotX.Core.Logic
         private BtStatus SpeakWithMerchant()
         {
             if (Merchant == null)
+            {
                 return BtStatus.Failed;
+            }
 
             if (Bot.Player.Position.GetDistance(Merchant.Position) > 3.0f)
             {
@@ -1199,7 +1254,9 @@ namespace AmeisenBotX.Core.Logic
             Bot.Movement.StopMovement();
 
             if (!NpcInteractionEvent.Run())
+            {
                 return BtStatus.Failed;
+            }
 
             SpeakToMerchantRoutine.Run(Bot, Merchant);
             return BtStatus.Success;

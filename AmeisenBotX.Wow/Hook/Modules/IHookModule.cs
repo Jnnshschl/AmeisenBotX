@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace AmeisenBotX.Wow.Shared.Hook.Modules
+namespace AmeisenBotX.Wow.Hook.Modules
 {
     public interface IHookModule
     {

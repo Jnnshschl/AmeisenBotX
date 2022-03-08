@@ -1,6 +1,7 @@
 ﻿using AmeisenBotX.Common.Math;
 using AmeisenBotX.Wow.Events;
 using AmeisenBotX.Wow.Objects;
+using AmeisenBotX.Wow.Objects.Constants;
 using AmeisenBotX.Wow.Objects.Enums;
 using AmeisenBotX.Wow.Offsets;
 using System;
@@ -299,5 +300,7 @@ namespace AmeisenBotX.Wow
         void UseInventoryItem(WowEquipmentSlot equipmentSlot);
 
         void UseItemByName(string name);
+
+        void ClickToMove(Vector3 pos, ulong guid, WowClickToMoveType clickToMoveType = WowClickToMoveType.Move, float turnSpeed = 20.9f, float distance = WowClickToMoveDistance.Move);
     }
 }

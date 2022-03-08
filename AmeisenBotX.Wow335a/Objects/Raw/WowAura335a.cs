@@ -1,10 +1,11 @@
-﻿using AmeisenBotX.Wow.Objects.Flags;
+﻿using AmeisenBotX.Wow.Objects;
+using AmeisenBotX.Wow.Objects.Flags;
 using System.Runtime.InteropServices;
 
-namespace AmeisenBotX.Wow.Objects.Raw
+namespace AmeisenBotX.Wow335a.Objects.Raw
 {
     [StructLayout(LayoutKind.Sequential)]
-    public struct RawWowAura
+    public struct WowAura335a : IWowAura
     {
         public ulong Creator { get; set; }
 

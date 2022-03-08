@@ -134,8 +134,6 @@ namespace AmeisenBotX.Wow.Offsets
 
         IntPtr RuneType { get; }
 
-        IntPtr StaticPlayer { get; }
-
         IntPtr TargetGuid { get; }
 
         IntPtr TickCount { get; }

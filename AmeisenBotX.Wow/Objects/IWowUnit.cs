@@ -1,7 +1,6 @@
 ﻿using AmeisenBotX.Memory;
 using AmeisenBotX.Wow.Objects.Enums;
 using AmeisenBotX.Wow.Objects.Flags;
-using AmeisenBotX.Wow.Objects.Raw;
 using AmeisenBotX.Wow.Offsets;
 using System.Collections.Generic;
 using System.Collections.Specialized;
@@ -12,7 +11,7 @@ namespace AmeisenBotX.Wow.Objects
     {
         int AuraCount { get; }
 
-        IEnumerable<RawWowAura> Auras { get; }
+        IEnumerable<IWowAura> Auras { get; }
 
         WowClass Class { get; }
 

@@ -1,6 +1,6 @@
 ﻿namespace AmeisenBotX.Wow.Objects.Enums
 {
-    enum WowFactionID
+    internal enum WowFactionID
     {
         None = 0,
         PlayerHuman = 1,

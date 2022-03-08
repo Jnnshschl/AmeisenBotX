@@ -110,6 +110,9 @@ namespace AmeisenBotX.Wow548.Objects
             {
                 RawWowPlayer = obj;
 
+                // Auras = GetUnitAuras(memoryApi, offsetList, BaseAddress, out int auraCount);
+                // AuraCount = auraCount;
+
                 questlogEntries = new QuestlogEntry[]
                 {
                     obj.QuestlogEntry1,
@@ -163,16 +166,18 @@ namespace AmeisenBotX.Wow548.Objects
                 };
             }
 
-            if (memoryApi.Read(IntPtr.Add(BaseAddress, (int)offsetList.WowUnitSwimFlags), out uint swimFlags))
+            if (memoryApi.Read(IntPtr.Add(BaseAddress, (int)offsetList.WowUnitSwimFlags), out IntPtr movementFlagsPtr)
+                && memoryApi.Read(IntPtr.Add(movementFlagsPtr, 0x38), out uint movementFlags))
             {
-                IsSwimming = (swimFlags & 0x200000) != 0;
+                IsSwimming = (movementFlags & 0x200000) != 0;
+                IsFlying = (movementFlags & 0x1000000) != 0;
             }
 
-            if (memoryApi.Read(IntPtr.Add(BaseAddress, (int)offsetList.WowUnitFlyFlagsPointer), out IntPtr flyFlagsPointer)
-                && memoryApi.Read(IntPtr.Add(flyFlagsPointer, (int)offsetList.WowUnitFlyFlags), out uint flyFlags))
-            {
-                IsFlying = (flyFlags & 0x2000000) != 0;
-            }
+            //  if (memoryApi.Read(IntPtr.Add(BaseAddress, (int)offsetList.WowUnitFlyFlagsPointer), out IntPtr flyFlagsPointer)
+            //      && memoryApi.Read(IntPtr.Add(flyFlagsPointer, (int)offsetList.WowUnitFlyFlags), out uint flyFlags))
+            //  {
+            //      IsFlying = (flyFlags & 0x1000000) != 0;
+            //  }
 
             // if (memoryApi.Read(offsetList.BreathTimer, out int breathTimer))
             // {

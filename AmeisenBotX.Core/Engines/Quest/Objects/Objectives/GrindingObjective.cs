@@ -57,7 +57,9 @@ namespace AmeisenBotX.Core.Engines.Quest.Objects.Objectives
                     .FirstOrDefault();
 
                 if (IWowUnit != null)
+                {
                     Bot.Wow.ChangeTarget(IWowUnit.Guid);
+                }
             }
 
             if (IWowUnit != null)

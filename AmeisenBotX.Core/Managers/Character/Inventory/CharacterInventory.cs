@@ -44,7 +44,9 @@ namespace AmeisenBotX.Core.Managers.Character.Inventory
         public void DestroyItemByName(string name, StringComparison stringComparison = StringComparison.OrdinalIgnoreCase)
         {
             if (!HasItemByName(name, stringComparison))
+            {
                 return;
+            }
 
             Wow.DeleteItemByName(name);
         }
@@ -64,14 +66,18 @@ namespace AmeisenBotX.Core.Managers.Character.Inventory
                 List<WowBasicItem> basicItems = ItemFactory.ParseItemList(resultJson);
 
                 if (basicItems is not { Count: > 0 })
+                {
                     return;
+                }
 
                 lock (queryLock)
                 {
                     Items.Clear();
 
-                    foreach (var basicItem in basicItems)
+                    foreach (WowBasicItem basicItem in basicItems)
+                    {
                         Items.Add(ItemFactory.BuildSpecificItem(basicItem));
+                    }
                 }
             }
             catch (Exception e)

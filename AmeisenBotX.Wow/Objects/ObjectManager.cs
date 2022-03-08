@@ -1,9 +1,9 @@
 ﻿using AmeisenBotX.Common.Math;
 using AmeisenBotX.Memory;
+using AmeisenBotX.Wow.Hook.Structs;
 using AmeisenBotX.Wow.Objects.Enums;
 using AmeisenBotX.Wow.Objects.Raw;
 using AmeisenBotX.Wow.Offsets;
-using AmeisenBotX.Wow.Shared.Hook.Structs;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -13,7 +13,7 @@ using System.Threading.Tasks;
 
 namespace AmeisenBotX.Wow.Objects
 {
-    public class ObjectManager<TObject, TUnit, TPlayer, TGameobject, TDynobject, TItem, TCorpse, TContainer> : IObjectProvider
+    public abstract class ObjectManager<TObject, TUnit, TPlayer, TGameobject, TDynobject, TItem, TCorpse, TContainer> : IObjectProvider
         where TObject : IWowObject, new()
         where TUnit : IWowUnit, new()
         where TPlayer : IWowPlayer, new()
@@ -24,12 +24,12 @@ namespace AmeisenBotX.Wow.Objects
         where TContainer : IWowContainer, new()
 
     {
-        private const int MAX_OBJECT_COUNT = 4096;
+        protected const int MAX_OBJECT_COUNT = 4096;
 
-        private readonly object queryLock = new();
+        protected readonly object queryLock = new();
 
-        private readonly IntPtr[] wowObjectPointers;
-        private readonly IWowObject[] wowObjects;
+        protected readonly IntPtr[] wowObjectPointers;
+        protected readonly IWowObject[] wowObjects;
 
         public ObjectManager(IMemoryApi memoryApi, IOffsetList offsetList)
         {
@@ -49,91 +49,91 @@ namespace AmeisenBotX.Wow.Objects
         public event Action<IEnumerable<IWowObject>> OnObjectUpdateComplete;
 
         ///<inheritdoc cref="IObjectProvider.Camera"/>
-        public RawCameraInfo Camera { get; private set; }
+        public RawCameraInfo Camera { get; protected set; }
 
         ///<inheritdoc cref="IObjectProvider.CenterPartyPosition"/>
-        public Vector3 CenterPartyPosition { get; private set; }
+        public Vector3 CenterPartyPosition { get; protected set; }
 
         ///<inheritdoc cref="IObjectProvider.GameState"/>
-        public string GameState { get; private set; }
+        public string GameState { get; protected set; }
 
         ///<inheritdoc cref="IObjectProvider.IsTargetInLineOfSight"/>
-        public bool IsTargetInLineOfSight { get; private set; }
+        public bool IsTargetInLineOfSight { get; protected set; }
 
         ///<inheritdoc cref="IObjectProvider.IsWorldLoaded"/>
-        public bool IsWorldLoaded { get; private set; }
+        public bool IsWorldLoaded { get; protected set; }
 
         ///<inheritdoc cref="IObjectProvider.LastTarget"/>
-        public IWowUnit LastTarget { get; private set; }
+        public IWowUnit LastTarget { get; protected set; }
 
         ///<inheritdoc cref="IObjectProvider.LastTargetGuid"/>
-        public ulong LastTargetGuid { get; private set; }
+        public ulong LastTargetGuid { get; protected set; }
 
         ///<inheritdoc cref="IObjectProvider.MapId"/>
-        public WowMapId MapId { get; private set; }
+        public WowMapId MapId { get; protected set; }
 
         ///<inheritdoc cref="IObjectProvider.ObjectCount"/>
-        public int ObjectCount { get; set; }
+        public int ObjectCount { get; protected set; }
 
         ///<inheritdoc cref="IObjectProvider.Partyleader"/>
-        public IWowUnit Partyleader { get; private set; }
+        public IWowUnit Partyleader { get; protected set; }
 
         ///<inheritdoc cref="IObjectProvider.PartyleaderGuid"/>
-        public ulong PartyleaderGuid { get; private set; }
+        public ulong PartyleaderGuid { get; protected set; }
 
         ///<inheritdoc cref="IObjectProvider.PartymemberGuids"/>
-        public IEnumerable<ulong> PartymemberGuids { get; private set; }
+        public IEnumerable<ulong> PartymemberGuids { get; protected set; }
 
         ///<inheritdoc cref="IObjectProvider.Partymembers"/>
-        public IEnumerable<IWowUnit> Partymembers { get; private set; }
+        public IEnumerable<IWowUnit> Partymembers { get; protected set; }
 
         ///<inheritdoc cref="IObjectProvider.PartyPetGuids"/>
-        public IEnumerable<ulong> PartyPetGuids { get; private set; }
+        public IEnumerable<ulong> PartyPetGuids { get; protected set; }
 
         ///<inheritdoc cref="IObjectProvider.PartyPets"/>
-        public IEnumerable<IWowUnit> PartyPets { get; private set; }
+        public IEnumerable<IWowUnit> PartyPets { get; protected set; }
 
         ///<inheritdoc cref="IObjectProvider.Pet"/>
-        public IWowUnit Pet { get; private set; }
+        public IWowUnit Pet { get; protected set; }
 
         ///<inheritdoc cref="IObjectProvider.PetGuid"/>
-        public ulong PetGuid { get; private set; }
+        public ulong PetGuid { get; protected set; }
 
         ///<inheritdoc cref="IObjectProvider.Player"/>
-        public IWowPlayer Player { get; private set; }
+        public IWowPlayer Player { get; protected set; }
 
         ///<inheritdoc cref="IObjectProvider.PlayerBase"/>
-        public IntPtr PlayerBase { get; private set; }
+        public IntPtr PlayerBase { get; protected set; }
 
         ///<inheritdoc cref="IObjectProvider.PlayerGuid"/>
-        public ulong PlayerGuid { get; private set; }
+        public ulong PlayerGuid { get; protected set; }
 
         ///<inheritdoc cref="IObjectProvider.Target"/>
-        public IWowUnit Target { get; private set; }
+        public IWowUnit Target { get; protected set; }
 
         ///<inheritdoc cref="IObjectProvider.TargetGuid"/>
-        public ulong TargetGuid { get; private set; }
+        public ulong TargetGuid { get; protected set; }
 
         ///<inheritdoc cref="IObjectProvider.Vehicle"/>
-        public IWowUnit Vehicle { get; private set; }
+        public IWowUnit Vehicle { get; protected set; }
 
         ///<inheritdoc cref="IObjectProvider.WowObjects"/>
-        public IEnumerable<IWowObject> WowObjects { get; private set; }
+        public IEnumerable<IWowObject> WowObjects { get; protected set; }
 
         ///<inheritdoc cref="IObjectProvider.ZoneId"/>
-        public int ZoneId { get; private set; }
+        public int ZoneId { get; protected set; }
 
         ///<inheritdoc cref="IObjectProvider.ZoneName"/>
-        public string ZoneName { get; private set; }
+        public string ZoneName { get; protected set; }
 
         ///<inheritdoc cref="IObjectProvider.ZoneSubName"/>
-        public string ZoneSubName { get; private set; }
+        public string ZoneSubName { get; protected set; }
 
-        private IMemoryApi MemoryApi { get; }
+        protected IMemoryApi MemoryApi { get; }
 
-        private IOffsetList OffsetList { get; }
+        protected IOffsetList OffsetList { get; }
 
-        private bool PlayerGuidIsVehicle { get; set; }
+        protected bool PlayerGuidIsVehicle { get; set; }
 
         ///<inheritdoc cref="IObjectProvider.RefreshIsWorldLoaded"/>
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -216,25 +216,7 @@ namespace AmeisenBotX.Wow.Objects
                 }
 
                 // read the party/raid leaders guid and if there is one, the group too
-                // PartyleaderGuid = ReadLeaderGuid();
-
-                if (PartyleaderGuid > 0)
-                {
-                    PartymemberGuids = ReadPartymemberGuids();
-                    Partymembers = wowObjects.OfType<IWowUnit>().Where(e => PartymemberGuids.Contains(e.Guid));
-
-                    Vector3 pos = new();
-
-                    foreach (Vector3 vec in Partymembers.Select(e => e.Position))
-                    {
-                        pos += vec;
-                    }
-
-                    CenterPartyPosition = pos / Partymembers.Count();
-
-                    PartyPetGuids = PartyPets.Select(e => e.Guid);
-                    PartyPets = wowObjects.OfType<IWowUnit>().Where(e => PartymemberGuids.Contains(e.SummonedByGuid));
-                }
+                ReadParty();
 
                 WowObjects = wowObjects[0..ObjectCount];
                 OnObjectUpdateComplete?.Invoke(WowObjects);
@@ -312,57 +294,16 @@ namespace AmeisenBotX.Wow.Objects
             }
         }
 
-        private ulong ReadLeaderGuid()
-        {
-            if (MemoryApi.Read(OffsetList.RaidLeader, out ulong partyleaderGuid))
-            {
-                if (partyleaderGuid == 0
-                    && MemoryApi.Read(OffsetList.PartyLeader, out partyleaderGuid))
-                {
-                    return partyleaderGuid;
-                }
-
-                return partyleaderGuid;
-            }
-
-            return 0;
-        }
-
-        private IEnumerable<ulong> ReadPartymemberGuids()
-        {
-            List<ulong> partymemberGuids = new();
-
-            if (MemoryApi.Read(OffsetList.PartyLeader, out ulong partyLeader)
-                && partyLeader != 0
-                && MemoryApi.Read(OffsetList.PartyPlayerGuids, out RawPartyGuids partyMembers))
-            {
-                partymemberGuids.AddRange(partyMembers.AsArray());
-            }
-
-            if (MemoryApi.Read(OffsetList.RaidLeader, out ulong raidLeader)
-                && raidLeader != 0
-                && MemoryApi.Read(OffsetList.RaidGroupStart, out RawRaidStruct raidStruct))
-            {
-                foreach (IntPtr raidPointer in raidStruct.GetPointers())
-                {
-                    if (MemoryApi.Read(raidPointer, out ulong guid))
-                    {
-                        partymemberGuids.Add(guid);
-                    }
-                }
-            }
-
-            return partymemberGuids.Where(e => e != 0).Distinct();
-        }
+        protected abstract void ReadParty();
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        private T UpdateGlobalVar<T>(IntPtr address) where T : unmanaged
+        protected T UpdateGlobalVar<T>(IntPtr address) where T : unmanaged
         {
             return address != IntPtr.Zero && MemoryApi.Read(address, out T v) ? v : default;
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        private string UpdateGlobalVarString(IntPtr address, int maxLenght = 128)
+        protected string UpdateGlobalVarString(IntPtr address, int maxLenght = 128)
         {
             return address != IntPtr.Zero && MemoryApi.ReadString(address, Encoding.UTF8, out string v, maxLenght) ? v : string.Empty;
         }

@@ -97,14 +97,28 @@ namespace AmeisenBotX.Common.Math
             float rise = System.Math.Abs(endPoint.Y - startPoint.Y);
 
             if (!toPercentage)
+            {
                 return rise / run;
+            }
 
             return (rise / run) * 100;
         }
 
         public static bool IsFacing(Vector3 position, float rotation, Vector3 targetPosition, float maxAngleDiff = 1.5f)
         {
-            return MathF.Abs(GetAngleDiff(position, rotation, targetPosition)) < maxAngleDiff;
+            float facingAngle = GetFacingAngle(position, targetPosition);
+            float angleDiff = facingAngle - rotation;
+
+            if (angleDiff < 0)
+            {
+                angleDiff += DOUBLE_PI;
+            }
+            else if (angleDiff > DOUBLE_PI)
+            {
+                angleDiff -= DOUBLE_PI;
+            }
+
+            return angleDiff <= maxAngleDiff;
         }
 
         /// <summary>

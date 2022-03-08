@@ -11,7 +11,10 @@ namespace AmeisenBotX.Core.Managers.Character.Inventory.Objects
 
         protected WowBasicItem(IWowInventoryItem item)
         {
-            if (item == null) return;
+            if (item == null)
+            {
+                return;
+            }
 
             BagId = item.BagId;
             BagSlot = item.BagSlot;
@@ -87,7 +90,9 @@ namespace AmeisenBotX.Core.Managers.Character.Inventory.Objects
         [JsonPropertyName("type")]
         public string Type { get; set; }
 
-        public override string ToString() =>
-            $"[{BagId}][{BagSlot}] - [{ItemQuality}][{Type}] {Name} (ilvl. {ItemLevel} | lvl.{RequiredLevel} | {Subtype} | {Price})";
+        public override string ToString()
+        {
+            return $"[{BagId}][{BagSlot}] - [{ItemQuality}][{Type}] {Name} (ilvl. {ItemLevel} | lvl.{RequiredLevel} | {Subtype} | {Price})";
+        }
     }
 }

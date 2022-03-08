@@ -162,7 +162,10 @@ namespace AmeisenBotX.Core
                 IEnumerable<T> nearEnemies = GetNearEnemies<T>(pathPosition, distance)
                     .ToArray();
 
-                if (nearEnemies.Any()) return nearEnemies;
+                if (nearEnemies.Any())
+                {
+                    return nearEnemies;
+                }
             }
 
             return Array.Empty<T>();

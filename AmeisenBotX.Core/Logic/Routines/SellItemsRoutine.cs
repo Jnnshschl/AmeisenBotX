@@ -35,7 +35,10 @@ namespace AmeisenBotX.Core.Logic.Routines
                 }
 
                 if (bot.Objects.Player.Class == WowClass.Hunter &&
-                    itemToSell.GetType() == typeof(WowProjectile)) continue;
+                    itemToSell.GetType() == typeof(WowProjectile))
+                {
+                    continue;
+                }
 
                 bot.Wow.UseContainerItem(itemToSell.BagId, itemToSell.BagSlot);
                 bot.Wow.CofirmStaticPopup();

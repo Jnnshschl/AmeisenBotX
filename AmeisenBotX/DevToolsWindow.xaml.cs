@@ -58,14 +58,22 @@ namespace AmeisenBotX
         private static void CopyDataOfNearestObject(ItemsControl listView)
         {
             ItemCollection listItems = listView.Items;
-            if (listItems.Count == 0) return;
+            if (listItems.Count == 0)
+            {
+                return;
+            }
 
             object firstItem = listItems[0];
-            if (firstItem == null) return;
+            if (firstItem == null)
+            {
+                return;
+            }
 
             string dataString = firstItem.ToString();
             if (string.IsNullOrEmpty(dataString) || string.IsNullOrWhiteSpace(dataString))
+            {
                 return;
+            }
 
             string[] splitByGuid = dataString.Split(" Guid:", 2);
             string entryId = splitByGuid[0].Replace("EntryId: ", string.Empty);
@@ -77,7 +85,9 @@ namespace AmeisenBotX
             string[] cleanComponents = { "", "", "" };
 
             for (int i = 0; i < posComponents.Length; i++)
+            {
                 cleanComponents[i] = posComponents[i].Split(".")[0];
+            }
 
             string finalPosStr = "new Vector3(" + cleanComponents[0] + ", " + cleanComponents[1] + ", " + cleanComponents[2] + ")";
             Clipboard.SetDataObject(entryId + ", " + finalPosStr);
@@ -122,7 +132,10 @@ namespace AmeisenBotX
 
         private void ListViewNearWowObjects_KeyDown(object sender, KeyEventArgs e)
         {
-            if (e.Key != Key.C) return;
+            if (e.Key != Key.C)
+            {
+                return;
+            }
 
             switch ((NearWowObjectsTab)tabControlNearWowObjects.SelectedIndex)
             {
@@ -478,17 +491,17 @@ namespace AmeisenBotX
         private void ClimbSteepSlopesChecked(object sender, RoutedEventArgs e)
         {
             // Todo: find a better way, multi-level pointer redirection very messy
-            AmeisenBot.Bot.Memory.Read<IntPtr>(AmeisenBot.Bot.Wow.Offsets.StaticPlayer, out var PlayerBase1);
-            AmeisenBot.Bot.Memory.Read<IntPtr>(IntPtr.Add(PlayerBase1, 0x34), out var PlayerBase2);
-            AmeisenBot.Bot.Memory.Read<IntPtr>(IntPtr.Add(PlayerBase2, 0x24), out var PlayerBase);
+            AmeisenBot.Bot.Memory.Read<IntPtr>(AmeisenBot.Bot.Wow.Offsets.PlayerBase, out IntPtr PlayerBase1);
+            AmeisenBot.Bot.Memory.Read<IntPtr>(IntPtr.Add(PlayerBase1, 0x34), out IntPtr PlayerBase2);
+            AmeisenBot.Bot.Memory.Read<IntPtr>(IntPtr.Add(PlayerBase2, 0x24), out IntPtr PlayerBase);
             AmeisenBot.Bot.Memory.Write<float>(IntPtr.Add(PlayerBase, (int)AmeisenBot.Bot.Wow.Offsets.ClimbAngle), 255);
         }
 
         private void ClimbSteepSlopesUnchecked(object sender, RoutedEventArgs e)
         {
-            AmeisenBot.Bot.Memory.Read<IntPtr>(AmeisenBot.Bot.Wow.Offsets.StaticPlayer, out var PlayerBase1);
-            AmeisenBot.Bot.Memory.Read<IntPtr>(IntPtr.Add(PlayerBase1, 0x34), out var PlayerBase2);
-            AmeisenBot.Bot.Memory.Read<IntPtr>(IntPtr.Add(PlayerBase2, 0x24), out var PlayerBase);
+            AmeisenBot.Bot.Memory.Read<IntPtr>(AmeisenBot.Bot.Wow.Offsets.PlayerBase, out IntPtr PlayerBase1);
+            AmeisenBot.Bot.Memory.Read<IntPtr>(IntPtr.Add(PlayerBase1, 0x34), out IntPtr PlayerBase2);
+            AmeisenBot.Bot.Memory.Read<IntPtr>(IntPtr.Add(PlayerBase2, 0x24), out IntPtr PlayerBase);
             AmeisenBot.Bot.Memory.Write<float>(IntPtr.Add(PlayerBase, (int)AmeisenBot.Bot.Wow.Offsets.ClimbAngle), 1);
         }
 

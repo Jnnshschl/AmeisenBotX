@@ -55,7 +55,9 @@ namespace AmeisenBotX.Core.Engines.Test
         private BtStatus GetTrainer()
         {
             if (Bot.GetClosestTrainerByEntryId(trainerEntryId) == null)
+            {
                 return BtStatus.Failed;
+            }
 
             trainer = Bot.GetClosestTrainerByEntryId(trainerEntryId);
             return BtStatus.Success;
@@ -64,16 +66,24 @@ namespace AmeisenBotX.Core.Engines.Test
         private BtStatus OpenTrainer()
         {
             if (Bot == null || trainer == null)
+            {
                 return BtStatus.Failed;
+            }
 
             if (Bot.Wow.TargetGuid != trainer.Guid)
+            {
                 Bot.Wow.ChangeTarget(trainer.Guid);
+            }
 
             if (!BotMath.IsFacing(Bot.Objects.Player.Position, Bot.Objects.Player.Rotation, trainer.Position, 0.5f))
+            {
                 Bot.Wow.FacePosition(Bot.Objects.Player.BaseAddress, Bot.Player.Position, trainer.Position);
+            }
 
             if (Bot.Wow.UiIsVisible("GossipFrame"))
+            {
                 return BtStatus.Success;
+            }
 
             Bot.Wow.InteractWithUnit(trainer.BaseAddress);
             return BtStatus.Success;
@@ -82,7 +92,9 @@ namespace AmeisenBotX.Core.Engines.Test
         public bool SelectedTraining()
         {
             if (!trainer.IsGossip)
+            {
                 return false;
+            }
 
             // gossip 1 train skills
             // gossip 2 unlearn talents
@@ -93,7 +105,9 @@ namespace AmeisenBotX.Core.Engines.Test
             for (int i = 0; i < gossipTypes.Length; ++i)
             {
                 if (!gossipTypes[i].Equals("trainer", StringComparison.OrdinalIgnoreCase))
+                {
                     continue;
+                }
 
                 // +1 is due to implicit conversion between lua array (indexed at 1 not 0) and c# array
                 Bot.Wow.SelectGossipOptionSimple(i + 1);

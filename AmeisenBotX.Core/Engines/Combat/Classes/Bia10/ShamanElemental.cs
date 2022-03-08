@@ -64,7 +64,7 @@ namespace AmeisenBotX.Core.Engines.Combat.Classes.Bia10
         {
             base.Execute();
 
-            var spellName = SelectSpell(out var targetGuid);
+            string spellName = SelectSpell(out ulong targetGuid);
             TryCastSpell(spellName, targetGuid);
         }
 
@@ -73,9 +73,11 @@ namespace AmeisenBotX.Core.Engines.Combat.Classes.Bia10
             base.OutOfCombatExecute();
 
             if (HandleDeadPartyMembers(Shaman335a.AncestralSpirit))
+            {
                 return;
+            }
 
-            var enchSpellName = DecideWeaponEnchantment(out var enchantName);
+            string enchSpellName = DecideWeaponEnchantment(out string enchantName);
             CheckForWeaponEnchantment(WowEquipmentSlot.INVSLOT_MAINHAND, enchantName, enchSpellName);
         }
 

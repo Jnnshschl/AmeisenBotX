@@ -23,8 +23,12 @@ namespace AmeisenBotX.Wow335a.Objects
             List<string> enchantments = new();
 
             foreach (ItemEnchantment itemEnch in ItemEnchantments)
+            {
                 if (WowEnchantmentHelper.TryLookupEnchantment(itemEnch.Id, out string text))
+                {
                     enchantments.Add(text);
+                }
+            }
 
             return enchantments;
         }

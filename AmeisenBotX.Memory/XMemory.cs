@@ -152,12 +152,17 @@ namespace AmeisenBotX.Memory
         {
             lock (allocLock)
             {
-                AmeisenLogger.I.Log("XMemory", $"Freeing all memory Pools...");
+                if (AllocationPools != null)
+                {
+                    AmeisenLogger.I.Log("XMemory", $"Freeing all memory Pools...");
 
-                foreach (AllocationPool allocPool in AllocationPools)
-                    VirtualFreeEx(ProcessHandle, allocPool.Address, 0, AllocationType.Release);
+                    foreach (AllocationPool allocPool in AllocationPools)
+                    {
+                        VirtualFreeEx(ProcessHandle, allocPool.Address, 0, AllocationType.Release);
+                    }
 
-                AllocationPools.Clear();
+                    AllocationPools.Clear();
+                }
             }
         }
 

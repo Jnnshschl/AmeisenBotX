@@ -536,6 +536,7 @@ namespace AmeisenBotX
             IdleActionItems = new();
 
             if (AmeisenBot?.Bot.IdleActions.IdleActions != null)
+            {
                 foreach (IIdleAction x in AmeisenBot.Bot.IdleActions.IdleActions)
                 {
                     bool state = Config.IdleActionsEnabled.TryGetValue(x.ToString(), out bool b) && b;
@@ -546,6 +547,7 @@ namespace AmeisenBotX
                         IsEnabled = state
                     });
                 }
+            }
 
             listviewIdleActions.ItemsSource = IdleActionItems;
 

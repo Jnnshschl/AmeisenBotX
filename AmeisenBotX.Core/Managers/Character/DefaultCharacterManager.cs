@@ -11,7 +11,6 @@ using AmeisenBotX.Logging.Enums;
 using AmeisenBotX.Memory;
 using AmeisenBotX.Wow;
 using AmeisenBotX.Wow.Objects;
-using AmeisenBotX.Wow.Objects.Constants;
 using AmeisenBotX.Wow.Objects.Enums;
 using System;
 using System.Collections;
@@ -62,28 +61,6 @@ namespace AmeisenBotX.Core.Managers.Character
         private IMemoryApi MemoryApi { get; }
 
         private IWowInterface Wow { get; }
-
-        public void ClickToMove(Vector3 pos, ulong guid,
-            WowClickToMoveType clickToMoveType = WowClickToMoveType.Move,
-            float turnSpeed = 20.9f, // where is this magic number from?
-            float distance = WowClickToMoveDistance.Move)
-        {
-            if (float.IsInfinity(pos.X) || float.IsNaN(pos.X) || MathF.Abs(pos.X) > 17066.6656
-                || float.IsInfinity(pos.Y) || float.IsNaN(pos.Y) || MathF.Abs(pos.Y) > 17066.6656
-                || float.IsInfinity(pos.Z) || float.IsNaN(pos.Z) || MathF.Abs(pos.Z) > 17066.6656)
-            {
-                return;
-            }
-
-            MemoryApi.Write(Wow.Offsets.ClickToMoveTurnSpeed, turnSpeed);
-            MemoryApi.Write(Wow.Offsets.ClickToMoveDistance, distance);
-
-            if (guid > 0)
-                MemoryApi.Write(Wow.Offsets.ClickToMoveGuid, guid);
-
-            MemoryApi.Write(Wow.Offsets.ClickToMoveAction, clickToMoveType);
-            MemoryApi.Write(Wow.Offsets.ClickToMoveX, pos);
-        }
 
         public Dictionary<int, int> GetConsumables()
         {
@@ -199,17 +176,27 @@ namespace AmeisenBotX.Core.Managers.Character
             itemToReplace = null;
 
             if (item == null || ItemComparator.IsBlacklistedItem(item))
+            {
                 return false;
+            }
 
-            if (!IsAbleToUseItem(item)) return false;
-            if (!GetItemsByEquipLocation(item.EquipLocation, out List<IWowInventoryItem> matchedItems, out _))
+            if (!IsAbleToUseItem(item))
+            {
                 return false;
+            }
+
+            if (!GetItemsByEquipLocation(item.EquipLocation, out List<IWowInventoryItem> matchedItems, out _))
+            {
+                return false;
+            }
 
             // if we don't have an item in the slot or if we only have 3 of 4 bags
             if (matchedItems.Count == 0)
+            {
                 return true;
+            }
 
-            foreach (var inventoryItem in matchedItems
+            foreach (IWowInventoryItem inventoryItem in matchedItems
                 .Where(invItem => invItem != null && item.Id != invItem.Id && ItemComparator.IsBetter(invItem, item)))
             {
                 itemToReplace = inventoryItem;
@@ -227,7 +214,7 @@ namespace AmeisenBotX.Core.Managers.Character
 
         public void MoveToPosition(Vector3 pos, float turnSpeed = 20.9f, float distance = 0.1f)
         {
-            ClickToMove(pos, 0, WowClickToMoveType.Move, turnSpeed, distance);
+            Wow.ClickToMove(pos, 0, WowClickToMoveType.Move, turnSpeed, distance);
         }
 
         public void UpdateAll()
@@ -250,12 +237,18 @@ namespace AmeisenBotX.Core.Managers.Character
                     item.Type.Equals("container", StringComparison.CurrentCultureIgnoreCase))
                 .ToList();
 
-            if (!container.Any()) return;
+            if (!container.Any())
+            {
+                return;
+            }
 
             for (int slotIndex = 20; slotIndex <= 23; ++slotIndex)
             {
                 if (Equipment.Items.Any(kvp =>
-                    kvp.Key == (WowEquipmentSlot)slotIndex)) continue;
+                    kvp.Key == (WowEquipmentSlot)slotIndex))
+                {
+                    continue;
+                }
 
                 Wow.EquipItem(container.First().Name);
                 break;
@@ -266,11 +259,14 @@ namespace AmeisenBotX.Core.Managers.Character
         {
             IList equipmentSlots = Enum.GetValues(typeof(WowEquipmentSlot));
 
-            foreach (var equipmentSlot in equipmentSlots)
+            foreach (object equipmentSlot in equipmentSlots)
             {
                 WowEquipmentSlot slot = (WowEquipmentSlot)equipmentSlot;
 
-                if (ItemSlotsToSkip.Contains(slot)) continue;
+                if (ItemSlotsToSkip.Contains(slot))
+                {
+                    continue;
+                }
 
                 if (slot == WowEquipmentSlot.INVSLOT_OFFHAND
                     && Equipment.Items.TryGetValue(WowEquipmentSlot.INVSLOT_MAINHAND, out IWowInventoryItem mainHandItem)
@@ -285,7 +281,10 @@ namespace AmeisenBotX.Core.Managers.Character
                     .OrderByDescending(e => e.ItemLevel)
                     .ToList();
 
-                if (!itemsLikeEquipped.Any()) continue;
+                if (!itemsLikeEquipped.Any())
+                {
+                    continue;
+                }
 
                 if (Equipment.Items.TryGetValue(slot, out IWowInventoryItem equippedItem))
                 {
@@ -293,7 +292,10 @@ namespace AmeisenBotX.Core.Managers.Character
                     {
                         IWowInventoryItem item = itemsLikeEquipped.ElementAt(f);
 
-                        if (!IsItemAnImprovement(item, out IWowInventoryItem itemToReplace)) continue;
+                        if (!IsItemAnImprovement(item, out IWowInventoryItem itemToReplace))
+                        {
+                            continue;
+                        }
 
                         AmeisenLogger.I.Log("Equipment", $"Replacing \"{itemToReplace}\" with \"{item}\"", LogLevel.Verbose);
                         Wow.EquipItem(item.Name);
@@ -308,7 +310,10 @@ namespace AmeisenBotX.Core.Managers.Character
                     if ((!string.Equals(itemToEquip.Type, "Armor", StringComparison.OrdinalIgnoreCase) ||
                          !IsAbleToUseArmor((WowArmor)itemToEquip)) &&
                         (!string.Equals(itemToEquip.Type, "Weapon", StringComparison.OrdinalIgnoreCase) ||
-                         !IsAbleToUseWeapon((WowWeapon)itemToEquip))) continue;
+                         !IsAbleToUseWeapon((WowWeapon)itemToEquip)))
+                    {
+                        continue;
+                    }
 
                     AmeisenLogger.I.Log("Equipment", $"Equipping \"{itemToEquip}\"", LogLevel.Verbose);
                     Wow.EquipItem(itemToEquip.Name);
@@ -402,7 +407,9 @@ namespace AmeisenBotX.Core.Managers.Character
         private void TryAddItem(WowEquipmentSlot slot, List<IWowInventoryItem> matchedItems)
         {
             if (Equipment.Items.TryGetValue(slot, out IWowInventoryItem ammoItem))
+            {
                 matchedItems.Add(ammoItem);
+            }
         }
 
         private void TryAddRings(List<IWowInventoryItem> matchedItems, ref int expectedItemCount)

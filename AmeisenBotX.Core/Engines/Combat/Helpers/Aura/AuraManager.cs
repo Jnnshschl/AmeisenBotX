@@ -1,5 +1,5 @@
 ﻿using AmeisenBotX.Core.Engines.Combat.Helpers.Aura.Objects;
-using AmeisenBotX.Wow.Objects.Raw;
+using AmeisenBotX.Wow.Objects;
 using System.Collections.Generic;
 
 namespace AmeisenBotX.Core.Engines.Combat.Helpers.Aura
@@ -16,7 +16,7 @@ namespace AmeisenBotX.Core.Engines.Combat.Helpers.Aura
 
         public List<IAuraJob> Jobs { get; set; }
 
-        public bool Tick(IEnumerable<RawWowAura> auras)
+        public bool Tick(IEnumerable<IWowAura> auras)
         {
             foreach (IAuraJob job in Jobs)
             {

@@ -33,7 +33,7 @@ namespace AmeisenBotX.Wow.Objects
 
         WowMapId MapId { get; }
 
-        int ObjectCount { get; set; }
+        int ObjectCount { get; }
 
         IWowUnit Partyleader { get; }
 

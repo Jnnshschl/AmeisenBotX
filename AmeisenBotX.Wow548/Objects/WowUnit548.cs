@@ -2,8 +2,8 @@
 using AmeisenBotX.Memory;
 using AmeisenBotX.Wow.Objects;
 using AmeisenBotX.Wow.Objects.Enums;
-using AmeisenBotX.Wow.Objects.Raw;
 using AmeisenBotX.Wow.Offsets;
+using AmeisenBotX.Wow335a.Objects.Raw;
 using AmeisenBotX.Wow548.Objects.Descriptors;
 using System.Collections.Specialized;
 using System.Text;
@@ -15,7 +15,7 @@ namespace AmeisenBotX.Wow548.Objects
     {
         public int AuraCount { get; set; }
 
-        public IEnumerable<RawWowAura> Auras { get; set; }
+        public IEnumerable<IWowAura> Auras { get; set; }
 
         public WowClass Class => (WowClass)RawWowUnit.Class;
 
@@ -107,7 +107,7 @@ namespace AmeisenBotX.Wow548.Objects
 
         protected WowUnitDescriptor548 RawWowUnit { get; private set; }
 
-        public static IEnumerable<RawWowAura> GetUnitAuras(IMemoryApi memoryApi, IOffsetList offsetList, IntPtr unitBase, out int auraCount)
+        public static IEnumerable<IWowAura> GetUnitAuras(IMemoryApi memoryApi, IOffsetList offsetList, IntPtr unitBase, out int auraCount)
         {
             if (memoryApi.Read(IntPtr.Add(unitBase, (int)offsetList.AuraCount1), out int auraCount1))
             {
@@ -117,26 +117,21 @@ namespace AmeisenBotX.Wow548.Objects
                         && auraCount2 > 0
                         && memoryApi.Read(IntPtr.Add(unitBase, (int)offsetList.AuraTable2), out IntPtr auraTable))
                     {
-                        auraCount = auraCount2;
-                        return ReadAuraTable(memoryApi, auraTable, auraCount2);
-                    }
-                    else
-                    {
-                        auraCount = 0;
+                        IEnumerable<IWowAura> auras = ReadAuraTable(memoryApi, auraTable, auraCount2);
+                        auraCount = auras.Count();
+                        return auras;
                     }
                 }
                 else
                 {
-                    auraCount = auraCount1;
-                    return ReadAuraTable(memoryApi, IntPtr.Add(unitBase, (int)offsetList.AuraTable1), auraCount1);
+                    IEnumerable<IWowAura> auras = ReadAuraTable(memoryApi, IntPtr.Add(unitBase, (int)offsetList.AuraTable1), auraCount1);
+                    auraCount = auras.Count();
+                    return auras;
                 }
             }
-            else
-            {
-                auraCount = 0;
-            }
 
-            return Array.Empty<RawWowAura>();
+            auraCount = 0;
+            return Array.Empty<IWowAura>();
         }
 
         public float AggroRangeTo(IWowUnit other)
@@ -216,19 +211,16 @@ namespace AmeisenBotX.Wow548.Objects
             }
         }
 
-        private static unsafe IEnumerable<RawWowAura> ReadAuraTable(IMemoryApi memoryApi, IntPtr buffBase, int auraCount)
+        private static unsafe IEnumerable<IWowAura> ReadAuraTable(IMemoryApi memoryApi, IntPtr buffBase, int auraCount)
         {
-            List<RawWowAura> auras = new();
-
-            if (auraCount > 40)
-            {
-                return auras;
-            }
+            List<IWowAura> auras = new();
 
             for (int i = 0; i < auraCount; ++i)
             {
-                memoryApi.Read(buffBase + (sizeof(RawWowAura) * i), out RawWowAura rawWowAura);
-                auras.Add(rawWowAura);
+                if (memoryApi.Read(buffBase + (sizeof(WowAura548) * i), out WowAura548 rawWowAura) && rawWowAura.SpellId > 0)
+                {
+                    auras.Add(rawWowAura);
+                }
             }
 
             return auras;

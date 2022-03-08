@@ -4,7 +4,7 @@ using System;
 using System.Collections.Generic;
 using System.Text;
 
-namespace AmeisenBotX.Wow.Shared.Hook.Modules
+namespace AmeisenBotX.Wow.Hook.Modules
 {
     public class TracelineJumpHookModule : RunAsmHookModule
     {

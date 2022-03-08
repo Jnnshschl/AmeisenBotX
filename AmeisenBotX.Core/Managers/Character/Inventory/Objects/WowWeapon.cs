@@ -37,7 +37,9 @@ namespace AmeisenBotX.Core.Managers.Character.Inventory.Objects
                 subType = subType.Replace("Main Hand", "");
 
                 if (subType.EndsWith("s"))
+                {
                     subType = subType.Remove(subType.Length - 1);
+                }
 
                 return subType;
             }
@@ -47,7 +49,9 @@ namespace AmeisenBotX.Core.Managers.Character.Inventory.Objects
                 subType = subType.Replace("Off Hand", "");
 
                 if (subType.EndsWith("s"))
+                {
                     subType = subType.Remove(subType.Length - 1);
+                }
 
                 return subType;
             }
@@ -57,7 +61,9 @@ namespace AmeisenBotX.Core.Managers.Character.Inventory.Objects
                 subType = subType.Replace("One-Handed", "");
 
                 if (subType.EndsWith("s"))
+                {
                     subType = subType.Remove(subType.Length - 1);
+                }
 
                 return subType;
             }
@@ -67,13 +73,17 @@ namespace AmeisenBotX.Core.Managers.Character.Inventory.Objects
                 subType = subType.Replace("One-Hand", "");
 
                 if (subType.EndsWith("s"))
+                {
                     subType = subType.Remove(subType.Length - 1);
+                }
 
                 return subType;
             }
 
             if (subType.StartsWith("Staves"))
+            {
                 return "Staff";
+            }
 
             if (subType.Contains("-"))
             {
@@ -81,15 +91,22 @@ namespace AmeisenBotX.Core.Managers.Character.Inventory.Objects
                 string weaponType = subType.Replace("-", string.Empty).Split(" ", 2)[1];
 
                 if (weaponType.EndsWith("s"))
+                {
                     weaponType = weaponType.Remove(weaponType.Length - 1);
+                }
+
                 if (handedness.EndsWith("ed"))
+                {
                     handedness = handedness.Remove(handedness.Length - 2);
+                }
 
                 return weaponType + handedness;
             }
 
             if (subType.EndsWith("s"))
+            {
                 return subType = subType.Remove(subType.Length - 1);
+            }
 
             return string.Empty;
         }

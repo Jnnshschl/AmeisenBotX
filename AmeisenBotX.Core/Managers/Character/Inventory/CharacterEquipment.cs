@@ -47,7 +47,9 @@ namespace AmeisenBotX.Core.Managers.Character.Inventory
         public bool HasEnchantment(WowEquipmentSlot slot, int enchantmentId)
         {
             if (!Items.ContainsKey(slot) || Items[slot].Id <= 0)
+            {
                 return false;
+            }
 
             IWowItem item = Wow.ObjectProvider.WowObjects.OfType<IWowItem>()
                 .FirstOrDefault(e => e.EntryId == Items[slot].Id);
@@ -61,7 +63,9 @@ namespace AmeisenBotX.Core.Managers.Character.Inventory
             string resultJson = Wow.GetEquipmentItems();
 
             if (string.IsNullOrWhiteSpace(resultJson))
+            {
                 return;
+            }
 
             try
             {
@@ -73,8 +77,10 @@ namespace AmeisenBotX.Core.Managers.Character.Inventory
                     {
                         Items.Clear();
 
-                        foreach (var item in rawEquipment.Select(ItemFactory.BuildSpecificItem))
+                        foreach (WowBasicItem item in rawEquipment.Select(ItemFactory.BuildSpecificItem))
+                        {
                             Items.Add((WowEquipmentSlot)((IWowInventoryItem)item).EquipSlot, item);
+                        }
                     }
                 }
 
@@ -93,7 +99,7 @@ namespace AmeisenBotX.Core.Managers.Character.Inventory
 
             IList enumValues = Enum.GetValues(typeof(WowEquipmentSlot));
 
-            foreach (var enumValue in enumValues)
+            foreach (object enumValue in enumValues)
             {
                 WowEquipmentSlot slot = (WowEquipmentSlot)enumValue;
 
@@ -110,7 +116,9 @@ namespace AmeisenBotX.Core.Managers.Character.Inventory
                 }
 
                 if (Items.ContainsKey(slot))
+                {
                     itemLevel += Items[slot].ItemLevel;
+                }
 
                 ++count;
             }

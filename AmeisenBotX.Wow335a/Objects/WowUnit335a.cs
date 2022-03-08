@@ -2,9 +2,9 @@
 using AmeisenBotX.Memory;
 using AmeisenBotX.Wow.Objects;
 using AmeisenBotX.Wow.Objects.Enums;
-using AmeisenBotX.Wow.Objects.Raw;
 using AmeisenBotX.Wow.Offsets;
 using AmeisenBotX.Wow335a.Objects.Descriptors;
+using AmeisenBotX.Wow335a.Objects.Raw;
 using System;
 using System.Collections.Generic;
 using System.Collections.Specialized;
@@ -18,7 +18,7 @@ namespace AmeisenBotX.Wow335a.Objects
     {
         public int AuraCount { get; set; }
 
-        public IEnumerable<RawWowAura> Auras { get; set; }
+        public IEnumerable<IWowAura> Auras { get; set; }
 
         public WowClass Class => (WowClass)RawWowUnit.Class;
 
@@ -112,7 +112,7 @@ namespace AmeisenBotX.Wow335a.Objects
 
         protected WowUnitDescriptor335a RawWowUnit { get; private set; }
 
-        public static IEnumerable<RawWowAura> GetUnitAuras(IMemoryApi memoryApi, IOffsetList offsetList, IntPtr unitBase, out int auraCount)
+        public static IEnumerable<IWowAura> GetUnitAuras(IMemoryApi memoryApi, IOffsetList offsetList, IntPtr unitBase, out int auraCount)
         {
             if (memoryApi.Read(IntPtr.Add(unitBase, (int)offsetList.AuraCount1), out int auraCount1))
             {
@@ -141,7 +141,7 @@ namespace AmeisenBotX.Wow335a.Objects
                 auraCount = 0;
             }
 
-            return Array.Empty<RawWowAura>();
+            return Array.Empty<IWowAura>();
         }
 
         public float AggroRangeTo(IWowUnit other)
@@ -221,9 +221,9 @@ namespace AmeisenBotX.Wow335a.Objects
             }
         }
 
-        private static unsafe IEnumerable<RawWowAura> ReadAuraTable(IMemoryApi memoryApi, IntPtr buffBase, int auraCount)
+        private static unsafe IEnumerable<IWowAura> ReadAuraTable(IMemoryApi memoryApi, IntPtr buffBase, int auraCount)
         {
-            List<RawWowAura> auras = new();
+            List<IWowAura> auras = new();
 
             if (auraCount > 40)
             {
@@ -232,8 +232,10 @@ namespace AmeisenBotX.Wow335a.Objects
 
             for (int i = 0; i < auraCount; ++i)
             {
-                memoryApi.Read(buffBase + (sizeof(RawWowAura) * i), out RawWowAura rawWowAura);
-                auras.Add(rawWowAura);
+                if (memoryApi.Read(buffBase + (sizeof(WowAura335a) * i), out WowAura335a rawWowAura) && rawWowAura.SpellId > 0)
+                {
+                    auras.Add(rawWowAura);
+                }
             }
 
             return auras;

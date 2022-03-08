@@ -1,6 +1,6 @@
 ﻿namespace AmeisenBotX.Wow.Objects.Enums
 {
-    enum WowUnitClassificationType
+    internal enum WowUnitClassificationType
     {
         NotSpecified = 0,
         Normal = 0,

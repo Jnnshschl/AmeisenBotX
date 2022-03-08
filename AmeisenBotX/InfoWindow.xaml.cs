@@ -73,7 +73,9 @@ namespace AmeisenBotX
                     IWowInventoryItem[] equipmentItems = AmeisenBot.Bot.Character.Equipment.Items.Values.ToArray();
 
                     foreach (IWowInventoryItem invItem in equipmentItems)
+                    {
                         equipmentWrapPanel.Children.Add(new ItemDisplay(invItem));
+                    }
 
                     break;
 
@@ -85,7 +87,9 @@ namespace AmeisenBotX
                     IWowInventoryItem[] inventoryItems = AmeisenBot.Bot.Character.Inventory.Items.ToArray();
 
                     foreach (IWowInventoryItem invItem in inventoryItems)
+                    {
                         equipmentWrapPanel.Children.Add(new ItemDisplay(invItem));
+                    }
 
                     break;
 

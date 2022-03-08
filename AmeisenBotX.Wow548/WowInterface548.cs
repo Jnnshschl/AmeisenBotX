@@ -5,11 +5,12 @@ using AmeisenBotX.Logging.Enums;
 using AmeisenBotX.Memory;
 using AmeisenBotX.Wow;
 using AmeisenBotX.Wow.Events;
+using AmeisenBotX.Wow.Hook.Modules;
 using AmeisenBotX.Wow.Objects;
+using AmeisenBotX.Wow.Objects.Constants;
 using AmeisenBotX.Wow.Objects.Enums;
 using AmeisenBotX.Wow.Objects.Flags;
 using AmeisenBotX.Wow.Offsets;
-using AmeisenBotX.Wow.Shared.Hook.Modules;
 using AmeisenBotX.Wow.Shared.Lua;
 using AmeisenBotX.Wow548.Hook;
 using AmeisenBotX.Wow548.Objects;
@@ -143,13 +144,13 @@ namespace AmeisenBotX.Wow548
 
             ObjectManager = new(memoryApi, Offsets);
 
-            Hook = new(memoryApi, Offsets, ObjectManager);
+            Hook = new(memoryApi, Offsets);
             Hook.OnGameInfoPush += ObjectManager.HookManagerOnGameInfoPush;
         }
 
-        public event Action<string> OnBattlegroundStatus;
+        public event Action<string>? OnBattlegroundStatus;
 
-        public event Action<string> OnStaticPopup;
+        public event Action<string>? OnStaticPopup;
 
         public IEventManager Events => EventManager;
 
@@ -171,7 +172,7 @@ namespace AmeisenBotX.Wow548
 
         private IMemoryApi Memory { get; }
 
-        private ObjectManager<WowObject548, WowUnit548, WowPlayer548, WowGameobject548, WowDynobject548, WowItem548, WowCorpse548, WowContainer548> ObjectManager { get; }
+        private ObjectManager548 ObjectManager { get; }
 
         private OffsetList548 OffsetList { get; }
 
@@ -903,9 +904,9 @@ namespace AmeisenBotX.Wow548
             if (IsClickToMoveActive())
             {
                 // TODO: find better fix for spinning bug
-                LuaDoString("MoveBackwardStart();MoveBackwardStop();");
-
+                // LuaDoString("MoveBackwardStart();MoveBackwardStop();");
                 // Hook.CallObjectFunction(Player.BaseAddress, OffsetList.FunctionPlayerClickToMoveStop, null, false, out _);
+                ClickToMove(Player.Position, 0, WowClickToMoveType.Stop);
             }
         }
 
@@ -916,7 +917,7 @@ namespace AmeisenBotX.Wow548
                 ObjectManager.UpdateWowObjects();
             }
 
-            Hook.GameInfoTick();
+            Hook.GameInfoTick(ObjectManager.Player, ObjectManager.Target);
         }
 
         public bool UiIsVisible(params string[] uiElements)
@@ -949,6 +950,27 @@ namespace AmeisenBotX.Wow548
         public void UseItemByName(string itemName)
         {
             LuaSellItemsByName(itemName);
+        }
+
+        public void ClickToMove(Vector3 pos, ulong guid, WowClickToMoveType clickToMoveType = WowClickToMoveType.Move, float turnSpeed = 20.9f, float distance = WowClickToMoveDistance.Move)
+        {
+            if (float.IsInfinity(pos.X) || float.IsNaN(pos.X) || MathF.Abs(pos.X) > 17066.6656
+                || float.IsInfinity(pos.Y) || float.IsNaN(pos.Y) || MathF.Abs(pos.Y) > 17066.6656
+                || float.IsInfinity(pos.Z) || float.IsNaN(pos.Z) || MathF.Abs(pos.Z) > 17066.6656)
+            {
+                return;
+            }
+
+            Memory.Write(Offsets.ClickToMoveTurnSpeed, turnSpeed);
+            Memory.Write(Offsets.ClickToMoveDistance, distance);
+
+            if (guid > 0)
+            {
+                Memory.Write(Offsets.ClickToMoveGuid, guid);
+            }
+
+            Memory.Write(Offsets.ClickToMoveAction, clickToMoveType);
+            Memory.Write(Offsets.ClickToMoveX, pos);
         }
 
         private int ExecuteLuaInt((string, string) cmdVar)

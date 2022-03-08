@@ -83,7 +83,9 @@ namespace AmeisenBotX.Logging
                     FileInfo fileInfo = new(file);
 
                     if (fileInfo.LastAccessTime < DateTime.Now.AddDays(daysToKeep * -1))
+                    {
                         fileInfo.Delete();
+                    }
                 }
             }
         }

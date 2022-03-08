@@ -56,7 +56,7 @@ namespace AmeisenBotX.Core.Engines.Combat.Classes.Bia10
         {
             base.Execute();
 
-            var spellName = SelectSpell(out var targetGuid);
+            string spellName = SelectSpell(out ulong targetGuid);
             TryCastSpell(spellName, targetGuid);
         }
 

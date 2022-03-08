@@ -117,12 +117,14 @@ namespace AmeisenBotX.Core
             Bot = new();
             Bot.Memory = new XMemory();
 
+            int wowBuild = FileVersionInfo.GetVersionInfo(Config.PathToWowExe).FilePrivatePart;
+
             // load the wow specific interface based on file version (build number)
-            Bot.Wow = FileVersionInfo.GetVersionInfo(Config.PathToWowExe).FilePrivatePart switch
+            Bot.Wow = wowBuild switch
             {
                 (int)WowVersion.WotLK335a => new WowInterface335a(Bot.Memory),
                 (int)WowVersion.MoP548 => new WowInterface548(Bot.Memory),
-                _ => throw new ArgumentException("Unsupported wow version", nameof(Config)),
+                _ => throw new ArgumentException($"Unsupported wow version: {wowBuild}"),
             };
 
             Bot.Storage = new(dataFolder, new List<string>()
@@ -519,13 +521,8 @@ namespace AmeisenBotX.Core
                          && x.Namespace != null
                          && x.Namespace.Contains(combatClassNamespace));
 
-            List<ICombatClass> combatClassInstances = new();
-
-            // Add combat classes with bot parameter
-            combatClassInstances.AddRange(combatClassTypes.Where(x => x.GetConstructor(new Type[] { typeof(AmeisenBotInterfaces) }) != null)
-                .Select(x => (ICombatClass)Activator.CreateInstance(x, Bot)));
-
-            CombatClasses = combatClassInstances;
+            CombatClasses = combatClassTypes.Where(x => x.GetConstructor(new Type[] { typeof(AmeisenBotInterfaces) }) != null)
+                .Select(x => (ICombatClass)Activator.CreateInstance(x, Bot));
         }
 
         private void InitGrindingProfiles()
@@ -641,7 +638,10 @@ namespace AmeisenBotX.Core
         private void OnClassTrainerShow(long timestamp, List<string> args)
         {
             // todo: Config.TrainSpells
-            if (!Bot.Target.IsClassTrainer && !Bot.Target.IsProfessionTrainer) return;
+            if (!Bot.Target.IsClassTrainer && !Bot.Target.IsProfessionTrainer)
+            {
+                return;
+            }
 
             TrainAllSpellsRoutine.Run(Bot, Config);
             Bot.Character.LastLevelTrained = Bot.Player.Level;
@@ -860,6 +860,7 @@ namespace AmeisenBotX.Core
                         case "LOOT_BIND":
                         case "RESURRECT":
                         case "USE_BIND":
+                        case "RECOVER_CORPSE":
                             Bot.Wow.ClickUiElement($"StaticPopup{parts[0]}Button1");
                             break;
 

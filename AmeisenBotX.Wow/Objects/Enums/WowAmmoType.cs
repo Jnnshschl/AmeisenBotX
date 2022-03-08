@@ -1,6 +1,6 @@
 ﻿namespace AmeisenBotX.Wow.Objects.Enums
 {
-    enum WowAmmoType
+    internal enum WowAmmoType
     {
         None = 0,
         Bolts = 1,

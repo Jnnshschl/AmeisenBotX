@@ -60,7 +60,9 @@ namespace AmeisenBotX.Wow.Events
                                 List<Action<long, List<string>>> actions = Events[x.Name];
 
                                 foreach (Action<long, List<string>> action in actions)
+                                {
                                     action(x.Timestamp, x.Arguments);
+                                }
                             }
                         }
                     }
