@@ -111,10 +111,20 @@ namespace AmeisenBotX.Core.Engines.Combat.Classes.Jannis548
                 }
                 else
                 {
-                    if (Bot.Player.Rage > 30)
+                    if (TryCastSpell(Warrior548.Execute, Bot.Wow.TargetGuid, true))
                     {
-                        TryCastSpell(Warrior548.HeroicStrike, Bot.Wow.TargetGuid, true);
+                        return;
                     }
+
+                    if (Bot.Player.Rage > 30 && TryCastSpell(Warrior548.HeroicStrike, Bot.Wow.TargetGuid, true))
+                    {
+                        return;
+                    }
+
+                    //if (Bot.Player.HasBuffById())
+                    //{
+                    TryCastSpell(Warrior548.VictoryRush, Bot.Wow.TargetGuid, true);
+                    //}
                 }
             }
         }

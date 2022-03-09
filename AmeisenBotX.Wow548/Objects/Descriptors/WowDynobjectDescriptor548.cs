@@ -10,7 +10,5 @@ namespace AmeisenBotX.Wow548.Objects.Descriptors
         public int SpellId;
         public float Radius;
         public int CastTime;
-
-        public static readonly int EndOffset = sizeof(WowObjectDescriptor548) + sizeof(WowDynobjectDescriptor548);
     }
 }

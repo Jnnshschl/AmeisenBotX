@@ -10,7 +10,7 @@ using System.Globalization;
 namespace AmeisenBotX.Wow548.Objects
 {
     [Serializable]
-    public class WowGameobject548 : WowObject548, IWowGameobject
+    public unsafe class WowGameobject548 : WowObject548, IWowGameobject
     {
         public byte Bytes0 { get; set; }
 
@@ -35,7 +35,7 @@ namespace AmeisenBotX.Wow548.Objects
         {
             base.Update(memoryApi, offsetList);
 
-            if (memoryApi.Read(DescriptorAddress + WowObjectDescriptor548.EndOffset, out WowGameobjectDescriptor548 objPtr)
+            if (memoryApi.Read(DescriptorAddress + sizeof(WowObjectDescriptor548), out WowGameobjectDescriptor548 objPtr)
                 && memoryApi.Read(IntPtr.Add(BaseAddress, (int)offsetList.WowGameobjectPosition), out Vector3 position))
             {
                 // GameObjectType = (WowGameObjectType)objPtr.GameobjectBytes1;

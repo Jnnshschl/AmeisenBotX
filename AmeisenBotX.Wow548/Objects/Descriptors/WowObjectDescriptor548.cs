@@ -12,7 +12,5 @@ namespace AmeisenBotX.Wow548.Objects.Descriptors
         public int EntryId;
         public BitVector32 DynamicFlags;
         public float Scale;
-
-        public static readonly int EndOffset = sizeof(WowObjectDescriptor548);
     }
 }

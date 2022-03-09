@@ -150,7 +150,5 @@ namespace AmeisenBotX.Wow548.Objects.Descriptors
         public int LootSpecId;
         public int OverrideZonePvpType;
         public int ItemLevelDelta;
-
-        public static readonly int EndOffset = sizeof(WowObjectDescriptor548) + sizeof(WowUnitDescriptor548) + sizeof(WowPlayerDescriptor548);
     }
 }

@@ -108,7 +108,5 @@ namespace AmeisenBotX.Wow548.Objects.Descriptors
         public int WildBattlePetLevel;
         public int BattlePetCompanionNameTimestamp;
         public int InteractSpellId;
-
-        public static readonly int EndOffset = sizeof(WowObjectDescriptor548) + sizeof(WowUnitDescriptor548);
     }
 }

@@ -6,7 +6,7 @@ using AmeisenBotX.Wow548.Objects.Descriptors;
 namespace AmeisenBotX.Wow548.Objects
 {
     [Serializable]
-    public class WowContainer548 : WowObject548, IWowContainer
+    public unsafe class WowContainer548 : WowObject548, IWowContainer
     {
         public int SlotCount => RawWowContainer.SlotCount;
 
@@ -21,7 +21,7 @@ namespace AmeisenBotX.Wow548.Objects
         {
             base.Update(memoryApi, offsetList);
 
-            if (memoryApi.Read(DescriptorAddress + WowObjectDescriptor548.EndOffset, out WowContainerDescriptor548 obj))
+            if (memoryApi.Read(DescriptorAddress + sizeof(WowObjectDescriptor548), out WowContainerDescriptor548 obj))
             {
                 RawWowContainer = obj;
             }

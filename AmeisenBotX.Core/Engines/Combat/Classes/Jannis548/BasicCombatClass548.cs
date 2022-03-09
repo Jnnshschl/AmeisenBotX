@@ -87,8 +87,6 @@ namespace AmeisenBotX.Core.Engines.Combat.Classes.Jannis548
 
         public abstract bool IsMelee { get; }
 
-        public bool IsWanding { get; private set; }
-
         public abstract IItemComparator ItemComparator { get; set; }
 
         public AuraManager MyAuraManager { get; private set; }
@@ -174,14 +172,8 @@ namespace AmeisenBotX.Core.Engines.Combat.Classes.Jannis548
             // --------------------------- >
             if (UseAutoAttacks)
             {
-                IsWanding = Bot.Character.SpellBook.IsSpellKnown("Shoot")
-                    && Bot.Character.Equipment.Items.ContainsKey(WowEquipmentSlot.INVSLOT_RANGED)
-                    && (WowClass == WowClass.Priest || WowClass == WowClass.Mage || WowClass == WowClass.Warlock)
-                    && (IsWanding || TryCastSpell("Shoot", Bot.Wow.TargetGuid));
-
-                if (!IsWanding
-                    && EventAutoAttack.Run()
-                    && !Bot.Player.IsAutoAttacking
+                if (EventAutoAttack.Run()
+                    //&& !Bot.Player.IsAutoAttacking
                     && Bot.Player.IsInMeleeRange(Bot.Target))
                 {
                     Bot.Wow.StartAutoAttack();
@@ -539,7 +531,6 @@ namespace AmeisenBotX.Core.Engines.Combat.Classes.Jannis548
                         CurrentCastTargetGuid = Bot.Target == null || castOnSelf ? Bot.Player.Guid : Bot.Target.Guid;
                         AmeisenLogger.I.Log("CombatClass", $"[{DisplayName}]: Casting Spell \"{spellName}\" on \"{(castOnSelf ? "self" : Bot.Target?.Guid)}\"", LogLevel.Verbose);
                         AmeisenLogger.I.Log("CombatClass", $"[{DisplayName}]: Spell \"{spellName}\" is on cooldown for {cooldown} ms", LogLevel.Verbose);
-                        IsWanding = IsWanding && spellName == "Shoot";
                         return true;
                     }
                     else

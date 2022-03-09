@@ -20,18 +20,18 @@ namespace AmeisenBotX.Core.Engines.Combat.Classes.Jannis548
             Configurables.TryAdd("AttackInGroupsUntilManaPercent", 85.0);
             Configurables.TryAdd("AttackInGroupsCloseCombat", false);
 
-            // HealingManager = new(bot, (string spellName, ulong guid) => { return TryCastSpell(spellName, guid); });
-            // 
-            // // make sure all new spells get added to the healing manager
-            // Bot.Character.SpellBook.OnSpellBookUpdate += () =>
-            // {
-            //     if (Bot.Character.SpellBook.TryGetSpellByName(Paladin548.FlashOfLight, out Spell spellFlashOfLight))
-            //     {
-            //         HealingManager.AddSpell(spellFlashOfLight);
-            //     }
-            // };
-            // 
-            // SpellAbortFunctions.Add(HealingManager.ShouldAbortCasting);
+            HealingManager = new(bot, (string spellName, ulong guid) => { return TryCastSpell(spellName, guid); });
+            
+            // make sure all new spells get added to the healing manager
+            Bot.Character.SpellBook.OnSpellBookUpdate += () =>
+            {
+                if (Bot.Character.SpellBook.TryGetSpellByName(Paladin548.FlashOfLight, out Spell spellFlashOfLight))
+                {
+                    HealingManager.AddSpell(spellFlashOfLight);
+                }
+            };
+            
+            SpellAbortFunctions.Add(HealingManager.ShouldAbortCasting);
         }
 
         public override string Description => "Beta CombatClass for the Holy Paladin spec.";
@@ -95,12 +95,17 @@ namespace AmeisenBotX.Core.Engines.Combat.Classes.Jannis548
                 if ((isAlone || (Configurables["AttackInGroups"] && Configurables["AttackInGroupsUntilManaPercent"] < Bot.Player.ManaPercentage))
                     && SelectTarget(TargetProviderDps))
                 {
+                    if (TryCastSpell(Paladin548.Judgement, Bot.Wow.TargetGuid, true))
+                    {
+                        return;
+                    }
+
                     // either we are alone or allowed to go close combat in groups
                     if (isAlone || Configurables["AttackInGroupsCloseCombat"])
                     {
                         if (Bot.Player.IsInMeleeRange(Bot.Target))
                         {
-                            if (!Bot.Player.IsAutoAttacking && EventAutoAttack.Run())
+                            if (EventAutoAttack.Run())
                             {
                                 Bot.Wow.StartAutoAttack();
                             }
@@ -127,12 +132,12 @@ namespace AmeisenBotX.Core.Engines.Combat.Classes.Jannis548
             {
                 Dictionary<string, JsonElement> s = objects["HealingManager"].To<Dictionary<string, JsonElement>>();
 
-                // if (s.TryGetValue("SpellHealing", out JsonElement j)) { HealingManager.SpellHealing = j.To<Dictionary<string, int>>(); }
-                // if (s.TryGetValue("DamageMonitorSeconds", out j)) { HealingManager.DamageMonitorSeconds = j.To<int>(); }
-                // if (s.TryGetValue("HealthWeight", out j)) { HealingManager.HealthWeightMod = j.To<float>(); }
-                // if (s.TryGetValue("DamageWeight", out j)) { HealingManager.IncomingDamageMod = j.To<float>(); }
-                // if (s.TryGetValue("OverhealingStopThreshold", out j)) { HealingManager.OverhealingStopThreshold = j.To<float>(); }
-                // if (s.TryGetValue("TargetDyingSeconds", out j)) { HealingManager.TargetDyingSeconds = j.To<int>(); }
+                if (s.TryGetValue("SpellHealing", out JsonElement j)) { HealingManager.SpellHealing = j.To<Dictionary<string, int>>(); }
+                if (s.TryGetValue("DamageMonitorSeconds", out j)) { HealingManager.DamageMonitorSeconds = j.To<int>(); }
+                if (s.TryGetValue("HealthWeight", out j)) { HealingManager.HealthWeightMod = j.To<float>(); }
+                if (s.TryGetValue("DamageWeight", out j)) { HealingManager.IncomingDamageMod = j.To<float>(); }
+                if (s.TryGetValue("OverhealingStopThreshold", out j)) { HealingManager.OverhealingStopThreshold = j.To<float>(); }
+                if (s.TryGetValue("TargetDyingSeconds", out j)) { HealingManager.TargetDyingSeconds = j.To<int>(); }
             }
         }
 
@@ -150,22 +155,22 @@ namespace AmeisenBotX.Core.Engines.Combat.Classes.Jannis548
         {
             Dictionary<string, object> s = base.Save();
 
-            // s.Add("HealingManager", new Dictionary<string, object>()
-            // {
-            //     { "SpellHealing", HealingManager.SpellHealing },
-            //     { "DamageMonitorSeconds", HealingManager.DamageMonitorSeconds },
-            //     { "HealthWeight", HealingManager.HealthWeightMod },
-            //     { "DamageWeight", HealingManager.IncomingDamageMod },
-            //     { "OverhealingStopThreshold", HealingManager.OverhealingStopThreshold },
-            //     { "TargetDyingSeconds", HealingManager.TargetDyingSeconds },
-            // });
+            s.Add("HealingManager", new Dictionary<string, object>()
+            {
+                { "SpellHealing", HealingManager.SpellHealing },
+                { "DamageMonitorSeconds", HealingManager.DamageMonitorSeconds },
+                { "HealthWeight", HealingManager.HealthWeightMod },
+                { "DamageWeight", HealingManager.IncomingDamageMod },
+                { "OverhealingStopThreshold", HealingManager.OverhealingStopThreshold },
+                { "TargetDyingSeconds", HealingManager.TargetDyingSeconds },
+            });
 
             return s;
         }
 
         private bool NeedToHealSomeone()
         {
-            return false; // HealingManager.Tick();
+            return HealingManager.Tick();
         }
     }
 }

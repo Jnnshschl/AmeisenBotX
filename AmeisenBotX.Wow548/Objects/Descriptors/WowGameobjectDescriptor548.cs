@@ -13,7 +13,5 @@ namespace AmeisenBotX.Wow548.Objects.Descriptors
         public int Level;
         public int Health;
         public int SpellId;
-
-        public static readonly int EndOffset = sizeof(WowObjectDescriptor548) + sizeof(WowGameobjectDescriptor548);
     }
 }

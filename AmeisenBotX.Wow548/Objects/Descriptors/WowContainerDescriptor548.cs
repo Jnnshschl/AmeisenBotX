@@ -7,7 +7,5 @@ namespace AmeisenBotX.Wow548.Objects.Descriptors
     {
         public fixed long Slots[36];
         public int SlotCount;
-
-        public static readonly int EndOffset = sizeof(WowObjectDescriptor548) + sizeof(WowContainerDescriptor548);
     }
 }

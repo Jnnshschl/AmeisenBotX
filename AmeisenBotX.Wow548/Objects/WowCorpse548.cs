@@ -6,7 +6,7 @@ using AmeisenBotX.Wow548.Objects.Descriptors;
 namespace AmeisenBotX.Wow548.Objects
 {
     [Serializable]
-    public class WowCorpse548 : WowObject548, IWowCorpse
+    public unsafe class WowCorpse548 : WowObject548, IWowCorpse
     {
         public int DisplayId => RawWowCorpse.DisplayId;
 
@@ -25,7 +25,7 @@ namespace AmeisenBotX.Wow548.Objects
         {
             base.Update(memoryApi, offsetList);
 
-            if (memoryApi.Read(DescriptorAddress + WowObjectDescriptor548.EndOffset, out WowCorpseDescriptor548 obj))
+            if (memoryApi.Read(DescriptorAddress + sizeof(WowObjectDescriptor548), out WowCorpseDescriptor548 obj))
             {
                 RawWowCorpse = obj;
             }

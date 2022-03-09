@@ -8,7 +8,7 @@ using AmeisenBotX.Wow548.Objects.Descriptors;
 namespace AmeisenBotX.Wow548.Objects
 {
     [Serializable]
-    public class WowItem548 : WowObject548, IWowItem
+    public unsafe class WowItem548 : WowObject548, IWowItem
     {
         public int Count { get; set; }
 
@@ -40,7 +40,7 @@ namespace AmeisenBotX.Wow548.Objects
         {
             base.Update(memoryApi, offsetList);
 
-            if (memoryApi.Read(DescriptorAddress + WowObjectDescriptor548.EndOffset, out WowItemDescriptor548 objPtr))
+            if (memoryApi.Read(DescriptorAddress + sizeof(WowObjectDescriptor548), out WowItemDescriptor548 objPtr))
             {
                 Count = objPtr.StackCount;
                 Owner = objPtr.Owner;

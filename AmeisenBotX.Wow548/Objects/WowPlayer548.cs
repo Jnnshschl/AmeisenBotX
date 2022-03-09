@@ -10,7 +10,7 @@ using System.Text;
 namespace AmeisenBotX.Wow548.Objects
 {
     [Serializable]
-    public class WowPlayer548 : WowUnit548, IWowPlayer
+    public unsafe class WowPlayer548 : WowUnit548, IWowPlayer
     {
         private VisibleItemEnchantment[] itemEnchantments;
         private QuestlogEntry[] questlogEntries;
@@ -106,7 +106,7 @@ namespace AmeisenBotX.Wow548.Objects
         {
             base.Update(memoryApi, offsetList);
 
-            if (memoryApi.Read(DescriptorAddress + WowObjectDescriptor548.EndOffset + WowUnitDescriptor548.EndOffset, out WowPlayerDescriptor548 obj))
+            if (memoryApi.Read(DescriptorAddress + sizeof(WowObjectDescriptor548) + sizeof(WowUnitDescriptor548), out WowPlayerDescriptor548 obj))
             {
                 RawWowPlayer = obj;
 

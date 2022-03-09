@@ -11,7 +11,7 @@ using System.Text;
 namespace AmeisenBotX.Wow548.Objects
 {
     [Serializable]
-    public class WowUnit548 : WowObject548, IWowUnit
+    public unsafe class WowUnit548 : WowObject548, IWowUnit
     {
         public int AuraCount { get; set; }
 
@@ -53,7 +53,7 @@ namespace AmeisenBotX.Wow548.Objects
 
         public int MaxMana => RawWowUnit.MaxPower1;
 
-        public int MaxRage => RawWowUnit.MaxPower2 / 10;
+        public int MaxRage => 100;
 
         public int MaxRunicPower => 0;
 
@@ -71,7 +71,7 @@ namespace AmeisenBotX.Wow548.Objects
 
         public WowRace Race => (WowRace)RawWowUnit.Race;
 
-        public int Rage => RawWowUnit.Power2 / 10;
+        public int Rage { get; private set; }
 
         public double RagePercentage => BotMath.Percentage(Rage, MaxRage);
 
@@ -177,9 +177,14 @@ namespace AmeisenBotX.Wow548.Objects
         {
             base.Update(memoryApi, offsetList);
 
-            if (memoryApi.Read(DescriptorAddress + WowObjectDescriptor548.EndOffset, out WowUnitDescriptor548 objPtr))
+            if (memoryApi.Read(DescriptorAddress + sizeof(WowObjectDescriptor548), out WowUnitDescriptor548 objPtr))
             {
                 RawWowUnit = objPtr;
+
+                if (Class == WowClass.Warrior && memoryApi.Read(BaseAddress + 0x1460, out int rage))
+                {
+                    Rage = rage / 10;
+                }
             }
 
             Auras = GetUnitAuras(memoryApi, offsetList, BaseAddress, out int auraCount);

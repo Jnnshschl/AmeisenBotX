@@ -7,7 +7,7 @@ using AmeisenBotX.Wow548.Objects.Descriptors;
 namespace AmeisenBotX.Wow548.Objects
 {
     [Serializable]
-    public class WowDynobject548 : WowObject548, IWowDynobject
+    public unsafe class WowDynobject548 : WowObject548, IWowDynobject
     {
         public ulong Caster { get; set; }
 
@@ -24,7 +24,7 @@ namespace AmeisenBotX.Wow548.Objects
         {
             base.Update(memoryApi, offsetList);
 
-            if (memoryApi.Read(DescriptorAddress + WowObjectDescriptor548.EndOffset, out WowDynobjectDescriptor548 objPtr)
+            if (memoryApi.Read(DescriptorAddress + sizeof(WowObjectDescriptor548), out WowDynobjectDescriptor548 objPtr)
                 && memoryApi.Read(IntPtr.Add(BaseAddress, (int)offsetList.WowDynobjectPosition), out Vector3 position))
             {
                 Caster = objPtr.Caster;

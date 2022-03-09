@@ -37,7 +37,5 @@ namespace AmeisenBotX.Wow548.Objects.Descriptors
         public int MaxDurability;
         public int CreatePlayedTime;
         public int Modifiers;
-
-        public static readonly int EndOffset = sizeof(WowObjectDescriptor548) + sizeof(WowItemDescriptor548);
     }
 }

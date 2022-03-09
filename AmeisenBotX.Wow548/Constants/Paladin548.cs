@@ -25,7 +25,7 @@
         public const string HolyShield = "Holy Shield";
         public const string HolyShock = "Holy Shock";
         public const string HolyWrath = "Holy Wrath";
-        public const string JudgementOfLight = "Judgement of Light";
+        public const string Judgement = "Judgement";
         public const string LayOnHands = "Lay on Hands";
         public const string RetributionAura = "Retribution Aura";
         public const string RighteousFury = "Righteous Fury";

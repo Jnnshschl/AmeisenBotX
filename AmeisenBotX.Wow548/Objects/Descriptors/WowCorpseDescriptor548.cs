@@ -13,7 +13,5 @@ namespace AmeisenBotX.Wow548.Objects.Descriptors
         public int FacialHairStyle;
         public int Flags;
         public int DynamicFlags;
-
-        public static readonly int EndOffset = sizeof(WowObjectDescriptor548) + sizeof(WowCorpseDescriptor548);
     }
 }
