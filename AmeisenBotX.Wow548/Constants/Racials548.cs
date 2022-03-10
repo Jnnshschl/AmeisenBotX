@@ -14,5 +14,6 @@
         public const string FindTreasure = "Find Treasure";               // Dwarf
         public const string EscapeArtist = "Escape Artist";               // Gnome
         public const string Shadowmeld = "Shadowmeld";                    // Elf
+        public const string QuakingPalm = "Quaking Palm";                 // Panda
     }
 }

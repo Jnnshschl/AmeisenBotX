@@ -450,7 +450,7 @@ namespace AmeisenBotX.Core.Engines.Battleground.Jannis.Profiles
             {
                 if (!CommonRoutines.MoveToTarget(Bot, nearestFlag.Position, 4.0f) && ActionEvent.Run())
                 {
-                    Bot.Wow.InteractWithObject(nearestFlag.BaseAddress);
+                    Bot.Wow.InteractWithObject(nearestFlag);
                     return BtStatus.Success;
                 }
 

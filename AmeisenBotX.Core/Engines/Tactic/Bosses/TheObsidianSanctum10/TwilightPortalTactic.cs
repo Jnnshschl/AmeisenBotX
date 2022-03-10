@@ -79,7 +79,7 @@ namespace AmeisenBotX.Core.Engines.Tactic.Bosses.TheObsidianSanctum10
             }
             else if (PortalClickEvent.Run())
             {
-                Bot.Wow.InteractWithObject(portal.BaseAddress);
+                Bot.Wow.InteractWithObject(portal);
             }
         }
     }

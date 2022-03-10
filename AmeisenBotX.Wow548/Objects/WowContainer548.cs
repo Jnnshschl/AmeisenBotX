@@ -8,7 +8,7 @@ namespace AmeisenBotX.Wow548.Objects
     [Serializable]
     public unsafe class WowContainer548 : WowObject548, IWowContainer
     {
-        public int SlotCount => RawWowContainer.SlotCount;
+        public int SlotCount => RawWowContainer.NumSlots;
 
         protected WowContainerDescriptor548 RawWowContainer { get; private set; }
 

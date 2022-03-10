@@ -136,7 +136,7 @@ namespace AmeisenBotX.Core.Engines.Combat.Classes.Jannis335a
             {
                 Bot.Wow.StopClickToMove();
                 Bot.Movement.Reset();
-                Bot.Wow.InteractWithUnit(Bot.Target.BaseAddress);
+                Bot.Wow.InteractWithUnit(Bot.Target);
             }
             else if (!Bot.Tactic.PreventMovement)
             {

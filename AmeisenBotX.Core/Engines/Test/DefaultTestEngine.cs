@@ -85,7 +85,7 @@ namespace AmeisenBotX.Core.Engines.Test
                 return BtStatus.Success;
             }
 
-            Bot.Wow.InteractWithUnit(trainer.BaseAddress);
+            Bot.Wow.InteractWithUnit(trainer);
             return BtStatus.Success;
         }
 

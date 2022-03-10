@@ -110,60 +110,57 @@ namespace AmeisenBotX.Wow548.Objects
             {
                 RawWowPlayer = obj;
 
-                // Auras = GetUnitAuras(memoryApi, offsetList, BaseAddress, out int auraCount);
-                // AuraCount = auraCount;
-
-                questlogEntries = new QuestlogEntry[]
-                {
-                    obj.QuestlogEntry1,
-                    obj.QuestlogEntry2,
-                    obj.QuestlogEntry3,
-                    obj.QuestlogEntry4,
-                    obj.QuestlogEntry5,
-                    obj.QuestlogEntry6,
-                    obj.QuestlogEntry7,
-                    obj.QuestlogEntry8,
-                    obj.QuestlogEntry9,
-                    obj.QuestlogEntry10,
-                    obj.QuestlogEntry11,
-                    obj.QuestlogEntry12,
-                    obj.QuestlogEntry13,
-                    obj.QuestlogEntry14,
-                    obj.QuestlogEntry15,
-                    obj.QuestlogEntry16,
-                    obj.QuestlogEntry17,
-                    obj.QuestlogEntry18,
-                    obj.QuestlogEntry19,
-                    obj.QuestlogEntry20,
-                    obj.QuestlogEntry21,
-                    obj.QuestlogEntry22,
-                    obj.QuestlogEntry23,
-                    obj.QuestlogEntry24,
-                    obj.QuestlogEntry25,
-                };
-
-                itemEnchantments = new VisibleItemEnchantment[]
-                {
-                    obj.VisibleItemEnchantment1,
-                    obj.VisibleItemEnchantment2,
-                    obj.VisibleItemEnchantment3,
-                    obj.VisibleItemEnchantment4,
-                    obj.VisibleItemEnchantment5,
-                    obj.VisibleItemEnchantment6,
-                    obj.VisibleItemEnchantment7,
-                    obj.VisibleItemEnchantment8,
-                    obj.VisibleItemEnchantment9,
-                    obj.VisibleItemEnchantment10,
-                    obj.VisibleItemEnchantment11,
-                    obj.VisibleItemEnchantment12,
-                    obj.VisibleItemEnchantment13,
-                    obj.VisibleItemEnchantment14,
-                    obj.VisibleItemEnchantment15,
-                    obj.VisibleItemEnchantment16,
-                    obj.VisibleItemEnchantment17,
-                    obj.VisibleItemEnchantment18,
-                    obj.VisibleItemEnchantment19,
-                };
+                // questlogEntries = new QuestlogEntry[]
+                // {
+                //     obj.QuestlogEntry1,
+                //     obj.QuestlogEntry2,
+                //     obj.QuestlogEntry3,
+                //     obj.QuestlogEntry4,
+                //     obj.QuestlogEntry5,
+                //     obj.QuestlogEntry6,
+                //     obj.QuestlogEntry7,
+                //     obj.QuestlogEntry8,
+                //     obj.QuestlogEntry9,
+                //     obj.QuestlogEntry10,
+                //     obj.QuestlogEntry11,
+                //     obj.QuestlogEntry12,
+                //     obj.QuestlogEntry13,
+                //     obj.QuestlogEntry14,
+                //     obj.QuestlogEntry15,
+                //     obj.QuestlogEntry16,
+                //     obj.QuestlogEntry17,
+                //     obj.QuestlogEntry18,
+                //     obj.QuestlogEntry19,
+                //     obj.QuestlogEntry20,
+                //     obj.QuestlogEntry21,
+                //     obj.QuestlogEntry22,
+                //     obj.QuestlogEntry23,
+                //     obj.QuestlogEntry24,
+                //     obj.QuestlogEntry25,
+                // };
+                // 
+                // itemEnchantments = new VisibleItemEnchantment[]
+                // {
+                //     obj.VisibleItemEnchantment1,
+                //     obj.VisibleItemEnchantment2,
+                //     obj.VisibleItemEnchantment3,
+                //     obj.VisibleItemEnchantment4,
+                //     obj.VisibleItemEnchantment5,
+                //     obj.VisibleItemEnchantment6,
+                //     obj.VisibleItemEnchantment7,
+                //     obj.VisibleItemEnchantment8,
+                //     obj.VisibleItemEnchantment9,
+                //     obj.VisibleItemEnchantment10,
+                //     obj.VisibleItemEnchantment11,
+                //     obj.VisibleItemEnchantment12,
+                //     obj.VisibleItemEnchantment13,
+                //     obj.VisibleItemEnchantment14,
+                //     obj.VisibleItemEnchantment15,
+                //     obj.VisibleItemEnchantment16,
+                //     obj.VisibleItemEnchantment17,
+                //     obj.VisibleItemEnchantment18,
+                //     obj.VisibleItemEnchantment19,
+                // };
             }
 
             if (memoryApi.Read(IntPtr.Add(BaseAddress, (int)offsetList.WowUnitSwimFlags), out IntPtr movementFlagsPtr)

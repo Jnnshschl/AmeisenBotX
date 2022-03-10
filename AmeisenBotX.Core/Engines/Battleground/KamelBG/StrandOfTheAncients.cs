@@ -82,7 +82,7 @@ namespace AmeisenBotX.Core.Engines.Battleground.KamelBG
                     {
                         Bot.Movement.StopMovement();
 
-                        Bot.Wow.InteractWithObject(VehicleNode.BaseAddress);
+                        Bot.Wow.InteractWithObject(VehicleNode);
                     }
                 }
             }

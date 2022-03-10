@@ -21,7 +21,7 @@ namespace AmeisenBotX.Core.Engines.Combat.Classes.Jannis548
             Configurables.TryAdd("AttackInGroupsCloseCombat", false);
 
             HealingManager = new(bot, (string spellName, ulong guid) => { return TryCastSpell(spellName, guid); });
-            
+
             // make sure all new spells get added to the healing manager
             Bot.Character.SpellBook.OnSpellBookUpdate += () =>
             {
@@ -29,8 +29,18 @@ namespace AmeisenBotX.Core.Engines.Combat.Classes.Jannis548
                 {
                     HealingManager.AddSpell(spellFlashOfLight);
                 }
+
+                if (Bot.Character.SpellBook.TryGetSpellByName(Paladin548.HolyShock, out Spell spellHolyShock))
+                {
+                    HealingManager.AddSpell(spellHolyShock);
+                }
+
+                if (Bot.Character.SpellBook.TryGetSpellByName(Paladin548.LayOnHands, out Spell spellLayOnHands))
+                {
+                    HealingManager.AddSpell(spellLayOnHands);
+                }
             };
-            
+
             SpellAbortFunctions.Add(HealingManager.ShouldAbortCasting);
         }
 
@@ -95,7 +105,14 @@ namespace AmeisenBotX.Core.Engines.Combat.Classes.Jannis548
                 if ((isAlone || (Configurables["AttackInGroups"] && Configurables["AttackInGroupsUntilManaPercent"] < Bot.Player.ManaPercentage))
                     && SelectTarget(TargetProviderDps))
                 {
-                    if (TryCastSpell(Paladin548.Judgement, Bot.Wow.TargetGuid, true))
+                    if (TryCastSpell(Paladin548.Judgment, Bot.Wow.TargetGuid, true))
+                    {
+                        return;
+                    }
+
+                    if (Bot.Player.HolyPower > 0
+                        && Bot.Player.HealthPercentage < 85.0
+                        && TryCastAoeSpell(Paladin548.WordOfGlory, Bot.Player.Guid))
                     {
                         return;
                     }
@@ -108,6 +125,12 @@ namespace AmeisenBotX.Core.Engines.Combat.Classes.Jannis548
                             if (EventAutoAttack.Run())
                             {
                                 Bot.Wow.StartAutoAttack();
+                            }
+
+                            if (Bot.Target.IsCasting
+                                && TryCastSpell(Paladin548.HammerOfJustice, Bot.Wow.TargetGuid, true))
+                            {
+                                return;
                             }
 
                             if (TryCastSpell(Paladin548.CrusaderStrike, Bot.Wow.TargetGuid, true))
@@ -144,7 +167,7 @@ namespace AmeisenBotX.Core.Engines.Combat.Classes.Jannis548
         public override void OutOfCombatExecute()
         {
             base.OutOfCombatExecute();
-            
+
             if (NeedToHealSomeone())
             {
                 return;

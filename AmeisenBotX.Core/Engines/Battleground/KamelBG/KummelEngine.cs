@@ -107,7 +107,7 @@ namespace AmeisenBotX.Core.Engines.Battleground.KamelBG
                             Bot.Movement.SetMovementAction(Movement.Enums.MovementAction.Move, ownFlag.Position);
                             if (Bot.Player.Position.GetDistance(ownFlag.Position) < 3.5f)
                             {
-                                Bot.Wow.InteractWithObject(FlagObject.BaseAddress);
+                                Bot.Wow.InteractWithObject(FlagObject);
                             }
                         }
                         else
@@ -156,7 +156,7 @@ namespace AmeisenBotX.Core.Engines.Battleground.KamelBG
                 Bot.Movement.SetMovementAction(Movement.Enums.MovementAction.Move, FlagObject.Position);
                 if (Bot.Player.Position.GetDistance(FlagObject.Position) < 3.5f) // limit the executions
                 {
-                    Bot.Wow.InteractWithObject(FlagObject.BaseAddress);
+                    Bot.Wow.InteractWithObject(FlagObject);
                 }
             }
             else if (startPosition != default)

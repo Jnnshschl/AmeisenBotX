@@ -70,7 +70,7 @@ namespace AmeisenBotX.Core.Engines.Quest.Objects.Objectives
                     {
                         Bot.Movement.Reset();
                         Bot.Wow.StopClickToMove();
-                        Bot.Wow.InteractWithObject(lootableObject.BaseAddress);
+                        Bot.Wow.InteractWithObject(lootableObject);
                     }
                 }
             }

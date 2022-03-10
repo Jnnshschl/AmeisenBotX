@@ -125,7 +125,7 @@ namespace AmeisenBotX.Core.Engines.Combat.Classes.einTyp
             {
                 Bot.Wow.StopClickToMove();
                 Bot.Movement.Reset();
-                Bot.Wow.InteractWithUnit(target.BaseAddress);
+                Bot.Wow.InteractWithUnit(target);
             }
             else
             {

@@ -8,7 +8,8 @@ using System.Text.Json;
 
 namespace AmeisenBotX.Wow.Combatlog
 {
-    public class DefaultCombatlogParser : ICombatlogParser
+    public class DefaultCombatlogParser<T> : ICombatlogParser
+        where T : ICombatlogFields, new()
     {
         public event Action<ulong, ulong, int, int, int> OnDamage;
 
@@ -18,9 +19,11 @@ namespace AmeisenBotX.Wow.Combatlog
 
         public event Action<ulong> OnUnitDied;
 
+        protected T CombatlogFields { get; } = new T();
+
         public void Parse(long timestamp, List<string> args)
         {
-            if (BasicCombatlogEntry.TryParse(args, out BasicCombatlogEntry entry))
+            if (BasicCombatlogEntry.TryParse(CombatlogFields, args, out BasicCombatlogEntry entry))
             {
                 AmeisenLogger.I.Log("CombatLogParser", $"[{timestamp}] Parsing CombatLog: {JsonSerializer.Serialize(args)}", LogLevel.Verbose);
 
@@ -50,9 +53,9 @@ namespace AmeisenBotX.Wow.Combatlog
                         switch (entry.Subtype)
                         {
                             case CombatlogEntrySubtype.DAMAGE:
-                                if (int.TryParse(entry.Args[(int)CombatlogField.SwingDamageAmount], out int damage))
+                                if (int.TryParse(entry.Args[CombatlogFields.SwingDamageAmount], out int damage))
                                 {
-                                    AmeisenLogger.I.Log("CombatLogParser", $"OnDamage({entry.SourceGuid}, {entry.DestinationGuid}, {entry.Args[(int)CombatlogField.SwingDamageAmount]})");
+                                    AmeisenLogger.I.Log("CombatLogParser", $"OnDamage({entry.SourceGuid}, {entry.DestinationGuid}, {entry.Args[CombatlogFields.SwingDamageAmount]})");
                                     OnDamage?.Invoke(entry.SourceGuid, entry.DestinationGuid, -1, damage, 0);
                                 }
                                 break;
@@ -63,21 +66,21 @@ namespace AmeisenBotX.Wow.Combatlog
                         switch (entry.Subtype)
                         {
                             case CombatlogEntrySubtype.DAMAGE:
-                                if (int.TryParse(entry.Args[(int)CombatlogField.SpellAmount], out int spellAmount)
-                                    && int.TryParse(entry.Args[(int)CombatlogField.SpellAmountOver], out int spellAmountOver)
-                                    && int.TryParse(entry.Args[(int)CombatlogField.SpellSpellId], out int spellSpellId))
+                                if (int.TryParse(entry.Args[CombatlogFields.SpellAmount], out int spellAmount)
+                                    && int.TryParse(entry.Args[CombatlogFields.SpellAmountOver], out int spellAmountOver)
+                                    && int.TryParse(entry.Args[CombatlogFields.SpellSpellId], out int spellSpellId))
                                 {
-                                    AmeisenLogger.I.Log("CombatLogParser", $"OnDamage({entry.SourceGuid}, {entry.DestinationGuid}, {entry.Args[(int)CombatlogField.SpellSpellId]}, {entry.Args[(int)CombatlogField.SpellAmount]}, {entry.Args[(int)CombatlogField.SpellAmountOver]})");
+                                    AmeisenLogger.I.Log("CombatLogParser", $"OnDamage({entry.SourceGuid}, {entry.DestinationGuid}, {entry.Args[CombatlogFields.SpellSpellId]}, {entry.Args[CombatlogFields.SpellAmount]}, {entry.Args[CombatlogFields.SpellAmountOver]})");
                                     OnDamage?.Invoke(entry.SourceGuid, entry.DestinationGuid, spellSpellId, spellAmount, spellAmountOver);
                                 }
                                 break;
 
                             case CombatlogEntrySubtype.HEAL:
-                                if (int.TryParse(entry.Args[(int)CombatlogField.SpellAmount], out int spellAmount2)
-                                    && int.TryParse(entry.Args[(int)CombatlogField.SpellAmountOver], out int spellAmountOver2)
-                                    && int.TryParse(entry.Args[(int)CombatlogField.SpellSpellId], out int spellSpellId2))
+                                if (int.TryParse(entry.Args[CombatlogFields.SpellAmount], out int spellAmount2)
+                                    && int.TryParse(entry.Args[CombatlogFields.SpellAmountOver], out int spellAmountOver2)
+                                    && int.TryParse(entry.Args[CombatlogFields.SpellSpellId], out int spellSpellId2))
                                 {
-                                    AmeisenLogger.I.Log("CombatLogParser", $"OnHeal({entry.SourceGuid}, {entry.DestinationGuid}, {entry.Args[(int)CombatlogField.SpellSpellId]}, {entry.Args[(int)CombatlogField.SpellAmount]}, {entry.Args[(int)CombatlogField.SpellAmountOver]})");
+                                    AmeisenLogger.I.Log("CombatLogParser", $"OnHeal({entry.SourceGuid}, {entry.DestinationGuid}, {entry.Args[CombatlogFields.SpellSpellId]}, {entry.Args[CombatlogFields.SpellAmount]}, {entry.Args[CombatlogFields.SpellAmountOver]})");
                                     OnHeal?.Invoke(entry.SourceGuid, entry.DestinationGuid, spellSpellId2, spellAmount2, spellAmountOver2);
                                 }
                                 break;

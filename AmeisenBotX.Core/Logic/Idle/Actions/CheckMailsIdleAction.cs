@@ -75,7 +75,7 @@ namespace AmeisenBotX.Core.Logic.Idle.Actions
 
                     if (mailbox != null)
                     {
-                        Bot.Wow.InteractWithObject(mailbox.BaseAddress);
+                        Bot.Wow.InteractWithObject(mailbox);
                         Bot.Wow.LuaDoString("for i=1,GetInboxNumItems()do AutoLootMailItem(i)end");
                     }
 

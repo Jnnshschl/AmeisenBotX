@@ -143,13 +143,11 @@ namespace AmeisenBotX.Wow
         /// </summary>
         void Dispose();
 
-        void EnableClickToMove();
-
         void EquipItem(string itemName, int slot = -1);
 
         bool ExecuteLuaAndRead((string, string) commandVariableCombo, out string result);
 
-        void FacePosition(IntPtr playerBase, Vector3 playerPosition, Vector3 position);
+        void FacePosition(IntPtr playerBase, Vector3 playerPosition, Vector3 position, bool smooth = false);
 
         IEnumerable<int> GetCompletedQuests();
 
@@ -201,9 +199,9 @@ namespace AmeisenBotX.Wow
 
         int GetUnspentTalentPoints();
 
-        void InteractWithObject(IntPtr objectBase);
+        void InteractWithObject(IWowObject obj);
 
-        void InteractWithUnit(IntPtr unitBase);
+        void InteractWithUnit(IWowUnit unit);
 
         /// <summary>
         /// Gets the state of autoloot.
@@ -260,7 +258,7 @@ namespace AmeisenBotX.Wow
 
         void SendChatMessage(string msg);
 
-        void SetFacing(IntPtr playerBase, float angle);
+        void SetFacing(IntPtr playerBase, float angle, bool smooth = false);
 
         void SetLfgRole(WowRole wowRole);
 

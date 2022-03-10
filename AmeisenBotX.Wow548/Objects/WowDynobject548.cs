@@ -24,7 +24,7 @@ namespace AmeisenBotX.Wow548.Objects
         {
             base.Update(memoryApi, offsetList);
 
-            if (memoryApi.Read(DescriptorAddress + sizeof(WowObjectDescriptor548), out WowDynobjectDescriptor548 objPtr)
+            if (memoryApi.Read(DescriptorAddress + sizeof(WowObjectDescriptor548), out WowDynamicobjectDescriptor548 objPtr)
                 && memoryApi.Read(IntPtr.Add(BaseAddress, (int)offsetList.WowDynobjectPosition), out Vector3 position))
             {
                 Caster = objPtr.Caster;

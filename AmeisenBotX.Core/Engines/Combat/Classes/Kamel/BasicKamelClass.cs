@@ -148,7 +148,7 @@ namespace AmeisenBotX.Core.Engines.Combat.Classes.Kamel
             {
                 Bot.Wow.StopClickToMove();
                 Bot.Movement.Reset();
-                Bot.Wow.InteractWithUnit(target.BaseAddress);
+                Bot.Wow.InteractWithUnit(target);
             }
             else
             {

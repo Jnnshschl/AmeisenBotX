@@ -26,7 +26,7 @@ namespace AmeisenBotX.Core.Logic.Routines
 
             if (!bot.Wow.UiIsVisible("GossipFrame", "MerchantFrame"))
             {
-                bot.Wow.InteractWithUnit(selectedUnit.BaseAddress);
+                bot.Wow.InteractWithUnit(selectedUnit);
                 return false;
             }
 

@@ -121,7 +121,7 @@ namespace AmeisenBotX.Core.Engines.Combat.Classes.Bia10
                         // todo: kinda buggy
                         Bot.Wow.StopClickToMove();
                         Bot.Movement.Reset();
-                        Bot.Wow.InteractWithUnit(target.BaseAddress);
+                        Bot.Wow.InteractWithUnit(target);
                         break;
                     }
 

@@ -79,32 +79,23 @@ namespace AmeisenBotX.Core.Managers.Character
             return item?.ArmorType switch
             {
                 WowArmorType.Plate => Skills.Any(e =>
-                    e.Key.Equals("Plate Mail", StringComparison.OrdinalIgnoreCase)
-                    || e.Key.Equals("Plattenpanzer", StringComparison.OrdinalIgnoreCase)),
+                    e.Key.Equals("Plate Mail", StringComparison.OrdinalIgnoreCase)),
                 WowArmorType.Mail => Skills.Any(e =>
-                    e.Key.Equals("Mail", StringComparison.OrdinalIgnoreCase)
-                    || e.Key.Equals("Panzer", StringComparison.OrdinalIgnoreCase)),
+                    e.Key.Equals("Mail", StringComparison.OrdinalIgnoreCase)),
                 WowArmorType.Leather => Skills.Any(e =>
-                    e.Key.Equals("Leather", StringComparison.OrdinalIgnoreCase)
-                    || e.Key.Equals("Leder", StringComparison.OrdinalIgnoreCase)),
+                    e.Key.Equals("Leather", StringComparison.OrdinalIgnoreCase)),
                 WowArmorType.Cloth => Skills.Any(e =>
-                    e.Key.Equals("Cloth", StringComparison.OrdinalIgnoreCase)
-                    || e.Key.Equals("Stoff", StringComparison.OrdinalIgnoreCase)),
+                    e.Key.Equals("Cloth", StringComparison.OrdinalIgnoreCase)),
                 WowArmorType.Totem => Skills.Any(e =>
-                    e.Key.Equals("Totem", StringComparison.OrdinalIgnoreCase)
-                    || e.Key.Equals("Totem", StringComparison.OrdinalIgnoreCase)),
+                    e.Key.Equals("Totem", StringComparison.OrdinalIgnoreCase)),
                 WowArmorType.Libram => Skills.Any(e =>
-                    e.Key.Equals("Libram", StringComparison.OrdinalIgnoreCase)
-                    || e.Key.Equals("Buchband", StringComparison.OrdinalIgnoreCase)),
+                    e.Key.Equals("Libram", StringComparison.OrdinalIgnoreCase)),
                 WowArmorType.Idol => Skills.Any(e =>
-                    e.Key.Equals("Idol", StringComparison.OrdinalIgnoreCase)
-                    || e.Key.Equals("Götzen", StringComparison.OrdinalIgnoreCase)),
+                    e.Key.Equals("Idol", StringComparison.OrdinalIgnoreCase)),
                 WowArmorType.Sigil => Skills.Any(e =>
-                    e.Key.Equals("Sigil", StringComparison.OrdinalIgnoreCase)
-                    || e.Key.Equals("Siegel", StringComparison.OrdinalIgnoreCase)),
+                    e.Key.Equals("Sigil", StringComparison.OrdinalIgnoreCase)),
                 WowArmorType.Shield => Skills.Any(e =>
-                    e.Key.Equals("Shield", StringComparison.OrdinalIgnoreCase)
-                    || e.Key.Equals("Schild", StringComparison.OrdinalIgnoreCase)),
+                    e.Key.Equals("Shield", StringComparison.OrdinalIgnoreCase)),
                 WowArmorType.Misc => true,
                 _ => false,
             };
@@ -121,50 +112,35 @@ namespace AmeisenBotX.Core.Managers.Character
             return item?.WeaponType switch
             {
                 WowWeaponType.Bow => Skills.Any(e =>
-                    e.Key.Equals("Bows", StringComparison.OrdinalIgnoreCase)
-                    || e.Key.Equals("Bogen", StringComparison.OrdinalIgnoreCase)),
+                    e.Key.Equals("Bows", StringComparison.OrdinalIgnoreCase)),
                 WowWeaponType.Crossbow => Skills.Any(e =>
-                    e.Key.Equals("Crossbows", StringComparison.OrdinalIgnoreCase)
-                    || e.Key.Equals("Armbrüste", StringComparison.OrdinalIgnoreCase)),
+                    e.Key.Equals("Crossbows", StringComparison.OrdinalIgnoreCase)),
                 WowWeaponType.Gun => Skills.Any(e =>
-                    e.Key.Equals("Guns", StringComparison.OrdinalIgnoreCase)
-                    || e.Key.Equals("Schusswaffen", StringComparison.OrdinalIgnoreCase)),
+                    e.Key.Equals("Guns", StringComparison.OrdinalIgnoreCase)),
                 WowWeaponType.Wand => Skills.Any(e =>
-                    e.Key.Equals("Wands", StringComparison.OrdinalIgnoreCase)
-                    || e.Key.Equals("Zauberstäbe", StringComparison.OrdinalIgnoreCase)),
+                    e.Key.Equals("Wands", StringComparison.OrdinalIgnoreCase)),
                 WowWeaponType.Thrown => Skills.Any(e =>
-                    e.Key.Equals("Thrown", StringComparison.OrdinalIgnoreCase)
-                    || e.Key.Equals("Wurfwaffe", StringComparison.OrdinalIgnoreCase)),
+                    e.Key.Equals("Thrown", StringComparison.OrdinalIgnoreCase)),
                 WowWeaponType.Axe => Skills.Any(e =>
-                    e.Key.Equals("Axes", StringComparison.OrdinalIgnoreCase)
-                    || e.Key.Equals("Einhandäxte", StringComparison.OrdinalIgnoreCase)),
+                    e.Key.Equals("Axes", StringComparison.OrdinalIgnoreCase)),
                 WowWeaponType.AxeTwoHand => Skills.Any(e =>
-                    e.Key.Equals("Two-Handed Axes", StringComparison.OrdinalIgnoreCase)
-                    || e.Key.Equals("Zweihandäxte", StringComparison.OrdinalIgnoreCase)),
+                    e.Key.Equals("Two-Handed Axes", StringComparison.OrdinalIgnoreCase)),
                 WowWeaponType.Mace => Skills.Any(e =>
-                    e.Key.Equals("Maces", StringComparison.OrdinalIgnoreCase)
-                    || e.Key.Equals("Einhandstreitkolben", StringComparison.OrdinalIgnoreCase)),
+                    e.Key.Equals("Maces", StringComparison.OrdinalIgnoreCase)),
                 WowWeaponType.MaceTwoHand => Skills.Any(e =>
-                    e.Key.Equals("Two-Handed Maces", StringComparison.OrdinalIgnoreCase)
-                    || e.Key.Equals("Zweihandstreitkolben", StringComparison.OrdinalIgnoreCase)),
+                    e.Key.Equals("Two-Handed Maces", StringComparison.OrdinalIgnoreCase)),
                 WowWeaponType.Sword => Skills.Any(e =>
-                    e.Key.Equals("Swords", StringComparison.OrdinalIgnoreCase)
-                    || e.Key.Equals("Einhandschwerter", StringComparison.OrdinalIgnoreCase)),
+                    e.Key.Equals("Swords", StringComparison.OrdinalIgnoreCase)),
                 WowWeaponType.SwordTwoHand => Skills.Any(e =>
-                    e.Key.Equals("Two-Handed Swords", StringComparison.OrdinalIgnoreCase)
-                    || e.Key.Equals("Zweihandschwerter", StringComparison.OrdinalIgnoreCase)),
+                    e.Key.Equals("Two-Handed Swords", StringComparison.OrdinalIgnoreCase)),
                 WowWeaponType.Dagger => Skills.Any(e =>
-                    e.Key.Equals("Daggers", StringComparison.OrdinalIgnoreCase)
-                    || e.Key.Equals("Dolche", StringComparison.OrdinalIgnoreCase)),
+                    e.Key.Equals("Daggers", StringComparison.OrdinalIgnoreCase)),
                 WowWeaponType.Fist => Skills.Any(e =>
-                    e.Key.Equals("Fist Weapons", StringComparison.OrdinalIgnoreCase)
-                    || e.Key.Equals("Faustwaffen", StringComparison.OrdinalIgnoreCase)),
+                    e.Key.Equals("Fist Weapons", StringComparison.OrdinalIgnoreCase)),
                 WowWeaponType.Polearm => Skills.Any(e =>
-                    e.Key.Equals("Polearms", StringComparison.OrdinalIgnoreCase)
-                    || e.Key.Equals("Stangenwaffen", StringComparison.OrdinalIgnoreCase)),
+                    e.Key.Equals("Polearms", StringComparison.OrdinalIgnoreCase)),
                 WowWeaponType.Staff => Skills.Any(e =>
-                    e.Key.Equals("Staves", StringComparison.OrdinalIgnoreCase)
-                    || e.Key.Equals("Stäbe", StringComparison.OrdinalIgnoreCase)),
+                    e.Key.Equals("Staves", StringComparison.OrdinalIgnoreCase)),
                 WowWeaponType.FishingPole => true,
                 WowWeaponType.Misc => true,
                 _ => false,

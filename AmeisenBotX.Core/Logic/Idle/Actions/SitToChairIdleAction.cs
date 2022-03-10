@@ -73,7 +73,7 @@ namespace AmeisenBotX.Core.Logic.Idle.Actions
                 else
                 {
                     Bot.Movement.StopMovement();
-                    Bot.Wow.InteractWithObject(CurrentSeat.BaseAddress);
+                    Bot.Wow.InteractWithObject(CurrentSeat);
 
                     SatDown = true;
                 }

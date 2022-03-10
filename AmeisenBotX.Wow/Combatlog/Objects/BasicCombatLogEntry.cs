@@ -28,7 +28,7 @@ namespace AmeisenBotX.Wow.Combatlog.Objects
 
         public CombatlogEntryType Type { get; set; }
 
-        public static bool TryParse(List<string> eventArgs, out BasicCombatlogEntry basicCombatLogEntry)
+        public static bool TryParse(ICombatlogFields fields, List<string> eventArgs, out BasicCombatlogEntry basicCombatLogEntry)
         {
             basicCombatLogEntry = new BasicCombatlogEntry();
 
@@ -39,7 +39,7 @@ namespace AmeisenBotX.Wow.Combatlog.Objects
 
             basicCombatLogEntry.Args = eventArgs;
 
-            if (double.TryParse(eventArgs[(int)CombatlogField.Timestamp].Replace(".", ""), NumberStyles.Any, CultureInfo.InvariantCulture, out double millis))
+            if (double.TryParse(eventArgs[fields.Timestamp].Replace(".", ""), NumberStyles.Any, CultureInfo.InvariantCulture, out double millis))
             {
                 basicCombatLogEntry.Timestamp = DateTimeOffset.FromUnixTimeMilliseconds((long)millis).LocalDateTime;
             }
@@ -48,7 +48,7 @@ namespace AmeisenBotX.Wow.Combatlog.Objects
                 return false;
             }
 
-            string[] splitted = eventArgs[(int)CombatlogField.Type]
+            string[] splitted = eventArgs[fields.Type]
                 .Replace("SPELL_BUILDING", "SPELLBUILDING")
                 .Replace("SPELL_PERIODIC", "SPELLPERIODIC")
                 .Split(new char[] { '_' }, 2);
@@ -69,7 +69,7 @@ namespace AmeisenBotX.Wow.Combatlog.Objects
                 return false;
             }
 
-            if (ulong.TryParse(eventArgs[(int)CombatlogField.Source].Replace("0x", ""), NumberStyles.HexNumber, CultureInfo.CurrentCulture, out ulong sourceGuid))
+            if (ulong.TryParse(eventArgs[fields.Source].Replace("0x", ""), NumberStyles.HexNumber, CultureInfo.CurrentCulture, out ulong sourceGuid))
             {
                 basicCombatLogEntry.SourceGuid = sourceGuid;
             }
@@ -77,9 +77,10 @@ namespace AmeisenBotX.Wow.Combatlog.Objects
             {
                 return false;
             }
-            basicCombatLogEntry.SourceName = eventArgs[(int)CombatlogField.SourceName];
 
-            if (int.TryParse(eventArgs[(int)CombatlogField.Flags], out int flags))
+            basicCombatLogEntry.SourceName = eventArgs[fields.SourceName];
+
+            if (int.TryParse(eventArgs[fields.Flags], out int flags))
             {
                 basicCombatLogEntry.Flags = flags;
             }
@@ -88,7 +89,7 @@ namespace AmeisenBotX.Wow.Combatlog.Objects
                 return false;
             }
 
-            if (ulong.TryParse(eventArgs[(int)CombatlogField.DestinationGuid].Replace("0x", ""), NumberStyles.HexNumber, CultureInfo.CurrentCulture, out ulong destGuid))
+            if (ulong.TryParse(eventArgs[fields.DestinationGuid].Replace("0x", ""), NumberStyles.HexNumber, CultureInfo.CurrentCulture, out ulong destGuid))
             {
                 basicCombatLogEntry.DestinationGuid = destGuid;
             }
@@ -97,9 +98,9 @@ namespace AmeisenBotX.Wow.Combatlog.Objects
                 return false;
             }
 
-            basicCombatLogEntry.DestinationName = eventArgs[(int)CombatlogField.DestinationName];
+            basicCombatLogEntry.DestinationName = eventArgs[fields.DestinationName];
 
-            if (int.TryParse(eventArgs[(int)CombatlogField.TargetFlags], out int targetFlags))
+            if (int.TryParse(eventArgs[fields.TargetFlags], out int targetFlags))
             {
                 basicCombatLogEntry.TargetFlags = targetFlags;
             }

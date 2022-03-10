@@ -25,7 +25,7 @@ namespace AmeisenBotX.Core.Logic.Routines
 
             if (!bot.Wow.UiIsVisible("GossipFrame"))
             {
-                bot.Wow.InteractWithUnit(selectedUnit.BaseAddress);
+                bot.Wow.InteractWithUnit(selectedUnit);
             }
 
             if (!selectedUnit.IsGossip)

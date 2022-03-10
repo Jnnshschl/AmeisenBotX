@@ -53,8 +53,6 @@ namespace AmeisenBotX.Wow.Objects
 
         bool IsDazed => UnitFlags[(int)WowUnitFlag.Dazed];
 
-        bool IsDead => (Health == 0 || UnitFlagsDynamic[(int)WowUnitDynamicFlag.Dead]) && !UnitFlags2[(int)WowUnit2Flag.FeignDeath];
-
         bool IsDisarmed => UnitFlags[(int)WowUnitFlag.Disarmed];
 
         bool IsFleeing => UnitFlags[(int)WowUnitFlag.Fleeing];
@@ -76,8 +74,6 @@ namespace AmeisenBotX.Wow.Objects
         bool IsInnkeeper => NpcFlags[(int)WowUnitNpcFlag.Innkeeper];
 
         bool IsInTaxiFlight => UnitFlags[(int)WowUnitFlag.TaxiFlight];
-
-        bool IsLootable => UnitFlagsDynamic[(int)WowUnitDynamicFlag.Lootable];
 
         bool IsLooting => UnitFlags[(int)WowUnitFlag.Looting];
 
@@ -109,8 +105,6 @@ namespace AmeisenBotX.Wow.Objects
 
         bool IsReagentVendor => NpcFlags[(int)WowUnitNpcFlag.ReagentVendor];
 
-        bool IsReferAFriendLinked => UnitFlagsDynamic[(int)WowUnitDynamicFlag.ReferAFriendLinked];
-
         bool IsRepairer => NpcFlags[(int)WowUnitNpcFlag.Repairer];
 
         bool IsSilenced => UnitFlags[(int)WowUnitFlag.Silenced];
@@ -118,8 +112,6 @@ namespace AmeisenBotX.Wow.Objects
         bool IsSitting => UnitFlags[(int)WowUnitFlag.Sitting];
 
         bool IsSkinnable => UnitFlags[(int)WowUnitFlag.Skinnable];
-
-        bool IsSpecialInfo => UnitFlagsDynamic[(int)WowUnitDynamicFlag.SpecialInfo];
 
         bool IsSpellclick => NpcFlags[(int)WowUnitNpcFlag.Spellclick];
 
@@ -131,19 +123,27 @@ namespace AmeisenBotX.Wow.Objects
 
         bool IsTabardDesigner => NpcFlags[(int)WowUnitNpcFlag.TabardDesigner];
 
-        bool IsTaggedByMe => UnitFlagsDynamic[(int)WowUnitDynamicFlag.TaggedByMe];
-
-        bool IsTaggedByOther => UnitFlagsDynamic[(int)WowUnitDynamicFlag.TaggedByOther];
-
-        bool IsTappedByAllThreatList => UnitFlagsDynamic[(int)WowUnitDynamicFlag.IsTappedByAllThreatList];
-
         bool IsTotem => UnitFlags[(int)WowUnitFlag.Totem];
-
-        bool IsTrackedUnit => UnitFlagsDynamic[(int)WowUnitDynamicFlag.TrackUnit];
 
         bool IsTrainer => NpcFlags[(int)WowUnitNpcFlag.Trainer];
 
         bool IsVendor => NpcFlags[(int)WowUnitNpcFlag.Vendor];
+
+        bool IsDead { get; }
+
+        bool IsLootable { get; }
+
+        bool IsReferAFriendLinked { get; }
+
+        bool IsSpecialInfo { get; }
+
+        bool IsTaggedByMe { get; }
+
+        bool IsTaggedByOther { get; }
+
+        bool IsTappedByAllThreatList { get; }
+
+        bool IsTrackedUnit { get; }
 
         int Level { get; }
 
@@ -170,6 +170,10 @@ namespace AmeisenBotX.Wow.Objects
         WowRace Race { get; }
 
         int Rage { get; }
+
+        int HolyPower { get; }
+
+        int MaxHolyPower { get; }
 
         double RagePercentage { get; }
 

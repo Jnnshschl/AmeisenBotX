@@ -884,7 +884,7 @@ namespace AmeisenBotX.Core.Logic
                 else
                 {
                     Bot.Wow.StopClickToMove();
-                    Bot.Wow.InteractWithUnit(unit.BaseAddress);
+                    Bot.Wow.InteractWithUnit(unit);
                     ++LootTry;
                 }
             }
@@ -1305,7 +1305,8 @@ namespace AmeisenBotX.Core.Logic
                 Bot.Wow.Events?.Start();
 
                 Bot.Wow.LuaDoString($"SetCVar(\"maxfps\", {Config.MaxFps});SetCVar(\"maxfpsbk\", {Config.MaxFps})");
-                // Bot.Wow.EnableClickToMove();
+                Bot.Wow.LuaDoString("SetCVar(\"AutoInteract\", 1)");
+                Bot.Wow.LuaDoString("SetCVar(\"autoLootDefault\", 0)");
 
                 if (Config.AutoSetUlowGfxSettings)
                 {

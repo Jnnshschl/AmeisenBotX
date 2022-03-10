@@ -26,6 +26,7 @@ using AmeisenBotX.Core.Engines.Tactic;
 using AmeisenBotX.Core.Engines.Test;
 using AmeisenBotX.Core.Logic;
 using AmeisenBotX.Core.Logic.Idle.Actions;
+using AmeisenBotX.Core.Logic.Idle.Actions.Utils;
 using AmeisenBotX.Core.Logic.Routines;
 using AmeisenBotX.Core.Managers.Character;
 using AmeisenBotX.Core.Managers.Character.Inventory;
@@ -44,7 +45,9 @@ using AmeisenBotX.Wow.Combatlog;
 using AmeisenBotX.Wow.Objects;
 using AmeisenBotX.Wow.Objects.Enums;
 using AmeisenBotX.Wow335a;
+using AmeisenBotX.Wow335a.Combatlog.Enums;
 using AmeisenBotX.Wow548;
+using AmeisenBotX.Wow548.Combatlog.Enums;
 using Microsoft.CSharp;
 using System;
 using System.CodeDom.Compiler;
@@ -139,8 +142,9 @@ namespace AmeisenBotX.Core
                 new AuctionHouseIdleAction(Bot),
                 new CheckMailsIdleAction(Bot),
                 new FishingIdleAction(Bot),
-                new LookAroundIdleAction(Bot),
-                new LookAtGroupIdleAction(Bot),
+                new SheathWeaponIdleAction(Bot),
+                new OpenMapIdleAction(Bot),
+                new FcfsIdleAction(new() { new LookAtGroupmemberIdleAction(Bot), new LookAtGroupIdleAction(Bot), new LookAroundIdleAction(Bot) }),
                 new RandomEmoteIdleAction(Bot),
                 new SitByCampfireIdleAction(Bot),
                 new SitToChairIdleAction(Bot, Config.MinFollowDistance),
@@ -165,7 +169,12 @@ namespace AmeisenBotX.Core
             PoiCacheEvent = new TimegatedEvent(TimeSpan.FromSeconds(2));
             Bot.Objects.OnObjectUpdateComplete += OnObjectUpdateComplete;
 
-            Bot.CombatLog = new DefaultCombatlogParser();
+            Bot.CombatLog = wowBuild switch
+            {
+                (int)WowVersion.WotLK335a => new DefaultCombatlogParser<CombatlogFields335a>(),
+                (int)WowVersion.MoP548 => new DefaultCombatlogParser<CombatlogFields548>(),
+                _ => throw new ArgumentException($"Unsupported wow version: {wowBuild}"),
+            };
 
             // setup all instances that use the whole Bot class last
             Bot.Dungeon = new DefaultDungeonEngine(Bot, Config);

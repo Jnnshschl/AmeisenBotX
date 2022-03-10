@@ -88,7 +88,7 @@ namespace AmeisenBotX.Core.Engines.Battleground.einTyp
                     if (IsAtPosition(ownFlag.Position))
                     {
                         // own flag reached, save it!
-                        Bot.Wow.InteractWithObject(ownFlag.BaseAddress);
+                        Bot.Wow.InteractWithObject(ownFlag);
                         hasStateChanged = true;
                     }
                 }
@@ -235,7 +235,7 @@ namespace AmeisenBotX.Core.Engines.Battleground.einTyp
                         {
                             // flag reached, save it!
                             hasStateChanged = true;
-                            Bot.Wow.InteractWithObject(enemyFlag.BaseAddress);
+                            Bot.Wow.InteractWithObject(enemyFlag);
                         }
                     }
                     else
@@ -279,7 +279,7 @@ namespace AmeisenBotX.Core.Engines.Battleground.einTyp
                     {
                         // flag reached, save it!
                         hasStateChanged = true;
-                        Bot.Wow.InteractWithObject(enemyFlag.BaseAddress);
+                        Bot.Wow.InteractWithObject(enemyFlag);
                     }
                 }
                 else

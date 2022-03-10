@@ -3,7 +3,7 @@
 namespace AmeisenBotX.Wow548.Objects.Descriptors
 {
     [StructLayout(LayoutKind.Sequential)]
-    public unsafe struct WowDynobjectDescriptor548
+    public unsafe struct WowDynamicobjectDescriptor548
     {
         public ulong Caster;
         public int TypeAndVisualId;

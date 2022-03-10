@@ -296,11 +296,6 @@ namespace AmeisenBotX.Wow335a
             Hook.Unhook();
         }
 
-        public void EnableClickToMove()
-        {
-            // TODO
-        }
-
         public void EquipItem(string newItem, int itemSlot = -1)
         {
             if (itemSlot == -1)
@@ -320,9 +315,9 @@ namespace AmeisenBotX.Wow335a
             return Hook.ExecuteLuaAndRead(p, out result);
         }
 
-        public void FacePosition(IntPtr playerBase, Vector3 playerPosition, Vector3 position)
+        public void FacePosition(IntPtr playerBase, Vector3 playerPosition, Vector3 position, bool smooth = false)
         {
-            Hook.FacePosition(playerBase, playerPosition, position);
+            Hook.FacePosition(playerBase, playerPosition, position, smooth);
         }
 
         public IEnumerable<int> GetCompletedQuests()
@@ -582,14 +577,14 @@ namespace AmeisenBotX.Wow335a
             return ExecuteLuaInt(BotUtils.ObfuscateLua("{v:0}=GetUnspentTalentPoints()"));
         }
 
-        public void InteractWithObject(IntPtr objectBase)
+        public void InteractWithObject(IWowObject obj)
         {
-            Hook.ObjectRightClick(objectBase);
+            Hook.ObjectRightClick(obj.BaseAddress);
         }
 
-        public void InteractWithUnit(IntPtr unitBase)
+        public void InteractWithUnit(IWowUnit unit)
         {
-            Hook.InteractWithUnit(unitBase);
+            Hook.InteractWithUnit(unit.BaseAddress);
         }
 
         public bool IsAutoLootEnabled()
@@ -857,9 +852,9 @@ namespace AmeisenBotX.Wow335a
             LuaDoString($"DEFAULT_CHAT_FRAME.editBox:SetText(\"{message}\") ChatEdit_SendText(DEFAULT_CHAT_FRAME.editBox, 0)");
         }
 
-        public void SetFacing(IntPtr playerBase, float angle)
+        public void SetFacing(IntPtr playerBase, float angle, bool smooth = false)
         {
-            Hook.SetFacing(playerBase, angle);
+            Hook.SetFacing(playerBase, angle, smooth);
         }
 
         public void SetLfgRole(WowRole combatClassRole)

@@ -98,7 +98,7 @@ namespace AmeisenBotX.Core.Engines.Battleground.KamelBG
 
                     if (CaptureFlagEvent.Run())
                     {
-                        Bot.Wow.InteractWithObject(FlagNode.BaseAddress);
+                        Bot.Wow.InteractWithObject(FlagNode);
                     }
                 }
                 else

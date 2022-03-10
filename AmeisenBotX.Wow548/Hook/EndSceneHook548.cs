@@ -4,7 +4,7 @@ using AmeisenBotX.Logging;
 using AmeisenBotX.Logging.Enums;
 using AmeisenBotX.Memory;
 using AmeisenBotX.Wow.Hook;
-using AmeisenBotX.Wow.Offsets;
+using AmeisenBotX.Wow548.Offsets;
 using System.Globalization;
 using System.Runtime.CompilerServices;
 using System.Text;
@@ -13,7 +13,7 @@ namespace AmeisenBotX.Wow548.Hook
 {
     public class EndSceneHook548 : GenericEndSceneHook
     {
-        public EndSceneHook548(IMemoryApi memoryApi, IOffsetList offsetList)
+        public EndSceneHook548(IMemoryApi memoryApi, OffsetList548 offsetList)
             : base(memoryApi, offsetList)
         {
             Memory = memoryApi;
@@ -23,7 +23,7 @@ namespace AmeisenBotX.Wow548.Hook
 
         private IMemoryApi Memory { get; }
 
-        private IOffsetList OffsetList { get; }
+        private OffsetList548 OffsetList { get; }
 
         /// <summary>
         /// Used to save the old render flags of wow.
@@ -138,9 +138,9 @@ namespace AmeisenBotX.Wow548.Hook
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public void SetFacing(IntPtr unitBase, float angle)
+        public void SetFacing(IntPtr unitBase, float angle, bool smooth = false)
         {
-            CallObjectFunction(unitBase, OffsetList.FunctionUnitSetFacing, new()
+            CallObjectFunction(unitBase, smooth ? OffsetList.FunctionUnitSetFacingSmooth : OffsetList.FunctionUnitSetFacing, new()
             {
                 angle.ToString(CultureInfo.InvariantCulture).Replace(',', '.'),
                 Environment.TickCount
@@ -244,9 +244,18 @@ namespace AmeisenBotX.Wow548.Hook
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public void InteractWithUnit(IntPtr unitBase)
+        public void InteractWithUnit(ulong guid)
         {
-            CallObjectFunction(unitBase, OffsetList.FunctionUnitOnRightClick);
+            byte[] guidBytes = BitConverter.GetBytes(guid);
+
+            InjectAndExecute(new string[]
+            {
+                $"PUSH {BitConverter.ToUInt32(guidBytes, 4)}",
+                $"PUSH {BitConverter.ToUInt32(guidBytes, 0)}",
+                $"CALL {OffsetList.FunctionUnitOnRightClick}",
+                "ADD ESP, 0x8",
+                "RET"
+            });
         }
 
         public void ClickOnTerrain(Vector3 position)
@@ -351,9 +360,9 @@ namespace AmeisenBotX.Wow548.Hook
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public void FacePosition(IntPtr playerBase, Vector3 playerPosition, Vector3 positionToFace)
+        public void FacePosition(IntPtr playerBase, Vector3 playerPosition, Vector3 positionToFace, bool smooth = false)
         {
-            SetFacing(playerBase, BotMath.GetFacingAngle(playerPosition, positionToFace));
+            SetFacing(playerBase, BotMath.GetFacingAngle(playerPosition, positionToFace), smooth);
         }
 
         public bool GetLocalizedText(string variable, out string result)

@@ -1,4 +1,5 @@
-﻿using System.Runtime.InteropServices;
+﻿using System.Collections.Specialized;
+using System.Runtime.InteropServices;
 
 namespace AmeisenBotX.Wow548.Objects.Descriptors
 {
@@ -6,12 +7,12 @@ namespace AmeisenBotX.Wow548.Objects.Descriptors
     public unsafe struct WowCorpseDescriptor548
     {
         public ulong Owner;
-        public ulong Party;
+        public ulong PartyGuid;
         public int DisplayId;
         public fixed int Items[19];
         public int SkinId;
-        public int FacialHairStyle;
-        public int Flags;
-        public int DynamicFlags;
+        public int FacialHairStyleId;
+        public BitVector32 Flags;
+        public BitVector32 DynamicFlags;
     }
 }

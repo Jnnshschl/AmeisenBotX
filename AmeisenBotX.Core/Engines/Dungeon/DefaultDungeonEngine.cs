@@ -237,7 +237,7 @@ namespace AmeisenBotX.Core.Engines.Dungeon
                                 Bot.Movement.Reset();
                                 Bot.Wow.StopClickToMove();
 
-                                Bot.Wow.InteractWithObject(nearestGameobject.BaseAddress);
+                                Bot.Wow.InteractWithObject(nearestGameobject);
                             }
 
                             return BtStatus.Ongoing;
@@ -278,7 +278,7 @@ namespace AmeisenBotX.Core.Engines.Dungeon
                                         Bot.Movement.Reset();
                                         Bot.Wow.StopClickToMove();
 
-                                        Bot.Wow.InteractWithObject(nearestGameobject.BaseAddress);
+                                        Bot.Wow.InteractWithObject(nearestGameobject);
                                         Bot.Wow.LootEverything();
                                     }
 

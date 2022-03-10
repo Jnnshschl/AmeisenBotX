@@ -62,7 +62,7 @@ namespace AmeisenBotX.Core.Engines.Quest.Objects.Objectives
                         Bot.Wow.StopClickToMove();
                         Bot.Movement.Reset();
 
-                        Bot.Wow.InteractWithObject(IWowGameobject.BaseAddress);
+                        Bot.Wow.InteractWithObject(IWowGameobject);
                     }
                 }
                 else

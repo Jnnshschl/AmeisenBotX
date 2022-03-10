@@ -1,9 +1,9 @@
 ﻿using System;
 
-namespace AmeisenBotX.Wow.Objects.Flags
+namespace AmeisenBotX.Wow335a.Objects.Flags
 {
     [Flags]
-    public enum WowUnitDynamicFlag
+    public enum WowUnitDynamicFlags335a
     {
         None = 0x0,
         Lootable = 0x1,

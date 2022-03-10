@@ -144,7 +144,7 @@ namespace AmeisenBotX.Wow548
 
             ObjectManager = new(memoryApi, Offsets);
 
-            Hook = new(memoryApi, Offsets);
+            Hook = new(memoryApi, OffsetList);
             Hook.OnGameInfoPush += ObjectManager.HookManagerOnGameInfoPush;
         }
 
@@ -293,11 +293,6 @@ namespace AmeisenBotX.Wow548
             Hook.Unhook();
         }
 
-        public void EnableClickToMove()
-        {
-            // TODO
-        }
-
         public void EquipItem(string newItem, int itemSlot = -1)
         {
             if (itemSlot == -1)
@@ -317,9 +312,9 @@ namespace AmeisenBotX.Wow548
             return Hook.ExecuteLuaAndRead(p, out result);
         }
 
-        public void FacePosition(IntPtr playerBase, Vector3 playerPosition, Vector3 position)
+        public void FacePosition(IntPtr playerBase, Vector3 playerPosition, Vector3 position, bool smooth = false)
         {
-            Hook.FacePosition(playerBase, playerPosition, position);
+            Hook.FacePosition(playerBase, playerPosition, position, smooth);
         }
 
         public IEnumerable<int> GetCompletedQuests()
@@ -472,38 +467,155 @@ namespace AmeisenBotX.Wow548
         public Dictionary<string, (int, int)> GetSkills()
         {
             // TODO: adjust this for mop
-            Dictionary<string, (int, int)> parsedSkills = new();
+            Dictionary<string, (int, int)> skills = new();
 
-            // try
-            // {
-            //     ExecuteLuaAndRead(
-            //         BotUtils.ObfuscateLua(
-            //             "{v:0}=\"\"{v:1}=GetNumSkillLines()for a=1,{v:1} do local b,c,_,d,_,_,e=GetSkillLineInfo(a)if not c then {v:0}={v:0}..b;if a<{v:1} then {v:0}={v:0}..\":\"..tostring(d or 0)..\"/\"..tostring(e or 0)..\";\"end end end"),
-            //         out string result);
-            // 
-            //     if (!string.IsNullOrEmpty(result))
-            //     {
-            //         IEnumerable<string> skills = new List<string>(result.Split(';')).Select(s => s.Trim());
-            // 
-            //         foreach (string x in skills)
-            //         {
-            //             string[] splittedParts = x.Split(":");
-            //             string[] maxSkill = splittedParts[1].Split("/");
-            // 
-            //             if (int.TryParse(maxSkill[0], out int currentSkillLevel)
-            //                 && int.TryParse(maxSkill[1], out int maxSkillLevel))
-            //             {
-            //                 parsedSkills.Add(splittedParts[0], (currentSkillLevel, maxSkillLevel));
-            //             }
-            //         }
-            //     }
-            // }
-            // catch
-            // {
-            //     // ignored
-            // }
+            switch (Player.Class)
+            {
+                case WowClass.Paladin:
+                case WowClass.Warrior:
+                    skills.Add("Plate Mail", (999, 999));
+                    skills.Add("Mail", (999, 999));
+                    skills.Add("Leather", (999, 999));
+                    skills.Add("Cloth", (999, 999));
+                    skills.Add("Shield", (999, 999));
+                    break;
 
-            return parsedSkills;
+                case WowClass.Deathknight:
+                    skills.Add("Plate Mail", (999, 999));
+                    skills.Add("Mail", (999, 999));
+                    skills.Add("Leather", (999, 999));
+                    skills.Add("Cloth", (999, 999));
+                    break;
+
+                case WowClass.Hunter:
+                case WowClass.Shaman:
+                    skills.Add("Mail", (999, 999));
+                    skills.Add("Leather", (999, 999));
+                    skills.Add("Cloth", (999, 999));
+                    break;
+
+                case WowClass.Druid:
+                case WowClass.Rogue:
+                case WowClass.Monk:
+                    skills.Add("Leather", (999, 999));
+                    skills.Add("Cloth", (999, 999));
+                    break;
+
+                case WowClass.Priest:
+                case WowClass.Mage:
+                case WowClass.Warlock:
+                    skills.Add("Cloth", (999, 999));
+                    break;
+
+                default:
+                    break;
+            }
+
+            switch (Player.Class)
+            {
+                case WowClass.Warrior:
+                    skills.Add("Axes", (999, 999));
+                    skills.Add("Two-Handed Axes", (999, 999));
+                    skills.Add("Daggers", (999, 999));
+                    skills.Add("Fist Weapons", (999, 999));
+                    skills.Add("Maces", (999, 999));
+                    skills.Add("Two-Handed Maces", (999, 999));
+                    skills.Add("Polearms", (999, 999));
+                    skills.Add("Staves", (999, 999));
+                    skills.Add("Swords", (999, 999));
+                    skills.Add("Two-Handed Swords", (999, 999));
+                    break;
+
+                case WowClass.Paladin:
+                    skills.Add("Axes", (999, 999));
+                    skills.Add("Two-Handed Axes", (999, 999));
+                    skills.Add("Maces", (999, 999));
+                    skills.Add("Two-Handed Maces", (999, 999));
+                    skills.Add("Polearms", (999, 999));
+                    skills.Add("Swords", (999, 999));
+                    skills.Add("Two-Handed Swords", (999, 999));
+                    break;
+
+                case WowClass.Hunter:
+                    skills.Add("Bows", (999, 999));
+                    skills.Add("Crossbows", (999, 999));
+                    skills.Add("Guns", (999, 999));
+
+                    skills.Add("Axes", (999, 999));
+                    skills.Add("Two-Handed Axes", (999, 999));
+                    skills.Add("Daggers", (999, 999));
+                    skills.Add("Fist Weapons", (999, 999));
+                    skills.Add("Polearms", (999, 999));
+                    skills.Add("Staves", (999, 999));
+                    skills.Add("Swords", (999, 999));
+                    skills.Add("Two-Handed Swords", (999, 999));
+                    break;
+
+                case WowClass.Rogue:
+                    skills.Add("Daggers", (999, 999));
+                    skills.Add("Fist Weapons", (999, 999));
+                    skills.Add("Axes", (999, 999));
+                    skills.Add("Maces", (999, 999));
+                    skills.Add("Swords", (999, 999));
+                    break;
+
+                case WowClass.Priest:
+                    skills.Add("Daggers", (999, 999));
+                    skills.Add("Maces", (999, 999));
+                    skills.Add("Staves", (999, 999));
+                    skills.Add("Wands", (999, 999));
+                    break;
+
+                case WowClass.Shaman:
+                    skills.Add("Axes", (999, 999));
+                    skills.Add("Daggers", (999, 999));
+                    skills.Add("Fist Weapons", (999, 999));
+                    skills.Add("Maces", (999, 999));
+                    skills.Add("Two-Handed Maces", (999, 999));
+                    skills.Add("Staves", (999, 999));
+                    break;
+
+                case WowClass.Mage:
+                case WowClass.Warlock:
+                    skills.Add("Daggers", (999, 999));
+                    skills.Add("Staves", (999, 999));
+                    skills.Add("Swords", (999, 999));
+                    skills.Add("Wands", (999, 999));
+                    break;
+
+                case WowClass.Monk:
+                    skills.Add("Polearms", (999, 999));
+                    skills.Add("Staves", (999, 999));
+                    skills.Add("Axes", (999, 999));
+                    skills.Add("Fist Weapons", (999, 999));
+                    skills.Add("Maces", (999, 999));
+                    skills.Add("Swords", (999, 999));
+                    break;
+
+                case WowClass.Druid:
+                    skills.Add("Daggers", (999, 999));
+                    skills.Add("Fist Weapons", (999, 999));
+                    skills.Add("Maces", (999, 999));
+                    skills.Add("Two-Handed Maces", (999, 999));
+                    skills.Add("Polearms", (999, 999));
+                    skills.Add("Staves", (999, 999));
+                    break;
+
+                case WowClass.Deathknight:
+                    skills.Add("Axes", (999, 999));
+                    skills.Add("Two-Handed Axes", (999, 999));
+                    skills.Add("Maces", (999, 999));
+                    skills.Add("Two-Handed Maces", (999, 999));
+                    skills.Add("Polearms", (999, 999));
+                    skills.Add("Swords", (999, 999));
+                    skills.Add("Two-Handed Swords", (999, 999));
+                    break;
+
+                default:
+                    break;
+            }
+
+            return skills;
         }
 
         public int GetSpellCooldown(string spellName)
@@ -533,7 +645,37 @@ namespace AmeisenBotX.Wow548
 
         public string GetSpells()
         {
-            return ExecuteLuaAndRead(BotUtils.ObfuscateLua("{v:0}='['{v:1}=GetNumSpellTabs()for a=1,{v:1} do {v:2},{v:3},{v:4},{v:5}=GetSpellTabInfo(a)for b={v:4}+1,{v:4}+{v:5} do {v:6},{v:7}=GetSpellBookItemName(b,\"BOOKTYPE_SPELL\")if {v:6} then {v:8},{v:9},_,{v:10},_,_,{v:11},{v:12},{v:13}=GetSpellInfo({v:6}){v:0}={v:0}..'{'..'\"spellbookName\": \"'..tostring({v:2} or 0)..'\",'..'\"spellbookId\": \"'..tostring(a or 0)..'\",'..'\"name\": \"'..tostring({v:6} or 0)..'\",'..'\"rank\": \"'..tostring({v:9} or 0)..'\",'..'\"castTime\": \"'..tostring({v:11} or 0)..'\",'..'\"minRange\": \"'..tostring({v:12} or 0)..'\",'..'\"maxRange\": \"'..tostring({v:13} or 0)..'\",'..'\"costs\": \"'..tostring({v:10} or 0)..'\"'..'}'if a<{v:1} or b<{v:4}+{v:5} then {v:0}={v:0}..','end end end end;{v:0}={v:0}..']'"), out string result) ? result : string.Empty;
+            return ExecuteLuaAndRead(BotUtils.ObfuscateLua(@"
+                {v:0}='['
+                {v:1}=GetNumSpellTabs()
+
+                for a=1,{v:1} do 
+                    local {v:2},{v:3},{v:4},{v:5}=GetSpellTabInfo(a)
+                
+                    for b={v:4}+1,{v:4}+{v:5} do 
+                        local {v:6},{v:7}=GetSpellBookItemName(b,""BOOKTYPE_SPELL"")
+
+                        if {v:6} then 
+                            local {v:8},{v:9},_,{v:10},_,_,{v:11},{v:12},{v:13}=GetSpellInfo({v:6})
+
+                            local firstSplitOk, _, {v:14}=pcall(strsplit, "":"", GetSpellLink({v:6}))
+
+                            if firstSplitOk then
+                                local secondSplitOk, {v:14}=pcall(strsplit, ""|"", {v:14})
+
+                                if secondSplitOk and IsSpellKnown({v:14}, false) then
+                                    {v:0}={v:0}..'{'..'""spellbookName"": ""'..tostring({v:2} or 0)..'"",'..'""spellbookId"": ""'..tostring(a or 0)..'"",'..'""name"": ""'..tostring({v:6} or 0)..'"",'..'""rank"": ""'..tostring({v:9} or 0)..'"",'..'""castTime"": ""'..tostring({v:11} or 0)..'"",'..'""minRange"": ""'..tostring({v:12} or 0)..'"",'..'""maxRange"": ""'..tostring({v:13} or 0)..'"",'..'""costs"": ""'..tostring({v:10} or 0)..'""'..'}'
+                
+                                    if a<{v:1} or b<{v:4}+{v:5} then 
+                                        {v:0}={v:0}..','
+                                    end 
+                                end
+                            end
+                        end 
+                    end 
+                end;
+                
+                {v:0}={v:0}..']'"), out string result) ? result : string.Empty;
         }
 
         public string GetTalents()
@@ -581,14 +723,14 @@ namespace AmeisenBotX.Wow548
             return ExecuteLuaInt(BotUtils.ObfuscateLua("{v:0}=GetUnspentTalentPoints()"));
         }
 
-        public void InteractWithObject(IntPtr objectBase)
+        public void InteractWithObject(IWowObject obj)
         {
-            Hook.ObjectRightClick(objectBase);
+            Hook.InteractWithUnit(obj.Guid);
         }
 
-        public void InteractWithUnit(IntPtr unitBase)
+        public void InteractWithUnit(IWowUnit unit)
         {
-            Hook.InteractWithUnit(unitBase);
+            Hook.InteractWithUnit(unit.Guid);
         }
 
         public bool IsAutoLootEnabled()
@@ -856,9 +998,9 @@ namespace AmeisenBotX.Wow548
             LuaDoString($"DEFAULT_CHAT_FRAME.editBox:SetText(\"{message}\") ChatEdit_SendText(DEFAULT_CHAT_FRAME.editBox, 0)");
         }
 
-        public void SetFacing(IntPtr playerBase, float angle)
+        public void SetFacing(IntPtr playerBase, float angle, bool smooth = false)
         {
-            Hook.SetFacing(playerBase, angle);
+            Hook.SetFacing(playerBase, angle, smooth);
         }
 
         public void SetLfgRole(WowRole combatClassRole)

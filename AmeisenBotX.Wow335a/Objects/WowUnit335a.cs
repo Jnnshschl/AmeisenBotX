@@ -2,8 +2,10 @@
 using AmeisenBotX.Memory;
 using AmeisenBotX.Wow.Objects;
 using AmeisenBotX.Wow.Objects.Enums;
+using AmeisenBotX.Wow.Objects.Flags;
 using AmeisenBotX.Wow.Offsets;
 using AmeisenBotX.Wow335a.Objects.Descriptors;
+using AmeisenBotX.Wow335a.Objects.Flags;
 using AmeisenBotX.Wow335a.Objects.Raw;
 using System;
 using System.Collections.Generic;
@@ -76,6 +78,10 @@ namespace AmeisenBotX.Wow335a.Objects
 
         public int Rage => RawWowUnit.Power2 / 10;
 
+        public int HolyPower => 0;
+
+        public int MaxHolyPower => 0;
+
         public double RagePercentage => BotMath.Percentage(Rage, MaxRage);
 
         public float Rotation { get; set; }
@@ -109,6 +115,22 @@ namespace AmeisenBotX.Wow335a.Objects
         public BitVector32 UnitFlags2 => RawWowUnit.Flags2;
 
         public BitVector32 UnitFlagsDynamic => RawWowUnit.DynamicFlags;
+
+        public bool IsDead => (Health == 0 || UnitFlagsDynamic[(int)WowUnitDynamicFlags335a.Dead]) && !UnitFlags2[(int)WowUnit2Flag.FeignDeath];
+
+        public bool IsLootable => UnitFlagsDynamic[(int)WowUnitDynamicFlags335a.Lootable];
+
+        public bool IsReferAFriendLinked => UnitFlagsDynamic[(int)WowUnitDynamicFlags335a.ReferAFriendLinked];
+
+        public bool IsSpecialInfo => UnitFlagsDynamic[(int)WowUnitDynamicFlags335a.SpecialInfo];
+
+        public bool IsTaggedByMe => UnitFlagsDynamic[(int)WowUnitDynamicFlags335a.TaggedByMe];
+
+        public bool IsTaggedByOther => UnitFlagsDynamic[(int)WowUnitDynamicFlags335a.TaggedByOther];
+
+        public bool IsTappedByAllThreatList => UnitFlagsDynamic[(int)WowUnitDynamicFlags335a.IsTappedByAllThreatList];
+
+        public bool IsTrackedUnit => UnitFlagsDynamic[(int)WowUnitDynamicFlags335a.TrackUnit];
 
         protected WowUnitDescriptor335a RawWowUnit { get; private set; }
 

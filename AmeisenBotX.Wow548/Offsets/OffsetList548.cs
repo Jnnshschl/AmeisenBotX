@@ -78,6 +78,8 @@ namespace AmeisenBotX.Wow548.Offsets
 
         public IntPtr FunctionUnitSetFacing { get; private set; }
 
+        public IntPtr FunctionUnitSetFacingSmooth { get; private set; }
+
         public IntPtr FunctionWorldFrame { get; } = new(0x0);
 
         public IntPtr FunctionWorldRender { get; } = new(0x0);
@@ -193,7 +195,8 @@ namespace AmeisenBotX.Wow548.Offsets
             FunctionSetTarget = IntPtr.Add(mainModuleBase, 0x8CE510);
             FunctionTraceline = IntPtr.Add(mainModuleBase, 0x5EEF7B);
             FunctionUnitOnRightClick = IntPtr.Add(mainModuleBase, 0x8D0268);
-            FunctionUnitSetFacing = IntPtr.Add(mainModuleBase, 0x41ADE7); // Smooth: 0x41A41F
+            FunctionUnitSetFacing = IntPtr.Add(mainModuleBase, 0x41ADE7);
+            FunctionUnitSetFacingSmooth = IntPtr.Add(mainModuleBase, 0x41A41F);
             FunctionUnitGetReaction = IntPtr.Add(mainModuleBase, 0x4153C3);
             GameState = IntPtr.Add(mainModuleBase, 0xD65B16);
             IsIngame = IntPtr.Add(mainModuleBase, 0xB935C0);

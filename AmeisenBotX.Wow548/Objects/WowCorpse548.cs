@@ -12,7 +12,7 @@ namespace AmeisenBotX.Wow548.Objects
 
         public ulong Owner => RawWowCorpse.Owner;
 
-        public ulong Party => RawWowCorpse.Party;
+        public ulong Party => RawWowCorpse.PartyGuid;
 
         protected WowCorpseDescriptor548 RawWowCorpse { get; private set; }
 

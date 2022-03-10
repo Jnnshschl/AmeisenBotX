@@ -119,7 +119,7 @@ namespace AmeisenBotX.Core.Engines.Jobs
 
                         if (MailSentEvent.Run())
                         {
-                            Bot.Wow.InteractWithObject(mailboxNode.BaseAddress);
+                            Bot.Wow.InteractWithObject(mailboxNode);
                             Bot.Wow.LuaDoString("MailFrameTab2:Click();");
 
                             int usedItems = 0;
@@ -246,7 +246,7 @@ namespace AmeisenBotX.Core.Engines.Jobs
                         }
                         else
                         {
-                            Bot.Wow.InteractWithObject(node.BaseAddress);
+                            Bot.Wow.InteractWithObject(node);
                         }
                     }
 

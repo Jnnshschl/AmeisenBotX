@@ -1,4 +1,5 @@
-﻿using System.Runtime.InteropServices;
+﻿using System.Collections.Specialized;
+using System.Runtime.InteropServices;
 
 namespace AmeisenBotX.Wow548.Objects.Descriptors
 {
@@ -7,11 +8,11 @@ namespace AmeisenBotX.Wow548.Objects.Descriptors
     {
         public ulong CreatedBy;
         public int DisplayId;
-        public int Flags;
-        public fixed float ParentRotations[4];
-        public int Faction;
+        public BitVector32 Flags;
+        public fixed float ParentRotation[4];
+        public int FactionTemplate;
         public int Level;
-        public int Health;
-        public int SpellId;
+        public int PercentHealth;
+        public int StateSpellVisualId;
     }
 }

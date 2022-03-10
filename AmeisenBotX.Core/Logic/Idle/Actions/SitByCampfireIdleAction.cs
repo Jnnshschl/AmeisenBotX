@@ -54,7 +54,7 @@ namespace AmeisenBotX.Core.Logic.Idle.Actions
 
             if (nearCampfire != null && !SatDown)
             {
-                Bot.Wow.FacePosition(Bot.Player.BaseAddress, Bot.Player.Position, nearCampfire.Position);
+                Bot.Wow.FacePosition(Bot.Player.BaseAddress, Bot.Player.Position, nearCampfire.Position, true);
                 Bot.Wow.SendChatMessage(Rnd.Next(0, 2) == 1 ? "/sit" : "/sleep");
                 SatDown = true;
             }

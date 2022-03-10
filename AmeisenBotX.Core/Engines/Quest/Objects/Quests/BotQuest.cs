@@ -241,11 +241,11 @@ namespace AmeisenBotX.Core.Engines.Quest.Objects.Quests
         {
             if (obj.GetType() == typeof(IWowGameobject))
             {
-                Bot.Wow.InteractWithObject(obj.BaseAddress);
+                Bot.Wow.InteractWithObject(obj);
             }
             else if (obj.GetType() == typeof(IWowUnit))
             {
-                Bot.Wow.InteractWithUnit(obj.BaseAddress);
+                Bot.Wow.InteractWithUnit((IWowUnit)obj);
             }
         }
     }

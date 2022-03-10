@@ -2,9 +2,11 @@
 using AmeisenBotX.Memory;
 using AmeisenBotX.Wow.Objects;
 using AmeisenBotX.Wow.Objects.Enums;
+using AmeisenBotX.Wow.Objects.Flags;
 using AmeisenBotX.Wow.Offsets;
 using AmeisenBotX.Wow335a.Objects.Raw;
 using AmeisenBotX.Wow548.Objects.Descriptors;
+using AmeisenBotX.Wow548.Objects.Flags;
 using System.Collections.Specialized;
 using System.Text;
 
@@ -53,7 +55,7 @@ namespace AmeisenBotX.Wow548.Objects
 
         public int MaxMana => RawWowUnit.MaxPower1;
 
-        public int MaxRage => 100;
+        public int MaxRage => RawWowUnit.MaxPower1 / 10;
 
         public int MaxRunicPower => 0;
 
@@ -65,13 +67,17 @@ namespace AmeisenBotX.Wow548.Objects
             _ => MaxMana,
         };
 
-        public BitVector32 NpcFlags => RawWowUnit.NpcFlags;
+        public BitVector32 NpcFlags => RawWowUnit.NpcFlags1;
 
         public WowPowerType PowerType => (WowPowerType)RawWowUnit.PowerType;
 
         public WowRace Race => (WowRace)RawWowUnit.Race;
 
-        public int Rage { get; private set; }
+        public int Rage => RawWowUnit.Power1 / 10;
+
+        public int HolyPower => RawWowUnit.Power2;
+
+        public int MaxHolyPower => RawWowUnit.MaxPower2;
 
         public double RagePercentage => BotMath.Percentage(Rage, MaxRage);
 
@@ -104,6 +110,22 @@ namespace AmeisenBotX.Wow548.Objects
         public BitVector32 UnitFlags => RawWowUnit.Flags1;
 
         public BitVector32 UnitFlags2 => RawWowUnit.Flags2;
+
+        public bool IsDead => (Health == 0 || UnitFlagsDynamic[(int)WowUnitDynamicFlags548.Dead]) && !UnitFlags2[(int)WowUnit2Flag.FeignDeath];
+
+        public bool IsLootable => UnitFlagsDynamic[(int)WowUnitDynamicFlags548.Lootable];
+
+        public bool IsReferAFriendLinked => UnitFlagsDynamic[(int)WowUnitDynamicFlags548.ReferAFriendLinked];
+
+        public bool IsSpecialInfo => UnitFlagsDynamic[(int)WowUnitDynamicFlags548.SpecialInfo];
+
+        public bool IsTaggedByMe => UnitFlagsDynamic[(int)WowUnitDynamicFlags548.TaggedByMe];
+
+        public bool IsTaggedByOther => UnitFlagsDynamic[(int)WowUnitDynamicFlags548.TaggedByOther];
+
+        public bool IsTappedByAllThreatList => UnitFlagsDynamic[(int)WowUnitDynamicFlags548.IsTappedByAllThreatList];
+
+        public bool IsTrackedUnit => UnitFlagsDynamic[(int)WowUnitDynamicFlags548.TrackUnit];
 
         protected WowUnitDescriptor548 RawWowUnit { get; private set; }
 
@@ -180,11 +202,6 @@ namespace AmeisenBotX.Wow548.Objects
             if (memoryApi.Read(DescriptorAddress + sizeof(WowObjectDescriptor548), out WowUnitDescriptor548 objPtr))
             {
                 RawWowUnit = objPtr;
-
-                if (Class == WowClass.Warrior && memoryApi.Read(BaseAddress + 0x1460, out int rage))
-                {
-                    Rage = rage / 10;
-                }
             }
 
             Auras = GetUnitAuras(memoryApi, offsetList, BaseAddress, out int auraCount);

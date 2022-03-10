@@ -5,6 +5,7 @@ using AmeisenBotX.Core.Managers.Character.Talents.Objects;
 using AmeisenBotX.Wow.Objects;
 using AmeisenBotX.Wow.Objects.Enums;
 using AmeisenBotX.Wow548.Constants;
+using System.Linq;
 
 namespace AmeisenBotX.Core.Engines.Combat.Classes.Jannis548
 {
@@ -104,27 +105,48 @@ namespace AmeisenBotX.Core.Engines.Combat.Classes.Jannis548
 
                 if (distanceToTarget > 8.0)
                 {
-                    if (TryCastSpellWarrior(Warrior548.Charge, Warrior548.BattleStance, Bot.Wow.TargetGuid, true))
+                    if (TryCastSpellWarrior(Warrior548.Charge, Warrior548.DefensiveStance, Bot.Wow.TargetGuid, true))
                     {
                         return;
                     }
                 }
                 else
                 {
-                    if (TryCastSpell(Warrior548.Execute, Bot.Wow.TargetGuid, true))
+                    if (Bot.Target.HealthPercentage < 20.0
+                        && TryCastSpell(Warrior548.Execute, Bot.Wow.TargetGuid, true))
                     {
                         return;
                     }
 
-                    if (Bot.Player.Rage > 30 && TryCastSpell(Warrior548.HeroicStrike, Bot.Wow.TargetGuid, true))
+                    if (TryCastSpellWarrior(Warrior548.ShieldSlam, Warrior548.DefensiveStance, Bot.Wow.TargetGuid, true))
                     {
                         return;
                     }
 
-                    //if (Bot.Player.HasBuffById())
-                    //{
-                    TryCastSpell(Warrior548.VictoryRush, Bot.Wow.TargetGuid, true);
-                    //}
+                    bool hasVictoriousBuff = Bot.Player.Auras.Any(e => Bot.Db.GetSpellName(e.SpellId) == Warrior548.Victorious);
+
+                    if (hasVictoriousBuff
+                        && Bot.Player.HealthPercentage < 80.0
+                        && TryCastSpell(Warrior548.VictoryRush, Bot.Wow.TargetGuid, true))
+                    {
+                        return;
+                    }
+
+                    // 60 rage is used because we want to still be able to instantly cast Execute below 30% hp
+                    int rageToSave = Bot.Target.HealthPercentage < 30.0 ? 30 : 0;
+
+
+                    if (Bot.Player.Rage > (30 + rageToSave) && TryCastSpell(Warrior548.HeroicStrike, Bot.Wow.TargetGuid, true))
+                    {
+                        return;
+                    }
+
+                    // when we got nothing to do, use Victory Rush
+                    if (hasVictoriousBuff
+                        && TryCastSpell(Warrior548.VictoryRush, Bot.Wow.TargetGuid, true))
+                    {
+                        return;
+                    }
                 }
             }
         }

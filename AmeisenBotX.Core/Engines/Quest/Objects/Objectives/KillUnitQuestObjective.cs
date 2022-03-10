@@ -32,7 +32,7 @@ namespace AmeisenBotX.Core.Engines.Quest.Objects.Objectives
 
         private KillUnitQuestObjectiveCondition Condition { get; }
 
-        private IWowUnit IWowUnit { get; set; }
+        private IWowUnit Unit { get; set; }
 
         private Dictionary<int, int> ObjectDisplayIds { get; }
 
@@ -45,13 +45,13 @@ namespace AmeisenBotX.Core.Engines.Quest.Objects.Objectives
                 && !Bot.Target.IsNotAttackable
                 && Bot.Db.GetReaction(Bot.Player, Bot.Target) != WowUnitReaction.Friendly)
             {
-                IWowUnit = Bot.Target;
+                Unit = Bot.Target;
             }
             else
             {
                 Bot.Wow.ClearTarget();
 
-                IWowUnit = Bot.Objects.WowObjects
+                Unit = Bot.Objects.WowObjects
                     .OfType<IWowUnit>()
                     .Where(e => !e.IsDead && ObjectDisplayIds.Values.Contains(e.DisplayId))
                     .OrderBy(e => e.Position.GetDistance(Bot.Player.Position))
@@ -59,17 +59,17 @@ namespace AmeisenBotX.Core.Engines.Quest.Objects.Objectives
                     .FirstOrDefault();
             }
 
-            if (IWowUnit != null)
+            if (Unit != null)
             {
-                if (IWowUnit.Position.GetDistance(Bot.Player.Position) < 3.0)
+                if (Unit.Position.GetDistance(Bot.Player.Position) < 3.0)
                 {
                     Bot.Wow.StopClickToMove();
                     Bot.Movement.Reset();
-                    Bot.Wow.InteractWithUnit(IWowUnit.BaseAddress);
+                    Bot.Wow.InteractWithUnit(Unit);
                 }
                 else
                 {
-                    Bot.Movement.SetMovementAction(MovementAction.Move, IWowUnit.Position);
+                    Bot.Movement.SetMovementAction(MovementAction.Move, Unit.Position);
                 }
             }
         }

@@ -141,8 +141,9 @@ namespace AmeisenBotX.Wow335a.Hook
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public void SetFacing(IntPtr unitBase, float angle)
+        public void SetFacing(IntPtr unitBase, float angle, bool smooth = false)
         {
+            // smooth not supported for now
             CallObjectFunction(unitBase, OffsetList.FunctionUnitSetFacing, new()
             {
                 angle.ToString(CultureInfo.InvariantCulture).Replace(',', '.'),
@@ -354,9 +355,9 @@ namespace AmeisenBotX.Wow335a.Hook
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public void FacePosition(IntPtr playerBase, Vector3 playerPosition, Vector3 positionToFace)
+        public void FacePosition(IntPtr playerBase, Vector3 playerPosition, Vector3 positionToFace, bool smooth = false)
         {
-            SetFacing(playerBase, BotMath.GetFacingAngle(playerPosition, positionToFace));
+            SetFacing(playerBase, BotMath.GetFacingAngle(playerPosition, positionToFace), smooth);
         }
 
         public bool GetLocalizedText(string variable, out string result)

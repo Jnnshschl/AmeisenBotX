@@ -42,7 +42,7 @@ namespace AmeisenBotX.Wow548.Objects
                 CreatedBy = objPtr.CreatedBy;
                 // Bytes0 = objPtr.GameobjectBytes0;
                 DisplayId = objPtr.DisplayId;
-                Faction = objPtr.Faction;
+                Faction = objPtr.FactionTemplate;
                 Flags = new(objPtr.Flags);
                 Level = objPtr.Level;
                 Position = position;
