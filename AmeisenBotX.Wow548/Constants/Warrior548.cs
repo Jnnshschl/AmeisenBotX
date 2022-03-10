@@ -11,5 +11,10 @@
         public const string DefensiveStance = "Defensive Stance";
         public const string ShieldSlam = "Shield Slam";
         public const string Taunt = "Taunt";
+        public const string ThunderClap = "Thunder Clap"; 
+        public const string ShieldBlock = "Shield Block";
+        public const string SunderAmor = "Sunder Armor";
+        public const string WeakenedAmor = "Weakened Armor";
+        public const string HeroicThrow = "Heroic Throw";
     }
 }

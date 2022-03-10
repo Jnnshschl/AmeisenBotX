@@ -105,6 +105,11 @@ namespace AmeisenBotX.Core.Engines.Combat.Classes.Jannis548
 
                 if (distanceToTarget > 8.0)
                 {
+                    if (TryCastSpell(Warrior548.HeroicThrow, Bot.Wow.TargetGuid, true))
+                    {
+                        return;
+                    }
+
                     if (TryCastSpellWarrior(Warrior548.Charge, Warrior548.DefensiveStance, Bot.Wow.TargetGuid, true))
                     {
                         return;
@@ -112,13 +117,14 @@ namespace AmeisenBotX.Core.Engines.Combat.Classes.Jannis548
                 }
                 else
                 {
-                    if (Bot.Target.HealthPercentage < 20.0
-                        && TryCastSpell(Warrior548.Execute, Bot.Wow.TargetGuid, true))
+                    if (Bot.Player.HealthPercentage < 50.0
+                        && TryCastSpell(Warrior548.ShieldBlock, Bot.Wow.TargetGuid, true))
                     {
                         return;
                     }
 
-                    if (TryCastSpellWarrior(Warrior548.ShieldSlam, Warrior548.DefensiveStance, Bot.Wow.TargetGuid, true))
+                    if (Bot.Target.HealthPercentage < 20.0
+                        && TryCastSpell(Warrior548.Execute, Bot.Wow.TargetGuid, true))
                     {
                         return;
                     }
@@ -132,9 +138,33 @@ namespace AmeisenBotX.Core.Engines.Combat.Classes.Jannis548
                         return;
                     }
 
+                    if (Bot.Target.TargetGuid != Bot.Wow.PlayerGuid
+                        && TryCastSpell(Warrior548.Taunt, Bot.Wow.TargetGuid))
+                    {
+                        return;
+                    }
+
+                    if (TryCastSpellWarrior(Warrior548.ShieldSlam, Warrior548.DefensiveStance, Bot.Wow.TargetGuid, true))
+                    {
+                        return;
+                    }
+
                     // 60 rage is used because we want to still be able to instantly cast Execute below 30% hp
                     int rageToSave = Bot.Target.HealthPercentage < 30.0 ? 30 : 0;
+                    int nearEnemies = Bot.GetNearEnemies<IWowUnit>(Bot.Player.Position, 10.0f).Count();
 
+                    if ((nearEnemies > 2 || Bot.Player.Rage > (rageToSave + 30))
+                        && TryCastSpell(Warrior548.ThunderClap, Bot.Wow.TargetGuid, true))
+                    {
+                        return;
+                    }
+
+                    if (Bot.Player.Rage > (rageToSave + 15)
+                        && !Bot.Player.Auras.Any(e => Bot.Db.GetSpellName(e.SpellId) == Warrior548.WeakenedAmor)
+                        && TryCastSpell(Warrior548.SunderAmor, Bot.Wow.TargetGuid, true))
+                    {
+                        return;
+                    }
 
                     if (Bot.Player.Rage > (30 + rageToSave) && TryCastSpell(Warrior548.HeroicStrike, Bot.Wow.TargetGuid, true))
                     {
