@@ -691,6 +691,8 @@ namespace AmeisenBotX.Wow548
                                         {v:0}={v:0}..','
                                     end
                                 end
+                            else
+                                print({v:6}..' failed to get link...')
                             end
                         end
                     end
