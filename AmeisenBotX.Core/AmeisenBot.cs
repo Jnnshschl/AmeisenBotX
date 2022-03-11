@@ -645,6 +645,12 @@ namespace AmeisenBotX.Core
 
                 Bot.Character.Inventory.Update();
             }
+
+            // open dungeon bags automatically
+            foreach (IWowInventoryItem item in Bot.Character.Inventory.Items.Where(e => e.Id == 52001))
+            {
+                Bot.Wow.UseItemByName(item.Name);
+            }
         }
 
         private void OnBattlegroundStatusChanged(string s)

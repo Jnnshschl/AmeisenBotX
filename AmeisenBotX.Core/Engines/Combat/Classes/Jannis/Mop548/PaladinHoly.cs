@@ -50,18 +50,18 @@ namespace AmeisenBotX.Core.Engines.Combat.Classes.Jannis.Mop548
                     HealingManager.AddSpell(spellLayOnHands);
                 }
 
-                if (Bot.Character.SpellBook.TryGetSpellByName(Paladin548.HolyRadiance, out Spell spellHolyRadiance))
-                {
-                    HealingManager.AddSpell(spellHolyRadiance);
-                }
+                // if (Bot.Character.SpellBook.TryGetSpellByName(Paladin548.HolyRadiance, out Spell spellHolyRadiance))
+                // {
+                //     HealingManager.AddSpell(spellHolyRadiance);
+                // }
 
-                if (Bot.Character.SpellBook.TryGetSpellByName(Paladin548.HolyLight, out Spell spellHolyLight))
-                {
-                    HealingManager.AddSpell(spellHolyLight);
-                }
+                // if (Bot.Character.SpellBook.TryGetSpellByName(Paladin548.HolyLight, out Spell spellHolyLight))
+                // {
+                //     HealingManager.AddSpell(spellHolyLight);
+                // }
             };
 
-            SpellAbortFunctions.Add(HealingManager.ShouldAbortCasting);
+            // SpellAbortFunctions.Add(HealingManager.ShouldAbortCasting);
         }
 
         public override string Description => "Beta CombatClass for the Holy Paladin spec.";
@@ -170,7 +170,8 @@ namespace AmeisenBotX.Core.Engines.Combat.Classes.Jannis.Mop548
                                 return;
                             }
 
-                            if (TryCastSpell(Paladin548.Denounce, Bot.Wow.TargetGuid, true))
+                            if (!Bot.Player.Auras.Any(e => Bot.Db.GetSpellName(e.SpellId) == Paladin548.Denounce)
+                                && TryCastSpell(Paladin548.Denounce, Bot.Wow.TargetGuid, true))
                             {
                                 return;
                             }
