@@ -679,20 +679,10 @@ namespace AmeisenBotX.Wow548
                         if {v:6} then
                             local {v:8},{v:9},_,{v:10},_,_,{v:11},{v:12},{v:13}=GetSpellInfo({v:6})
 
-                            local firstSplitOk, _, {v:14}=pcall(strsplit, "":"", GetSpellLink({v:6}))
+                            {v:0}={v:0}..'{'..'""spellbookName"": ""'..tostring({v:2} or 0)..'"",'..'""spellbookId"": ""'..tostring(a or 0)..'"",'..'""name"": ""'..tostring({v:6} or 0)..'"",'..'""rank"": ""'..tostring({v:9} or 0)..'"",'..'""castTime"": ""'..tostring({v:11} or 0)..'"",'..'""minRange"": ""'..tostring({v:12} or 0)..'"",'..'""maxRange"": ""'..tostring({v:13} or 0)..'"",'..'""costs"": ""'..tostring({v:10} or 0)..'""'..'}'
 
-                            if firstSplitOk then
-                                local secondSplitOk, {v:14}=pcall(strsplit, ""|"", {v:14})
-
-                                if secondSplitOk and IsSpellKnown({v:14}, false) then
-                                    {v:0}={v:0}..'{'..'""spellbookName"": ""'..tostring({v:2} or 0)..'"",'..'""spellbookId"": ""'..tostring(a or 0)..'"",'..'""name"": ""'..tostring({v:6} or 0)..'"",'..'""rank"": ""'..tostring({v:9} or 0)..'"",'..'""castTime"": ""'..tostring({v:11} or 0)..'"",'..'""minRange"": ""'..tostring({v:12} or 0)..'"",'..'""maxRange"": ""'..tostring({v:13} or 0)..'"",'..'""costs"": ""'..tostring({v:10} or 0)..'""'..'}'
-
-                                    if a<{v:1} or b<{v:4}+{v:5} then
-                                        {v:0}={v:0}..','
-                                    end
-                                end
-                            else
-                                print({v:6}..' failed to get link...')
+                            if a<{v:1} or b<{v:4}+{v:5} then
+                                {v:0}={v:0}..','
                             end
                         end
                     end
