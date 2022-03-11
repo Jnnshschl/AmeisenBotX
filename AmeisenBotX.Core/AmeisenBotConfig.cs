@@ -23,6 +23,8 @@ namespace AmeisenBotX.Core
 
         public bool AutocloseWow { get; set; } = true;
 
+        public bool AutoDestroyTrash { get; set; } = true;
+
         public bool AutoDisableRender { get; set; } = false;
 
         public bool AutojoinBg { get; set; } = true;

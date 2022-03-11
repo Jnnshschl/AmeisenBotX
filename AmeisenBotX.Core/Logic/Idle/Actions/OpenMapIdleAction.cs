@@ -15,11 +15,11 @@ namespace AmeisenBotX.Core.Logic.Idle.Actions
 
         public DateTime Cooldown { get; set; }
 
-        public int MaxCooldown => 13 * 1000;
+        public int MaxCooldown => 59 * 1000;
 
         public int MaxDuration => 0;
 
-        public int MinCooldown => 7 * 1000;
+        public int MinCooldown => 43 * 1000;
 
         public int MinDuration => 0;
 
@@ -32,15 +32,15 @@ namespace AmeisenBotX.Core.Logic.Idle.Actions
         {
             // open map and make the windows small and transparent
             Bot.Wow.LuaDoString(@"
-                if WorldMapFrame:IsShown() then 
-                    WorldMapFrame:Hide() 
-                    WorldMapFrame:SetAlpha(1.0) 
-                else WorldMapFrame:Show() 
-                    if WorldMapFrameSizeDownButton then 
-                        WorldMapFrameSizeDownButton:Click() 
-                    end 
+                if WorldMapFrame:IsShown() then
+                    WorldMapFrame:Hide()
+                    WorldMapFrame:SetAlpha(1.0)
+                else WorldMapFrame:Show()
+                    if WorldMapFrameSizeDownButton and WorldMapFrameSizeDownButton:IsShown() then
+                        WorldMapFrameSizeDownButton:Click()
+                    end
 
-                    WorldMapFrame:SetAlpha(0.1) 
+                    WorldMapFrame:SetAlpha(0.1)
                 end");
         }
 

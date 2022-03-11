@@ -96,8 +96,7 @@ namespace AmeisenBotX.Core.Logic
                         )
                     )
                 ),
-                // TODO: handle tactics here
-                // run combat class logic
+                // TODO: handle tactics here run combat class logic
                 new Selector
                 (
                     // combatclass handles movement itself or has no target or tactic handle the movement
@@ -233,8 +232,8 @@ namespace AmeisenBotX.Core.Logic
                 new Leaf(() => { Bot.Battleground.Execute(); return BtStatus.Success; }),
                 // leave battleground once it is finished
                 (IsBattlegroundFinished, new Leaf(() => { Bot.Wow.LeaveBattleground(); Bot.Battleground.Reset(); return BtStatus.Success; })),
-                // only handle dead state here, ghost should only be a problem
-                // on AV as the graveyard might get lost while we are a ghost
+                // only handle dead state here, ghost should only be a problem on AV as the
+                // graveyard might get lost while we are a ghost
                 (() => Bot.Player.IsDead, new Leaf(Dead)),
                 (NeedToFight, combatNode),
                 (NeedToEat, new Leaf(Eat))
@@ -289,8 +288,8 @@ namespace AmeisenBotX.Core.Logic
 
             INode mainLogicNode = new Annotator
             (
-                // run the update stuff before we execute the main logic
-                // objects will be updated here for example
+                // run the update stuff before we execute the main logic objects will be updated
+                // here for example
                 new Leaf(UpdateWowInterface),
                 new Selector
                 (
@@ -329,8 +328,7 @@ namespace AmeisenBotX.Core.Logic
             (
                 new Waterfall
                 (
-                    // run the anti afk and main logic if wow is running
-                    // and we are logged in
+                    // run the anti afk and main logic if wow is running and we are logged in
                     new Annotator
                     (
                         new Leaf(AntiAfk),
@@ -367,8 +365,6 @@ namespace AmeisenBotX.Core.Logic
 
         private IWowUnit ClassTrainer { get; set; }
 
-        private IWowUnit ProfessionTrainer { get; set; }
-
         private AmeisenBotConfig Config { get; }
 
         private DateTime DungeonDiedTimestamp { get; set; }
@@ -400,6 +396,8 @@ namespace AmeisenBotX.Core.Logic
         private TimegatedEvent PartymembersFightEvent { get; }
 
         private IWowUnit PlayerToFollow { get; set; }
+
+        private IWowUnit ProfessionTrainer { get; set; }
 
         private Random Random { get; }
 
@@ -468,9 +466,9 @@ namespace AmeisenBotX.Core.Logic
         }
 
         /// <summary>
-        /// This method searches for static death routes, this is needed when pathfinding
-        /// cannot find a good route from the graveyard to th dungeon entry. For example
-        /// the ICC dungeons are only reachable by flying, its easier to use static routes.
+        /// This method searches for static death routes, this is needed when pathfinding cannot
+        /// find a good route from the graveyard to th dungeon entry. For example the ICC dungeons
+        /// are only reachable by flying, its easier to use static routes.
         /// </summary>
         /// <returns>True when a static path can be used, false if not</returns>
         private bool CanUseStaticPaths()
@@ -911,8 +909,8 @@ namespace AmeisenBotX.Core.Logic
                 return false;
             }
 
-            // when we are in a group an they move too far away, abort eating
-            // and dont start eating for 30s
+            // when we are in a group an they move too far away, abort eating and dont start eating
+            // for 30s
             if (Config.EatDrinkAbortFollowParty && Bot.Objects.PartymemberGuids.Any() && Bot.Player.DistanceTo(Bot.Objects.CenterPartyPosition) > Config.EatDrinkAbortFollowPartyDistance)
             {
                 EatBlockEvent.Run();
@@ -1053,10 +1051,13 @@ namespace AmeisenBotX.Core.Logic
 
                 case BotMode.Questing:
                     break;
+
                 case BotMode.PvP:
                     break;
+
                 case BotMode.Testing:
                     break;
+
                 case BotMode.Jobs:
                     break;
 
@@ -1214,30 +1215,6 @@ namespace AmeisenBotX.Core.Logic
             return BtStatus.Success;
         }
 
-        private BtStatus SpeakWithProfessionTrainer()
-        {
-            if (ProfessionTrainer == null)
-            {
-                return BtStatus.Failed;
-            }
-
-            if (Bot.Player.Position.GetDistance(ProfessionTrainer.Position) > 3.0f)
-            {
-                Bot.Movement.SetMovementAction(MovementAction.Move, ProfessionTrainer.Position);
-                return BtStatus.Ongoing;
-            }
-
-            Bot.Movement.StopMovement();
-
-            if (!NpcInteractionEvent.Run())
-            {
-                return BtStatus.Failed;
-            }
-
-            SpeakToClassTrainerRoutine.Run(Bot, ProfessionTrainer);
-            return BtStatus.Success;
-        }
-
         private BtStatus SpeakWithMerchant()
         {
             if (Merchant == null)
@@ -1259,6 +1236,30 @@ namespace AmeisenBotX.Core.Logic
             }
 
             SpeakToMerchantRoutine.Run(Bot, Merchant);
+            return BtStatus.Success;
+        }
+
+        private BtStatus SpeakWithProfessionTrainer()
+        {
+            if (ProfessionTrainer == null)
+            {
+                return BtStatus.Failed;
+            }
+
+            if (Bot.Player.Position.GetDistance(ProfessionTrainer.Position) > 3.0f)
+            {
+                Bot.Movement.SetMovementAction(MovementAction.Move, ProfessionTrainer.Position);
+                return BtStatus.Ongoing;
+            }
+
+            Bot.Movement.StopMovement();
+
+            if (!NpcInteractionEvent.Run())
+            {
+                return BtStatus.Failed;
+            }
+
+            SpeakToClassTrainerRoutine.Run(Bot, ProfessionTrainer);
             return BtStatus.Success;
         }
 

@@ -589,10 +589,9 @@ namespace AmeisenBotX
 
                 // events used to update our GUI
                 AmeisenBot.Bot.Objects.OnObjectUpdateComplete += OnObjectUpdateComplete;
-                // AmeisenBot.StateMachine.OnStateMachineStateChanged += () =>
-                // {
-                //     Dispatcher.InvokeAsync(() => { labelCurrentState.Content = $"{AmeisenBot.StateMachine.CurrentState.Key}"; });
-                // };
+                // AmeisenBot.StateMachine.OnStateMachineStateChanged += () => {
+                // Dispatcher.InvokeAsync(() => { labelCurrentState.Content =
+                // $"{AmeisenBot.StateMachine.CurrentState.Key}"; }); };
 
                 // handle the autoposition function where the wow window gets "absorbed" by the bots window
                 if (AmeisenBot.Config.AutoPositionWow)

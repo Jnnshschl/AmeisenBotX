@@ -10,7 +10,9 @@ namespace AmeisenBotX.Core.Engines.Battleground.KamelBG
     internal class KummelEngine : IBattlegroundEngine
     {
         private const int OWN_TEAM_FLAG = 2;
+
         private const int PICKED_UP = 1;
+
         private Vector3 ausgangAlly = new(1055, 1395, 340);
 
         private Vector3 ausgangHord = new(1051, 1398, 340);

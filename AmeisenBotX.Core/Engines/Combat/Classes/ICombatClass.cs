@@ -43,12 +43,14 @@ namespace AmeisenBotX.Core.Engines.Combat.Classes
         bool IsMelee { get; }
 
         /// <summary>
-        /// This is the item comparator that the class will use to determine whether an item is better or not.
+        /// This is the item comparator that the class will use to determine whether an item is
+        /// better or not.
         /// </summary>
         IItemComparator ItemComparator { get; }
 
         /// <summary>
-        /// This will contain units that need to be focused, for example keleseths iceblocks in utgarde. Will be set by the dungeon engine.
+        /// This will contain units that need to be focused, for example keleseths iceblocks in
+        /// utgarde. Will be set by the dungeon engine.
         /// </summary>
         IEnumerable<int> PriorityTargetDisplayIds { get; set; }
 
@@ -68,7 +70,8 @@ namespace AmeisenBotX.Core.Engines.Combat.Classes
         string Version { get; }
 
         /// <summary>
-        /// Only used when you dont handle movement yourself. If this is true, the bot will always try to stay behind the target.
+        /// Only used when you dont handle movement yourself. If this is true, the bot will always
+        /// try to stay behind the target.
         /// </summary>
         bool WalkBehindEnemy { get; }
 

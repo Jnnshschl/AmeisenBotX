@@ -495,8 +495,7 @@ namespace AmeisenBotX.Core.Engines.Combat.Classes.einTyp
                     {
                         if (distanceToTarget > (9 + target.CombatReach))
                         {
-                            // 9 < distance < 24
-                            // run?
+                            // 9 < distance < 24 run?
                             if (energy > 15 && IsReady(Sprint) && IsTargetBleeding())
                             {
                                 CastSpell(Sprint, ref energy, 15, 180, true);
@@ -504,8 +503,7 @@ namespace AmeisenBotX.Core.Engines.Combat.Classes.einTyp
                         }
                         else if (distanceToTarget <= 0.75f * (Player.CombatReach + target.CombatReach))
                         {
-                            // distance <= 9
-                            // close combat
+                            // distance <= 9 close combat
                             if (IsInStealth())
                             {
                                 if (energy > 50 && IsReady(Garrote) && !IsTargetBleeding())
@@ -566,8 +564,7 @@ namespace AmeisenBotX.Core.Engines.Combat.Classes.einTyp
                     }
                     else
                     {
-                        // 24 <= distance < 29
-                        // distance attacks
+                        // 24 <= distance < 29 distance attacks
                         if (Player.IsInCombat)
                         {
                             if (comboCnt > 4 && energy > 35 && IsReady(DeadlyThrow))

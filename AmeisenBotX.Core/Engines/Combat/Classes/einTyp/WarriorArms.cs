@@ -509,8 +509,7 @@ namespace AmeisenBotX.Core.Engines.Combat.Classes.einTyp
                         }
                         else if (distanceToTarget <= 0.75f * (Player.CombatReach + target.CombatReach))
                         {
-                            // -- close combat --
-                            // Battle Stance
+                            // -- close combat -- Battle Stance
                             if (IsInBerserkerStance && IsReady(NextStance))
                             {
                                 ChangeToStance(BattleStance, out rage);

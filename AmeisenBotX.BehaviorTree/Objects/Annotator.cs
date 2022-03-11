@@ -3,7 +3,8 @@
 namespace AmeisenBotX.BehaviorTree.Objects
 {
     /// <summary>
-    /// BehaviorTree Node that executes a node before executing annother node. Use this to update stuff before executing a node.
+    /// BehaviorTree Node that executes a node before executing annother node. Use this to update
+    /// stuff before executing a node.
     /// </summary>
     public class Annotator : INode
     {

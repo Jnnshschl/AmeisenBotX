@@ -32,6 +32,8 @@ namespace AmeisenBotX.Wow.Objects
             return Position.GetDistance(b);
         }
 
+        void Init(IMemoryApi memoryApi, IOffsetList offsetList, IntPtr baseAddress, IntPtr descriptorAddress);
+
         public bool IsContainer()
         {
             return Type == WowObjectType.Container;
@@ -71,8 +73,6 @@ namespace AmeisenBotX.Wow.Objects
         {
             return Type == WowObjectType.Unit;
         }
-
-        void Init(IMemoryApi memoryApi, IOffsetList offsetList, IntPtr baseAddress, IntPtr descriptorAddress);
 
         void Update(IMemoryApi memoryApi, IOffsetList offsetList);
     }

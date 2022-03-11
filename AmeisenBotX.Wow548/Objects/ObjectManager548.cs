@@ -34,11 +34,6 @@ namespace AmeisenBotX.Wow548.Objects
             }
         }
 
-        private bool ReadPartyPointer(out IntPtr party)
-        {
-            return MemoryApi.Read(OffsetList.PartyLeader, out party) && party != IntPtr.Zero;
-        }
-
         private IEnumerable<ulong> ReadPartymemberGuids(IntPtr party)
         {
             List<ulong> partymemberGuids = new();
@@ -58,6 +53,11 @@ namespace AmeisenBotX.Wow548.Objects
             }
 
             return partymemberGuids.Where(e => e != 0 && e != PlayerGuid).Distinct();
+        }
+
+        private bool ReadPartyPointer(out IntPtr party)
+        {
+            return MemoryApi.Read(OffsetList.PartyLeader, out party) && party != IntPtr.Zero;
         }
     }
 }

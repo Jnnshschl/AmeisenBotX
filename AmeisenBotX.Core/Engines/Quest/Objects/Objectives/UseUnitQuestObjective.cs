@@ -31,11 +31,11 @@ namespace AmeisenBotX.Core.Engines.Quest.Objects.Objectives
 
         private UseUnitQuestObjectiveCondition Condition { get; }
 
-        private IWowUnit Unit { get; set; }
-
         private List<int> ObjectDisplayIds { get; }
 
         private bool QuestgiversOnly { get; }
+
+        private IWowUnit Unit { get; set; }
 
         public void Execute()
         {

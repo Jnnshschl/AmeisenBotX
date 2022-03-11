@@ -20,9 +20,9 @@ namespace AmeisenBotX.Core.Engines.Quest.Objects.Quests
 
         public string Name { get; }
 
-        public bool Returned => Finished;
-
         public List<IQuestObjective> Objectives { get; }
+
+        public bool Returned => Finished;
 
         public void AcceptQuest()
         {

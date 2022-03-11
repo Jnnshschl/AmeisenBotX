@@ -130,6 +130,43 @@ namespace AmeisenBotX
             RefreshActiveData();
         }
 
+        private void ClimbSteepSlopesChecked(object sender, RoutedEventArgs e)
+        {
+            // Todo: find a better way, multi-level pointer redirection very messy
+            AmeisenBot.Bot.Memory.Read<IntPtr>(AmeisenBot.Bot.Wow.Offsets.PlayerBase, out IntPtr PlayerBase1);
+            AmeisenBot.Bot.Memory.Read<IntPtr>(IntPtr.Add(PlayerBase1, 0x34), out IntPtr PlayerBase2);
+            AmeisenBot.Bot.Memory.Read<IntPtr>(IntPtr.Add(PlayerBase2, 0x24), out IntPtr PlayerBase);
+            AmeisenBot.Bot.Memory.Write<float>(IntPtr.Add(PlayerBase, (int)AmeisenBot.Bot.Wow.Offsets.ClimbAngle), 255);
+        }
+
+        private void ClimbSteepSlopesUnchecked(object sender, RoutedEventArgs e)
+        {
+            AmeisenBot.Bot.Memory.Read<IntPtr>(AmeisenBot.Bot.Wow.Offsets.PlayerBase, out IntPtr PlayerBase1);
+            AmeisenBot.Bot.Memory.Read<IntPtr>(IntPtr.Add(PlayerBase1, 0x34), out IntPtr PlayerBase2);
+            AmeisenBot.Bot.Memory.Read<IntPtr>(IntPtr.Add(PlayerBase2, 0x24), out IntPtr PlayerBase);
+            AmeisenBot.Bot.Memory.Write<float>(IntPtr.Add(PlayerBase, (int)AmeisenBot.Bot.Wow.Offsets.ClimbAngle), 1);
+        }
+
+        private void DisableM2CollisionsChecked(object sender, RoutedEventArgs e)
+        {
+            throw new NotImplementedException();
+        }
+
+        private void DisableM2CollisionsUnchecked(object sender, RoutedEventArgs e)
+        {
+            throw new NotImplementedException();
+        }
+
+        private void DisableWMOCollisionsChecked(object sender, RoutedEventArgs e)
+        {
+            throw new NotImplementedException();
+        }
+
+        private void DisableWMOCollisionsUnchecked(object sender, RoutedEventArgs e)
+        {
+            throw new NotImplementedException();
+        }
+
         private void ListViewNearWowObjects_KeyDown(object sender, KeyEventArgs e)
         {
             if (e.Key != Key.C)
@@ -486,43 +523,6 @@ namespace AmeisenBotX
         private void Window_MouseLeftButtonDown(object sender, MouseButtonEventArgs e)
         {
             DragMove();
-        }
-
-        private void ClimbSteepSlopesChecked(object sender, RoutedEventArgs e)
-        {
-            // Todo: find a better way, multi-level pointer redirection very messy
-            AmeisenBot.Bot.Memory.Read<IntPtr>(AmeisenBot.Bot.Wow.Offsets.PlayerBase, out IntPtr PlayerBase1);
-            AmeisenBot.Bot.Memory.Read<IntPtr>(IntPtr.Add(PlayerBase1, 0x34), out IntPtr PlayerBase2);
-            AmeisenBot.Bot.Memory.Read<IntPtr>(IntPtr.Add(PlayerBase2, 0x24), out IntPtr PlayerBase);
-            AmeisenBot.Bot.Memory.Write<float>(IntPtr.Add(PlayerBase, (int)AmeisenBot.Bot.Wow.Offsets.ClimbAngle), 255);
-        }
-
-        private void ClimbSteepSlopesUnchecked(object sender, RoutedEventArgs e)
-        {
-            AmeisenBot.Bot.Memory.Read<IntPtr>(AmeisenBot.Bot.Wow.Offsets.PlayerBase, out IntPtr PlayerBase1);
-            AmeisenBot.Bot.Memory.Read<IntPtr>(IntPtr.Add(PlayerBase1, 0x34), out IntPtr PlayerBase2);
-            AmeisenBot.Bot.Memory.Read<IntPtr>(IntPtr.Add(PlayerBase2, 0x24), out IntPtr PlayerBase);
-            AmeisenBot.Bot.Memory.Write<float>(IntPtr.Add(PlayerBase, (int)AmeisenBot.Bot.Wow.Offsets.ClimbAngle), 1);
-        }
-
-        private void DisableM2CollisionsChecked(object sender, RoutedEventArgs e)
-        {
-            throw new NotImplementedException();
-        }
-
-        private void DisableM2CollisionsUnchecked(object sender, RoutedEventArgs e)
-        {
-            throw new NotImplementedException();
-        }
-
-        private void DisableWMOCollisionsChecked(object sender, RoutedEventArgs e)
-        {
-            throw new NotImplementedException();
-        }
-
-        private void DisableWMOCollisionsUnchecked(object sender, RoutedEventArgs e)
-        {
-            throw new NotImplementedException();
         }
     }
 }

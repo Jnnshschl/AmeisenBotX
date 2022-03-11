@@ -32,9 +32,9 @@ namespace AmeisenBotX.Core.Engines.Quest.Objects.Objectives
 
         private KillUnitQuestObjectiveCondition Condition { get; }
 
-        private IWowUnit Unit { get; set; }
-
         private Dictionary<int, int> ObjectDisplayIds { get; }
+
+        private IWowUnit Unit { get; set; }
 
         public void Execute()
         {

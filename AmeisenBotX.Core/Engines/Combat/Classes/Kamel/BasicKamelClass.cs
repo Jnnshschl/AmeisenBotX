@@ -97,11 +97,12 @@ namespace AmeisenBotX.Core.Engines.Combat.Classes.Kamel
         public TimegatedEvent AutoAttackEvent { get; private set; }
 
         public IEnumerable<int> BlacklistedTargetDisplayIds { get; set; }
-        public Dictionary<string, dynamic> Configureables { get; set; }
 
         public AmeisenBotInterfaces Bot { get; internal set; }
 
         public abstract Dictionary<string, dynamic> C { get; set; }
+
+        public Dictionary<string, dynamic> Configureables { get; set; }
 
         public abstract string Description { get; }
 

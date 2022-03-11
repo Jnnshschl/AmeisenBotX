@@ -93,7 +93,8 @@ namespace AmeisenBotX.Memory
         public Rect GetWindowPosition();
 
         /// <summary>
-        /// Initializes XMemory. Recommended to use StartProcessNoActivate(), it will provide all variables needed.
+        /// Initializes XMemory. Recommended to use StartProcessNoActivate(), it will provide all
+        /// variables needed.
         /// </summary>
         /// <param name="process">NET process class</param>
         /// <param name="processHandle">Native process handle</param>
@@ -106,7 +107,9 @@ namespace AmeisenBotX.Memory
         /// </summary>
         /// <param name="asm">Assembly to inject</param>
         /// <param name="address">Address where the fasm will be injected</param>
-        /// <param name="patchMemProtection">Whether we need to patch memory protection or nor. Useful when memory is write protected.</param>
+        /// <param name="patchMemProtection">
+        /// Whether we need to patch memory protection or nor. Useful when memory is write protected.
+        /// </param>
         /// <returns>True when the injection was successful</returns>
         public bool InjectAssembly(IEnumerable<string> asm, IntPtr address, bool patchMemProtection = false);
 

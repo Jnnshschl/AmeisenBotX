@@ -9,8 +9,6 @@ namespace AmeisenBotX.Core.Engines.Grinding.Profiles.Horde
 {
     public class DurotarGrindTo6 : IGrindingProfile
     {
-        public bool RandomizeSpots => true;
-
         public List<Npc> NpcsOfInterest { get; } = new()
         {
             new Npc("Duokna", 3158,
@@ -37,6 +35,8 @@ namespace AmeisenBotX.Core.Engines.Grinding.Profiles.Horde
                 WowMapId.Kalimdor, WowZoneId.ValleyofTrials, new Vector3(-602, -4250, 37),
                 InteractableObjectType.Fire)
         };
+
+        public bool RandomizeSpots => true;
 
         public List<GrindingSpot> Spots { get; } = new()
         {

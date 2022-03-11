@@ -19,13 +19,16 @@ namespace AmeisenBotX.Wow.Objects.Flags
         AutoRun = 0x1000,              // HEX: 0x0000 1000 - DEC: 4096
         JumpAscend = 0x2000,           // HEX: 0x0000 2000 - DEC: 8192; Note: flying/swimming
         Descend = 0x4000,              // HEX: 0x0000 4000 - DEC: 16384; Note: flying/swimming
-        // ????                           HEX: 0x0000 8000 - DEC: 32768
+
+        // ???? HEX: 0x0000 8000 - DEC: 32768
         ForwardBackMovement = 0x10000, // HEX: 0x0001 0000 - DEC: 65536
-        StrafeMovement = 0x20000,      // HEX: 0x0002 0000 - DEC: 131072 
+
+        StrafeMovement = 0x20000,      // HEX: 0x0002 0000 - DEC: 131072
         TurnMovement = 0x40000,        // HEX: 0x0004 0000 - DEC: 262144
-        // ????                           HEX: 0x0008 0000 - DEC: 524288
-        // ????                           HEX: 0x0010 0000 - DEC: 1048576
+
+        // ???? HEX: 0x0008 0000 - DEC: 524288 ???? HEX: 0x0010 0000 - DEC: 1048576
         IsCTMing = 0x200000,          // HEX: 0x0020 0000 - DEC: 2097152
+
         ClickToMove = 0x400000,        // HEX: 0x0040 0000 - DEC: 4194304; Note: Only turns the CTM flag on or off.
     }
 }

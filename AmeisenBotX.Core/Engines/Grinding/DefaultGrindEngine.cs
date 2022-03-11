@@ -133,6 +133,48 @@ namespace AmeisenBotX.Core.Engines.Grinding
             return BtStatus.Success;
         }
 
+        private BtStatus GoToNpcAndLearnSecondarySkills()
+        {
+            Npc profileTrainer = Profile.NpcsOfInterest?
+                .Where(e => e.Type == NpcType.ProfessionTrainer)
+                .OrderBy(e => e.Position.GetDistance(Bot.Player.Position))
+                .FirstOrDefault();
+
+            IWowUnit professionTrainer = null;
+
+            if (profileTrainer != null)
+            {
+                professionTrainer = profileTrainer.SubType switch
+                {
+                    NpcSubType.FishingTrainer when !Bot.Character.Skills.ContainsKey("Fishing") => Bot
+                        .GetClosestTrainerByEntryId(profileTrainer.EntryId),
+                    NpcSubType.FirstAidTrainer when !Bot.Character.Skills.ContainsKey("First Aid") => Bot
+                        .GetClosestTrainerByEntryId(profileTrainer.EntryId),
+                    NpcSubType.CookingTrainer when !Bot.Character.Skills.ContainsKey("Cooking") => Bot
+                        .GetClosestTrainerByEntryId(profileTrainer.EntryId),
+                    _ => null
+                };
+            }
+
+            if (professionTrainer == null)
+            {
+                return BtStatus.Failed;
+            }
+
+            if (professionTrainer.Position.GetDistance(Bot.Player.Position) > 5.0f)
+            {
+                Bot.Movement.SetMovementAction(MovementAction.Move, professionTrainer.Position);
+                return BtStatus.Ongoing;
+            }
+
+            if (professionTrainer.Position.GetDistance(Bot.Player.Position) < 5.0f)
+            {
+                Bot.Movement.StopMovement();
+            }
+
+            return BtStatus.Success;
+        }
+
         private BtStatus GoToNpcAndRepair()
         {
             List<Vector3> repairNpcsPos = (
@@ -278,32 +320,6 @@ namespace AmeisenBotX.Core.Engines.Grinding
             return Bot.Player.IsInCombat && Bot.Player.IsMounted;
         }
 
-        private bool NeedToRepair()
-        {
-            return Bot.Character.Equipment.Items.Any(e => e.Value.MaxDurability > 0
-                   && (e.Value.Durability / (double)e.Value.MaxDurability * 100.0) <= Config.ItemRepairThreshold);
-        }
-
-        private bool NeedToSell()
-        {
-            return Bot.Character.Inventory.FreeBagSlots < Config.BagSlotsToGoSell;
-        }
-
-        private bool NeedToTrainSpells()
-        {
-            bool levelGreaterThenLastTrained = Bot.Character.LastLevelTrained != 0
-                                               && Bot.Character.LastLevelTrained < Bot.Player.Level;
-
-            bool hasMoney = Bot.Character.Money > 10;
-
-            Npc trainer = Profile.NpcsOfInterest?
-                .Where(e => e.Type == NpcType.ClassTrainer && e.SubType == AmeisenBotLogic.DecideClassTrainer(Bot.Player.Class))
-                .OrderBy(e => e.Position.GetDistance(Bot.Player.Position))
-                .FirstOrDefault();
-
-            return trainer != null && levelGreaterThenLastTrained && hasMoney;
-        }
-
         private bool NeedToLearnSecondarySkills()
         {
             Npc profileTrainer = Profile.NpcsOfInterest?
@@ -330,46 +346,30 @@ namespace AmeisenBotX.Core.Engines.Grinding
             return professionTrainer != null;
         }
 
-        private BtStatus GoToNpcAndLearnSecondarySkills()
+        private bool NeedToRepair()
         {
-            Npc profileTrainer = Profile.NpcsOfInterest?
-                .Where(e => e.Type == NpcType.ProfessionTrainer)
+            return Bot.Character.Equipment.Items.Any(e => e.Value.MaxDurability > 0
+                   && (e.Value.Durability / (double)e.Value.MaxDurability * 100.0) <= Config.ItemRepairThreshold);
+        }
+
+        private bool NeedToSell()
+        {
+            return Bot.Character.Inventory.FreeBagSlots < Config.BagSlotsToGoSell;
+        }
+
+        private bool NeedToTrainSpells()
+        {
+            bool levelGreaterThenLastTrained = Bot.Character.LastLevelTrained != 0
+                                               && Bot.Character.LastLevelTrained < Bot.Player.Level;
+
+            bool hasMoney = Bot.Character.Money > 10;
+
+            Npc trainer = Profile.NpcsOfInterest?
+                .Where(e => e.Type == NpcType.ClassTrainer && e.SubType == AmeisenBotLogic.DecideClassTrainer(Bot.Player.Class))
                 .OrderBy(e => e.Position.GetDistance(Bot.Player.Position))
                 .FirstOrDefault();
 
-            IWowUnit professionTrainer = null;
-
-            if (profileTrainer != null)
-            {
-                professionTrainer = profileTrainer.SubType switch
-                {
-                    NpcSubType.FishingTrainer when !Bot.Character.Skills.ContainsKey("Fishing") => Bot
-                        .GetClosestTrainerByEntryId(profileTrainer.EntryId),
-                    NpcSubType.FirstAidTrainer when !Bot.Character.Skills.ContainsKey("First Aid") => Bot
-                        .GetClosestTrainerByEntryId(profileTrainer.EntryId),
-                    NpcSubType.CookingTrainer when !Bot.Character.Skills.ContainsKey("Cooking") => Bot
-                        .GetClosestTrainerByEntryId(profileTrainer.EntryId),
-                    _ => null
-                };
-            }
-
-            if (professionTrainer == null)
-            {
-                return BtStatus.Failed;
-            }
-
-            if (professionTrainer.Position.GetDistance(Bot.Player.Position) > 5.0f)
-            {
-                Bot.Movement.SetMovementAction(MovementAction.Move, professionTrainer.Position);
-                return BtStatus.Ongoing;
-            }
-
-            if (professionTrainer.Position.GetDistance(Bot.Player.Position) < 5.0f)
-            {
-                Bot.Movement.StopMovement();
-            }
-
-            return BtStatus.Success;
+            return trainer != null && levelGreaterThenLastTrained && hasMoney;
         }
 
         private BtStatus ReportNoProfile()

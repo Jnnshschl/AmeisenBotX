@@ -2,8 +2,6 @@
 {
     public static class DataConstants
     {
-        internal const int HealSelfPercentage = 60;
-
         public static readonly int[] usableHealingItems = {
             // food
             117,
@@ -19,6 +17,8 @@
             // potions
             2245, 3385, 3827, 6149, 13443, 13444, 33448, 22832,
         };
+
+        internal const int HealSelfPercentage = 60;
 
         public static string GetCastSpellString(string spellName, bool castOnSelf)
         {

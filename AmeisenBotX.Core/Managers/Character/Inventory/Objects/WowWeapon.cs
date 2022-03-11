@@ -5,8 +5,6 @@ namespace AmeisenBotX.Core.Managers.Character.Inventory.Objects
 {
     public class WowWeapon : WowBasicItem
     {
-        public WowWeaponType WeaponType { get; set; }
-
         public WowWeapon(IWowInventoryItem wowBasicItem) : base(wowBasicItem)
         {
             Id = wowBasicItem.Id;
@@ -29,6 +27,8 @@ namespace AmeisenBotX.Core.Managers.Character.Inventory.Objects
             WeaponType = Enum.TryParse(GetWeaponTypeName(Subtype), out WowWeaponType weaponType)
                 ? weaponType : WowWeaponType.Misc;
         }
+
+        public WowWeaponType WeaponType { get; set; }
 
         private static string GetWeaponTypeName(string subType)
         {

@@ -23,10 +23,12 @@ namespace AmeisenBotX.Core.Engines.Combat.Classes.Bia10
                 && TryCastSpell(Mage335a.ArcaneIntellect, Bot.Player.Guid)));
         }
 
-        public override string Version => "1.0";
         public override string Description => "CombatClass for the Frost Mage spec.";
+
         public override string DisplayName => "Frost Mage";
+
         public override bool HandlesMovement => false;
+
         public override bool IsMelee => false;
 
         public override IItemComparator ItemComparator { get; set; } =
@@ -37,7 +39,6 @@ namespace AmeisenBotX.Core.Engines.Combat.Classes.Bia10
                 WowWeaponType.SwordTwoHand
             });
 
-        public override WowClass WowClass => WowClass.Mage;
         public override WowRole Role => WowRole.Dps;
 
         public override TalentTree Talents { get; } = new()
@@ -48,7 +49,12 @@ namespace AmeisenBotX.Core.Engines.Combat.Classes.Bia10
         };
 
         public override bool UseAutoAttacks => true;
+
+        public override string Version => "1.0";
+
         public override bool WalkBehindEnemy => false;
+
+        public override WowClass WowClass => WowClass.Mage;
 
         public override void Execute()
         {

@@ -6,7 +6,8 @@ using System.Linq;
 namespace AmeisenBotX.Core.Logic.StaticDeathRoutes
 {
     /// <summary>
-    /// Static death routes are used to describe routes to dungeons that cannot be reached by the bots pathfinding at the moment.
+    /// Static death routes are used to describe routes to dungeons that cannot be reached by the
+    /// bots pathfinding at the moment.
     /// </summary>
     public abstract class StaticPathDeathRoute : IStaticDeathRoute
     {

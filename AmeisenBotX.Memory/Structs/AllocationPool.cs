@@ -80,7 +80,8 @@ namespace AmeisenBotX.Memory.Structs
                         KeyValuePair<int, int> allocation = Allocations.ElementAt(i);
                         int allocationEnd = allocation.Key + allocation.Value;
 
-                        // when there is a next element, used it as the limiter, if not use the whole remaining space
+                        // when there is a next element, used it as the limiter, if not use the
+                        // whole remaining space
                         int memoryLeft = i + 1 < Allocations.Count
                             ? Allocations.ElementAt(i + 1).Key - allocationEnd
                             : Size - allocationEnd;

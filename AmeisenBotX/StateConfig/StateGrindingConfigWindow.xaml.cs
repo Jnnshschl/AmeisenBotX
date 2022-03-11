@@ -47,16 +47,10 @@ namespace AmeisenBotX.StateConfig
 
         private void ButtonExit_Click(object sender, RoutedEventArgs e)
         {
-            // if (ChangedSomething)
-            // {
-            //     ConfirmWindow confirmWindow = new ConfirmWindow("Unsaved Changes!", "Are you sure that you wan't to cancel?", "Yes", "No");
-            //     confirmWindow.ShowDialog();
+            // if (ChangedSomething) { ConfirmWindow confirmWindow = new ConfirmWindow("Unsaved
+            // Changes!", "Are you sure that you wan't to cancel?", "Yes", "No"); confirmWindow.ShowDialog();
             //
-            //     if (!confirmWindow.OkayPressed)
-            //     {
-            //         return;
-            //     }
-            // }
+            // if (!confirmWindow.OkayPressed) { return; } }
 
             Hide();
         }

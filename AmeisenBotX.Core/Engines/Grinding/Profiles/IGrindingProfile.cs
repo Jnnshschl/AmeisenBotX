@@ -6,11 +6,11 @@ namespace AmeisenBotX.Core.Engines.Grinding.Profiles
 {
     public interface IGrindingProfile
     {
-        bool RandomizeSpots { get; }
-
         List<Npc> NpcsOfInterest { get; }
 
         List<InteractableObject> ObjectsOfInterest { get; }
+
+        bool RandomizeSpots { get; }
 
         List<GrindingSpot> Spots { get; }
     }

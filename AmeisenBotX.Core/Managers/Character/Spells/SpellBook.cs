@@ -15,15 +15,13 @@ namespace AmeisenBotX.Core.Managers.Character.Spells
         public SpellBook(IWowInterface wowInterface)
         {
             Wow = wowInterface;
-
-            Spells = new();
         }
 
         public delegate void SpellBookUpdate();
 
         public event SpellBookUpdate OnSpellBookUpdate;
 
-        public List<Spell> Spells { get; private set; }
+        public IEnumerable<Spell> Spells { get; private set; }
 
         private IWowInterface Wow { get; }
 
@@ -51,8 +49,7 @@ namespace AmeisenBotX.Core.Managers.Character.Spells
             {
                 Spells = JsonSerializer.Deserialize<List<Spell>>(rawSpells, new JsonSerializerOptions() { AllowTrailingCommas = true, NumberHandling = JsonNumberHandling.AllowReadingFromString })
                     .OrderBy(e => e.Name)
-                    .ThenByDescending(e => e.Rank)
-                    .ToList();
+                    .ThenByDescending(e => e.Rank);
 
                 OnSpellBookUpdate?.Invoke();
             }

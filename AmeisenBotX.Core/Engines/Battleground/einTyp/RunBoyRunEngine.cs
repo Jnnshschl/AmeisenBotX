@@ -11,16 +11,27 @@ namespace AmeisenBotX.Core.Engines.Battleground.einTyp
     public class RunBoyRunEngine : IBattlegroundEngine
     {
         private readonly AmeisenBotInterfaces Bot;
+
         private Vector3 baseAlly = new(1539, 1481, 352);
+
         private Vector3 baseHord = new(916, 1434, 346);
+
         private IWowObject enemyFlag;
+
         private ulong EnemyFlagCarrierGuid;
+
         private bool enemyTeamHasFlag = false;
+
         private bool hasFlag = false;
+
         private bool hasStateChanged = true;
+
         private bool isHorde = false;
+
         private IWowObject ownFlag;
+
         private bool ownTeamHasFlag = false;
+
         private ulong TeamFlagCarrierGuid;
 
         public RunBoyRunEngine(AmeisenBotInterfaces bot)

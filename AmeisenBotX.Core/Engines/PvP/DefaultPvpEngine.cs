@@ -15,7 +15,8 @@ namespace AmeisenBotX.Core.Engines.PvP
             (
                 new Leaf(() => BtStatus.Ongoing),
                 (() => QueueStatus == 0, new Leaf(QueueForBattlegrounds))
-            //  (() => QueueStatus == 2, new Leaf(() => { Bot.Wow.AcceptBattlegroundInvite(); return BtStatus.Success; }))
+            // (() => QueueStatus == 2, new Leaf(() => { Bot.Wow.AcceptBattlegroundInvite(); return
+            // BtStatus.Success; }))
             );
 
             Bt = new(mainNode);
@@ -37,8 +38,7 @@ namespace AmeisenBotX.Core.Engines.PvP
 
         private BtStatus QueueForBattlegrounds()
         {
-            // TODO: fix this function
-            // Bot.Wow.LuaQueueBattlegroundByName("Warsong Gulch");
+            // TODO: fix this function Bot.Wow.LuaQueueBattlegroundByName("Warsong Gulch");
 
             Bot.Wow.ClickUiElement("BattlegroundType2");
             Bot.Wow.ClickUiElement("PVPBattlegroundFrameJoinButton");

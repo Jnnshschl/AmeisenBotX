@@ -9,7 +9,9 @@ namespace AmeisenBotX.Logging
     public class AmeisenLogger
     {
         private static readonly object padlock = new();
+
         private static readonly object stringBuilderLock = new();
+
         private static AmeisenLogger instance;
 
         private AmeisenLogger(bool deleteOldLogs = false)

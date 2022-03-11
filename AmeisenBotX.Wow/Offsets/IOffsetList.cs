@@ -22,12 +22,6 @@ namespace AmeisenBotX.Wow.Offsets
 
         IntPtr CameraPointer { get; }
 
-        IntPtr CollisionM2C { get; }
-
-        IntPtr CollisionM2S { get; }
-
-        IntPtr CollisionWMO { get; }
-
         IntPtr ClickToMoveAction { get; }
 
         IntPtr ClickToMoveDistance { get; }
@@ -41,6 +35,12 @@ namespace AmeisenBotX.Wow.Offsets
         IntPtr ClientConnection { get; }
 
         IntPtr ClimbAngle { get; }
+
+        IntPtr CollisionM2C { get; }
+
+        IntPtr CollisionM2S { get; }
+
+        IntPtr CollisionWMO { get; }
 
         IntPtr ComboPoints { get; }
 

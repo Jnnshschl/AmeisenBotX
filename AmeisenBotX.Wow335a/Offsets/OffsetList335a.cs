@@ -23,12 +23,6 @@ namespace AmeisenBotX.Wow335a.Offsets
 
         public IntPtr CameraPointer { get; } = new(0xB7436C);
 
-        public IntPtr CollisionM2C { get; } = new(0x7A50CF);
-
-        public IntPtr CollisionM2S { get; } = new(0x7A52EC);
-
-        public IntPtr CollisionWMO { get; } = new(0x7AE7EA);
-
         public IntPtr ClickToMoveAction { get; } = new(0xCA11D8 + 0x1C);
 
         public IntPtr ClickToMoveDistance { get; } = new(0xCA11D8 + 0xC);
@@ -46,6 +40,12 @@ namespace AmeisenBotX.Wow335a.Offsets
         public IntPtr ClientConnection { get; } = new(0xC79CE0);
 
         public IntPtr ClimbAngle { get; } = new(0x858);
+
+        public IntPtr CollisionM2C { get; } = new(0x7A50CF);
+
+        public IntPtr CollisionM2S { get; } = new(0x7A52EC);
+
+        public IntPtr CollisionWMO { get; } = new(0x7AE7EA);
 
         public IntPtr ComboPoints { get; } = new(0xBD084D);
 

@@ -183,12 +183,11 @@ namespace AmeisenBotX.Memory
                     {
                         AmeisenLogger.I.Log("XMemory", $"Freed {size} bytes in Pool[{i}] at: 0x{address:X}");
 
-                        // if (AllocationPools[i].Allocations.Count == 0
-                        //     && VirtualFreeEx(ProcessHandle, AllocationPools[i].Address, 0, AllocationType.Release))
-                        // {
-                        //     AmeisenLogger.I.Log("XMemory", $"Freed Pool[{i}] with {AllocationPools[i].Size} bytes at: 0x{address:X}");
-                        //     AllocationPools.RemoveAt(i);
-                        // }
+                        // if (AllocationPools[i].Allocations.Count == 0 &&
+                        // VirtualFreeEx(ProcessHandle, AllocationPools[i].Address, 0,
+                        // AllocationType.Release)) { AmeisenLogger.I.Log("XMemory", $"Freed
+                        // Pool[{i}] with {AllocationPools[i].Size} bytes at: 0x{address:X}");
+                        // AllocationPools.RemoveAt(i); }
 
                         return true;
                     }
@@ -307,8 +306,7 @@ namespace AmeisenBotX.Memory
                         }
                     }
 
-                    // use this to read the error
-                    // FasmStateError stateError = *(FasmStateError*)pBytes;
+                    // use this to read the error FasmStateError stateError = *(FasmStateError*)pBytes;
                     return false;
                 }
             }

@@ -15,6 +15,7 @@ namespace AmeisenBotX.Wow335a.Objects
     public class WowPlayer335a : WowUnit335a, IWowPlayer
     {
         private VisibleItemEnchantment[] itemEnchantments;
+
         private QuestlogEntry[] questlogEntries;
 
         public int ComboPoints { get; set; }

@@ -5,54 +5,6 @@ using System;
 
 namespace AmeisenBotX.BehaviorTree
 {
-    public class Tree
-    {
-        public Tree(INode node, bool resumeOngoingNodes = false)
-        {
-            RootNode = node;
-            ResumeOngoingNodes = resumeOngoingNodes;
-        }
-
-        public INode OngoingNode { get; private set; }
-
-        public bool ResumeOngoingNodes { get; set; }
-
-        public INode RootNode { get; set; }
-
-        public BtStatus Tick()
-        {
-            if (ResumeOngoingNodes)
-            {
-                BtStatus status;
-
-                if (OngoingNode != null)
-                {
-                    status = OngoingNode.Execute();
-
-                    if (status is BtStatus.Failed or BtStatus.Success)
-                    {
-                        OngoingNode = null;
-                    }
-                }
-                else
-                {
-                    status = RootNode.Execute();
-
-                    if (status is BtStatus.Ongoing)
-                    {
-                        OngoingNode = RootNode.GetNodeToExecute();
-                    }
-                }
-
-                return status;
-            }
-            else
-            {
-                return RootNode.GetNodeToExecute().Execute();
-            }
-        }
-    }
-
     public class BehaviorTree<T> where T : IBlackboard
     {
         public BehaviorTree(INode<T> node, T blackboard, bool resumeOngoingNodes = false)
@@ -124,6 +76,54 @@ namespace AmeisenBotX.BehaviorTree
             else
             {
                 return RootNode.GetNodeToExecute(Blackboard).Execute(Blackboard);
+            }
+        }
+    }
+
+    public class Tree
+    {
+        public Tree(INode node, bool resumeOngoingNodes = false)
+        {
+            RootNode = node;
+            ResumeOngoingNodes = resumeOngoingNodes;
+        }
+
+        public INode OngoingNode { get; private set; }
+
+        public bool ResumeOngoingNodes { get; set; }
+
+        public INode RootNode { get; set; }
+
+        public BtStatus Tick()
+        {
+            if (ResumeOngoingNodes)
+            {
+                BtStatus status;
+
+                if (OngoingNode != null)
+                {
+                    status = OngoingNode.Execute();
+
+                    if (status is BtStatus.Failed or BtStatus.Success)
+                    {
+                        OngoingNode = null;
+                    }
+                }
+                else
+                {
+                    status = RootNode.Execute();
+
+                    if (status is BtStatus.Ongoing)
+                    {
+                        OngoingNode = RootNode.GetNodeToExecute();
+                    }
+                }
+
+                return status;
+            }
+            else
+            {
+                return RootNode.GetNodeToExecute().Execute();
             }
         }
     }

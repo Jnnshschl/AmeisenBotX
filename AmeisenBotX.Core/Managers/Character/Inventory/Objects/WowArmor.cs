@@ -5,8 +5,6 @@ namespace AmeisenBotX.Core.Managers.Character.Inventory.Objects
 {
     public class WowArmor : WowBasicItem
     {
-        public WowArmorType ArmorType { get; }
-
         public WowArmor(IWowInventoryItem wowBasicItem) : base(wowBasicItem)
         {
             Id = wowBasicItem.Id;
@@ -35,5 +33,7 @@ namespace AmeisenBotX.Core.Managers.Character.Inventory.Objects
             ArmorType = Enum.TryParse(Subtype, out WowArmorType armorType)
                 ? armorType : WowArmorType.Misc;
         }
+
+        public WowArmorType ArmorType { get; }
     }
 }

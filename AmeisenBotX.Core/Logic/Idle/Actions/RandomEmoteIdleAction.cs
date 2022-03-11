@@ -19,6 +19,7 @@ namespace AmeisenBotX.Core.Logic.Idle.Actions
                 "laugh",
                 "dance",
                 "sit",
+                "sleep",
             };
 
             EmotesWithInteraction = new List<string>()
@@ -32,6 +33,7 @@ namespace AmeisenBotX.Core.Logic.Idle.Actions
                 "rude",
                 "roar",
                 "applaud",
+                "shy",
             };
 
             Rnd = new Random();

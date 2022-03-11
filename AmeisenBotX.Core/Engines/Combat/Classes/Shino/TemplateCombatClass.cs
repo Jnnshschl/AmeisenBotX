@@ -1,5 +1,5 @@
 ﻿using AmeisenBotX.Common.Math;
-using AmeisenBotX.Core.Engines.Combat.Classes.Jannis335a;
+using AmeisenBotX.Core.Engines.Combat.Classes.Jannis.Wotlk335a;
 using AmeisenBotX.Core.Engines.Movement.Enums;
 using AmeisenBotX.Core.Managers.Character.Spells.Objects;
 using AmeisenBotX.Wow.Objects;

@@ -1,5 +1,4 @@
 ﻿using System.Text.Json.Serialization;
-using System.Text.RegularExpressions;
 
 namespace AmeisenBotX.Core.Managers.Character.Spells.Objects
 {
@@ -31,15 +30,7 @@ namespace AmeisenBotX.Core.Managers.Character.Spells.Objects
 
         public bool TryGetRank(out int rank)
         {
-            Match result = Regex.Match(Rank, @"\d+");
-
-            if (result.Success && int.TryParse(result.Value, out rank))
-            {
-                return true;
-            }
-
-            rank = 0;
-            return false;
+            return int.TryParse(Rank, out rank);
         }
     }
 }

@@ -30,16 +30,17 @@ namespace AmeisenBotX.Core.Engines.Combat.Classes.Bia10
                 && TryCastSpell(Warrior335a.ThunderClap, Bot.Wow.TargetGuid)));
         }
 
-        public override string Version => "1.0";
         public override string Description => "CombatClass for the Warrior Furry spec.";
+
         public override string DisplayName => "Warrior Furry";
+
         public override bool HandlesMovement => false;
+
         public override bool IsMelee => true;
 
         public override IItemComparator ItemComparator { get; set; } =
             new BasicStrengthComparator(null, new List<WowWeaponType>());
 
-        public override WowClass WowClass => WowClass.Warrior;
         public override WowRole Role => WowRole.Dps;
 
         public override TalentTree Talents { get; } = new()
@@ -50,7 +51,12 @@ namespace AmeisenBotX.Core.Engines.Combat.Classes.Bia10
         };
 
         public override bool UseAutoAttacks => true;
+
+        public override string Version => "1.0";
+
         public override bool WalkBehindEnemy => false;
+
+        public override WowClass WowClass => WowClass.Warrior;
 
         public override void Execute()
         {

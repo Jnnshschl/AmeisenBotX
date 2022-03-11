@@ -9,8 +9,6 @@ namespace AmeisenBotX.Core.Engines.Grinding.Profiles.Horde
 {
     public class BarrensGrindTo17 : IGrindingProfile
     {
-        public bool RandomizeSpots => false;
-
         public List<Npc> NpcsOfInterest { get; } = new()
         {
             new Npc("Nargal Deatheye", 3479,
@@ -24,6 +22,8 @@ namespace AmeisenBotX.Core.Engines.Grinding.Profiles.Horde
                 WowMapId.Kalimdor, WowZoneId.RazorHill, new Vector3(-443, -2649, 95),
                 InteractableObjectType.Mailbox, MailboxFactionType.Horde)
         };
+
+        public bool RandomizeSpots => false;
 
         public List<GrindingSpot> Spots { get; } = new()
         {

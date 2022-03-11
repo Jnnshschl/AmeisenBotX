@@ -230,7 +230,8 @@ namespace AmeisenBotX.Core.Engines.Combat.Classes.Kamel
 
         private void StartAttack()
         {
-            // IWowUnit wowUnit = Bot.ObjectManager.GetClosestWowUnitByDisplayId(AnubRhekanDisplayId, false);
+            // IWowUnit wowUnit =
+            // Bot.ObjectManager.GetClosestWowUnitByDisplayId(AnubRhekanDisplayId, false);
 
             if (Bot.Wow.TargetGuid != 0)
             {

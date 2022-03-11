@@ -24,11 +24,11 @@ namespace AmeisenBotX.Wow.Objects
 
         IEnumerable<QuestlogEntry> QuestlogEntries { get; }
 
+        public new WowObjectType Type => WowObjectType.Player;
+
         int Xp { get; }
 
         double XpPercentage { get; }
-
-        public new WowObjectType Type => WowObjectType.Player;
 
         bool IsAlliance();
 

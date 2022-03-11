@@ -13,8 +13,9 @@ namespace AmeisenBotX.Core.Managers.Character.Inventory
 {
     public class CharacterEquipment
     {
-        private readonly object queryLock = new();
         private readonly Dictionary<WowEquipmentSlot, IWowInventoryItem> items;
+
+        private readonly object queryLock = new();
 
         public CharacterEquipment(IWowInterface wowInterface)
         {

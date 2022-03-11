@@ -251,8 +251,8 @@ namespace AmeisenBotX.Core.Engines.Movement.Objects
 
         public Vector3 Wander(float multiplier)
         {
-            // TODO: implement some sort of radius where the target wanders around.
-            //       maybe add a very weak force keeping it inside a given circle...
+            // TODO: implement some sort of radius where the target wanders around. maybe add a very
+            // weak force keeping it inside a given circle...
             // TODO: implement some sort of delay so that the target is not constantly walking
             Random rnd = new();
             Vector3 currentPosition = Bot.Player.Position;
@@ -380,9 +380,8 @@ namespace AmeisenBotX.Core.Engines.Movement.Objects
 
             List<(Vector3, float)> objectDistances = new();
 
-            // we need to know every objects position and distance
-            // to later apply a force pushing us back from it that
-            // is relational to the objects distance.
+            // we need to know every objects position and distance to later apply a force pushing us
+            // back from it that is relational to the objects distance.
             IEnumerable<T> objects = Bot.Objects.WowObjects.OfType<T>();
 
             for (int i = 0; i < objects.Count(); ++i)

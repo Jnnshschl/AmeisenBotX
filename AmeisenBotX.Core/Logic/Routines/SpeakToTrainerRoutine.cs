@@ -33,9 +33,7 @@ namespace AmeisenBotX.Core.Logic.Routines
                 return false;
             }
 
-            // gossip 1 train skills
-            // gossip 2 unlearn talents
-            // quest gossip from trainer??
+            // gossip 1 train skills gossip 2 unlearn talents quest gossip from trainer??
 
             string[] gossipTypes = bot.Wow.GetGossipTypes();
 

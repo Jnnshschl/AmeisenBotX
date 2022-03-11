@@ -41,7 +41,25 @@ namespace AmeisenBotX.Wow548.Objects
 
         public double HealthPercentage => BotMath.Percentage(Health, MaxHealth);
 
+        public int HolyPower => RawWowUnit.Power2;
+
         public bool IsAutoAttacking { get; set; }
+
+        public bool IsDead => (Health == 0 || UnitFlagsDynamic[(int)WowUnitDynamicFlags548.Dead]) && !UnitFlags2[(int)WowUnit2Flag.FeignDeath];
+
+        public bool IsLootable => UnitFlagsDynamic[(int)WowUnitDynamicFlags548.Lootable];
+
+        public bool IsReferAFriendLinked => UnitFlagsDynamic[(int)WowUnitDynamicFlags548.ReferAFriendLinked];
+
+        public bool IsSpecialInfo => UnitFlagsDynamic[(int)WowUnitDynamicFlags548.SpecialInfo];
+
+        public bool IsTaggedByMe => UnitFlagsDynamic[(int)WowUnitDynamicFlags548.TaggedByMe];
+
+        public bool IsTaggedByOther => UnitFlagsDynamic[(int)WowUnitDynamicFlags548.TaggedByOther];
+
+        public bool IsTappedByAllThreatList => UnitFlagsDynamic[(int)WowUnitDynamicFlags548.IsTappedByAllThreatList];
+
+        public bool IsTrackedUnit => UnitFlagsDynamic[(int)WowUnitDynamicFlags548.TrackUnit];
 
         public int Level => RawWowUnit.Level;
 
@@ -52,6 +70,8 @@ namespace AmeisenBotX.Wow548.Objects
         public int MaxEnergy => RawWowUnit.MaxPower4;
 
         public int MaxHealth => RawWowUnit.MaxHealth;
+
+        public int MaxHolyPower => RawWowUnit.MaxPower2;
 
         public int MaxMana => RawWowUnit.MaxPower1;
 
@@ -74,10 +94,6 @@ namespace AmeisenBotX.Wow548.Objects
         public WowRace Race => (WowRace)RawWowUnit.Race;
 
         public int Rage => RawWowUnit.Power1 / 10;
-
-        public int HolyPower => RawWowUnit.Power2;
-
-        public int MaxHolyPower => RawWowUnit.MaxPower2;
 
         public double RagePercentage => BotMath.Percentage(Rage, MaxRage);
 
@@ -110,22 +126,6 @@ namespace AmeisenBotX.Wow548.Objects
         public BitVector32 UnitFlags => RawWowUnit.Flags1;
 
         public BitVector32 UnitFlags2 => RawWowUnit.Flags2;
-
-        public bool IsDead => (Health == 0 || UnitFlagsDynamic[(int)WowUnitDynamicFlags548.Dead]) && !UnitFlags2[(int)WowUnit2Flag.FeignDeath];
-
-        public bool IsLootable => UnitFlagsDynamic[(int)WowUnitDynamicFlags548.Lootable];
-
-        public bool IsReferAFriendLinked => UnitFlagsDynamic[(int)WowUnitDynamicFlags548.ReferAFriendLinked];
-
-        public bool IsSpecialInfo => UnitFlagsDynamic[(int)WowUnitDynamicFlags548.SpecialInfo];
-
-        public bool IsTaggedByMe => UnitFlagsDynamic[(int)WowUnitDynamicFlags548.TaggedByMe];
-
-        public bool IsTaggedByOther => UnitFlagsDynamic[(int)WowUnitDynamicFlags548.TaggedByOther];
-
-        public bool IsTappedByAllThreatList => UnitFlagsDynamic[(int)WowUnitDynamicFlags548.IsTappedByAllThreatList];
-
-        public bool IsTrackedUnit => UnitFlagsDynamic[(int)WowUnitDynamicFlags548.TrackUnit];
 
         protected WowUnitDescriptor548 RawWowUnit { get; private set; }
 

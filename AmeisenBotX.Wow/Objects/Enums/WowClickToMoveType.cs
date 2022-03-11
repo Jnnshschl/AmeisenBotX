@@ -14,13 +14,16 @@
         AttackPosition = 10,
         AttackGuid = 11,
         ConstantFace = 12,
+
         // ----- Values below may be wrong ---->
         Halted = 13,
+
         None = 14,
+
         // 15
         Attack = 16,
-        // 17
-        // 18
+
+        // 17 18
         WalkAndRotate = 19
     }
 }

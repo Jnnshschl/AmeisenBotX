@@ -43,8 +43,8 @@ namespace AmeisenBotX.Core.Engines.Tactic.Dungeon.ForgeOfSouls
             {
                 if (wowUnit.DisplayId == 30150)
                 {
-                    // make sure we avoid the lazer
-                    // we only care about being on the reight side of him because the lazer spins clockwise
+                    // make sure we avoid the lazer we only care about being on the reight side of
+                    // him because the lazer spins clockwise
                     float angleDiff = BotMath.GetAngleDiff(wowUnit.Position, wowUnit.Rotation, Bot.Player.Position);
 
                     if (angleDiff < 0.5f)

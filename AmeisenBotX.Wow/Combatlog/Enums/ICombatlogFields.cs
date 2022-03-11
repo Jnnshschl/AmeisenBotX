@@ -2,28 +2,28 @@
 {
     public interface ICombatlogFields
     {
-        int Timestamp { get; }
+        int DestinationGuid { get; }
 
-        int Type { get; }
+        int DestinationName { get; }
+
+        int Flags { get; }
 
         int Source { get; }
 
         int SourceName { get; }
 
-        int Flags { get; }
-
-        int DestinationGuid { get; }
-
-        int DestinationName { get; }
-
-        int TargetFlags { get; }
-
-        int SwingDamageAmount { get; }
-
-        int SpellSpellId { get; }
-
         int SpellAmount { get; }
 
         int SpellAmountOver { get; }
+
+        int SpellSpellId { get; }
+
+        int SwingDamageAmount { get; }
+
+        int TargetFlags { get; }
+
+        int Timestamp { get; }
+
+        int Type { get; }
     }
 }

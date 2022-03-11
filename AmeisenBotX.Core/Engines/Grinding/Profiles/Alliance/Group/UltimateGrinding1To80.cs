@@ -6,11 +6,11 @@ namespace AmeisenBotX.Core.Engines.Grinding.Profiles.Alliance.Group
 {
     public class UltimateGrinding1To80 : IGrindingProfile
     {
-        public bool RandomizeSpots => true;
-
         public List<Npc> NpcsOfInterest { get; }
 
         public List<InteractableObject> ObjectsOfInterest { get; }
+
+        public bool RandomizeSpots => true;
 
         public List<GrindingSpot> Spots { get; } = new()
         {

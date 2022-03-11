@@ -9,8 +9,6 @@ namespace AmeisenBotX.Core.Engines.Grinding.Profiles.Horde
 {
     public class DurotarGrindTo14 : IGrindingProfile
     {
-        public bool RandomizeSpots => false;
-
         public List<Npc> NpcsOfInterest { get; } = new()
         {
             new Npc("Wuark", 3167,
@@ -51,6 +49,8 @@ namespace AmeisenBotX.Core.Engines.Grinding.Profiles.Horde
                 WowMapId.Kalimdor, WowZoneId.RazorHill, new Vector3(440, -4214, 25),
                 InteractableObjectType.Container)
         };
+
+        public bool RandomizeSpots => false;
 
         public List<GrindingSpot> Spots { get; } = new()
         {

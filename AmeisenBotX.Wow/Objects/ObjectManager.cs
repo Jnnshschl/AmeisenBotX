@@ -135,6 +135,21 @@ namespace AmeisenBotX.Wow.Objects
 
         protected bool PlayerGuidIsVehicle { get; set; }
 
+        /// <summary>
+        /// Process the pushed game info that we receive from the EndScene hook.
+        /// </summary>
+        /// <param name="gameInfo"></param>
+        public void HookManagerOnGameInfoPush(GameInfo gameInfo)
+        {
+            if (Player != null)
+            {
+                ((TPlayer)Player).IsOutdoors = gameInfo.isOutdoors;
+            }
+
+            IsTargetInLineOfSight = TargetGuid == 0 || TargetGuid == PlayerGuid || (gameInfo.losCheckResult & 0xFF) == 0;
+            // AmeisenLogger.I.Log("GameInfo", $"IsTargetInLineOfSight: {IsTargetInLineOfSight}");
+        }
+
         ///<inheritdoc cref="IObjectProvider.RefreshIsWorldLoaded"/>
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public bool RefreshIsWorldLoaded()
@@ -172,15 +187,11 @@ namespace AmeisenBotX.Wow.Objects
                     Camera = UpdateGlobalVar<RawCameraInfo>(cameraPointer);
                 }
 
-                // if (MemoryApi.Read(OffsetList.ZoneText, out IntPtr zoneNamePointer))
-                // {
-                //     ZoneName = UpdateGlobalVarString(zoneNamePointer);
-                // }
+                // if (MemoryApi.Read(OffsetList.ZoneText, out IntPtr zoneNamePointer)) { ZoneName =
+                // UpdateGlobalVarString(zoneNamePointer); }
 
-                // if (MemoryApi.Read(OffsetList.ZoneSubText, out IntPtr zoneSubNamePointer))
-                // {
-                //     ZoneSubName = UpdateGlobalVarString(zoneSubNamePointer);
-                // }
+                // if (MemoryApi.Read(OffsetList.ZoneSubText, out IntPtr zoneSubNamePointer)) {
+                // ZoneSubName = UpdateGlobalVarString(zoneSubNamePointer); }
 
                 if (TargetGuid == 0) { Target = null; }
                 if (PetGuid == 0) { Pet = null; }
@@ -223,24 +234,23 @@ namespace AmeisenBotX.Wow.Objects
             }
         }
 
-        /// <summary>
-        /// Process the pushed game info that we receive from the EndScene hook.
-        /// </summary>
-        /// <param name="gameInfo"></param>
-        public void HookManagerOnGameInfoPush(GameInfo gameInfo)
-        {
-            if (Player != null)
-            {
-                ((TPlayer)Player).IsOutdoors = gameInfo.isOutdoors;
-            }
+        protected abstract void ReadParty();
 
-            IsTargetInLineOfSight = TargetGuid == 0 || TargetGuid == PlayerGuid || (gameInfo.losCheckResult & 0xFF) == 0;
-            // AmeisenLogger.I.Log("GameInfo", $"IsTargetInLineOfSight: {IsTargetInLineOfSight}");
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        protected T UpdateGlobalVar<T>(IntPtr address) where T : unmanaged
+        {
+            return address != IntPtr.Zero && MemoryApi.Read(address, out T v) ? v : default;
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        protected string UpdateGlobalVarString(IntPtr address, int maxLenght = 128)
+        {
+            return address != IntPtr.Zero && MemoryApi.ReadString(address, Encoding.UTF8, out string v, maxLenght) ? v : string.Empty;
         }
 
         /// <summary>
-        /// Process a wow object pointer into a full object. Object will be placed
-        /// in "wowObjects", pointers will be taken from "wowObjectPointers".
+        /// Process a wow object pointer into a full object. Object will be placed in "wowObjects",
+        /// pointers will be taken from "wowObjectPointers".
         /// </summary>
         /// <param name="i">Index of the object</param>
         private void ProcessObject(int i)
@@ -292,20 +302,6 @@ namespace AmeisenBotX.Wow.Objects
                     }
                 }
             }
-        }
-
-        protected abstract void ReadParty();
-
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        protected T UpdateGlobalVar<T>(IntPtr address) where T : unmanaged
-        {
-            return address != IntPtr.Zero && MemoryApi.Read(address, out T v) ? v : default;
-        }
-
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        protected string UpdateGlobalVarString(IntPtr address, int maxLenght = 128)
-        {
-            return address != IntPtr.Zero && MemoryApi.ReadString(address, Encoding.UTF8, out string v, maxLenght) ? v : string.Empty;
         }
     }
 }

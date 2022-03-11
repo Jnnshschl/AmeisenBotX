@@ -164,6 +164,8 @@ namespace AmeisenBotX.Wow548
 
         public IWowPlayer Player => ObjectManager.Player;
 
+        public WowVersion WowVersion { get; } = WowVersion.MoP548;
+
         private SimpleEventManager EventManager { get; }
 
         private EndSceneHook548 Hook { get; }
@@ -175,8 +177,6 @@ namespace AmeisenBotX.Wow548
         private ObjectManager548 ObjectManager { get; }
 
         private OffsetList548 OffsetList { get; }
-
-        public WowVersion WowVersion { get; } = WowVersion.MoP548;
 
         public void AbandonQuestsNotIn(IEnumerable<string> quests)
         {
@@ -251,6 +251,27 @@ namespace AmeisenBotX.Wow548
         public void ClickOnTrainButton()
         {
             LuaDoString("LoadAddOn\"Blizzard_TrainerUI\"f=ClassTrainerTrainButton;f.e=0;if f:GetScript\"OnUpdate\"then f:SetScript(\"OnUpdate\",nil)else f:SetScript(\"OnUpdate\",function(f,a)f.e=f.e+a;if f.e>.01 then f.e=0;f:Click()end end)end");
+        }
+
+        public void ClickToMove(Vector3 pos, ulong guid, WowClickToMoveType clickToMoveType = WowClickToMoveType.Move, float turnSpeed = 20.9f, float distance = WowClickToMoveDistance.Move)
+        {
+            if (float.IsInfinity(pos.X) || float.IsNaN(pos.X) || MathF.Abs(pos.X) > 17066.6656
+                || float.IsInfinity(pos.Y) || float.IsNaN(pos.Y) || MathF.Abs(pos.Y) > 17066.6656
+                || float.IsInfinity(pos.Z) || float.IsNaN(pos.Z) || MathF.Abs(pos.Z) > 17066.6656)
+            {
+                return;
+            }
+
+            Memory.Write(Offsets.ClickToMoveTurnSpeed, turnSpeed);
+            Memory.Write(Offsets.ClickToMoveDistance, distance);
+
+            if (guid > 0)
+            {
+                Memory.Write(Offsets.ClickToMoveGuid, guid);
+            }
+
+            Memory.Write(Offsets.ClickToMoveAction, clickToMoveType);
+            Memory.Write(Offsets.ClickToMoveX, pos);
         }
 
         public void ClickUiElement(string elementName)
@@ -649,13 +670,13 @@ namespace AmeisenBotX.Wow548
                 {v:0}='['
                 {v:1}=GetNumSpellTabs()
 
-                for a=1,{v:1} do 
+                for a=1,{v:1} do
                     local {v:2},{v:3},{v:4},{v:5}=GetSpellTabInfo(a)
-                
-                    for b={v:4}+1,{v:4}+{v:5} do 
+
+                    for b={v:4}+1,{v:4}+{v:5} do
                         local {v:6},{v:7}=GetSpellBookItemName(b,""BOOKTYPE_SPELL"")
 
-                        if {v:6} then 
+                        if {v:6} then
                             local {v:8},{v:9},_,{v:10},_,_,{v:11},{v:12},{v:13}=GetSpellInfo({v:6})
 
                             local firstSplitOk, _, {v:14}=pcall(strsplit, "":"", GetSpellLink({v:6}))
@@ -665,16 +686,16 @@ namespace AmeisenBotX.Wow548
 
                                 if secondSplitOk and IsSpellKnown({v:14}, false) then
                                     {v:0}={v:0}..'{'..'""spellbookName"": ""'..tostring({v:2} or 0)..'"",'..'""spellbookId"": ""'..tostring(a or 0)..'"",'..'""name"": ""'..tostring({v:6} or 0)..'"",'..'""rank"": ""'..tostring({v:9} or 0)..'"",'..'""castTime"": ""'..tostring({v:11} or 0)..'"",'..'""minRange"": ""'..tostring({v:12} or 0)..'"",'..'""maxRange"": ""'..tostring({v:13} or 0)..'"",'..'""costs"": ""'..tostring({v:10} or 0)..'""'..'}'
-                
-                                    if a<{v:1} or b<{v:4}+{v:5} then 
+
+                                    if a<{v:1} or b<{v:4}+{v:5} then
                                         {v:0}={v:0}..','
-                                    end 
+                                    end
                                 end
                             end
-                        end 
-                    end 
+                        end
+                    end
                 end;
-                
+
                 {v:0}={v:0}..']'"), out string result) ? result : string.Empty;
         }
 
@@ -940,7 +961,8 @@ namespace AmeisenBotX.Wow548
         {
             if (rollType == WowRollType.Need)
             {
-                // first we need to check whether we can roll a need on this, otherwise the bot might not roll at all
+                // first we need to check whether we can roll a need on this, otherwise the bot
+                // might not roll at all
                 LuaDoString($"_,_,_,_,_,canNeed=GetLootRollItemInfo({rollId});if canNeed then RollOnLoot({rollId}, {(int)rollType}) else RollOnLoot({rollId}, 2) end");
             }
             else
@@ -1047,7 +1069,8 @@ namespace AmeisenBotX.Wow548
             {
                 // TODO: find better fix for spinning bug
                 // LuaDoString("MoveBackwardStart();MoveBackwardStop();");
-                // Hook.CallObjectFunction(Player.BaseAddress, OffsetList.FunctionPlayerClickToMoveStop, null, false, out _);
+                // Hook.CallObjectFunction(Player.BaseAddress,
+                // OffsetList.FunctionPlayerClickToMoveStop, null, false, out _);
                 ClickToMove(Player.Position, 0, WowClickToMoveType.Stop);
             }
         }
@@ -1092,27 +1115,6 @@ namespace AmeisenBotX.Wow548
         public void UseItemByName(string itemName)
         {
             LuaSellItemsByName(itemName);
-        }
-
-        public void ClickToMove(Vector3 pos, ulong guid, WowClickToMoveType clickToMoveType = WowClickToMoveType.Move, float turnSpeed = 20.9f, float distance = WowClickToMoveDistance.Move)
-        {
-            if (float.IsInfinity(pos.X) || float.IsNaN(pos.X) || MathF.Abs(pos.X) > 17066.6656
-                || float.IsInfinity(pos.Y) || float.IsNaN(pos.Y) || MathF.Abs(pos.Y) > 17066.6656
-                || float.IsInfinity(pos.Z) || float.IsNaN(pos.Z) || MathF.Abs(pos.Z) > 17066.6656)
-            {
-                return;
-            }
-
-            Memory.Write(Offsets.ClickToMoveTurnSpeed, turnSpeed);
-            Memory.Write(Offsets.ClickToMoveDistance, distance);
-
-            if (guid > 0)
-            {
-                Memory.Write(Offsets.ClickToMoveGuid, guid);
-            }
-
-            Memory.Write(Offsets.ClickToMoveAction, clickToMoveType);
-            Memory.Write(Offsets.ClickToMoveX, pos);
         }
 
         private int ExecuteLuaInt((string, string) cmdVar)

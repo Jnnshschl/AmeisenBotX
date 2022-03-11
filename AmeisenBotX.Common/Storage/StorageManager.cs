@@ -8,13 +8,13 @@ namespace AmeisenBotX.Common.Storage
     public class StorageManager
     {
         /// <summary>
-        /// Helper class used to save configureable values in json files. Files
-        /// will be named after their full class name (including namespace).
+        /// Helper class used to save configureable values in json files. Files will be named after
+        /// their full class name (including namespace).
         /// </summary>
         /// <param name="basePath">Folder to save the json files in.</param>
         /// <param name="partsToRemove">
-        /// Strings that are going to be removed from the final filename,
-        /// use this to remove namespace parts from them.
+        /// Strings that are going to be removed from the final filename, use this to remove
+        /// namespace parts from them.
         /// </param>
         public StorageManager(string basePath, IEnumerable<string> partsToRemove = null)
         {
@@ -52,7 +52,8 @@ namespace AmeisenBotX.Common.Storage
             }
             catch
             {
-                // AmeisenLogger.I.Log("CombatClass", $"Failed to load {s.GetType().Name} ({fullPath}):\n{ex}", LogLevel.Error);
+                // AmeisenLogger.I.Log("CombatClass", $"Failed to load {s.GetType().Name}
+                // ({fullPath}):\n{ex}", LogLevel.Error);
             }
         }
 
@@ -98,7 +99,8 @@ namespace AmeisenBotX.Common.Storage
             }
             catch
             {
-                // AmeisenLogger.I.Log("CombatClass", $"Failed to save {s.GetType().Name} ({fullPath}):\n{ex}", LogLevel.Error);
+                // AmeisenLogger.I.Log("CombatClass", $"Failed to save {s.GetType().Name}
+                // ({fullPath}):\n{ex}", LogLevel.Error);
             }
         }
 

@@ -34,6 +34,14 @@ namespace AmeisenBotX.Wow548.Offsets
 
         public IntPtr ClientConnection { get; private set; }
 
+        public IntPtr ClimbAngle { get; } = new(0x0);
+
+        public IntPtr CollisionM2C { get; } = new(0x0);
+
+        public IntPtr CollisionM2S { get; } = new(0x0);
+
+        public IntPtr CollisionWMO { get; } = new(0x0);
+
         public IntPtr ComboPoints { get; private set; }
 
         public IntPtr CorpsePosition { get; private set; }
@@ -140,6 +148,8 @@ namespace AmeisenBotX.Wow548.Offsets
 
         public IntPtr WowObjectType { get; } = new(0xC);
 
+        public IntPtr WowUnitCanInterrupt { get; } = new(0xC64);
+
         public IntPtr WowUnitFlyFlags { get; } = new(0x38);
 
         public IntPtr WowUnitFlyFlagsPointer { get; } = new(0xEC);
@@ -150,8 +160,6 @@ namespace AmeisenBotX.Wow548.Offsets
 
         public IntPtr WowUnitName2 { get; } = new(0x6C);
 
-        public IntPtr WowUnitCanInterrupt { get; } = new(0xC64);
-
         public IntPtr WowUnitPosition { get; } = new(0x838);
 
         public IntPtr WowUnitSwimFlags { get; } = new(0xEC);
@@ -161,14 +169,6 @@ namespace AmeisenBotX.Wow548.Offsets
         public IntPtr ZoneSubText { get; } = new(0x0);
 
         public IntPtr ZoneText { get; } = new(0x0);
-
-        public IntPtr CollisionM2C { get; } = new(0x0);
-
-        public IntPtr CollisionM2S { get; } = new(0x0);
-
-        public IntPtr CollisionWMO { get; } = new(0x0);
-
-        public IntPtr ClimbAngle { get; } = new(0x0);
 
         public void Init(IntPtr mainModuleBase)
         {

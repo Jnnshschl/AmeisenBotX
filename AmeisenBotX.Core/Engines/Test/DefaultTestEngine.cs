@@ -10,6 +10,7 @@ namespace AmeisenBotX.Core.Engines.Test
     public class DefaultTestEngine : ITestEngine
     {
         private const int trainerEntryId = 3173;
+
         private IWowUnit trainer;
 
         public DefaultTestEngine(AmeisenBotInterfaces bot, AmeisenBotConfig config)
@@ -39,17 +40,54 @@ namespace AmeisenBotX.Core.Engines.Test
                 RootSelector
             );
         }
+
         public AmeisenBotInterfaces Bot { get; }
 
         public AmeisenBotConfig Config { get; }
 
-        private Tree TestTree { get; }
-
         private Selector RootSelector { get; }
+
+        private Tree TestTree { get; }
 
         public void Execute()
         {
             TestTree.Tick();
+        }
+
+        public bool SelectedTraining()
+        {
+            if (!trainer.IsGossip)
+            {
+                return false;
+            }
+
+            // gossip 1 train skills gossip 2 unlearn talents quest gossip from trainer??
+
+            string[] gossipTypes = Bot.Wow.GetGossipTypes();
+
+            for (int i = 0; i < gossipTypes.Length; ++i)
+            {
+                if (!gossipTypes[i].Equals("trainer", StringComparison.OrdinalIgnoreCase))
+                {
+                    continue;
+                }
+
+                // +1 is due to implicit conversion between lua array (indexed at 1 not 0) and c# array
+                Bot.Wow.SelectGossipOptionSimple(i + 1);
+                return true;
+            }
+
+            return false;
+        }
+
+        private static BtStatus Fail()
+        {
+            return BtStatus.Failed;
+        }
+
+        private static BtStatus Success()
+        {
+            return BtStatus.Success;
         }
 
         private BtStatus GetTrainer()
@@ -89,48 +127,10 @@ namespace AmeisenBotX.Core.Engines.Test
             return BtStatus.Success;
         }
 
-        public bool SelectedTraining()
-        {
-            if (!trainer.IsGossip)
-            {
-                return false;
-            }
-
-            // gossip 1 train skills
-            // gossip 2 unlearn talents
-            // quest gossip from trainer??
-
-            string[] gossipTypes = Bot.Wow.GetGossipTypes();
-
-            for (int i = 0; i < gossipTypes.Length; ++i)
-            {
-                if (!gossipTypes[i].Equals("trainer", StringComparison.OrdinalIgnoreCase))
-                {
-                    continue;
-                }
-
-                // +1 is due to implicit conversion between lua array (indexed at 1 not 0) and c# array
-                Bot.Wow.SelectGossipOptionSimple(i + 1);
-                return true;
-            }
-
-            return false;
-        }
-
         private BtStatus TrainAll()
         {
             Bot.Wow.ClickOnTrainButton();
 
-            return BtStatus.Success;
-        }
-
-        private static BtStatus Fail()
-        {
-            return BtStatus.Failed;
-        }
-
-        private static BtStatus Success()
-        {
             return BtStatus.Success;
         }
     }

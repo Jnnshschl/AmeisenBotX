@@ -35,7 +35,7 @@ namespace AmeisenBotX.Common.Utils
 
         /// <summary>
         /// Convert a byte array to string without a delimiter.
-        /// Example: [0x00, 0x12, 0xab, 0xe4] -> 0012abe4
+        /// Example: [0x00, 0x12, 0xab, 0xe4] -&gt; 0012abe4
         /// </summary>
         /// <param name="bytes">Byte array</param>
         /// <returns>Byte array as a string</returns>
@@ -105,8 +105,8 @@ namespace AmeisenBotX.Common.Utils
         /// <summary>
         /// Replace the variables in a LUA string to make them less obvious.
         ///
-        /// Mark the variable places using this format: "{v:0}=1" ({v:0} will be replaced with a random string)
-        /// Name the next {v:1} the next {v:2} and so on.
+        /// Mark the variable places using this format: "{v:0}=1" ({v:0} will be replaced with a
+        /// random string) Name the next {v:1} the next {v:2} and so on.
         ///
         /// The first variable will always be the return variable name!
         /// </summary>

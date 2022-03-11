@@ -60,6 +60,8 @@ namespace AmeisenBotX.Core.Engines.Quest.Objects.Objectives
             }
         }
 
+        public List<Vector3> VendorsLocation { get; }
+
         private AmeisenBotInterfaces Bot { get; }
 
         private int CollectOrKillAmount { get; }
@@ -67,8 +69,6 @@ namespace AmeisenBotX.Core.Engines.Quest.Objects.Objectives
         private bool CollectQuestItem => QuestItemId > 0;
 
         private Vector3 CurrentSpot { get; set; }
-
-        public List<Vector3> VendorsLocation { get; }
 
         private IWowUnit IWowUnit { get; set; }
 

@@ -159,8 +159,7 @@ namespace AmeisenBotX.Core
         {
             foreach (Vector3 pathPosition in path)
             {
-                IEnumerable<T> nearEnemies = GetNearEnemies<T>(pathPosition, distance)
-                    .ToArray();
+                IEnumerable<T> nearEnemies = GetNearEnemies<T>(pathPosition, distance);
 
                 if (nearEnemies.Any())
                 {
@@ -180,16 +179,16 @@ namespace AmeisenBotX.Core
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public IEnumerable<T> GetEnemiesTargetingMe<T>(Vector3 position, float distance) where T : IWowUnit
+        public IEnumerable<T> GetEnemiesOrNeutralsTargetingMe<T>(Vector3 position, float distance) where T : IWowUnit
         {
-            return GetNearEnemies<T>(position, distance)  // is hostile
+            return GetNearEnemiesOrNeutrals<T>(position, distance)  // is hostile/neutral
                 .Where(e => e.TargetGuid == Player.Guid); // targets us
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public IEnumerable<T> GetEnemiesOrNeutralsTargetingMe<T>(Vector3 position, float distance) where T : IWowUnit
+        public IEnumerable<T> GetEnemiesTargetingMe<T>(Vector3 position, float distance) where T : IWowUnit
         {
-            return GetNearEnemiesOrNeutrals<T>(position, distance)  // is hostile/neutral
+            return GetNearEnemies<T>(position, distance)  // is hostile
                 .Where(e => e.TargetGuid == Player.Guid); // targets us
         }
 

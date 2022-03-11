@@ -6,13 +6,13 @@ namespace AmeisenBotX.Core.Objects
 {
     public class Npc
     {
-        public string Name;
         public readonly int EntryId;
-        public WowMapId MapId;
-        public WowZoneId ZoneId;
-        public Vector3 Position;
-        public readonly NpcType Type;
         public readonly NpcSubType SubType;
+        public readonly NpcType Type;
+        public WowMapId MapId;
+        public string Name;
+        public Vector3 Position;
+        public WowZoneId ZoneId;
 
         public Npc(string name, int entryId, WowMapId mapId, WowZoneId zoneId, Vector3 position,
             NpcType type, NpcSubType subType = NpcSubType.None)

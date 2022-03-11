@@ -45,21 +45,11 @@ namespace AmeisenBotX.Wow548.Objects
                 Count = objPtr.StackCount;
                 Owner = objPtr.Owner;
 
-                // ItemEnchantments = new()
-                // {
-                //     objPtr.Enchantment1,
-                //     objPtr.Enchantment2,
-                //     objPtr.Enchantment3,
-                //     objPtr.Enchantment4,
-                //     objPtr.Enchantment5,
-                //     objPtr.Enchantment6,
-                //     objPtr.Enchantment7,
-                //     objPtr.Enchantment8,
-                //     objPtr.Enchantment9,
-                //     objPtr.Enchantment10,
-                //     objPtr.Enchantment11,
-                //     objPtr.Enchantment12,
-                // };
+                // ItemEnchantments = new() { objPtr.Enchantment1, objPtr.Enchantment2,
+                // objPtr.Enchantment3, objPtr.Enchantment4, objPtr.Enchantment5,
+                // objPtr.Enchantment6, objPtr.Enchantment7, objPtr.Enchantment8,
+                // objPtr.Enchantment9, objPtr.Enchantment10, objPtr.Enchantment11,
+                // objPtr.Enchantment12, };
             }
         }
     }

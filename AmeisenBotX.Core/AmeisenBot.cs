@@ -75,7 +75,10 @@ namespace AmeisenBotX.Core
         /// More stuff of the bot can be reached via its "Bot" property.
         /// </summary>
         /// <param name="config">The bot configuration.</param>
-        /// <param name="logfilePath">Logfile folder path, not a file path. Leave DEFAULT to put it into bots profile folder. Set to string.Empty to disable logging.</param>
+        /// <param name="logfilePath">
+        /// Logfile folder path, not a file path. Leave DEFAULT to put it into bots profile folder.
+        /// Set to string.Empty to disable logging.
+        /// </param>
         /// <param name="initialLogLevel">The initial LogLevel of the bots logger.</param>
         public AmeisenBot(AmeisenBotConfig config, string logfilePath = "DEFAULT", LogLevel initialLogLevel = LogLevel.Verbose)
         {
@@ -144,7 +147,16 @@ namespace AmeisenBotX.Core
                 new FishingIdleAction(Bot),
                 new SheathWeaponIdleAction(Bot),
                 new OpenMapIdleAction(Bot),
-                new FcfsIdleAction(new() { new LookAtGroupmemberIdleAction(Bot), new LookAtGroupIdleAction(Bot), new LookAroundIdleAction(Bot) }),
+                new FcfsIdleAction
+                (
+                    "Look at Group/NPCs/World",
+                    new()
+                    {
+                        new FcfsIdleAction(new() { new LookAtNpcsIdleAction(Bot), new LookAtGroupmemberIdleAction(Bot) }),
+                        new LookAtGroupIdleAction(Bot),
+                        new LookAroundIdleAction(Bot)
+                    }
+                ),
                 new RandomEmoteIdleAction(Bot),
                 new SitByCampfireIdleAction(Bot),
                 new SitToChairIdleAction(Bot, Config.MinFollowDistance),
@@ -160,7 +172,7 @@ namespace AmeisenBotX.Core
 
             AmeisenLogger.I.Log("AmeisenBot", $"Using OffsetList: {Bot.Wow.Offsets.GetType().Name}", LogLevel.Master);
 
-            Bot.Character = new DefaultCharacterManager(Bot.Wow, Bot.Memory);
+            Bot.Character = new DefaultCharacterManager(Bot.Wow, Bot.Memory, Config);
 
             string dbPath = Path.Combine(ProfileFolder, "db.json");
             AmeisenLogger.I.Log("AmeisenBot", $"Loading DB from: {dbPath}", LogLevel.Master);
@@ -245,7 +257,7 @@ namespace AmeisenBotX.Core
         public AmeisenBotInterfaces Bot { get; private set; }
 
         /// <summary>
-        /// Folder where  all profile relevant stuff is stored.
+        /// Folder where all profile relevant stuff is stored.
         /// </summary>
         public string BotFolder { get; }
 
@@ -295,7 +307,7 @@ namespace AmeisenBotX.Core
         public IAmeisenBotLogic Logic { get; private set; }
 
         /// <summary>
-        /// Folder where  all profile relevant stuff is stored.
+        /// Folder where all profile relevant stuff is stored.
         /// </summary>
         public string ProfileFolder { get; }
 
@@ -341,7 +353,8 @@ namespace AmeisenBotX.Core
             {
                 if (Bot.Wow.IsReady)
                 {
-                    Bot.Wow.LuaDoString("ForceQuit()");
+                    // ForceQuit: ingame, QuitGame: login screen
+                    Bot.Wow.LuaDoString("pcall(ForceQuit);pcall(QuitGame)");
 
                     // wait 3 sec for wow to exit, otherwise we kill it
                     TimeSpan timeToWait = TimeSpan.FromSeconds(3);
@@ -388,12 +401,8 @@ namespace AmeisenBotX.Core
                 IsRunning = false;
                 AmeisenLogger.I.Log("AmeisenBot", "Pausing", LogLevel.Debug);
 
-                // if (StateMachine.CurrentState.Key is not BotState.StartWow
-                //     and not BotState.Login
-                //     and not BotState.LoadingScreen)
-                // {
-                //     StateMachine.SetState(BotState.Idle);
-                // }
+                // if (StateMachine.CurrentState.Key is not BotState.StartWow and not BotState.Login
+                // and not BotState.LoadingScreen) { StateMachine.SetState(BotState.Idle); }
 
                 OnStatusChanged?.Invoke();
             }
@@ -442,8 +451,8 @@ namespace AmeisenBotX.Core
         }
 
         /// <summary>
-        /// Starts the bots engine, only call this once, use Pause() and
-        /// Resume() to control the execution of the engine afterwards
+        /// Starts the bots engine, only call this once, use Pause() and Resume() to control the
+        /// execution of the engine afterwards
         /// </summary>
         public void Start()
         {
@@ -607,8 +616,7 @@ namespace AmeisenBotX.Core
                 LoadCustomCombatClass();
             }
 
-            // if a combatclass specified an ItemComparator
-            // use it instead of the default one
+            // if a combatclass specified an ItemComparator use it instead of the default one
             if (Bot.CombatClass?.ItemComparator != null)
             {
                 Bot.Character.ItemComparator = Bot.CombatClass.ItemComparator;
@@ -689,7 +697,7 @@ namespace AmeisenBotX.Core
 
                 WowBasicItem item = ItemFactory.BuildSpecificItem(ItemFactory.ParseItem(itemJson));
 
-                if (item.Name == "0" || item.ItemLink == "0")
+                if (item.Name == "0")
                 {
                     // get the item id and try again
                     itemJson = Bot.Wow.GetItemByNameOrLink
@@ -704,6 +712,12 @@ namespace AmeisenBotX.Core
                 if (Bot.Character.IsItemAnImprovement(item, out IWowInventoryItem itemToReplace))
                 {
                     AmeisenLogger.I.Log("WoWEvents", $"Would like to replace item {item?.Name} with {itemToReplace?.Name}, rolling need", LogLevel.Verbose);
+
+                    // do i need to destroy trash?
+                    if (Config.AutoDestroyTrash && Bot.Character.Inventory.FreeBagSlots < 2)
+                    {
+                        Bot.Character.Inventory.TryDestroyTrash();
+                    }
 
                     Bot.Wow.RollOnLoot(rollId, WowRollType.Need);
                     return;
@@ -870,7 +884,14 @@ namespace AmeisenBotX.Core
                         case "RESURRECT":
                         case "USE_BIND":
                         case "RECOVER_CORPSE":
+                        case "TRADE_POTENTIAL_BIND_ENCHANT":
+                        case "INSTANCE_BOOT":
+                        case "RESURRECT_NO_TIMER":
                             Bot.Wow.ClickUiElement($"StaticPopup{parts[0]}Button1");
+                            break;
+
+                        case "DELETE_ITEM":
+                            Bot.Character.Inventory.OnStaticPopupDeleteItem(id);
                             break;
 
                         case "TOO_MANY_LUA_ERRORS":
@@ -1057,10 +1078,9 @@ namespace AmeisenBotX.Core
             Bot.Wow.Events?.Subscribe("START_LOOT_ROLL", OnLootRollStarted);
             Bot.Wow.Events?.Subscribe("BAG_UPDATE", OnBagChanged);
             Bot.Wow.Events?.Subscribe("PLAYER_EQUIPMENT_CHANGED", OnEquipmentChanged);
-            // Bot.EventHookManager.Subscribe("DELETE_ITEM_CONFIRM", OnConfirmDeleteItem);
 
             // Merchant Events
-            // Bot.EventHookManager.Subscribe("MERCHANT_SHOW", OnMerchantShow);
+            Bot.Wow.Events?.Subscribe("MERCHANT_SHOW", OnMerchantShow);
 
             // PvP Events
             Bot.Wow.Events?.Subscribe("UPDATE_BATTLEFIELD_STATUS", OnPvpQueueShow);

@@ -22,15 +22,15 @@ namespace AmeisenBotX.Core.Managers.Character
 {
     public class DefaultCharacterManager : ICharacterManager
     {
-        public DefaultCharacterManager(IWowInterface wowInterface, IMemoryApi memoryApi)
+        public DefaultCharacterManager(IWowInterface wowInterface, IMemoryApi memoryApi, AmeisenBotConfig config)
         {
             Wow = wowInterface;
             MemoryApi = memoryApi;
 
-            Inventory = new CharacterInventory(Wow);
-            Equipment = new CharacterEquipment(Wow);
-            SpellBook = new SpellBook(Wow);
-            TalentManager = new TalentManager(Wow);
+            Inventory = new(Wow, config);
+            Equipment = new(Wow);
+            SpellBook = new(Wow);
+            TalentManager = new(Wow);
             LastLevelTrained = 0;
             ItemComparator = new ItemLevelComparator();
             Skills = new Dictionary<string, (int, int)>();

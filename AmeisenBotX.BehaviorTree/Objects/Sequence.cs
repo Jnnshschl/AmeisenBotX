@@ -3,7 +3,8 @@
 namespace AmeisenBotX.BehaviorTree.Objects
 {
     /// <summary>
-    /// Executes a sequence of nodes until all nodes returned success. If a node fails or the sequence finished, it gets resetted.
+    /// Executes a sequence of nodes until all nodes returned success. If a node fails or the
+    /// sequence finished, it gets resetted.
     /// </summary>
     public class Sequence : IComposite
     {

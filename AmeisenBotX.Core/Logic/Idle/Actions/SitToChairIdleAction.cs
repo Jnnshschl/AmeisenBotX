@@ -39,9 +39,8 @@ namespace AmeisenBotX.Core.Logic.Idle.Actions
         {
             SatDown = false;
 
-            // get the center from where to cal the distance, this is needed
-            // to prevent going out of the follow trigger radius, which
-            // would cause a suspicous loop of running around
+            // get the center from where to cal the distance, this is needed to prevent going out of
+            // the follow trigger radius, which would cause a suspicous loop of running around
             Vector3 originPos = Bot.Player.Position; // StateMachine.Get<StateFollowing>().IsUnitToFollowThere(out IWowUnit unit, false) ? unit.Position : Bot.Player.Position;
 
             IWowGameobject seat = Bot.Objects.WowObjects.OfType<IWowGameobject>()

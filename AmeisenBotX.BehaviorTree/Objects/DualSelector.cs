@@ -4,7 +4,8 @@ using System;
 namespace AmeisenBotX.BehaviorTree.Objects
 {
     /// <summary>
-    /// Special selector that executes nodeNone when input is 0|0, nodeA when input is 1|0, nodeB when input is 0|1 and nodeBoth when input is 1|1.
+    /// Special selector that executes nodeNone when input is 0|0, nodeA when input is 1|0, nodeB
+    /// when input is 0|1 and nodeBoth when input is 1|1.
     /// </summary>
     public class DualSelector : IComposite
     {

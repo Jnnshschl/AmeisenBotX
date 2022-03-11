@@ -167,6 +167,8 @@ namespace AmeisenBotX.Wow335a
 
         public IWowPlayer Player => ObjectManager.Player;
 
+        public WowVersion WowVersion { get; } = WowVersion.WotLK335a;
+
         private SimpleEventManager EventManager { get; }
 
         private EndSceneHook335a Hook { get; }
@@ -178,8 +180,6 @@ namespace AmeisenBotX.Wow335a
         private ObjectManager335a ObjectManager { get; }
 
         private OffsetList335a OffsetList { get; }
-
-        public WowVersion WowVersion { get; } = WowVersion.WotLK335a;
 
         public void AbandonQuestsNotIn(IEnumerable<string> quests)
         {
@@ -254,6 +254,27 @@ namespace AmeisenBotX.Wow335a
         public void ClickOnTrainButton()
         {
             LuaDoString("LoadAddOn\"Blizzard_TrainerUI\"f=ClassTrainerTrainButton;f.e=0;if f:GetScript\"OnUpdate\"then f:SetScript(\"OnUpdate\",nil)else f:SetScript(\"OnUpdate\",function(f,a)f.e=f.e+a;if f.e>.01 then f.e=0;f:Click()end end)end");
+        }
+
+        public void ClickToMove(Vector3 pos, ulong guid, WowClickToMoveType clickToMoveType = WowClickToMoveType.Move, float turnSpeed = 20.9f, float distance = WowClickToMoveDistance.Move)
+        {
+            if (float.IsInfinity(pos.X) || float.IsNaN(pos.X) || MathF.Abs(pos.X) > 17066.6656
+                || float.IsInfinity(pos.Y) || float.IsNaN(pos.Y) || MathF.Abs(pos.Y) > 17066.6656
+                || float.IsInfinity(pos.Z) || float.IsNaN(pos.Z) || MathF.Abs(pos.Z) > 17066.6656)
+            {
+                return;
+            }
+
+            Memory.Write(Offsets.ClickToMoveTurnSpeed, turnSpeed);
+            Memory.Write(Offsets.ClickToMoveDistance, distance);
+
+            if (guid > 0)
+            {
+                Memory.Write(Offsets.ClickToMoveGuid, guid);
+            }
+
+            Memory.Write(Offsets.ClickToMoveAction, clickToMoveType);
+            Memory.Write(Offsets.ClickToMoveX, pos);
         }
 
         public void ClickUiElement(string elementName)
@@ -794,7 +815,8 @@ namespace AmeisenBotX.Wow335a
         {
             if (rollType == WowRollType.Need)
             {
-                // first we need to check whether we can roll a need on this, otherwise the bot might not roll at all
+                // first we need to check whether we can roll a need on this, otherwise the bot
+                // might not roll at all
                 LuaDoString($"_,_,_,_,_,canNeed=GetLootRollItemInfo({rollId});if canNeed then RollOnLoot({rollId}, {(int)rollType}) else RollOnLoot({rollId}, 2) end");
             }
             else
@@ -946,27 +968,6 @@ namespace AmeisenBotX.Wow335a
         public void UseItemByName(string itemName)
         {
             LuaSellItemsByName(itemName);
-        }
-
-        public void ClickToMove(Vector3 pos, ulong guid, WowClickToMoveType clickToMoveType = WowClickToMoveType.Move, float turnSpeed = 20.9f, float distance = WowClickToMoveDistance.Move)
-        {
-            if (float.IsInfinity(pos.X) || float.IsNaN(pos.X) || MathF.Abs(pos.X) > 17066.6656
-                || float.IsInfinity(pos.Y) || float.IsNaN(pos.Y) || MathF.Abs(pos.Y) > 17066.6656
-                || float.IsInfinity(pos.Z) || float.IsNaN(pos.Z) || MathF.Abs(pos.Z) > 17066.6656)
-            {
-                return;
-            }
-
-            Memory.Write(Offsets.ClickToMoveTurnSpeed, turnSpeed);
-            Memory.Write(Offsets.ClickToMoveDistance, distance);
-
-            if (guid > 0)
-            {
-                Memory.Write(Offsets.ClickToMoveGuid, guid);
-            }
-
-            Memory.Write(Offsets.ClickToMoveAction, clickToMoveType);
-            Memory.Write(Offsets.ClickToMoveX, pos);
         }
 
         private int ExecuteLuaInt((string, string) cmdVar)

@@ -35,6 +35,8 @@ namespace AmeisenBotX.Wow.Objects
 
         double HealthPercentage { get; }
 
+        int HolyPower { get; }
+
         bool IsAmmoVendor => NpcFlags[(int)WowUnitNpcFlag.AmmoVendor];
 
         bool IsAuctioneer => NpcFlags[(int)WowUnitNpcFlag.Auctioneer];
@@ -52,6 +54,8 @@ namespace AmeisenBotX.Wow.Objects
         bool IsConfused => UnitFlags[(int)WowUnitFlag.Confused];
 
         bool IsDazed => UnitFlags[(int)WowUnitFlag.Dazed];
+
+        bool IsDead { get; }
 
         bool IsDisarmed => UnitFlags[(int)WowUnitFlag.Disarmed];
 
@@ -74,6 +78,8 @@ namespace AmeisenBotX.Wow.Objects
         bool IsInnkeeper => NpcFlags[(int)WowUnitNpcFlag.Innkeeper];
 
         bool IsInTaxiFlight => UnitFlags[(int)WowUnitFlag.TaxiFlight];
+
+        bool IsLootable { get; }
 
         bool IsLooting => UnitFlags[(int)WowUnitFlag.Looting];
 
@@ -105,6 +111,8 @@ namespace AmeisenBotX.Wow.Objects
 
         bool IsReagentVendor => NpcFlags[(int)WowUnitNpcFlag.ReagentVendor];
 
+        bool IsReferAFriendLinked { get; }
+
         bool IsRepairer => NpcFlags[(int)WowUnitNpcFlag.Repairer];
 
         bool IsSilenced => UnitFlags[(int)WowUnitFlag.Silenced];
@@ -112,6 +120,8 @@ namespace AmeisenBotX.Wow.Objects
         bool IsSitting => UnitFlags[(int)WowUnitFlag.Sitting];
 
         bool IsSkinnable => UnitFlags[(int)WowUnitFlag.Skinnable];
+
+        bool IsSpecialInfo { get; }
 
         bool IsSpellclick => NpcFlags[(int)WowUnitNpcFlag.Spellclick];
 
@@ -123,27 +133,19 @@ namespace AmeisenBotX.Wow.Objects
 
         bool IsTabardDesigner => NpcFlags[(int)WowUnitNpcFlag.TabardDesigner];
 
-        bool IsTotem => UnitFlags[(int)WowUnitFlag.Totem];
-
-        bool IsTrainer => NpcFlags[(int)WowUnitNpcFlag.Trainer];
-
-        bool IsVendor => NpcFlags[(int)WowUnitNpcFlag.Vendor];
-
-        bool IsDead { get; }
-
-        bool IsLootable { get; }
-
-        bool IsReferAFriendLinked { get; }
-
-        bool IsSpecialInfo { get; }
-
         bool IsTaggedByMe { get; }
 
         bool IsTaggedByOther { get; }
 
         bool IsTappedByAllThreatList { get; }
 
+        bool IsTotem => UnitFlags[(int)WowUnitFlag.Totem];
+
         bool IsTrackedUnit { get; }
+
+        bool IsTrainer => NpcFlags[(int)WowUnitNpcFlag.Trainer];
+
+        bool IsVendor => NpcFlags[(int)WowUnitNpcFlag.Vendor];
 
         int Level { get; }
 
@@ -154,6 +156,8 @@ namespace AmeisenBotX.Wow.Objects
         int MaxEnergy { get; }
 
         int MaxHealth { get; }
+
+        int MaxHolyPower { get; }
 
         int MaxMana { get; }
 
@@ -170,10 +174,6 @@ namespace AmeisenBotX.Wow.Objects
         WowRace Race { get; }
 
         int Rage { get; }
-
-        int HolyPower { get; }
-
-        int MaxHolyPower { get; }
 
         double RagePercentage { get; }
 
@@ -199,13 +199,13 @@ namespace AmeisenBotX.Wow.Objects
 
         ulong TargetGuid { get; }
 
+        public new WowObjectType Type => WowObjectType.Unit;
+
         BitVector32 UnitFlags { get; }
 
         BitVector32 UnitFlags2 { get; }
 
         BitVector32 UnitFlagsDynamic { get; }
-
-        public new WowObjectType Type => WowObjectType.Unit;
 
         static bool IsValidUnit(IWowUnit unit)
         {

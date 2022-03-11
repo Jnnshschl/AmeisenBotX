@@ -6,7 +6,7 @@ namespace AmeisenBotX.Core.Engines.Combat.Helpers
 {
     public class CooldownManager
     {
-        public CooldownManager(List<Spell> spells)
+        public CooldownManager(IEnumerable<Spell> spells)
         {
             Cooldowns = new();
 

@@ -53,21 +53,18 @@ namespace AmeisenBotX.Wow.Hook
         private IntPtr CExecution { get; set; }
 
         /// <summary>
-        /// Codecave that hold the original EndScene instructions
-        /// and jumps back to the original function.
+        /// Codecave that hold the original EndScene instructions and jumps back to the original function.
         /// </summary>
         private IntPtr CGateway { get; set; }
 
         /// <summary>
-        /// Codecave used to check whether the bot want's to execute
-        /// code and run the IHookModule's.
+        /// Codecave used to check whether the bot want's to execute code and run the IHookModule's.
         /// </summary>
         private IntPtr CRoutine { get; set; }
 
         /// <summary>
-        /// Pointer to the GameInfo struct that contains various
-        /// static information about wow that are needed on a
-        /// regular basis.
+        /// Pointer to the GameInfo struct that contains various static information about wow that
+        /// are needed on a regular basis.
         /// </summary>
         private IntPtr GameInfoAddress { get; set; }
 
@@ -77,20 +74,17 @@ namespace AmeisenBotX.Wow.Hook
         private IntPtr GameInfoExecuteAddress { get; set; }
 
         /// <summary>
-        /// Integer tha will be set to 1 when wow finished
-        /// refreshing the GameInfo data.
+        /// Integer tha will be set to 1 when wow finished refreshing the GameInfo data.
         /// </summary>
         private IntPtr GameInfoExecutedAddress { get; set; }
 
         /// <summary>
-        /// Integer tha will be set to 1 when we want to
-        /// execute the LOS check.
+        /// Integer tha will be set to 1 when we want to execute the LOS check.
         /// </summary>
         private IntPtr GameInfoExecuteLosCheckAddress { get; set; }
 
         /// <summary>
-        /// Integer tha will be set to 1 when we're able
-        /// to perform the LOS check.
+        /// Integer tha will be set to 1 when we're able to perform the LOS check.
         /// </summary>
         private IntPtr GameInfoLosCheckDataAddress { get; set; }
 
@@ -100,8 +94,8 @@ namespace AmeisenBotX.Wow.Hook
         private List<IHookModule> HookModules { get; set; }
 
         /// <summary>
-        /// Integer that will be set to 1 if the bot wait's for
-        /// code to be executed. Will be set to 0 when done.
+        /// Integer that will be set to 1 if the bot wait's for code to be executed. Will be set to
+        /// 0 when done.
         /// </summary>
         private IntPtr IntShouldExecute { get; set; }
 
@@ -110,8 +104,7 @@ namespace AmeisenBotX.Wow.Hook
         private IOffsetList OffsetList { get; }
 
         /// <summary>
-        /// Save the original EndScene instructions that will be
-        /// restored when the hook gets disposed.
+        /// Save the original EndScene instructions that will be restored when the hook gets disposed.
         /// </summary>
         private byte[] OriginalEndsceneBytes { get; set; }
 
@@ -121,8 +114,7 @@ namespace AmeisenBotX.Wow.Hook
         private IntPtr OverrideWorldCheckAddress { get; set; }
 
         /// <summary>
-        /// Pointer to the return value of the code executed on the
-        /// EndScene hook.
+        /// Pointer to the return value of the code executed on the EndScene hook.
         /// </summary>
         private IntPtr ReturnValueAddress { get; set; }
 
@@ -132,13 +124,62 @@ namespace AmeisenBotX.Wow.Hook
         private IntPtr WowEndSceneAddress { get; set; }
 
         /// <summary>
-        /// Whether the hook should ignore if the world is not loaded or not.
-        /// Used in the login screen as the world isnt loaded there.
+        /// Whether the hook should ignore if the world is not loaded or not. Used in the login
+        /// screen as the world isnt loaded there.
         /// </summary>
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public void BotOverrideWorldLoadedCheck(bool status)
         {
             Memory.Write(OverrideWorldCheckAddress, status ? 1 : 0);
+        }
+
+        public void GameInfoTick(IWowUnit player, IWowUnit target)
+        {
+            if (Memory.Read(GameInfoExecuteAddress, out int executeStatus)
+                && executeStatus == 1)
+            {
+                // still waiting for execution
+                return;
+            }
+
+            if (Memory.Read(GameInfoExecutedAddress, out int executedStatus)
+                && executedStatus == 0)
+            {
+                if (player != null && target != null)
+                {
+                    Vector3 playerPosition = player.Position;
+                    playerPosition.Z += 1.5f;
+
+                    Vector3 targetPosition = target.Position;
+                    targetPosition.Z += 1.5f;
+
+                    if (Memory.Write(GameInfoLosCheckDataAddress, (1.0f, playerPosition, targetPosition)))
+                    {
+                        // run the los check if we have a target
+                        Memory.Write(GameInfoExecuteLosCheckAddress, 1);
+                    }
+                }
+
+                // run the gameinfo update
+                Memory.Write(GameInfoExecuteAddress, 1);
+            }
+            else
+            {
+                if (Memory.Read(GameInfoAddress, out GameInfo gameInfo))
+                {
+                    OnGameInfoPush?.Invoke(gameInfo);
+                    // AmeisenLogger.I.Log("GameInfo", $"Pushing GameInfo Update:
+                    // {JsonSerializer.Serialize(gameInfo, new JsonSerializerOptions() {
+                    // IncludeFields = true })}");
+                }
+
+                Memory.Write(GameInfoExecutedAddress, 0);
+
+                foreach (IHookModule module in HookModules)
+                {
+                    module.OnDataUpdate?.Invoke(module.GetDataPointer());
+                }
+            }
         }
 
         public bool Hook(int hookSize, List<IHookModule> hookModules)
@@ -158,7 +199,8 @@ namespace AmeisenBotX.Wow.Hook
                 }
                 catch
                 {
-                    // ignored, as we expect it to fail here atleast once, because wows start takes some time
+                    // ignored, as we expect it to fail here atleast once, because wows start takes
+                    // some time
                 }
 
                 if (WowEndSceneAddress == IntPtr.Zero)
@@ -199,15 +241,13 @@ namespace AmeisenBotX.Wow.Hook
             assemblyBuffer.Add($"TEST DWORD [{IntShouldExecute}], 1");
             assemblyBuffer.Add("JE @out");
 
-            // check if we want to override our is ingame check
-            // going to be used while we are in the login screen
+            // check if we want to override our is ingame check going to be used while we are in the
+            // login screen
             assemblyBuffer.Add($"TEST DWORD [{OverrideWorldCheckAddress}], 1");
             assemblyBuffer.Add("JNE @ovr");
 
-            // check for world to be loaded
-            // we dont want to execute code in
-            // the loadingscreen, cause that
-            // mostly results in crashes
+            // check for world to be loaded we dont want to execute code in the loadingscreen, cause
+            // that mostly results in crashes
             assemblyBuffer.Add($"TEST DWORD [{OffsetList.IsWorldLoaded}], 1");
             assemblyBuffer.Add("JE @out");
             assemblyBuffer.Add("@ovr:");
@@ -220,10 +260,8 @@ namespace AmeisenBotX.Wow.Hook
             assemblyBuffer.Add("@out:");
             assemblyBuffer.Add($"MOV DWORD [{IntShouldExecute}], 0");
 
-            // ----------------------------
-            // # GameInfo & EventHook stuff
-            // ----------------------------
-            // world loaded and should execute check
+            // ---------------------------- # GameInfo & EventHook stuff
+            // ---------------------------- world loaded and should execute check
             assemblyBuffer.Add($"TEST DWORD [{OffsetList.IsWorldLoaded}], 1");
             assemblyBuffer.Add("JE @skpgi");
             assemblyBuffer.Add($"TEST DWORD [{GameInfoExecuteAddress}], 1");
@@ -286,10 +324,8 @@ namespace AmeisenBotX.Wow.Hook
 
             assemblyBuffer.Clear();
 
-            // ---------------------------------------------------
-            // End of the code that checks if there is asm to be
-            // executed on our hook
-            // ---------------------------------------------------
+            // --------------------------------------------------- End of the code that checks if
+            // there is asm to be executed on our hook ---------------------------------------------------
 
             // write the original EndScene instructions
             Memory.WriteBytes(CGateway, OriginalEndsceneBytes);
@@ -305,18 +341,13 @@ namespace AmeisenBotX.Wow.Hook
 
             assemblyBuffer.Clear();
 
-            // ---------------------------------------------------
-            // End of doing the original stuff and returning to
-            // the original instruction
-            // ---------------------------------------------------
+            // --------------------------------------------------- End of doing the original stuff
+            // and returning to the original instruction ---------------------------------------------------
 
             // modify original EndScene instructions to start the hook
             assemblyBuffer.Add($"JMP {CRoutine}");
 
-            // for (int i = 5; i < hookSize; ++i)
-            // {
-            //     assemblyBuffer.Add("NOP");
-            // }
+            // for (int i = 5; i < hookSize; ++i) { assemblyBuffer.Add("NOP"); }
 
             // suspend wows main thread and inject
             Memory.SuspendMainThread();
@@ -332,6 +363,66 @@ namespace AmeisenBotX.Wow.Hook
 
             AmeisenLogger.I.Log("HookManager", "EndsceneHook successful", LogLevel.Verbose);
             return IsWoWHooked;
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public bool InjectAndExecute(IEnumerable<string> asm)
+        {
+            return InjectAndExecute(asm, false, out _);
+        }
+
+        public bool InjectAndExecute(IEnumerable<string> asm, bool returns, out IntPtr returnAddress)
+        {
+            if (!IsWoWHooked)
+            {
+                returnAddress = IntPtr.Zero;
+                return false;
+            }
+
+            lock (hookLock)
+            {
+                ++hookCalls;
+
+                try
+                {
+                    Memory.SuspendMainThread();
+
+                    try
+                    {
+                        Memory.InjectAssembly(asm, CExecution);
+                        Memory.Write(IntShouldExecute, 1);
+                    }
+                    finally
+                    {
+                        Memory.ResumeMainThread();
+                    }
+
+                    // wait for the code to be executed
+                    while (Memory.Read(IntShouldExecute, out int c) && c == 1)
+                    {
+                        Thread.Sleep(1);
+                    }
+
+                    // if we want to read the return value do it otherwise we're done
+                    if (!returns)
+                    {
+                        returnAddress = IntPtr.Zero;
+                        return true;
+                    }
+                    else
+                    {
+                        return Memory.Read(ReturnValueAddress, out returnAddress) && returnAddress != IntPtr.Zero;
+                    }
+                }
+                catch (Exception ex)
+                {
+                    AmeisenLogger.I.Log("Hook", $"Failed to InjectAndExecute:\n{ex}");
+                    Memory.Write(IntShouldExecute, 0);
+                }
+            }
+
+            returnAddress = IntPtr.Zero;
+            return false;
         }
 
         public void Unhook()
@@ -429,53 +520,6 @@ namespace AmeisenBotX.Wow.Hook
             return true;
         }
 
-        public void GameInfoTick(IWowUnit player, IWowUnit target)
-        {
-            if (Memory.Read(GameInfoExecuteAddress, out int executeStatus)
-                && executeStatus == 1)
-            {
-                // still waiting for execution
-                return;
-            }
-
-            if (Memory.Read(GameInfoExecutedAddress, out int executedStatus)
-                && executedStatus == 0)
-            {
-                if (player != null && target != null)
-                {
-                    Vector3 playerPosition = player.Position;
-                    playerPosition.Z += 1.5f;
-
-                    Vector3 targetPosition = target.Position;
-                    targetPosition.Z += 1.5f;
-
-                    if (Memory.Write(GameInfoLosCheckDataAddress, (1.0f, playerPosition, targetPosition)))
-                    {
-                        // run the los check if we have a target
-                        Memory.Write(GameInfoExecuteLosCheckAddress, 1);
-                    }
-                }
-
-                // run the gameinfo update
-                Memory.Write(GameInfoExecuteAddress, 1);
-            }
-            else
-            {
-                if (Memory.Read(GameInfoAddress, out GameInfo gameInfo))
-                {
-                    OnGameInfoPush?.Invoke(gameInfo);
-                    // AmeisenLogger.I.Log("GameInfo", $"Pushing GameInfo Update: {JsonSerializer.Serialize(gameInfo, new JsonSerializerOptions() { IncludeFields = true })}");
-                }
-
-                Memory.Write(GameInfoExecutedAddress, 0);
-
-                foreach (IHookModule module in HookModules)
-                {
-                    module.OnDataUpdate?.Invoke(module.GetDataPointer());
-                }
-            }
-        }
-
         private IntPtr GetEndScene()
         {
             if (Memory.Read(OffsetList.EndSceneStaticDevice, out IntPtr pDevice)
@@ -489,66 +533,6 @@ namespace AmeisenBotX.Wow.Hook
             {
                 return IntPtr.Zero;
             }
-        }
-
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public bool InjectAndExecute(IEnumerable<string> asm)
-        {
-            return InjectAndExecute(asm, false, out _);
-        }
-
-        public bool InjectAndExecute(IEnumerable<string> asm, bool returns, out IntPtr returnAddress)
-        {
-            if (!IsWoWHooked)
-            {
-                returnAddress = IntPtr.Zero;
-                return false;
-            }
-
-            lock (hookLock)
-            {
-                ++hookCalls;
-
-                try
-                {
-                    Memory.SuspendMainThread();
-
-                    try
-                    {
-                        Memory.InjectAssembly(asm, CExecution);
-                        Memory.Write(IntShouldExecute, 1);
-                    }
-                    finally
-                    {
-                        Memory.ResumeMainThread();
-                    }
-
-                    // wait for the code to be executed
-                    while (Memory.Read(IntShouldExecute, out int c) && c == 1)
-                    {
-                        Thread.Sleep(1);
-                    }
-
-                    // if we want to read the return value do it otherwise we're done
-                    if (!returns)
-                    {
-                        returnAddress = IntPtr.Zero;
-                        return true;
-                    }
-                    else
-                    {
-                        return Memory.Read(ReturnValueAddress, out returnAddress) && returnAddress != IntPtr.Zero;
-                    }
-                }
-                catch (Exception ex)
-                {
-                    AmeisenLogger.I.Log("Hook", $"Failed to InjectAndExecute:\n{ex}");
-                    Memory.Write(IntShouldExecute, 0);
-                }
-            }
-
-            returnAddress = IntPtr.Zero;
-            return false;
         }
     }
 }

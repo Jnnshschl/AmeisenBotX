@@ -45,8 +45,7 @@ namespace AmeisenBotX.Core.Engines.Combat.Helpers
 
             if (LastTimeMounted + TimeSpan.FromSeconds(1) > DateTime.UtcNow)
             {
-                // only do stuff 1sec after we dismounted
-                // pets need a few ms to spawn
+                // only do stuff 1sec after we dismounted pets need a few ms to spawn
                 return false;
             }
 

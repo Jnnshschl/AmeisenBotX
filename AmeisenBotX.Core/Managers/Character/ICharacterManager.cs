@@ -20,6 +20,8 @@ namespace AmeisenBotX.Core.Managers.Character
 
         List<WowEquipmentSlot> ItemSlotsToSkip { get; set; }
 
+        int LastLevelTrained { get; set; }
+
         int Money { get; }
 
         IEnumerable<WowMount> Mounts { get; }
@@ -29,8 +31,6 @@ namespace AmeisenBotX.Core.Managers.Character
         SpellBook SpellBook { get; }
 
         TalentManager TalentManager { get; }
-
-        int LastLevelTrained { get; set; }
 
         bool HasItemTypeInBag<T>(bool needsToBeUseable = false);
 

@@ -82,7 +82,8 @@ namespace AmeisenBotX.Core.Engines.Movement
         public void DirectMove(Vector3 position)
         {
             Bot.Character.MoveToPosition(position, 20.9f, 0.5f);
-            // PlayerVehicle.Update((x) => Bot.Character.MoveToPosition(x, 20.9f, 0.5f), MovementAction.Follow, position);
+            // PlayerVehicle.Update((x) => Bot.Character.MoveToPosition(x, 20.9f, 0.5f),
+            // MovementAction.Follow, position);
         }
 
         public void Execute()
@@ -226,9 +227,8 @@ namespace AmeisenBotX.Core.Engines.Movement
                     return false;
                 }
 
-                // TODO: handle incomplete paths, disabled for now
-                // double distance = lastNode.GetDistance(position);
-                // return distance < maxDistance;
+                // TODO: handle incomplete paths, disabled for now double distance =
+                // lastNode.GetDistance(position); return distance < maxDistance;
 
                 return true;
             }
@@ -256,8 +256,8 @@ namespace AmeisenBotX.Core.Engines.Movement
 
                 if (places.Any())
                 {
-                    // build mean position and move away x meters from it
-                    // x is the biggest distance we have to move
+                    // build mean position and move away x meters from it x is the biggest distance
+                    // we have to move
                     Vector3 meanAoePos = BotMath.GetMeanPosition(places.Select(e => e.position));
                     float distanceToMove = places.Max(e => e.radius) + Config.AoeDetectionExtends;
 

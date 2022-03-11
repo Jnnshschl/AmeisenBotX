@@ -29,6 +29,10 @@ namespace AmeisenBotX.Core.Engines.Quest
 
         private TimegatedEvent QueryCompletedQuestsEvent { get; }
 
+        public void Enter()
+        {
+        }
+
         public void Execute()
         {
             if (Profile == null)
@@ -109,10 +113,6 @@ namespace AmeisenBotX.Core.Engines.Quest
 
             // filter duplicates
             CompletedQuests = CompletedQuests.Distinct().ToList();
-        }
-
-        public void Enter()
-        {
         }
 
         private void OnGetQuestsCompleted(long timestamp, List<string> args)

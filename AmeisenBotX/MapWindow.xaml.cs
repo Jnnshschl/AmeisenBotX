@@ -358,16 +358,15 @@ namespace AmeisenBotX
                 // Render blacklisted nodes
                 // ------------------------ >
 
-                // if (AmeisenBot.Bot.BotCache.TryGetBlacklistPosition((int)AmeisenBot.Bot.ObjectManager.MapId, playerPosition, 64, out List<Vector3> blacklistNodes))
-                // {
-                //     for (int i = 0; i < blacklistNodes.Count; ++i)
-                //     {
-                //         Vector3 node = blacklistNodes[i];
-                //         Point nodePositionOnMap = GetRelativePosition(playerPosition, node, playerRotation, halfWidth, halfHeight, scale);
+                // if
+                // (AmeisenBot.Bot.BotCache.TryGetBlacklistPosition((int)AmeisenBot.Bot.ObjectManager.MapId,
+                // playerPosition, 64, out List<Vector3> blacklistNodes)) { for (int i = 0; i <
+                // blacklistNodes.Count; ++i) { Vector3 node = blacklistNodes[i]; Point
+                // nodePositionOnMap = GetRelativePosition(playerPosition, node, playerRotation,
+                // halfWidth, halfHeight, scale);
                 //
-                //         RenderBlacklistNode(nodePositionOnMap.X, nodePositionOnMap.Y, BlacklistNodeBrush, BlacklistNodePen, graphics, 3, 32);
-                //     }
-                // }
+                // RenderBlacklistNode(nodePositionOnMap.X, nodePositionOnMap.Y, BlacklistNodeBrush,
+                // BlacklistNodePen, graphics, 3, 32); } }
 
                 // Render Gameobjects
                 // ------------------ >

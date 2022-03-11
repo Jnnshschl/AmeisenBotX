@@ -626,8 +626,8 @@ namespace AmeisenBotX.Core.Engines.Dungeon.Profiles.Classic
             new(new(-115, 141, -81)),
             new(new(-121, 135, -79)),
             new(new(-127, 130, -79)),
-            // new(new(-132, 127, -79), DungeonNodeType.Talk, "1941"),
-            // new(new(115, 243, -96), DungeonNodeType.Protect, "4216"),
+            // new(new(-132, 127, -79), DungeonNodeType.Talk, "1941"), new(new(115, 243, -96),
+            // DungeonNodeType.Protect, "4216"),
         };
 
         public List<int> PriorityUnits { get; } = new();

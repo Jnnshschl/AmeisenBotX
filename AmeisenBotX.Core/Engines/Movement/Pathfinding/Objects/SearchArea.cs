@@ -59,10 +59,10 @@ namespace AmeisenBotX.Core.Engines.Movement.Pathfinding.Objects
 
             Vector3 currentPosition = bot.Objects.Player.Position;
 
-            // This is not optimal but fairly simple
-            // We ask for the path for every vertex.
-            // It could be optimized by following the edges up or down and stop once the distance increased in both directions.
-            // We dont ask for the Distance2D because we want to know the movement path length
+            // This is not optimal but fairly simple We ask for the path for every vertex. It could
+            // be optimized by following the edges up or down and stop once the distance increased
+            // in both directions. We dont ask for the Distance2D because we want to know the
+            // movement path length
 
             List<double> distances = new();
 
@@ -88,7 +88,8 @@ namespace AmeisenBotX.Core.Engines.Movement.Pathfinding.Objects
             int minimumIndex = distances.IndexOf(distances.Min());
             Vector3 entryPosition = Area[minimumIndex];
 
-            // The ContainsPoint function is sensible towards edges, therefore we will wiggle us into the polygon
+            // The ContainsPoint function is sensible towards edges, therefore we will wiggle us
+            // into the polygon
             if (!ContainsPosition(entryPosition))
             {
                 {
@@ -169,10 +170,9 @@ namespace AmeisenBotX.Core.Engines.Movement.Pathfinding.Objects
                 return;
             }
 
-            // This is not optimal but should be fast
-            // We raster the polygon with points apart 2x VisibilityRadius
-            // We then remove all points that are not in the polygon
-            // Finally we move to one point after another
+            // This is not optimal but should be fast We raster the polygon with points apart 2x
+            // VisibilityRadius We then remove all points that are not in the polygon Finally we
+            // move to one point after another
 
             // First find top, right, left, right
             float top = Area[0].Y;

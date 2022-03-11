@@ -3,9 +3,8 @@
 namespace AmeisenBotX.Common.Utils
 {
     /// <summary>
-    /// Utility class to limit the execution of actions. It is able to
-    /// run code only when x seconds/minutes/... passed. Useful when
-    /// you dont want high cost code to be spammed.
+    /// Utility class to limit the execution of actions. It is able to run code only when x
+    /// seconds/minutes/... passed. Useful when you dont want high cost code to be spammed.
     /// </summary>
     public class TimegatedEvent
     {

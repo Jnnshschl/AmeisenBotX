@@ -14,6 +14,8 @@ namespace AmeisenBotX.Core.Engines.Quest.Objects.Objectives
 
         public double Progress => QuestObjectives.Count(e => QuestObjectives.IndexOf(e) <= AlreadyCompletedIndex || e.Finished) / (double)QuestObjectives.Count * 100.0;
 
+        public List<IQuestObjective> QuestObjectives { get; }
+
         private int AlreadyCompletedIndex
         {
             get
@@ -22,8 +24,6 @@ namespace AmeisenBotX.Core.Engines.Quest.Objects.Objectives
                 return QuestObjectives.IndexOf(questObjective);
             }
         }
-
-        public List<IQuestObjective> QuestObjectives { get; }
 
         public void Execute()
         {

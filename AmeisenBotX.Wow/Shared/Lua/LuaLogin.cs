@@ -4,8 +4,8 @@
     {
         public static string Get(string user, string pass, string realm, int characterslot)
         {
-            // CharacterSelect_EnterWorld() got replaced by CharSelectEnterWorldButton:Click()
-            // for whetever reason, the mop client freezes if we call this directly
+            // CharacterSelect_EnterWorld() got replaced by CharSelectEnterWorldButton:Click() for
+            // whetever reason, the mop client freezes if we call this directly
             return @$"
                 if AccountLoginUI then
                     AccountLoginUI:Show()
@@ -45,7 +45,7 @@
                     end
                 elseif CharacterSelectUI and CharacterSelectUI:IsVisible() then
                     if string.find(string.lower(GetServerName()), string.lower(""{realm}"")) then
-                        CharacterSelect_SelectCharacter({ characterslot + 1})                            
+                        CharacterSelect_SelectCharacter({ characterslot + 1})
                         CharSelectEnterWorldButton:Click()
                     elseif RealmList and not RealmList:IsVisible() then
                          CharSelectChangeRealmButton:Click()

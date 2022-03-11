@@ -199,7 +199,9 @@ namespace AmeisenBotX.Core.Engines.Combat.Classes.Kamel
 
         private void StartHeal()
         {
-            // List<IWowUnit> partyMemberToHeal = Bot.ObjectManager.Partymembers.Where(e => e.HealthPercentage <= 94 && !e.IsDead).OrderBy(e => e.HealthPercentage).ToList();//FirstOrDefault => tolist
+            // List<IWowUnit> partyMemberToHeal = Bot.ObjectManager.Partymembers.Where(e =>
+            // e.HealthPercentage <= 94 && !e.IsDead).OrderBy(e =>
+            // e.HealthPercentage).ToList();//FirstOrDefault => tolist
 
             List<IWowUnit> partyMemberToHeal = new(Bot.Objects.Partymembers)
             {

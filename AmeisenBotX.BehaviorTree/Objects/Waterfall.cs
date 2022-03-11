@@ -4,7 +4,8 @@ using System;
 namespace AmeisenBotX.BehaviorTree.Objects
 {
     /// <summary>
-    /// Special selector that runs the first node where the condition returns true. If none returned true, the fallbackNode will be executed
+    /// Special selector that runs the first node where the condition returns true. If none returned
+    /// true, the fallbackNode will be executed
     /// </summary>
     public class Waterfall : IComposite
     {

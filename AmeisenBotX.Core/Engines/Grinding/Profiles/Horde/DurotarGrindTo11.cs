@@ -9,8 +9,6 @@ namespace AmeisenBotX.Core.Engines.Grinding.Profiles.Horde
 {
     public class DurotarGrindTo11 : IGrindingProfile
     {
-        public bool RandomizeSpots => false;
-
         public List<Npc> NpcsOfInterest { get; } = new()
         {
             new Npc("Trayexir", 10369,
@@ -36,6 +34,8 @@ namespace AmeisenBotX.Core.Engines.Grinding.Profiles.Horde
         };
 
         public List<InteractableObject> ObjectsOfInterest { get; }
+
+        public bool RandomizeSpots => false;
 
         public List<GrindingSpot> Spots { get; } = new()
         {

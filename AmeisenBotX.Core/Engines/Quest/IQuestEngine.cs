@@ -11,8 +11,8 @@ namespace AmeisenBotX.Core.Engines.Quest
 
         bool UpdatedCompletedQuests { get; set; }
 
-        void Execute();
-
         void Enter();
+
+        void Execute();
     }
 }

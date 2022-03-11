@@ -45,9 +45,9 @@ namespace AmeisenBotX.Core.Engines.Quest.Objects.Objectives
 
         private List<int> GossipIds { get; }
 
-        private IWowUnit Unit { get; set; }
-
         private TimegatedEvent TalkEvent { get; }
+
+        private IWowUnit Unit { get; set; }
 
         public void Execute()
         {

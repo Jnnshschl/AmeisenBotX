@@ -27,16 +27,16 @@ namespace AmeisenBotX.Wow335a.Objects
 
         protected WowObjectDescriptor335a RawObject { get; private set; }
 
-        public override string ToString()
-        {
-            return $"Object: {Guid}";
-        }
-
         public virtual void Init(IMemoryApi memoryApi, IOffsetList offsetList, IntPtr baseAddress, IntPtr descriptorAddress)
         {
             BaseAddress = baseAddress;
             DescriptorAddress = descriptorAddress;
             Update(memoryApi, offsetList);
+        }
+
+        public override string ToString()
+        {
+            return $"Object: {Guid}";
         }
 
         public virtual void Update(IMemoryApi memoryApi, IOffsetList offsetList)

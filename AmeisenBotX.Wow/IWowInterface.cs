@@ -10,7 +10,8 @@ using System.Collections.Generic;
 namespace AmeisenBotX.Wow
 {
     /// <summary>
-    /// Interface to the wow game. All functions that interact with the game should be reachable via this interface.
+    /// Interface to the wow game. All functions that interact with the game should be reachable via
+    /// this interface.
     /// </summary>
     public interface IWowInterface
     {
@@ -21,7 +22,7 @@ namespace AmeisenBotX.Wow
 
         /// <summary>
         /// Gets fired when a new static popup appears ingame.
-        /// Format: {ID}:{POPUPTYPE};... => 1:DELETE_ITEM;2:SAMPLE_POPUP;...
+        /// Format: {ID}:{POPUPTYPE};... =&gt; 1:DELETE_ITEM;2:SAMPLE_POPUP;...
         /// </summary>
         event Action<string> OnStaticPopup;
 
@@ -31,9 +32,8 @@ namespace AmeisenBotX.Wow
         IEventManager Events { get; }
 
         /// <summary>
-        /// Used for the HookCall display in the bots main window.
-        /// Use this to display cost intensive calls to the user.
-        /// The name Hookcall originates from EndScene hook calls.
+        /// Used for the HookCall display in the bots main window. Use this to display cost
+        /// intensive calls to the user. The name Hookcall originates from EndScene hook calls.
         /// </summary>
         int HookCallCount { get; }
 
@@ -41,11 +41,6 @@ namespace AmeisenBotX.Wow
         /// Get the status of the wow interface, true if its useable, false if not.
         /// </summary>
         bool IsReady { get; }
-
-        /// <summary>
-        /// Get the current version of wow.
-        /// </summary>
-        WowVersion WowVersion { get; }
 
         /// <summary>
         /// Shortcut to get the last targets guid.
@@ -87,6 +82,11 @@ namespace AmeisenBotX.Wow
         /// </summary>
         public ulong TargetGuid => ObjectProvider.Target != null ? ObjectProvider.Target.Guid : 0ul;
 
+        /// <summary>
+        /// Get the current version of wow.
+        /// </summary>
+        WowVersion WowVersion { get; }
+
         void AbandonQuestsNotIn(IEnumerable<string> enumerable);
 
         void AcceptBattlegroundInvite();
@@ -119,6 +119,8 @@ namespace AmeisenBotX.Wow
         void ClickOnTerrain(Vector3 position);
 
         void ClickOnTrainButton();
+
+        void ClickToMove(Vector3 pos, ulong guid, WowClickToMoveType clickToMoveType = WowClickToMoveType.Move, float turnSpeed = 20.9f, float distance = WowClickToMoveDistance.Move);
 
         /// <summary>
         /// Performs a click on the given ui element.
@@ -271,10 +273,9 @@ namespace AmeisenBotX.Wow
         bool Setup();
 
         /// <summary>
-        /// Use this to diable the is world loaded check that is used to
-        /// prevent the execution of assembly code during loading screens.
-        /// Used to disable the check in the login process as the world
-        /// is not loaded in the main menu.
+        /// Use this to diable the is world loaded check that is used to prevent the execution of
+        /// assembly code during loading screens. Used to disable the check in the login process as
+        /// the world is not loaded in the main menu.
         /// </summary>
         /// <param name="enabled">Status of the check (true = on | false = off)</param>
         void SetWorldLoadedCheck(bool enabled);
@@ -286,8 +287,7 @@ namespace AmeisenBotX.Wow
         void StopClickToMove();
 
         /// <summary>
-        /// Poll this on a regular basis to keep the stuff up to date.
-        /// Updates objects, gameinfo and more.
+        /// Poll this on a regular basis to keep the stuff up to date. Updates objects, gameinfo and more.
         /// </summary>
         void Tick();
 
@@ -298,7 +298,5 @@ namespace AmeisenBotX.Wow
         void UseInventoryItem(WowEquipmentSlot equipmentSlot);
 
         void UseItemByName(string name);
-
-        void ClickToMove(Vector3 pos, ulong guid, WowClickToMoveType clickToMoveType = WowClickToMoveType.Move, float turnSpeed = 20.9f, float distance = WowClickToMoveDistance.Move);
     }
 }

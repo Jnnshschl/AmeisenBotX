@@ -18,19 +18,20 @@ namespace AmeisenBotX.Core.Engines.Quest.Objects.Objectives
             SearchAreas = new SearchAreaEnsamble(grindingAreas);
             VendorsLocation = vendorsLocation;
         }
+
         public bool Finished => Bot.Player.Level >= WantedLevel;
 
         public double Progress => 100.0 * (Bot.Player.Level + Bot.Player.XpPercentage / 100.0) / WantedLevel;
 
+        public List<Vector3> VendorsLocation { get; }
+
         private AmeisenBotInterfaces Bot { get; }
+
+        private Vector3 CurrentNode { get; set; }
 
         private IWowUnit IWowUnit { get; set; }
 
         private SearchAreaEnsamble SearchAreas { get; }
-
-        private Vector3 CurrentNode { get; set; }
-
-        public List<Vector3> VendorsLocation { get; }
 
         private int WantedLevel { get; }
 
