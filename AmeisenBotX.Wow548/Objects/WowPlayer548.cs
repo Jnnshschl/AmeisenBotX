@@ -12,32 +12,35 @@ namespace AmeisenBotX.Wow548.Objects
     [Serializable]
     public unsafe class WowPlayer548 : WowUnit548, IWowPlayer
     {
-        private VisibleItemEnchantment[] itemEnchantments;
-        private QuestlogEntry[] questlogEntries;
+        protected uint? MovementFlags;
 
-        public int ComboPoints { get; set; }
+        protected WowPlayerDescriptor548? PlayerDescriptor;
 
-        public bool IsFlying { get; set; }
+        private IEnumerable<VisibleItemEnchantment> itemEnchantments;
 
-        public bool IsGhost { get; set; }
+        private IEnumerable<QuestlogEntry> questlogEntries;
+
+        public int ComboPoints => Memory.Read(Offsets.ComboPoints, out byte comboPoints) ? comboPoints : 0;
+
+        public bool IsFlying => (GetMovementFlags() & 0x1000000) != 0;
+
+        public bool IsGhost => HasBuffById(8326);
 
         public bool IsOutdoors { get; set; }
 
-        public bool IsSwimming { get; set; }
+        public bool IsSwimming => (GetMovementFlags() & 0x200000) != 0;
 
         public bool IsUnderwater { get; set; }
 
         public IEnumerable<VisibleItemEnchantment> ItemEnchantments => itemEnchantments;
 
-        public int NextLevelXp => RawWowPlayer.NextLevelXp;
+        public int NextLevelXp => GetPlayerDescriptor().NextLevelXp;
 
         public IEnumerable<QuestlogEntry> QuestlogEntries => questlogEntries;
 
-        public int Xp => RawWowPlayer.Xp;
+        public int Xp => GetPlayerDescriptor().Xp;
 
         public double XpPercentage => BotMath.Percentage(Xp, NextLevelXp);
-
-        protected WowPlayerDescriptor548 RawWowPlayer { get; private set; }
 
         public bool IsAlliance()
         {
@@ -106,52 +109,13 @@ namespace AmeisenBotX.Wow548.Objects
         {
             base.Update(memoryApi, offsetList);
 
-            if (memoryApi.Read(DescriptorAddress + sizeof(WowObjectDescriptor548) + sizeof(WowUnitDescriptor548), out WowPlayerDescriptor548 obj))
-            {
-                RawWowPlayer = obj;
-
-                // questlogEntries = new QuestlogEntry[] { obj.QuestlogEntry1, obj.QuestlogEntry2,
-                // obj.QuestlogEntry3, obj.QuestlogEntry4, obj.QuestlogEntry5, obj.QuestlogEntry6,
-                // obj.QuestlogEntry7, obj.QuestlogEntry8, obj.QuestlogEntry9, obj.QuestlogEntry10,
-                // obj.QuestlogEntry11, obj.QuestlogEntry12, obj.QuestlogEntry13,
-                // obj.QuestlogEntry14, obj.QuestlogEntry15, obj.QuestlogEntry16,
-                // obj.QuestlogEntry17, obj.QuestlogEntry18, obj.QuestlogEntry19,
-                // obj.QuestlogEntry20, obj.QuestlogEntry21, obj.QuestlogEntry22,
-                // obj.QuestlogEntry23, obj.QuestlogEntry24, obj.QuestlogEntry25, };
-                //
-                // itemEnchantments = new VisibleItemEnchantment[] { obj.VisibleItemEnchantment1,
-                // obj.VisibleItemEnchantment2, obj.VisibleItemEnchantment3,
-                // obj.VisibleItemEnchantment4, obj.VisibleItemEnchantment5,
-                // obj.VisibleItemEnchantment6, obj.VisibleItemEnchantment7,
-                // obj.VisibleItemEnchantment8, obj.VisibleItemEnchantment9,
-                // obj.VisibleItemEnchantment10, obj.VisibleItemEnchantment11,
-                // obj.VisibleItemEnchantment12, obj.VisibleItemEnchantment13,
-                // obj.VisibleItemEnchantment14, obj.VisibleItemEnchantment15,
-                // obj.VisibleItemEnchantment16, obj.VisibleItemEnchantment17,
-                // obj.VisibleItemEnchantment18, obj.VisibleItemEnchantment19, };
-            }
-
-            if (memoryApi.Read(IntPtr.Add(BaseAddress, (int)offsetList.WowUnitSwimFlags), out IntPtr movementFlagsPtr)
-                && memoryApi.Read(IntPtr.Add(movementFlagsPtr, 0x38), out uint movementFlags))
-            {
-                IsSwimming = (movementFlags & 0x200000) != 0;
-                IsFlying = (movementFlags & 0x1000000) != 0;
-            }
-
-            // if (memoryApi.Read(IntPtr.Add(BaseAddress, (int)offsetList.WowUnitFlyFlagsPointer),
-            // out IntPtr flyFlagsPointer) && memoryApi.Read(IntPtr.Add(flyFlagsPointer,
-            // (int)offsetList.WowUnitFlyFlags), out uint flyFlags)) { IsFlying = (flyFlags &
-            // 0x1000000) != 0; }
-
             // if (memoryApi.Read(offsetList.BreathTimer, out int breathTimer)) { IsUnderwater =
             // breathTimer > 0; }
-
-            if (memoryApi.Read(offsetList.ComboPoints, out byte comboPoints))
-            {
-                ComboPoints = comboPoints;
-            }
-
-            IsGhost = HasBuffById(8326);
         }
+
+        protected uint GetMovementFlags() => MovementFlags ??= Memory.Read(IntPtr.Add(BaseAddress, (int)Offsets.WowUnitSwimFlags), out IntPtr movementFlagsPtr) 
+            && Memory.Read(IntPtr.Add(movementFlagsPtr, 0x38), out uint movementFlags) ? movementFlags : 0;
+
+        protected WowPlayerDescriptor548 GetPlayerDescriptor() => PlayerDescriptor ??= Memory.Read(DescriptorAddress + sizeof(WowObjectDescriptor548) + sizeof(WowUnitDescriptor548), out WowPlayerDescriptor548 objPtr) ? objPtr : new();
     }
 }

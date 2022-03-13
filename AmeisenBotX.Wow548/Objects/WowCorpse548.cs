@@ -8,13 +8,13 @@ namespace AmeisenBotX.Wow548.Objects
     [Serializable]
     public unsafe class WowCorpse548 : WowObject548, IWowCorpse
     {
-        public int DisplayId => RawWowCorpse.DisplayId;
+        protected WowCorpseDescriptor548? CorpseDescriptor;
 
-        public ulong Owner => RawWowCorpse.Owner;
+        public int DisplayId => GetCorpseDescriptor().DisplayId;
 
-        public ulong Party => RawWowCorpse.PartyGuid;
+        public ulong Owner => GetCorpseDescriptor().Owner;
 
-        protected WowCorpseDescriptor548 RawWowCorpse { get; private set; }
+        public ulong Party => GetCorpseDescriptor().PartyGuid;
 
         public override string ToString()
         {
@@ -24,11 +24,8 @@ namespace AmeisenBotX.Wow548.Objects
         public override void Update(IMemoryApi memoryApi, IOffsetList offsetList)
         {
             base.Update(memoryApi, offsetList);
-
-            if (memoryApi.Read(DescriptorAddress + sizeof(WowObjectDescriptor548), out WowCorpseDescriptor548 obj))
-            {
-                RawWowCorpse = obj;
-            }
         }
+
+        protected WowCorpseDescriptor548 GetCorpseDescriptor() => CorpseDescriptor ??= Memory.Read(DescriptorAddress + sizeof(WowObjectDescriptor548), out WowCorpseDescriptor548 objPtr) ? objPtr : new();
     }
 }

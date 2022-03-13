@@ -644,12 +644,17 @@ namespace AmeisenBotX.Core
                 Bot.Character.UpdateBags();
 
                 Bot.Character.Inventory.Update();
-            }
 
-            // open dungeon bags automatically
-            foreach (IWowInventoryItem item in Bot.Character.Inventory.Items.Where(e => e.Id == 52001))
-            {
-                Bot.Wow.UseItemByName(item.Name);
+                // open dungeon reward bags automatically
+                if (Bot.Wow.WowVersion is WowVersion.MoP548)
+                {
+                    IWowInventoryItem item = Bot.Character.Inventory.Items.FirstOrDefault(e => e.Id == 52001);
+
+                    if (item != null)
+                    {
+                        Bot.Wow.UseItemByName(item.Name);
+                    }
+                }
             }
         }
 

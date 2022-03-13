@@ -12,19 +12,23 @@ namespace AmeisenBotX.Wow548.Objects
     [Serializable]
     public unsafe class WowGameobject548 : WowObject548, IWowGameobject
     {
+        protected WowGameobjectDescriptor548? GameobjectDescriptor;
+
         public byte Bytes0 { get; set; }
 
-        public ulong CreatedBy { get; set; }
+        public ulong CreatedBy => GetGameobjectDescriptor().CreatedBy;
 
-        public int DisplayId { get; set; }
+        public int DisplayId => GetGameobjectDescriptor().DisplayId;
 
-        public int Faction { get; set; }
+        public int Faction => GetGameobjectDescriptor().FactionTemplate;
 
-        public BitVector32 Flags { get; set; }
+        public BitVector32 Flags => GetGameobjectDescriptor().Flags;
 
         public WowGameObjectType GameObjectType { get; set; }
 
-        public int Level { get; set; }
+        public int Level => GetGameobjectDescriptor().Level;
+
+        public new Vector3 Position => Memory.Read(IntPtr.Add(BaseAddress, (int)Offsets.WowGameobjectPosition), out Vector3 position) ? position : Vector3.Zero;
 
         public override string ToString()
         {
@@ -35,18 +39,9 @@ namespace AmeisenBotX.Wow548.Objects
         {
             base.Update(memoryApi, offsetList);
 
-            if (memoryApi.Read(DescriptorAddress + sizeof(WowObjectDescriptor548), out WowGameobjectDescriptor548 objPtr)
-                && memoryApi.Read(IntPtr.Add(BaseAddress, (int)offsetList.WowGameobjectPosition), out Vector3 position))
-            {
-                // GameObjectType = (WowGameObjectType)objPtr.GameobjectBytes1;
-                CreatedBy = objPtr.CreatedBy;
-                // Bytes0 = objPtr.GameobjectBytes0;
-                DisplayId = objPtr.DisplayId;
-                Faction = objPtr.FactionTemplate;
-                Flags = new(objPtr.Flags);
-                Level = objPtr.Level;
-                Position = position;
-            }
+            // GameObjectType = (WowGameObjectType)objPtr.GameobjectBytes1; Bytes0 = objPtr.GameobjectBytes0;
         }
+
+        protected WowGameobjectDescriptor548 GetGameobjectDescriptor() => GameobjectDescriptor ??= Memory.Read(DescriptorAddress + sizeof(WowObjectDescriptor548), out WowGameobjectDescriptor548 objPtr) ? objPtr : new();
     }
 }

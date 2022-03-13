@@ -8,9 +8,9 @@ namespace AmeisenBotX.Wow548.Objects
     [Serializable]
     public unsafe class WowContainer548 : WowObject548, IWowContainer
     {
-        public int SlotCount => RawWowContainer.NumSlots;
+        protected WowContainerDescriptor548? ContainerDescriptor;
 
-        protected WowContainerDescriptor548 RawWowContainer { get; private set; }
+        public int SlotCount => GetContainerDescriptor().NumSlots;
 
         public override string ToString()
         {
@@ -20,11 +20,8 @@ namespace AmeisenBotX.Wow548.Objects
         public override void Update(IMemoryApi memoryApi, IOffsetList offsetList)
         {
             base.Update(memoryApi, offsetList);
-
-            if (memoryApi.Read(DescriptorAddress + sizeof(WowObjectDescriptor548), out WowContainerDescriptor548 obj))
-            {
-                RawWowContainer = obj;
-            }
         }
+
+        protected WowContainerDescriptor548 GetContainerDescriptor() => ContainerDescriptor ??= Memory.Read(DescriptorAddress + sizeof(WowObjectDescriptor548), out WowContainerDescriptor548 objPtr) ? objPtr : new();
     }
 }

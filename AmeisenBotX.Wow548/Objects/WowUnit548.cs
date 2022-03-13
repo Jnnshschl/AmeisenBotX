@@ -15,35 +15,39 @@ namespace AmeisenBotX.Wow548.Objects
     [Serializable]
     public unsafe class WowUnit548 : WowObject548, IWowUnit
     {
-        public int AuraCount { get; set; }
+        private IEnumerable<IWowAura>? AuraTable;
 
-        public IEnumerable<IWowAura> Auras { get; set; }
+        private WowUnitDescriptor548? UnitDescriptor;
 
-        public WowClass Class => (WowClass)RawWowUnit.Class;
+        public int AuraCount => ReadAuraTable().Count();
 
-        public float CombatReach => RawWowUnit.CombatReach;
+        public IEnumerable<IWowAura> Auras => ReadAuraTable();
 
-        public int CurrentlyCastingSpellId { get; set; }
+        public WowClass Class => (WowClass)GetUnitDescriptor().Class;
 
-        public int CurrentlyChannelingSpellId { get; set; }
+        public float CombatReach => GetUnitDescriptor().CombatReach;
 
-        public int DisplayId => RawWowUnit.DisplayId;
+        public int CurrentlyCastingSpellId => Memory.Read(IntPtr.Add(BaseAddress, (int)Offsets.CurrentlyCastingSpellId), out int castingId) ? castingId : 0;
 
-        public int Energy => RawWowUnit.Power4;
+        public int CurrentlyChannelingSpellId => Memory.Read(IntPtr.Add(BaseAddress, (int)Offsets.CurrentlyChannelingSpellId), out int channelingId) ? channelingId : 0;
+
+        public int DisplayId => GetUnitDescriptor().DisplayId;
+
+        public int Energy => GetUnitDescriptor().Power4;
 
         public double EnergyPercentage => BotMath.Percentage(Energy, MaxEnergy);
 
-        public int FactionTemplate => RawWowUnit.FactionTemplate;
+        public int FactionTemplate => GetUnitDescriptor().FactionTemplate;
 
-        public WowGender Gender => (WowGender)RawWowUnit.Gender;
+        public WowGender Gender => (WowGender)GetUnitDescriptor().Gender;
 
-        public int Health => RawWowUnit.Health;
+        public int Health => GetUnitDescriptor().Health;
 
         public double HealthPercentage => BotMath.Percentage(Health, MaxHealth);
 
-        public int HolyPower => RawWowUnit.Power2;
+        public int HolyPower => GetUnitDescriptor().Power2;
 
-        public bool IsAutoAttacking { get; set; }
+        public bool IsAutoAttacking => Memory.Read(IntPtr.Add(BaseAddress, (int)Offsets.WowUnitIsAutoAttacking), out int isAutoAttacking) && isAutoAttacking == 1;
 
         public bool IsDead => (Health == 0 || UnitFlagsDynamic[(int)WowUnitDynamicFlags548.Dead]) && !UnitFlags2[(int)WowUnit2Flag.FeignDeath];
 
@@ -61,21 +65,21 @@ namespace AmeisenBotX.Wow548.Objects
 
         public bool IsTrackedUnit => UnitFlagsDynamic[(int)WowUnitDynamicFlags548.TrackUnit];
 
-        public int Level => RawWowUnit.Level;
+        public int Level => GetUnitDescriptor().Level;
 
-        public int Mana => RawWowUnit.Power1;
+        public int Mana => GetUnitDescriptor().Power1;
 
         public double ManaPercentage => BotMath.Percentage(Mana, MaxMana);
 
-        public int MaxEnergy => RawWowUnit.MaxPower4;
+        public int MaxEnergy => GetUnitDescriptor().MaxPower4;
 
-        public int MaxHealth => RawWowUnit.MaxHealth;
+        public int MaxHealth => GetUnitDescriptor().MaxHealth;
 
-        public int MaxHolyPower => RawWowUnit.MaxPower2;
+        public int MaxHolyPower => GetUnitDescriptor().MaxPower2;
 
-        public int MaxMana => RawWowUnit.MaxPower1;
+        public int MaxMana => GetUnitDescriptor().MaxPower1;
 
-        public int MaxRage => RawWowUnit.MaxPower1 / 10;
+        public int MaxRage => GetUnitDescriptor().MaxPower1 / 10;
 
         public int MaxRunicPower => 0;
 
@@ -87,17 +91,19 @@ namespace AmeisenBotX.Wow548.Objects
             _ => MaxMana,
         };
 
-        public BitVector32 NpcFlags => RawWowUnit.NpcFlags1;
+        public BitVector32 NpcFlags => GetUnitDescriptor().NpcFlags1;
 
-        public WowPowerType PowerType => (WowPowerType)RawWowUnit.PowerType;
+        public new Vector3 Position => Memory.Read(IntPtr.Add(BaseAddress, (int)Offsets.WowUnitPosition), out Vector3 position) ? position : Vector3.Zero;
 
-        public WowRace Race => (WowRace)RawWowUnit.Race;
+        public WowPowerType PowerType => (WowPowerType)GetUnitDescriptor().PowerType;
 
-        public int Rage => RawWowUnit.Power1 / 10;
+        public WowRace Race => (WowRace)GetUnitDescriptor().Race;
+
+        public int Rage => GetUnitDescriptor().Power1 / 10;
 
         public double RagePercentage => BotMath.Percentage(Rage, MaxRage);
 
-        public float Rotation { get; set; }
+        public float Rotation => Memory.Read(IntPtr.Add(BaseAddress, (int)Offsets.WowUnitPosition + 0x10), out float rotation) ? rotation : 0.0f;
 
         public int RunicPower => 0;
 
@@ -119,15 +125,13 @@ namespace AmeisenBotX.Wow548.Objects
             _ => ManaPercentage,
         };
 
-        public ulong SummonedByGuid => RawWowUnit.SummonedBy;
+        public ulong SummonedByGuid => GetUnitDescriptor().SummonedBy;
 
-        public ulong TargetGuid => RawWowUnit.Target;
+        public ulong TargetGuid => GetUnitDescriptor().Target;
 
-        public BitVector32 UnitFlags => RawWowUnit.Flags1;
+        public BitVector32 UnitFlags => GetUnitDescriptor().Flags1;
 
-        public BitVector32 UnitFlags2 => RawWowUnit.Flags2;
-
-        protected WowUnitDescriptor548 RawWowUnit { get; private set; }
+        public BitVector32 UnitFlags2 => GetUnitDescriptor().Flags2;
 
         public static IEnumerable<IWowAura> GetUnitAuras(IMemoryApi memoryApi, IOffsetList offsetList, IntPtr unitBase, out int auraCount)
         {
@@ -198,40 +202,9 @@ namespace AmeisenBotX.Wow548.Objects
         public override void Update(IMemoryApi memoryApi, IOffsetList offsetList)
         {
             base.Update(memoryApi, offsetList);
-
-            if (memoryApi.Read(DescriptorAddress + sizeof(WowObjectDescriptor548), out WowUnitDescriptor548 objPtr))
-            {
-                RawWowUnit = objPtr;
-            }
-
-            Auras = GetUnitAuras(memoryApi, offsetList, BaseAddress, out int auraCount);
-            AuraCount = auraCount;
-
-            if (memoryApi.Read(IntPtr.Add(BaseAddress, (int)offsetList.WowUnitPosition), out Vector3 position))
-            {
-                Position = position;
-            }
-
-            if (memoryApi.Read(IntPtr.Add(BaseAddress, (int)offsetList.WowUnitPosition + 0x10), out float rotation))
-            {
-                Rotation = rotation;
-            }
-
-            if (memoryApi.Read(IntPtr.Add(BaseAddress, (int)offsetList.WowUnitIsAutoAttacking), out int isAutoAttacking))
-            {
-                IsAutoAttacking = isAutoAttacking == 1;
-            }
-
-            if (memoryApi.Read(IntPtr.Add(BaseAddress, (int)offsetList.CurrentlyCastingSpellId), out int castingId))
-            {
-                CurrentlyCastingSpellId = castingId;
-            }
-
-            if (memoryApi.Read(IntPtr.Add(BaseAddress, (int)offsetList.CurrentlyChannelingSpellId), out int channelingId))
-            {
-                CurrentlyChannelingSpellId = channelingId;
-            }
         }
+
+        protected WowUnitDescriptor548 GetUnitDescriptor() => UnitDescriptor ??= Memory.Read(DescriptorAddress + sizeof(WowObjectDescriptor548), out WowUnitDescriptor548 objPtr) ? objPtr : new();
 
         private static unsafe IEnumerable<IWowAura> ReadAuraTable(IMemoryApi memoryApi, IntPtr buffBase, int auraCount)
         {
@@ -247,5 +220,7 @@ namespace AmeisenBotX.Wow548.Objects
 
             return auras;
         }
+
+        private IEnumerable<IWowAura> ReadAuraTable() => AuraTable ??= GetUnitAuras(Memory, Offsets, BaseAddress, out _);
     }
 }

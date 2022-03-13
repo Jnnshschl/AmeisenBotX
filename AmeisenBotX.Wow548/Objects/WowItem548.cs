@@ -10,11 +10,13 @@ namespace AmeisenBotX.Wow548.Objects
     [Serializable]
     public unsafe class WowItem548 : WowObject548, IWowItem
     {
-        public int Count { get; set; }
+        protected WowItemDescriptor548? ItemDescriptor;
+
+        public int Count => GetItemDescriptor().StackCount;
 
         public List<ItemEnchantment> ItemEnchantments { get; private set; }
 
-        public ulong Owner { get; set; }
+        public ulong Owner => GetItemDescriptor().Owner;
 
         public IEnumerable<string> GetEnchantmentStrings()
         {
@@ -40,17 +42,12 @@ namespace AmeisenBotX.Wow548.Objects
         {
             base.Update(memoryApi, offsetList);
 
-            if (memoryApi.Read(DescriptorAddress + sizeof(WowObjectDescriptor548), out WowItemDescriptor548 objPtr))
-            {
-                Count = objPtr.StackCount;
-                Owner = objPtr.Owner;
-
-                // ItemEnchantments = new() { objPtr.Enchantment1, objPtr.Enchantment2,
-                // objPtr.Enchantment3, objPtr.Enchantment4, objPtr.Enchantment5,
-                // objPtr.Enchantment6, objPtr.Enchantment7, objPtr.Enchantment8,
-                // objPtr.Enchantment9, objPtr.Enchantment10, objPtr.Enchantment11,
-                // objPtr.Enchantment12, };
-            }
+            // ItemEnchantments = new() { objPtr.Enchantment1, objPtr.Enchantment2,
+            // objPtr.Enchantment3, objPtr.Enchantment4, objPtr.Enchantment5, objPtr.Enchantment6,
+            // objPtr.Enchantment7, objPtr.Enchantment8, objPtr.Enchantment9, objPtr.Enchantment10,
+            // objPtr.Enchantment11, objPtr.Enchantment12, };
         }
+
+        protected WowItemDescriptor548 GetItemDescriptor() => ItemDescriptor ??= Memory.Read(DescriptorAddress + sizeof(WowObjectDescriptor548), out WowItemDescriptor548 objPtr) ? objPtr : new();
     }
 }

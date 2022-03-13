@@ -41,7 +41,6 @@ namespace AmeisenBotX.Core.Logic
             Random = new();
 
             Mode = BotMode.None;
-            // Mode = BotMode.PvP;
 
             AntiAfkEvent = new(TimeSpan.FromMilliseconds(1200));
             CharacterUpdateEvent = new(TimeSpan.FromMilliseconds(5000));

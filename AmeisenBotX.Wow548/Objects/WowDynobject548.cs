@@ -9,11 +9,15 @@ namespace AmeisenBotX.Wow548.Objects
     [Serializable]
     public unsafe class WowDynobject548 : WowObject548, IWowDynobject
     {
-        public ulong Caster { get; set; }
+        protected WowDynamicobjectDescriptor548? DynamicobjectDescriptor;
 
-        public float Radius { get; set; }
+        public ulong Caster => GetDynamicobjectDescriptor().Caster;
 
-        public int SpellId { get; set; }
+        public new Vector3 Position => Memory.Read(IntPtr.Add(BaseAddress, (int)Offsets.WowDynobjectPosition), out Vector3 position) ? position : Vector3.Zero;
+
+        public float Radius => GetDynamicobjectDescriptor().Radius;
+
+        public int SpellId => GetDynamicobjectDescriptor().SpellId;
 
         public override string ToString()
         {
@@ -23,15 +27,8 @@ namespace AmeisenBotX.Wow548.Objects
         public override void Update(IMemoryApi memoryApi, IOffsetList offsetList)
         {
             base.Update(memoryApi, offsetList);
-
-            if (memoryApi.Read(DescriptorAddress + sizeof(WowObjectDescriptor548), out WowDynamicobjectDescriptor548 objPtr)
-                && memoryApi.Read(IntPtr.Add(BaseAddress, (int)offsetList.WowDynobjectPosition), out Vector3 position))
-            {
-                Caster = objPtr.Caster;
-                Radius = objPtr.Radius;
-                SpellId = objPtr.SpellId;
-                Position = position;
-            }
         }
+
+        protected WowDynamicobjectDescriptor548 GetDynamicobjectDescriptor() => DynamicobjectDescriptor ??= Memory.Read(DescriptorAddress + sizeof(WowObjectDescriptor548), out WowDynamicobjectDescriptor548 objPtr) ? objPtr : new();
     }
 }

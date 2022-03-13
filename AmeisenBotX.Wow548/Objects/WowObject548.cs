@@ -10,24 +10,30 @@ namespace AmeisenBotX.Wow548.Objects
     [Serializable]
     public class WowObject548 : IWowObject
     {
+        protected WowObjectDescriptor548? ObjectDescriptor;
+
         public IntPtr BaseAddress { get; private set; }
 
         public IntPtr DescriptorAddress { get; private set; }
 
-        public int EntryId => RawObject.EntryId;
+        public int EntryId => GetObjectDescriptor().EntryId;
 
-        public ulong Guid => RawObject.Guid;
+        public ulong Guid => GetObjectDescriptor().Guid;
 
         public Vector3 Position { get; protected set; }
 
-        public float Scale => RawObject.Scale;
+        public float Scale => GetObjectDescriptor().Scale;
 
-        public BitVector32 UnitFlagsDynamic => RawObject.DynamicFlags;
+        public BitVector32 UnitFlagsDynamic => GetObjectDescriptor().DynamicFlags;
 
-        protected WowObjectDescriptor548 RawObject { get; private set; }
+        protected IMemoryApi Memory { get; private set; }
+
+        protected IOffsetList Offsets { get; private set; }
 
         public virtual void Init(IMemoryApi memoryApi, IOffsetList offsetList, IntPtr baseAddress, IntPtr descriptorAddress)
         {
+            Memory = memoryApi;
+            Offsets = offsetList;
             BaseAddress = baseAddress;
             DescriptorAddress = descriptorAddress;
             Update(memoryApi, offsetList);
@@ -35,10 +41,8 @@ namespace AmeisenBotX.Wow548.Objects
 
         public virtual void Update(IMemoryApi memoryApi, IOffsetList offsetList)
         {
-            if (DescriptorAddress != IntPtr.Zero && memoryApi.Read(DescriptorAddress, out WowObjectDescriptor548 obj))
-            {
-                RawObject = obj;
-            }
         }
+
+        protected WowObjectDescriptor548 GetObjectDescriptor() => ObjectDescriptor ??= Memory.Read(DescriptorAddress, out WowObjectDescriptor548 objPtr) ? objPtr : new();
     }
 }
