@@ -687,7 +687,14 @@ namespace AmeisenBotX.Core
         {
             if (Config.AutojoinLfg)
             {
-                Bot.Wow.ClickUiElement("LFDDungeonReadyDialogEnterDungeonButton");
+                if (Bot.Wow.WowVersion is WowVersion.MoP548)
+                {
+                    Bot.Wow.ClickUiElement("LFGDungeonReadyDialogEnterDungeonButton");
+                }
+                else if(Bot.Wow.WowVersion is WowVersion.WotLK335a)
+                {
+                    Bot.Wow.ClickUiElement("LFDDungeonReadyDialogEnterDungeonButton");
+                }
             }
         }
 
