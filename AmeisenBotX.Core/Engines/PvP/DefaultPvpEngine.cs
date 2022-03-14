@@ -48,7 +48,7 @@ namespace AmeisenBotX.Core.Engines.PvP
 
         private void UpdatePvpQueueStatus()
         {
-            if (Bot.Memory.Read(Bot.Wow.Offsets.BattlegroundStatus, out int q))
+            if (Bot.Memory.Read(Bot.Memory.Offsets.BattlegroundStatus, out int q))
             {
                 QueueStatus = q;
             }

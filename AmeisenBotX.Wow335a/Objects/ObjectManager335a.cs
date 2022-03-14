@@ -1,7 +1,6 @@
 ﻿using AmeisenBotX.Common.Math;
-using AmeisenBotX.Memory;
+using AmeisenBotX.Wow;
 using AmeisenBotX.Wow.Objects;
-using AmeisenBotX.Wow.Offsets;
 using AmeisenBotX.Wow335a.Objects.Raw;
 using System;
 using System.Collections.Generic;
@@ -11,8 +10,8 @@ namespace AmeisenBotX.Wow335a.Objects
 {
     public class ObjectManager335a : ObjectManager<WowObject335a, WowUnit335a, WowPlayer335a, WowGameobject335a, WowDynobject335a, WowItem335a, WowCorpse335a, WowContainer335a>
     {
-        public ObjectManager335a(IMemoryApi memoryApi, IOffsetList offsetList)
-            : base(memoryApi, offsetList)
+        public ObjectManager335a(WowMemoryApi memory)
+            : base(memory)
         {
         }
 
@@ -41,10 +40,10 @@ namespace AmeisenBotX.Wow335a.Objects
 
         private ulong ReadLeaderGuid()
         {
-            if (MemoryApi.Read(OffsetList.RaidLeader, out ulong partyleaderGuid))
+            if (Memory.Read(Memory.Offsets.RaidLeader, out ulong partyleaderGuid))
             {
                 if (partyleaderGuid == 0
-                    && MemoryApi.Read(OffsetList.PartyLeader, out partyleaderGuid))
+                    && Memory.Read(Memory.Offsets.PartyLeader, out partyleaderGuid))
                 {
                     return partyleaderGuid;
                 }
@@ -59,20 +58,20 @@ namespace AmeisenBotX.Wow335a.Objects
         {
             List<ulong> partymemberGuids = new();
 
-            if (MemoryApi.Read(OffsetList.PartyLeader, out ulong partyLeader)
+            if (Memory.Read(Memory.Offsets.PartyLeader, out ulong partyLeader)
                 && partyLeader != 0
-                && MemoryApi.Read(OffsetList.PartyPlayerGuids, out RawPartyGuids partyMembers))
+                && Memory.Read(Memory.Offsets.PartyPlayerGuids, out RawPartyGuids partyMembers))
             {
                 partymemberGuids.AddRange(partyMembers.AsArray());
             }
 
-            if (MemoryApi.Read(OffsetList.RaidLeader, out ulong raidLeader)
+            if (Memory.Read(Memory.Offsets.RaidLeader, out ulong raidLeader)
                 && raidLeader != 0
-                && MemoryApi.Read(OffsetList.RaidGroupStart, out RawRaidStruct raidStruct))
+                && Memory.Read(Memory.Offsets.RaidGroupStart, out RawRaidStruct raidStruct))
             {
                 foreach (IntPtr raidPointer in raidStruct.GetPointers())
                 {
-                    if (MemoryApi.Read(raidPointer, out ulong guid))
+                    if (Memory.Read(raidPointer, out ulong guid))
                     {
                         partymemberGuids.Add(guid);
                     }

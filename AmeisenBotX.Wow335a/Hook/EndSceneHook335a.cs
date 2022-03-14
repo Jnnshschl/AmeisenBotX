@@ -2,9 +2,8 @@
 using AmeisenBotX.Common.Utils;
 using AmeisenBotX.Logging;
 using AmeisenBotX.Logging.Enums;
-using AmeisenBotX.Memory;
+using AmeisenBotX.Wow;
 using AmeisenBotX.Wow.Hook;
-using AmeisenBotX.Wow.Offsets;
 using System;
 using System.Collections.Generic;
 using System.Globalization;
@@ -16,17 +15,14 @@ namespace AmeisenBotX.Wow335a.Hook
 {
     public class EndSceneHook335a : GenericEndSceneHook
     {
-        public EndSceneHook335a(IMemoryApi memoryApi, IOffsetList offsetList)
-            : base(memoryApi, offsetList)
+        public EndSceneHook335a(WowMemoryApi memory)
+            : base(memory)
         {
-            Memory = memoryApi;
-            OffsetList = offsetList;
+            Memory = memory;
             OriginalFunctionBytes = new();
         }
 
-        private IMemoryApi Memory { get; }
-
-        private IOffsetList OffsetList { get; }
+        private WowMemoryApi Memory { get; }
 
         /// <summary>
         /// Used to save the old render flags of wow.
@@ -119,7 +115,7 @@ namespace AmeisenBotX.Wow335a.Hook
                             "PUSH 0",
                             $"PUSH {memAlloc}",
                             $"PUSH {memAlloc}",
-                            $"CALL {OffsetList.FunctionLuaDoString}",
+                            $"CALL {Memory.Offsets.FunctionLuaDoString}",
                             "ADD ESP, 0xC",
                             "RET",
                         });
@@ -137,14 +133,14 @@ namespace AmeisenBotX.Wow335a.Hook
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public void ObjectRightClick(IntPtr objectBase)
         {
-            CallObjectFunction(objectBase, OffsetList.FunctionGameobjectOnRightClick);
+            CallObjectFunction(objectBase, Memory.Offsets.FunctionGameobjectOnRightClick);
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public void SetFacing(IntPtr unitBase, float angle, bool smooth = false)
         {
             // smooth not supported for now
-            CallObjectFunction(unitBase, OffsetList.FunctionUnitSetFacing, new()
+            CallObjectFunction(unitBase, Memory.Offsets.FunctionUnitSetFacing, new()
             {
                 angle.ToString(CultureInfo.InvariantCulture).Replace(',', '.'),
                 Environment.TickCount
@@ -162,24 +158,24 @@ namespace AmeisenBotX.Wow335a.Hook
 
             if (renderingEnabled)
             {
-                EnableFunction(OffsetList.FunctionWorldRender);
-                EnableFunction(OffsetList.FunctionWorldRenderWorld);
-                EnableFunction(OffsetList.FunctionWorldFrame);
+                EnableFunction(Memory.Offsets.FunctionWorldRender);
+                EnableFunction(Memory.Offsets.FunctionWorldRenderWorld);
+                EnableFunction(Memory.Offsets.FunctionWorldFrame);
 
-                Memory.Write(OffsetList.RenderFlags, OldRenderFlags);
+                Memory.Write(Memory.Offsets.RenderFlags, OldRenderFlags);
             }
             else
             {
-                if (Memory.Read(OffsetList.RenderFlags, out int renderFlags))
+                if (Memory.Read(Memory.Offsets.RenderFlags, out int renderFlags))
                 {
                     OldRenderFlags = renderFlags;
                 }
 
-                DisableFunction(OffsetList.FunctionWorldRender);
-                DisableFunction(OffsetList.FunctionWorldRenderWorld);
-                DisableFunction(OffsetList.FunctionWorldFrame);
+                DisableFunction(Memory.Offsets.FunctionWorldRender);
+                DisableFunction(Memory.Offsets.FunctionWorldRenderWorld);
+                DisableFunction(Memory.Offsets.FunctionWorldFrame);
 
-                Memory.Write(OffsetList.RenderFlags, 0);
+                Memory.Write(Memory.Offsets.RenderFlags, 0);
             }
 
             Memory.ResumeMainThread();
@@ -198,7 +194,7 @@ namespace AmeisenBotX.Wow335a.Hook
             {
                 $"PUSH {BitConverter.ToUInt32(guidBytes, 4)}",
                 $"PUSH {BitConverter.ToUInt32(guidBytes, 0)}",
-                $"CALL {OffsetList.FunctionSetTarget}",
+                $"CALL {Memory.Offsets.FunctionSetTarget}",
                 "ADD ESP, 0x8",
                 "RET"
             });
@@ -227,7 +223,7 @@ namespace AmeisenBotX.Wow335a.Hook
                             $"PUSH {resultPointer}",
                             $"PUSH {endPointer}",
                             $"PUSH {startPointer}",
-                            $"CALL {OffsetList.FunctionTraceline}",
+                            $"CALL {Memory.Offsets.FunctionTraceline}",
                             "ADD ESP, 0x18",
                             "RET",
                         };
@@ -250,7 +246,7 @@ namespace AmeisenBotX.Wow335a.Hook
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public void InteractWithUnit(IntPtr unitBase)
         {
-            CallObjectFunction(unitBase, OffsetList.FunctionUnitOnRightClick);
+            CallObjectFunction(unitBase, Memory.Offsets.FunctionUnitOnRightClick);
         }
 
         public void ClickOnTerrain(Vector3 position)
@@ -264,7 +260,7 @@ namespace AmeisenBotX.Wow335a.Hook
                         InjectAndExecute(new string[]
                         {
                             $"PUSH {codeCaveVector3.ToInt32()}",
-                            $"CALL {OffsetList.FunctionHandleTerrainClick}",
+                            $"CALL {Memory.Offsets.FunctionHandleTerrainClick}",
                             "ADD ESP, 0x4",
                             "RET",
                         });
@@ -285,7 +281,7 @@ namespace AmeisenBotX.Wow335a.Hook
                 {
                     if (Memory.Write(codeCaveVector3, position))
                     {
-                        CallObjectFunction(playerBase, OffsetList.FunctionPlayerClickToMove, new() { codeCaveVector3 });
+                        CallObjectFunction(playerBase, Memory.Offsets.FunctionPlayerClickToMove, new() { codeCaveVector3 });
                     }
                 }
                 finally
@@ -328,13 +324,13 @@ namespace AmeisenBotX.Wow335a.Hook
                         "PUSH 0",
                         $"PUSH {memAllocCmdVar}",
                         $"PUSH {memAllocCmdVar}",
-                        $"CALL {OffsetList.FunctionLuaDoString}",
+                        $"CALL {Memory.Offsets.FunctionLuaDoString}",
                         "ADD ESP, 0xC",
-                        $"CALL {OffsetList.FunctionGetActivePlayerObject}",
+                        $"CALL {Memory.Offsets.FunctionGetActivePlayerObject}",
                         "MOV ECX, EAX",
                         "PUSH -1",
                         $"PUSH {memAllocCmdVar + commandBytes.Length}",
-                        $"CALL {OffsetList.FunctionGetLocalizedText}",
+                        $"CALL {Memory.Offsets.FunctionGetLocalizedText}",
                         "RET",
                     };
 
@@ -377,11 +373,11 @@ namespace AmeisenBotX.Wow335a.Hook
 
                         string[] asm = new string[]
                         {
-                            $"CALL {OffsetList.FunctionGetActivePlayerObject}",
+                            $"CALL {Memory.Offsets.FunctionGetActivePlayerObject}",
                             "MOV ECX, EAX",
                             "PUSH -1",
                             $"PUSH {memAlloc}",
-                            $"CALL {OffsetList.FunctionGetLocalizedText}",
+                            $"CALL {Memory.Offsets.FunctionGetLocalizedText}",
                             "RET",
                         };
 
@@ -409,7 +405,7 @@ namespace AmeisenBotX.Wow335a.Hook
             if (a == IntPtr.Zero) { throw new ArgumentOutOfRangeException(nameof(a), "a is no valid pointer"); }
             if (b == IntPtr.Zero) { throw new ArgumentOutOfRangeException(nameof(b), "b is no valid pointer"); }
 #endif
-            return CallObjectFunction(a, OffsetList.FunctionUnitGetReaction, new() { b }, true, out IntPtr ret)
+            return CallObjectFunction(a, Memory.Offsets.FunctionUnitGetReaction, new() { b }, true, out IntPtr ret)
                 && ret != IntPtr.Zero ? ret.ToInt32() : 2;
         }
 

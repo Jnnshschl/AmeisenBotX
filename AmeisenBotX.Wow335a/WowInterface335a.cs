@@ -2,7 +2,6 @@
 using AmeisenBotX.Common.Utils;
 using AmeisenBotX.Logging;
 using AmeisenBotX.Logging.Enums;
-using AmeisenBotX.Memory;
 using AmeisenBotX.Wow;
 using AmeisenBotX.Wow.Events;
 using AmeisenBotX.Wow.Hook.Modules;
@@ -10,11 +9,9 @@ using AmeisenBotX.Wow.Objects;
 using AmeisenBotX.Wow.Objects.Constants;
 using AmeisenBotX.Wow.Objects.Enums;
 using AmeisenBotX.Wow.Objects.Flags;
-using AmeisenBotX.Wow.Offsets;
 using AmeisenBotX.Wow.Shared.Lua;
 using AmeisenBotX.Wow335a.Hook;
 using AmeisenBotX.Wow335a.Objects;
-using AmeisenBotX.Wow335a.Offsets;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -29,11 +26,9 @@ namespace AmeisenBotX.Wow335a
     /// </summary>
     public class WowInterface335a : IWowInterface
     {
-        public WowInterface335a(IMemoryApi memoryApi)
+        public WowInterface335a(WowMemoryApi memory)
         {
-            Memory = memoryApi;
-
-            OffsetList = new();
+            Memory = memory;
             HookModules = new();
 
             // lua variable names for the event hook
@@ -51,15 +46,14 @@ namespace AmeisenBotX.Wow335a
                 (x) =>
                 {
                     if (x != IntPtr.Zero
-                        && memoryApi.ReadString(x, Encoding.UTF8, out string s)
+                        && memory.ReadString(x, Encoding.UTF8, out string s)
                         && !string.IsNullOrWhiteSpace(s))
                     {
                         EventManager.OnEventPush(s);
                     }
                 },
                 null,
-                memoryApi,
-                Offsets,
+                memory,
                 LuaEventHook.Get(eventHookFrameName, tableName, handlerName, eventHookOutput),
                 eventHookOutput
             ));
@@ -73,7 +67,7 @@ namespace AmeisenBotX.Wow335a
                 (x) =>
                 {
                     if (x != IntPtr.Zero
-                        && memoryApi.ReadString(x, Encoding.UTF8, out string s)
+                        && memory.ReadString(x, Encoding.UTF8, out string s)
                         && !string.IsNullOrWhiteSpace(s))
                     {
                         if (!oldPoupString.Equals(s, StringComparison.Ordinal))
@@ -88,8 +82,7 @@ namespace AmeisenBotX.Wow335a
                     }
                 },
                 null,
-                memoryApi,
-                Offsets,
+                memory,
                 $"{staticPopupsVarName}=\"\"for b=1,STATICPOPUP_NUMDIALOGS do local c=_G[\"StaticPopup\"..b]if c:IsShown()then {staticPopupsVarName}={staticPopupsVarName}..b..\":\"..c.which..\"; \"end end",
                 staticPopupsVarName
             ));
@@ -103,7 +96,7 @@ namespace AmeisenBotX.Wow335a
                 (x) =>
                 {
                     if (x != IntPtr.Zero
-                        && memoryApi.ReadString(x, Encoding.UTF8, out string s)
+                        && memory.ReadString(x, Encoding.UTF8, out string s)
                         && !string.IsNullOrWhiteSpace(s))
                     {
                         if (!oldBattlegroundStatus.Equals(s, StringComparison.Ordinal))
@@ -118,8 +111,7 @@ namespace AmeisenBotX.Wow335a
                     }
                 },
                 null,
-                memoryApi,
-                Offsets,
+                memory,
                 $"{battlegroundStatusVarName}=\"\"for b=1,MAX_BATTLEFIELD_QUEUES do local c,d,e,f,g,h=GetBattlefieldStatus(b)local i=GetBattlefieldTimeWaited(b)/1000;{battlegroundStatusVarName}={battlegroundStatusVarName}..b..\":\"..tostring(c or\"unknown\")..\":\"..tostring(d or\"unknown\")..\":\"..tostring(e or\"unknown\")..\":\"..tostring(f or\"unknown\")..\":\"..tostring(g or\"unknown\")..\":\"..tostring(h or\"unknown\")..\":\"..tostring(i or\"unknown\")..\";\"end",
                 battlegroundStatusVarName
             ));
@@ -138,16 +130,15 @@ namespace AmeisenBotX.Wow335a
                         playerPosition.Z += 1.3f;
 
                         Vector3 pos = BotUtils.MoveAhead(playerPosition, Player.Rotation, 0.25f);
-                        memoryApi.Write(dataPtr, (1.0f, playerPosition, pos));
+                        memory.Write(dataPtr, (1.0f, playerPosition, pos));
                     }
                 },
-                memoryApi,
-                Offsets
+                memory
             ));
 
-            ObjectManager = new(memoryApi, Offsets);
+            ObjectManager = new(memory);
 
-            Hook = new(memoryApi, Offsets);
+            Hook = new(memory);
             Hook.OnGameInfoPush += ObjectManager.HookManagerOnGameInfoPush;
         }
 
@@ -161,9 +152,9 @@ namespace AmeisenBotX.Wow335a
 
         public bool IsReady => Hook.IsWoWHooked;
 
-        public IObjectProvider ObjectProvider => ObjectManager;
+        public WowMemoryApi Memory { get; }
 
-        public IOffsetList Offsets => OffsetList;
+        public IObjectProvider ObjectProvider => ObjectManager;
 
         public IWowPlayer Player => ObjectManager.Player;
 
@@ -175,11 +166,7 @@ namespace AmeisenBotX.Wow335a
 
         private List<IHookModule> HookModules { get; }
 
-        private IMemoryApi Memory { get; }
-
         private ObjectManager335a ObjectManager { get; }
-
-        private OffsetList335a OffsetList { get; }
 
         public void AbandonQuestsNotIn(IEnumerable<string> quests)
         {
@@ -265,16 +252,16 @@ namespace AmeisenBotX.Wow335a
                 return;
             }
 
-            Memory.Write(Offsets.ClickToMoveTurnSpeed, turnSpeed);
-            Memory.Write(Offsets.ClickToMoveDistance, distance);
+            Memory.Write(Memory.Offsets.ClickToMoveTurnSpeed, turnSpeed);
+            Memory.Write(Memory.Offsets.ClickToMoveDistance, distance);
 
             if (guid > 0)
             {
-                Memory.Write(Offsets.ClickToMoveGuid, guid);
+                Memory.Write(Memory.Offsets.ClickToMoveGuid, guid);
             }
 
-            Memory.Write(Offsets.ClickToMoveAction, clickToMoveType);
-            Memory.Write(Offsets.ClickToMoveX, pos);
+            Memory.Write(Memory.Offsets.ClickToMoveAction, clickToMoveType);
+            Memory.Write(Memory.Offsets.ClickToMoveX, pos);
         }
 
         public void ClickUiElement(string elementName)
@@ -477,8 +464,8 @@ namespace AmeisenBotX.Wow335a
 
             for (int i = 0; i < 6; ++i)
             {
-                if (Memory.Read(OffsetList.RuneType + (4 * i), out int type)
-                    && Memory.Read(OffsetList.Runes, out byte runeStatus)
+                if (Memory.Read(Memory.Offsets.RuneType + (4 * i), out int type)
+                    && Memory.Read(Memory.Offsets.Runes, out byte runeStatus)
                     && ((1 << i) & runeStatus) != 0)
                 {
                     ++runes[type];
@@ -615,7 +602,7 @@ namespace AmeisenBotX.Wow335a
 
         public bool IsClickToMoveActive()
         {
-            return Memory.Read(OffsetList.ClickToMoveAction, out int ctmState)
+            return Memory.Read(Memory.Offsets.ClickToMoveAction, out int ctmState)
                 && ctmState != 0    // None
                 && ctmState != 3    // Stop
                 && ctmState != 13;  // Halted
@@ -637,7 +624,7 @@ namespace AmeisenBotX.Wow335a
 
         public bool IsRuneReady(int runeId)
         {
-            return Memory.Read(OffsetList.Runes, out byte runeStatus) && ((1 << runeId) & runeStatus) != 0;
+            return Memory.Read(Memory.Offsets.Runes, out byte runeStatus) && ((1 << runeId) & runeStatus) != 0;
         }
 
         public void LeaveBattleground()
@@ -924,7 +911,7 @@ namespace AmeisenBotX.Wow335a
                 // TODO: find better fix for spinning bug
                 LuaDoString("MoveBackwardStart();MoveBackwardStop();");
 
-                Hook.CallObjectFunction(Player.BaseAddress, OffsetList.FunctionPlayerClickToMoveStop, null, false, out _);
+                Hook.CallObjectFunction(Player.BaseAddress, Memory.Offsets.FunctionPlayerClickToMoveStop, null, false, out _);
             }
         }
 

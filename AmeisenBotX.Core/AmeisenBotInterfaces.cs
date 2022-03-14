@@ -16,7 +16,6 @@ using AmeisenBotX.Core.Logic.Idle;
 using AmeisenBotX.Core.Managers.Character;
 using AmeisenBotX.Core.Managers.Chat;
 using AmeisenBotX.Core.Managers.Threat;
-using AmeisenBotX.Memory;
 using AmeisenBotX.RconClient;
 using AmeisenBotX.Wow;
 using AmeisenBotX.Wow.Cache;
@@ -54,7 +53,7 @@ namespace AmeisenBotX.Core
 
         public IWowUnit LastTarget => Objects.LastTarget;
 
-        public IMemoryApi Memory { get; set; }
+        public WowMemoryApi Memory { get; set; }
 
         public IMovementEngine Movement { get; set; }
 

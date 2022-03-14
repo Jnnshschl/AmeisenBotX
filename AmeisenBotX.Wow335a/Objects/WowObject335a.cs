@@ -1,8 +1,7 @@
 ﻿using AmeisenBotX.Common.Math;
-using AmeisenBotX.Memory;
+using AmeisenBotX.Wow;
 using AmeisenBotX.Wow.Objects;
 using AmeisenBotX.Wow.Objects.Enums;
-using AmeisenBotX.Wow.Offsets;
 using AmeisenBotX.Wow335a.Objects.Descriptors;
 using System;
 
@@ -27,11 +26,11 @@ namespace AmeisenBotX.Wow335a.Objects
 
         protected WowObjectDescriptor335a RawObject { get; private set; }
 
-        public virtual void Init(IMemoryApi memoryApi, IOffsetList offsetList, IntPtr baseAddress, IntPtr descriptorAddress)
+        public virtual void Init(WowMemoryApi memory, IntPtr baseAddress, IntPtr descriptorAddress)
         {
             BaseAddress = baseAddress;
             DescriptorAddress = descriptorAddress;
-            Update(memoryApi, offsetList);
+            Update(memory);
         }
 
         public override string ToString()
@@ -39,9 +38,9 @@ namespace AmeisenBotX.Wow335a.Objects
             return $"Object: {Guid}";
         }
 
-        public virtual void Update(IMemoryApi memoryApi, IOffsetList offsetList)
+        public virtual void Update(WowMemoryApi memory)
         {
-            if (DescriptorAddress != IntPtr.Zero && memoryApi.Read(DescriptorAddress, out WowObjectDescriptor335a obj))
+            if (DescriptorAddress != IntPtr.Zero && memory.Read(DescriptorAddress, out WowObjectDescriptor335a obj))
             {
                 RawObject = obj;
             }

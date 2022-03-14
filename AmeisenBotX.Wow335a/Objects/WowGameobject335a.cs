@@ -1,8 +1,7 @@
 ﻿using AmeisenBotX.Common.Math;
-using AmeisenBotX.Memory;
+using AmeisenBotX.Wow;
 using AmeisenBotX.Wow.Objects;
 using AmeisenBotX.Wow.Objects.Enums;
-using AmeisenBotX.Wow.Offsets;
 using AmeisenBotX.Wow335a.Objects.Descriptors;
 using System;
 using System.Collections.Specialized;
@@ -32,12 +31,12 @@ namespace AmeisenBotX.Wow335a.Objects
             return $"GameObject: [{EntryId}] ({(Enum.IsDefined(typeof(WowGameObjectDisplayId), DisplayId) ? ((WowGameObjectDisplayId)DisplayId).ToString() : DisplayId.ToString(CultureInfo.InvariantCulture))}:{DisplayId})";
         }
 
-        public override void Update(IMemoryApi memoryApi, IOffsetList offsetList)
+        public override void Update(WowMemoryApi memory)
         {
-            base.Update(memoryApi, offsetList);
+            base.Update(memory);
 
-            if (memoryApi.Read(DescriptorAddress + WowObjectDescriptor335a.EndOffset, out WowGameobjectDescriptor335a objPtr)
-                && memoryApi.Read(IntPtr.Add(BaseAddress, (int)offsetList.WowGameobjectPosition), out Vector3 position))
+            if (memory.Read(DescriptorAddress + WowObjectDescriptor335a.EndOffset, out WowGameobjectDescriptor335a objPtr)
+                && memory.Read(IntPtr.Add(BaseAddress, (int)memory.Offsets.WowGameobjectPosition), out Vector3 position))
             {
                 GameObjectType = (WowGameObjectType)objPtr.GameobjectBytes1;
                 CreatedBy = objPtr.CreatedBy;

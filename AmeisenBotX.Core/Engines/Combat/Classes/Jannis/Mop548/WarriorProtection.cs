@@ -15,6 +15,12 @@ namespace AmeisenBotX.Core.Engines.Combat.Classes.Jannis.Mop548
         public WarriorProtection(AmeisenBotInterfaces bot) : base(bot)
         {
             Configurables.TryAdd("FartOnCharge", false);
+
+            InterruptManager.InterruptSpells = new()
+            {
+                { 0, (x) => TryCastSpell(Warrior548.Pummel, x.Guid, true) },
+                { 1, (x) => TryCastSpell(Warrior548.DragonRoar, x.Guid, true) },
+            };
         }
 
         public override string Description => "Beta CombatClass for the Protection Warrior spec. For Dungeons and Questing";
@@ -27,11 +33,7 @@ namespace AmeisenBotX.Core.Engines.Combat.Classes.Jannis.Mop548
 
         public override IItemComparator ItemComparator { get; set; } = new BasicStaminaComparator
         (
-            new()
-            {
-                WowArmorType.Cloth,
-                WowArmorType.Leather
-            },
+            null,
             new()
             {
                 WowWeaponType.SwordTwoHand,
@@ -63,7 +65,7 @@ namespace AmeisenBotX.Core.Engines.Combat.Classes.Jannis.Mop548
 
         public override bool UseAutoAttacks => true;
 
-        public override string Version => "1.1";
+        public override string Version => "1.0";
 
         public override bool WalkBehindEnemy => false;
 
@@ -107,28 +109,45 @@ namespace AmeisenBotX.Core.Engines.Combat.Classes.Jannis.Mop548
                     }
                 }
 
+                if (TryCastSpell(Warrior548.BattleShout, 0))
+                {
+                    return;
+                }
+
                 if (distanceToTarget > 8.0)
                 {
-                    if (TryCastSpell(Warrior548.HeroicThrow, Bot.Wow.TargetGuid, true))
-                    {
-                        return;
-                    }
-
-                    if (TryCastSpellWarrior(Warrior548.Charge, Warrior548.DefensiveStance, Bot.Wow.TargetGuid, true))
+                    if (TryCastSpellWarrior(Warrior548.Charge, Warrior548.DefensiveStance, Bot.Wow.TargetGuid))
                     {
                         if (Configurables["FartOnCharge"] && DateTime.Now - LastFarted > TimeSpan.FromSeconds(8))
                         {
                             LastFarted = DateTime.Now;
-                            Bot.Wow.SendChatMessage($"/rude");
+                            Bot.Wow.SendChatMessage("/rude");
                         }
 
+                        return;
+                    }
+
+                    if (TryCastSpell(Warrior548.HeroicThrow, Bot.Wow.TargetGuid))
+                    {
                         return;
                     }
                 }
                 else
                 {
                     if (Bot.Player.HealthPercentage < 50.0
-                        && TryCastSpell(Warrior548.ShieldBlock, Bot.Wow.TargetGuid, true))
+                        && TryCastSpell(Warrior548.ShieldBlock, 0, true))
+                    {
+                        return;
+                    }
+
+                    if (Bot.Player.HealthPercentage < 35.0
+                        && TryCastSpell(Warrior548.ShieldWall, 0))
+                    {
+                        return;
+                    }
+
+                    if (Bot.Player.HealthPercentage < 25.0
+                        && TryCastSpell(Warrior548.LastStand, 0))
                     {
                         return;
                     }
@@ -143,13 +162,25 @@ namespace AmeisenBotX.Core.Engines.Combat.Classes.Jannis.Mop548
 
                     if (hasVictoriousBuff
                         && Bot.Player.HealthPercentage < 80.0
-                        && TryCastSpell(Warrior548.VictoryRush, Bot.Wow.TargetGuid, true))
+                        && TryCastSpell(Warrior548.VictoryRush, Bot.Wow.TargetGuid))
                     {
                         return;
                     }
 
                     if (Bot.Target.TargetGuid != Bot.Wow.PlayerGuid
                         && TryCastSpell(Warrior548.Taunt, Bot.Wow.TargetGuid))
+                    {
+                        return;
+                    }
+
+                    if (!Bot.Target.Auras.Any(e => Bot.Db.GetSpellName(e.SpellId) == Warrior548.DemoralizingShout)
+                        && TryCastSpellWarrior(Warrior548.DemoralizingShout, Warrior548.DefensiveStance, Bot.Wow.TargetGuid))
+                    {
+                        return;
+                    }
+
+                    if (!Bot.Target.Auras.Any(e => Bot.Db.GetSpellName(e.SpellId) == Warrior548.PiercingHowl)
+                        && TryCastSpellWarrior(Warrior548.PiercingHowl, Warrior548.DefensiveStance, Bot.Wow.TargetGuid))
                     {
                         return;
                     }
@@ -170,15 +201,15 @@ namespace AmeisenBotX.Core.Engines.Combat.Classes.Jannis.Mop548
                     int nearEnemies = Bot.GetNearEnemies<IWowUnit>(Bot.Player.Position, 10.0f).Count();
 
                     if ((nearEnemies > 2 || Bot.Player.Rage > (rageToSave + 30))
-                        && TryCastSpell(Warrior548.ThunderClap, Bot.Wow.TargetGuid, true))
+                        && TryCastSpell(Warrior548.ThunderClap, Bot.Wow.TargetGuid))
                     {
                         return;
                     }
 
                     if (Bot.Player.Rage > (rageToSave + 15)
-                        && !Bot.Player.Auras.Any(e => Bot.Db.GetSpellName(e.SpellId) == Warrior548.WeakenedAmor)
-                        && (TryCastSpell(Warrior548.SunderAmor, Bot.Wow.TargetGuid, true)
-                            || TryCastSpell(Warrior548.Devastate, Bot.Wow.TargetGuid, true)))
+                        && !Bot.Target.Auras.Any(e => Bot.Db.GetSpellName(e.SpellId) == Warrior548.WeakenedAmor && e.StackCount < 3)
+                        && (TryCastSpell(Warrior548.SunderAmor, Bot.Wow.TargetGuid)
+                            || TryCastSpell(Warrior548.Devastate, Bot.Wow.TargetGuid)))
                     {
                         return;
                     }
@@ -188,9 +219,21 @@ namespace AmeisenBotX.Core.Engines.Combat.Classes.Jannis.Mop548
                         return;
                     }
 
+                    if (nearEnemies > 1
+                        && TryCastSpell(Warrior548.DragonRoar, Bot.Wow.TargetGuid))
+                    {
+                        return;
+                    }
+
+                    if ((nearEnemies > 1 || Bot.Player.Rage > (rageToSave + 30))
+                        && TryCastSpell(Warrior548.Cleave, Bot.Wow.TargetGuid))
+                    {
+                        return;
+                    }
+
                     // when we got nothing to do, use Victory Rush
                     if (hasVictoriousBuff
-                        && TryCastSpell(Warrior548.VictoryRush, Bot.Wow.TargetGuid, true))
+                        && TryCastSpell(Warrior548.VictoryRush, Bot.Wow.TargetGuid))
                     {
                         return;
                     }

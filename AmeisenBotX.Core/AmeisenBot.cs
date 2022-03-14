@@ -35,10 +35,10 @@ using AmeisenBotX.Core.Managers.Chat;
 using AmeisenBotX.Core.Managers.Threat;
 using AmeisenBotX.Logging;
 using AmeisenBotX.Logging.Enums;
-using AmeisenBotX.Memory;
 using AmeisenBotX.Memory.Win32;
 using AmeisenBotX.RconClient.Enums;
 using AmeisenBotX.RconClient.Messages;
+using AmeisenBotX.Wow;
 using AmeisenBotX.Wow.Cache;
 using AmeisenBotX.Wow.Cache.Enums;
 using AmeisenBotX.Wow.Combatlog;
@@ -46,8 +46,10 @@ using AmeisenBotX.Wow.Objects;
 using AmeisenBotX.Wow.Objects.Enums;
 using AmeisenBotX.Wow335a;
 using AmeisenBotX.Wow335a.Combatlog.Enums;
+using AmeisenBotX.Wow335a.Offsets;
 using AmeisenBotX.Wow548;
 using AmeisenBotX.Wow548.Combatlog.Enums;
+using AmeisenBotX.Wow548.Offsets;
 using Microsoft.CSharp;
 using System;
 using System.CodeDom.Compiler;
@@ -119,11 +121,16 @@ namespace AmeisenBotX.Core
                 Directory.CreateDirectory(dataFolder);
             }
 
+            int wowBuild = FileVersionInfo.GetVersionInfo(Config.PathToWowExe).FilePrivatePart;
+
             // start initializing the wow interface
             Bot = new();
-            Bot.Memory = new XMemory();
-
-            int wowBuild = FileVersionInfo.GetVersionInfo(Config.PathToWowExe).FilePrivatePart;
+            Bot.Memory = new WowMemoryApi(wowBuild switch
+            {
+                (int)WowVersion.WotLK335a => new OffsetList335a(),
+                (int)WowVersion.MoP548 => new OffsetList548(),
+                _ => throw new ArgumentException($"Unsupported wow version: {wowBuild}"),
+            });
 
             // load the wow specific interface based on file version (build number)
             Bot.Wow = wowBuild switch
@@ -170,13 +177,13 @@ namespace AmeisenBotX.Core
             Bot.Wow.OnStaticPopup += OnStaticPopup;
             Bot.Wow.OnBattlegroundStatus += OnBattlegroundStatusChanged;
 
-            AmeisenLogger.I.Log("AmeisenBot", $"Using OffsetList: {Bot.Wow.Offsets.GetType().Name}", LogLevel.Master);
+            AmeisenLogger.I.Log("AmeisenBot", $"Using OffsetList: {Bot.Memory.Offsets.GetType().Name}", LogLevel.Master);
 
             Bot.Character = new DefaultCharacterManager(Bot.Wow, Bot.Memory, Config);
 
             string dbPath = Path.Combine(ProfileFolder, "db.json");
             AmeisenLogger.I.Log("AmeisenBot", $"Loading DB from: {dbPath}", LogLevel.Master);
-            Bot.Db = LocalAmeisenBotDb.FromJson(dbPath, Bot.Wow, Bot.Memory);
+            Bot.Db = LocalAmeisenBotDb.FromJson(dbPath, Bot.Wow);
 
             PoiCacheEvent = new TimegatedEvent(TimeSpan.FromSeconds(2));
             Bot.Objects.OnObjectUpdateComplete += OnObjectUpdateComplete;
@@ -663,14 +670,11 @@ namespace AmeisenBotX.Core
 
         private void OnClassTrainerShow(long timestamp, List<string> args)
         {
-            // todo: Config.TrainSpells
-            if (!Bot.Target.IsClassTrainer && !Bot.Target.IsProfessionTrainer)
+            if (Config.TrainSpells && Bot.Target != null && !Bot.Target.IsClassTrainer && !Bot.Target.IsProfessionTrainer)
             {
-                return;
+                TrainAllSpellsRoutine.Run(Bot, Config);
+                Bot.Character.LastLevelTrained = Bot.Player.Level;
             }
-
-            TrainAllSpellsRoutine.Run(Bot, Config);
-            Bot.Character.LastLevelTrained = Bot.Player.Level;
         }
 
         private void OnEquipmentChanged(long timestamp, List<string> args)
@@ -689,7 +693,7 @@ namespace AmeisenBotX.Core
                 {
                     Bot.Wow.ClickUiElement("LFGDungeonReadyDialogEnterDungeonButton");
                 }
-                else if(Bot.Wow.WowVersion is WowVersion.WotLK335a)
+                else if (Bot.Wow.WowVersion is WowVersion.WotLK335a)
                 {
                     Bot.Wow.ClickUiElement("LFDDungeonReadyDialogEnterDungeonButton");
                 }

@@ -357,7 +357,7 @@ namespace AmeisenBotX.Core.Engines.Combat.Classes.Jannis.Mop548
                     if (Bot.Player.TargetGuid != guid)
                     {
                         Bot.Wow.ChangeTarget(guid);
-                        Bot.Objects.Player.Update(Bot.Memory, Bot.Wow.Offsets);
+                        Bot.Objects.Player.Update(Bot.Memory);
                     }
                 }
             }

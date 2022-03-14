@@ -148,6 +148,8 @@ namespace AmeisenBotX.Wow548.Offsets
 
         public IntPtr WowObjectType { get; } = new(0xC);
 
+        public IntPtr WowPlayerIsSitting { get; } = new(0x3BF8);
+
         public IntPtr WowUnitCanInterrupt { get; } = new(0xC64);
 
         public IntPtr WowUnitFlyFlags { get; } = new(0x38);

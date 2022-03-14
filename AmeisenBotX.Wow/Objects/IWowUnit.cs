@@ -1,7 +1,5 @@
-﻿using AmeisenBotX.Memory;
-using AmeisenBotX.Wow.Objects.Enums;
+﻿using AmeisenBotX.Wow.Objects.Enums;
 using AmeisenBotX.Wow.Objects.Flags;
-using AmeisenBotX.Wow.Offsets;
 using System.Collections.Generic;
 using System.Collections.Specialized;
 
@@ -220,6 +218,6 @@ namespace AmeisenBotX.Wow.Objects
 
         float MeleeRangeTo(IWowUnit wowUnit);
 
-        string ReadName(IMemoryApi memoryApi, IOffsetList offsetList);
+        string ReadName(WowMemoryApi memory);
     }
 }

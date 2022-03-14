@@ -8,7 +8,6 @@ using AmeisenBotX.Core.Managers.Character.Spells;
 using AmeisenBotX.Core.Managers.Character.Talents;
 using AmeisenBotX.Logging;
 using AmeisenBotX.Logging.Enums;
-using AmeisenBotX.Memory;
 using AmeisenBotX.Wow;
 using AmeisenBotX.Wow.Objects;
 using AmeisenBotX.Wow.Objects.Enums;
@@ -22,10 +21,10 @@ namespace AmeisenBotX.Core.Managers.Character
 {
     public class DefaultCharacterManager : ICharacterManager
     {
-        public DefaultCharacterManager(IWowInterface wowInterface, IMemoryApi memoryApi, AmeisenBotConfig config)
+        public DefaultCharacterManager(IWowInterface wowInterface, WowMemoryApi memory, AmeisenBotConfig config)
         {
             Wow = wowInterface;
-            MemoryApi = memoryApi;
+            MemoryApi = memory;
 
             Inventory = new(Wow, config);
             Equipment = new(Wow);
@@ -58,7 +57,7 @@ namespace AmeisenBotX.Core.Managers.Character
 
         public TalentManager TalentManager { get; }
 
-        private IMemoryApi MemoryApi { get; }
+        private WowMemoryApi MemoryApi { get; }
 
         private IWowInterface Wow { get; }
 

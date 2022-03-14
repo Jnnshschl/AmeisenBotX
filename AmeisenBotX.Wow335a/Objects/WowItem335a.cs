@@ -1,8 +1,7 @@
-﻿using AmeisenBotX.Memory;
+﻿using AmeisenBotX.Wow;
 using AmeisenBotX.Wow.Objects;
 using AmeisenBotX.Wow.Objects.Raw.Enums;
 using AmeisenBotX.Wow.Objects.Raw.SubStructs;
-using AmeisenBotX.Wow.Offsets;
 using AmeisenBotX.Wow335a.Objects.Descriptors;
 using System;
 using System.Collections.Generic;
@@ -38,11 +37,11 @@ namespace AmeisenBotX.Wow335a.Objects
             return $"Item: [{Guid}] ({EntryId}) Owner: {Owner} Count: {Count}";
         }
 
-        public override void Update(IMemoryApi memoryApi, IOffsetList offsetList)
+        public override void Update(WowMemoryApi memory)
         {
-            base.Update(memoryApi, offsetList);
+            base.Update(memory);
 
-            if (memoryApi.Read(DescriptorAddress + WowObjectDescriptor335a.EndOffset, out WowItemDescriptor335a objPtr))
+            if (memory.Read(DescriptorAddress + WowObjectDescriptor335a.EndOffset, out WowItemDescriptor335a objPtr))
             {
                 Count = objPtr.StackCount;
                 Owner = objPtr.Owner;

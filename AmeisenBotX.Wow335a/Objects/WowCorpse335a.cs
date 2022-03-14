@@ -1,6 +1,5 @@
-﻿using AmeisenBotX.Memory;
+﻿using AmeisenBotX.Wow;
 using AmeisenBotX.Wow.Objects;
-using AmeisenBotX.Wow.Offsets;
 using AmeisenBotX.Wow335a.Objects.Descriptors;
 using System;
 
@@ -22,11 +21,11 @@ namespace AmeisenBotX.Wow335a.Objects
             return $"Corpse: [{Guid}] Owner: {Owner} Party: {Party} DisplayId: {DisplayId}";
         }
 
-        public override void Update(IMemoryApi memoryApi, IOffsetList offsetList)
+        public override void Update(WowMemoryApi memory)
         {
-            base.Update(memoryApi, offsetList);
+            base.Update(memory);
 
-            if (memoryApi.Read(DescriptorAddress + WowObjectDescriptor335a.EndOffset, out WowCorpseDescriptor335a obj))
+            if (memory.Read(DescriptorAddress + WowObjectDescriptor335a.EndOffset, out WowCorpseDescriptor335a obj))
             {
                 RawWowCorpse = obj;
             }

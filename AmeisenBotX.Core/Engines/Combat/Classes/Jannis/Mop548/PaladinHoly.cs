@@ -5,6 +5,7 @@ using AmeisenBotX.Core.Engines.Movement.Enums;
 using AmeisenBotX.Core.Managers.Character.Comparators;
 using AmeisenBotX.Core.Managers.Character.Spells.Objects;
 using AmeisenBotX.Core.Managers.Character.Talents.Objects;
+using AmeisenBotX.Wow.Objects;
 using AmeisenBotX.Wow.Objects.Enums;
 using AmeisenBotX.Wow548.Constants;
 using System;
@@ -21,14 +22,17 @@ namespace AmeisenBotX.Core.Engines.Combat.Classes.Jannis.Mop548
             Configurables.TryAdd("AttackInGroups", true);
             Configurables.TryAdd("AttackInGroupsUntilManaPercent", 85.0);
             Configurables.TryAdd("AttackInGroupsCloseCombat", false);
+            Configurables.TryAdd("BeaconOfLightSelfHealth", 85.0);
+            Configurables.TryAdd("BeaconOfLightPartyHealth", 85.0);
+            Configurables.TryAdd("DivinePleaMana", 60.0);
 
-            MyAuraManager.Jobs.Add(new KeepActiveAuraJob(bot.Db, Paladin548.BlessingOfKings, () => TryCastSpell(Paladin548.BlessingOfKings, Bot.Wow.PlayerGuid, true)));
+            // MyAuraManager.Jobs.Add(new KeepBestActiveAuraJob(bot.Db, new List<(string, Func<bool>)>()
+            // {
+            //     (Paladin548.SealOfInsight, () => TryCastSpell(Paladin548.SealOfInsight, 0, true)),
+            //     (Paladin548.SealOfTruth, () => TryCastSpell(Paladin548.SealOfTruth, 0, true)),
+            // }));
 
-            MyAuraManager.Jobs.Add(new KeepBestActiveAuraJob(bot.Db, new List<(string, Func<bool>)>()
-            {
-                (Paladin548.SealOfInsight, () => TryCastSpell(Paladin548.SealOfInsight, 0, true)),
-                (Paladin548.SealOfTruth, () => TryCastSpell(Paladin548.SealOfTruth, 0, true)),
-            }));
+            GroupAuraManager.SpellsToKeepActiveOnParty.Add((Paladin548.BlessingOfKings, (spellName, guid) => TryCastSpell(spellName, guid, true)));
 
             HealingManager = new(bot, (string spellName, ulong guid) => { return TryCastSpell(spellName, guid); });
 
@@ -45,23 +49,26 @@ namespace AmeisenBotX.Core.Engines.Combat.Classes.Jannis.Mop548
                     HealingManager.AddSpell(spellHolyShock);
                 }
 
-                if (Bot.Character.SpellBook.TryGetSpellByName(Paladin548.LayOnHands, out Spell spellLayOnHands))
+                if (Bot.Character.SpellBook.TryGetSpellByName(Paladin548.HolyLight, out Spell spellHolyLight))
                 {
-                    HealingManager.AddSpell(spellLayOnHands);
+                    HealingManager.AddSpell(spellHolyLight);
                 }
 
-                // if (Bot.Character.SpellBook.TryGetSpellByName(Paladin548.HolyRadiance, out Spell spellHolyRadiance))
-                // {
-                //     HealingManager.AddSpell(spellHolyRadiance);
-                // }
+                if (Bot.Character.SpellBook.TryGetSpellByName(Paladin548.DivineLight, out Spell spellDivineLight))
+                {
+                    HealingManager.AddSpell(spellDivineLight);
+                }
+            };
 
-                // if (Bot.Character.SpellBook.TryGetSpellByName(Paladin548.HolyLight, out Spell spellHolyLight))
-                // {
-                //     HealingManager.AddSpell(spellHolyLight);
-                // }
+            InterruptManager.InterruptSpells = new()
+            {
+                { 0, (x) => TryCastSpell(Paladin548.FistOfJustice, x.Guid, true) },
+                { 1, (x) => TryCastSpell(Paladin548.HammerOfJustice, x.Guid, true) },
+                { 2, (x) => TryCastSpell(Paladin548.Rebuke, x.Guid, true) },
             };
 
             // SpellAbortFunctions.Add(HealingManager.ShouldAbortCasting);
+            ChangeBeaconEvent = new(TimeSpan.FromSeconds(1));
         }
 
         public override string Description => "Beta CombatClass for the Holy Paladin spec.";
@@ -112,13 +119,101 @@ namespace AmeisenBotX.Core.Engines.Combat.Classes.Jannis.Mop548
 
         public override WowClass WowClass => WowClass.Paladin;
 
+        private TimegatedEvent ChangeBeaconEvent { get; }
+
         private HealingManager HealingManager { get; }
 
         public override void Execute()
         {
             base.Execute();
 
-            if (NeedToHealSomeone())
+            IWowUnit dyingUnit = Bot.Objects.Partymembers.FirstOrDefault(e => e.HealthPercentage < 14.0 && !e.Auras.Any(e => Bot.Db.GetSpellName(e.SpellId) == Paladin548.Forbearance));
+
+            if (dyingUnit != null)
+            {
+                if (TryCastSpell(Paladin548.LayOnHands, dyingUnit.Guid, true))
+                {
+                    return;
+                }
+
+                if (TryCastSpell(Paladin548.HandOfProtection, dyingUnit.Guid, true))
+                {
+                    return;
+                }
+            }
+
+            IWowUnit shieldWorthyUnit = Bot.Objects.Partymembers.FirstOrDefault(e => e.HealthPercentage < 20.0 && !e.Auras.Any(e => Bot.Db.GetSpellName(e.SpellId) == Paladin548.Forbearance));
+
+            if (shieldWorthyUnit != null)
+            {
+                if (TryCastSpell(Paladin548.DivineShield, shieldWorthyUnit.Guid, true))
+                {
+                    return;
+                }
+            }
+
+            if (!Bot.Objects.Partymembers.Any(e => e.HealthPercentage < 85.0))
+            {
+                IEnumerable<IWowUnit> lowHpUnits = Bot.Objects.Partymembers.Where(e => e.HealthPercentage < 95.0);
+
+                if (lowHpUnits.Any())
+                {
+                    if (TryCastSpell(Paladin548.DivineShield, lowHpUnits.First().Guid, true))
+                    {
+                        return;
+                    }
+                }
+            }
+
+            IWowUnit movementImpairedUnit = Bot.Objects.Partymembers.FirstOrDefault(e => e.IsConfused);
+
+            if (movementImpairedUnit != null)
+            {
+                if (TryCastSpell(Paladin548.HandOfFreedom, movementImpairedUnit.Guid, true))
+                {
+                    return;
+                }
+            }
+
+            if (Bot.Player.ManaPercentage < Configurables["DivinePleaMana"]
+                && TryCastSpell(Paladin548.DivinePlea, 0, true))
+            {
+                return;
+            }
+
+            if (ChangeBeaconEvent.Ready)
+            {
+                if (Bot.Player.HealthPercentage < Configurables["BeaconOfLightSelfHealth"])
+                {
+                    // keep beacon of light on us to reduce healing ourself
+                    if (!Bot.Player.Auras.Any(e => Bot.Db.GetSpellName(e.SpellId) == Paladin548.BeaconOfLight)
+                        && TryCastSpell(Paladin548.BeaconOfLight, Bot.Player.Guid, true))
+                    {
+                        ChangeBeaconEvent.Run();
+                        return;
+                    }
+                }
+                else
+                {
+                    IEnumerable<IWowUnit> healableTargets = Bot.Wow.ObjectProvider.Partymembers.Where(e => e != null && !e.IsDead).OrderBy(e => e.HealthPercentage);
+
+                    if (healableTargets.Count() > 1)
+                    {
+                        IWowUnit t = healableTargets.Skip(1).FirstOrDefault(e => e.HealthPercentage < Configurables["BeaconOfLightPartyHealth"]);
+
+                        // keep beacon of light on second lowest target
+                        if (t != null
+                            && !t.Auras.Any(e => Bot.Db.GetSpellName(e.SpellId) == Paladin548.BeaconOfLight)
+                            && TryCastSpell(Paladin548.BeaconOfLight, t.Guid, true))
+                        {
+                            ChangeBeaconEvent.Run();
+                            return;
+                        }
+                    }
+                }
+            }
+
+            if (HealingManager.Tick())
             {
                 return;
             }
@@ -136,12 +231,6 @@ namespace AmeisenBotX.Core.Engines.Combat.Classes.Jannis.Mop548
                         return;
                     }
 
-                    if (Bot.Target.IsCasting
-                        && TryCastSpell(Paladin548.FistOfJustice, Bot.Wow.TargetGuid, true))
-                    {
-                        return;
-                    }
-
                     // either we are alone or allowed to go close combat in groups
                     if (isAlone || Configurables["AttackInGroupsCloseCombat"])
                     {
@@ -152,12 +241,6 @@ namespace AmeisenBotX.Core.Engines.Combat.Classes.Jannis.Mop548
                                 Bot.Wow.StartAutoAttack();
                             }
 
-                            if (Bot.Target.IsCasting
-                                && TryCastSpell(Paladin548.HammerOfJustice, Bot.Wow.TargetGuid, true))
-                            {
-                                return;
-                            }
-
                             if (TryCastSpell(Paladin548.CrusaderStrike, Bot.Wow.TargetGuid, true))
                             {
                                 return;
@@ -165,12 +248,18 @@ namespace AmeisenBotX.Core.Engines.Combat.Classes.Jannis.Mop548
                         }
                         else
                         {
+                            if (Bot.Target.HealthPercentage < 20.0
+                                && TryCastSpell(Paladin548.HammerOfWrath, Bot.Wow.TargetGuid, true))
+                            {
+                                return;
+                            }
+
                             if (TryCastSpell(Paladin548.Judgment, Bot.Wow.TargetGuid, true))
                             {
                                 return;
                             }
 
-                            if (!Bot.Player.Auras.Any(e => Bot.Db.GetSpellName(e.SpellId) == Paladin548.Denounce)
+                            if (!Bot.Target.Auras.Any(e => Bot.Db.GetSpellName(e.SpellId) == Paladin548.Denounce)
                                 && TryCastSpell(Paladin548.Denounce, Bot.Wow.TargetGuid, true))
                             {
                                 return;
@@ -197,7 +286,7 @@ namespace AmeisenBotX.Core.Engines.Combat.Classes.Jannis.Mop548
         {
             base.OutOfCombatExecute();
 
-            if (NeedToHealSomeone())
+            if (HealingManager.Tick())
             {
                 return;
             }
@@ -208,11 +297,6 @@ namespace AmeisenBotX.Core.Engines.Combat.Classes.Jannis.Mop548
             Dictionary<string, object> s = base.Save();
             s.Add("HealingManager", HealingManager.Save());
             return s;
-        }
-
-        private bool NeedToHealSomeone()
-        {
-            return HealingManager.Tick();
         }
     }
 }

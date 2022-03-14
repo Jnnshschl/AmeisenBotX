@@ -3,7 +3,6 @@ using AmeisenBotX.Wow.Events;
 using AmeisenBotX.Wow.Objects;
 using AmeisenBotX.Wow.Objects.Constants;
 using AmeisenBotX.Wow.Objects.Enums;
-using AmeisenBotX.Wow.Offsets;
 using System;
 using System.Collections.Generic;
 
@@ -22,7 +21,7 @@ namespace AmeisenBotX.Wow
 
         /// <summary>
         /// Gets fired when a new static popup appears ingame.
-        /// Format: {ID}:{POPUPTYPE};... =&gt; 1:DELETE_ITEM;2:SAMPLE_POPUP;...
+        /// Format: {ID}:{POPUPTYPE};... 1:DELETE_ITEM;2:SAMPLE_POPUP;...
         /// </summary>
         event Action<string> OnStaticPopup;
 
@@ -48,6 +47,11 @@ namespace AmeisenBotX.Wow
         public ulong LastTargetGuid => ObjectProvider.LastTarget != null ? ObjectProvider.LastTarget.Guid : 0ul;
 
         /// <summary>
+        /// Use this to interact with the wows memory.
+        /// </summary>
+        WowMemoryApi Memory { get; }
+
+        /// <summary>
         /// Use this to interact with wowobjects, units, players and more.
         /// </summary>
         IObjectProvider ObjectProvider { get; }
@@ -56,11 +60,6 @@ namespace AmeisenBotX.Wow
         /// Shortcut to all wow objects.
         /// </summary>
         IEnumerable<IWowObject> Objects => ObjectProvider.WowObjects;
-
-        /// <summary>
-        /// Currently used offset list.
-        /// </summary>
-        IOffsetList Offsets { get; }
 
         /// <summary>
         /// Shortcut to get the current partyleaders guid.

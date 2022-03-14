@@ -1,8 +1,7 @@
-﻿using AmeisenBotX.Memory;
+﻿using AmeisenBotX.Wow;
 using AmeisenBotX.Wow.Objects;
 using AmeisenBotX.Wow.Objects.Raw.Enums;
 using AmeisenBotX.Wow.Objects.Raw.SubStructs;
-using AmeisenBotX.Wow.Offsets;
 using AmeisenBotX.Wow548.Objects.Descriptors;
 
 namespace AmeisenBotX.Wow548.Objects
@@ -38,9 +37,9 @@ namespace AmeisenBotX.Wow548.Objects
             return $"Item: [{Guid}] ({EntryId}) Owner: {Owner} Count: {Count}";
         }
 
-        public override void Update(IMemoryApi memoryApi, IOffsetList offsetList)
+        public override void Update(WowMemoryApi memory)
         {
-            base.Update(memoryApi, offsetList);
+            base.Update(memory);
 
             // ItemEnchantments = new() { objPtr.Enchantment1, objPtr.Enchantment2,
             // objPtr.Enchantment3, objPtr.Enchantment4, objPtr.Enchantment5, objPtr.Enchantment6,
@@ -48,6 +47,9 @@ namespace AmeisenBotX.Wow548.Objects
             // objPtr.Enchantment11, objPtr.Enchantment12, };
         }
 
-        protected WowItemDescriptor548 GetItemDescriptor() => ItemDescriptor ??= Memory.Read(DescriptorAddress + sizeof(WowObjectDescriptor548), out WowItemDescriptor548 objPtr) ? objPtr : new();
+        protected WowItemDescriptor548 GetItemDescriptor()
+        {
+            return ItemDescriptor ??= Memory.Read(DescriptorAddress + sizeof(WowObjectDescriptor548), out WowItemDescriptor548 objPtr) ? objPtr : new();
+        }
     }
 }

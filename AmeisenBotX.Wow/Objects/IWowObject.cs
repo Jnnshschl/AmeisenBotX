@@ -1,7 +1,5 @@
 ﻿using AmeisenBotX.Common.Math;
-using AmeisenBotX.Memory;
 using AmeisenBotX.Wow.Objects.Enums;
-using AmeisenBotX.Wow.Offsets;
 using System;
 
 namespace AmeisenBotX.Wow.Objects
@@ -32,7 +30,7 @@ namespace AmeisenBotX.Wow.Objects
             return Position.GetDistance(b);
         }
 
-        void Init(IMemoryApi memoryApi, IOffsetList offsetList, IntPtr baseAddress, IntPtr descriptorAddress);
+        void Init(WowMemoryApi memory, IntPtr baseAddress, IntPtr descriptorAddress);
 
         public bool IsContainer()
         {
@@ -74,6 +72,6 @@ namespace AmeisenBotX.Wow.Objects
             return Type == WowObjectType.Unit;
         }
 
-        void Update(IMemoryApi memoryApi, IOffsetList offsetList);
+        void Update(WowMemoryApi memory);
     }
 }

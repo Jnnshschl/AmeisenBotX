@@ -224,6 +224,8 @@ namespace AmeisenBotX.Core
 
         public float SupportRange { get; set; } = 64.0f;
 
+        public bool TrainSpells { get; set; } = false;
+
         public bool UseBuiltInCombatClass { get; set; } = true;
 
         public bool UseMounts { get; set; } = true;

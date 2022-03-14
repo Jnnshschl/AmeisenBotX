@@ -1,6 +1,4 @@
-﻿using AmeisenBotX.Memory;
-using AmeisenBotX.Wow.Offsets;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Text;
 
@@ -8,14 +6,13 @@ namespace AmeisenBotX.Wow.Hook.Modules
 {
     public class TracelineJumpHookModule : RunAsmHookModule
     {
-        public TracelineJumpHookModule(Action<IntPtr> onUpdate, Action<IHookModule> tick, IMemoryApi memoryApi, IOffsetList offsetList) : base(onUpdate, tick, memoryApi, 256)
+        public TracelineJumpHookModule(Action<IntPtr> onUpdate, Action<IHookModule> tick, WowMemoryApi memory) : base(onUpdate, tick, memory, 256)
         {
-            OffsetList = offsetList;
         }
 
         ~TracelineJumpHookModule()
         {
-            if (ExecuteAddress != IntPtr.Zero) { MemoryApi.FreeMemory(ExecuteAddress); }
+            if (ExecuteAddress != IntPtr.Zero) { Memory.FreeMemory(ExecuteAddress); }
         }
 
         public IntPtr CommandAddress { get; private set; }
@@ -23,8 +20,6 @@ namespace AmeisenBotX.Wow.Hook.Modules
         public IntPtr DataAddress { get; private set; }
 
         public IntPtr ExecuteAddress { get; private set; }
-
-        private IOffsetList OffsetList { get; }
 
         public override IntPtr GetDataPointer()
         {
@@ -37,13 +32,13 @@ namespace AmeisenBotX.Wow.Hook.Modules
 
             uint memoryNeeded = (uint)(4 + 40 + luaJumpBytes.Length + 1);
 
-            if (MemoryApi.AllocateMemory(memoryNeeded, out IntPtr memory))
+            if (Memory.AllocateMemory(memoryNeeded, out IntPtr memory))
             {
                 ExecuteAddress = memory;
                 CommandAddress = ExecuteAddress + 4;
                 DataAddress = CommandAddress + 40;
 
-                MemoryApi.WriteBytes(CommandAddress, luaJumpBytes);
+                Memory.WriteBytes(CommandAddress, luaJumpBytes);
 
                 IntPtr distancePointer = DataAddress;
                 IntPtr startPointer = IntPtr.Add(distancePointer, 0x4);
@@ -61,14 +56,14 @@ namespace AmeisenBotX.Wow.Hook.Modules
                     $"PUSH {resultPointer}",
                     $"PUSH {endPointer}",
                     $"PUSH {startPointer}",
-                    $"CALL {OffsetList.FunctionTraceline}",
+                    $"CALL {Memory.Offsets.FunctionTraceline}",
                     "ADD ESP, 0x18",
                     "TEST AL, 1",
                     "JE @out",
                     "PUSH 0",
                     $"PUSH {CommandAddress}",
                     $"PUSH {CommandAddress}",
-                    $"CALL {OffsetList.FunctionLuaDoString}",
+                    $"CALL {Memory.Offsets.FunctionLuaDoString}",
                     "ADD ESP, 0xC",
                     $"MOV DWORD [{ExecuteAddress}], 0",
                     "@out:",

@@ -1,6 +1,5 @@
-﻿using AmeisenBotX.Memory;
+﻿using AmeisenBotX.Wow;
 using AmeisenBotX.Wow.Objects;
-using AmeisenBotX.Wow.Offsets;
 using AmeisenBotX.Wow548.Objects.Descriptors;
 
 namespace AmeisenBotX.Wow548.Objects
@@ -17,11 +16,14 @@ namespace AmeisenBotX.Wow548.Objects
             return $"Container: [{Guid}] SlotCount: {SlotCount}";
         }
 
-        public override void Update(IMemoryApi memoryApi, IOffsetList offsetList)
+        public override void Update(WowMemoryApi memory)
         {
-            base.Update(memoryApi, offsetList);
+            base.Update(memory);
         }
 
-        protected WowContainerDescriptor548 GetContainerDescriptor() => ContainerDescriptor ??= Memory.Read(DescriptorAddress + sizeof(WowObjectDescriptor548), out WowContainerDescriptor548 objPtr) ? objPtr : new();
+        protected WowContainerDescriptor548 GetContainerDescriptor()
+        {
+            return ContainerDescriptor ??= Memory.Read(DescriptorAddress + sizeof(WowObjectDescriptor548), out WowContainerDescriptor548 objPtr) ? objPtr : new();
+        }
     }
 }

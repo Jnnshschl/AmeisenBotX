@@ -1,7 +1,6 @@
 ﻿using AmeisenBotX.Common.Math;
 using AmeisenBotX.Logging;
 using AmeisenBotX.Logging.Enums;
-using AmeisenBotX.Memory;
 using AmeisenBotX.Wow.Cache.Enums;
 using AmeisenBotX.Wow.Objects;
 using AmeisenBotX.Wow.Objects.Enums;
@@ -25,9 +24,8 @@ namespace AmeisenBotX.Wow.Cache
             Clear();
         }
 
-        public LocalAmeisenBotDb(IWowInterface wowInterface, IMemoryApi memoryApi)
+        public LocalAmeisenBotDb(IWowInterface wowInterface)
         {
-            MemoryApi = memoryApi;
             Wow = wowInterface;
 
             Clear();
@@ -47,11 +45,9 @@ namespace AmeisenBotX.Wow.Cache
 
         public ConcurrentDictionary<int, string> SpellNames { get; set; }
 
-        private IMemoryApi MemoryApi { get; set; }
-
         private IWowInterface Wow { get; set; }
 
-        public static LocalAmeisenBotDb FromJson(string dbFile, IWowInterface wowInterface, IMemoryApi memoryApi)
+        public static LocalAmeisenBotDb FromJson(string dbFile, IWowInterface wowInterface)
         {
             if (!Directory.Exists(Path.GetDirectoryName(dbFile)))
             {
@@ -64,7 +60,6 @@ namespace AmeisenBotX.Wow.Cache
                 try
                 {
                     LocalAmeisenBotDb db = JsonSerializer.Deserialize<LocalAmeisenBotDb>(File.ReadAllText(dbFile), new JsonSerializerOptions() { AllowTrailingCommas = true, NumberHandling = JsonNumberHandling.AllowReadingFromString });
-                    db.MemoryApi = memoryApi;
                     db.Wow = wowInterface;
                     return db;
                 }
@@ -74,7 +69,7 @@ namespace AmeisenBotX.Wow.Cache
                 }
             }
 
-            return new(wowInterface, memoryApi);
+            return new(wowInterface);
         }
 
         public IReadOnlyDictionary<int, List<Vector3>> AllBlacklistNodes()
@@ -233,7 +228,7 @@ namespace AmeisenBotX.Wow.Cache
             }
             else
             {
-                name = unit.ReadName(MemoryApi, Wow.Offsets);
+                name = unit.ReadName(Wow.Memory);
 
                 if (!string.IsNullOrWhiteSpace(name))
                 {

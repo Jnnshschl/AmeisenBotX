@@ -1,9 +1,7 @@
 ﻿using AmeisenBotX.Common.Math;
-using AmeisenBotX.Memory;
 using AmeisenBotX.Wow.Hook.Structs;
 using AmeisenBotX.Wow.Objects.Enums;
 using AmeisenBotX.Wow.Objects.Raw;
-using AmeisenBotX.Wow.Offsets;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -31,10 +29,9 @@ namespace AmeisenBotX.Wow.Objects
         protected readonly IntPtr[] wowObjectPointers;
         protected readonly IWowObject[] wowObjects;
 
-        public ObjectManager(IMemoryApi memoryApi, IOffsetList offsetList)
+        public ObjectManager(WowMemoryApi memory)
         {
-            MemoryApi = memoryApi;
-            OffsetList = offsetList;
+            Memory = memory;
 
             wowObjectPointers = new IntPtr[MAX_OBJECT_COUNT];
             wowObjects = new IWowObject[MAX_OBJECT_COUNT];
@@ -129,9 +126,7 @@ namespace AmeisenBotX.Wow.Objects
         ///<inheritdoc cref="IObjectProvider.ZoneSubName"/>
         public string ZoneSubName { get; protected set; }
 
-        protected IMemoryApi MemoryApi { get; }
-
-        protected IOffsetList OffsetList { get; }
+        protected WowMemoryApi Memory { get; }
 
         protected bool PlayerGuidIsVehicle { get; set; }
 
@@ -154,7 +149,7 @@ namespace AmeisenBotX.Wow.Objects
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public bool RefreshIsWorldLoaded()
         {
-            if (MemoryApi.Read(OffsetList.IsWorldLoaded, out int isWorldLoaded))
+            if (Memory.Read(Memory.Offsets.IsWorldLoaded, out int isWorldLoaded))
             {
                 IsWorldLoaded = isWorldLoaded == 1;
                 return IsWorldLoaded;
@@ -168,29 +163,29 @@ namespace AmeisenBotX.Wow.Objects
         {
             lock (queryLock)
             {
-                IsWorldLoaded = UpdateGlobalVar<int>(OffsetList.IsWorldLoaded) == 1;
+                IsWorldLoaded = UpdateGlobalVar<int>(Memory.Offsets.IsWorldLoaded) == 1;
 
                 if (!IsWorldLoaded) { return; }
 
-                PlayerGuid = UpdateGlobalVar<ulong>(OffsetList.PlayerGuid);
-                TargetGuid = UpdateGlobalVar<ulong>(OffsetList.TargetGuid);
-                LastTargetGuid = UpdateGlobalVar<ulong>(OffsetList.LastTargetGuid);
-                PetGuid = UpdateGlobalVar<ulong>(OffsetList.PetGuid);
-                PlayerBase = UpdateGlobalVar<IntPtr>(OffsetList.PlayerBase);
-                MapId = UpdateGlobalVar<WowMapId>(OffsetList.MapId);
-                ZoneId = UpdateGlobalVar<int>(OffsetList.ZoneId);
-                GameState = UpdateGlobalVarString(OffsetList.GameState);
+                PlayerGuid = UpdateGlobalVar<ulong>(Memory.Offsets.PlayerGuid);
+                TargetGuid = UpdateGlobalVar<ulong>(Memory.Offsets.TargetGuid);
+                LastTargetGuid = UpdateGlobalVar<ulong>(Memory.Offsets.LastTargetGuid);
+                PetGuid = UpdateGlobalVar<ulong>(Memory.Offsets.PetGuid);
+                PlayerBase = UpdateGlobalVar<IntPtr>(Memory.Offsets.PlayerBase);
+                MapId = UpdateGlobalVar<WowMapId>(Memory.Offsets.MapId);
+                ZoneId = UpdateGlobalVar<int>(Memory.Offsets.ZoneId);
+                GameState = UpdateGlobalVarString(Memory.Offsets.GameState);
 
-                if (MemoryApi.Read(OffsetList.CameraPointer, out IntPtr cameraPointer)
-                    && MemoryApi.Read(IntPtr.Add(cameraPointer, (int)OffsetList.CameraOffset), out cameraPointer))
+                if (Memory.Read(Memory.Offsets.CameraPointer, out IntPtr cameraPointer)
+                    && Memory.Read(IntPtr.Add(cameraPointer, (int)Memory.Offsets.CameraOffset), out cameraPointer))
                 {
                     Camera = UpdateGlobalVar<RawCameraInfo>(cameraPointer);
                 }
 
-                // if (MemoryApi.Read(OffsetList.ZoneText, out IntPtr zoneNamePointer)) { ZoneName =
-                // UpdateGlobalVarString(zoneNamePointer); }
+                // if (MemoryApi.Read(Memory.Offsets.ZoneText, out IntPtr zoneNamePointer)) {
+                // ZoneName = UpdateGlobalVarString(zoneNamePointer); }
 
-                // if (MemoryApi.Read(OffsetList.ZoneSubText, out IntPtr zoneSubNamePointer)) {
+                // if (MemoryApi.Read(Memory.Offsets.ZoneSubText, out IntPtr zoneSubNamePointer)) {
                 // ZoneSubName = UpdateGlobalVarString(zoneSubNamePointer); }
 
                 if (TargetGuid == 0) { Target = null; }
@@ -198,9 +193,9 @@ namespace AmeisenBotX.Wow.Objects
                 if (LastTargetGuid == 0) { LastTarget = null; }
                 if (PartyleaderGuid == 0) { Partyleader = null; }
 
-                MemoryApi.Read(OffsetList.ClientConnection, out IntPtr clientConnection);
-                MemoryApi.Read(IntPtr.Add(clientConnection, (int)OffsetList.CurrentObjectManager), out IntPtr currentObjectManager);
-                MemoryApi.Read(IntPtr.Add(currentObjectManager, (int)OffsetList.FirstObject), out IntPtr activeObjectBaseAddress);
+                Memory.Read(Memory.Offsets.ClientConnection, out IntPtr clientConnection);
+                Memory.Read(IntPtr.Add(clientConnection, (int)Memory.Offsets.CurrentObjectManager), out IntPtr currentObjectManager);
+                Memory.Read(IntPtr.Add(currentObjectManager, (int)Memory.Offsets.FirstObject), out IntPtr activeObjectBaseAddress);
 
                 int c = 0;
                 Array.Clear(wowObjects, 0, MAX_OBJECT_COUNT);
@@ -209,7 +204,7 @@ namespace AmeisenBotX.Wow.Objects
                 for (; (int)activeObjectBaseAddress > 0 && c < MAX_OBJECT_COUNT; ++c)
                 {
                     wowObjectPointers[c] = activeObjectBaseAddress;
-                    MemoryApi.Read(IntPtr.Add(activeObjectBaseAddress, (int)OffsetList.NextObject), out activeObjectBaseAddress);
+                    Memory.Read(IntPtr.Add(activeObjectBaseAddress, (int)Memory.Offsets.NextObject), out activeObjectBaseAddress);
                 }
 
                 ObjectCount = c;
@@ -239,13 +234,13 @@ namespace AmeisenBotX.Wow.Objects
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         protected T UpdateGlobalVar<T>(IntPtr address) where T : unmanaged
         {
-            return address != IntPtr.Zero && MemoryApi.Read(address, out T v) ? v : default;
+            return address != IntPtr.Zero && Memory.Read(address, out T v) ? v : default;
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         protected string UpdateGlobalVarString(IntPtr address, int maxLenght = 128)
         {
-            return address != IntPtr.Zero && MemoryApi.ReadString(address, Encoding.UTF8, out string v, maxLenght) ? v : string.Empty;
+            return address != IntPtr.Zero && Memory.ReadString(address, Encoding.UTF8, out string v, maxLenght) ? v : string.Empty;
         }
 
         /// <summary>
@@ -258,8 +253,8 @@ namespace AmeisenBotX.Wow.Objects
             IntPtr ptr = wowObjectPointers[i];
 
             if (ptr != IntPtr.Zero
-                && MemoryApi.Read(IntPtr.Add(ptr, (int)OffsetList.WowObjectType), out WowObjectType type)
-                && MemoryApi.Read(IntPtr.Add(ptr, (int)OffsetList.WowObjectDescriptor), out IntPtr descriptorAddress))
+                && Memory.Read(IntPtr.Add(ptr, (int)Memory.Offsets.WowObjectType), out WowObjectType type)
+                && Memory.Read(IntPtr.Add(ptr, (int)Memory.Offsets.WowObjectDescriptor), out IntPtr descriptorAddress))
             {
                 wowObjects[i] = type switch
                 {
@@ -275,7 +270,7 @@ namespace AmeisenBotX.Wow.Objects
 
                 if (wowObjects[i] != null)
                 {
-                    wowObjects[i].Init(MemoryApi, OffsetList, ptr, descriptorAddress);
+                    wowObjects[i].Init(Memory, ptr, descriptorAddress);
 
                     if (type is WowObjectType.Unit or WowObjectType.Player)
                     {

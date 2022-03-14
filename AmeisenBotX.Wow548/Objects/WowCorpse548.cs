@@ -1,6 +1,5 @@
-﻿using AmeisenBotX.Memory;
+﻿using AmeisenBotX.Wow;
 using AmeisenBotX.Wow.Objects;
-using AmeisenBotX.Wow.Offsets;
 using AmeisenBotX.Wow548.Objects.Descriptors;
 
 namespace AmeisenBotX.Wow548.Objects
@@ -21,11 +20,14 @@ namespace AmeisenBotX.Wow548.Objects
             return $"Corpse: [{Guid}] Owner: {Owner} Party: {Party} DisplayId: {DisplayId}";
         }
 
-        public override void Update(IMemoryApi memoryApi, IOffsetList offsetList)
+        public override void Update(WowMemoryApi memory)
         {
-            base.Update(memoryApi, offsetList);
+            base.Update(memory);
         }
 
-        protected WowCorpseDescriptor548 GetCorpseDescriptor() => CorpseDescriptor ??= Memory.Read(DescriptorAddress + sizeof(WowObjectDescriptor548), out WowCorpseDescriptor548 objPtr) ? objPtr : new();
+        protected WowCorpseDescriptor548 GetCorpseDescriptor()
+        {
+            return CorpseDescriptor ??= Memory.Read(DescriptorAddress + sizeof(WowObjectDescriptor548), out WowCorpseDescriptor548 objPtr) ? objPtr : new();
+        }
     }
 }

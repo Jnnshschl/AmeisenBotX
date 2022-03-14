@@ -2,11 +2,9 @@
 using AmeisenBotX.Common.Utils;
 using AmeisenBotX.Logging;
 using AmeisenBotX.Logging.Enums;
-using AmeisenBotX.Memory;
 using AmeisenBotX.Wow.Hook.Modules;
 using AmeisenBotX.Wow.Hook.Structs;
 using AmeisenBotX.Wow.Objects;
-using AmeisenBotX.Wow.Offsets;
 using System;
 using System.Collections.Generic;
 using System.Runtime.CompilerServices;
@@ -24,10 +22,9 @@ namespace AmeisenBotX.Wow.Hook
 
         private int hookCalls;
 
-        public GenericEndSceneHook(IMemoryApi memoryApi, IOffsetList offsetList)
+        public GenericEndSceneHook(WowMemoryApi memory)
         {
-            Memory = memoryApi;
-            OffsetList = offsetList;
+            Memory = memory;
         }
 
         public event Action<GameInfo> OnGameInfoPush;
@@ -46,6 +43,8 @@ namespace AmeisenBotX.Wow.Hook
         }
 
         public bool IsWoWHooked => WowEndSceneAddress != IntPtr.Zero && Memory.Read(WowEndSceneAddress, out byte c) && c == 0xE9;
+
+        protected WowMemoryApi Memory { get; }
 
         /// <summary>
         /// Codecave that hold the code, the bot want's to execute.
@@ -98,10 +97,6 @@ namespace AmeisenBotX.Wow.Hook
         /// 0 when done.
         /// </summary>
         private IntPtr IntShouldExecute { get; set; }
-
-        private IMemoryApi Memory { get; }
-
-        private IOffsetList OffsetList { get; }
 
         /// <summary>
         /// Save the original EndScene instructions that will be restored when the hook gets disposed.
@@ -248,7 +243,7 @@ namespace AmeisenBotX.Wow.Hook
 
             // check for world to be loaded we dont want to execute code in the loadingscreen, cause
             // that mostly results in crashes
-            assemblyBuffer.Add($"TEST DWORD [{OffsetList.IsWorldLoaded}], 1");
+            assemblyBuffer.Add($"TEST DWORD [{Memory.Offsets.IsWorldLoaded}], 1");
             assemblyBuffer.Add("JE @out");
             assemblyBuffer.Add("@ovr:");
 
@@ -262,15 +257,15 @@ namespace AmeisenBotX.Wow.Hook
 
             // ---------------------------- # GameInfo & EventHook stuff
             // ---------------------------- world loaded and should execute check
-            assemblyBuffer.Add($"TEST DWORD [{OffsetList.IsWorldLoaded}], 1");
+            assemblyBuffer.Add($"TEST DWORD [{Memory.Offsets.IsWorldLoaded}], 1");
             assemblyBuffer.Add("JE @skpgi");
             assemblyBuffer.Add($"TEST DWORD [{GameInfoExecuteAddress}], 1");
             assemblyBuffer.Add("JE @skpgi");
 
             // isOutdoors
-            assemblyBuffer.Add($"CALL {OffsetList.FunctionGetActivePlayerObject}");
+            assemblyBuffer.Add($"CALL {Memory.Offsets.FunctionGetActivePlayerObject}");
             assemblyBuffer.Add("MOV ECX, EAX");
-            assemblyBuffer.Add($"CALL {OffsetList.FunctionIsOutdoors}");
+            assemblyBuffer.Add($"CALL {Memory.Offsets.FunctionIsOutdoors}");
             assemblyBuffer.Add($"MOV BYTE [{GameInfoAddress}], AL");
 
             // isTargetInLineOfSight
@@ -290,7 +285,7 @@ namespace AmeisenBotX.Wow.Hook
             assemblyBuffer.Add($"PUSH {resultPointer}");
             assemblyBuffer.Add($"PUSH {endPointer}");
             assemblyBuffer.Add($"PUSH {startPointer}");
-            assemblyBuffer.Add($"CALL {OffsetList.FunctionTraceline}");
+            assemblyBuffer.Add($"CALL {Memory.Offsets.FunctionTraceline}");
             assemblyBuffer.Add("ADD ESP, 0x18");
             assemblyBuffer.Add($"MOV DWORD [{GameInfoAddress.ToInt32() + 1}], EAX");
 
@@ -522,10 +517,10 @@ namespace AmeisenBotX.Wow.Hook
 
         private IntPtr GetEndScene()
         {
-            if (Memory.Read(OffsetList.EndSceneStaticDevice, out IntPtr pDevice)
-                && Memory.Read(IntPtr.Add(pDevice, (int)OffsetList.EndSceneOffsetDevice), out IntPtr pEnd)
+            if (Memory.Read(Memory.Offsets.EndSceneStaticDevice, out IntPtr pDevice)
+                && Memory.Read(IntPtr.Add(pDevice, (int)Memory.Offsets.EndSceneOffsetDevice), out IntPtr pEnd)
                 && Memory.Read(pEnd, out IntPtr pScene)
-                && Memory.Read(IntPtr.Add(pScene, (int)OffsetList.EndSceneOffset), out IntPtr pEndscene))
+                && Memory.Read(IntPtr.Add(pScene, (int)Memory.Offsets.EndSceneOffset), out IntPtr pEndscene))
             {
                 return pEndscene;
             }

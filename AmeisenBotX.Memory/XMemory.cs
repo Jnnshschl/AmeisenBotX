@@ -229,7 +229,7 @@ namespace AmeisenBotX.Memory
         private bool Initialized { get; set; }
 
         ///<inheritdoc cref="IMemoryApi.Init"/>
-        public bool Init(Process process, IntPtr processHandle, IntPtr mainThreadHandle)
+        public virtual bool Init(Process process, IntPtr processHandle, IntPtr mainThreadHandle)
         {
             Process = process ?? throw new ArgumentNullException(nameof(process), "process cannot be null");
 

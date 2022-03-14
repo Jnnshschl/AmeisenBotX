@@ -21,6 +21,7 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
 using System.Linq;
+using System.Text;
 
 namespace AmeisenBotX.Core.Logic
 {
@@ -38,6 +39,7 @@ namespace AmeisenBotX.Core.Logic
             Bot = bot;
 
             FirstStart = true;
+            FirstLogin = true;
             Random = new();
 
             Mode = BotMode.None;
@@ -372,6 +374,8 @@ namespace AmeisenBotX.Core.Logic
 
         private TimegatedEvent EatEvent { get; }
 
+        private bool FirstLogin { get; set; }
+
         private bool FirstStart { get; set; }
 
         private Vector3 FollowOffset { get; set; }
@@ -457,7 +461,7 @@ namespace AmeisenBotX.Core.Logic
         {
             if (AntiAfkEvent.Run())
             {
-                Bot.Memory.Write(Bot.Wow.Offsets.TickCount, Environment.TickCount);
+                Bot.Memory.Write(Bot.Memory.Offsets.TickCount, Environment.TickCount);
                 AntiAfkEvent.Timegate = TimeSpan.FromMilliseconds(Random.Next(300, 2300));
             }
 
@@ -474,7 +478,7 @@ namespace AmeisenBotX.Core.Logic
         {
             if (!SearchedStaticRoutes)
             {
-                if (Bot.Memory.Read(Bot.Wow.Offsets.CorpsePosition, out Vector3 corpsePosition))
+                if (Bot.Memory.Read(Bot.Memory.Offsets.CorpsePosition, out Vector3 corpsePosition))
                 {
                     SearchedStaticRoutes = true;
 
@@ -760,7 +764,7 @@ namespace AmeisenBotX.Core.Logic
 
         private bool IsBattlegroundFinished()
         {
-            return Bot.Memory.Read(Bot.Wow.Offsets.BattlegroundFinished, out int bgFinished)
+            return Bot.Memory.Read(Bot.Memory.Offsets.BattlegroundFinished, out int bgFinished)
                 && bgFinished == 1;
         }
 
@@ -837,6 +841,12 @@ namespace AmeisenBotX.Core.Logic
         {
             Bot.Wow.SetWorldLoadedCheck(true);
 
+            if (FirstLogin)
+            {
+                FirstLogin = true;
+                SetCVars();
+            }
+
             // needed to prevent direct logout due to inactivity
             AntiAfk();
 
@@ -867,7 +877,7 @@ namespace AmeisenBotX.Core.Logic
             }
             else if (LootTryEvent.Run())
             {
-                if (Bot.Memory.Read(Bot.Wow.Offsets.LootWindowOpen, out byte lootOpen)
+                if (Bot.Memory.Read(Bot.Memory.Offsets.LootWindowOpen, out byte lootOpen)
                     && lootOpen > 0)
                 {
                     Bot.Wow.LootEverything();
@@ -975,7 +985,7 @@ namespace AmeisenBotX.Core.Logic
 
         private bool NeedToLogin()
         {
-            return Bot.Memory.Read(Bot.Wow.Offsets.IsIngame, out int isIngame) && isIngame == 0;
+            return Bot.Memory.Read(Bot.Memory.Offsets.IsIngame, out int isIngame) && isIngame == 0;
         }
 
         private bool NeedToLoot()
@@ -1027,12 +1037,14 @@ namespace AmeisenBotX.Core.Logic
                 case BotMode.Grinding:
                     {
                         Npc repairNpcEntry = Bot.Grinding.Profile.NpcsOfInterest.FirstOrDefault(e => e.Type == NpcType.VendorRepair);
+
                         if (repairNpcEntry != null)
                         {
                             vendorRepair = Bot.GetClosestVendorByEntryId(repairNpcEntry.EntryId);
                         }
 
                         Npc sellNpcEntry = Bot.Grinding.Profile.NpcsOfInterest.FirstOrDefault(e => e.Type is NpcType.VendorRepair or NpcType.VendorSellBuy);
+
                         if (sellNpcEntry != null)
                         {
                             vendorSell = Bot.GetClosestVendorByEntryId(sellNpcEntry.EntryId);
@@ -1139,7 +1151,7 @@ namespace AmeisenBotX.Core.Logic
 
         private BtStatus RunToCorpseAndRetrieveIt()
         {
-            if (!Bot.Memory.Read(Bot.Wow.Offsets.CorpsePosition, out Vector3 corpsePosition))
+            if (!Bot.Memory.Read(Bot.Memory.Offsets.CorpsePosition, out Vector3 corpsePosition))
             {
                 return BtStatus.Failed;
             }
@@ -1154,22 +1166,82 @@ namespace AmeisenBotX.Core.Logic
             return BtStatus.Success;
         }
 
-        private void SetUlowGfxSettings()
+        private void SetCVars()
         {
-            Bot.Wow.LuaDoString
-            (
-                @"pcall(SetCVar,""gxcolorbits"",""16"");
-                pcall(SetCVar,""gxdepthbits"",""16"");
-                pcall(SetCVar,""skycloudlod"",""0"");
-                pcall(SetCVar,""particledensity"",""0.3"");
-                pcall(SetCVar,""lod"",""0"");
-                pcall(SetCVar,""mapshadows"",""0"");
-                pcall(SetCVar,""maxlights"",""0"");
-                pcall(SetCVar,""specular"",""0"");
-                pcall(SetCVar,""waterlod"",""0"");
-                pcall(SetCVar,""basemip"",""1"");
-                pcall(SetCVar,""shadowlevel"",""1"")"
-            );
+            List<(string, string)> cvars = new()
+            {
+                ("maxfps", $"{Config.MaxFps}"),
+                ("maxfpsbk", $"{Config.MaxFps}"),
+                ("AutoInteract", "1"),
+                ("AutoLootDefault", "0"),
+            };
+
+            if (Config.AutoSetUlowGfxSettings)
+            {
+                cvars.AddRange(new (string, string)[]
+                {
+                    ("alphalevel", "1"),
+                    ("anisotropic", "0"),
+                    ("basemip", "1"),
+                    ("bitdepth", "16"),
+                    ("characterAmbient", "1"),
+                    ("detaildensity", "1"),
+                    ("detailDoodadAlpha", "0"),
+                    ("doodadanim", "0"),
+                    ("environmentDetail", "0.5"),
+                    ("extshadowquality", "0"),
+                    ("farclip", "177"),
+                    ("ffx", "0"),
+                    ("fog", "0"),
+                    ("fullalpha", "0"),
+                    ("groundeffectdensity", "16"),
+                    ("groundeffectdist", "1"),
+                    ("gxcolorbits", "16"),
+                    ("gxdepthbits", "16"),
+                    ("horizonfarclip", "1305"),
+                    ("hwPCF", "1"),
+                    ("light", "0"),
+                    ("lod", "0"),
+                    ("loddist", "50"),
+                    ("m2Faster", "1"),
+                    ("mapshadows", "0"),
+                    ("maxlights", "0"),
+                    ("maxlod", "0"),
+                    ("overridefarclip ", "0"),
+                    ("particledensity", "0.3"),
+                    ("pixelshader", "0"),
+                    ("shadowlevel", "1"),
+                    ("shadowlod", "0"),
+                    ("showfootprintparticles", "0"),
+                    ("showfootprints", "0"),
+                    ("showshadow", "0"),
+                    ("showwater", "0"),
+                    ("skyclouddensity", "0"),
+                    ("skycloudlod", "0"),
+                    ("skyshow", "0"),
+                    ("skysunglare", "0"),
+                    ("smallcull", "1"),
+                    ("specular", "0"),
+                    ("textureloddist", "80"),
+                    ("timingmethod", "1"),
+                    ("unitdrawdist", "20"),
+                    ("waterlod", "0"),
+                    ("watermaxlod", "0"),
+                    ("waterparticulates", "0"),
+                    ("waterripples", "0"),
+                    ("waterspecular", "0"),
+                    ("waterwaves", "0"),
+                });
+            }
+
+            StringBuilder sb = new();
+
+            foreach ((string cvar, string value) in cvars)
+            {
+                sb.Append($"pcall(SetCVar,\"{cvar}\",\"{value}\");");
+            }
+
+            Bot.Wow.LuaDoString(sb.ToString());
         }
 
         private BtStatus SetupWowInterface()
@@ -1274,7 +1346,7 @@ namespace AmeisenBotX.Core.Logic
 
                 if (Bot.Memory.Init(p, processHandle, mainThreadHandle))
                 {
-                    Bot.Wow.Offsets.Init(Bot.Memory.Process.MainModule.BaseAddress);
+                    Bot.Memory.Offsets.Init(Bot.Memory.Process.MainModule.BaseAddress);
 
                     OnWoWStarted?.Invoke();
 
@@ -1296,25 +1368,26 @@ namespace AmeisenBotX.Core.Logic
             return BtStatus.Failed;
         }
 
+        private DateTime IngameSince { get; set; }
+
         private BtStatus UpdateIngame()
         {
             if (FirstStart)
             {
                 FirstStart = false;
-
-                Bot.Wow.Events?.Start();
-
-                Bot.Wow.LuaDoString($"SetCVar(\"maxfps\", {Config.MaxFps});SetCVar(\"maxfpsbk\", {Config.MaxFps})");
-                Bot.Wow.LuaDoString("SetCVar(\"AutoInteract\", 1)");
-                Bot.Wow.LuaDoString("SetCVar(\"autoLootDefault\", 0)");
-
-                if (Config.AutoSetUlowGfxSettings)
-                {
-                    SetUlowGfxSettings();
-                }
+                IngameSince = DateTime.UtcNow;
             }
 
-            Bot.Wow.Events?.Tick();
+            if (Bot.Wow.Events != null)
+            {
+                if (!Bot.Wow.Events.IsActive && DateTime.UtcNow - IngameSince > TimeSpan.FromSeconds(2))
+                {
+                    // need to wait for the Frame setup
+                    Bot.Wow.Events.Start();
+                }
+
+                Bot.Wow.Events.Tick();
+            }
 
             Bot.Movement.Execute();
 

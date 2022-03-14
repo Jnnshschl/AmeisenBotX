@@ -1,7 +1,6 @@
 ﻿using AmeisenBotX.Common.Math;
-using AmeisenBotX.Memory;
+using AmeisenBotX.Wow;
 using AmeisenBotX.Wow.Objects;
-using AmeisenBotX.Wow.Offsets;
 using AmeisenBotX.Wow548.Objects.Descriptors;
 using System.Collections.Specialized;
 
@@ -26,23 +25,23 @@ namespace AmeisenBotX.Wow548.Objects
 
         public BitVector32 UnitFlagsDynamic => GetObjectDescriptor().DynamicFlags;
 
-        protected IMemoryApi Memory { get; private set; }
+        protected WowMemoryApi Memory { get; private set; }
 
-        protected IOffsetList Offsets { get; private set; }
-
-        public virtual void Init(IMemoryApi memoryApi, IOffsetList offsetList, IntPtr baseAddress, IntPtr descriptorAddress)
+        public virtual void Init(WowMemoryApi memory, IntPtr baseAddress, IntPtr descriptorAddress)
         {
-            Memory = memoryApi;
-            Offsets = offsetList;
+            Memory = memory;
             BaseAddress = baseAddress;
             DescriptorAddress = descriptorAddress;
-            Update(memoryApi, offsetList);
+            Update(memory);
         }
 
-        public virtual void Update(IMemoryApi memoryApi, IOffsetList offsetList)
+        public virtual void Update(WowMemoryApi memory)
         {
         }
 
-        protected WowObjectDescriptor548 GetObjectDescriptor() => ObjectDescriptor ??= Memory.Read(DescriptorAddress, out WowObjectDescriptor548 objPtr) ? objPtr : new();
+        protected WowObjectDescriptor548 GetObjectDescriptor()
+        {
+            return ObjectDescriptor ??= Memory.Read(DescriptorAddress, out WowObjectDescriptor548 objPtr) ? objPtr : new();
+        }
     }
 }
