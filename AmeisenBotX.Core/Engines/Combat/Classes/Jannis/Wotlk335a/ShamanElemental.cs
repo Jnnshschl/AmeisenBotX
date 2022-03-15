@@ -8,7 +8,7 @@ using System.Linq;
 
 namespace AmeisenBotX.Core.Engines.Combat.Classes.Jannis.Wotlk335a
 {
-    public class ShamanElemental : BasicCombatClass335a
+    public class ShamanElemental : BasicCombatClass
     {
         public ShamanElemental(AmeisenBotInterfaces bot) : base(bot)
         {
@@ -80,13 +80,15 @@ namespace AmeisenBotX.Core.Engines.Combat.Classes.Jannis.Wotlk335a
 
         public override WowClass WowClass => WowClass.Shaman;
 
+        public override WowVersion WowVersion => WowVersion.WotLK335a;
+
         private bool HexedTarget { get; set; }
 
         public override void Execute()
         {
             base.Execute();
 
-            if (SelectTarget(TargetProviderDps))
+            if (FindTarget(TargetProviderDps))
             {
                 if (Bot.Player.HealthPercentage < 30
                 && Bot.Target.Type == WowObjectType.Player

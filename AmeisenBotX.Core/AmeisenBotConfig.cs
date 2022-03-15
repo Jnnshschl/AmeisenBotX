@@ -202,6 +202,8 @@ namespace AmeisenBotX.Core
 
         public float RepairNpcSearchRadius { get; set; } = 50.0f;
 
+        public bool RollGreedOnItems { get; set; } = true;
+
         public bool SaveBotWindowPosition { get; set; } = false;
 
         public bool SaveWowWindowPosition { get; set; } = false;

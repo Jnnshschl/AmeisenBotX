@@ -205,9 +205,19 @@ namespace AmeisenBotX.Wow.Objects
 
         BitVector32 UnitFlagsDynamic { get; }
 
-        static bool IsValidUnit(IWowUnit unit)
+        static bool IsValid(IWowUnit unit)
         {
             return unit != null && !unit.IsNotAttackable;
+        }
+
+        static bool IsValidAlive(IWowUnit unit)
+        {
+            return IsValid(unit) && !unit.IsDead;
+        }
+
+        static bool IsValidAliveInCombat(IWowUnit unit)
+        {
+            return IsValidAlive(unit) && unit.IsInCombat;
         }
 
         float AggroRangeTo(IWowUnit other);

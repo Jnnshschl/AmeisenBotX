@@ -92,7 +92,7 @@ namespace AmeisenBotX.Common.Math
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static float GetSlope(Vector3 startPoint, Vector3 endPoint, bool toPercentage = false)
         {
-            //Calculate the values of the run and rise
+            // calculate the values of the run and rise
             float run = System.Math.Abs(endPoint.X - startPoint.X);
             float rise = System.Math.Abs(endPoint.Y - startPoint.Y);
 
@@ -101,7 +101,7 @@ namespace AmeisenBotX.Common.Math
                 return rise / run;
             }
 
-            return (rise / run) * 100;
+            return (rise / run) * 100.0f;
         }
 
         public static bool IsFacing(Vector3 position, float rotation, Vector3 targetPosition, float maxAngleDiff = 1.5f)
@@ -142,9 +142,9 @@ namespace AmeisenBotX.Common.Math
         public static double SlopeGradientAngle(Vector3 startPoint, Vector3 endPoint)
         {
             float slope = GetSlope(startPoint, endPoint, true);
-            //Calculates the arctan to get the radians (arctan(alpha) = rise / run)
+            // calculates the arctan to get the radians (arctan(alpha) = rise / run)
             double radAngle = System.Math.Atan(slope / 100);
-            //Converts the radians in degrees
+            // converts the radians in degrees
             double degAngle = radAngle * 180 / System.Math.PI;
 
             return degAngle;

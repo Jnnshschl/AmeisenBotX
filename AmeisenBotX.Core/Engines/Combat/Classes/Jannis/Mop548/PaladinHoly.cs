@@ -1,5 +1,4 @@
 ﻿using AmeisenBotX.Common.Utils;
-using AmeisenBotX.Core.Engines.Combat.Helpers.Aura.Objects;
 using AmeisenBotX.Core.Engines.Combat.Helpers.Healing;
 using AmeisenBotX.Core.Engines.Movement.Enums;
 using AmeisenBotX.Core.Managers.Character.Comparators;
@@ -15,7 +14,7 @@ using System.Text.Json;
 
 namespace AmeisenBotX.Core.Engines.Combat.Classes.Jannis.Mop548
 {
-    public class PaladinHoly : BasicCombatClass548
+    public class PaladinHoly : BasicCombatClass
     {
         public PaladinHoly(AmeisenBotInterfaces bot) : base(bot)
         {
@@ -26,11 +25,10 @@ namespace AmeisenBotX.Core.Engines.Combat.Classes.Jannis.Mop548
             Configurables.TryAdd("BeaconOfLightPartyHealth", 85.0);
             Configurables.TryAdd("DivinePleaMana", 60.0);
 
-            // MyAuraManager.Jobs.Add(new KeepBestActiveAuraJob(bot.Db, new List<(string, Func<bool>)>()
-            // {
-            //     (Paladin548.SealOfInsight, () => TryCastSpell(Paladin548.SealOfInsight, 0, true)),
-            //     (Paladin548.SealOfTruth, () => TryCastSpell(Paladin548.SealOfTruth, 0, true)),
-            // }));
+            // MyAuraManager.Jobs.Add(new KeepBestActiveAuraJob(bot.Db, new List<(string,
+            // Func<bool>)>() { (Paladin548.SealOfInsight, () =>
+            // TryCastSpell(Paladin548.SealOfInsight, 0, true)), (Paladin548.SealOfTruth, () =>
+            // TryCastSpell(Paladin548.SealOfTruth, 0, true)), }));
 
             GroupAuraManager.SpellsToKeepActiveOnParty.Add((Paladin548.BlessingOfKings, (spellName, guid) => TryCastSpell(spellName, guid, true)));
 
@@ -119,6 +117,8 @@ namespace AmeisenBotX.Core.Engines.Combat.Classes.Jannis.Mop548
 
         public override WowClass WowClass => WowClass.Paladin;
 
+        public override WowVersion WowVersion => WowVersion.MoP548;
+
         private TimegatedEvent ChangeBeaconEvent { get; }
 
         private HealingManager HealingManager { get; }
@@ -152,77 +152,77 @@ namespace AmeisenBotX.Core.Engines.Combat.Classes.Jannis.Mop548
                 }
             }
 
-            if (!Bot.Objects.Partymembers.Any(e => e.HealthPercentage < 85.0))
-            {
-                IEnumerable<IWowUnit> lowHpUnits = Bot.Objects.Partymembers.Where(e => e.HealthPercentage < 95.0);
-
-                if (lowHpUnits.Any())
-                {
-                    if (TryCastSpell(Paladin548.DivineShield, lowHpUnits.First().Guid, true))
-                    {
-                        return;
-                    }
-                }
-            }
-
-            IWowUnit movementImpairedUnit = Bot.Objects.Partymembers.FirstOrDefault(e => e.IsConfused);
-
-            if (movementImpairedUnit != null)
-            {
-                if (TryCastSpell(Paladin548.HandOfFreedom, movementImpairedUnit.Guid, true))
-                {
-                    return;
-                }
-            }
-
-            if (Bot.Player.ManaPercentage < Configurables["DivinePleaMana"]
-                && TryCastSpell(Paladin548.DivinePlea, 0, true))
-            {
-                return;
-            }
-
-            if (ChangeBeaconEvent.Ready)
-            {
-                if (Bot.Player.HealthPercentage < Configurables["BeaconOfLightSelfHealth"])
-                {
-                    // keep beacon of light on us to reduce healing ourself
-                    if (!Bot.Player.Auras.Any(e => Bot.Db.GetSpellName(e.SpellId) == Paladin548.BeaconOfLight)
-                        && TryCastSpell(Paladin548.BeaconOfLight, Bot.Player.Guid, true))
-                    {
-                        ChangeBeaconEvent.Run();
-                        return;
-                    }
-                }
-                else
-                {
-                    IEnumerable<IWowUnit> healableTargets = Bot.Wow.ObjectProvider.Partymembers.Where(e => e != null && !e.IsDead).OrderBy(e => e.HealthPercentage);
-
-                    if (healableTargets.Count() > 1)
-                    {
-                        IWowUnit t = healableTargets.Skip(1).FirstOrDefault(e => e.HealthPercentage < Configurables["BeaconOfLightPartyHealth"]);
-
-                        // keep beacon of light on second lowest target
-                        if (t != null
-                            && !t.Auras.Any(e => Bot.Db.GetSpellName(e.SpellId) == Paladin548.BeaconOfLight)
-                            && TryCastSpell(Paladin548.BeaconOfLight, t.Guid, true))
-                        {
-                            ChangeBeaconEvent.Run();
-                            return;
-                        }
-                    }
-                }
-            }
-
             if (HealingManager.Tick())
             {
                 return;
             }
             else
             {
+                if (!Bot.Objects.Partymembers.Any(e => e.HealthPercentage < 85.0))
+                {
+                    IEnumerable<IWowUnit> lowHpUnits = Bot.Objects.Partymembers.Where(e => e.HealthPercentage < 95.0);
+
+                    if (lowHpUnits.Any())
+                    {
+                        if (TryCastSpell(Paladin548.DivineProtection, lowHpUnits.First().Guid, true))
+                        {
+                            return;
+                        }
+                    }
+                }
+
+                IWowUnit movementImpairedUnit = Bot.Objects.Partymembers.FirstOrDefault(e => e.IsConfused);
+
+                if (movementImpairedUnit != null)
+                {
+                    if (TryCastSpell(Paladin548.HandOfFreedom, movementImpairedUnit.Guid, true))
+                    {
+                        return;
+                    }
+                }
+
+                if (Bot.Player.ManaPercentage < Configurables["DivinePleaMana"]
+                    && TryCastSpell(Paladin548.DivinePlea, 0, true))
+                {
+                    return;
+                }
+
+                if (ChangeBeaconEvent.Ready)
+                {
+                    if (Bot.Player.HealthPercentage < Configurables["BeaconOfLightSelfHealth"])
+                    {
+                        // keep beacon of light on us to reduce healing ourself
+                        if (!Bot.Player.Auras.Any(e => Bot.Db.GetSpellName(e.SpellId) == Paladin548.BeaconOfLight)
+                            && TryCastSpell(Paladin548.BeaconOfLight, Bot.Player.Guid, true))
+                        {
+                            ChangeBeaconEvent.Run();
+                            return;
+                        }
+                    }
+                    else
+                    {
+                        IEnumerable<IWowUnit> healableTargets = Bot.Wow.ObjectProvider.Partymembers.Where(e => e != null && !e.IsDead).OrderBy(e => e.HealthPercentage);
+
+                        if (healableTargets.Count() > 1)
+                        {
+                            IWowUnit t = healableTargets.Skip(1).FirstOrDefault(e => e.HealthPercentage < Configurables["BeaconOfLightPartyHealth"]);
+
+                            // keep beacon of light on second lowest target
+                            if (t != null
+                                && !t.Auras.Any(e => Bot.Db.GetSpellName(e.SpellId) == Paladin548.BeaconOfLight)
+                                && TryCastSpell(Paladin548.BeaconOfLight, t.Guid, true))
+                            {
+                                ChangeBeaconEvent.Run();
+                                return;
+                            }
+                        }
+                    }
+                }
+
                 bool isAlone = !Bot.Objects.Partymembers.Any(e => e.Guid != Bot.Player.Guid);
 
                 if ((isAlone || (Configurables["AttackInGroups"] && Configurables["AttackInGroupsUntilManaPercent"] < Bot.Player.ManaPercentage))
-                    && SelectTarget(TargetProviderDps))
+                    && FindTarget(TargetProviderDps))
                 {
                     if (Bot.Player.HolyPower > 0
                         && Bot.Player.HealthPercentage < 85.0

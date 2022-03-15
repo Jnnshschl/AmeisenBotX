@@ -9,7 +9,7 @@ using System.Linq;
 
 namespace AmeisenBotX.Core.Engines.Combat.Classes.Jannis.Wotlk335a
 {
-    public class ShamanRestoration : BasicCombatClass335a
+    public class ShamanRestoration : BasicCombatClass
     {
         public ShamanRestoration(AmeisenBotInterfaces bot) : base(bot)
         {
@@ -77,6 +77,8 @@ namespace AmeisenBotX.Core.Engines.Combat.Classes.Jannis.Wotlk335a
 
         public override WowClass WowClass => WowClass.Shaman;
 
+        public override WowVersion WowVersion => WowVersion.WotLK335a;
+
         private Dictionary<int, string> SpellUsageHealDict { get; }
 
         public override void Execute()
@@ -88,7 +90,7 @@ namespace AmeisenBotX.Core.Engines.Combat.Classes.Jannis.Wotlk335a
                 return;
             }
 
-            if (SelectTarget(TargetProviderDps))
+            if (FindTarget(TargetProviderDps))
             {
                 if (Bot.Target.Auras.Any(e => Bot.Db.GetSpellName(e.SpellId) == Shaman335a.FlameShock)
                     && TryCastSpell(Shaman335a.FlameShock, Bot.Wow.TargetGuid, true))

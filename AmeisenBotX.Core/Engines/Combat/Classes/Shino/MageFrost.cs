@@ -85,6 +85,8 @@ namespace AmeisenBotX.Core.Engines.Combat.Classes.Shino
 
         public override WowClass WowClass => WowClass.Mage;
 
+        public override WowVersion WowVersion => WowVersion.WotLK335a;
+
         private DateTime LastSheep { get; set; } = DateTime.Now;
 
         public override void Execute()

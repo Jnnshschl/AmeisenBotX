@@ -7,7 +7,7 @@ using System.Linq;
 
 namespace AmeisenBotX.Core.Engines.Combat.Classes.Jannis.Wotlk335a
 {
-    public class PaladinRetribution : BasicCombatClass335a
+    public class PaladinRetribution : BasicCombatClass
     {
         public PaladinRetribution(AmeisenBotInterfaces bot) : base(bot)
         {
@@ -82,11 +82,13 @@ namespace AmeisenBotX.Core.Engines.Combat.Classes.Jannis.Wotlk335a
 
         public override WowClass WowClass => WowClass.Paladin;
 
+        public override WowVersion WowVersion => WowVersion.WotLK335a;
+
         public override void Execute()
         {
             base.Execute();
 
-            if (SelectTarget(TargetProviderDps))
+            if (FindTarget(TargetProviderDps))
             {
                 if ((Bot.Player.HealthPercentage < 20.0
                         && TryCastSpell(Paladin335a.LayOnHands, Bot.Wow.PlayerGuid))

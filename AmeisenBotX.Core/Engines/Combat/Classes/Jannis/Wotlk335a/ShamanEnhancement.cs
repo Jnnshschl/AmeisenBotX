@@ -7,7 +7,7 @@ using System.Linq;
 
 namespace AmeisenBotX.Core.Engines.Combat.Classes.Jannis.Wotlk335a
 {
-    public class ShamanEnhancement : BasicCombatClass335a
+    public class ShamanEnhancement : BasicCombatClass
     {
         public ShamanEnhancement(AmeisenBotInterfaces bot) : base(bot)
         {
@@ -79,13 +79,15 @@ namespace AmeisenBotX.Core.Engines.Combat.Classes.Jannis.Wotlk335a
 
         public override WowClass WowClass => WowClass.Shaman;
 
+        public override WowVersion WowVersion => WowVersion.WotLK335a;
+
         private bool HexedTarget { get; set; }
 
         public override void Execute()
         {
             base.Execute();
 
-            if (SelectTarget(TargetProviderDps))
+            if (FindTarget(TargetProviderDps))
             {
                 if (CheckForWeaponEnchantment(WowEquipmentSlot.INVSLOT_MAINHAND, Shaman335a.FlametongueBuff, Shaman335a.FlametongueWeapon)
                     || CheckForWeaponEnchantment(WowEquipmentSlot.INVSLOT_OFFHAND, Shaman335a.WindfuryBuff, Shaman335a.WindfuryWeapon))

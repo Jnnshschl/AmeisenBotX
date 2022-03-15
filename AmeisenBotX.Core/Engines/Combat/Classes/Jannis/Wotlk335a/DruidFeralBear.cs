@@ -8,7 +8,7 @@ using System.Linq;
 
 namespace AmeisenBotX.Core.Engines.Combat.Classes.Jannis.Wotlk335a
 {
-    public class DruidFeralBear : BasicCombatClass335a
+    public class DruidFeralBear : BasicCombatClass
     {
         public DruidFeralBear(AmeisenBotInterfaces bot) : base(bot)
         {
@@ -85,11 +85,13 @@ namespace AmeisenBotX.Core.Engines.Combat.Classes.Jannis.Wotlk335a
 
         public override WowClass WowClass => WowClass.Druid;
 
+        public override WowVersion WowVersion => WowVersion.WotLK335a;
+
         public override void Execute()
         {
             base.Execute();
 
-            if (SelectTarget(TargetProviderDps))
+            if (FindTarget(TargetProviderDps))
             {
                 double distanceToTarget = Bot.Target.Position.GetDistance(Bot.Player.Position);
 

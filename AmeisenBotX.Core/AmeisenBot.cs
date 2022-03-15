@@ -729,18 +729,26 @@ namespace AmeisenBotX.Core
                     item = ItemFactory.BuildSpecificItem(ItemFactory.ParseItem(itemJson));
                 }
 
-                if (Bot.Character.IsItemAnImprovement(item, out IWowInventoryItem itemToReplace))
+                if (item != null)
                 {
-                    AmeisenLogger.I.Log("WoWEvents", $"Would like to replace item {item?.Name} with {itemToReplace?.Name}, rolling need", LogLevel.Verbose);
-
-                    // do i need to destroy trash?
-                    if (Config.AutoDestroyTrash && Bot.Character.Inventory.FreeBagSlots < 2)
+                    if (Bot.Character.IsItemAnImprovement(item, out IWowInventoryItem itemToReplace))
                     {
-                        Bot.Character.Inventory.TryDestroyTrash();
-                    }
+                        AmeisenLogger.I.Log("WoWEvents", $"Would like to replace item {item?.Name} with {itemToReplace?.Name}, rolling need", LogLevel.Verbose);
 
-                    Bot.Wow.RollOnLoot(rollId, WowRollType.Need);
-                    return;
+                        // do i need to destroy trash?
+                        if (Config.AutoDestroyTrash && Bot.Character.Inventory.FreeBagSlots < 2)
+                        {
+                            Bot.Character.Inventory.TryDestroyTrash();
+                        }
+
+                        Bot.Wow.RollOnLoot(rollId, WowRollType.Need);
+                        return;
+                    }
+                    else if (Config.RollGreedOnItems && item.Price > 0)
+                    {
+                        Bot.Wow.RollOnLoot(rollId, WowRollType.Greed);
+                        return;
+                    }
                 }
             }
 
@@ -752,10 +760,11 @@ namespace AmeisenBotX.Core
             if (Config.LootOnlyMoneyAndQuestitems)
             {
                 Bot.Wow.LootMoneyAndQuestItems();
-                return;
             }
-
-            Bot.Wow.LootEverything();
+            else
+            {
+                Bot.Wow.LootEverything();
+            }
         }
 
         private void OnMerchantShow(long timestamp, List<string> args)
@@ -943,7 +952,7 @@ namespace AmeisenBotX.Core
 
         private void OnTradeAcceptUpdate(long timestamp, List<string> args)
         {
-            Bot.Wow.LuaDoString("AcceptTrade();");
+            Bot.Wow.LuaDoString("AcceptTrade()");
         }
 
         private void RconClientTimerTick()

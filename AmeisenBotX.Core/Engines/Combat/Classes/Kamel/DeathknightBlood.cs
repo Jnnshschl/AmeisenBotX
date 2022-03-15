@@ -124,7 +124,7 @@ namespace AmeisenBotX.Core.Engines.Combat.Classes.Kamel
 
             if (Bot.Objects.Target == null
                 || Bot.Objects.Target.IsDead
-                || !IWowUnit.IsValidUnit(Bot.Objects.Target))
+                || !IWowUnit.IsValid(Bot.Objects.Target))
             {
                 return;
             }

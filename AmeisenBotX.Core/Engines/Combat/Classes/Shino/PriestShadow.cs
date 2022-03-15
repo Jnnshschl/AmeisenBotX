@@ -95,6 +95,8 @@ namespace AmeisenBotX.Core.Engines.Combat.Classes.Shino
 
         public override WowClass WowClass => WowClass.Priest;
 
+        public override WowVersion WowVersion => WowVersion.WotLK335a;
+
         public override void Execute()
         {
             base.Execute();

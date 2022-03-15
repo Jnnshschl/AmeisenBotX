@@ -3,6 +3,7 @@ using AmeisenBotX.Core.Engines.Combat.Helpers.Targets.Logics;
 using AmeisenBotX.Wow.Objects;
 using System;
 using System.Collections.Generic;
+using System.Linq;
 
 namespace AmeisenBotX.Core.Engines.Combat.Helpers.Targets
 {
@@ -22,17 +23,24 @@ namespace AmeisenBotX.Core.Engines.Combat.Helpers.Targets
 
         private TimegatedEvent TargetSwitchEvent { get; set; }
 
+        private IEnumerable<IWowUnit> PossibleTargets { get; set; }
+
         public bool Get(out IEnumerable<IWowUnit> possibleTargets)
         {
-            if (TargetSwitchEvent.Run() && TargetSelectionLogic.SelectTarget(out possibleTargets))
+            if (TargetSwitchEvent.Run())
             {
-                return true;
+                if (TargetSelectionLogic.SelectTarget(out IEnumerable<IWowUnit> newPossibleTargets))
+                {
+                    PossibleTargets = newPossibleTargets;
+                }
+                else
+                {
+                    PossibleTargets = null;
+                }
             }
-            else
-            {
-                possibleTargets = null;
-                return false;
-            }
+
+            possibleTargets = PossibleTargets;
+            return PossibleTargets != null && PossibleTargets.Any();
         }
     }
 }

@@ -12,7 +12,7 @@ using System.Linq;
 
 namespace AmeisenBotX.Core.Engines.Combat.Classes.Jannis.Wotlk335a
 {
-    public class WarriorProtection : BasicCombatClass335a
+    public class WarriorProtection : BasicCombatClass
     {
         public WarriorProtection(AmeisenBotInterfaces bot) : base(bot)
         {
@@ -108,13 +108,15 @@ namespace AmeisenBotX.Core.Engines.Combat.Classes.Jannis.Wotlk335a
 
         public override WowClass WowClass => WowClass.Warrior;
 
+        public override WowVersion WowVersion => WowVersion.WotLK335a;
+
         private TimegatedEvent HeroicStrikeEvent { get; }
 
         public override void Execute()
         {
             base.Execute();
 
-            if (SelectTarget(TargetProviderTank))
+            if (FindTarget(TargetProviderTank))
             {
                 if ((Bot.Player.IsFleeing
                     || Bot.Player.IsDazed

@@ -20,7 +20,7 @@ namespace AmeisenBotX.Core.Engines.Combat.Helpers.Targets.Logics
             // healableUnits.AddRange(Bot.ObjectManager.PartyPets);
 
             possibleTargets = healableUnits
-                .Where(e => !e.IsDead && e.Health < e.MaxHealth)
+                .Where(e => IsValidTarget(e) && e.Health > 1 && e.Health < e.MaxHealth)
                 .OrderByDescending(e => e.Type)
                 .ThenByDescending(e => e.MaxHealth - e.Health);
 

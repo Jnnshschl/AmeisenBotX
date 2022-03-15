@@ -9,7 +9,7 @@ using System.Linq;
 
 namespace AmeisenBotX.Core.Engines.Combat.Classes.Jannis.Wotlk335a
 {
-    public class PriestHoly : BasicCombatClass335a
+    public class PriestHoly : BasicCombatClass
     {
         public PriestHoly(AmeisenBotInterfaces bot) : base(bot)
         {
@@ -81,6 +81,8 @@ namespace AmeisenBotX.Core.Engines.Combat.Classes.Jannis.Wotlk335a
 
         public override WowClass WowClass => WowClass.Priest;
 
+        public override WowVersion WowVersion => WowVersion.WotLK335a;
+
         private Dictionary<int, string> SpellUsageHealDict { get; }
 
         public override void Execute()
@@ -99,7 +101,7 @@ namespace AmeisenBotX.Core.Engines.Combat.Classes.Jannis.Wotlk335a
                 return;
             }
 
-            if ((!Bot.Objects.PartymemberGuids.Any() || Bot.Player.ManaPercentage > 50) && SelectTarget(TargetProviderDps))
+            if ((!Bot.Objects.PartymemberGuids.Any() || Bot.Player.ManaPercentage > 50) && FindTarget(TargetProviderDps))
             {
                 if (Bot.Target.Auras.Any(e => Bot.Db.GetSpellName(e.SpellId) == Priest335a.ShadowWordPain)
                     && TryCastSpell(Priest335a.ShadowWordPain, Bot.Wow.TargetGuid, true))

@@ -12,7 +12,7 @@ using System.Linq;
 
 namespace AmeisenBotX.Core.Engines.Combat.Classes.Jannis.Wotlk335a
 {
-    public class HunterSurvival : BasicCombatClass335a
+    public class HunterSurvival : BasicCombatClass
     {
         public HunterSurvival(AmeisenBotInterfaces bot) : base(bot)
         {
@@ -97,6 +97,8 @@ namespace AmeisenBotX.Core.Engines.Combat.Classes.Jannis.Wotlk335a
 
         public override WowClass WowClass => WowClass.Hunter;
 
+        public override WowVersion WowVersion => WowVersion.WotLK335a;
+
         private PetManager PetManager { get; set; }
 
         private bool ReadyToDisengage { get; set; } = false;
@@ -107,7 +109,7 @@ namespace AmeisenBotX.Core.Engines.Combat.Classes.Jannis.Wotlk335a
         {
             base.Execute();
 
-            if (SelectTarget(TargetProviderDps))
+            if (FindTarget(TargetProviderDps))
             {
                 if (PetManager.Tick()) { return; }
 

@@ -59,7 +59,7 @@ namespace AmeisenBotX.Core.Logic.Idle
                 (
                     e => Config.IdleActionsEnabled.TryGetValue(e.ToString(), out bool b) && b
                       && (!e.AutopilotOnly || autopilotEnabled)
-                      && DateTime.Now > e.Cooldown
+                      && DateTime.UtcNow > e.Cooldown
                 );
 
                 if (filteredActions.Any())
@@ -71,7 +71,7 @@ namespace AmeisenBotX.Core.Logic.Idle
                         LastActionExecuted = DateTime.UtcNow;
 
                         Cooldown = TimeSpan.FromMilliseconds(Rnd.Next(MinActionCooldown, MaxActionCooldown));
-                        CurrentAction.Cooldown = DateTime.Now + TimeSpan.FromMilliseconds(Rnd.Next(CurrentAction.MinCooldown, CurrentAction.MaxCooldown));
+                        CurrentAction.Cooldown = DateTime.UtcNow + TimeSpan.FromMilliseconds(Rnd.Next(CurrentAction.MinCooldown, CurrentAction.MaxCooldown));
                         ExecuteUntil = LastActionExecuted + TimeSpan.FromMilliseconds(Rnd.Next(CurrentAction.MinDuration, CurrentAction.MaxDuration));
 
                         LastActions.Add(new(LastActionExecuted, CurrentAction));

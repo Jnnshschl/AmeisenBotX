@@ -11,7 +11,7 @@ using System.Linq;
 
 namespace AmeisenBotX.Core.Engines.Combat.Classes.Jannis.Wotlk335a
 {
-    public class WarlockDestruction : BasicCombatClass335a
+    public class WarlockDestruction : BasicCombatClass
     {
         public WarlockDestruction(AmeisenBotInterfaces bot) : base(bot)
         {
@@ -95,13 +95,15 @@ namespace AmeisenBotX.Core.Engines.Combat.Classes.Jannis.Wotlk335a
 
         public override WowClass WowClass => WowClass.Warlock;
 
+        public override WowVersion WowVersion => WowVersion.WotLK335a;
+
         private DateTime LastFearAttempt { get; set; }
 
         public override void Execute()
         {
             base.Execute();
 
-            if (SelectTarget(TargetProviderDps))
+            if (FindTarget(TargetProviderDps))
             {
                 if (PetManager.Tick()) { return; }
 

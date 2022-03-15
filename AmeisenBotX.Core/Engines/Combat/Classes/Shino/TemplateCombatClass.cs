@@ -1,5 +1,5 @@
 ﻿using AmeisenBotX.Common.Math;
-using AmeisenBotX.Core.Engines.Combat.Classes.Jannis.Wotlk335a;
+using AmeisenBotX.Core.Engines.Combat.Classes.Jannis;
 using AmeisenBotX.Core.Engines.Movement.Enums;
 using AmeisenBotX.Core.Managers.Character.Spells.Objects;
 using AmeisenBotX.Wow.Objects;
@@ -11,7 +11,7 @@ using System.Linq;
 
 namespace AmeisenBotX.Core.Logic.CombatClasses.Shino
 {
-    public abstract class TemplateCombatClass : BasicCombatClass335a
+    public abstract class TemplateCombatClass : BasicCombatClass
     {
         public TemplateCombatClass(AmeisenBotInterfaces bot) : base(bot)
         {
@@ -97,7 +97,7 @@ namespace AmeisenBotX.Core.Logic.CombatClasses.Shino
                    || (currentTarget.Auras.Any(e => Bot.Db.GetSpellName(e.SpellId) == Mage335a.Polymorph) &&
                        nearAttackingEnemies.Where(e => e.Auras.All(aura => Bot.Db.GetSpellName(aura.SpellId) != Mage335a.Polymorph)).Any(e => e.Guid != currentTarget.Guid))
                    || (!currentTarget.IsInCombat && nearAttackingEnemies.Any())
-                   || !IWowUnit.IsValidUnit(Bot.Target)
+                   || !IWowUnit.IsValid(Bot.Target)
                    || Bot.Db.GetReaction(Bot.Player, currentTarget) == WowUnitReaction.Friendly))
             {
                 currentTarget = null;

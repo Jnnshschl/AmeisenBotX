@@ -6,7 +6,7 @@ using AmeisenBotX.Wow335a.Constants;
 
 namespace AmeisenBotX.Core.Engines.Combat.Classes.Jannis.Wotlk335a
 {
-    public class RogueAssassination : BasicCombatClass335a
+    public class RogueAssassination : BasicCombatClass
     {
         public RogueAssassination(AmeisenBotInterfaces bot) : base(bot)
         {
@@ -74,11 +74,13 @@ namespace AmeisenBotX.Core.Engines.Combat.Classes.Jannis.Wotlk335a
 
         public override WowClass WowClass => WowClass.Rogue;
 
+        public override WowVersion WowVersion => WowVersion.WotLK335a;
+
         public override void Execute()
         {
             base.Execute();
 
-            if (SelectTarget(TargetProviderDps))
+            if (FindTarget(TargetProviderDps))
             {
                 if ((Bot.Player.HealthPercentage < 20
                         && TryCastSpellRogue(Rogue335a.CloakOfShadows, 0, true)))

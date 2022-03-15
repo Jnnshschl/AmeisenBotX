@@ -17,10 +17,12 @@
         public const string LastStand = "Last Stand";
         public const string PiercingHowl = "Piercing Howl";
         public const string Pummel = "Pummel";
+        public const string Recklessness = "Recklessness";
         public const string Revenge = "Revenge";
         public const string ShieldBlock = "Shield Block";
         public const string ShieldSlam = "Shield Slam";
         public const string ShieldWall = "Shield Wall";
+        public const string SpellReflection = "Spell Reflection";
         public const string SunderAmor = "Sunder Armor";
         public const string Taunt = "Taunt";
         public const string ThunderClap = "Thunder Clap";

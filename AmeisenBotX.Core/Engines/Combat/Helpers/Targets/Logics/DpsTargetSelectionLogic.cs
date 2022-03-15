@@ -12,33 +12,13 @@ namespace AmeisenBotX.Core.Engines.Combat.Helpers.Targets.Logics
 
         public override bool SelectTarget(out IEnumerable<IWowUnit> possibleTargets)
         {
-            possibleTargets = null;
+            possibleTargets = Bot.Objects.WowObjects.OfType<IWowUnit>()
+                .Where(e => IsValidEnemy(e))
+                .OrderByDescending(e => IsPriorityTarget(e))
+                .ThenByDescending(e => e.Type)
+                .ThenBy(e => e.DistanceTo(Bot.Player));
 
-            if (Bot.Wow.TargetGuid == 0 || Bot.Target == null)
-            {
-                possibleTargets = Bot.Objects.WowObjects.OfType<IWowUnit>()
-                    .Where(e => IsValidUnit(e))
-                    .OrderByDescending(e => e.Type)
-                    .ThenBy(e => e.DistanceTo(Bot.Player));
-
-                IEnumerable<IWowUnit> priorityTargets = possibleTargets
-                    .Where(e => IsPriorityTarget(e));
-
-                if (priorityTargets.Any())
-                {
-                    possibleTargets = priorityTargets;
-                    return true;
-                }
-
-                return true;
-            }
-            else if (!IsValidUnit(Bot.Target))
-            {
-                Bot.Wow.ClearTarget();
-                return true;
-            }
-
-            return false;
+            return possibleTargets != null && possibleTargets.Any();
         }
     }
 }

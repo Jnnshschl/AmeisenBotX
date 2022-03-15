@@ -6,7 +6,7 @@ using AmeisenBotX.Wow335a.Constants;
 
 namespace AmeisenBotX.Core.Engines.Combat.Classes.Jannis.Wotlk335a
 {
-    public class PriestShadow : BasicCombatClass335a
+    public class PriestShadow : BasicCombatClass
     {
         public PriestShadow(AmeisenBotInterfaces bot) : base(bot)
         {
@@ -79,11 +79,13 @@ namespace AmeisenBotX.Core.Engines.Combat.Classes.Jannis.Wotlk335a
 
         public override WowClass WowClass => WowClass.Priest;
 
+        public override WowVersion WowVersion => WowVersion.WotLK335a;
+
         public override void Execute()
         {
             base.Execute();
 
-            if (SelectTarget(TargetProviderDps))
+            if (FindTarget(TargetProviderDps))
             {
                 if (Bot.Player.ManaPercentage < 90
                     && TryCastSpell(Priest335a.Shadowfiend, Bot.Wow.TargetGuid))

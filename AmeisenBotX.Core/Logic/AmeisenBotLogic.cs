@@ -384,6 +384,8 @@ namespace AmeisenBotX.Core.Logic
 
         private TimegatedEvent IdleActionEvent { get; }
 
+        private DateTime IngameSince { get; set; }
+
         private TimegatedEvent LoginAttemptEvent { get; }
 
         private int LootTry { get; set; }
@@ -1367,8 +1369,6 @@ namespace AmeisenBotX.Core.Logic
 
             return BtStatus.Failed;
         }
-
-        private DateTime IngameSince { get; set; }
 
         private BtStatus UpdateIngame()
         {

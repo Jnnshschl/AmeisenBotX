@@ -6,11 +6,12 @@ using AmeisenBotX.Wow.Objects;
 using AmeisenBotX.Wow.Objects.Enums;
 using AmeisenBotX.Wow548.Constants;
 using System;
+using System.Collections.Generic;
 using System.Linq;
 
 namespace AmeisenBotX.Core.Engines.Combat.Classes.Jannis.Mop548
 {
-    public class WarriorProtection : BasicCombatClass548
+    public class WarriorProtection : BasicCombatClass
     {
         public WarriorProtection(AmeisenBotInterfaces bot) : base(bot)
         {
@@ -71,13 +72,15 @@ namespace AmeisenBotX.Core.Engines.Combat.Classes.Jannis.Mop548
 
         public override WowClass WowClass => WowClass.Warrior;
 
+        public override WowVersion WowVersion => WowVersion.MoP548;
+
         private DateTime LastFarted { get; set; }
 
         public override void Execute()
         {
             base.Execute();
 
-            if (SelectTarget(TargetProviderTank))
+            if (FindTarget(TargetProviderTank))
             {
                 float distanceToTarget = Bot.Target.Position.GetDistance(Bot.Player.Position);
 
@@ -88,15 +91,24 @@ namespace AmeisenBotX.Core.Engines.Combat.Classes.Jannis.Mop548
                     if (targetOfTarget != null && targetOfTarget.Guid == Bot.Player.Guid)
                     {
                         // if we have aggro, pull the unit to the best tanking spot
-                        Vector3 direction = Bot.Player.Position - Bot.Objects.CenterPartyPosition;
-                        direction.Normalize();
-
-                        Vector3 bestTankingSpot = Bot.Objects.CenterPartyPosition + (direction * 12.0f);
-                        float distanceToBestTankingSpot = Bot.Player.DistanceTo(bestTankingSpot);
-
-                        if (distanceToBestTankingSpot > 4.0f)
+                        if (Bot.Objects.Partymembers.Any())
                         {
-                            Bot.Movement.SetMovementAction(MovementAction.Move, Bot.Target.Position);
+                            Vector3 direction = Bot.Player.Position - Bot.Objects.CenterPartyPosition;
+                            direction.Normalize();
+
+                            Vector3 bestTankingSpot = Bot.Objects.CenterPartyPosition + (direction * 12.0f);
+
+                            if (Bot.Player.DistanceTo(bestTankingSpot) > 2.75f)
+                            {
+                                Bot.Movement.SetMovementAction(MovementAction.Move, Bot.Target.Position);
+                            }
+                        }
+                        else
+                        {
+                            if (Bot.Player.DistanceTo(Bot.Target.Position) > Bot.Player.MeleeRangeTo(Bot.Target))
+                            {
+                                Bot.Movement.SetMovementAction(MovementAction.Move, Bot.Target.Position);
+                            }
                         }
                     }
                     else
@@ -109,18 +121,25 @@ namespace AmeisenBotX.Core.Engines.Combat.Classes.Jannis.Mop548
                     }
                 }
 
-                if (TryCastSpell(Warrior548.BattleShout, 0))
+                // go all ham, maybe filter for bossfights?
+                TryCastSpell(Warrior548.BattleShout, 0);
+                TryCastSpell(Warrior548.Recklessness, 0);
+
+                // is anyone casting stuff on me, try to reflect
+                IEnumerable<IWowUnit> castingUnits = Bot.Objects.WowObjects.OfType<IWowUnit>().Where(e => e.IsCasting && e.TargetGuid == Bot.Player.Guid && e.DistanceTo(Bot.Player) < 38.0);
+
+                if (castingUnits.Any())
                 {
-                    return;
+                    TryCastSpell(Warrior548.SpellReflection, 0);
                 }
 
                 if (distanceToTarget > 8.0)
                 {
                     if (TryCastSpellWarrior(Warrior548.Charge, Warrior548.DefensiveStance, Bot.Wow.TargetGuid))
                     {
-                        if (Configurables["FartOnCharge"] && DateTime.Now - LastFarted > TimeSpan.FromSeconds(8))
+                        if (Configurables["FartOnCharge"] && DateTime.UtcNow - LastFarted > TimeSpan.FromSeconds(8))
                         {
-                            LastFarted = DateTime.Now;
+                            LastFarted = DateTime.UtcNow;
                             Bot.Wow.SendChatMessage("/rude");
                         }
 
@@ -140,16 +159,14 @@ namespace AmeisenBotX.Core.Engines.Combat.Classes.Jannis.Mop548
                         return;
                     }
 
-                    if (Bot.Player.HealthPercentage < 35.0
-                        && TryCastSpell(Warrior548.ShieldWall, 0))
+                    if (Bot.Player.HealthPercentage < 35.0)
                     {
-                        return;
+                        TryCastSpell(Warrior548.ShieldWall, 0);
                     }
 
-                    if (Bot.Player.HealthPercentage < 25.0
-                        && TryCastSpell(Warrior548.LastStand, 0))
+                    if (Bot.Player.HealthPercentage < 25.0)
                     {
-                        return;
+                        TryCastSpell(Warrior548.LastStand, 0);
                     }
 
                     if (Bot.Target.HealthPercentage < 20.0
@@ -174,13 +191,13 @@ namespace AmeisenBotX.Core.Engines.Combat.Classes.Jannis.Mop548
                     }
 
                     if (!Bot.Target.Auras.Any(e => Bot.Db.GetSpellName(e.SpellId) == Warrior548.DemoralizingShout)
-                        && TryCastSpellWarrior(Warrior548.DemoralizingShout, Warrior548.DefensiveStance, Bot.Wow.TargetGuid))
+                        && TryCastSpell(Warrior548.DemoralizingShout, Bot.Wow.TargetGuid))
                     {
                         return;
                     }
 
                     if (!Bot.Target.Auras.Any(e => Bot.Db.GetSpellName(e.SpellId) == Warrior548.PiercingHowl)
-                        && TryCastSpellWarrior(Warrior548.PiercingHowl, Warrior548.DefensiveStance, Bot.Wow.TargetGuid))
+                        && TryCastSpell(Warrior548.PiercingHowl, Bot.Wow.TargetGuid))
                     {
                         return;
                     }
@@ -206,15 +223,14 @@ namespace AmeisenBotX.Core.Engines.Combat.Classes.Jannis.Mop548
                         return;
                     }
 
-                    if (Bot.Player.Rage > (rageToSave + 15)
-                        && !Bot.Target.Auras.Any(e => Bot.Db.GetSpellName(e.SpellId) == Warrior548.WeakenedAmor && e.StackCount < 3)
-                        && (TryCastSpell(Warrior548.SunderAmor, Bot.Wow.TargetGuid)
-                            || TryCastSpell(Warrior548.Devastate, Bot.Wow.TargetGuid)))
+                    if (!Bot.Target.Auras.Any(e => Bot.Db.GetSpellName(e.SpellId) == Warrior548.WeakenedAmor && e.StackCount < 3)
+                        && (TryCastSpell(Warrior548.SunderAmor, Bot.Wow.TargetGuid, true, Bot.Player.Rage - 15))
+                            || TryCastSpell(Warrior548.Devastate, Bot.Wow.TargetGuid, true, Bot.Player.Rage - 15))
                     {
                         return;
                     }
 
-                    if (Bot.Player.Rage > (30 + rageToSave) && TryCastSpell(Warrior548.HeroicStrike, Bot.Wow.TargetGuid, true))
+                    if (TryCastSpell(Warrior548.HeroicStrike, Bot.Wow.TargetGuid, true, Bot.Player.Rage - 30))
                     {
                         return;
                     }
@@ -226,7 +242,7 @@ namespace AmeisenBotX.Core.Engines.Combat.Classes.Jannis.Mop548
                     }
 
                     if ((nearEnemies > 1 || Bot.Player.Rage > (rageToSave + 30))
-                        && TryCastSpell(Warrior548.Cleave, Bot.Wow.TargetGuid))
+                        && TryCastSpell(Warrior548.Cleave, Bot.Wow.TargetGuid, true))
                     {
                         return;
                     }

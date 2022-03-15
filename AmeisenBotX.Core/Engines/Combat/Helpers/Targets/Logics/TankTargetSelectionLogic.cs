@@ -15,26 +15,9 @@ namespace AmeisenBotX.Core.Engines.Combat.Helpers.Targets.Logics
         {
             possibleTargets = null;
 
-            if (Bot.Target != null
-                && Bot.Wow.TargetGuid != 0)
-            {
-                if (!IsValidUnit(Bot.Target))
-                {
-                    Bot.Wow.ClearTarget();
-                    return true;
-                }
-
-                if (Bot.Target.Type != WowObjectType.Player
-                    && Bot.Target.TargetGuid != Bot.Wow.PlayerGuid
-                    && Bot.Objects.PartymemberGuids.Contains(Bot.Target.TargetGuid))
-                {
-                    return true;
-                }
-            }
-
             IEnumerable<IWowUnit> unitsAroundMe = Bot.Objects.WowObjects
                 .OfType<IWowUnit>()
-                .Where(e => IsValidUnit(e))
+                .Where(e => IsValidEnemy(e))
                 .OrderByDescending(e => e.Type)
                 .ThenByDescending(e => e.MaxHealth);
 

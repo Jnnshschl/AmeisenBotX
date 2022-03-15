@@ -9,7 +9,7 @@ using System.Linq;
 
 namespace AmeisenBotX.Core.Engines.Combat.Classes.Jannis.Wotlk335a
 {
-    public class DruidBalance : BasicCombatClass335a
+    public class DruidBalance : BasicCombatClass
     {
         public DruidBalance(AmeisenBotInterfaces bot) : base(bot)
         {
@@ -96,13 +96,15 @@ namespace AmeisenBotX.Core.Engines.Combat.Classes.Jannis.Wotlk335a
 
         public override WowClass WowClass => WowClass.Druid;
 
+        public override WowVersion WowVersion => WowVersion.WotLK335a;
+
         public override void Execute()
         {
             base.Execute();
 
             CheckForEclipseProcs();
 
-            if (SelectTarget(TargetProviderDps))
+            if (FindTarget(TargetProviderDps))
             {
                 if (TryCastSpell(Druid335a.NaturesGrasp, 0))
                 {
@@ -167,7 +169,7 @@ namespace AmeisenBotX.Core.Engines.Combat.Classes.Jannis.Wotlk335a
                 LunarEclipse = false;
             }
 
-            LastEclipseCheck = DateTime.Now;
+            LastEclipseCheck = DateTime.UtcNow;
             return false;
         }
 

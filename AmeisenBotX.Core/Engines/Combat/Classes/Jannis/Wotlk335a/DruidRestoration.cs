@@ -14,7 +14,7 @@ using System.Text.Json;
 
 namespace AmeisenBotX.Core.Engines.Combat.Classes.Jannis.Wotlk335a
 {
-    public class DruidRestoration : BasicCombatClass335a
+    public class DruidRestoration : BasicCombatClass
     {
         public DruidRestoration(AmeisenBotInterfaces bot) : base(bot)
         {
@@ -119,6 +119,8 @@ namespace AmeisenBotX.Core.Engines.Combat.Classes.Jannis.Wotlk335a
 
         public override WowClass WowClass => WowClass.Druid;
 
+        public override WowVersion WowVersion => WowVersion.WotLK335a;
+
         private HealingManager HealingManager { get; }
 
         private TimegatedEvent SwiftmendEvent { get; }
@@ -154,7 +156,7 @@ namespace AmeisenBotX.Core.Engines.Combat.Classes.Jannis.Wotlk335a
                     return;
                 }
 
-                if (SelectTarget(TargetProviderDps))
+                if (FindTarget(TargetProviderDps))
                 {
                     if (!Bot.Target.Auras.Any(e => Bot.Db.GetSpellName(e.SpellId) == Druid335a.Moonfire)
                         && TryCastSpell(Druid335a.Moonfire, Bot.Wow.TargetGuid, true))

@@ -7,7 +7,7 @@ using System.Linq;
 
 namespace AmeisenBotX.Core.Engines.Combat.Classes.Jannis.Wotlk335a
 {
-    public class DeathknightFrost : BasicCombatClass335a
+    public class DeathknightFrost : BasicCombatClass
     {
         public DeathknightFrost(AmeisenBotInterfaces bot) : base(bot)
         {
@@ -83,11 +83,13 @@ namespace AmeisenBotX.Core.Engines.Combat.Classes.Jannis.Wotlk335a
 
         public override WowClass WowClass => WowClass.Deathknight;
 
+        public override WowVersion WowVersion => WowVersion.WotLK335a;
+
         public override void Execute()
         {
             base.Execute();
 
-            if (SelectTarget(TargetProviderDps))
+            if (FindTarget(TargetProviderDps))
             {
                 if (Bot.Target.TargetGuid != Bot.Wow.PlayerGuid
                    && TryCastSpellDk(Deathknight335a.DarkCommand, Bot.Wow.TargetGuid))

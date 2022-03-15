@@ -272,7 +272,7 @@ namespace AmeisenBotX.Core.Engines.Combat.Classes.einTyp
             multipleTargets = false;
             foreach (IWowUnit unit in wowUnits)
             {
-                if (IWowUnit.IsValidUnit(unit) && unit != target && !(unit.IsDead || unit.Health < 1 || unit.Auras.Any(e => Bot.Db.GetSpellName(e.SpellId).Contains("Spirit of Redem"))))
+                if (IWowUnit.IsValid(unit) && unit != target && !(unit.IsDead || unit.Health < 1 || unit.Auras.Any(e => Bot.Db.GetSpellName(e.SpellId).Contains("Spirit of Redem"))))
                 {
                     double tmpDistance = Bot.Player.Position.GetDistance(unit.Position);
                     if (tmpDistance < 100.0 || grinding)

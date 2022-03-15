@@ -18,7 +18,7 @@ namespace AmeisenBotX.Wow.Events
             LuaDoString = luaDoString;
             FrameName = frameName;
 
-            Setup();
+            Reset();
         }
 
         ///<inheritdoc cref="IEventManager.Events"/>
@@ -47,7 +47,11 @@ namespace AmeisenBotX.Wow.Events
             {
                 try
                 {
-                    List<WowEvent> events = JsonSerializer.Deserialize<List<WowEvent>>(eventJson, new JsonSerializerOptions() { AllowTrailingCommas = true, NumberHandling = JsonNumberHandling.AllowReadingFromString });
+                    List<WowEvent> events = JsonSerializer.Deserialize<List<WowEvent>>(eventJson, new JsonSerializerOptions()
+                    {
+                        AllowTrailingCommas = true,
+                        NumberHandling = JsonNumberHandling.AllowReadingFromString
+                    });
 
                     if (events != null && events.Count > 0)
                     {
@@ -57,9 +61,7 @@ namespace AmeisenBotX.Wow.Events
                         {
                             if (x.Name != null && Events.ContainsKey(x.Name))
                             {
-                                List<Action<long, List<string>>> actions = Events[x.Name];
-
-                                foreach (Action<long, List<string>> action in actions)
+                                foreach (Action<long, List<string>> action in Events[x.Name])
                                 {
                                     action(x.Timestamp, x.Arguments);
                                 }
@@ -90,9 +92,8 @@ namespace AmeisenBotX.Wow.Events
             if (IsActive)
             {
                 AmeisenLogger.I.Log("EventHook", $"Stopping EventHookManager", LogLevel.Verbose);
-                Setup();
+                Reset();
 
-                IsActive = false;
                 LuaDoString($"{FrameName}:UnregisterAllEvents();{FrameName}:SetScript(\"OnEvent\", nil);");
             }
         }
@@ -184,8 +185,9 @@ namespace AmeisenBotX.Wow.Events
             }
         }
 
-        private void Setup()
+        private void Reset()
         {
+            IsActive = false;
             Events = new();
             SubscribeQueue = new();
             UnsubscribeQueue = new();

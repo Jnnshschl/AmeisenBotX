@@ -72,7 +72,7 @@ namespace AmeisenBotX.Core.Managers.Character.Inventory
 
         public void TryDestroyTrash(WowItemQuality maxQuality = WowItemQuality.Poor)
         {
-            if (DateTime.Now - ConfirmDeleteTime > TimeSpan.FromSeconds(10))
+            if (DateTime.UtcNow - ConfirmDeleteTime > TimeSpan.FromSeconds(10))
             {
                 // after 10s reset confirm stuff
                 ConfirmDelete = false;
@@ -90,7 +90,7 @@ namespace AmeisenBotX.Core.Managers.Character.Inventory
                     AmeisenLogger.I.Log("Inventory", $"Deleting Trash: {item.Name}");
                     Wow.DeleteItemByName(item.Name);
                     ConfirmDelete = true;
-                    ConfirmDeleteTime = DateTime.Now;
+                    ConfirmDeleteTime = DateTime.UtcNow;
                     break;
                 }
             }

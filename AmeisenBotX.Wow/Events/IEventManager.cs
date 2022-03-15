@@ -11,6 +11,11 @@ namespace AmeisenBotX.Wow.Events
         Dictionary<string, List<Action<long, List<string>>>> Events { get; }
 
         /// <summary>
+        /// Is hook active or not.
+        /// </summary>
+        bool IsActive { get; }
+
+        /// <summary>
         /// Pending subscribe actions.
         /// </summary>
         Queue<(string, Action<long, List<string>>)> SubscribeQueue { get; }
@@ -19,11 +24,6 @@ namespace AmeisenBotX.Wow.Events
         /// Pending unsubscribe actions.
         /// </summary>
         Queue<(string, Action<long, List<string>>)> UnsubscribeQueue { get; }
-
-        /// <summary>
-        /// Is hook active or not.
-        /// </summary>
-        bool IsActive { get; }
 
         /// <summary>
         /// Initializes the event hookand sets it to active.
