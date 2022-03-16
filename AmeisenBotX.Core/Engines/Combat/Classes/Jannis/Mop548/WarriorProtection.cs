@@ -80,7 +80,7 @@ namespace AmeisenBotX.Core.Engines.Combat.Classes.Jannis.Mop548
         {
             base.Execute();
 
-            if (FindTarget(TargetProviderTank))
+            if (TryFindTarget(TargetProviderTank, out _))
             {
                 float distanceToTarget = Bot.Target.Position.GetDistance(Bot.Player.Position);
 
@@ -126,14 +126,14 @@ namespace AmeisenBotX.Core.Engines.Combat.Classes.Jannis.Mop548
                 TryCastSpell(Warrior548.Recklessness, 0);
 
                 // is anyone casting stuff on me, try to reflect
-                IEnumerable<IWowUnit> castingUnits = Bot.Objects.WowObjects.OfType<IWowUnit>().Where(e => e.IsCasting && e.TargetGuid == Bot.Player.Guid && e.DistanceTo(Bot.Player) < 38.0);
+                IEnumerable<IWowUnit> castingUnits = Bot.Objects.WowObjects.OfType<IWowUnit>().Where(e => e.IsCasting && e.TargetGuid == Bot.Player.Guid && e.DistanceTo(Bot.Player) < 38.0f);
 
                 if (castingUnits.Any())
                 {
                     TryCastSpell(Warrior548.SpellReflection, 0);
                 }
 
-                if (distanceToTarget > 8.0)
+                if (distanceToTarget > 8.0f)
                 {
                     if (TryCastSpellWarrior(Warrior548.Charge, Warrior548.DefensiveStance, Bot.Wow.TargetGuid))
                     {

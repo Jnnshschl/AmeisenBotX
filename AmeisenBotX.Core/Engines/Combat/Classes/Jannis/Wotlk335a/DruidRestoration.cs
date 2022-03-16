@@ -156,7 +156,7 @@ namespace AmeisenBotX.Core.Engines.Combat.Classes.Jannis.Wotlk335a
                     return;
                 }
 
-                if (FindTarget(TargetProviderDps))
+                if (TryFindTarget(TargetProviderDps, out _))
                 {
                     if (!Bot.Target.Auras.Any(e => Bot.Db.GetSpellName(e.SpellId) == Druid335a.Moonfire)
                         && TryCastSpell(Druid335a.Moonfire, Bot.Wow.TargetGuid, true))

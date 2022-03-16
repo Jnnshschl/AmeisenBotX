@@ -85,7 +85,7 @@ namespace AmeisenBotX.Core.Engines.Combat.Classes.Jannis.Wotlk335a
         {
             base.Execute();
 
-            if (FindTarget(TargetProviderDps))
+            if (TryFindTarget(TargetProviderDps, out _))
             {
                 if (Bot.Player.ManaPercentage < 90
                     && TryCastSpell(Priest335a.Shadowfiend, Bot.Wow.TargetGuid))

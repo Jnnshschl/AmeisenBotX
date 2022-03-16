@@ -96,7 +96,7 @@ namespace AmeisenBotX.Core.Engines.Combat.Classes.Jannis.Wotlk335a
         {
             base.Execute();
 
-            if (FindTarget(TargetProviderDps))
+            if (TryFindTarget(TargetProviderDps, out _))
             {
                 if (Bot.Target != null)
                 {

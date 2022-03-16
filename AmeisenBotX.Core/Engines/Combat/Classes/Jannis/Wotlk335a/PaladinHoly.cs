@@ -197,7 +197,7 @@ namespace AmeisenBotX.Core.Engines.Combat.Classes.Jannis.Wotlk335a
                 bool isAlone = !Bot.Objects.Partymembers.Any(e => e.Guid != Bot.Player.Guid);
 
                 if ((isAlone || (Configurables["AttackInGroups"] && Configurables["AttackInGroupsUntilManaPercent"] < Bot.Player.ManaPercentage))
-                    && FindTarget(TargetProviderDps))
+                    && TryFindTarget(TargetProviderDps, out _))
                 {
                     if ((Bot.Player.Auras.Any(e => Bot.Db.GetSpellName(e.SpellId) == Paladin335a.SealOfVengeance) || Bot.Player.Auras.Any(e => Bot.Db.GetSpellName(e.SpellId) == Paladin335a.SealOfWisdom))
                         && TryCastSpell(Paladin335a.JudgementOfLight, Bot.Wow.TargetGuid, true))

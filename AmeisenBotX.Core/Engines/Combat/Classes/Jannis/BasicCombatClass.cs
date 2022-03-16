@@ -297,9 +297,9 @@ namespace AmeisenBotX.Core.Engines.Combat.Classes.Jannis
             return false;
         }
 
-        protected bool FindTarget(ITargetProvider targetProvider)
+        protected bool TryFindTarget(ITargetProvider targetProvider, out IEnumerable<IWowUnit> targets)
         {
-            if (targetProvider.Get(out IEnumerable<IWowUnit> targets))
+            if (targetProvider.Get(out targets))
             {
                 IWowUnit unit = targets.FirstOrDefault();
 

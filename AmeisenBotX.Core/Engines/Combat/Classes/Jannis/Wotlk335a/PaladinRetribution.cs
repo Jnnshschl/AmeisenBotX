@@ -88,7 +88,7 @@ namespace AmeisenBotX.Core.Engines.Combat.Classes.Jannis.Wotlk335a
         {
             base.Execute();
 
-            if (FindTarget(TargetProviderDps))
+            if (TryFindTarget(TargetProviderDps, out _))
             {
                 if ((Bot.Player.HealthPercentage < 20.0
                         && TryCastSpell(Paladin335a.LayOnHands, Bot.Wow.PlayerGuid))

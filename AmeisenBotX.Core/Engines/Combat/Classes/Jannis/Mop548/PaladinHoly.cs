@@ -79,11 +79,7 @@ namespace AmeisenBotX.Core.Engines.Combat.Classes.Jannis.Mop548
 
         public override IItemComparator ItemComparator { get; set; } = new BasicComparator
         (
-            new()
-            {
-                WowArmorType.Cloth,
-                WowArmorType.Leather
-            },
+            null,
             new() { WowWeaponType.AxeTwoHand, WowWeaponType.MaceTwoHand, WowWeaponType.SwordTwoHand },
             new Dictionary<string, double>()
             {
@@ -222,7 +218,7 @@ namespace AmeisenBotX.Core.Engines.Combat.Classes.Jannis.Mop548
                 bool isAlone = !Bot.Objects.Partymembers.Any(e => e.Guid != Bot.Player.Guid);
 
                 if ((isAlone || (Configurables["AttackInGroups"] && Configurables["AttackInGroupsUntilManaPercent"] < Bot.Player.ManaPercentage))
-                    && FindTarget(TargetProviderDps))
+                    && TryFindTarget(TargetProviderDps, out _))
                 {
                     if (Bot.Player.HolyPower > 0
                         && Bot.Player.HealthPercentage < 85.0

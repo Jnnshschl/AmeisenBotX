@@ -80,7 +80,7 @@ namespace AmeisenBotX.Core.Engines.Combat.Classes.Jannis.Wotlk335a
         {
             base.Execute();
 
-            if (FindTarget(TargetProviderDps))
+            if (TryFindTarget(TargetProviderDps, out _))
             {
                 if ((Bot.Player.HealthPercentage < 20
                         && TryCastSpellRogue(Rogue335a.CloakOfShadows, 0, true)))

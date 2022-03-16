@@ -98,7 +98,7 @@ namespace AmeisenBotX.Core.Engines.Combat.Classes.Jannis.Wotlk335a
                 return;
             }
 
-            if ((!Bot.Objects.PartymemberGuids.Any() || Bot.Player.ManaPercentage > 50) && FindTarget(TargetProviderDps))
+            if ((!Bot.Objects.PartymemberGuids.Any() || Bot.Player.ManaPercentage > 50) && TryFindTarget(TargetProviderDps, out _))
             {
                 if (Bot.Target.Auras.Any(e => Bot.Db.GetSpellName(e.SpellId) == Priest335a.ShadowWordPain)
                     && TryCastSpell(Priest335a.ShadowWordPain, Bot.Wow.TargetGuid, true))

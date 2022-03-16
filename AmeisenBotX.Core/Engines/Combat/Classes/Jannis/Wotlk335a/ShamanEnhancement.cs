@@ -87,7 +87,7 @@ namespace AmeisenBotX.Core.Engines.Combat.Classes.Jannis.Wotlk335a
         {
             base.Execute();
 
-            if (FindTarget(TargetProviderDps))
+            if (TryFindTarget(TargetProviderDps, out _))
             {
                 if (CheckForWeaponEnchantment(WowEquipmentSlot.INVSLOT_MAINHAND, Shaman335a.FlametongueBuff, Shaman335a.FlametongueWeapon)
                     || CheckForWeaponEnchantment(WowEquipmentSlot.INVSLOT_OFFHAND, Shaman335a.WindfuryBuff, Shaman335a.WindfuryWeapon))

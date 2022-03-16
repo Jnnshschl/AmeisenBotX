@@ -35,6 +35,9 @@ namespace AmeisenBotX.Core.Engines.Combat.Helpers.Healing
         /// <param name="overhealingStopThreshold">
         /// How much percent of a spell needs to be overhealing to cancel it (0.0f - 1.0f)
         /// </param>
+        /// <param name="overhealingStopThreshold">
+        /// How much percent of a spell is allowed to be overheal (0.0f - 1.0f)
+        /// </param>
         public HealingManager
         (
             AmeisenBotInterfaces bot,
@@ -43,7 +46,8 @@ namespace AmeisenBotX.Core.Engines.Combat.Helpers.Healing
             float healthWeight = 0.7f,
             float incomingDamageWeight = 0.3f,
             int targetDyingSeconds = 4,
-            float overhealingStopThreshold = 0.75f
+            float overhealingStopThreshold = 0.75f,
+            float maxOverheal = 0.5f
         )
         {
             Bot = bot;
@@ -54,7 +58,8 @@ namespace AmeisenBotX.Core.Engines.Combat.Helpers.Healing
             HealthWeightMod = healthWeight;
             IncomingDamageMod = incomingDamageWeight;
             TargetDyingSeconds = targetDyingSeconds;
-            OverhealingStopThreshold = 1.0f - overhealingStopThreshold;
+            OverhealingStopThreshold = overhealingStopThreshold;
+            MaxOverheal = maxOverheal;
 
             HealingSpells = new();
             MeasurementEvent = new(TimeSpan.FromSeconds(1));
@@ -74,7 +79,7 @@ namespace AmeisenBotX.Core.Engines.Combat.Helpers.Healing
         public float IncomingDamageMod { get; set; }
 
         public float OverhealingStopThreshold { get; set; }
-
+        public float MaxOverheal { get; set; }
         public Dictionary<string, int> SpellHealing { get; set; }
 
         public int TargetDyingSeconds { get; set; }
@@ -118,6 +123,7 @@ namespace AmeisenBotX.Core.Engines.Combat.Helpers.Healing
             if (s.TryGetValue("HealthWeight", out j)) { HealthWeightMod = j.To<float>(); }
             if (s.TryGetValue("DamageWeight", out j)) { IncomingDamageMod = j.To<float>(); }
             if (s.TryGetValue("OverhealingStopThreshold", out j)) { OverhealingStopThreshold = j.To<float>(); }
+            if (s.TryGetValue("MaxOverheal", out j)) { MaxOverheal = j.To<float>(); }
             if (s.TryGetValue("TargetDyingSeconds", out j)) { TargetDyingSeconds = j.To<int>(); }
         }
 
@@ -130,6 +136,7 @@ namespace AmeisenBotX.Core.Engines.Combat.Helpers.Healing
                 { "HealthWeight", HealthWeightMod },
                 { "DamageWeight", IncomingDamageMod },
                 { "OverhealingStopThreshold", OverhealingStopThreshold },
+                { "MaxOverheal", MaxOverheal },
                 { "TargetDyingSeconds", TargetDyingSeconds },
             };
         }
@@ -152,12 +159,12 @@ namespace AmeisenBotX.Core.Engines.Combat.Helpers.Healing
                 if (SpellHealing.ContainsKey(castingSpell))
                 {
                     int missingHealth = target.MaxHealth - target.Health;
-                    int expectedHeal = (int)(SpellHealing[castingSpell] * OverhealingStopThreshold);
+                    int maxAllowedHeal = (int)(SpellHealing[castingSpell] * (1.0f + OverhealingStopThreshold));
 
                     // if the cast would be more than x% overheal, stop it
-                    if (missingHealth < expectedHeal)
+                    if (missingHealth < maxAllowedHeal)
                     {
-                        AmeisenLogger.I.Log("HealingManager", $"Abort cast due to overhealing: {missingHealth} < {expectedHeal}", LogLevel.Verbose);
+                        AmeisenLogger.I.Log("HealingManager", $"Abort cast due to overhealing: {missingHealth} < {maxAllowedHeal}", LogLevel.Verbose);
                         return true;
                     }
                 }
@@ -203,8 +210,8 @@ namespace AmeisenBotX.Core.Engines.Combat.Helpers.Healing
                 }
             }
 
-            // is there anyone that we could heal with zero overheal
-            IEnumerable<IWowUnit> targetsNeedToBeHealed = healableTargets.Where(e => SpellHealing.Any(x => (e.MaxHealth - e.Health) >= x.Value));
+            // is there anyone that we could heal with max allowed overheal
+            IEnumerable<IWowUnit> targetsNeedToBeHealed = healableTargets.Where(e => SpellHealing.Any(x => (e.MaxHealth - e.Health) >= x.Value * (1.0f + MaxOverheal)));
 
             if (targetsNeedToBeHealed.Any())
             {

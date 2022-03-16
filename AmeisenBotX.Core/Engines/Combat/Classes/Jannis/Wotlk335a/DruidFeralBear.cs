@@ -91,7 +91,7 @@ namespace AmeisenBotX.Core.Engines.Combat.Classes.Jannis.Wotlk335a
         {
             base.Execute();
 
-            if (FindTarget(TargetProviderDps))
+            if (TryFindTarget(TargetProviderDps, out _))
             {
                 double distanceToTarget = Bot.Target.Position.GetDistance(Bot.Player.Position);
 

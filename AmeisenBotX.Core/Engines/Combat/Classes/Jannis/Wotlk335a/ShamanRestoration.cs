@@ -90,7 +90,7 @@ namespace AmeisenBotX.Core.Engines.Combat.Classes.Jannis.Wotlk335a
                 return;
             }
 
-            if (FindTarget(TargetProviderDps))
+            if (TryFindTarget(TargetProviderDps, out _))
             {
                 if (Bot.Target.Auras.Any(e => Bot.Db.GetSpellName(e.SpellId) == Shaman335a.FlameShock)
                     && TryCastSpell(Shaman335a.FlameShock, Bot.Wow.TargetGuid, true))

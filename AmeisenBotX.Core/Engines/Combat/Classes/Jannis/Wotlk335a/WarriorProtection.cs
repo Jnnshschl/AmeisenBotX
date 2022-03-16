@@ -116,7 +116,7 @@ namespace AmeisenBotX.Core.Engines.Combat.Classes.Jannis.Wotlk335a
         {
             base.Execute();
 
-            if (FindTarget(TargetProviderTank))
+            if (TryFindTarget(TargetProviderTank, out _))
             {
                 if ((Bot.Player.IsFleeing
                     || Bot.Player.IsDazed

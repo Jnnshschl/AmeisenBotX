@@ -104,7 +104,7 @@ namespace AmeisenBotX.Core.Engines.Combat.Classes.Jannis.Wotlk335a
 
             CheckForEclipseProcs();
 
-            if (FindTarget(TargetProviderDps))
+            if (TryFindTarget(TargetProviderDps, out _))
             {
                 if (TryCastSpell(Druid335a.NaturesGrasp, 0))
                 {
