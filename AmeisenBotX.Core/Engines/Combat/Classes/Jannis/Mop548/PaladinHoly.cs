@@ -1,5 +1,6 @@
 ﻿using AmeisenBotX.Common.Utils;
 using AmeisenBotX.Core.Engines.Combat.Helpers.Healing;
+using AmeisenBotX.Core.Engines.Combat.Helpers.Healing.Enums;
 using AmeisenBotX.Core.Engines.Movement.Enums;
 using AmeisenBotX.Core.Managers.Character.Comparators;
 using AmeisenBotX.Core.Managers.Character.Spells.Objects;
@@ -55,6 +56,11 @@ namespace AmeisenBotX.Core.Engines.Combat.Classes.Jannis.Mop548
                 if (Bot.Character.SpellBook.TryGetSpellByName(Paladin548.DivineLight, out Spell spellDivineLight))
                 {
                     HealingManager.AddSpell(spellDivineLight);
+                }
+
+                if (Bot.Character.SpellBook.TryGetSpellByName(Paladin548.HolyRadiance, out Spell spellHolyRadiance))
+                {
+                    HealingManager.AddSpell(spellHolyRadiance, HealSpellType.MultiTarget);
                 }
             };
 

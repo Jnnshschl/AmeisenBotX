@@ -20,7 +20,7 @@ namespace AmeisenBotX.Core.Logic.Idle.Actions
 
         public DateTime Cooldown { get; set; }
 
-        public int MaxCooldown => 12 * 1000;
+        public int MaxCooldown => 32 * 1000;
 
         public int MaxDuration => 0;
 

@@ -16,7 +16,7 @@ namespace AmeisenBotX.Core.Logic.Idle.Actions
 
         public DateTime Cooldown { get; set; }
 
-        public int MaxCooldown => 32 * 1000;
+        public int MaxCooldown => 49 * 1000;
 
         public int MaxDuration => 0;
 
@@ -33,7 +33,7 @@ namespace AmeisenBotX.Core.Logic.Idle.Actions
 
         public void Execute()
         {
-            float modificationFactor = ((float)Rnd.NextDouble() - 0.5f) / ((float)Rnd.NextDouble() * 2.5f);
+            float modificationFactor = ((float)Rnd.NextDouble() - 0.5f) / ((float)Rnd.NextDouble() * 1.2f);
             Bot.Wow.SetFacing(Bot.Player.BaseAddress, Bot.Player.Rotation + modificationFactor, true);
         }
 

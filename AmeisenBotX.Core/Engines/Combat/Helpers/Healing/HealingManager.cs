@@ -1,4 +1,5 @@
 ﻿using AmeisenBotX.Common.Utils;
+using AmeisenBotX.Core.Engines.Combat.Helpers.Healing.Enums;
 using AmeisenBotX.Core.Managers.Character.Spells.Objects;
 using AmeisenBotX.Logging;
 using AmeisenBotX.Logging.Enums;
@@ -47,7 +48,7 @@ namespace AmeisenBotX.Core.Engines.Combat.Helpers.Healing
             float incomingDamageWeight = 0.3f,
             int targetDyingSeconds = 4,
             float overhealingStopThreshold = 0.75f,
-            float maxOverheal = 0.5f
+            float maxOverheal = 0.75f
         )
         {
             Bot = bot;
@@ -78,15 +79,17 @@ namespace AmeisenBotX.Core.Engines.Combat.Helpers.Healing
 
         public float IncomingDamageMod { get; set; }
 
-        public float OverhealingStopThreshold { get; set; }
         public float MaxOverheal { get; set; }
+
+        public float OverhealingStopThreshold { get; set; }
+
         public Dictionary<string, int> SpellHealing { get; set; }
 
         public int TargetDyingSeconds { get; set; }
 
         private AmeisenBotInterfaces Bot { get; }
 
-        private List<Spell> HealingSpells { get; }
+        private List<(Spell, HealSpellType)> HealingSpells { get; }
 
         private Dictionary<ulong, int> IncomingDamage { get; }
 
@@ -102,11 +105,11 @@ namespace AmeisenBotX.Core.Engines.Combat.Helpers.Healing
         /// Register a new spell that the bot can use to heal.
         /// </summary>
         /// <param name="spell">Spell object to register</param>
-        public void AddSpell(Spell spell)
+        public void AddSpell(Spell spell, HealSpellType spellType = HealSpellType.SingleTarget)
         {
             if (!SpellHealingBuffer.ContainsKey(spell.Name))
             {
-                HealingSpells.Add(spell);
+                HealingSpells.Add((spell, spellType));
                 SpellHealingBuffer.Add(spell.Name, new());
 
                 if (!SpellHealing.ContainsKey(spell.Name))
@@ -193,19 +196,22 @@ namespace AmeisenBotX.Core.Engines.Combat.Helpers.Healing
 
             // is anyone going to die in the next seconds that we could save order by max health to
             // prioritize tanks
-            IWowUnit dyingTarget = healableTargets.OrderBy(e => e.MaxHealth)
-                .FirstOrDefault(e => IncomingDamage.ContainsKey(e.Guid) && e.Health - (IncomingDamage[e.Guid] * TargetDyingSeconds) < 0);
+            IEnumerable<IWowUnit> dyingTargets = healableTargets.OrderBy(e => e.MaxHealth)
+                .Where(e => e.HealthPercentage < 20.0 || (IncomingDamage.ContainsKey(e.Guid) && e.Health - (IncomingDamage[e.Guid] * TargetDyingSeconds) <= 0));
 
-            if (dyingTarget != null)
+            if (dyingTargets != null)
             {
                 // fastest heal possible
-                IEnumerable<Spell> fastestHeals = HealingSpells.OrderBy(e => e.CastTime);
+                IEnumerable<(Spell, HealSpellType)> fastestHeals = HealingSpells.OrderBy(e => e.Item1.CastTime);
 
-                foreach (Spell spell in fastestHeals)
+                foreach (IWowUnit dyingTarget in dyingTargets)
                 {
-                    if (TryCastSpellAction(spell.Name, dyingTarget.Guid))
+                    foreach ((Spell spell, HealSpellType spellType) in fastestHeals)
                     {
-                        return true;
+                        if (TryCastSpellAction(spell.Name, dyingTarget.Guid))
+                        {
+                            return true;
+                        }
                     }
                 }
             }
@@ -239,11 +245,17 @@ namespace AmeisenBotX.Core.Engines.Combat.Helpers.Healing
                 foreach ((ulong guid, double weight, int missingHealth) in weightedTargets.OrderByDescending(e => e.Item2))
                 {
                     // filter spell that would overheal us and then order by the amount of healing
-                    IEnumerable<Spell> heals = HealingSpells
-                        .Where(e => missingHealth >= SpellHealing[e.Name])
-                        .OrderByDescending(e => SpellHealing[e.Name]);
+                    IEnumerable<(Spell, HealSpellType)> heals = HealingSpells
+                        .Where(e => missingHealth >= SpellHealing[e.Item1.Name])
+                        .OrderByDescending(e => SpellHealing[e.Item1.Name]);
 
-                    foreach (Spell spell in heals)
+                    if (weightedTargets.Count > 2 && heals.Any(e => e.Item2 == HealSpellType.MultiTarget))
+                    {
+                        // try multi heals first
+                        heals = heals.OrderByDescending(e => e.Item2);
+                    }
+
+                    foreach ((Spell spell, HealSpellType spellType) in heals)
                     {
                         if (TryCastSpellAction(spell.Name, guid))
                         {
@@ -261,7 +273,7 @@ namespace AmeisenBotX.Core.Engines.Combat.Helpers.Healing
 
                 int healthMissing = target.MaxHealth - target.Health;
 
-                foreach (Spell spell in HealingSpells)
+                foreach ((Spell spell, HealSpellType spellType) in HealingSpells)
                 {
                     // try to simulate what the health looks like when we finished casting
                     int simulatedHealthMissing = healthMissing + (IncomingDamage[target.Guid] * (spell.CastTime / 1000));
@@ -338,7 +350,7 @@ namespace AmeisenBotX.Core.Engines.Combat.Helpers.Healing
                 while (IncomingDamageBuffer[guid].Count > 0 && now - IncomingDamageBuffer[guid].Peek().Item1 > TimeSpan.FromSeconds(DamageMonitorSeconds))
                 {
                     IncomingDamageBuffer[guid].Dequeue();
-                };
+                }
 
                 if (IncomingDamageBuffer[guid].Count > 0)
                 {
@@ -369,7 +381,7 @@ namespace AmeisenBotX.Core.Engines.Combat.Helpers.Healing
                 while (SpellHealingBuffer[spell].Count > 32)
                 {
                     SpellHealingBuffer[spell].Dequeue();
-                };
+                }
 
                 if (SpellHealingBuffer[spell].Count > 0)
                 {

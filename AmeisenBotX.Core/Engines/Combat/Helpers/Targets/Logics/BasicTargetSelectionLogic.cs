@@ -36,8 +36,31 @@ namespace AmeisenBotX.Core.Engines.Combat.Helpers.Targets.Logics
         {
             return IWowUnit.IsValidAliveInCombat(wowUnit)
                 && !IsBlacklisted(wowUnit)
-                && wowUnit.DistanceTo(Bot.Player) < 80.0f
-                && IsReachable(wowUnit);
+                && IsInRangePathfinding(wowUnit, 80.0f, out IEnumerable<Vector3> path)
+                && IsReachable(wowUnit, path);
+        }
+
+        private bool IsInRangePathfinding(IWowUnit wowUnit, float maxDistance, out IEnumerable<Vector3> path)
+        {
+            float distance = 0;
+            path = Bot.PathfindingHandler.GetPath((int)Bot.Objects.MapId, Bot.Objects.Player.Position, wowUnit.Position);
+
+            if (path == null || !path.Any())
+            {
+                return false;
+            }
+
+            for (int i = 0; i < path.Count() - 1; ++i)
+            {
+                distance += path.ElementAt(i).GetDistance(path.ElementAt(i + 1));
+
+                if (distance > maxDistance)
+                {
+                    return false;
+                }
+            }
+
+            return true;
         }
 
         protected bool IsValidEnemy(IWowUnit wowUnit)
@@ -46,18 +69,16 @@ namespace AmeisenBotX.Core.Engines.Combat.Helpers.Targets.Logics
                 && Bot.Db.GetReaction(Bot.Player, wowUnit) is WowUnitReaction.Hostile or WowUnitReaction.Neutral;
         }
 
-        protected bool IsReachable(IWowUnit wowUnit)
+        protected bool IsReachable(IWowUnit wowUnit, IEnumerable<Vector3> path)
         {
+            if (path == null|| !path.Any())
+            {
+                return false;
+            }
+
             if (Bot.CombatClass.IsMelee)
             {
-                IEnumerable<Vector3> pathToUnit = Bot.PathfindingHandler.GetPath((int)Bot.Objects.MapId, Bot.Objects.Player.Position, wowUnit.Position);
-
-                if (pathToUnit == null || !pathToUnit.Any())
-                {
-                    return false;
-                }
-
-                Vector3 last = pathToUnit.Last();
+                Vector3 last = path.Last();
                 // last node should be in combat reach and not too far above
                 return last.GetDistance2D(wowUnit.Position) < (wowUnit.CombatReach + 1.0f)
                     && MathF.Abs(last.Z - wowUnit.Position.Z) < 2.5f;

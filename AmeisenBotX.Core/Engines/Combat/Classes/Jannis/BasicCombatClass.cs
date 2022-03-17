@@ -307,7 +307,10 @@ namespace AmeisenBotX.Core.Engines.Combat.Classes.Jannis
                 {
                     if (Bot.Player.TargetGuid == unit.Guid)
                     {
-                        return IWowUnit.IsValidAlive(Bot.Target);
+                        if (IWowUnit.IsValidAlive(Bot.Target))
+                        {
+                            return true;
+                        }
                     }
                     else
                     {
