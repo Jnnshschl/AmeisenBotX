@@ -15,6 +15,7 @@ namespace AmeisenBotX.Wow548.Objects
     [Serializable]
     public unsafe class WowUnit548 : WowObject548, IWowUnit
     {
+        protected uint? MovementFlags;
         private IEnumerable<IWowAura>? AuraTable;
 
         private WowUnitDescriptor548? UnitDescriptor;
@@ -51,11 +52,15 @@ namespace AmeisenBotX.Wow548.Objects
 
         public bool IsDead => (Health == 0 || UnitFlagsDynamic[(int)WowUnitDynamicFlags548.Dead]) && !UnitFlags2[(int)WowUnit2Flag.FeignDeath];
 
+        public bool IsFlying => (GetMovementFlags() & 0x1000000) != 0;
+
         public bool IsLootable => UnitFlagsDynamic[(int)WowUnitDynamicFlags548.Lootable];
 
         public bool IsReferAFriendLinked => UnitFlagsDynamic[(int)WowUnitDynamicFlags548.ReferAFriendLinked];
 
         public bool IsSpecialInfo => UnitFlagsDynamic[(int)WowUnitDynamicFlags548.SpecialInfo];
+
+        public bool IsSwimming => (GetMovementFlags() & 0x100000) != 0;
 
         public bool IsTaggedByMe => UnitFlagsDynamic[(int)WowUnitDynamicFlags548.TaggedByMe];
 
@@ -182,16 +187,15 @@ namespace AmeisenBotX.Wow548.Objects
             return wowUnit != null ? (wowUnit.CombatReach + CombatReach) * 0.95f : 0.0f;
         }
 
-        public virtual string ReadName(WowMemoryApi memory)
+        public virtual string ReadName()
         {
-            if (memory.Read(IntPtr.Add(BaseAddress, (int)memory.Offsets.WowUnitName1), out IntPtr objName)
-                && memory.Read(IntPtr.Add(objName, (int)memory.Offsets.WowUnitName2), out objName)
-                && memory.ReadString(objName, Encoding.UTF8, out string name))
-            {
-                return name;
-            }
+            return GetDbEntry(Memory.Offsets.WowUnitDbEntryName, out IntPtr namePtr)
+                && Memory.ReadString(namePtr, Encoding.UTF8, out string name) ? name : "unknown";
+        }
 
-            return "unknown";
+        public virtual WowCreatureType ReadType()
+        {
+            return GetDbEntry(Memory.Offsets.WowUnitDbEntryType, out WowCreatureType type) ? type : WowCreatureType.Unknown;
         }
 
         public override string ToString()
@@ -199,9 +203,15 @@ namespace AmeisenBotX.Wow548.Objects
             return $"Unit: {Guid} lvl. {Level} Position: {Position} DisplayId: {DisplayId}";
         }
 
-        public override void Update(WowMemoryApi memory)
+        public override void Update()
         {
-            base.Update(memory);
+            base.Update();
+        }
+
+        protected uint GetMovementFlags()
+        {
+            return MovementFlags ??= Memory.Read(IntPtr.Add(BaseAddress, 0xec), out IntPtr movementFlagsPtr)
+                && Memory.Read(IntPtr.Add(movementFlagsPtr, 0x38), out uint movementFlags) ? movementFlags : 0;
         }
 
         protected WowUnitDescriptor548 GetUnitDescriptor()
@@ -222,6 +232,14 @@ namespace AmeisenBotX.Wow548.Objects
             }
 
             return auras;
+        }
+
+        private bool GetDbEntry<T>(IntPtr entryOffset, out T ptr) where T : unmanaged
+        {
+            ptr = default;
+            return Memory.Read(IntPtr.Add(BaseAddress, (int)Memory.Offsets.WowUnitDbEntry), out IntPtr dbEntry)
+                && dbEntry != IntPtr.Zero
+                && Memory.Read(IntPtr.Add(dbEntry, (int)entryOffset), out ptr);
         }
 
         private IEnumerable<IWowAura> ReadAuraTable()

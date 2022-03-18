@@ -4,7 +4,6 @@ using AmeisenBotX.Common.Utils;
 using AmeisenBotX.Core.Engines.Combat.Helpers;
 using AmeisenBotX.Core.Engines.Combat.Helpers.Aura;
 using AmeisenBotX.Core.Engines.Combat.Helpers.Targets;
-using AmeisenBotX.Core.Engines.Combat.Helpers.Targets.Logics;
 using AmeisenBotX.Core.Engines.Movement.Enums;
 using AmeisenBotX.Core.Managers.Character.Comparators;
 using AmeisenBotX.Core.Managers.Character.Inventory.Objects;
@@ -46,9 +45,9 @@ namespace AmeisenBotX.Core.Engines.Combat.Classes.Jannis
             CooldownManager = new(Bot.Character.SpellBook.Spells);
             RessurrectionTargets = new();
 
-            TargetProviderDps = new TargetManager(new DpsTargetSelectionLogic(Bot), TimeSpan.FromMilliseconds(250));
-            TargetProviderTank = new TargetManager(new TankTargetSelectionLogic(Bot), TimeSpan.FromMilliseconds(250));
-            TargetProviderHeal = new TargetManager(new HealTargetSelectionLogic(Bot), TimeSpan.FromMilliseconds(250));
+            TargetProviderDps = new TargetManager(Bot, WowRole.Dps, TimeSpan.FromMilliseconds(250));
+            TargetProviderTank = new TargetManager(Bot, WowRole.Tank, TimeSpan.FromMilliseconds(250));
+            TargetProviderHeal = new TargetManager(Bot, WowRole.Heal, TimeSpan.FromMilliseconds(250));
 
             MyAuraManager = new(Bot);
             TargetAuraManager = new(Bot);
@@ -70,8 +69,6 @@ namespace AmeisenBotX.Core.Engines.Combat.Classes.Jannis
         public CooldownManager CooldownManager { get; private set; }
 
         public abstract string Description { get; }
-
-        public abstract WowVersion WowVersion { get; }
 
         public string DisplayName => $"[{WowVersion}] {DisplayName2}";
 
@@ -118,6 +115,8 @@ namespace AmeisenBotX.Core.Engines.Combat.Classes.Jannis
         public abstract bool WalkBehindEnemy { get; }
 
         public abstract WowClass WowClass { get; }
+
+        public abstract WowVersion WowVersion { get; }
 
         protected AmeisenBotInterfaces Bot { get; }
 
@@ -297,33 +296,6 @@ namespace AmeisenBotX.Core.Engines.Combat.Classes.Jannis
             return false;
         }
 
-        protected bool TryFindTarget(ITargetProvider targetProvider, out IEnumerable<IWowUnit> targets)
-        {
-            if (targetProvider.Get(out targets))
-            {
-                IWowUnit unit = targets.FirstOrDefault();
-
-                if (unit != null)
-                {
-                    if (Bot.Player.TargetGuid == unit.Guid)
-                    {
-                        if (IWowUnit.IsValidAlive(Bot.Target))
-                        {
-                            return true;
-                        }
-                    }
-                    else
-                    {
-                        Bot.Wow.ChangeTarget(unit.Guid);
-                        return false;
-                    }
-                }
-            }
-
-            Bot.Wow.ChangeTarget(0);
-            return false;
-        }
-
         protected bool HandleDeadPartymembers(string spellName)
         {
             Spell spell = Bot.Character.SpellBook.GetSpellByName(spellName);
@@ -451,6 +423,33 @@ namespace AmeisenBotX.Core.Engines.Combat.Classes.Jannis
 
                 return true;
             });
+        }
+
+        protected bool TryFindTarget(ITargetProvider targetProvider, out IEnumerable<IWowUnit> targets)
+        {
+            if (targetProvider.Get(out targets))
+            {
+                IWowUnit unit = targets.FirstOrDefault();
+
+                if (unit != null)
+                {
+                    if (Bot.Player.TargetGuid == unit.Guid)
+                    {
+                        if (IWowUnit.IsValidAlive(Bot.Target))
+                        {
+                            return true;
+                        }
+                    }
+                    else
+                    {
+                        Bot.Wow.ChangeTarget(unit.Guid);
+                        return false;
+                    }
+                }
+            }
+
+            Bot.Wow.ChangeTarget(0);
+            return false;
         }
 
         private bool CastAoeSpell(ulong targetGuid)

@@ -228,7 +228,7 @@ namespace AmeisenBotX.Wow.Cache
             }
             else
             {
-                name = unit.ReadName(Wow.Memory);
+                name = unit.ReadName();
 
                 if (!string.IsNullOrWhiteSpace(name))
                 {

@@ -1,5 +1,4 @@
 ﻿using AmeisenBotX.Common.Math;
-using AmeisenBotX.Wow;
 using AmeisenBotX.Wow.Objects;
 using AmeisenBotX.Wow.Objects.Enums;
 using AmeisenBotX.Wow548.Objects.Descriptors;
@@ -34,9 +33,9 @@ namespace AmeisenBotX.Wow548.Objects
             return $"GameObject: [{EntryId}] ({(Enum.IsDefined(typeof(WowGameObjectDisplayId), DisplayId) ? ((WowGameObjectDisplayId)DisplayId).ToString() : DisplayId.ToString(CultureInfo.InvariantCulture))}:{DisplayId})";
         }
 
-        public override void Update(WowMemoryApi memory)
+        public override void Update()
         {
-            base.Update(memory);
+            base.Update();
 
             // GameObjectType = (WowGameObjectType)objPtr.GameobjectBytes1; Bytes0 = objPtr.GameobjectBytes0;
         }

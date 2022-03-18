@@ -32,7 +32,7 @@ namespace AmeisenBotX.Core.Engines.Combat.Classes.Jannis.Mop548
 
         public override bool IsMelee => true;
 
-        public override IItemComparator ItemComparator { get; set; } = new BasicStaminaComparator
+        public override IItemComparator ItemComparator { get; set; } = new BasicComparator
         (
             null,
             new()
@@ -46,6 +46,16 @@ namespace AmeisenBotX.Core.Engines.Combat.Classes.Jannis.Mop548
                 WowWeaponType.Thrown,
                 WowWeaponType.Wand,
                 WowWeaponType.Dagger
+            },
+            new Dictionary<string, double>()
+            {
+                { "ITEM_MOD_STAMINA_SHORT", 1.0 },
+                { "ITEM_MOD_PARRY_RATING_SHORT", 1.0 },
+                { "ITEM_MOD_DODGE_RATING_SHORT", 0.6 },
+                { "ITEM_MOD_MASTERY_RATING_SHORT", 0.5},
+                { "ITEM_MOD_CRIT_RATING_SHORT", 0.3 },
+                { "ITEM_MOD_STRENGHT_SHORT", 0.2 },
+                { "ITEM_MOD_HASTE_RATING_SHORT", 0.1 },
             }
         );
 
@@ -135,7 +145,7 @@ namespace AmeisenBotX.Core.Engines.Combat.Classes.Jannis.Mop548
 
                 if (distanceToTarget > 8.0f)
                 {
-                    if (TryCastSpellWarrior(Warrior548.Charge, Warrior548.DefensiveStance, Bot.Wow.TargetGuid))
+                    if (TryCastSpell(Warrior548.Charge, Bot.Wow.TargetGuid))
                     {
                         if (Configurables["FartOnCharge"] && DateTime.UtcNow - LastFarted > TimeSpan.FromSeconds(8))
                         {
@@ -154,7 +164,7 @@ namespace AmeisenBotX.Core.Engines.Combat.Classes.Jannis.Mop548
                 else
                 {
                     if (Bot.Player.HealthPercentage < 50.0
-                        && TryCastSpell(Warrior548.ShieldBlock, 0, true))
+                        && TryCastSpell(Warrior548.ShieldBlock, 0))
                     {
                         return;
                     }
@@ -171,6 +181,16 @@ namespace AmeisenBotX.Core.Engines.Combat.Classes.Jannis.Mop548
 
                     if (Bot.Target.HealthPercentage < 20.0
                         && TryCastSpell(Warrior548.Execute, Bot.Wow.TargetGuid, true))
+                    {
+                        return;
+                    }
+
+                    if (TryCastSpell(Warrior548.ShieldSlam, Bot.Wow.TargetGuid))
+                    {
+                        return;
+                    }
+
+                    if (TryCastSpell(Warrior548.Revenge, Bot.Wow.TargetGuid))
                     {
                         return;
                     }
@@ -197,17 +217,7 @@ namespace AmeisenBotX.Core.Engines.Combat.Classes.Jannis.Mop548
                     }
 
                     if (!Bot.Target.Auras.Any(e => Bot.Db.GetSpellName(e.SpellId) == Warrior548.PiercingHowl)
-                        && TryCastSpell(Warrior548.PiercingHowl, Bot.Wow.TargetGuid))
-                    {
-                        return;
-                    }
-
-                    if (TryCastSpellWarrior(Warrior548.ShieldSlam, Warrior548.DefensiveStance, Bot.Wow.TargetGuid, true))
-                    {
-                        return;
-                    }
-
-                    if (TryCastSpellWarrior(Warrior548.Revenge, Warrior548.DefensiveStance, Bot.Wow.TargetGuid, true))
+                        && TryCastSpell(Warrior548.PiercingHowl, Bot.Wow.TargetGuid, true))
                     {
                         return;
                     }
@@ -230,11 +240,6 @@ namespace AmeisenBotX.Core.Engines.Combat.Classes.Jannis.Mop548
                         return;
                     }
 
-                    if (TryCastSpell(Warrior548.HeroicStrike, Bot.Wow.TargetGuid, true, Bot.Player.Rage - 30))
-                    {
-                        return;
-                    }
-
                     if (nearEnemies > 1
                         && TryCastSpell(Warrior548.DragonRoar, Bot.Wow.TargetGuid))
                     {
@@ -243,6 +248,11 @@ namespace AmeisenBotX.Core.Engines.Combat.Classes.Jannis.Mop548
 
                     if ((nearEnemies > 1 || Bot.Player.Rage > (rageToSave + 30))
                         && TryCastSpell(Warrior548.Cleave, Bot.Wow.TargetGuid, true))
+                    {
+                        return;
+                    }
+
+                    if (TryCastSpell(Warrior548.HeroicStrike, Bot.Wow.TargetGuid, true, Bot.Player.Rage - 30))
                     {
                         return;
                     }

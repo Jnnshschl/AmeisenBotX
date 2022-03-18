@@ -2,7 +2,7 @@
 {
     public enum WowCreatureType
     {
-        Unknown = 0,
+        Unknown,
         Beast,
         Dragon,
         Demon,
@@ -15,6 +15,7 @@
         NotSpecified,
         Totem,
         NonCombatPet,
-        GasCloud
+        GasCloud,
+        Battlepet
     }
 }

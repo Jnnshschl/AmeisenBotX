@@ -207,7 +207,9 @@ namespace AmeisenBotX.Wow.Objects
 
         static bool IsValid(IWowUnit unit)
         {
-            return unit != null && !unit.IsNotAttackable;
+            return unit != null
+                && !unit.IsNotAttackable
+                && !unit.IsNotSelectable;
         }
 
         static bool IsValidAlive(IWowUnit unit)
@@ -228,6 +230,8 @@ namespace AmeisenBotX.Wow.Objects
 
         float MeleeRangeTo(IWowUnit wowUnit);
 
-        string ReadName(WowMemoryApi memory);
+        string ReadName();
+
+        WowCreatureType ReadType();
     }
 }

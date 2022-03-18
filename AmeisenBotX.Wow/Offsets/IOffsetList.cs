@@ -146,19 +146,15 @@ namespace AmeisenBotX.Wow.Offsets
 
         IntPtr WowObjectType { get; }
 
-        IntPtr WowUnitFlyFlags { get; }
+        IntPtr WowUnitDbEntry { get; }
 
-        IntPtr WowUnitFlyFlagsPointer { get; }
+        IntPtr WowUnitDbEntryName { get; }
+
+        IntPtr WowUnitDbEntryType { get; }
 
         IntPtr WowUnitIsAutoAttacking { get; }
 
-        IntPtr WowUnitName1 { get; }
-
-        IntPtr WowUnitName2 { get; }
-
         IntPtr WowUnitPosition { get; }
-
-        IntPtr WowUnitSwimFlags { get; }
 
         IntPtr ZoneId { get; }
 

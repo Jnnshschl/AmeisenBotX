@@ -12,9 +12,9 @@ namespace AmeisenBotX.Wow548.Offsets
 
         public IntPtr AuraTable2 { get; } = new(0xE1C);
 
-        public IntPtr BattlegroundFinished { get; } = new(0x0);
+        public IntPtr BattlegroundFinished { get; private set; }
 
-        public IntPtr BattlegroundStatus { get; } = new(0x0);
+        public IntPtr BattlegroundStatus { get; private set; }
 
         public IntPtr BreathTimer { get; } = new(0x0);
 
@@ -140,7 +140,7 @@ namespace AmeisenBotX.Wow548.Offsets
 
         public IntPtr TickCount { get; private set; }
 
-        public IntPtr WowDynobjectPosition { get; } = new(0x0);
+        public IntPtr WowDynobjectPosition { get; } = new(0x1F4);
 
         public IntPtr WowGameobjectPosition { get; } = new(0x1F4);
 
@@ -152,19 +152,15 @@ namespace AmeisenBotX.Wow548.Offsets
 
         public IntPtr WowUnitCanInterrupt { get; } = new(0xC64);
 
-        public IntPtr WowUnitFlyFlags { get; } = new(0x38);
+        public IntPtr WowUnitDbEntry { get; } = new(0x9B4);
 
-        public IntPtr WowUnitFlyFlagsPointer { get; } = new(0xEC);
+        public IntPtr WowUnitDbEntryName { get; } = new(0x6C);
+
+        public IntPtr WowUnitDbEntryType { get; } = new(0x18);
 
         public IntPtr WowUnitIsAutoAttacking { get; } = new(0x14EC);
 
-        public IntPtr WowUnitName1 { get; } = new(0x9B4);
-
-        public IntPtr WowUnitName2 { get; } = new(0x6C);
-
         public IntPtr WowUnitPosition { get; } = new(0x838);
-
-        public IntPtr WowUnitSwimFlags { get; } = new(0xEC);
 
         public IntPtr ZoneId { get; private set; }
 
@@ -175,6 +171,8 @@ namespace AmeisenBotX.Wow548.Offsets
         public void Init(IntPtr mainModuleBase)
         {
             // need to add base to offsets because ASLR is enabled
+            BattlegroundFinished = IntPtr.Add(mainModuleBase, 0xDC3050);
+            BattlegroundStatus = IntPtr.Add(mainModuleBase, 0xB6335C);
             CameraPointer = IntPtr.Add(mainModuleBase, 0xD64E5C);
 
             IntPtr clickToMoveBase = IntPtr.Add(mainModuleBase, 0xD0F390);

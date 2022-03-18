@@ -1,14 +1,30 @@
-﻿using AmeisenBotX.Wow.Objects;
+﻿using AmeisenBotX.Core.Engines.Combat.Helpers.Targets.Priority.Special;
+using AmeisenBotX.Core.Engines.Combat.Helpers.Targets.Validation.Basic;
+using AmeisenBotX.Core.Engines.Combat.Helpers.Targets.Validation.Special;
+using AmeisenBotX.Core.Engines.Combat.Helpers.Targets.Validation.Util;
+using AmeisenBotX.Wow.Objects;
 using AmeisenBotX.Wow.Objects.Enums;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 
-namespace AmeisenBotX.Core.Engines.Combat.Helpers.Targets.Logics
+namespace AmeisenBotX.Core.Engines.Combat.Helpers.Targets.Logics.Tank
 {
-    public class TankTargetSelectionLogic : BasicTargetSelectionLogic
+    public class SimpleTankTargetSelectionLogic : BasicTargetSelectionLogic
     {
-        public TankTargetSelectionLogic(AmeisenBotInterfaces bot) : base(bot)
+        public SimpleTankTargetSelectionLogic(AmeisenBotInterfaces bot) : base(bot)
         {
+            TargetValidator.Validators.Add(new IsAttackableTargetValidator(bot));
+            TargetValidator.Validators.Add(new IsThreatTargetValidator(bot));
+            TargetValidator.Validators.Add(new DungeonTargetValidator(bot));
+            TargetValidator.Validators.Add
+            (
+                new CachedTargetValidator(new IsReachableTargetValidator(bot), TimeSpan.FromSeconds(4))
+            );
+
+            // ListTargetPrioritizer not enabled as the tank needs to keep its focus on the boss,
+            // need to test this TargetPrioritizer.Prioritizers.Add(new ListTargetPrioritizer());
+            TargetPrioritizer.Prioritizers.Add(new DungeonTargetPrioritizer(bot));
         }
 
         public override bool SelectTarget(out IEnumerable<IWowUnit> possibleTargets)
@@ -17,7 +33,7 @@ namespace AmeisenBotX.Core.Engines.Combat.Helpers.Targets.Logics
 
             IEnumerable<IWowUnit> unitsAroundMe = Bot.Objects.WowObjects
                 .OfType<IWowUnit>()
-                .Where(e => IsValidEnemy(e))
+                .Where(e => TargetValidator.IsValid(e) && e.IsInCombat)
                 .OrderByDescending(e => e.Type)
                 .ThenByDescending(e => e.MaxHealth);
 

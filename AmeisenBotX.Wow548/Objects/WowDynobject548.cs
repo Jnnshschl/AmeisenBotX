@@ -1,5 +1,4 @@
 ﻿using AmeisenBotX.Common.Math;
-using AmeisenBotX.Wow;
 using AmeisenBotX.Wow.Objects;
 using AmeisenBotX.Wow548.Objects.Descriptors;
 
@@ -23,9 +22,9 @@ namespace AmeisenBotX.Wow548.Objects
             return $"DynamicObject: [{Guid}] SpellId: {SpellId} Caster: {Caster} Radius: {Radius}";
         }
 
-        public override void Update(WowMemoryApi memory)
+        public override void Update()
         {
-            base.Update(memory);
+            base.Update();
         }
 
         protected WowDynamicobjectDescriptor548 GetDynamicobjectDescriptor()

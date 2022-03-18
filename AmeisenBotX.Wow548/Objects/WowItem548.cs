@@ -1,5 +1,4 @@
-﻿using AmeisenBotX.Wow;
-using AmeisenBotX.Wow.Objects;
+﻿using AmeisenBotX.Wow.Objects;
 using AmeisenBotX.Wow.Objects.Raw.Enums;
 using AmeisenBotX.Wow.Objects.Raw.SubStructs;
 using AmeisenBotX.Wow548.Objects.Descriptors;
@@ -37,9 +36,9 @@ namespace AmeisenBotX.Wow548.Objects
             return $"Item: [{Guid}] ({EntryId}) Owner: {Owner} Count: {Count}";
         }
 
-        public override void Update(WowMemoryApi memory)
+        public override void Update()
         {
-            base.Update(memory);
+            base.Update();
 
             // ItemEnchantments = new() { objPtr.Enchantment1, objPtr.Enchantment2,
             // objPtr.Enchantment3, objPtr.Enchantment4, objPtr.Enchantment5, objPtr.Enchantment6,

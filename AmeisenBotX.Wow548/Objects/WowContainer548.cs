@@ -1,5 +1,4 @@
-﻿using AmeisenBotX.Wow;
-using AmeisenBotX.Wow.Objects;
+﻿using AmeisenBotX.Wow.Objects;
 using AmeisenBotX.Wow548.Objects.Descriptors;
 
 namespace AmeisenBotX.Wow548.Objects
@@ -16,9 +15,9 @@ namespace AmeisenBotX.Wow548.Objects
             return $"Container: [{Guid}] SlotCount: {SlotCount}";
         }
 
-        public override void Update(WowMemoryApi memory)
+        public override void Update()
         {
-            base.Update(memory);
+            base.Update();
         }
 
         protected WowContainerDescriptor548 GetContainerDescriptor()

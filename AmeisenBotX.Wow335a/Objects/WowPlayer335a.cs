@@ -1,5 +1,4 @@
 ﻿using AmeisenBotX.Common.Math;
-using AmeisenBotX.Wow;
 using AmeisenBotX.Wow.Objects;
 using AmeisenBotX.Wow.Objects.Enums;
 using AmeisenBotX.Wow.Objects.Raw.SubStructs;
@@ -59,37 +58,37 @@ namespace AmeisenBotX.Wow335a.Objects
                 or WowRace.Troll;
         }
 
-        public override string ReadName(WowMemoryApi memory)
+        public override string ReadName()
         {
-            if (memory.Read(IntPtr.Add(memory.Offsets.NameStore, (int)memory.Offsets.NameMask), out uint nameMask)
-                && memory.Read(IntPtr.Add(memory.Offsets.NameStore, (int)memory.Offsets.NameBase), out uint nameBase))
+            if (Memory.Read(IntPtr.Add(Memory.Offsets.NameStore, (int)Memory.Offsets.NameMask), out uint nameMask)
+                && Memory.Read(IntPtr.Add(Memory.Offsets.NameStore, (int)Memory.Offsets.NameBase), out uint nameBase))
             {
                 uint shortGuid = (uint)Guid & 0xfffffff;
                 uint offset = 12 * (nameMask & shortGuid);
 
-                if (memory.Read(new(nameBase + offset + 8), out uint current)
-                    && memory.Read(new(nameBase + offset), out offset))
+                if (Memory.Read(new(nameBase + offset + 8), out uint current)
+                    && Memory.Read(new(nameBase + offset), out offset))
                 {
                     if ((current & 0x1) == 0x1)
                     {
                         return string.Empty;
                     }
 
-                    memory.Read(new(current), out uint testGuid);
+                    Memory.Read(new(current), out uint testGuid);
 
                     while (testGuid != shortGuid)
                     {
-                        memory.Read(new(current + offset + 4), out current);
+                        Memory.Read(new(current + offset + 4), out current);
 
                         if ((current & 0x1) == 0x1)
                         {
                             return string.Empty;
                         }
 
-                        memory.Read(new(current), out testGuid);
+                        Memory.Read(new(current), out testGuid);
                     }
 
-                    if (memory.ReadString(new(current + (int)memory.Offsets.NameString), Encoding.UTF8, out string name, 16))
+                    if (Memory.ReadString(new(current + (int)Memory.Offsets.NameString), Encoding.UTF8, out string name, 16))
                     {
                         return name;
                     }
@@ -104,11 +103,11 @@ namespace AmeisenBotX.Wow335a.Objects
             return $"Player: {Guid} lvl. {Level}";
         }
 
-        public override void Update(WowMemoryApi memory)
+        public override void Update()
         {
-            base.Update(memory);
+            base.Update();
 
-            if (memory.Read(DescriptorAddress + WowObjectDescriptor335a.EndOffset + WowUnitDescriptor335a.EndOffset, out WowPlayerDescriptor335a obj))
+            if (Memory.Read(DescriptorAddress + WowObjectDescriptor335a.EndOffset + WowUnitDescriptor335a.EndOffset, out WowPlayerDescriptor335a obj))
             {
                 RawWowPlayer = obj;
 
@@ -165,23 +164,23 @@ namespace AmeisenBotX.Wow335a.Objects
                 };
             }
 
-            if (memory.Read(IntPtr.Add(BaseAddress, (int)memory.Offsets.WowUnitSwimFlags), out uint swimFlags))
+            if (Memory.Read(IntPtr.Add(BaseAddress, 0xA30), out uint swimFlags))
             {
                 IsSwimming = (swimFlags & 0x200000) != 0;
             }
 
-            if (memory.Read(IntPtr.Add(BaseAddress, (int)memory.Offsets.WowUnitFlyFlagsPointer), out IntPtr flyFlagsPointer)
-                && memory.Read(IntPtr.Add(flyFlagsPointer, (int)memory.Offsets.WowUnitFlyFlags), out uint flyFlags))
+            if (Memory.Read(IntPtr.Add(BaseAddress, 0xD8), out IntPtr flyFlagsPointer)
+                && Memory.Read(IntPtr.Add(flyFlagsPointer, 0x44), out uint flyFlags))
             {
                 IsFlying = (flyFlags & 0x2000000) != 0;
             }
 
-            if (memory.Read(memory.Offsets.BreathTimer, out int breathTimer))
+            if (Memory.Read(Memory.Offsets.BreathTimer, out int breathTimer))
             {
                 IsUnderwater = breathTimer > 0;
             }
 
-            if (memory.Read(memory.Offsets.ComboPoints, out byte comboPoints))
+            if (Memory.Read(Memory.Offsets.ComboPoints, out byte comboPoints))
             {
                 ComboPoints = comboPoints;
             }

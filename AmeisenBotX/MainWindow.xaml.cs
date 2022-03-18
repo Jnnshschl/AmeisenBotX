@@ -266,7 +266,10 @@ namespace AmeisenBotX
 
         private void ButtonToggleRendering_Click(object sender, RoutedEventArgs e)
         {
-            // string n = AmeisenBot.Bot.Wow.ObjectProvider.Target.ReadName(AmeisenBot.Bot.Memory, AmeisenBot.Bot.Wow.Offsets);
+            // ((BasicCombatClass)AmeisenBot.Bot.CombatClass).TargetProviderTank.Get(out IEnumerable<IWowUnit> units);
+            // WowCreatureType type = AmeisenBot.Bot.Objects.Target.ReadType(AmeisenBot.Bot.Memory);
+            // bool x = AmeisenBot.Bot.Player.IsSwimming;
+            // bool y = AmeisenBot.Bot.Player.IsFlying;
         }
 
         private void ComboboxStateOverride_SelectionChanged(object sender, System.Windows.Controls.SelectionChangedEventArgs e)
@@ -589,9 +592,6 @@ namespace AmeisenBotX
 
                 // events used to update our GUI
                 AmeisenBot.Bot.Objects.OnObjectUpdateComplete += OnObjectUpdateComplete;
-                // AmeisenBot.StateMachine.OnStateMachineStateChanged += () => {
-                // Dispatcher.InvokeAsync(() => { labelCurrentState.Content =
-                // $"{AmeisenBot.StateMachine.CurrentState.Key}"; }); };
 
                 // handle the autoposition function where the wow window gets "absorbed" by the bots window
                 if (AmeisenBot.Config.AutoPositionWow)

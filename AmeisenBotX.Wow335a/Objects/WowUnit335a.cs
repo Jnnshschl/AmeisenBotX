@@ -188,16 +188,15 @@ namespace AmeisenBotX.Wow335a.Objects
             return wowUnit != null ? (wowUnit.CombatReach + CombatReach) * 0.95f : 0.0f;
         }
 
-        public virtual string ReadName(WowMemoryApi memory)
+        public virtual string ReadName()
         {
-            if (memory.Read(IntPtr.Add(BaseAddress, (int)memory.Offsets.WowUnitName1), out IntPtr objName)
-                && memory.Read(IntPtr.Add(objName, (int)memory.Offsets.WowUnitName2), out objName)
-                && memory.ReadString(objName, Encoding.UTF8, out string name))
-            {
-                return name;
-            }
+            return GetDbEntry(Memory.Offsets.WowUnitDbEntryName, out IntPtr namePtr)
+                && Memory.ReadString(namePtr, Encoding.UTF8, out string name) ? name : "unknown";
+        }
 
-            return "unknown";
+        public virtual WowCreatureType ReadType()
+        {
+            return GetDbEntry(Memory.Offsets.WowUnitDbEntryType, out WowCreatureType type) ? type : WowCreatureType.Unknown;
         }
 
         public override string ToString()
@@ -205,39 +204,39 @@ namespace AmeisenBotX.Wow335a.Objects
             return $"Unit: {Guid} lvl. {Level} Position: {Position} DisplayId: {DisplayId}";
         }
 
-        public override void Update(WowMemoryApi memory)
+        public override void Update()
         {
-            base.Update(memory);
+            base.Update();
 
-            if (memory.Read(DescriptorAddress + WowObjectDescriptor335a.EndOffset, out WowUnitDescriptor335a objPtr))
+            if (Memory.Read(DescriptorAddress + WowObjectDescriptor335a.EndOffset, out WowUnitDescriptor335a objPtr))
             {
                 RawWowUnit = objPtr;
             }
 
-            Auras = GetUnitAuras(memory, BaseAddress, out int auraCount);
+            Auras = GetUnitAuras(Memory, BaseAddress, out int auraCount);
             AuraCount = auraCount;
 
-            if (memory.Read(IntPtr.Add(BaseAddress, (int)memory.Offsets.WowUnitPosition), out Vector3 position))
+            if (Memory.Read(IntPtr.Add(BaseAddress, (int)Memory.Offsets.WowUnitPosition), out Vector3 position))
             {
                 Position = position;
             }
 
-            if (memory.Read(IntPtr.Add(BaseAddress, (int)memory.Offsets.WowUnitPosition + 0x10), out float rotation))
+            if (Memory.Read(IntPtr.Add(BaseAddress, (int)Memory.Offsets.WowUnitPosition + 0x10), out float rotation))
             {
                 Rotation = rotation;
             }
 
-            if (memory.Read(IntPtr.Add(BaseAddress, (int)memory.Offsets.WowUnitIsAutoAttacking), out int isAutoAttacking))
+            if (Memory.Read(IntPtr.Add(BaseAddress, (int)Memory.Offsets.WowUnitIsAutoAttacking), out int isAutoAttacking))
             {
                 IsAutoAttacking = isAutoAttacking == 1;
             }
 
-            if (memory.Read(IntPtr.Add(BaseAddress, (int)memory.Offsets.CurrentlyCastingSpellId), out int castingId))
+            if (Memory.Read(IntPtr.Add(BaseAddress, (int)Memory.Offsets.CurrentlyCastingSpellId), out int castingId))
             {
                 CurrentlyCastingSpellId = castingId;
             }
 
-            if (memory.Read(IntPtr.Add(BaseAddress, (int)memory.Offsets.CurrentlyChannelingSpellId), out int channelingId))
+            if (Memory.Read(IntPtr.Add(BaseAddress, (int)Memory.Offsets.CurrentlyChannelingSpellId), out int channelingId))
             {
                 CurrentlyChannelingSpellId = channelingId;
             }
@@ -261,6 +260,14 @@ namespace AmeisenBotX.Wow335a.Objects
             }
 
             return auras;
+        }
+
+        private bool GetDbEntry<T>(IntPtr entryOffset, out T ptr) where T : unmanaged
+        {
+            ptr = default;
+            return Memory.Read(IntPtr.Add(BaseAddress, (int)Memory.Offsets.WowUnitDbEntry), out IntPtr dbEntry)
+                && dbEntry != IntPtr.Zero
+                && Memory.Read(IntPtr.Add(dbEntry, (int)entryOffset), out ptr);
         }
     }
 }

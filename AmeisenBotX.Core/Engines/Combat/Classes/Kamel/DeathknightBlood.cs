@@ -1,6 +1,6 @@
 ﻿using AmeisenBotX.Common.Utils;
 using AmeisenBotX.Core.Engines.Combat.Helpers.Targets;
-using AmeisenBotX.Core.Engines.Combat.Helpers.Targets.Logics;
+using AmeisenBotX.Core.Engines.Combat.Helpers.Targets.Logics.Dps;
 using AmeisenBotX.Core.Engines.Movement.Enums;
 using AmeisenBotX.Core.Managers.Character.Comparators;
 using AmeisenBotX.Core.Managers.Character.Talents.Objects;
@@ -18,7 +18,7 @@ namespace AmeisenBotX.Core.Engines.Combat.Classes.Kamel
         public DeathknightBlood(AmeisenBotInterfaces bot)
         {
             Bot = bot;
-            TargetProvider = new TargetManager(new DpsTargetSelectionLogic(bot), TimeSpan.FromMilliseconds(250));//Heal/Tank/DPS
+            TargetProvider = new TargetManager(new SimpleDpsTargetSelectionLogic(bot), TimeSpan.FromMilliseconds(250));//Heal/Tank/DPS
         }
 
         public string Author => "Kamel";

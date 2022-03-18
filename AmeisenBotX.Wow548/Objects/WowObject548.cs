@@ -32,10 +32,11 @@ namespace AmeisenBotX.Wow548.Objects
             Memory = memory;
             BaseAddress = baseAddress;
             DescriptorAddress = descriptorAddress;
-            Update(memory);
+
+            Update();
         }
 
-        public virtual void Update(WowMemoryApi memory)
+        public virtual void Update()
         {
         }
 

@@ -89,10 +89,12 @@ namespace AmeisenBotX.Core.Engines.Combat.Classes.Jannis.Mop548
             new() { WowWeaponType.AxeTwoHand, WowWeaponType.MaceTwoHand, WowWeaponType.SwordTwoHand },
             new Dictionary<string, double>()
             {
-                { "ITEM_MOD_CRIT_RATING_SHORT", 0.88 },
-                { "ITEM_MOD_INTELLECT_SHORT", 0.2 },
-                { "ITEM_MOD_SPELL_POWER_SHORT", 0.68 },
-                { "ITEM_MOD_HASTE_RATING_SHORT", 0.71},
+                { "ITEM_MOD_INTELLECT_SHORT", 1.0 },
+                { "ITEM_MOD_SPELL_POWER_SHORT", 1.0 },
+                { "ITEM_MOD_SPIRIT_SHORT", 0.75 },
+                { "ITEM_MOD_HASTE_RATING_SHORT", 0.5},
+                { "ITEM_MOD_MASTERY_RATING_SHORT", 0.25 },
+                { "ITEM_MOD_CRIT_RATING_SHORT", 0.125 },
             }
         );
 
@@ -129,7 +131,9 @@ namespace AmeisenBotX.Core.Engines.Combat.Classes.Jannis.Mop548
         {
             base.Execute();
 
-            IWowUnit dyingUnit = Bot.Objects.Partymembers.FirstOrDefault(e => e.HealthPercentage < 14.0 && !e.Auras.Any(e => Bot.Db.GetSpellName(e.SpellId) == Paladin548.Forbearance));
+            IEnumerable<IWowUnit> validPartymembers = Bot.Objects.Partymembers.Where(e => IWowUnit.IsValidAliveInCombat(e));
+
+            IWowUnit dyingUnit = validPartymembers.FirstOrDefault(e => e.HealthPercentage < 14.0 && !e.Auras.Any(e => Bot.Db.GetSpellName(e.SpellId) == Paladin548.Forbearance));
 
             if (dyingUnit != null)
             {
@@ -144,14 +148,11 @@ namespace AmeisenBotX.Core.Engines.Combat.Classes.Jannis.Mop548
                 }
             }
 
-            IWowUnit shieldWorthyUnit = Bot.Objects.Partymembers.FirstOrDefault(e => e.HealthPercentage < 20.0 && !e.Auras.Any(e => Bot.Db.GetSpellName(e.SpellId) == Paladin548.Forbearance));
+            IWowUnit shieldWorthyUnit = validPartymembers.FirstOrDefault(e => e.HealthPercentage < 20.0 && !e.Auras.Any(e => Bot.Db.GetSpellName(e.SpellId) == Paladin548.Forbearance));
 
-            if (shieldWorthyUnit != null)
+            if (shieldWorthyUnit != null && TryCastSpell(Paladin548.DivineShield, shieldWorthyUnit.Guid, true))
             {
-                if (TryCastSpell(Paladin548.DivineShield, shieldWorthyUnit.Guid, true))
-                {
-                    return;
-                }
+                return;
             }
 
             if (HealingManager.Tick())
@@ -160,27 +161,21 @@ namespace AmeisenBotX.Core.Engines.Combat.Classes.Jannis.Mop548
             }
             else
             {
-                if (!Bot.Objects.Partymembers.Any(e => e.HealthPercentage < 85.0))
+                if (!validPartymembers.Any(e => e.HealthPercentage < 85.0))
                 {
-                    IEnumerable<IWowUnit> lowHpUnits = Bot.Objects.Partymembers.Where(e => e.HealthPercentage < 95.0);
+                    IEnumerable<IWowUnit> lowHpUnits = validPartymembers.Where(e => e.HealthPercentage < 95.0);
 
-                    if (lowHpUnits.Any())
-                    {
-                        if (TryCastSpell(Paladin548.DivineProtection, lowHpUnits.First().Guid, true))
-                        {
-                            return;
-                        }
-                    }
-                }
-
-                IWowUnit movementImpairedUnit = Bot.Objects.Partymembers.FirstOrDefault(e => e.IsConfused);
-
-                if (movementImpairedUnit != null)
-                {
-                    if (TryCastSpell(Paladin548.HandOfFreedom, movementImpairedUnit.Guid, true))
+                    if (lowHpUnits.Any() && TryCastSpell(Paladin548.DivineProtection, lowHpUnits.First().Guid, true))
                     {
                         return;
                     }
+                }
+
+                IWowUnit movementImpairedUnit = validPartymembers.FirstOrDefault(e => e.IsConfused || e.IsDazed);
+
+                if (movementImpairedUnit != null && TryCastSpell(Paladin548.HandOfFreedom, movementImpairedUnit.Guid, true))
+                {
+                    return;
                 }
 
                 if (Bot.Player.ManaPercentage < Configurables["DivinePleaMana"]
@@ -203,11 +198,11 @@ namespace AmeisenBotX.Core.Engines.Combat.Classes.Jannis.Mop548
                     }
                     else
                     {
-                        IEnumerable<IWowUnit> healableTargets = Bot.Wow.ObjectProvider.Partymembers.Where(e => e != null && !e.IsDead).OrderBy(e => e.HealthPercentage);
-
-                        if (healableTargets.Count() > 1)
+                        if (validPartymembers.Any())
                         {
-                            IWowUnit t = healableTargets.Skip(1).FirstOrDefault(e => e.HealthPercentage < Configurables["BeaconOfLightPartyHealth"]);
+                            IWowUnit t = validPartymembers.OrderBy(e => e.HealthPercentage)
+                                .Skip(1)
+                                .FirstOrDefault(e => e.HealthPercentage < Configurables["BeaconOfLightPartyHealth"]);
 
                             // keep beacon of light on second lowest target
                             if (t != null
@@ -221,7 +216,7 @@ namespace AmeisenBotX.Core.Engines.Combat.Classes.Jannis.Mop548
                     }
                 }
 
-                bool isAlone = !Bot.Objects.Partymembers.Any(e => e.Guid != Bot.Player.Guid);
+                bool isAlone = !validPartymembers.Any(e => e.Guid != Bot.Player.Guid);
 
                 if ((isAlone || (Configurables["AttackInGroups"] && Configurables["AttackInGroupsUntilManaPercent"] < Bot.Player.ManaPercentage))
                     && TryFindTarget(TargetProviderDps, out _))

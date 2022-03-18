@@ -16,8 +16,8 @@ namespace AmeisenBotX.Core.Engines.Combat.Helpers.Healing
         /// <summary>
         /// Create a new instance of the HealingManager that is used to choose healing spell in a
         /// smart way. It observes the heals done by the bot and remembers how much each spell
-        /// healed. Based of that knoweledge it is able to cancel spells to prevent overheal an
-        /// chose fast heals when the target is going to die in a few seconds.
+        /// healed. Based of that knoweledge it is able to cancel spells to prevent overheal and
+        /// choose fast heals when the target is going to die in a few seconds.
         /// </summary>
         /// <param name="bot">AmeisenBotInterfaces collection</param>
         /// <param name="tryCastSpellAction">Function to cast a spell</param>
@@ -47,7 +47,7 @@ namespace AmeisenBotX.Core.Engines.Combat.Helpers.Healing
             float healthWeight = 0.7f,
             float incomingDamageWeight = 0.3f,
             int targetDyingSeconds = 4,
-            float overhealingStopThreshold = 0.75f,
+            float overhealingStopThreshold = 0.8f,
             float maxOverheal = 0.75f
         )
         {

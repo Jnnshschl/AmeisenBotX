@@ -1,5 +1,4 @@
 ﻿using AmeisenBotX.Common.Math;
-using AmeisenBotX.Wow;
 using AmeisenBotX.Wow.Objects;
 using AmeisenBotX.Wow335a.Objects.Descriptors;
 using System;
@@ -20,12 +19,12 @@ namespace AmeisenBotX.Wow335a.Objects
             return $"DynamicObject: [{Guid}] SpellId: {SpellId} Caster: {Caster} Radius: {Radius}";
         }
 
-        public override void Update(WowMemoryApi memory)
+        public override void Update()
         {
-            base.Update(memory);
+            base.Update();
 
-            if (memory.Read(DescriptorAddress + WowObjectDescriptor335a.EndOffset, out WowDynobjectDescriptor335a objPtr)
-                && memory.Read(IntPtr.Add(BaseAddress, (int)memory.Offsets.WowDynobjectPosition), out Vector3 position))
+            if (Memory.Read(DescriptorAddress + WowObjectDescriptor335a.EndOffset, out WowDynobjectDescriptor335a objPtr)
+                && Memory.Read(IntPtr.Add(BaseAddress, (int)Memory.Offsets.WowDynobjectPosition), out Vector3 position))
             {
                 Caster = objPtr.Caster;
                 Radius = objPtr.Radius;

@@ -72,6 +72,6 @@ namespace AmeisenBotX.Wow.Objects
             return Type == WowObjectType.Unit;
         }
 
-        void Update(WowMemoryApi memory);
+        void Update();
     }
 }

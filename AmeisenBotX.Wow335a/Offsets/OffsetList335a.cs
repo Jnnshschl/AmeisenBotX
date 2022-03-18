@@ -151,19 +151,15 @@ namespace AmeisenBotX.Wow335a.Offsets
 
         public IntPtr WowObjectType { get; } = new(0x14);
 
-        public IntPtr WowUnitFlyFlags { get; } = new(0x44);
+        public IntPtr WowUnitDbEntry { get; } = new(0x964);
 
-        public IntPtr WowUnitFlyFlagsPointer { get; } = new(0xD8);
+        public IntPtr WowUnitDbEntryName { get; } = new(0x5C);
+
+        public IntPtr WowUnitDbEntryType { get; } = new(0x10);
 
         public IntPtr WowUnitIsAutoAttacking { get; } = new(0xA20);
 
-        public IntPtr WowUnitName1 { get; } = new(0x964);
-
-        public IntPtr WowUnitName2 { get; } = new(0x5C);
-
         public IntPtr WowUnitPosition { get; } = new(0x798);
-
-        public IntPtr WowUnitSwimFlags { get; } = new(0xA30);
 
         public IntPtr ZoneId { get; } = new(0xBD080C);
 

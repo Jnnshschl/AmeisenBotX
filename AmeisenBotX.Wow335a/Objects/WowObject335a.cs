@@ -24,13 +24,17 @@ namespace AmeisenBotX.Wow335a.Objects
 
         public WowObjectType Type { get; protected set; }
 
+        protected WowMemoryApi Memory { get; private set; }
+
         protected WowObjectDescriptor335a RawObject { get; private set; }
 
         public virtual void Init(WowMemoryApi memory, IntPtr baseAddress, IntPtr descriptorAddress)
         {
+            Memory = memory;
             BaseAddress = baseAddress;
             DescriptorAddress = descriptorAddress;
-            Update(memory);
+
+            Update();
         }
 
         public override string ToString()
@@ -38,9 +42,9 @@ namespace AmeisenBotX.Wow335a.Objects
             return $"Object: {Guid}";
         }
 
-        public virtual void Update(WowMemoryApi memory)
+        public virtual void Update()
         {
-            if (DescriptorAddress != IntPtr.Zero && memory.Read(DescriptorAddress, out WowObjectDescriptor335a obj))
+            if (DescriptorAddress != IntPtr.Zero && Memory.Read(DescriptorAddress, out WowObjectDescriptor335a obj))
             {
                 RawObject = obj;
             }

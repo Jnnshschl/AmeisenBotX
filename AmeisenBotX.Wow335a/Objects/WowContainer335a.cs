@@ -1,5 +1,4 @@
-﻿using AmeisenBotX.Wow;
-using AmeisenBotX.Wow.Objects;
+﻿using AmeisenBotX.Wow.Objects;
 using AmeisenBotX.Wow335a.Objects.Descriptors;
 using System;
 
@@ -17,11 +16,11 @@ namespace AmeisenBotX.Wow335a.Objects
             return $"Container: [{Guid}] SlotCount: {SlotCount}";
         }
 
-        public override void Update(WowMemoryApi memory)
+        public override void Update()
         {
-            base.Update(memory);
+            base.Update();
 
-            if (memory.Read(DescriptorAddress + WowObjectDescriptor335a.EndOffset, out WowContainerDescriptor335a obj))
+            if (Memory.Read(DescriptorAddress + WowObjectDescriptor335a.EndOffset, out WowContainerDescriptor335a obj))
             {
                 RawWowContainer = obj;
             }

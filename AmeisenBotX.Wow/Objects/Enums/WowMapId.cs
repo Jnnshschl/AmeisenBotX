@@ -102,7 +102,7 @@
         Gilneas = 638,
         Transport_AllianceAirshipBG = 641,
         Transport_HordeAirshipBG = 642,
-        AbyssalMaw_Interior = 643,
+        ThroneOfTides = 643,
         Uldum = 644,
         BlackRockSpire_4_0 = 645,
         Maelstrom = 646,
