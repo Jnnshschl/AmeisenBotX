@@ -2,6 +2,7 @@
 using AmeisenBotX.Wow.Objects.Enums;
 using System;
 using System.Collections.Generic;
+using System.Linq;
 
 namespace AmeisenBotX.Core.Engines.Combat.Helpers.Targets.Validation.Special
 {
@@ -18,7 +19,13 @@ namespace AmeisenBotX.Core.Engines.Combat.Helpers.Targets.Validation.Special
                 { WowMapId.HallsOfReflection, HallsOfReflectionIsTheLichKing },
                 { WowMapId.DrakTharonKeep, DrakTharonKeepIsNovosChanneling },
                 { WowMapId.ThroneOfTides, ThroneOfTidesIsLadyNazjarChanneling },
+                { WowMapId.TempleOfTheJadeSerpent, TempleOfTheJadeSerpent }
             };
+        }
+
+        private bool TempleOfTheJadeSerpent(IWowUnit arg)
+        {
+            return arg.Auras.Any(e => e.SpellId == 113315 && e.StackCount >= 2); // Peril and Strafe
         }
 
         private AmeisenBotInterfaces Bot { get; }

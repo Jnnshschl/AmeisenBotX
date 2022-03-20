@@ -16,8 +16,6 @@ namespace AmeisenBotX.Core.Engines.Movement.Objects
 
         public delegate void MoveCharacter(Vector3 positionToGoTo);
 
-        public bool IsOnWaterSurface { get; set; }
-
         public DateTime LastUpdate { get; private set; }
 
         public Vector3 Velocity { get; private set; }
@@ -26,15 +24,10 @@ namespace AmeisenBotX.Core.Engines.Movement.Objects
 
         public Vector3 AvoidObstacles(float maxSteering, float maxVelocity, float multiplier)
         {
-            Vector3 acceleration = new();
+            Vector3 acceleration = GetObjectForceAroundMe<IWowGameobject>(maxSteering, maxVelocity) 
+                                 + GetNearestBlacklistForce(maxSteering, maxVelocity, 12.0f);
 
-            acceleration += GetObjectForceAroundMe<IWowGameobject>(maxSteering, maxVelocity);
-            acceleration += GetNearestBlacklistForce(maxSteering, maxVelocity, 12.0f);
-
-            acceleration.Limit(maxVelocity);
-            acceleration.Multiply(multiplier);
-
-            return acceleration;
+            return acceleration.Limited(maxSteering) * multiplier;
         }
 
         public Vector3 Evade(Vector3 position, float maxSteering, float maxVelocity, float multiplier, float targetRotation, float targetVelocity = 2.0f)
@@ -199,13 +192,13 @@ namespace AmeisenBotX.Core.Engines.Movement.Objects
         {
             return movementAction switch
             {
-                MovementAction.Move => Seek(targetPosition, maxSteering, maxVelocity, 0.85f)
-                                     + AvoidObstacles(maxSteering, maxVelocity, 0.1f)
+                MovementAction.Move => Seek(targetPosition, maxSteering, maxVelocity, 0.70f)
+                                     + AvoidObstacles(maxSteering, maxVelocity, 0.25f)
                                      + Seperate(seperationDistance, maxVelocity, 0.05f),
 
-                MovementAction.Follow => Seek(targetPosition, maxSteering, maxVelocity, 0.9f)
-                                       + Seperate(seperationDistance, maxVelocity, 0.05f)
-                                       + AvoidObstacles(maxSteering, maxVelocity, 0.05f),
+                MovementAction.Follow => Seek(targetPosition, maxSteering, maxVelocity, 0.70f)
+                                       + AvoidObstacles(maxSteering, maxVelocity, 0.25f)
+                                       + Seperate(seperationDistance, maxVelocity, 0.05f),
 
                 MovementAction.Chase => Seek(targetPosition, maxSteering, maxVelocity, 1.0f),
                 MovementAction.Flee => Flee(targetPosition, maxSteering, maxVelocity, 1.0f).ZeroZ(),
@@ -238,11 +231,9 @@ namespace AmeisenBotX.Core.Engines.Movement.Objects
 
             // we need to know every objects position and distance to later apply a force pushing us
             // back from it that is relational to the objects distance.
-            IEnumerable<T> objects = Bot.Objects.WowObjects.OfType<T>();
 
-            for (int i = 0; i < objects.Count(); ++i)
+            foreach (T obj in Bot.Objects.WowObjects.OfType<T>())
             {
-                T obj = objects.ElementAt(i);
                 float distance = obj.Position.GetDistance(vehiclePosition);
 
                 if (distance < maxDistance)

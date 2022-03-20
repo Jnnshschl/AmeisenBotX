@@ -85,7 +85,7 @@ namespace AmeisenBotX.Core.Engines.Combat.Classes.Jannis.Mop548
 
         public override IItemComparator ItemComparator { get; set; } = new BasicComparator
         (
-            null,
+            new() { WowArmorType.Cloth, WowArmorType.Leather },
             new() { WowWeaponType.AxeTwoHand, WowWeaponType.MaceTwoHand, WowWeaponType.SwordTwoHand },
             new Dictionary<string, double>()
             {

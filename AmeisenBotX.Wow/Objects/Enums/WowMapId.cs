@@ -173,7 +173,7 @@
         TheHourOfTwilight = 940,
         NexusLegendary = 951,
         ShadowpanHideout = 959,
-        EastTemple = 960,
+        TempleOfTheJadeSerpent = 960,
         StormstoutBrewery = 961,
         TheGreatWall = 962,
         DeathwingBack = 967,
