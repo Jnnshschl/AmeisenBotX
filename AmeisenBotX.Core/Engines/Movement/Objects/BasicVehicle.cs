@@ -9,42 +9,41 @@ namespace AmeisenBotX.Core.Engines.Movement.Objects
 {
     public class BasicVehicle
     {
-        public BasicVehicle(AmeisenBotInterfaces bot, AmeisenBotConfig config)
+        public BasicVehicle(AmeisenBotInterfaces bot)
         {
             Bot = bot;
-            Config = config;
         }
 
         public delegate void MoveCharacter(Vector3 positionToGoTo);
 
         public bool IsOnWaterSurface { get; set; }
 
+        public DateTime LastUpdate { get; private set; }
+
         public Vector3 Velocity { get; private set; }
 
         private AmeisenBotInterfaces Bot { get; }
 
-        private AmeisenBotConfig Config { get; }
-
-        public Vector3 AvoidObstacles(float multiplier)
+        public Vector3 AvoidObstacles(float maxSteering, float maxVelocity, float multiplier)
         {
-            Vector3 acceleration = new(0, 0, 0);
+            Vector3 acceleration = new();
 
-            acceleration += GetObjectForceAroundMe<IWowObject>();
-            acceleration += GetNearestBlacklistForce(12);
+            acceleration += GetObjectForceAroundMe<IWowGameobject>(maxSteering, maxVelocity);
+            acceleration += GetNearestBlacklistForce(maxSteering, maxVelocity, 12.0f);
 
-            acceleration.Limit(Config.MovementSettings.MaxAcceleration);
+            acceleration.Limit(maxVelocity);
             acceleration.Multiply(multiplier);
 
             return acceleration;
         }
 
-        public Vector3 Evade(Vector3 position, float multiplier, float targetRotation, float targetVelocity = 2f)
+        public Vector3 Evade(Vector3 position, float maxSteering, float maxVelocity, float multiplier, float targetRotation, float targetVelocity = 2.0f)
         {
             Vector3 positionAhead = CalculateFuturePosition(position, targetRotation, targetVelocity);
-            return Flee(positionAhead, multiplier);
+            return Flee(positionAhead, maxSteering, maxVelocity, multiplier);
         }
 
-        public Vector3 Flee(Vector3 position, float multiplier)
+        public Vector3 Flee(Vector3 position, float maxSteering, float maxVelocity, float multiplier)
         {
             Vector3 currentPosition = Bot.Player.Position;
             Vector3 desired = currentPosition;
@@ -52,8 +51,6 @@ namespace AmeisenBotX.Core.Engines.Movement.Objects
 
             desired -= position;
             desired.Normalize2D(desired.GetMagnitude2D());
-
-            float maxVelocity = Config.MovementSettings.MaxVelocity;
 
             if (Bot.Player.IsMounted)
             {
@@ -79,7 +76,7 @@ namespace AmeisenBotX.Core.Engines.Movement.Objects
 
             if (Bot.Player.IsInCombat)
             {
-                float maxSteeringCombat = Config.MovementSettings.MaxSteeringCombat;
+                float maxSteeringCombat = maxSteering;
 
                 if (Bot.Player.IsMounted)
                 {
@@ -90,8 +87,6 @@ namespace AmeisenBotX.Core.Engines.Movement.Objects
             }
             else
             {
-                float maxSteering = Config.MovementSettings.MaxSteering;
-
                 if (Bot.Player.IsMounted)
                 {
                     maxSteering *= 2;
@@ -100,121 +95,56 @@ namespace AmeisenBotX.Core.Engines.Movement.Objects
                 steering.Limit(maxSteering);
             }
 
-            Vector3 acceleration = new(0, 0, 0);
+            Vector3 acceleration = new();
             acceleration += steering;
 
             if (Bot.Player.IsInCombat)
             {
-                float maxAcceleration = Config.MovementSettings.MaxAccelerationCombat;
-
                 if (Bot.Player.IsMounted)
                 {
-                    maxAcceleration *= 2;
+                    maxVelocity *= 2;
                 }
 
-                acceleration.Limit(maxAcceleration);
+                acceleration.Limit(maxVelocity);
             }
             else
             {
-                float maxAcceleration = Config.MovementSettings.MaxAcceleration;
-
                 if (Bot.Player.IsMounted)
                 {
-                    maxAcceleration *= 2;
+                    maxVelocity *= 2;
                 }
 
-                acceleration.Limit(maxAcceleration);
+                acceleration.Limit(maxVelocity);
             }
 
             acceleration.Multiply(multiplier);
             return acceleration;
         }
 
-        public Vector3 Pursuit(Vector3 position, float multiplier, float targetRotation, float targetVelocity = 2f)
+        public Vector3 Pursuit(Vector3 position, float maxSteering, float maxVelocity, float multiplier, float targetRotation, float targetVelocity = 2.0f)
         {
             Vector3 positionAhead = CalculateFuturePosition(position, targetRotation, targetVelocity);
-            return Seek(positionAhead, multiplier);
+            return Seek(positionAhead, maxSteering, maxVelocity, multiplier);
         }
 
-        public void Reset()
+        public Vector3 Seek(Vector3 position, float maxSteering, float maxVelocity, float multiplier)
         {
-            Velocity = new Vector3();
+            Vector3 desiredVelocity = (position - Bot.Player.Position).Normalized() * maxVelocity;
+            return (desiredVelocity - Velocity).Limited(maxSteering) * multiplier;
         }
 
-        public Vector3 Seek(Vector3 position, float multiplier)
+        public Vector3 Seperate(float seperationDistance, float maxVelocity, float multiplier)
         {
-            Vector3 currentPosition = Bot.Player.Position;
-            Vector3 desired = position;
-            float distanceToTarget = currentPosition.GetDistance(position);
-
-            desired -= currentPosition;
-            desired.Normalize2D(desired.GetMagnitude2D());
-
-            float maxVelocity = Config.MovementSettings.MaxVelocity;
-
-            if (Bot.Player.IsMounted)
-            {
-                maxVelocity *= 2;
-            }
-
-            desired.Multiply(maxVelocity);
-
-            if (distanceToTarget < 4)
-            {
-                desired.Multiply(distanceToTarget / 4);
-            }
-
-            Vector3 steering = desired;
-            steering -= Velocity;
-
-            // float maxSteering = Bot.Player.IsInCombat ? Bot.MovementSettings.MaxSteeringCombat : Bot.MovementSettings.MaxSteering;
-
-            if (Bot.Player.IsMounted)
-            {
-                maxVelocity *= 2;
-            }
-
-            steering.Limit(maxVelocity);
-
-            Vector3 acceleration = new(0, 0, 0);
-            acceleration += steering;
-
-            float maxAcceleration = Bot.Player.IsInCombat ? Config.MovementSettings.MaxAccelerationCombat : Config.MovementSettings.MaxAcceleration;
-
-            if (Bot.Player.IsMounted)
-            {
-                maxAcceleration *= 2;
-            }
-
-            acceleration.Limit(maxAcceleration);
-            acceleration.Multiply(multiplier);
-            return acceleration;
+            return GetObjectForceAroundMe<IWowPlayer>(seperationDistance, maxVelocity) * multiplier;
         }
 
-        public Vector3 Seperate(float multiplier)
+        public Vector3 Unstuck(float maxSteering, float maxVelocity, float multiplier)
         {
-            Vector3 acceleration = new(0, 0, 0);
-            acceleration += GetObjectForceAroundMe<IWowPlayer>(Config.MovementSettings.SeperationDistance);
-
-            float maxAcceleration = Config.MovementSettings.MaxAcceleration;
-
-            if (Bot.Player.IsMounted)
-            {
-                maxAcceleration *= 2;
-            }
-
-            acceleration.Limit(maxAcceleration);
-            acceleration.Multiply(multiplier);
-            return acceleration;
+            Vector3 positionBehindMe = BotMath.CalculatePositionBehind(Bot.Player.Position, Bot.Player.Rotation, 8.0f);
+            return Seek(positionBehindMe, maxSteering, maxVelocity, multiplier);
         }
 
-        public Vector3 Unstuck(float multiplier)
-        {
-            Vector3 positionBehindMe = CalculatPositionBehind(Bot.Player.Position, Bot.Player.Rotation, 8);
-            return Seek(positionBehindMe, multiplier);
-        }
-
-        public void Update(MoveCharacter moveCharacter, MovementAction movementAction, Vector3 targetPosition, float rotation = 0f)
+        public void Update(MoveCharacter moveCharacter, MovementAction movementAction, Vector3 targetPosition, float rotation, float maxSteering, float maxVelocity, float seperationDistance)
         {
             if (movementAction == MovementAction.DirectMove)
             {
@@ -222,34 +152,19 @@ namespace AmeisenBotX.Core.Engines.Movement.Objects
                 return;
             }
 
-            List<Vector3> forces = GetForces(movementAction, targetPosition, rotation);
+            // adjust max steering based on time passed since last Update() call
+            float timedelta = (float)(DateTime.UtcNow - LastUpdate).TotalSeconds;
+            float maxSteeringNormalized = maxSteering * timedelta;
 
-            foreach (Vector3 force in forces)
-            {
-                Velocity += force;
-            }
-
-            if (IsOnWaterSurface && Velocity.Z > 0f)
-            {
-                Velocity = new(Velocity.X, Velocity.Y, 0f);
-            }
-
-            float maxVelocity = Config.MovementSettings.MaxVelocity;
-
-            if (Bot.Player.IsMounted)
-            {
-                maxVelocity *= 2;
-            }
-
+            Vector3 totalforce = GetForce(movementAction, targetPosition, rotation, maxSteeringNormalized, maxVelocity, seperationDistance);
+            Velocity += totalforce;
             Velocity.Limit(maxVelocity);
 
-            Vector3 currentPosition = Bot.Player.Position;
-            currentPosition.Add(Velocity);
-
-            moveCharacter?.Invoke(currentPosition);
+            moveCharacter?.Invoke(Bot.Player.Position + Velocity);
+            LastUpdate = DateTime.UtcNow;
         }
 
-        public Vector3 Wander(float multiplier)
+        public Vector3 Wander(float multiplier, float maxSteering, float maxVelocity)
         {
             // TODO: implement some sort of radius where the target wanders around. maybe add a very
             // weak force keeping it inside a given circle...
@@ -257,13 +172,13 @@ namespace AmeisenBotX.Core.Engines.Movement.Objects
             Random rnd = new();
             Vector3 currentPosition = Bot.Player.Position;
 
-            Vector3 newRandomPosition = new(0, 0, 0);
+            Vector3 newRandomPosition = new();
             newRandomPosition += CalculateFuturePosition(currentPosition, Bot.Player.Rotation, ((float)rnd.NextDouble() * 4.0f) + 4.0f);
 
             // rotate the vector by random amount of degrees
             newRandomPosition.Rotate(rnd.Next(-14, 14));
 
-            return Seek(newRandomPosition, multiplier);
+            return Seek(newRandomPosition, maxSteering, maxVelocity, multiplier);
         }
 
         private static Vector3 CalculateFuturePosition(Vector3 position, float targetRotation, float targetVelocity)
@@ -280,104 +195,45 @@ namespace AmeisenBotX.Core.Engines.Movement.Objects
             };
         }
 
-        private static Vector3 CalculatPositionBehind(Vector3 position, float targetRotation, float targetVelocity)
+        private Vector3 GetForce(MovementAction movementAction, Vector3 targetPosition, float rotation, float maxSteering, float maxVelocity, float seperationDistance)
         {
-            float rotation = targetRotation + MathF.PI;
-
-            if (rotation > 2.0f * MathF.PI)
+            return movementAction switch
             {
-                rotation -= 2.0f * MathF.PI;
-            }
+                MovementAction.Move => Seek(targetPosition, maxSteering, maxVelocity, 0.85f)
+                                     + AvoidObstacles(maxSteering, maxVelocity, 0.1f)
+                                     + Seperate(seperationDistance, maxVelocity, 0.05f),
 
-            float x = position.X + (MathF.Cos(rotation) * targetVelocity);
-            float y = position.Y + (MathF.Sin(rotation) * targetVelocity);
+                MovementAction.Follow => Seek(targetPosition, maxSteering, maxVelocity, 0.9f)
+                                       + Seperate(seperationDistance, maxVelocity, 0.05f)
+                                       + AvoidObstacles(maxSteering, maxVelocity, 0.05f),
 
-            return new()
-            {
-                X = x,
-                Y = y,
-                Z = position.Z
+                MovementAction.Chase => Seek(targetPosition, maxSteering, maxVelocity, 1.0f),
+                MovementAction.Flee => Flee(targetPosition, maxSteering, maxVelocity, 1.0f).ZeroZ(),
+                MovementAction.Evade => Evade(targetPosition, maxSteering, maxVelocity, 1.0f, rotation),
+                MovementAction.Wander => Wander(maxSteering, maxVelocity, 1.0f).ZeroZ(),
+                MovementAction.Unstuck => Unstuck(maxSteering, maxVelocity, 1.0f),
+
+                _ => Vector3.Zero,
             };
         }
 
-        private List<Vector3> GetForces(MovementAction movementAction, Vector3 targetPosition, float rotation = 0f, bool enablePlayerForces = false)
+        private Vector3 GetNearestBlacklistForce(float maxSteering, float maxVelocity, float maxDistance = 8.0f)
         {
-            List<Vector3> forces = new();
-
-            switch (movementAction)
-            {
-                case MovementAction.Move:
-                    forces.Add(Seek(targetPosition, 1f));
-
-                    if (enablePlayerForces)
-                    {
-                        forces.Add(Seperate(0.05f));
-                    }
-
-                    forces.Add(AvoidObstacles(0.5f));
-                    break;
-
-                case MovementAction.Follow:
-                    forces.Add(Seek(targetPosition, 1f));
-                    forces.Add(Seperate(0.03f));
-                    forces.Add(AvoidObstacles(0.03f));
-                    break;
-
-                case MovementAction.Chase:
-                    forces.Add(Seek(targetPosition, 1f));
-                    break;
-
-                case MovementAction.Flee:
-                    Vector3 fleeForce = Flee(targetPosition, 1f);
-                    fleeForce.Z = 0; // set z to zero to avoid going under the terrain
-                    forces.Add(fleeForce);
-                    break;
-
-                case MovementAction.Evade:
-                    forces.Add(Evade(targetPosition, 1f, rotation));
-                    break;
-
-                case MovementAction.Wander:
-                    Vector3 wanderForce = Wander(1f);
-                    wanderForce.Z = 0; // set z to zero to avoid going under the terrain
-                    forces.Add(wanderForce);
-                    break;
-
-                case MovementAction.Unstuck:
-                    forces.Add(Unstuck(1f));
-                    break;
-
-                case MovementAction.None:
-                    break;
-
-                case MovementAction.DirectMove:
-                    break;
-
-                default:
-                    break;
-            }
-
-            return forces;
-        }
-
-        private Vector3 GetNearestBlacklistForce(float maxDistance = 8.0f)
-        {
-            Vector3 force = new(0, 0, 0);
+            Vector3 force = new();
 
             if (Bot.Db.TryGetBlacklistPosition((int)Bot.Objects.MapId, Bot.Player.Position, maxDistance, out IEnumerable<Vector3> nodes))
             {
-                force += Flee(nodes.First(), 0.5f);
+                force += Flee(nodes.First(), 0.5f, maxSteering, maxVelocity);
             }
 
             return force;
         }
 
-        private Vector3 GetObjectForceAroundMe<T>(float maxDistance = 3.0f) where T : IWowObject
+        private Vector3 GetObjectForceAroundMe<T>(float maxSteering, float maxVelocity, float maxDistance = 3.0f) where T : IWowObject
         {
-            Vector3 force = new(0, 0, 0);
-            Vector3 vehiclePosition = Bot.Player.Position;
             int count = 0;
-
+            Vector3 force = new();
+            Vector3 vehiclePosition = Bot.Player.Position;
             List<(Vector3, float)> objectDistances = new();
 
             // we need to know every objects position and distance to later apply a force pushing us
@@ -405,7 +261,7 @@ namespace AmeisenBotX.Core.Engines.Movement.Objects
 
             for (int i = 0; i < objectDistances.Count; ++i)
             {
-                force += Flee(objectDistances[i].Item1, objectDistances[i].Item2 * normalizingMultiplier);
+                force += Flee(objectDistances[i].Item1, objectDistances[i].Item2 * normalizingMultiplier, maxSteering, maxVelocity);
                 count++;
             }
 

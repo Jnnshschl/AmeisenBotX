@@ -149,12 +149,53 @@ namespace AmeisenBotX.Common.Math
             Z = v.Z > 0f ? Z / v.Z : 0f;
         }
 
+        public Vector3 Limited(float limit)
+        {
+            Limit(limit);
+            return this;
+        }
+
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public void Divide(float n)
         {
             X = n > 0f ? X / n : 0f;
             Y = n > 0f ? Y / n : 0f;
             Z = n > 0f ? Z / n : 0f;
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public Vector3 Normalized()
+        {
+            return Normalized(GetMagnitude());
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public Vector3 Normalized(float magnitude)
+        {
+            if (magnitude > 0.0f)
+            {
+                return new
+                (
+                    X /= magnitude,
+                    Y /= magnitude,
+                    Z /= magnitude
+                );
+            }
+
+            return this;
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public Vector3 ZeroZ()
+        {
+            return AdjustedZ(0.0f);
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public Vector3 AdjustedZ(float z)
+        {
+            Z = z;
+            return this;
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]

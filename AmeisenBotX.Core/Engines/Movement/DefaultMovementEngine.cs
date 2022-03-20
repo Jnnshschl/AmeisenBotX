@@ -24,7 +24,7 @@ namespace AmeisenBotX.Core.Engines.Movement
             PathQueue = new();
             PlacesToAvoidList = new();
 
-            PlayerVehicle = new(bot, config);
+            PlayerVehicle = new(bot);
         }
 
         public float CurrentSpeed { get; private set; }
@@ -129,7 +129,16 @@ namespace AmeisenBotX.Core.Engines.Movement
                     // we need to move to the node
                     if (!Bot.Player.IsCasting)
                     {
-                        PlayerVehicle.Update(MoveCharacter, Status, currentNode);
+                        PlayerVehicle.Update
+                        (
+                            MoveCharacter,
+                            Status,
+                            currentNode,
+                            Bot.Player.Rotation,
+                            Bot.Player.IsInCombat ? Config.MovementSettings.MaxSteeringCombat : Config.MovementSettings.MaxSteering,
+                            Config.MovementSettings.MaxVelocity,
+                            Config.MovementSettings.SeperationDistance
+                        );
                     }
                 }
                 else
@@ -199,13 +208,7 @@ namespace AmeisenBotX.Core.Engines.Movement
         public void StopMovement()
         {
             Reset();
-
-            if (Bot.Player != null && Bot.Wow.IsClickToMoveActive())
-            {
-                Bot.Character.MoveToPosition(Bot.Player.Position, 20.9f, 0.5f);
-            }
-
-            // Bot.Wow.StopClickToMove();
+            Bot.Wow.StopClickToMove();
         }
 
         public bool TryGetPath(Vector3 position, out IEnumerable<Vector3> path, float maxDistance = 5.0f)
@@ -281,29 +284,30 @@ namespace AmeisenBotX.Core.Engines.Movement
             {
                 if (LastMovement != default && DateTime.UtcNow - LastMovement < TimeSpan.FromSeconds(1))
                 {
-                    CurrentSpeed = LastPosition.GetDistance(Bot.Player.Position) / (float)(DateTime.UtcNow - LastMovement).TotalSeconds;
+                    CurrentSpeed = LastPosition.GetDistance2D(Bot.Player.Position) / (float)(DateTime.UtcNow - LastMovement).TotalSeconds;
 
-                    if (IsUnstucking && CurrentSpeed > 1.0f)
-                    {
-                        IsUnstucking = false;
-                    }
-
-                    if (CurrentSpeed == 0.0f && !IsUnstucking)
-                    {
-                        // hard stuck
-                        IsUnstucking = true;
-
-                        // get position behind us
-                        Vector3 positionBehind = BotUtils.MoveAhead(Bot.Player.Position, Bot.Player.Rotation, -Config.MovementSettings.UnstuckDistance);
-                        UnstuckTarget = Bot.PathfindingHandler.GetRandomPointAround((int)Bot.Objects.MapId, positionBehind, 5.0f);
-
-                        Reset();
-                        SetMovementAction(MovementAction.Move, UnstuckTarget);
-                    }
-                    else if (CurrentSpeed < 0.1f)
+                    if (CurrentSpeed > 0.0f && CurrentSpeed < 0.1f)
                     {
                         // soft stuck
                         Bot.Character.Jump();
+                    }
+
+                    if (IsUnstucking)
+                    {
+                        if ((CurrentSpeed > 1.0f && UnstuckTarget.GetDistance(Bot.Player.Position) <= Config.MovementSettings.WaypointCheckThreshold) || UnstuckTarget == Vector3.Zero)
+                        {
+                            IsUnstucking = false;
+                            UnstuckTarget = Vector3.Zero;
+                        }
+                    }
+                    else
+                    {
+                        if (CurrentSpeed == 0.0f)
+                        {
+                            IsUnstucking = true;
+                            UnstuckTarget = Bot.PathfindingHandler.GetRandomPointAround((int)Bot.Objects.MapId, Bot.Player.Position, 6.0f);
+                            SetMovementAction(MovementAction.Move, UnstuckTarget);
+                        }
                     }
                 }
 
@@ -340,7 +344,7 @@ namespace AmeisenBotX.Core.Engines.Movement
             if (filteredMounts != null && filteredMounts.Any())
             {
                 WowMount mount = filteredMounts.ElementAt(new Random().Next(0, filteredMounts.Count()));
-                PreventMovement(TimeSpan.FromSeconds(1));
+                PreventMovement(TimeSpan.FromSeconds(2));
                 Bot.Wow.CallCompanion(mount.Index, "MOUNT");
             }
         }
@@ -349,14 +353,14 @@ namespace AmeisenBotX.Core.Engines.Movement
         {
             Vector3 node = Bot.PathfindingHandler.MoveAlongSurface((int)Bot.Objects.MapId, Bot.Player.Position, positionToGoTo);
 
-            if (node != default)
+            if (node != Vector3.Zero)
             {
-                Bot.Character.MoveToPosition(node);
-            }
+                Bot.Character.MoveToPosition(node, MathF.Tau, 0.25f);
 
-            if (Config.MovementSettings.EnableDistanceMovedJumpCheck)
-            {
-                DistanceMovedJumpCheck();
+                if (Config.MovementSettings.EnableDistanceMovedJumpCheck)
+                {
+                    DistanceMovedJumpCheck();
+                }
             }
         }
     }

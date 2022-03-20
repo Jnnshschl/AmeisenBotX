@@ -558,7 +558,6 @@
                         <SolidColorBrush Color="{DynamicResource DarkForeground}" />
                     </Border.BorderBrush>
                     <Grid>
-                        <Slider x:Name="sliderMaxAccelerationNormal" HorizontalAlignment="Left" Margin="4,107,0,0" VerticalAlignment="Top" Width="179" Maximum="100" Minimum="1" SmallChange="1" Style="{DynamicResource SliderStyleDark}" ValueChanged="SliderMaxAccelerationNormal_ValueChanged" FontFamily="Bahnschrift Light" />
                         <Label x:Name="labelFollowing3" Content="Normal:" HorizontalAlignment="Left" VerticalAlignment="Top" FontFamily="Bahnschrift Light" Margin="4,4,0,0" BorderThickness="0,0,0,1" Width="180" Padding="0,5,5,5">
                             <Label.BorderBrush>
                                 <SolidColorBrush Color="{DynamicResource DarkAccent1}" />
@@ -573,12 +572,6 @@
                                 <SolidColorBrush Color="{DynamicResource DarkForeground}" />
                             </Label.Foreground>
                         </Label>
-                        <Label x:Name="labelMaxAccelerationNormal" Content="Max Acceleration:" HorizontalAlignment="Left" VerticalAlignment="Top" FontFamily="Bahnschrift Light" Margin="3,82,0,0" Padding="0,5,5,5">
-                            <Label.Foreground>
-                                <SolidColorBrush Color="{DynamicResource DarkForeground}" />
-                            </Label.Foreground>
-                        </Label>
-                        <Slider x:Name="sliderMaxAccelerationCombat" HorizontalAlignment="Left" Margin="244,107,0,0" VerticalAlignment="Top" Width="179" Maximum="100" Minimum="1" SmallChange="1" Style="{DynamicResource SliderStyleDark}" ValueChanged="SliderMaxAccelerationCombat_ValueChanged" FontFamily="Bahnschrift Light" />
                         <Label x:Name="labelFollowing3_Copy" Content="Combat:" HorizontalAlignment="Left" VerticalAlignment="Top" FontFamily="Bahnschrift Light" Margin="244,4,0,0" BorderThickness="0,0,0,1" Width="180" Padding="0,5,5,5">
                             <Label.BorderBrush>
                                 <SolidColorBrush Color="{DynamicResource DarkAccent1}" />
@@ -593,17 +586,12 @@
                                 <SolidColorBrush Color="{DynamicResource DarkForeground}" />
                             </Label.Foreground>
                         </Label>
-                        <Label x:Name="labelMaxAccelerationCombat" Content="Max Acceleration:" HorizontalAlignment="Left" VerticalAlignment="Top" FontFamily="Bahnschrift Light" Margin="242,82,0,0" Padding="0,5,5,5">
-                            <Label.Foreground>
-                                <SolidColorBrush Color="{DynamicResource DarkForeground}" />
-                            </Label.Foreground>
-                        </Label>
                         <Label x:Name="labelWindowPositions_Copy2" Content="General" HorizontalAlignment="Left" VerticalAlignment="Top" FontFamily="Bahnschrift Light" Margin="472,4,0,0" BorderBrush="{DynamicResource Button.MouseOver.Border}" BorderThickness="0,0,0,1" Width="180" Padding="0,5,5,5">
                             <Label.Foreground>
                                 <SolidColorBrush Color="{DynamicResource DarkForeground}" />
                             </Label.Foreground>
                         </Label>
-                        <Slider x:Name="sliderMaxVelocity" HorizontalAlignment="Left" Margin="472,59,0,0" VerticalAlignment="Top" Width="179" Maximum="12" Minimum="0.1" Style="{DynamicResource SliderStyleDark}" ValueChanged="SliderMaxVelocity_ValueChanged" FontFamily="Bahnschrift Light" LargeChange="0.1" />
+                        <Slider x:Name="sliderMaxVelocity" HorizontalAlignment="Left" Margin="472,59,0,0" VerticalAlignment="Top" Width="179" Maximum="60" Minimum="5" Style="{DynamicResource SliderStyleDark}" ValueChanged="SliderMaxVelocity_ValueChanged" FontFamily="Bahnschrift Light" LargeChange="5" SmallChange="1" />
                         <Label x:Name="labelMaxVelocity" Content="Max Velocity:" HorizontalAlignment="Left" VerticalAlignment="Top" FontFamily="Bahnschrift Light" Margin="472,34,0,0" Padding="0,5,5,5" Width="179">
                             <Label.Foreground>
                                 <SolidColorBrush Color="{DynamicResource DarkForeground}" />

@@ -188,12 +188,10 @@ namespace AmeisenBotX
                 Config.Username = textboxUsername.Text;
 
                 Config.MovementSettings.EnableDistanceMovedJumpCheck = checkboxDistanceMovedJumpCheck.IsChecked.GetValueOrDefault(false);
-                Config.MovementSettings.MaxAcceleration = (float)sliderMaxAccelerationNormal.Value / 100.0f;
-                Config.MovementSettings.MaxAccelerationCombat = (float)sliderMaxAccelerationCombat.Value / 100.0f;
-                Config.MovementSettings.MaxSteering = (float)sliderMaxSteeringNormal.Value / 100.0f;
-                Config.MovementSettings.MaxVelocity = (float)sliderMaxVelocity.Value;
+                Config.MovementSettings.MaxSteering = (float)sliderMaxSteeringNormal.Value / 10.0f;
+                Config.MovementSettings.MaxSteeringCombat = (float)sliderMaxSteeringCombat.Value / 10.0f;
+                Config.MovementSettings.MaxVelocity = (float)sliderMaxVelocity.Value / 10.0f;
                 Config.MovementSettings.WaypointCheckThresholdMounted = sliderWaypointThresholdMount.Value;
-                Config.MovementSettings.MaxSteeringCombat = (float)sliderMaxSteeringCombat.Value / 100.0f;
                 Config.MovementSettings.SeperationDistance = (float)sliderPlayerSeperationDistance.Value;
                 Config.MovementSettings.WaypointCheckThreshold = sliderWaypointThreshold.Value;
 
@@ -511,11 +509,9 @@ namespace AmeisenBotX
             textboxWowPath.Text = Config.PathToWowExe;
 
             checkboxDistanceMovedJumpCheck.IsChecked = Config.MovementSettings.EnableDistanceMovedJumpCheck;
-            sliderMaxAccelerationCombat.Value = Config.MovementSettings.MaxAccelerationCombat * 100.0f;
-            sliderMaxAccelerationNormal.Value = Config.MovementSettings.MaxAcceleration * 100.0f;
-            sliderMaxSteeringCombat.Value = Config.MovementSettings.MaxSteeringCombat * 100.0f;
-            sliderMaxSteeringNormal.Value = Config.MovementSettings.MaxSteering * 100.0f;
-            sliderMaxVelocity.Value = Config.MovementSettings.MaxVelocity;
+            sliderMaxSteeringCombat.Value = Config.MovementSettings.MaxSteeringCombat * 10.0f;
+            sliderMaxSteeringNormal.Value = Config.MovementSettings.MaxSteering * 10.0f;
+            sliderMaxVelocity.Value = Config.MovementSettings.MaxVelocity * 10.0f;
             sliderPlayerSeperationDistance.Value = Config.MovementSettings.SeperationDistance;
             sliderWaypointThreshold.Value = Config.MovementSettings.WaypointCheckThreshold;
             sliderWaypointThresholdMount.Value = Config.MovementSettings.WaypointCheckThresholdMounted;
@@ -623,24 +619,6 @@ namespace AmeisenBotX
             }
         }
 
-        private void SliderMaxAccelerationCombat_ValueChanged(object sender, RoutedPropertyChangedEventArgs<double> e)
-        {
-            if (WindowLoaded)
-            {
-                labelMaxAccelerationCombat.Content = $"Max Acceleration: {MathF.Round((float)e.NewValue / 100.0f, 2)}m/tick";
-                ChangedSomething = true;
-            }
-        }
-
-        private void SliderMaxAccelerationNormal_ValueChanged(object sender, RoutedPropertyChangedEventArgs<double> e)
-        {
-            if (WindowLoaded)
-            {
-                labelMaxAccelerationNormal.Content = $"Max Acceleration: {MathF.Round((float)e.NewValue / 100.0f, 2)}m/tick";
-                ChangedSomething = true;
-            }
-        }
-
         private void SliderMaxFollowDistance_ValueChanged(object sender, RoutedPropertyChangedEventArgs<double> e)
         {
             if (WindowLoaded)
@@ -672,7 +650,7 @@ namespace AmeisenBotX
         {
             if (WindowLoaded)
             {
-                labelMaxSteeringCombat.Content = $"Max Steering: {MathF.Round((float)e.NewValue / 100.0f, 2)}m/tick";
+                labelMaxSteeringCombat.Content = $"Max Steering: {MathF.Round((float)e.NewValue / 10.0f, 2)}m/s";
                 ChangedSomething = true;
             }
         }
@@ -681,7 +659,7 @@ namespace AmeisenBotX
         {
             if (WindowLoaded)
             {
-                labelMaxSteeringNormal.Content = $"Max Steering: {MathF.Round((float)e.NewValue / 100.0f, 2)}m/tick";
+                labelMaxSteeringNormal.Content = $"Max Steering: {MathF.Round((float)e.NewValue / 10.0f, 2)}m/s";
                 ChangedSomething = true;
             }
         }
@@ -690,7 +668,7 @@ namespace AmeisenBotX
         {
             if (WindowLoaded)
             {
-                labelMaxVelocity.Content = $"Max Velocity: {MathF.Round((float)e.NewValue / 100.0f, 2)}m/tick";
+                labelMaxVelocity.Content = $"Max Velocity: {MathF.Round((float)e.NewValue / 10.0f, 2)}m/s";
                 ChangedSomething = true;
             }
         }
