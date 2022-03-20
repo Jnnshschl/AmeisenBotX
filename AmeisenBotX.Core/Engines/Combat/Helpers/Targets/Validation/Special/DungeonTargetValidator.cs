@@ -23,11 +23,6 @@ namespace AmeisenBotX.Core.Engines.Combat.Helpers.Targets.Validation.Special
             };
         }
 
-        private bool TempleOfTheJadeSerpent(IWowUnit arg)
-        {
-            return arg.Auras.Any(e => e.SpellId == 113315 && e.StackCount >= 2); // Peril and Strafe
-        }
-
         private AmeisenBotInterfaces Bot { get; }
 
         private Dictionary<WowMapId, Func<IWowUnit, bool>> Validations { get; }
@@ -51,6 +46,11 @@ namespace AmeisenBotX.Core.Engines.Combat.Helpers.Targets.Validation.Special
         private bool HallsOfReflectionIsTheLichKing(IWowUnit unit)
         {
             return Bot.Db.GetUnitName(unit, out string name) && name == "The Lich King";
+        }
+
+        private bool TempleOfTheJadeSerpent(IWowUnit unit)
+        {
+            return unit.Auras.Any(e => e.SpellId == 113315 || e.SpellId == 106062); // Peril and Strafe || Wise Mari
         }
 
         private bool ThroneOfTidesIsLadyNazjarChanneling(IWowUnit unit)

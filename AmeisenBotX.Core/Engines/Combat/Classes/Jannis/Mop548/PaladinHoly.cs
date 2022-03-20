@@ -71,7 +71,7 @@ namespace AmeisenBotX.Core.Engines.Combat.Classes.Jannis.Mop548
                 { 2, (x) => TryCastSpell(Paladin548.Rebuke, x.Guid, true) },
             };
 
-            // SpellAbortFunctions.Add(HealingManager.ShouldAbortCasting);
+            SpellAbortFunctions.Add(HealingManager.ShouldAbortCasting);
             ChangeBeaconEvent = new(TimeSpan.FromSeconds(1));
         }
 
