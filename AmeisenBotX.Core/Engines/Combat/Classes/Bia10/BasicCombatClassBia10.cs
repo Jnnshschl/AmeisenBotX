@@ -340,7 +340,7 @@ namespace AmeisenBotX.Core.Engines.Combat.Classes.Bia10
                 return false;
             }
 
-            IWowItem item = Bot.Objects.WowObjects.OfType<IWowItem>().FirstOrDefault(e => e.EntryId == itemId);
+            IWowItem item = Bot.Objects.All.OfType<IWowItem>().FirstOrDefault(e => e.EntryId == itemId);
             if (item == null)
             {
                 return false;
@@ -574,11 +574,11 @@ namespace AmeisenBotX.Core.Engines.Combat.Classes.Bia10
             switch (angleDiff)
             {
                 case < 0:
-                    angleDiff += BotMath.DOUBLE_PI;
+                    angleDiff += MathF.Tau;
                     break;
 
-                case > BotMath.DOUBLE_PI:
-                    angleDiff -= BotMath.DOUBLE_PI;
+                case > MathF.Tau:
+                    angleDiff -= MathF.Tau;
                     break;
             }
 

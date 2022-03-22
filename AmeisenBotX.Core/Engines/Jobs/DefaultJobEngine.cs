@@ -103,7 +103,7 @@ namespace AmeisenBotX.Core.Engines.Jobs
 
             if (SellActionsNeeded > 0)
             {
-                IWowGameobject mailboxNode = Bot.Objects.WowObjects.OfType<IWowGameobject>()
+                IWowGameobject mailboxNode = Bot.Objects.All.OfType<IWowGameobject>()
                     .Where(x => Enum.IsDefined(typeof(MailBox), x.DisplayId)
                             && x.Position.GetDistance(Bot.Player.Position) < 15)
                     .OrderBy(x => x.Position.GetDistance(Bot.Player.Position))
@@ -165,7 +165,7 @@ namespace AmeisenBotX.Core.Engines.Jobs
                 // search for nodes
                 int miningSkill = Bot.Character.Skills.ContainsKey("Mining") ? Bot.Character.Skills["Mining"].Item1 : 0;
 
-                IWowGameobject nearestNode = Bot.Objects.WowObjects.OfType<IWowGameobject>()
+                IWowGameobject nearestNode = Bot.Objects.All.OfType<IWowGameobject>()
                     .Where(e => !NodeBlacklist.Contains(e.Guid)
                              && Enum.IsDefined(typeof(WowOreId), e.DisplayId)
                              && miningProfile.OreTypes.Contains((WowOreId)e.DisplayId)

@@ -45,6 +45,9 @@ namespace AmeisenBotX.Wow.Objects
         ///<inheritdoc cref="IObjectProvider.OnObjectUpdateComplete"/>
         public event Action<IEnumerable<IWowObject>> OnObjectUpdateComplete;
 
+        ///<inheritdoc cref="IObjectProvider.All"/>
+        public IEnumerable<IWowObject> All { get; protected set; }
+
         ///<inheritdoc cref="IObjectProvider.Camera"/>
         public RawCameraInfo Camera { get; protected set; }
 
@@ -113,9 +116,6 @@ namespace AmeisenBotX.Wow.Objects
 
         ///<inheritdoc cref="IObjectProvider.Vehicle"/>
         public IWowUnit Vehicle { get; protected set; }
-
-        ///<inheritdoc cref="IObjectProvider.WowObjects"/>
-        public IEnumerable<IWowObject> WowObjects { get; protected set; }
 
         ///<inheritdoc cref="IObjectProvider.ZoneId"/>
         public int ZoneId { get; protected set; }
@@ -224,8 +224,8 @@ namespace AmeisenBotX.Wow.Objects
                 // read the party/raid leaders guid and if there is one, the group too
                 ReadParty();
 
-                WowObjects = wowObjects[0..ObjectCount];
-                OnObjectUpdateComplete?.Invoke(WowObjects);
+                All = wowObjects[0..ObjectCount];
+                OnObjectUpdateComplete?.Invoke(All);
             }
         }
 

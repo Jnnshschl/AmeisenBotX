@@ -253,7 +253,6 @@ namespace AmeisenBotX.Test
         public void Vector3RotationTest()
         {
             Vector3 a = new(1, 0, 0);
-
             a.Rotate(180);
 
             Assert.AreEqual(-1f, a.X);

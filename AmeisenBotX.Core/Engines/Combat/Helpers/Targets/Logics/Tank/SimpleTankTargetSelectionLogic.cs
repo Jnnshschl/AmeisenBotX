@@ -31,7 +31,7 @@ namespace AmeisenBotX.Core.Engines.Combat.Helpers.Targets.Logics.Tank
         {
             possibleTargets = null;
 
-            IEnumerable<IWowUnit> unitsAroundMe = Bot.Objects.WowObjects
+            IEnumerable<IWowUnit> unitsAroundMe = Bot.Objects.All
                 .OfType<IWowUnit>()
                 .Where(e => TargetValidator.IsValid(e) && e.IsInCombat)
                 .OrderByDescending(e => e.Type)

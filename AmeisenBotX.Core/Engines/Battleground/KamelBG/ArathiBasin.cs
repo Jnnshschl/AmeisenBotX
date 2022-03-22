@@ -82,7 +82,7 @@ namespace AmeisenBotX.Core.Engines.Battleground.KamelBG
         {
             Combat();
 
-            IWowGameobject FlagNode = Bot.Objects.WowObjects
+            IWowGameobject FlagNode = Bot.Objects.All
             .OfType<IWowGameobject>()
             .Where(x => !FlagsNodelist.Contains((Flags)x.DisplayId)
                     && Enum.IsDefined(typeof(Flags), x.DisplayId)

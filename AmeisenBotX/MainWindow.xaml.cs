@@ -270,6 +270,11 @@ namespace AmeisenBotX
             // WowCreatureType type = AmeisenBot.Bot.Objects.Target.ReadType(AmeisenBot.Bot.Memory);
             // bool x = AmeisenBot.Bot.Player.IsSwimming;
             // bool y = AmeisenBot.Bot.Player.IsFlying;
+
+            foreach (IWowDynobject aoe in AmeisenBot.Bot.Objects.All.OfType<IWowDynobject>().Where(e => e.Caster == 1))
+            {
+                Vector3 pos = aoe.Position;
+            }
         }
 
         private void ComboboxStateOverride_SelectionChanged(object sender, System.Windows.Controls.SelectionChangedEventArgs e)

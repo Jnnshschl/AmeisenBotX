@@ -149,6 +149,12 @@ namespace AmeisenBotX.Common.Math
             Z = v.Z > 0f ? Z / v.Z : 0f;
         }
 
+        public Vector3 Truncated(float max)
+        {
+            Truncate(max);
+            return this;
+        }
+
         public Vector3 Limited(float limit)
         {
             Limit(limit);
@@ -249,6 +255,21 @@ namespace AmeisenBotX.Common.Math
             X = X < 0f ? MathF.Max(X, limit * -1f) : MathF.Min(X, limit);
             Y = Y < 0f ? MathF.Max(Y, limit * -1f) : MathF.Min(Y, limit);
             Z = Z < 0f ? MathF.Max(Z, limit * -1f) : MathF.Min(Z, limit);
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public void Truncate(float max)
+        {
+            float factor = max / GetMagnitude();
+            Scale(factor < 1.0f ? factor : 1.0f);
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public void Scale(float factor)
+        {
+            X *= factor;
+            Y *= factor;
+            Z *= factor;
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]

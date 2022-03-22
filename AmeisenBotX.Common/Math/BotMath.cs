@@ -6,7 +6,6 @@ namespace AmeisenBotX.Common.Math
 {
     public static class BotMath
     {
-        public const float DOUBLE_PI = MathF.PI * 2.0f;
         public const float HALF_PI = MathF.PI / 2.0f;
         public const float M_SQRT1_2 = 0.707106781186547524401f;
         public const float M_SQRT2 = 1.41421356237309504880f;
@@ -22,28 +21,6 @@ namespace AmeisenBotX.Common.Math
         public static Vector3 CalculatePositionBehind(Vector3 position, float rotation, float distanceToMove = 2.0f)
         {
             return CalculatePositionAround(position, rotation, MathF.PI, distanceToMove);
-        }
-
-        /// <summary>
-        /// Clamps an angle to 0 - 2*PI
-        /// </summary>
-        /// <param name="angle">Current angle</param>
-        /// <returns></returns>
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static float ClampAngles(float angle)
-        {
-            switch (angle)
-            {
-                case < 0.0f:
-                    angle += DOUBLE_PI;
-                    break;
-
-                case > DOUBLE_PI:
-                    angle -= DOUBLE_PI;
-                    break;
-            }
-
-            return angle;
         }
 
         /// <summary>
@@ -67,7 +44,7 @@ namespace AmeisenBotX.Common.Math
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static float GetFacingAngle(Vector3 position, Vector3 targetPosition)
         {
-            return ClampAngles(MathF.Atan2(targetPosition.Y - position.Y, targetPosition.X - position.X));
+            return ClampAngle(MathF.Atan2(targetPosition.Y - position.Y, targetPosition.X - position.X));
         }
 
         /// <summary>
@@ -93,8 +70,8 @@ namespace AmeisenBotX.Common.Math
         public static float GetSlope(Vector3 startPoint, Vector3 endPoint, bool toPercentage = false)
         {
             // calculate the values of the run and rise
-            float run = System.Math.Abs(endPoint.X - startPoint.X);
-            float rise = System.Math.Abs(endPoint.Y - startPoint.Y);
+            float run = System.MathF.Abs(endPoint.X - startPoint.X);
+            float rise = System.MathF.Abs(endPoint.Y - startPoint.Y);
 
             if (!toPercentage)
             {
@@ -107,18 +84,24 @@ namespace AmeisenBotX.Common.Math
         public static bool IsFacing(Vector3 position, float rotation, Vector3 targetPosition, float maxAngleDiff = 1.5f)
         {
             float facingAngle = GetFacingAngle(position, targetPosition);
-            float angleDiff = facingAngle - rotation;
-
-            if (angleDiff < 0)
-            {
-                angleDiff += DOUBLE_PI;
-            }
-            else if (angleDiff > DOUBLE_PI)
-            {
-                angleDiff -= DOUBLE_PI;
-            }
-
+            float angleDiff = ClampAngle(facingAngle - rotation);
             return angleDiff <= maxAngleDiff;
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static float ClampAngle(float angle)
+        {
+            while (angle < 0.0f)
+            {
+                angle += MathF.Tau;
+            }
+
+            while (angle > MathF.Tau)
+            {
+                angle -= MathF.Tau;
+            }
+
+            return angle;
         }
 
         /// <summary>

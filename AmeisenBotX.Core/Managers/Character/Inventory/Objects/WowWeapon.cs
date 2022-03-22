@@ -7,24 +7,7 @@ namespace AmeisenBotX.Core.Managers.Character.Inventory.Objects
     {
         public WowWeapon(IWowInventoryItem wowBasicItem) : base(wowBasicItem)
         {
-            Id = wowBasicItem.Id;
-            BagId = wowBasicItem.BagId;
-            BagSlot = wowBasicItem.BagSlot;
-            Type = wowBasicItem.Type;
-            Subtype = wowBasicItem.Subtype;
-            Name = wowBasicItem.Name;
-            ItemLink = wowBasicItem.ItemLink;
-            EquipSlot = wowBasicItem.EquipSlot;
-            ItemQuality = wowBasicItem.ItemQuality;
-            ItemLevel = wowBasicItem.ItemLevel;
-            RequiredLevel = wowBasicItem.RequiredLevel;
-            Price = wowBasicItem.Price;
-            Count = wowBasicItem.Count;
-            MaxStack = wowBasicItem.MaxStack;
-            Durability = wowBasicItem.Durability;
-            MaxDurability = wowBasicItem.MaxDurability;
-            EquipLocation = wowBasicItem.EquipLocation;
-            WeaponType = Enum.TryParse(GetWeaponTypeName(Subtype), out WowWeaponType weaponType)
+            WeaponType = Enum.TryParse(GetWeaponTypeName(Subtype.ToLowerInvariant()), true, out WowWeaponType weaponType)
                 ? weaponType : WowWeaponType.Misc;
         }
 
@@ -85,7 +68,7 @@ namespace AmeisenBotX.Core.Managers.Character.Inventory.Objects
                 return "Staff";
             }
 
-            if (subType.Contains("-"))
+            if (subType.Contains('-'))
             {
                 string handedness = subType.Replace("-", string.Empty).Split(" ", 2)[0];
                 string weaponType = subType.Replace("-", string.Empty).Split(" ", 2)[1];
@@ -105,10 +88,10 @@ namespace AmeisenBotX.Core.Managers.Character.Inventory.Objects
 
             if (subType.EndsWith("s"))
             {
-                return subType = subType.Remove(subType.Length - 1);
+                return subType.Remove(subType.Length - 1);
             }
 
-            return string.Empty;
+            return subType;
         }
     }
 }

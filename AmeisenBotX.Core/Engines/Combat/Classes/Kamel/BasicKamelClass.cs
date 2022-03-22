@@ -185,7 +185,7 @@ namespace AmeisenBotX.Core.Engines.Combat.Classes.Kamel
                 {
                     if (slot == WowEquipmentSlot.INVSLOT_MAINHAND)
                     {
-                        IWowItem item = Bot.Objects.WowObjects.OfType<IWowItem>().FirstOrDefault(e => e.EntryId == itemId);
+                        IWowItem item = Bot.Objects.All.OfType<IWowItem>().FirstOrDefault(e => e.EntryId == itemId);
 
                         if (item != null
                             && !item.GetEnchantmentStrings().Any(e => e.Contains(enchantmentName))
@@ -196,7 +196,7 @@ namespace AmeisenBotX.Core.Engines.Combat.Classes.Kamel
                     }
                     else if (slot == WowEquipmentSlot.INVSLOT_OFFHAND)
                     {
-                        IWowItem item = Bot.Objects.WowObjects.OfType<IWowItem>().LastOrDefault(e => e.EntryId == itemId);
+                        IWowItem item = Bot.Objects.All.OfType<IWowItem>().LastOrDefault(e => e.EntryId == itemId);
 
                         if (item != null
                             && !item.GetEnchantmentStrings().Any(e => e.Contains(enchantmentName))

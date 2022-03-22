@@ -156,9 +156,10 @@ namespace AmeisenBotX.Core
                 new OpenMapIdleAction(Bot),
                 new FcfsIdleAction
                 (
-                    "Look at Group/NPCs/World",
+                    "Look at Target/Group/NPCs/World",
                     new()
                     {
+                        new LookAtTargetIdleAction(Bot),
                         new FcfsIdleAction(new() { new LookAtNpcsIdleAction(Bot), new LookAtGroupmemberIdleAction(Bot) }),
                         new LookAtGroupIdleAction(Bot),
                         new LookAroundIdleAction(Bot)
@@ -205,7 +206,7 @@ namespace AmeisenBotX.Core
             Bot.Test = new DefaultTestEngine(Bot, Config);
 
             Bot.PathfindingHandler = new AmeisenNavigationHandler(Config.NavmeshServerIp, Config.NameshServerPort);
-            Bot.Movement = new DefaultMovementEngine(Bot, Config);
+            Bot.Movement = new MovementEngine(Bot, Config);
             // wow interface setup done
 
             AmeisenLogger.I.Log("AmeisenBot", "Finished setting up Bot", LogLevel.Verbose);

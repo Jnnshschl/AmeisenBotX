@@ -34,7 +34,7 @@ namespace AmeisenBotX.Core.Engines.Tactic.Bosses.TheObsidianSanctum10
 
         private AmeisenBotInterfaces Bot { get; }
 
-        private IWowGameobject NearestPortal => Bot.Objects.WowObjects.OfType<IWowGameobject>().FirstOrDefault(e => e.DisplayId == 1327 && e.Position.GetDistance(Bot.Player.Position) < 80.0);
+        private IWowGameobject NearestPortal => Bot.Objects.All.OfType<IWowGameobject>().FirstOrDefault(e => e.DisplayId == 1327 && e.Position.GetDistance(Bot.Player.Position) < 80.0);
 
         private TimegatedEvent PortalClickEvent { get; }
 

@@ -20,7 +20,7 @@ namespace AmeisenBotX.Core.Managers.Character.Inventory
         public CharacterEquipment(IWowInterface wowInterface)
         {
             Wow = wowInterface;
-            Items = new Dictionary<WowEquipmentSlot, IWowInventoryItem>();
+            Items = new();
         }
 
         public float AverageItemLevel { get; private set; }
@@ -52,7 +52,7 @@ namespace AmeisenBotX.Core.Managers.Character.Inventory
                 return false;
             }
 
-            IWowItem item = Wow.ObjectProvider.WowObjects.OfType<IWowItem>()
+            IWowItem item = Wow.ObjectProvider.All.OfType<IWowItem>()
                 .FirstOrDefault(e => e.EntryId == Items[slot].Id);
 
             return item != null && item.ItemEnchantments.Any(e =>

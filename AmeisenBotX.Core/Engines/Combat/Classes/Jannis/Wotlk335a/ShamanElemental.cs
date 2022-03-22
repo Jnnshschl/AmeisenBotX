@@ -117,7 +117,7 @@ namespace AmeisenBotX.Core.Engines.Combat.Classes.Jannis.Wotlk335a
                         return;
                     }
 
-                    if ((Bot.Objects.WowObjects.OfType<IWowUnit>().Where(e => Bot.Target.Position.GetDistance(e.Position) < 16).Count() > 2 && TryCastSpell(Shaman335a.ChainLightning, Bot.Wow.TargetGuid, true))
+                    if ((Bot.Objects.All.OfType<IWowUnit>().Where(e => Bot.Target.Position.GetDistance(e.Position) < 16).Count() > 2 && TryCastSpell(Shaman335a.ChainLightning, Bot.Wow.TargetGuid, true))
                         || TryCastSpell(Shaman335a.LightningBolt, Bot.Wow.TargetGuid, true))
                     {
                         return;

@@ -136,7 +136,7 @@ namespace AmeisenBotX.Core.Engines.Combat.Classes.Jannis.Mop548
                 TryCastSpell(Warrior548.Recklessness, 0);
 
                 // is anyone casting stuff on me, try to reflect
-                IEnumerable<IWowUnit> castingUnits = Bot.Objects.WowObjects.OfType<IWowUnit>().Where(e => e.IsCasting && e.TargetGuid == Bot.Player.Guid && e.DistanceTo(Bot.Player) < 38.0f);
+                IEnumerable<IWowUnit> castingUnits = Bot.Objects.All.OfType<IWowUnit>().Where(e => e.IsCasting && e.TargetGuid == Bot.Player.Guid && e.DistanceTo(Bot.Player) < 38.0f);
 
                 if (castingUnits.Any())
                 {

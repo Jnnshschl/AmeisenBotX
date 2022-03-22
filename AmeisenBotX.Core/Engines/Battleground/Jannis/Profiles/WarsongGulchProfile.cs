@@ -291,14 +291,14 @@ namespace AmeisenBotX.Core.Engines.Battleground.Jannis.Profiles
         {
             if (Bot.Player.IsAlliance())
             {
-                IWowGameobject obj = Bot.Objects.WowObjects.OfType<IWowGameobject>()
+                IWowGameobject obj = Bot.Objects.All.OfType<IWowGameobject>()
                                     .FirstOrDefault(e => e.GameObjectType == WowGameObjectType.Door && e.DisplayId == 411);
 
                 return obj == null || obj.Bytes0 == 0;
             }
             else
             {
-                IWowGameobject obj = Bot.Objects.WowObjects.OfType<IWowGameobject>()
+                IWowGameobject obj = Bot.Objects.All.OfType<IWowGameobject>()
                                     .FirstOrDefault(e => e.GameObjectType == WowGameObjectType.Door && e.DisplayId == 850);
 
                 return obj == null || obj.Bytes0 == 0;
@@ -411,8 +411,8 @@ namespace AmeisenBotX.Core.Engines.Battleground.Jannis.Profiles
                         JBgBlackboard.MyTeamFlagPos = new(allianceFlagX, allianceFlagY, 0.0f);
                         JBgBlackboard.EnemyTeamFlagPos = new(hordeFlagX, hordeFlagY, 0.0f);
 
-                        JBgBlackboard.MyTeamFlagCarrier = Bot.Objects.WowObjects.OfType<IWowPlayer>().FirstOrDefault(e => e.HasBuffById(23333));
-                        JBgBlackboard.EnemyTeamFlagCarrier = Bot.Objects.WowObjects.OfType<IWowPlayer>().FirstOrDefault(e => e.HasBuffById(23335));
+                        JBgBlackboard.MyTeamFlagCarrier = Bot.Objects.All.OfType<IWowPlayer>().FirstOrDefault(e => e.HasBuffById(23333));
+                        JBgBlackboard.EnemyTeamFlagCarrier = Bot.Objects.All.OfType<IWowPlayer>().FirstOrDefault(e => e.HasBuffById(23335));
                     }
                     else
                     {
@@ -428,11 +428,11 @@ namespace AmeisenBotX.Core.Engines.Battleground.Jannis.Profiles
                         JBgBlackboard.MyTeamFlagPos = new(hordeFlagX, hordeFlagY, 0.0f);
                         JBgBlackboard.EnemyTeamFlagPos = new(allianceFlagX, allianceFlagY, 0.0f);
 
-                        JBgBlackboard.MyTeamFlagCarrier = Bot.Objects.WowObjects.OfType<IWowPlayer>().FirstOrDefault(e => e.HasBuffById(23335));
-                        JBgBlackboard.EnemyTeamFlagCarrier = Bot.Objects.WowObjects.OfType<IWowPlayer>().FirstOrDefault(e => e.HasBuffById(23333));
+                        JBgBlackboard.MyTeamFlagCarrier = Bot.Objects.All.OfType<IWowPlayer>().FirstOrDefault(e => e.HasBuffById(23335));
+                        JBgBlackboard.EnemyTeamFlagCarrier = Bot.Objects.All.OfType<IWowPlayer>().FirstOrDefault(e => e.HasBuffById(23333));
                     }
 
-                    JBgBlackboard.NearFlags = Bot.Objects.WowObjects.OfType<IWowGameobject>()
+                    JBgBlackboard.NearFlags = Bot.Objects.All.OfType<IWowGameobject>()
                                                  .Where(e => e.DisplayId == (int)WowGameObjectDisplayId.WsgAllianceFlag
                                                           || e.DisplayId == (int)WowGameObjectDisplayId.WsgHordeFlag);
                 }

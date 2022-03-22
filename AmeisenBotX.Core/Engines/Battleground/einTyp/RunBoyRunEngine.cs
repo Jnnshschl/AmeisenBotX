@@ -319,7 +319,7 @@ namespace AmeisenBotX.Core.Engines.Battleground.einTyp
 
         private IWowUnit GetEnemyFlagCarrier()
         {
-            List<IWowUnit> flagCarrierList = Bot.Objects.WowObjects.OfType<IWowUnit>().Where(e =>
+            List<IWowUnit> flagCarrierList = Bot.Objects.All.OfType<IWowUnit>().Where(e =>
             Bot.Db.GetReaction(Bot.Player, e) != WowUnitReaction.Friendly
             && Bot.Db.GetReaction(Bot.Player, e) != WowUnitReaction.Neutral
             && !e.IsDead && e.Guid != Bot.Wow.PlayerGuid
@@ -342,7 +342,7 @@ namespace AmeisenBotX.Core.Engines.Battleground.einTyp
             WowGameObjectDisplayId targetFlag = Bot.Player.IsHorde()
                 ? WowGameObjectDisplayId.WsgAllianceFlag : WowGameObjectDisplayId.WsgHordeFlag;
 
-            List<IWowGameobject> flagObjectList = Bot.Objects.WowObjects
+            List<IWowGameobject> flagObjectList = Bot.Objects.All
                 .OfType<IWowGameobject>() // only WowGameobjects
                 .Where(x => Enum.IsDefined(typeof(WowGameObjectDisplayId), x.DisplayId)
                          && targetFlag == (WowGameObjectDisplayId)x.DisplayId).ToList();
@@ -362,7 +362,7 @@ namespace AmeisenBotX.Core.Engines.Battleground.einTyp
             WowGameObjectDisplayId targetFlag = Bot.Player.IsHorde()
                 ? WowGameObjectDisplayId.WsgHordeFlag : WowGameObjectDisplayId.WsgAllianceFlag;
 
-            List<IWowGameobject> flagObjectList = Bot.Objects.WowObjects
+            List<IWowGameobject> flagObjectList = Bot.Objects.All
                 .OfType<IWowGameobject>() // only WowGameobjects
                 .Where(x => Enum.IsDefined(typeof(WowGameObjectDisplayId), x.DisplayId)
                          && targetFlag == (WowGameObjectDisplayId)x.DisplayId).ToList();
@@ -379,7 +379,7 @@ namespace AmeisenBotX.Core.Engines.Battleground.einTyp
 
         private IWowUnit GetTeamFlagCarrier()
         {
-            List<IWowUnit> flagCarrierList = Bot.Objects.WowObjects.OfType<IWowUnit>().Where(e => (Bot.Db.GetReaction(Bot.Player, e) == WowUnitReaction.Friendly || Bot.Db.GetReaction(Bot.Player, e) == WowUnitReaction.Neutral) && !e.IsDead && e.Guid != Bot.Wow.PlayerGuid && e.Auras != null && e.Auras.Any(en => Bot.Db.GetSpellName(en.SpellId).Contains("Flag") || Bot.Db.GetSpellName(en.SpellId).Contains("flag"))).ToList();
+            List<IWowUnit> flagCarrierList = Bot.Objects.All.OfType<IWowUnit>().Where(e => (Bot.Db.GetReaction(Bot.Player, e) == WowUnitReaction.Friendly || Bot.Db.GetReaction(Bot.Player, e) == WowUnitReaction.Neutral) && !e.IsDead && e.Guid != Bot.Wow.PlayerGuid && e.Auras != null && e.Auras.Any(en => Bot.Db.GetSpellName(en.SpellId).Contains("Flag") || Bot.Db.GetSpellName(en.SpellId).Contains("flag"))).ToList();
             if (flagCarrierList.Count > 0)
             {
                 return flagCarrierList[0];
@@ -397,14 +397,14 @@ namespace AmeisenBotX.Core.Engines.Battleground.einTyp
 
         private bool IsEnemyClose()
         {
-            return Bot.Objects.WowObjects.OfType<IWowUnit>() != null && Bot.Objects.WowObjects.OfType<IWowUnit>().Any(e => Bot.Player.Position.GetDistance(e.Position) < 49 && !e.IsDead && !(e.Health < 1) && Bot.Db.GetReaction(Bot.Player, e) != WowUnitReaction.Friendly && Bot.Db.GetReaction(Bot.Player, e) != WowUnitReaction.Neutral);
+            return Bot.Objects.All.OfType<IWowUnit>() != null && Bot.Objects.All.OfType<IWowUnit>().Any(e => Bot.Player.Position.GetDistance(e.Position) < 49 && !e.IsDead && !(e.Health < 1) && Bot.Db.GetReaction(Bot.Player, e) != WowUnitReaction.Friendly && Bot.Db.GetReaction(Bot.Player, e) != WowUnitReaction.Neutral);
         }
 
         private bool IsGateOpen()
         {
             if (Bot.Player.IsAlliance())
             {
-                IWowGameobject obj = Bot.Objects.WowObjects.OfType<IWowGameobject>()
+                IWowGameobject obj = Bot.Objects.All.OfType<IWowGameobject>()
                                     .Where(e => e.GameObjectType == WowGameObjectType.Door && e.DisplayId == 411)
                                     .FirstOrDefault();
 
@@ -412,7 +412,7 @@ namespace AmeisenBotX.Core.Engines.Battleground.einTyp
             }
             else
             {
-                IWowGameobject obj = Bot.Objects.WowObjects.OfType<IWowGameobject>()
+                IWowGameobject obj = Bot.Objects.All.OfType<IWowGameobject>()
                                     .Where(e => e.GameObjectType == WowGameObjectType.Door && e.DisplayId == 850)
                                     .FirstOrDefault();
 

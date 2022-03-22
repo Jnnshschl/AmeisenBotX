@@ -1,6 +1,5 @@
 ﻿using AmeisenBotX.Common.Utils;
 using AmeisenBotX.Core.Engines.Combat.Helpers.Healing;
-using AmeisenBotX.Core.Engines.Combat.Helpers.Healing.Enums;
 using AmeisenBotX.Core.Engines.Movement.Enums;
 using AmeisenBotX.Core.Managers.Character.Comparators;
 using AmeisenBotX.Core.Managers.Character.Spells.Objects;
@@ -25,11 +24,6 @@ namespace AmeisenBotX.Core.Engines.Combat.Classes.Jannis.Mop548
             Configurables.TryAdd("BeaconOfLightSelfHealth", 85.0);
             Configurables.TryAdd("BeaconOfLightPartyHealth", 85.0);
             Configurables.TryAdd("DivinePleaMana", 60.0);
-
-            // MyAuraManager.Jobs.Add(new KeepBestActiveAuraJob(bot.Db, new List<(string,
-            // Func<bool>)>() { (Paladin548.SealOfInsight, () =>
-            // TryCastSpell(Paladin548.SealOfInsight, 0, true)), (Paladin548.SealOfTruth, () =>
-            // TryCastSpell(Paladin548.SealOfTruth, 0, true)), }));
 
             GroupAuraManager.SpellsToKeepActiveOnParty.Add((Paladin548.BlessingOfKings, (spellName, guid) => TryCastSpell(spellName, guid, true)));
 
@@ -57,11 +51,6 @@ namespace AmeisenBotX.Core.Engines.Combat.Classes.Jannis.Mop548
                 {
                     HealingManager.AddSpell(spellDivineLight);
                 }
-
-                if (Bot.Character.SpellBook.TryGetSpellByName(Paladin548.HolyRadiance, out Spell spellHolyRadiance))
-                {
-                    HealingManager.AddSpell(spellHolyRadiance, HealSpellType.MultiTarget);
-                }
             };
 
             InterruptManager.InterruptSpells = new()
@@ -71,7 +60,7 @@ namespace AmeisenBotX.Core.Engines.Combat.Classes.Jannis.Mop548
                 { 2, (x) => TryCastSpell(Paladin548.Rebuke, x.Guid, true) },
             };
 
-            SpellAbortFunctions.Add(HealingManager.ShouldAbortCasting);
+            // SpellAbortFunctions.Add(HealingManager.ShouldAbortCasting);
             ChangeBeaconEvent = new(TimeSpan.FromSeconds(1));
         }
 

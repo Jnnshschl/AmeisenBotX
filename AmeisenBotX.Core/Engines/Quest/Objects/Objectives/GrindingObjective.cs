@@ -48,7 +48,7 @@ namespace AmeisenBotX.Core.Engines.Quest.Objects.Objectives
             if (!Bot.Player.IsInCombat
                 && Bot.Target == null) // if pulling with ranged we have target and yet not in combat
             {
-                IWowUnit = Bot.Objects.WowObjects
+                IWowUnit = Bot.Objects.All
                     .OfType<IWowUnit>()
                     .Where(e => !e.IsDead && !e.IsNotAttackable
                                     && Bot.Db.GetReaction(Bot.Player, e) != WowUnitReaction.Friendly

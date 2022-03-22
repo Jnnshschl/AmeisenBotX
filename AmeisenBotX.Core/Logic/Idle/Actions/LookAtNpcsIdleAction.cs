@@ -34,7 +34,7 @@ namespace AmeisenBotX.Core.Logic.Idle.Actions
 
         public bool Enter()
         {
-            NpcsNearMe = Bot.Objects.WowObjects.OfType<IWowUnit>().Where(e => e.Position.GetDistance(Bot.Player.Position) < 12.0f);
+            NpcsNearMe = Bot.Objects.All.OfType<IWowUnit>().Where(e => e.Position.GetDistance(Bot.Player.Position) < 12.0f);
             return NpcsNearMe.Any();
         }
 

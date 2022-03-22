@@ -111,7 +111,7 @@ namespace AmeisenBotX.Core.Logic.Idle.Actions
                 }
             }
 
-            IWowGameobject fishingBobber = Bot.Objects.WowObjects.OfType<IWowGameobject>()
+            IWowGameobject fishingBobber = Bot.Objects.All.OfType<IWowGameobject>()
                 .FirstOrDefault(e => e.GameObjectType == WowGameObjectType.FishingBobber && e.CreatedBy == Bot.Wow.PlayerGuid);
 
             if (!Started)

@@ -59,7 +59,7 @@ namespace AmeisenBotX.Wow
         /// <summary>
         /// Shortcut to all wow objects.
         /// </summary>
-        IEnumerable<IWowObject> Objects => ObjectProvider.WowObjects;
+        IEnumerable<IWowObject> Objects => ObjectProvider.All;
 
         /// <summary>
         /// Shortcut to get the current partyleaders guid.

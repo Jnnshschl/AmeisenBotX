@@ -19,7 +19,7 @@ namespace AmeisenBotX.Core.Managers.Character.Inventory
         {
             Wow = wowInterface;
             Config = config;
-            Items = new List<IWowInventoryItem>();
+            Items = new();
         }
 
         public int FreeBagSlots { get; private set; }

@@ -10,9 +10,9 @@ using System.Linq;
 
 namespace AmeisenBotX.Core.Engines.Movement
 {
-    public class DefaultMovementEngine : IMovementEngine
+    public class MovementEngine : IMovementEngine
     {
-        public DefaultMovementEngine(AmeisenBotInterfaces bot, AmeisenBotConfig config)
+        public MovementEngine(AmeisenBotInterfaces bot, AmeisenBotConfig config)
         {
             Bot = bot;
             Config = config;
@@ -241,37 +241,33 @@ namespace AmeisenBotX.Core.Engines.Movement
 
         private bool AvoidAoeStuff(Vector3 position, out Vector3 newPosition)
         {
-            // TODO: avoid dodgeing player aoe spells in sactuaries, this may looks suspect
+            List<(Vector3 position, float radius)> places = new(PlacesToAvoid);
+
+            // TODO: avoid dodging player aoe spells in sactuaries, this may looks suspect
             if (Config.AoeDetectionAvoid)
             {
-                // add places to avoid, these are for example blocked zones
-                List<(Vector3 position, float radius)> places = new(PlacesToAvoid);
-
                 // add all aoe spells
-                IEnumerable<IWowDynobject> aoeEffects = Bot.GetAoeSpells(position, true, Config.AoeDetectionExtends);
-
-                if (!Config.AoeDetectionIncludePlayers)
-                {
-                    aoeEffects = aoeEffects.Where(e => Bot.GetWowObjectByGuid<IWowUnit>(e.Caster)?.Type == WowObjectType.Unit);
-                }
+                IEnumerable<IWowDynobject> aoeEffects = Bot.GetAoeSpells(position, Config.AoeDetectionExtends)
+                    .Where(e => (Config.AoeDetectionIncludePlayers || Bot.GetWowObjectByGuid<IWowUnit>(e.Caster)?.Type == WowObjectType.Unit)
+                             && Bot.Db.GetReaction(Bot.Player, Bot.GetWowObjectByGuid<IWowUnit>(e.Caster)) is WowUnitReaction.Hostile or WowUnitReaction.Neutral);
 
                 places.AddRange(aoeEffects.Select(e => (e.Position, e.Radius)));
+            }
 
-                if (places.Any())
-                {
-                    // build mean position and move away x meters from it x is the biggest distance
-                    // we have to move
-                    Vector3 meanAoePos = BotMath.GetMeanPosition(places.Select(e => e.position));
-                    float distanceToMove = places.Max(e => e.radius) + Config.AoeDetectionExtends;
+            if (places.Any())
+            {
+                // build mean position and move away x meters from it x is the biggest distance
+                // we have to move
+                Vector3 meanAoePos = BotMath.GetMeanPosition(places.Select(e => e.position));
+                float distanceToMove = places.Max(e => e.radius) + Config.AoeDetectionExtends;
 
-                    // claculate the repell direction to move away from the aoe effects
-                    Vector3 repellDirection = position - meanAoePos;
-                    repellDirection.Normalize();
+                // claculate the repell direction to move away from the aoe effects
+                Vector3 repellDirection = position - meanAoePos;
+                repellDirection.Normalize();
 
-                    // "repell" the position from the aoe spell
-                    newPosition = meanAoePos + (repellDirection * distanceToMove);
-                    return true;
-                }
+                // "repell" the position from the aoe spell
+                newPosition = meanAoePos + (repellDirection * distanceToMove);
+                return true;
             }
 
             newPosition = default;

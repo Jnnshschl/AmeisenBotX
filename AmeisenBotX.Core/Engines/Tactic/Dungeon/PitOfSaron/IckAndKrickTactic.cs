@@ -60,7 +60,7 @@ namespace AmeisenBotX.Core.Engines.Tactic.Dungeon.PitOfSaron
                     return true;
                 }
 
-                IWowUnit unitOrb = Bot.Objects.WowObjects.OfType<IWowUnit>()
+                IWowUnit unitOrb = Bot.Objects.All.OfType<IWowUnit>()
                     .OrderBy(e => e.Position.GetDistance(Bot.Player.Position))
                     .FirstOrDefault(e => e.DisplayId == 11686 && e.HasBuffById(69017) && e.Position.GetDistance(Bot.Player.Position) < 3.0f);
 

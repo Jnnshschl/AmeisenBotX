@@ -65,7 +65,7 @@ namespace AmeisenBotX.Core.Engines.Tactic.Dungeon.ForgeOfSouls
 
                         // flee from the corrupted souls target
                         bool needToFlee = wowUnit.CurrentlyChannelingSpellId == 68839
-                            || Bot.Objects.WowObjects.OfType<IWowUnit>().Any(e => e.DisplayId == 30233 && e.IsInCombat);
+                            || Bot.Objects.All.OfType<IWowUnit>().Any(e => e.DisplayId == 30233 && e.IsInCombat);
 
                         if (needToFlee)
                         {

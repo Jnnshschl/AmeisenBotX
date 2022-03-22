@@ -28,7 +28,7 @@ namespace AmeisenBotX.Core.Engines.Combat.Helpers.Targets.Logics.Dps
 
         public override bool SelectTarget(out IEnumerable<IWowUnit> possibleTargets)
         {
-            possibleTargets = Bot.Objects.WowObjects.OfType<IWowUnit>()
+            possibleTargets = Bot.Objects.All.OfType<IWowUnit>()
                 .Where(e => TargetValidator.IsValid(e) && e.IsInCombat)
                 .OrderByDescending(e => IsPriorityTarget(e))
                 .ThenByDescending(e => e.Type)

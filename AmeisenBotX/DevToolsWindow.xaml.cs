@@ -364,7 +364,7 @@ namespace AmeisenBotX
                             {
                                 listViewUnits.Items.Clear();
 
-                                List<(IWowUnit, double)> wowObjects = AmeisenBot.Bot.Objects.WowObjects
+                                List<(IWowUnit, double)> wowObjects = AmeisenBot.Bot.Objects.All
                                     .OfType<IWowUnit>()
                                     .TakeWhile(wowObject => wowObject != null)
                                     .Select(wowObject => (wowObject, Math.Round(wowObject.Position.GetDistance(AmeisenBot.Bot.Player.Position), 2)))
@@ -381,7 +381,7 @@ namespace AmeisenBotX
                             {
                                 listViewPlayers.Items.Clear();
 
-                                List<(IWowPlayer, double)> wowObjects = AmeisenBot.Bot.Objects.WowObjects
+                                List<(IWowPlayer, double)> wowObjects = AmeisenBot.Bot.Objects.All
                                     .OfType<IWowPlayer>()
                                     .TakeWhile(wowObject => wowObject != null)
                                     .Select(wowObject => (wowObject, Math.Round(wowObject.Position.GetDistance(AmeisenBot.Bot.Player.Position), 2)))
@@ -398,7 +398,7 @@ namespace AmeisenBotX
                             {
                                 listViewGameObjects.Items.Clear();
 
-                                List<(IWowGameobject, double)> wowObjects = AmeisenBot.Bot.Objects.WowObjects
+                                List<(IWowGameobject, double)> wowObjects = AmeisenBot.Bot.Objects.All
                                     .OfType<IWowGameobject>()
                                     .TakeWhile(wowObject => wowObject != null)
                                     .Select(wowObject => (wowObject, Math.Round(wowObject.Position.GetDistance(AmeisenBot.Bot.Player.Position), 2)))
@@ -415,7 +415,7 @@ namespace AmeisenBotX
                             {
                                 listViewDynamicObjects.Items.Clear();
 
-                                List<(IWowDynobject, double)> wowObjects = AmeisenBot.Bot.Objects.WowObjects
+                                List<(IWowDynobject, double)> wowObjects = AmeisenBot.Bot.Objects.All
                                     .OfType<IWowDynobject>()
                                     .TakeWhile(wowObject => wowObject != null)
                                     .Select(wowObject => (wowObject, Math.Round(wowObject.Position.GetDistance(AmeisenBot.Bot.Player.Position), 2)))

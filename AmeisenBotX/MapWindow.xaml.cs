@@ -456,7 +456,7 @@ namespace AmeisenBotX
 
         private void RenderHerbs(int halfWidth, int halfHeight, Graphics graphics, float scale, Vector3 playerPosition, float playerRotation)
         {
-            IEnumerable<IWowGameobject> herbNodes = AmeisenBot.Bot.Objects.WowObjects
+            IEnumerable<IWowGameobject> herbNodes = AmeisenBot.Bot.Objects.All
                 .OfType<IWowGameobject>()
                 .Where(e => Enum.IsDefined(typeof(WowHerbId), e.DisplayId));
 
@@ -470,7 +470,7 @@ namespace AmeisenBotX
 
         private void RenderOres(int halfWidth, int halfHeight, Graphics graphics, float scale, Vector3 playerPosition, float playerRotation)
         {
-            IEnumerable<IWowGameobject> oreNodes = AmeisenBot.Bot.Objects.WowObjects
+            IEnumerable<IWowGameobject> oreNodes = AmeisenBot.Bot.Objects.All
                 .OfType<IWowGameobject>()
                 .Where(e => Enum.IsDefined(typeof(WowOreId), e.DisplayId));
 
@@ -484,7 +484,7 @@ namespace AmeisenBotX
 
         private void RenderUnits(int halfWidth, int halfHeight, Graphics graphics, float scale, Vector3 playerPosition, float playerRotation)
         {
-            IEnumerable<IWowUnit> wowUnits = AmeisenBot.Bot.Objects.WowObjects
+            IEnumerable<IWowUnit> wowUnits = AmeisenBot.Bot.Objects.All
                 .OfType<IWowUnit>();
 
             for (int i = 0; i < wowUnits.Count(); ++i)

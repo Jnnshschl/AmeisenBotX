@@ -114,7 +114,7 @@ namespace AmeisenBotX.Core.Engines.Combat.Classes.Jannis.Wotlk335a
             {
                 if (PetManager.Tick()) { return; }
 
-                IWowUnit target = (IWowUnit)Bot.Objects.WowObjects.FirstOrDefault(e => e != null && e.Guid == Bot.Wow.TargetGuid);
+                IWowUnit target = (IWowUnit)Bot.Objects.All.FirstOrDefault(e => e != null && e.Guid == Bot.Wow.TargetGuid);
 
                 if (target != null)
                 {
@@ -185,7 +185,7 @@ namespace AmeisenBotX.Core.Engines.Combat.Classes.Jannis.Wotlk335a
                             return;
                         }
 
-                        if ((Bot.Objects.WowObjects.OfType<IWowUnit>().Where(e => target.Position.GetDistance(e.Position) < 16).Count() > 2 && TryCastSpell(Hunter335a.MultiShot, Bot.Wow.TargetGuid, true))
+                        if ((Bot.Objects.All.OfType<IWowUnit>().Where(e => target.Position.GetDistance(e.Position) < 16).Count() > 2 && TryCastSpell(Hunter335a.MultiShot, Bot.Wow.TargetGuid, true))
                             || TryCastSpell(Hunter335a.ChimeraShot, Bot.Wow.TargetGuid, true)
                             || TryCastSpell(Hunter335a.AimedShot, Bot.Wow.TargetGuid, true)
                             || TryCastSpell(Hunter335a.ArcaneShot, Bot.Wow.TargetGuid, true)

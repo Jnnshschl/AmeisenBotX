@@ -118,7 +118,7 @@ namespace AmeisenBotX.Core.Engines.Combat.Classes.Jannis.Wotlk335a
                             return;
                         }
 
-                        if ((Bot.Objects.WowObjects.OfType<IWowUnit>().Where(e => Bot.Target.Position.GetDistance(e.Position) < 8).Count() > 2 && TryCastSpell(Warrior335a.Bladestorm, 0, true))
+                        if ((Bot.Objects.All.OfType<IWowUnit>().Where(e => Bot.Target.Position.GetDistance(e.Position) < 8).Count() > 2 && TryCastSpell(Warrior335a.Bladestorm, 0, true))
                             || TryCastSpellWarrior(Warrior335a.Overpower, Warrior335a.BattleStance, Bot.Wow.TargetGuid, true)
                             || TryCastSpellWarrior(Warrior335a.MortalStrike, Warrior335a.BattleStance, Bot.Wow.TargetGuid, true)
                             || (HeroicStrikeEvent.Run() && TryCastSpellWarrior(Warrior335a.HeroicStrike, Warrior335a.BattleStance, Bot.Wow.TargetGuid, true)))

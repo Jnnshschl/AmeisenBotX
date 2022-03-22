@@ -67,7 +67,7 @@ namespace AmeisenBotX.Core.Engines.Battleground.KamelBG
 
             if (Bot.Objects.Vehicle == null)
             {
-                IWowGameobject VehicleNode = Bot.Objects.WowObjects
+                IWowGameobject VehicleNode = Bot.Objects.All
                     .OfType<IWowGameobject>()
                     .Where(x => Enum.IsDefined(typeof(Vehicle), x.DisplayId)
                             && x.Position.GetDistance(Bot.Player.Position) < 20)

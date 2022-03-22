@@ -51,7 +51,7 @@ namespace AmeisenBotX.Core.Engines.Quest.Objects.Objectives
             {
                 Bot.Wow.ClearTarget();
 
-                Unit = Bot.Objects.WowObjects
+                Unit = Bot.Objects.All
                     .OfType<IWowUnit>()
                     .Where(e => !e.IsDead && ObjectDisplayIds.Values.Contains(e.DisplayId))
                     .OrderBy(e => e.Position.GetDistance(Bot.Player.Position))

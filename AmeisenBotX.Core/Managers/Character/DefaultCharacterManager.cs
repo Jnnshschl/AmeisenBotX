@@ -32,9 +32,8 @@ namespace AmeisenBotX.Core.Managers.Character
             TalentManager = new(Wow);
             LastLevelTrained = 0;
             ItemComparator = new ItemLevelComparator();
-            Skills = new Dictionary<string, (int, int)>();
-
-            ItemSlotsToSkip = new List<WowEquipmentSlot>();
+            Skills = new();
+            ItemSlotsToSkip = new();
         }
 
         public CharacterEquipment Equipment { get; }

@@ -89,7 +89,7 @@ namespace AmeisenBotX.Core.Engines.Quest.Objects.Objectives
             if (!Bot.Player.IsInCombat && DateTime.UtcNow.Subtract(LastUnitCheck).TotalMilliseconds >= 1250.0)
             {
                 LastUnitCheck = DateTime.UtcNow;
-                IWowUnit = Bot.Objects.WowObjects
+                IWowUnit = Bot.Objects.All
                     .OfType<IWowUnit>()
                     .Where(e => !e.IsDead && NpcIds.Contains(BotUtils.GuidToNpcId(e.Guid)) && !e.IsNotAttackable
                                 && Bot.Db.GetReaction(Bot.Player, e) != WowUnitReaction.Friendly)

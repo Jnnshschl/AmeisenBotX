@@ -53,7 +53,7 @@ namespace AmeisenBotX.Core.Engines.Quest.Objects.Objectives
         {
             if (Finished || Bot.Player.IsCasting) { return; }
 
-            Unit = Bot.Objects.WowObjects
+            Unit = Bot.Objects.All
                 .OfType<IWowUnit>()
                 .Where(e => e.IsGossip && !e.IsDead && DisplayIds.Contains(e.DisplayId))
                 .OrderBy(e => e.Position.GetDistance(Bot.Player.Position))
