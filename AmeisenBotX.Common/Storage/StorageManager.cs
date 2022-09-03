@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using AmeisenBotX.Common.Utils;
+using System.Collections.Generic;
 using System.IO;
 using System.Text.Json;
 using System.Text.Json.Serialization;
@@ -88,13 +89,7 @@ namespace AmeisenBotX.Common.Storage
                     return;
                 }
 
-                string parent = Path.GetDirectoryName(fullPath);
-
-                if (!Directory.Exists(parent))
-                {
-                    Directory.CreateDirectory(parent);
-                }
-
+                IOUtils.CreateDirectoryIfNotExists(Path.GetDirectoryName(fullPath));
                 File.WriteAllText(fullPath, JsonSerializer.Serialize(data, new JsonSerializerOptions() { WriteIndented = true }));
             }
             catch

@@ -1,4 +1,5 @@
 ﻿using AmeisenBotX.Common.Math;
+using AmeisenBotX.Common.Utils;
 using AmeisenBotX.Logging;
 using AmeisenBotX.Logging.Enums;
 using AmeisenBotX.Wow.Cache.Enums;
@@ -55,7 +56,7 @@ namespace AmeisenBotX.Wow.Cache
             }
             else if (File.Exists(dbFile))
             {
-                AmeisenLogger.I.Log("Cache", "Loading Cache", LogLevel.Debug);
+                AmeisenLogger.I.Log("AmeisenBot", $"Loading LocalAmeisenBotDb from: {dbFile}", LogLevel.Debug);
 
                 try
                 {
@@ -243,13 +244,9 @@ namespace AmeisenBotX.Wow.Cache
 
         public void Save(string dbFile)
         {
-            if (!Directory.Exists(Path.GetDirectoryName(dbFile)))
-            {
-                Directory.CreateDirectory(Path.GetDirectoryName(dbFile));
-            }
-
             try
             {
+                IOUtils.CreateDirectoryIfNotExists(Path.GetDirectoryName(dbFile));
                 File.WriteAllText(dbFile, JsonSerializer.Serialize(this));
             }
             catch

@@ -76,20 +76,23 @@ namespace AmeisenBotX.Core
         ///
         /// More stuff of the bot can be reached via its "Bot" property.
         /// </summary>
+        /// <param name="instanceName">Instance name of the bot.</param>
         /// <param name="config">The bot configuration.</param>
         /// <param name="logfilePath">
         /// Logfile folder path, not a file path. Leave DEFAULT to put it into bots profile folder.
         /// Set to string.Empty to disable logging.
         /// </param>
         /// <param name="initialLogLevel">The initial LogLevel of the bots logger.</param>
-        public AmeisenBot(AmeisenBotConfig config, string logfilePath = "DEFAULT", LogLevel initialLogLevel = LogLevel.Verbose)
+        public AmeisenBot(string instanceName, AmeisenBotConfig config, string logfilePath = "DEFAULT", LogLevel initialLogLevel = LogLevel.Verbose)
         {
-            Config = config ?? throw new ArgumentException("config cannot be null", nameof(config));
+            if (string.IsNullOrWhiteSpace(instanceName)) { throw new ArgumentException("instanceName cannot be empty or whitespace", nameof(config)); }
             if (string.IsNullOrWhiteSpace(config.Path)) { throw new ArgumentException("config.Path cannot be empty, make sure you set it after loading the config", nameof(config)); }
             if (!File.Exists(config.Path)) { throw new ArgumentException("config.Path does not exist", nameof(config)); }
 
+            Config = config ?? throw new ArgumentException("config cannot be null", nameof(config));
+
+            AccountName = instanceName;
             ProfileFolder = Path.GetDirectoryName(config.Path);
-            AccountName = Path.GetFileName(ProfileFolder);
 
             if (logfilePath == "DEFAULT")
             {
@@ -98,51 +101,53 @@ namespace AmeisenBotX.Core
 
             if (!string.IsNullOrWhiteSpace(logfilePath))
             {
-                if (!Directory.Exists(logfilePath))
-                {
-                    Directory.CreateDirectory(logfilePath);
-                }
-
+                IOUtils.CreateDirectoryIfNotExists(logfilePath);
                 AmeisenLogger.I.ChangeLogFolder(logfilePath);
                 AmeisenLogger.I.ActiveLogLevel = initialLogLevel;
                 AmeisenLogger.I.Start();
             }
 
-            AmeisenLogger.I.Log("AmeisenBot", $"AmeisenBot ({Assembly.GetExecutingAssembly().GetName().Version}) starting", LogLevel.Master);
+            AmeisenLogger.I.Log("AmeisenBot", $">> AmeisenBot ({Assembly.GetExecutingAssembly().GetName().Version})", LogLevel.Master);
             AmeisenLogger.I.Log("AmeisenBot", $"AccountName: {AccountName}", LogLevel.Master);
-            AmeisenLogger.I.Log("AmeisenBot", $"BotDataPath: {ProfileFolder}", LogLevel.Verbose);
+            AmeisenLogger.I.Log("AmeisenBot", $"ProfileFolder: {ProfileFolder}", LogLevel.Verbose);
+
+            Bot = new();
 
             ExecutionMsStopwatch = new();
-
-            string dataFolder = Path.Combine(ProfileFolder, "data");
-
-            if (!Directory.Exists(dataFolder))
-            {
-                Directory.CreateDirectory(dataFolder);
-            }
-
-            int wowBuild = FileVersionInfo.GetVersionInfo(Config.PathToWowExe).FilePrivatePart;
-
-            // start initializing the wow interface
-            Bot = new();
-            Bot.Memory = new WowMemoryApi(wowBuild switch
-            {
-                (int)WowVersion.WotLK335a => new OffsetList335a(),
-                (int)WowVersion.MoP548 => new OffsetList548(),
-                _ => throw new ArgumentException($"Unsupported wow version: {wowBuild}"),
-            });
+            PoiCacheEvent = new TimegatedEvent(TimeSpan.FromSeconds(2));
 
             // load the wow specific interface based on file version (build number)
-            Bot.Wow = wowBuild switch
-            {
-                (int)WowVersion.WotLK335a => new WowInterface335a(Bot.Memory),
-                (int)WowVersion.MoP548 => new WowInterface548(Bot.Memory),
-                _ => throw new ArgumentException($"Unsupported wow version: {wowBuild}"),
-            };
+            int executeableVersion = FileVersionInfo.GetVersionInfo(Config.PathToWowExe).FilePrivatePart;
 
-            Bot.Storage = new(dataFolder, new List<string>()
+            if (Enum.TryParse(executeableVersion.ToString(), true, out WowVersion wowVersion))
             {
-                // strings to strip from class names
+                switch (wowVersion)
+                {
+                    case WowVersion.WotLK335a:
+                        Bot.Wow = new WowInterface335a(new WowMemoryApi(new OffsetList335a()));
+                        Bot.CombatLog = new DefaultCombatlogParser<CombatlogFields335a>();
+                        break;
+
+                    case WowVersion.MoP548:
+                        Bot.Wow = new WowInterface548(new WowMemoryApi(new OffsetList548()));
+                        Bot.CombatLog = new DefaultCombatlogParser<CombatlogFields548>();
+                        break;
+                }
+            }
+            else
+            {
+                throw new ArgumentException($"Unsupported wow version: {executeableVersion}");
+            }
+
+            Bot.Wow.OnStaticPopup += OnStaticPopup;
+            Bot.Wow.OnBattlegroundStatus += OnBattlegroundStatusChanged;
+            Bot.Wow.ObjectProvider.OnObjectUpdateComplete += OnObjectUpdateComplete;
+
+            Bot.Storage = new(IOUtils.CreateDirectoryIfNotExists(ProfileFolder, "data"), new List<string>()
+            {
+                // strings to strip from class names in the config file, makes stuff more compact.
+                // example: "AmeisenBotX.Core.Engines.Combat.Classes.Jannis.Wotlk335a.WarriorArms"
+                //          will be name "Jannis.Wotlk335a.WarriorArms" in the config file.
                 "AmeisenBotX.Core.Engines.Combat.Classes.",
                 "AmeisenBotX.Core.Engines.Tactic."
             });
@@ -170,31 +175,11 @@ namespace AmeisenBotX.Core
                 new SitToChairIdleAction(Bot, Config.MinFollowDistance),
             });
 
-            Logic = new AmeisenBotLogic(Config, Bot);
-
             Bot.Chat = new DefaultChatManager(Config, ProfileFolder);
             Bot.Tactic = new DefaultTacticEngine(Bot);
-
-            Bot.Wow.OnStaticPopup += OnStaticPopup;
-            Bot.Wow.OnBattlegroundStatus += OnBattlegroundStatusChanged;
-
-            AmeisenLogger.I.Log("AmeisenBot", $"Using OffsetList: {Bot.Memory.Offsets.GetType().Name}", LogLevel.Master);
-
             Bot.Character = new DefaultCharacterManager(Bot.Wow, Bot.Memory, Config);
 
-            string dbPath = Path.Combine(ProfileFolder, "db.json");
-            AmeisenLogger.I.Log("AmeisenBot", $"Loading DB from: {dbPath}", LogLevel.Master);
-            Bot.Db = LocalAmeisenBotDb.FromJson(dbPath, Bot.Wow);
-
-            PoiCacheEvent = new TimegatedEvent(TimeSpan.FromSeconds(2));
-            Bot.Objects.OnObjectUpdateComplete += OnObjectUpdateComplete;
-
-            Bot.CombatLog = wowBuild switch
-            {
-                (int)WowVersion.WotLK335a => new DefaultCombatlogParser<CombatlogFields335a>(),
-                (int)WowVersion.MoP548 => new DefaultCombatlogParser<CombatlogFields548>(),
-                _ => throw new ArgumentException($"Unsupported wow version: {wowBuild}"),
-            };
+            Bot.Db = LocalAmeisenBotDb.FromJson(Path.Combine(ProfileFolder, "db.json"), Bot.Wow);
 
             // setup all instances that use the whole Bot class last
             Bot.Dungeon = new DefaultDungeonEngine(Bot, Config);
@@ -207,7 +192,8 @@ namespace AmeisenBotX.Core
 
             Bot.PathfindingHandler = new AmeisenNavigationHandler(Config.NavmeshServerIp, Config.NameshServerPort);
             Bot.Movement = new MovementEngine(Bot, Config);
-            // wow interface setup done
+
+            Logic = new AmeisenBotLogic(Config, Bot);
 
             AmeisenLogger.I.Log("AmeisenBot", "Finished setting up Bot", LogLevel.Verbose);
 

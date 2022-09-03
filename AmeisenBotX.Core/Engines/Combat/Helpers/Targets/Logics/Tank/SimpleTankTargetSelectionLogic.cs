@@ -14,17 +14,15 @@ namespace AmeisenBotX.Core.Engines.Combat.Helpers.Targets.Logics.Tank
     {
         public SimpleTankTargetSelectionLogic(AmeisenBotInterfaces bot) : base(bot)
         {
-            TargetValidator.Validators.Add(new IsAttackableTargetValidator(bot));
-            TargetValidator.Validators.Add(new IsThreatTargetValidator(bot));
-            TargetValidator.Validators.Add(new DungeonTargetValidator(bot));
-            TargetValidator.Validators.Add
-            (
-                new CachedTargetValidator(new IsReachableTargetValidator(bot), TimeSpan.FromSeconds(4))
-            );
+            TargetValidator.Add(new IsAttackableTargetValidator(bot));
+            TargetValidator.Add(new IsInCombatTargetValidator());
+            TargetValidator.Add(new IsThreatTargetValidator(bot));
+            TargetValidator.Add(new DungeonTargetValidator(bot));
+            TargetValidator.Add(new CachedTargetValidator(new IsReachableTargetValidator(bot), TimeSpan.FromSeconds(4)));
 
             // ListTargetPrioritizer not enabled as the tank needs to keep its focus on the boss,
             // need to test this TargetPrioritizer.Prioritizers.Add(new ListTargetPrioritizer());
-            TargetPrioritizer.Prioritizers.Add(new DungeonTargetPrioritizer(bot));
+            TargetPrioritizer.Add(new DungeonTargetPrioritizer(bot));
         }
 
         public override bool SelectTarget(out IEnumerable<IWowUnit> possibleTargets)
@@ -33,7 +31,7 @@ namespace AmeisenBotX.Core.Engines.Combat.Helpers.Targets.Logics.Tank
 
             IEnumerable<IWowUnit> unitsAroundMe = Bot.Objects.All
                 .OfType<IWowUnit>()
-                .Where(e => TargetValidator.IsValid(e) && e.IsInCombat)
+                .Where(e => TargetValidator.IsValid(e))
                 .OrderByDescending(e => e.Type)
                 .ThenByDescending(e => e.MaxHealth);
 
@@ -55,26 +53,26 @@ namespace AmeisenBotX.Core.Engines.Combat.Helpers.Targets.Logics.Tank
 
                     foreach (IWowUnit unit in Bot.Objects.Partymembers)
                     {
-                        if (unit.TargetGuid > 0)
+                        if (Bot.TryGetWowObjectByGuid<IWowUnit>(unit.TargetGuid, out IWowUnit targetUnit) 
+                            && targetUnit != null 
+                            && Bot.Db.GetReaction(targetUnit, Bot.Player) != WowUnitReaction.Friendly)
                         {
-                            IWowUnit targetUnit = Bot.GetWowObjectByGuid<IWowUnit>(unit.TargetGuid);
-
-                            if (targetUnit != null && Bot.Db.GetReaction(targetUnit, Bot.Player) != WowUnitReaction.Friendly)
+                            if (!targets.ContainsKey(targetUnit))
                             {
-                                if (!targets.ContainsKey(targetUnit))
-                                {
-                                    targets.Add(targetUnit, 1);
-                                }
-                                else
-                                {
-                                    ++targets[targetUnit];
-                                }
+                                targets.Add(targetUnit, 1);
+                            }
+                            else
+                            {
+                                ++targets[targetUnit];
                             }
                         }
                     }
 
-                    possibleTargets = targets.OrderBy(e => e.Value).Select(e => e.Key);
-                    return true;
+                    if (targets.Any())
+                    {
+                        possibleTargets = targets.OrderBy(e => e.Value).Select(e => e.Key);
+                        return true;
+                    }
                 }
 
                 possibleTargets = unitsAroundMe;

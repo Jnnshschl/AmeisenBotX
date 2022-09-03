@@ -61,9 +61,9 @@ namespace AmeisenBotX.Logging
         {
             LogFileFolder = logFolderPath;
 
-            if (createFolder && !Directory.Exists(logFolderPath))
+            if (createFolder)
             {
-                Directory.CreateDirectory(logFolderPath);
+                IOUtils.CreateDirectoryIfNotExists(logFolderPath);
             }
 
             LogFilePath = LogFileFolder + $"AmeisenBot.{DateTime.Now:dd.MM.yyyy}-{DateTime.Now:HH.mm}.txt";

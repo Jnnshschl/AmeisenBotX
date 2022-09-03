@@ -57,8 +57,9 @@ namespace AmeisenBotX.Core.Logic
             NpcInteractionEvent = new(TimeSpan.FromMilliseconds(1000));
             PartymembersFightEvent = new(TimeSpan.FromMilliseconds(1000));
             RenderSwitchEvent = new(TimeSpan.FromMilliseconds(1000));
-            UpdateFood = new(TimeSpan.FromMilliseconds(1000));
+            TalkToQuestgiverEvent = new(TimeSpan.FromMilliseconds(1500));
             UnitsLootedCleanupEvent = new(TimeSpan.FromMilliseconds(1000));
+            UpdateFood = new(TimeSpan.FromMilliseconds(1000));
 
             UnitsLooted = new();
             UnitsToLoot = new();
@@ -177,6 +178,7 @@ namespace AmeisenBotX.Core.Logic
                 (NeedToRepairOrSell, new Leaf(SpeakWithMerchant)),
                 (NeedToLoot, new Leaf(LootNearUnits)),
                 (NeedToEat, new Leaf(Eat)),
+                (NeedToTalkToQuestgiver, new Leaf(TalkToQuestgiver)),
                 (() => Config.IdleActions && IdleActionEvent.Run(), new Leaf(() => { Bot.IdleActions.Tick(Config.Autopilot); return BtStatus.Success; }))
             );
 
@@ -334,8 +336,6 @@ namespace AmeisenBotX.Core.Logic
 
         private bool FirstStart { get; set; }
 
-        private Vector3 FollowOffset { get; set; }
-
         private IEnumerable<IWowInventoryItem> Food { get; set; }
 
         private TimegatedEvent IdleActionEvent { get; }
@@ -356,9 +356,9 @@ namespace AmeisenBotX.Core.Logic
 
         private TimegatedEvent PartymembersFightEvent { get; }
 
-        private IWowUnit PlayerToFollow { get; set; }
-
         private IWowUnit ProfessionTrainer { get; set; }
+
+        private IWowUnit QuestGiverToTalkTo { get; set; }
 
         private Random Random { get; }
 
@@ -367,6 +367,8 @@ namespace AmeisenBotX.Core.Logic
         private bool SearchedStaticRoutes { get; set; }
 
         private IStaticDeathRoute StaticRoute { get; set; }
+
+        private TimegatedEvent TalkToQuestgiverEvent { get; }
 
         private Tree Tree { get; }
 
@@ -997,12 +999,44 @@ namespace AmeisenBotX.Core.Logic
                 Merchant = vendorRepair;
                 return true;
             }
+
             if (needToSell && vendorSell != null)
             {
                 Merchant = vendorSell;
                 return true;
             }
 
+            return false;
+        }
+
+        private bool NeedToTalkToQuestgiver()
+        {
+            if (Config.AutoTalkToNearQuestgivers)
+            {
+                if (Bot.Objects.Partymembers.Any())
+                {
+                    List<ulong> guids = new();
+
+                    if (Bot.Objects.Partyleader != null && Bot.Player.DistanceTo(Bot.Objects.Partyleader) < 6.0f)
+                    {
+                        guids.Add(Bot.Objects.Partyleader.TargetGuid);
+                    }
+
+                    foreach (ulong guid in guids)
+                    {
+                        if (Bot.TryGetWowObjectByGuid(guid, out IWowUnit unit)
+                            && Bot.Player.DistanceTo(unit) < 5.6f
+                            && unit.IsQuestgiver
+                            && Bot.Db.GetReaction(Bot.Player, unit) != WowUnitReaction.Hostile)
+                        {
+                            QuestGiverToTalkTo = unit;
+                            return true;
+                        }
+                    }
+                }
+            }
+
+            QuestGiverToTalkTo = null;
             return false;
         }
 
@@ -1266,6 +1300,26 @@ namespace AmeisenBotX.Core.Logic
                     p.Kill();
                     return BtStatus.Failed;
                 }
+            }
+
+            return BtStatus.Failed;
+        }
+
+        private BtStatus TalkToQuestgiver()
+        {
+            if (QuestGiverToTalkTo != null)
+            {
+                if (Bot.Player.DistanceTo(QuestGiverToTalkTo) > 3.2f)
+                {
+                    Bot.Movement.SetMovementAction(MovementAction.Move, QuestGiverToTalkTo.Position);
+                }
+                else if (TalkToQuestgiverEvent.Run())
+                {
+                    Bot.Wow.InteractWithUnit(QuestGiverToTalkTo);
+                    return BtStatus.Success;
+                }
+
+                return BtStatus.Ongoing;
             }
 
             return BtStatus.Failed;

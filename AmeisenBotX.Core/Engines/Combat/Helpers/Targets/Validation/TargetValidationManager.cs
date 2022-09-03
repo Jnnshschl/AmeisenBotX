@@ -23,6 +23,11 @@ namespace AmeisenBotX.Core.Engines.Combat.Helpers.Targets.Validation
 
         public List<ITargetValidator> Validators { get; }
 
+        public void Add(ITargetValidator validator)
+        {
+            Validators.Add(validator);
+        }
+
         public bool IsValid(IWowUnit unit)
         {
             // is unit on blacklist

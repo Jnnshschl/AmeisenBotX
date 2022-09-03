@@ -286,7 +286,7 @@
                                 <SolidColorBrush Color="{DynamicResource DarkForeground}" />
                             </Label.Foreground>
                         </Label>
-                        <CheckBox x:Name="checkboxFollowGroupLeader" Content="Follow Group Leader" HorizontalAlignment="Left" Margin="3,35,0,0" VerticalAlignment="Top" TabIndex="9" Style="{DynamicResource CheckBoxStyleDark}" FontFamily="Bahnschrift Light" Width="180" VerticalContentAlignment="Bottom">
+                        <CheckBox x:Name="checkboxFollowGroupLeader" Content="Follow Group Leader" HorizontalAlignment="Left" Margin="3,35,0,0" VerticalAlignment="Top" TabIndex="9" Style="{DynamicResource CheckBoxStyleDark}" FontFamily="Bahnschrift Light" Width="180" VerticalContentAlignment="Bottom" IsChecked="True">
                             <CheckBox.Foreground>
                                 <SolidColorBrush Color="{DynamicResource DarkForeground}" />
                             </CheckBox.Foreground>
@@ -297,7 +297,7 @@
                                 <SolidColorBrush Color="{DynamicResource DarkBackground}" />
                             </CheckBox.Background>
                         </CheckBox>
-                        <CheckBox x:Name="checkboxGroupMembers" Content="Follow Group Members" HorizontalAlignment="Left" Margin="3,56,0,0" VerticalAlignment="Top" TabIndex="10" Style="{DynamicResource CheckBoxStyleDark}" FontFamily="Bahnschrift Light" Width="180" VerticalContentAlignment="Bottom">
+                        <CheckBox x:Name="checkboxGroupMembers" Content="Follow Group Members" HorizontalAlignment="Left" Margin="3,56,0,0" VerticalAlignment="Top" TabIndex="10" Style="{DynamicResource CheckBoxStyleDark}" FontFamily="Bahnschrift Light" Width="180" VerticalContentAlignment="Bottom" IsChecked="True">
                             <CheckBox.Foreground>
                                 <SolidColorBrush Color="{DynamicResource DarkForeground}" />
                             </CheckBox.Foreground>
@@ -352,7 +352,7 @@
                                 <SolidColorBrush Color="{DynamicResource DarkBackground}" />
                             </CheckBox.Background>
                         </CheckBox>
-                        <CheckBox x:Name="checkboxLooting" Content="" HorizontalAlignment="Left" Margin="408,10,0,0" VerticalAlignment="Top" TabIndex="15" Style="{DynamicResource CheckBoxStyleDark}" FontFamily="Bahnschrift Light" Width="17">
+                        <CheckBox x:Name="checkboxLooting" Content="" HorizontalAlignment="Left" Margin="408,10,0,0" VerticalAlignment="Top" TabIndex="15" Style="{DynamicResource CheckBoxStyleDark}" FontFamily="Bahnschrift Light" Width="17" IsChecked="True">
                             <CheckBox.Foreground>
                                 <SolidColorBrush Color="{DynamicResource DarkForeground}" />
                             </CheckBox.Foreground>
@@ -417,7 +417,7 @@
                                 <SolidColorBrush Color="{DynamicResource DarkForeground}" />
                             </Label.Foreground>
                         </Label>
-                        <CheckBox x:Name="checkboxDynamicPosition" Content="Dynamic Positioning" HorizontalAlignment="Left" Margin="3,224,0,0" VerticalAlignment="Top" Checked="CheckboxFollowSpecificCharacter_Checked" Unchecked="CheckboxFollowSpecificCharacter_Unchecked" TabIndex="11" Style="{DynamicResource CheckBoxStyleDark}" FontFamily="Bahnschrift Light" Width="180" VerticalContentAlignment="Bottom">
+                        <CheckBox x:Name="checkboxDynamicPosition" Content="Dynamic Positioning" HorizontalAlignment="Left" Margin="3,224,0,0" VerticalAlignment="Top" Checked="CheckboxFollowSpecificCharacter_Checked" Unchecked="CheckboxFollowSpecificCharacter_Unchecked" TabIndex="11" Style="{DynamicResource CheckBoxStyleDark}" FontFamily="Bahnschrift Light" Width="180" VerticalContentAlignment="Bottom" IsChecked="True">
                             <CheckBox.Foreground>
                                 <SolidColorBrush Color="{DynamicResource DarkForeground}" />
                             </CheckBox.Foreground>

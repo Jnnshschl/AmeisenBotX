@@ -590,7 +590,7 @@ namespace AmeisenBotX
 
             if (TryLoadConfig(ConfigPath, out AmeisenBotConfig config))
             {
-                AmeisenBot = new(config);
+                AmeisenBot = new(Path.GetFileName(config.Path), config);
 
                 // capture whisper messages and display them in the bots ui as a flashing button
                 AmeisenBot.Bot.Wow.Events?.Subscribe("CHAT_MSG_WHISPER", OnWhisper);

@@ -1,4 +1,5 @@
-﻿using AmeisenBotX.Wow.Objects;
+﻿using AmeisenBotX.Common.Utils;
+using AmeisenBotX.Wow.Objects;
 using AmeisenBotX.Wow.Objects.Enums;
 using System;
 using System.Collections.Generic;
@@ -64,12 +65,7 @@ namespace AmeisenBotX.Core.Managers.Chat
 
                     string protocolName = ProtocolName(typeName);
                     string dirName = Path.GetDirectoryName(protocolName);
-
-                    if (!Directory.Exists(dirName))
-                    {
-                        Directory.CreateDirectory(dirName);
-                    }
-
+                    IOUtils.CreateDirectoryIfNotExists(dirName);
                     File.AppendAllText(protocolName, $"{chatMessage}\n");
                 }
                 catch { }

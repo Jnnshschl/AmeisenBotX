@@ -53,7 +53,7 @@ namespace AmeisenBotX.Core
 
         public IWowUnit LastTarget => Objects.LastTarget;
 
-        public WowMemoryApi Memory { get; set; }
+        public WowMemoryApi Memory => Wow.Memory;
 
         public IMovementEngine Movement { get; set; }
 
@@ -238,6 +238,13 @@ namespace AmeisenBotX.Core
         public T GetWowObjectByGuid<T>(ulong guid) where T : IWowObject
         {
             return Objects.All.OfType<T>().FirstOrDefault(e => e.Guid == guid);
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public bool TryGetWowObjectByGuid<T>(ulong guid, out T obj) where T : IWowObject
+        {
+            obj = guid == 0 ? default : GetWowObjectByGuid<T>(guid);
+            return obj != null;
         }
     }
 }

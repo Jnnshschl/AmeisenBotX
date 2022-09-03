@@ -1,4 +1,5 @@
-﻿using System;
+﻿using AmeisenBotX.Common.Utils;
+using System;
 using System.IO;
 using System.Text.Json;
 using System.Text.Json.Serialization;
@@ -47,11 +48,7 @@ namespace AmeisenBotX
                 if (configEditor.ConfigName != null && configEditor.Config != null)
                 {
                     ConfigToLoad = Path.Combine(DataPath, configEditor.ConfigName, "config.json");
-
-                    if (!Directory.Exists(Path.GetDirectoryName(ConfigToLoad)))
-                    {
-                        Directory.CreateDirectory(Path.GetDirectoryName(ConfigToLoad));
-                    }
+                    IOUtils.CreateDirectoryIfNotExists(Path.GetDirectoryName(ConfigToLoad));
 
                     File.WriteAllText(ConfigToLoad, JsonSerializer.Serialize(configEditor.Config, new JsonSerializerOptions() { AllowTrailingCommas = true, NumberHandling = JsonNumberHandling.AllowReadingFromString }));
                 }
@@ -80,10 +77,7 @@ namespace AmeisenBotX
             }
 
             // create our data folder, default will be placed at "%APPDATA%/AmeisenBotX/..."
-            if (!Directory.Exists(DataPath))
-            {
-                Directory.CreateDirectory(DataPath);
-            }
+            IOUtils.CreateDirectoryIfNotExists(DataPath);
 
             comboboxSelectedConfig.Items.Add("New Config");
 
