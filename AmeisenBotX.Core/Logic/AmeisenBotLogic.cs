@@ -8,6 +8,7 @@ using AmeisenBotX.Core.Engines.Movement.Enums;
 using AmeisenBotX.Core.Engines.Movement.Providers.Basic;
 using AmeisenBotX.Core.Engines.Movement.Providers.Special;
 using AmeisenBotX.Core.Logic.Enums;
+using AmeisenBotX.Core.Logic.Leafs;
 using AmeisenBotX.Core.Logic.Routines;
 using AmeisenBotX.Core.Logic.StaticDeathRoutes;
 using AmeisenBotX.Core.Managers.Character.Inventory.Objects;
@@ -54,10 +55,8 @@ namespace AmeisenBotX.Core.Logic
             IdleActionEvent = new(TimeSpan.FromMilliseconds(1000));
             LoginAttemptEvent = new(TimeSpan.FromMilliseconds(500));
             LootTryEvent = new(TimeSpan.FromMilliseconds(750));
-            NpcInteractionEvent = new(TimeSpan.FromMilliseconds(1000));
             PartymembersFightEvent = new(TimeSpan.FromMilliseconds(1000));
             RenderSwitchEvent = new(TimeSpan.FromMilliseconds(1000));
-            TalkToQuestgiverEvent = new(TimeSpan.FromMilliseconds(1500));
             UnitsLootedCleanupEvent = new(TimeSpan.FromMilliseconds(1000));
             UpdateFood = new(TimeSpan.FromMilliseconds(1000));
 
@@ -80,7 +79,7 @@ namespace AmeisenBotX.Core.Logic
             (
                 () => CanUseStaticPaths(),
                 // prefer static paths
-                new Leaf(() => { Bot.Movement.DirectMove(StaticRoute.GetNextPoint(Bot.Player.Position)); return BtStatus.Success; }),
+                new SuccessLeaf(() => Bot.Movement.DirectMove(StaticRoute.GetNextPoint(Bot.Player.Position))),
                 // run to corpse by position
                 new Leaf(RunToCorpseAndRetrieveIt)
             );
@@ -92,7 +91,7 @@ namespace AmeisenBotX.Core.Logic
                 new Selector
                 (
                     () => Bot.Target == null,
-                    new Leaf(() => { Bot.Wow.StartAutoAttack(); return BtStatus.Success; }),
+                    new SuccessLeaf(() => Bot.Wow.StartAutoAttack()),
                     new Selector
                     (
                         () => !Bot.Player.IsInMeleeRange(Bot.Target),
@@ -100,69 +99,73 @@ namespace AmeisenBotX.Core.Logic
                         new Selector
                         (
                             () => !BotMath.IsFacing(Bot.Player.Position, Bot.Player.Rotation, Bot.Target.Position),
-                            new Leaf(() => { Bot.Wow.FacePosition(Bot.Player.BaseAddress, Bot.Player.Position, Bot.Target.Position); return BtStatus.Success; }),
+                            new SuccessLeaf(() => Bot.Wow.FacePosition(Bot.Player.BaseAddress, Bot.Player.Position, Bot.Target.Position)),
                             new Selector
                             (
                                 () => !Bot.Player.IsAutoAttacking,
-                                new Leaf(() => { Bot.Wow.StartAutoAttack(); /*Bot.Wow.StopClickToMove();*/ return BtStatus.Success; }),
-                                new Leaf(() => { return BtStatus.Success; })
+                                new SuccessLeaf(() => { Bot.Wow.StartAutoAttack(); /*Bot.Wow.StopClickToMove();*/ }),
+                                new SuccessLeaf()
                             )
                         )
                     )
                 ),
                 // TODO: handle tactics here run combat class logic
-                new Leaf(() => { Bot.CombatClass.Execute(); return BtStatus.Success; })
+                new SuccessLeaf(() => Bot.CombatClass.Execute())
             );
+
+            INode interactWithMerchantNode = new InteractWithUnitLeaf(Bot, () => Merchant, new SuccessLeaf(() => SpeakToMerchantRoutine.Run(Bot, Merchant)));
+            INode interactWithClassTrainerNode = new InteractWithUnitLeaf(Bot, () => ClassTrainer, new SuccessLeaf(() => SpeakToClassTrainerRoutine.Run(Bot, ClassTrainer)));
+            INode interactWithProfessionTrainerNode = new InteractWithUnitLeaf(Bot, () => ProfessionTrainer, new SuccessLeaf(() => SpeakToClassTrainerRoutine.Run(Bot, ProfessionTrainer)));
 
             INode jobsNode = new Waterfall
             (
-                new Leaf(() => { Bot.Jobs.Execute(); return BtStatus.Success; }),
+                new SuccessLeaf(() => Bot.Jobs.Execute()),
                 (() => Bot.Player.IsDead, new Leaf(Dead)),
                 (() => Bot.Player.IsGhost, openworldGhostNode),
                 (() => !Bot.Player.IsMounted && NeedToFight(), combatNode),
-                (NeedToRepairOrSell, new Leaf(SpeakWithMerchant)),
+                (NeedToRepairOrSell, interactWithMerchantNode),
                 // (NeedToLoot, new Leaf(LootNearUnits)),
                 (NeedToEat, new Leaf(Eat))
             );
 
             INode grindingNode = new Waterfall
             (
-                new Leaf(() => { Bot.Grinding.Execute(); return BtStatus.Success; }),
+                new SuccessLeaf(() => Bot.Grinding.Execute()),
                 (() => Bot.Player.IsDead, new Leaf(Dead)),
                 (() => Bot.Player.IsGhost, openworldGhostNode),
                 (NeedToFight, combatNode),
-                (NeedToRepairOrSell, new Leaf(SpeakWithMerchant)),
-                (NeedToTrainSpells, new Leaf(SpeakWithClassTrainer)),
-                (NeedToTrainSecondarySkills, new Leaf(SpeakWithProfessionTrainer)),
+                (NeedToRepairOrSell, interactWithMerchantNode),
+                (NeedToTrainSpells, interactWithClassTrainerNode),
+                (NeedToTrainSecondarySkills, interactWithProfessionTrainerNode),
                 (NeedToLoot, new Leaf(LootNearUnits)),
                 (NeedToEat, new Leaf(Eat))
             );
 
             INode questingNode = new Waterfall
             (
-                new Leaf(() => { Bot.Quest.Execute(); return BtStatus.Success; }),
+                new SuccessLeaf(() => Bot.Quest.Execute()),
                 (() => Bot.Player.IsDead, new Leaf(Dead)),
                 (() => Bot.Player.IsGhost, openworldGhostNode),
                 (NeedToFight, combatNode),
-                (NeedToRepairOrSell, new Leaf(SpeakWithMerchant)),
+                (NeedToRepairOrSell, interactWithMerchantNode),
                 (NeedToLoot, new Leaf(LootNearUnits)),
                 (NeedToEat, new Leaf(Eat))
             );
 
             INode pvpNode = new Waterfall
             (
-                new Leaf(() => { Bot.Pvp.Execute(); return BtStatus.Success; }),
+                new SuccessLeaf(() => Bot.Pvp.Execute()),
                 (() => Bot.Player.IsDead, new Leaf(Dead)),
                 (() => Bot.Player.IsGhost, openworldGhostNode),
                 (NeedToFight, combatNode),
-                (NeedToRepairOrSell, new Leaf(SpeakWithMerchant)),
+                (NeedToRepairOrSell, interactWithMerchantNode),
                 (NeedToLoot, new Leaf(LootNearUnits)),
                 (NeedToEat, new Leaf(Eat))
             );
 
             INode testingNode = new Waterfall
             (
-                new Leaf(() => { Bot.Test.Execute(); return BtStatus.Success; }),
+                new SuccessLeaf(() => Bot.Test.Execute()),
                 (() => Bot.Player.IsDead, new Leaf(Dead)),
                 (() => Bot.Player.IsGhost, openworldGhostNode)
             );
@@ -170,25 +173,25 @@ namespace AmeisenBotX.Core.Logic
             INode openworldNode = new Waterfall
             (
                 // do idle stuff as fallback
-                new Leaf(Idle),
+                new SuccessLeaf(() => Bot.CombatClass?.OutOfCombatExecute()),
                 // handle main open world states
                 (() => Bot.Player.IsDead, new Leaf(Dead)),
                 (() => Bot.Player.IsGhost, openworldGhostNode),
                 (NeedToFight, combatNode),
-                (NeedToRepairOrSell, new Leaf(SpeakWithMerchant)),
+                (NeedToRepairOrSell, interactWithMerchantNode),
                 (NeedToLoot, new Leaf(LootNearUnits)),
                 (NeedToEat, new Leaf(Eat)),
-                (NeedToTalkToQuestgiver, new Leaf(TalkToQuestgiver)),
-                (() => Config.IdleActions && IdleActionEvent.Run(), new Leaf(() => { Bot.IdleActions.Tick(Config.Autopilot); return BtStatus.Success; }))
+                (NeedToTalkToQuestgiver, new InteractWithUnitLeaf(Bot, () => QuestGiverToTalkTo)),
+                (() => Config.IdleActions && IdleActionEvent.Run(), new SuccessLeaf(() => Bot.IdleActions.Tick(Config.Autopilot)))
             );
 
             // SPECIAL ENVIRONMENTS -----------------------------
 
             INode battlegroundNode = new Waterfall
             (
-                new Leaf(() => { Bot.Battleground.Execute(); return BtStatus.Success; }),
+                new SuccessLeaf(() => { Bot.Battleground.Execute(); }),
                 // leave battleground once it is finished
-                (IsBattlegroundFinished, new Leaf(() => { Bot.Wow.LeaveBattleground(); Bot.Battleground.Reset(); return BtStatus.Success; })),
+                (IsBattlegroundFinished, new SuccessLeaf(() => { Bot.Wow.LeaveBattleground(); Bot.Battleground.Reset(); })),
                 // only handle dead state here, ghost should only be a problem on AV as the
                 // graveyard might get lost while we are a ghost
                 (() => Bot.Player.IsDead, new Leaf(Dead)),
@@ -203,7 +206,7 @@ namespace AmeisenBotX.Core.Logic
                     () => Config.DungeonUsePartyMode,
                     // just follow when we use party mode in dungeon
                     openworldNode,
-                    new Leaf(() => { Bot.Dungeon.Execute(); return BtStatus.Success; })
+                    new SuccessLeaf(() => Bot.Dungeon.Execute())
                 ),
                 (() => Bot.Player.IsDead, new Leaf(DeadDungeon)),
                 (
@@ -211,7 +214,7 @@ namespace AmeisenBotX.Core.Logic
                     new Selector
                     (
                         NeedToFollowTactic,
-                        new Leaf(() => { return BtStatus.Success; }),
+                        new SuccessLeaf(),
                         combatNode
                     )
                 ),
@@ -226,14 +229,14 @@ namespace AmeisenBotX.Core.Logic
                     () => Config.DungeonUsePartyMode,
                     // just follow when we use party mode in raid
                     new Leaf(Move),
-                    new Leaf(() => { Bot.Dungeon.Execute(); return BtStatus.Success; })
+                    new SuccessLeaf(() => Bot.Dungeon.Execute())
                 ),
                 (
                     NeedToFight,
                     new Selector
                     (
                         NeedToFollowTactic,
-                        new Leaf(() => { return BtStatus.Success; }),
+                        new SuccessLeaf(),
                         combatNode
                     )
                 ),
@@ -247,14 +250,14 @@ namespace AmeisenBotX.Core.Logic
             (
                 // run the update stuff before we execute the main logic objects will be updated
                 // here for example
-                new Leaf(UpdateWowInterface),
+                new SuccessLeaf(() => Bot.Wow.Tick()),
                 new Selector
                 (
                     () => Bot.Objects.IsWorldLoaded && Bot.Player != null && Bot.Objects != null,
                     new Annotator
                     (
                         // update stuff that needs us to be ingame
-                        new Leaf(UpdateIngame),
+                        new SuccessLeaf(UpdateIngame),
                         new Waterfall
                         (
                             // open world auto behavior as fallback
@@ -274,11 +277,10 @@ namespace AmeisenBotX.Core.Logic
                         )
                     ),
                     // we are most likely in the loading screen or player/objects are null
-                    new Leaf(() =>
+                    new SuccessLeaf(() =>
                     {
                         // make sure we dont run after we leave the loadingscreen
                         Bot.Movement.StopMovement();
-                        return BtStatus.Success;
                     })
                 )
             );
@@ -290,7 +292,7 @@ namespace AmeisenBotX.Core.Logic
                     // run the anti afk and main logic if wow is running and we are logged in
                     new Annotator
                     (
-                        new Leaf(AntiAfk),
+                        new SuccessLeaf(AntiAfk),
                         mainLogicNode
                     ),
                     // accept tos and eula, start wow
@@ -305,7 +307,7 @@ namespace AmeisenBotX.Core.Logic
                     ),
                     // setup interface and login
                     (() => !Bot.Wow.IsReady, new Leaf(SetupWowInterface)),
-                    (NeedToLogin, new Leaf(Login))
+                    (NeedToLogin, new SuccessLeaf(Login))
                 )
             );
         }
@@ -352,8 +354,6 @@ namespace AmeisenBotX.Core.Logic
 
         private MovementManager MovementManager { get; }
 
-        private TimegatedEvent NpcInteractionEvent { get; }
-
         private TimegatedEvent PartymembersFightEvent { get; }
 
         private IWowUnit ProfessionTrainer { get; set; }
@@ -367,8 +367,6 @@ namespace AmeisenBotX.Core.Logic
         private bool SearchedStaticRoutes { get; set; }
 
         private IStaticDeathRoute StaticRoute { get; set; }
-
-        private TimegatedEvent TalkToQuestgiverEvent { get; }
 
         private Tree Tree { get; }
 
@@ -417,15 +415,13 @@ namespace AmeisenBotX.Core.Logic
             Tree.Tick();
         }
 
-        private BtStatus AntiAfk()
+        private void AntiAfk()
         {
             if (AntiAfkEvent.Run())
             {
                 Bot.Memory.Write(Bot.Memory.Offsets.TickCount, Environment.TickCount);
                 AntiAfkEvent.Timegate = TimeSpan.FromMilliseconds(Random.Next(300, 2300));
             }
-
-            return BtStatus.Success;
         }
 
         /// <summary>
@@ -710,12 +706,6 @@ namespace AmeisenBotX.Core.Logic
                     && e.Position.GetDistance(Bot.Player.Position) < Config.LootUnitsRadius);
         }
 
-        private BtStatus Idle()
-        {
-            Bot.CombatClass?.OutOfCombatExecute();
-            return BtStatus.Success;
-        }
-
         private bool IsBattlegroundFinished()
         {
             return Bot.Memory.Read(Bot.Memory.Offsets.BattlegroundFinished, out int bgFinished)
@@ -762,7 +752,7 @@ namespace AmeisenBotX.Core.Logic
             }
         }
 
-        private BtStatus Login()
+        private void Login()
         {
             Bot.Wow.SetWorldLoadedCheck(true);
 
@@ -781,7 +771,6 @@ namespace AmeisenBotX.Core.Logic
             }
 
             Bot.Wow.SetWorldLoadedCheck(false);
-            return BtStatus.Success;
         }
 
         private BtStatus LootNearUnits()
@@ -1199,78 +1188,6 @@ namespace AmeisenBotX.Core.Logic
             return Bot.Wow.Setup() ? BtStatus.Success : BtStatus.Failed;
         }
 
-        private BtStatus SpeakWithClassTrainer()
-        {
-            if (ClassTrainer == null)
-            {
-                return BtStatus.Failed;
-            }
-
-            if (Bot.Player.Position.GetDistance(ClassTrainer.Position) > 3.0f)
-            {
-                Bot.Movement.SetMovementAction(MovementAction.Move, ClassTrainer.Position);
-                return BtStatus.Ongoing;
-            }
-
-            Bot.Movement.StopMovement();
-
-            if (!NpcInteractionEvent.Run())
-            {
-                return BtStatus.Failed;
-            }
-
-            SpeakToClassTrainerRoutine.Run(Bot, ClassTrainer);
-            return BtStatus.Success;
-        }
-
-        private BtStatus SpeakWithMerchant()
-        {
-            if (Merchant == null)
-            {
-                return BtStatus.Failed;
-            }
-
-            if (Bot.Player.Position.GetDistance(Merchant.Position) > 3.0f)
-            {
-                Bot.Movement.SetMovementAction(MovementAction.Move, Merchant.Position);
-                return BtStatus.Ongoing;
-            }
-
-            Bot.Movement.StopMovement();
-
-            if (!NpcInteractionEvent.Run())
-            {
-                return BtStatus.Failed;
-            }
-
-            SpeakToMerchantRoutine.Run(Bot, Merchant);
-            return BtStatus.Success;
-        }
-
-        private BtStatus SpeakWithProfessionTrainer()
-        {
-            if (ProfessionTrainer == null)
-            {
-                return BtStatus.Failed;
-            }
-
-            if (Bot.Player.Position.GetDistance(ProfessionTrainer.Position) > 3.0f)
-            {
-                Bot.Movement.SetMovementAction(MovementAction.Move, ProfessionTrainer.Position);
-                return BtStatus.Ongoing;
-            }
-
-            Bot.Movement.StopMovement();
-
-            if (!NpcInteractionEvent.Run())
-            {
-                return BtStatus.Failed;
-            }
-
-            SpeakToClassTrainerRoutine.Run(Bot, ProfessionTrainer);
-            return BtStatus.Success;
-        }
-
         private BtStatus StartWow()
         {
             if (File.Exists(Config.PathToWowExe))
@@ -1305,27 +1222,7 @@ namespace AmeisenBotX.Core.Logic
             return BtStatus.Failed;
         }
 
-        private BtStatus TalkToQuestgiver()
-        {
-            if (QuestGiverToTalkTo != null)
-            {
-                if (Bot.Player.DistanceTo(QuestGiverToTalkTo) > 3.2f)
-                {
-                    Bot.Movement.SetMovementAction(MovementAction.Move, QuestGiverToTalkTo.Position);
-                }
-                else if (TalkToQuestgiverEvent.Run())
-                {
-                    Bot.Wow.InteractWithUnit(QuestGiverToTalkTo);
-                    return BtStatus.Success;
-                }
-
-                return BtStatus.Ongoing;
-            }
-
-            return BtStatus.Failed;
-        }
-
-        private BtStatus UpdateIngame()
+        private void UpdateIngame()
         {
             if (FirstStart)
             {
@@ -1362,14 +1259,6 @@ namespace AmeisenBotX.Core.Logic
                 IntPtr foregroundWindow = Bot.Memory.GetForegroundWindow();
                 Bot.Wow.SetRenderState(foregroundWindow == Bot.Memory.Process.MainWindowHandle);
             }
-
-            return BtStatus.Success;
-        }
-
-        private BtStatus UpdateWowInterface()
-        {
-            Bot.Wow.Tick();
-            return BtStatus.Success;
         }
     }
 }

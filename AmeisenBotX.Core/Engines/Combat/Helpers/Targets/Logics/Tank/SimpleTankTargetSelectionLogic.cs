@@ -53,8 +53,8 @@ namespace AmeisenBotX.Core.Engines.Combat.Helpers.Targets.Logics.Tank
 
                     foreach (IWowUnit unit in Bot.Objects.Partymembers)
                     {
-                        if (Bot.TryGetWowObjectByGuid<IWowUnit>(unit.TargetGuid, out IWowUnit targetUnit) 
-                            && targetUnit != null 
+                        if (Bot.TryGetWowObjectByGuid<IWowUnit>(unit.TargetGuid, out IWowUnit targetUnit)
+                            && targetUnit != null
                             && Bot.Db.GetReaction(targetUnit, Bot.Player) != WowUnitReaction.Friendly)
                         {
                             if (!targets.ContainsKey(targetUnit))
