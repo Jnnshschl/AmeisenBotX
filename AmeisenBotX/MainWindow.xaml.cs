@@ -16,6 +16,7 @@ using AmeisenBotX.Wow.Objects;
 using AmeisenBotX.Wow.Objects.Enums;
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Globalization;
 using System.IO;
 using System.Linq;
@@ -30,14 +31,14 @@ namespace AmeisenBotX
 {
     public partial class MainWindow : Window
     {
-        public MainWindow(string dataPath, string configPath)
+        public MainWindow(string dataPath, string configPath, int processToHook = default)
         {
             if (!Directory.Exists(dataPath)) { throw new FileNotFoundException(dataPath); }
             if (!File.Exists(configPath)) { throw new FileNotFoundException(configPath); }
 
             DataPath = dataPath;
             ConfigPath = configPath;
-
+            ProcessToHook = processToHook;
             InitializeComponent();
 
             CurrentTickTimeBadBrush = new SolidColorBrush(Color.FromRgb(255, 0, 80));
@@ -85,7 +86,7 @@ namespace AmeisenBotX
         private AmeisenBot AmeisenBot { get; set; }
 
         private string ConfigPath { get; }
-
+        public int ProcessToHook { get; }
         private Brush CurrentTickTimeBadBrush { get; }
 
         private Brush CurrentTickTimeGoodBrush { get; }
@@ -271,10 +272,10 @@ namespace AmeisenBotX
             // bool x = AmeisenBot.Bot.Player.IsSwimming;
             // bool y = AmeisenBot.Bot.Player.IsFlying;
 
-            foreach (IWowDynobject aoe in AmeisenBot.Bot.Objects.All.OfType<IWowDynobject>().Where(e => e.Caster == 1))
-            {
-                Vector3 pos = aoe.Position;
-            }
+            //foreach (IWowDynobject aoe in AmeisenBot.Bot.Objects.All?.OfType<IWowDynobject>()?.Where(e => e?.Caster == 1))
+            //{
+            //    Vector3 pos = aoe.Position;
+            //}
         }
 
         private void ComboboxStateOverride_SelectionChanged(object sender, System.Windows.Controls.SelectionChangedEventArgs e)
@@ -461,16 +462,26 @@ namespace AmeisenBotX
         private void StartPause()
         {
             if (AmeisenBot.IsRunning)
-            {
                 AmeisenBot.Pause();
-                buttonStartPause.Content = "▶";
-                buttonStartPause.Foreground = TextAccentBrush;
+            else if (AmeisenBot.Initialized)
+                AmeisenBot.Resume();
+            else
+                AmeisenBot.Start();
+
+            SetButtonStartPause();
+        }
+
+        private void SetButtonStartPause()
+        {
+            if (AmeisenBot.IsRunning)
+            {
+                buttonStartPause.Content = "||";
+                buttonStartPause.Foreground = DarkForegroundBrush;
             }
             else
             {
-                AmeisenBot.Resume();
-                buttonStartPause.Content = "||";
-                buttonStartPause.Foreground = DarkForegroundBrush;
+                buttonStartPause.Content = "▶";
+                buttonStartPause.Foreground = TextAccentBrush;
             }
         }
 
@@ -590,7 +601,7 @@ namespace AmeisenBotX
 
             if (TryLoadConfig(ConfigPath, out AmeisenBotConfig config))
             {
-                AmeisenBot = new(Path.GetFileName(config.Path), config);
+                AmeisenBot = new(Path.GetFileName(config.Path), config, processToHook: ProcessToHook);
 
                 // capture whisper messages and display them in the bots ui as a flashing button
                 AmeisenBot.Bot.Wow.Events?.Subscribe("CHAT_MSG_WHISPER", OnWhisper);
@@ -627,7 +638,7 @@ namespace AmeisenBotX
                 AmeisenLogger.I.Log("AmeisenBot", "Loading Hotkeys", LogLevel.Verbose);
                 LoadHotkeys();
 
-                AmeisenBot.Start();
+                SetButtonStartPause();
 
                 StateConfigWindows = new()
                 {

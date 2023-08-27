@@ -50,7 +50,7 @@ namespace AmeisenBotX.Memory
         /// <summary>
         /// Disposes XMemory and frees all memory allocated by it.
         /// </summary>
-        public new void Dispose();
+        public new void Dispose(bool managed = false);
 
         /// <summary>
         /// Brings a window to the users focus.

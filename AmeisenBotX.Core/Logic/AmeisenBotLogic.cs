@@ -37,11 +37,11 @@ namespace AmeisenBotX.Core.Logic
             new PitOfSaronDeathRoute()
         };
 
-        public AmeisenBotLogic(AmeisenBotConfig config, AmeisenBotInterfaces bot)
+        public AmeisenBotLogic(AmeisenBotConfig config, AmeisenBotInterfaces bot, int processToHook = default)
         {
             Config = config;
             Bot = bot;
-
+            ProcessToHook = processToHook;
             FirstStart = true;
             FirstLogin = true;
             Random = new();
@@ -321,7 +321,7 @@ namespace AmeisenBotX.Core.Logic
         private bool ArePartymembersInFight { get; set; }
 
         private AmeisenBotInterfaces Bot { get; }
-
+        public int ProcessToHook { get; }
         private TimegatedEvent CharacterUpdateEvent { get; }
 
         private IWowUnit ClassTrainer { get; set; }
@@ -765,7 +765,7 @@ namespace AmeisenBotX.Core.Logic
             // needed to prevent direct logout due to inactivity
             AntiAfk();
 
-            if (LoginAttemptEvent.Run())
+            if (Config.AutoLogin && LoginAttemptEvent.Run())
             {
                 Bot.Wow.LuaDoString(LuaLogin.Get(Config.Username, Config.Password, Config.Realm, Config.CharacterSlot));
             }
@@ -1190,7 +1190,35 @@ namespace AmeisenBotX.Core.Logic
 
         private BtStatus StartWow()
         {
-            if (File.Exists(Config.PathToWowExe))
+            if(ProcessToHook != default)
+            {
+                Process p = Process.GetProcessById(ProcessToHook);
+                p.WaitForInputIdle();
+                var processHandle = p.Handle;
+                var mainThreadHandle = p.MainWindowHandle;
+
+                AmeisenLogger.I.Log("StartWow", $"Attaching XMemory to {p.ProcessName} ({p.Id})");
+
+                if (Bot.Memory.Init(p, processHandle, mainThreadHandle))
+                {
+                    Bot.Memory.Offsets.Init(Bot.Memory.Process.MainModule.BaseAddress);
+
+                    OnWoWStarted?.Invoke();
+
+                    if (Config.SaveWowWindowPosition)
+                    {
+                        LoadWowWindowPosition();
+                    }
+
+                    return BtStatus.Success;
+                }
+                else
+                {
+                    AmeisenLogger.I.Log("StartWow", $"Attaching XMemory failed...");
+                    return BtStatus.Failed;
+                }
+            }
+            else if (Config.AutostartWow && File.Exists(Config.PathToWowExe))
             {
                 AmeisenLogger.I.Log("StartWow", "Starting WoW Process");
                 Process p = Bot.Memory.StartProcessNoActivate($"\"{Config.PathToWowExe}\" -windowed -d3d9", out IntPtr processHandle, out IntPtr mainThreadHandle);

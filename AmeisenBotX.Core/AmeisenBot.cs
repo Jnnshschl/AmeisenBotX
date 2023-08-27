@@ -83,14 +83,14 @@ namespace AmeisenBotX.Core
         /// Set to string.Empty to disable logging.
         /// </param>
         /// <param name="initialLogLevel">The initial LogLevel of the bots logger.</param>
-        public AmeisenBot(string instanceName, AmeisenBotConfig config, string logfilePath = "DEFAULT", LogLevel initialLogLevel = LogLevel.Verbose)
+        public AmeisenBot(string instanceName, AmeisenBotConfig config, string logfilePath = "DEFAULT", LogLevel initialLogLevel = LogLevel.Verbose, int processToHook = default)
         {
             if (string.IsNullOrWhiteSpace(instanceName)) { throw new ArgumentException("instanceName cannot be empty or whitespace", nameof(config)); }
             if (string.IsNullOrWhiteSpace(config.Path)) { throw new ArgumentException("config.Path cannot be empty, make sure you set it after loading the config", nameof(config)); }
             if (!File.Exists(config.Path)) { throw new ArgumentException("config.Path does not exist", nameof(config)); }
 
             Config = config ?? throw new ArgumentException("config cannot be null", nameof(config));
-
+            ProcessToHook = processToHook;
             AccountName = instanceName;
             ProfileFolder = Path.GetDirectoryName(config.Path);
 
@@ -193,7 +193,7 @@ namespace AmeisenBotX.Core
             Bot.PathfindingHandler = new AmeisenNavigationHandler(Config.NavmeshServerIp, Config.NameshServerPort);
             Bot.Movement = new MovementEngine(Bot, Config);
 
-            Logic = new AmeisenBotLogic(Config, Bot);
+            Logic = new AmeisenBotLogic(Config, Bot, processToHook);
 
             AmeisenLogger.I.Log("AmeisenBot", "Finished setting up Bot", LogLevel.Verbose);
 
@@ -264,6 +264,7 @@ namespace AmeisenBotX.Core
         /// Current configuration.
         /// </summary>
         public AmeisenBotConfig Config { get; private set; }
+        public int ProcessToHook { get; }
 
         /// <summary>
         /// How long the bot needed to execute one tick.
@@ -284,6 +285,11 @@ namespace AmeisenBotX.Core
         /// All currently loaded grinding profiles.
         /// </summary>
         public IEnumerable<IGrindingProfile> GrindingProfiles { get; private set; }
+
+        /// <summary>
+        /// Whether the bot has run <see cref="Start"/> yet.
+        /// </summary>
+        public bool Initialized { get; private set; }
 
         /// <summary>
         /// Whether the bot is running or paused.
@@ -358,7 +364,8 @@ namespace AmeisenBotX.Core
                     {
                         if (DateTime.UtcNow - exited > timeToWait)
                         {
-                            Bot.Memory.Process.Kill();
+                            if (ProcessToHook == default)
+                                Bot.Memory.Process.Kill();
                             break;
                         }
                         else
@@ -369,14 +376,15 @@ namespace AmeisenBotX.Core
                 }
                 else
                 {
-                    Bot.Memory.Process?.Kill();
+                    if (ProcessToHook == default)
+                        Bot.Memory.Process?.Kill();
                 }
             }
 
             Bot.PathfindingHandler.Stop();
 
             Bot.Wow.Dispose();
-            Bot.Memory.Dispose();
+            Bot.Memory.Dispose(ProcessToHook == default);
 
             Bot.Db.Save(Path.Combine(ProfileFolder, "db.json"));
 
@@ -450,7 +458,7 @@ namespace AmeisenBotX.Core
         /// </summary>
         public void Start()
         {
-            if (!IsRunning)
+            if (!IsRunning && !Initialized)
             {
                 IsRunning = true;
                 AmeisenLogger.I.Log("AmeisenBot", "Starting", LogLevel.Debug);
@@ -469,6 +477,8 @@ namespace AmeisenBotX.Core
 
                 AmeisenLogger.I.Log("AmeisenBot", "Setup done", LogLevel.Debug);
                 OnStatusChanged?.Invoke();
+
+                Initialized = true;
             }
         }
 

@@ -122,13 +122,21 @@ namespace AmeisenBotX.Memory
             }
         }
 
-        ///<inheritdoc cref="IMemoryApi.Dispose"/>
+        /// <inheritdoc/>
         public void Dispose()
         {
-            GC.SuppressFinalize(this);
+            Dispose(true);
+        }
 
-            CloseHandle(MainThreadHandle);
-            CloseHandle(ProcessHandle);
+        ///<inheritdoc cref="IMemoryApi.Dispose"/>
+        public void Dispose(bool managed = false)
+        {
+            GC.SuppressFinalize(this);
+            if (managed)
+            {
+                CloseHandle(MainThreadHandle);
+                CloseHandle(ProcessHandle);
+            }
 
             FreeAllMemory();
         }
@@ -496,7 +504,7 @@ namespace AmeisenBotX.Memory
                 dwFlags = STARTF_USESHOWWINDOW,
                 wShowWindow = SW_SHOWMINNOACTIVE
             };
-
+            
             if (CreateProcess(null, processCmd, IntPtr.Zero, IntPtr.Zero, true, 0x10, IntPtr.Zero, null, ref startupInfo, out ProcessInformation processInformation))
             {
                 processHandle = processInformation.hProcess;
