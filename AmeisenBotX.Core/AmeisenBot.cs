@@ -117,7 +117,18 @@ namespace AmeisenBotX.Core
             PoiCacheEvent = new TimegatedEvent(TimeSpan.FromSeconds(2));
 
             // load the wow specific interface based on file version (build number)
-            int executeableVersion = FileVersionInfo.GetVersionInfo(Config.PathToWowExe).FilePrivatePart;
+            int executeableVersion;
+            if (ProcessToHook != default)
+            {
+                var fileVersionInfo = Process.GetProcessById(ProcessToHook).MainModule.FileVersionInfo;
+                executeableVersion = fileVersionInfo.FilePrivatePart;
+                Config.PathToWowExe = fileVersionInfo.FileName;
+            }
+            else
+            {
+                executeableVersion = FileVersionInfo.GetVersionInfo(Config.PathToWowExe).FilePrivatePart;
+            }
+            
 
             if (Enum.TryParse(executeableVersion.ToString(), true, out WowVersion wowVersion))
             {
@@ -421,7 +432,7 @@ namespace AmeisenBotX.Core
             bool oldRconState = Config.RconEnabled;
 
             Config = newConfig;
-            StateMachineTimer.SetInterval(Config.StateMachineTickMs);
+            StateMachineTimer?.SetInterval(Config.StateMachineTickMs);
             LoadProfiles();
 
             if (!oldRconState && Config.RconEnabled)

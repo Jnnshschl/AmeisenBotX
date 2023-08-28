@@ -1194,8 +1194,9 @@ namespace AmeisenBotX.Core.Logic
             {
                 Process p = Process.GetProcessById(ProcessToHook);
                 p.WaitForInputIdle();
-                var processHandle = p.Handle;
-                var mainThreadHandle = p.MainWindowHandle;
+                
+                var processHandle = p.SafeHandle.DangerousGetHandle();
+                var mainThreadHandle = p.Handle;
 
                 AmeisenLogger.I.Log("StartWow", $"Attaching XMemory to {p.ProcessName} ({p.Id})");
 

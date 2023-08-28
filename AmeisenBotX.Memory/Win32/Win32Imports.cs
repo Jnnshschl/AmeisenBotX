@@ -180,7 +180,7 @@ namespace AmeisenBotX.Memory.Win32
         internal static extern bool NtWriteVirtualMemory(IntPtr processHandle, IntPtr baseAddress, void* buffer, int size, out IntPtr numberOfBytesWritten);
 
         [DllImport("kernel32", SetLastError = true)]
-        internal static extern IntPtr OpenProcess(ProcessAccessFlag processAccess, bool inheritHandle, int processId);
+        public static extern IntPtr OpenProcess(ProcessAccessFlag processAccess, bool inheritHandle, int processId);
 
         [DllImport("kernel32", SetLastError = true)]
         internal static extern IntPtr OpenThread(ThreadAccessFlag threadAccess, bool inheritHandle, uint threadId);

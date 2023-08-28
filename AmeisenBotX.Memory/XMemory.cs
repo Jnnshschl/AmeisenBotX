@@ -137,7 +137,10 @@ namespace AmeisenBotX.Memory
                 CloseHandle(MainThreadHandle);
                 CloseHandle(ProcessHandle);
             }
-
+            else
+            {
+                RemoveAutoPosition();
+            }
             FreeAllMemory();
         }
 
@@ -478,6 +481,21 @@ namespace AmeisenBotX.Memory
                 SetWindowLong(Process.MainWindowHandle, GWL_STYLE, style);
 
                 ResizeParentWindow(offsetX, offsetY, width, height);
+            }
+        }
+
+        public void RemoveAutoPosition()
+        {
+            if(Process.MainWindowHandle != IntPtr.Zero)
+            {
+                SetParent(Process.MainWindowHandle, IntPtr.Zero);
+                uint style = (uint)GetWindowLong(Process.MainWindowHandle, GWL_STYLE);
+                style = (style 
+                        | (uint)WindowStyle.WS_POPUP 
+                        | (uint)WindowStyle.WS_THICKFRAME 
+                        | (uint)WindowStyle.WS_CAPTION
+                    ) & (~(uint)WindowStyle.WS_CHILD);
+                SetWindowLong(Process.MainWindowHandle, GWL_STYLE, (int)style);
             }
         }
 
