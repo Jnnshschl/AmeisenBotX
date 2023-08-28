@@ -132,15 +132,10 @@ namespace AmeisenBotX.Memory
         public void Dispose(bool managed = false)
         {
             GC.SuppressFinalize(this);
-            if (managed)
-            {
-                CloseHandle(MainThreadHandle);
+            CloseHandle(MainThreadHandle);
+            if (MainThreadHandle != ProcessHandle)
                 CloseHandle(ProcessHandle);
-            }
-            else
-            {
-                RemoveAutoPosition();
-            }
+            RemoveAutoPosition();
             FreeAllMemory();
         }
 
@@ -615,7 +610,8 @@ namespace AmeisenBotX.Memory
         private bool RpmGateWay(IntPtr baseAddress, void* buffer, int size)
         {
             ++rpmCalls;
-            return !NtReadVirtualMemory(ProcessHandle, baseAddress, buffer, size, out _);
+            var ret = !NtReadVirtualMemory(ProcessHandle, baseAddress, buffer, size, out _);
+            return ret;
         }
 
         /// <summary>

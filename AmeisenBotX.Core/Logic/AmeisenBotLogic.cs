@@ -1190,12 +1190,12 @@ namespace AmeisenBotX.Core.Logic
 
         private BtStatus StartWow()
         {
-            if(ProcessToHook != default)
+            if (ProcessToHook != default)
             {
                 Process p = Process.GetProcessById(ProcessToHook);
                 p.WaitForInputIdle();
-                
-                var processHandle = p.SafeHandle.DangerousGetHandle();
+
+                var processHandle = p.Handle;
                 var mainThreadHandle = p.Handle;
 
                 AmeisenLogger.I.Log("StartWow", $"Attaching XMemory to {p.ProcessName} ({p.Id})");
