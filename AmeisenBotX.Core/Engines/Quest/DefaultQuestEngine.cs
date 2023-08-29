@@ -60,7 +60,7 @@ namespace AmeisenBotX.Core.Engines.Quest
                 IEnumerable<IBotQuest> selectedQuests = Profile.Quests.Peek().Where(e => !e.Returned && !CompletedQuests.Contains(e.Id));
 
                 // drop all quest that are not selected
-                if (Bot.Player.QuestlogEntries.Count() == 25 && DateTime.UtcNow.Subtract(LastAbandonQuestTime).TotalSeconds > 30)
+                if (Bot.Player.QuestlogEntries?.Count() == 25 && DateTime.UtcNow.Subtract(LastAbandonQuestTime).TotalSeconds > 30)
                 {
                     Bot.Wow.AbandonQuestsNotIn(selectedQuests.Select(q => q.Name));
                     LastAbandonQuestTime = DateTime.UtcNow;

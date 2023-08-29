@@ -481,7 +481,8 @@ namespace AmeisenBotX.Memory
 
         public void RemoveAutoPosition()
         {
-            if(Process.MainWindowHandle != IntPtr.Zero)
+            Process.Refresh();
+            if (Process.MainWindowHandle != IntPtr.Zero)
             {
                 SetParent(Process.MainWindowHandle, IntPtr.Zero);
                 uint style = (uint)GetWindowLong(Process.MainWindowHandle, GWL_STYLE);

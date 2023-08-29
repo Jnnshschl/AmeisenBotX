@@ -145,14 +145,24 @@ namespace AmeisenBotX
 
         private void comboboxSelectedProcess_Loaded(object sender, RoutedEventArgs e)
         {
+            ReloadProcesses();
+        }
+
+        void ReloadProcesses()
+        {
             var processes = Process.GetProcesses().Where(t => t.ProcessName.Contains("Wow"));
-            
             comboboxSelectedProcess.Items.Clear();
+            comboboxSelectedProcess.Items.Add("New Window");
 
             foreach (var process in processes)
             {
                 comboboxSelectedProcess.Items.Add(ProcessToName(process));
             }
+        }
+
+        private void Button_Click(object sender, RoutedEventArgs e)
+        {
+            ReloadProcesses();
         }
     }
 }

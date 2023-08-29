@@ -46,5 +46,6 @@
             </Label.Foreground>
         </Label>
         <ComboBox x:Name="comboboxSelectedProcess" Margin="13,56,0,0" FontFamily="Segoe UI Semibold" SelectionChanged="comboboxSelectedProcess_SelectionChanged" FontSize="16" Style="{DynamicResource ComboBoxStyleDark}" HorizontalAlignment="Left" Width="337" Height="30" VerticalAlignment="Top" Loaded="comboboxSelectedProcess_Loaded" />
+        <Button Content="Refresh&#xD;&#xA;" HorizontalAlignment="Left" Height="18" Margin="275,33,0,0" FontFamily="Segoe UI Semibold" VerticalAlignment="Top" Width="51" Style="{DynamicResource ButtonStyleDark}" Foreground="White" Click="Button_Click"/>
     </Grid>
 </Window>
