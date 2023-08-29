@@ -532,6 +532,30 @@ namespace AmeisenBotX.Memory
             }
         }
 
+        ///<inheritdoc/>
+        public Process AttachProcess(int processId, out IntPtr processHandle, out IntPtr threadHandle)
+        {
+            Process process = Process.GetProcessById(processId);
+
+            processHandle = OpenProcess(ProcessAccessFlag.All, false, processId);
+            threadHandle = GetMainThreadHandle(processId);
+
+            return process;
+
+            static IntPtr GetMainThreadHandle(int processId)
+            {
+                Process process = Process.GetProcessById(processId);
+                ProcessThread primaryThread = process.Threads.Cast<ProcessThread>().OrderBy(t => t.StartTime).FirstOrDefault();
+
+                if (primaryThread != null)
+                {
+                    return OpenThread(ThreadAccessFlag.SuspendResume, false, (uint)primaryThread.Id);
+                }
+
+                return IntPtr.Zero;
+            }
+        }
+
         ///<inheritdoc cref="IMemoryApi.SuspendMainThread"/>
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public void SuspendMainThread()
@@ -610,7 +634,7 @@ namespace AmeisenBotX.Memory
         private bool RpmGateWay(IntPtr baseAddress, void* buffer, int size)
         {
             ++rpmCalls;
-            var ret = !NtReadVirtualMemory(ProcessHandle, baseAddress, buffer, size, out _);
+            var ret = !NtReadVirtualMemory(ProcessHandle, baseAddress, buffer, size, out IntPtr bytesRead);
             return ret;
         }
 

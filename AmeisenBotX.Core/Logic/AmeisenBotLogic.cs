@@ -1192,12 +1192,8 @@ namespace AmeisenBotX.Core.Logic
         {
             if (ProcessToHook != default)
             {
-                Process p = Process.GetProcessById(ProcessToHook);
+                Process p = Bot.Memory.AttachProcess(ProcessToHook, out IntPtr processHandle, out IntPtr mainThreadHandle);
                 p.WaitForInputIdle();
-
-                var processHandle = p.Handle;
-                var mainThreadHandle = p.Handle;
-
                 AmeisenLogger.I.Log("StartWow", $"Attaching XMemory to {p.ProcessName} ({p.Id})");
 
                 if (Bot.Memory.Init(p, processHandle, mainThreadHandle))
