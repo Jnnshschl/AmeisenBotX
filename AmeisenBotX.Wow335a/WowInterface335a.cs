@@ -515,7 +515,7 @@ namespace AmeisenBotX.Wow335a
         {
             int cooldown = 0;
 
-            if (ExecuteLuaAndRead(BotUtils.ObfuscateLua($"{{v:1}},{{v:2}},{{v:3}}=GetSpellCooldown(\"{spellName}\");{{v:0}}=({{v:1}}+{{v:2}}-GetTime())*1000;if {{v:0}}<0 then {{v:0}}=0 end;"), out string result))
+            if (ExecuteLuaAndRead(BotUtils.ObfuscateLua($"{{v:1}},{{v:2}},{{v:3}}=GetSpellCooldown(\"{spellName}\");{{v:0}}=(({{v:1}} or 0)+({{v:2}} or 0)-GetTime())*1000;if {{v:0}}<0 then {{v:0}}=0 end;"), out string result))
             {
                 if (result.Contains('.', StringComparison.OrdinalIgnoreCase))
                 {

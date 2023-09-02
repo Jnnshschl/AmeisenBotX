@@ -9,9 +9,9 @@ using System.Linq;
 
 namespace AmeisenBotX.Core.Engines.Quest.Profiles.StartAreas
 {
-    public class DeathknightStartAreaQuestProfile : IQuestProfile
+    public class DeathknightStartAreaQuestProfile : QuestProfile
     {
-        public DeathknightStartAreaQuestProfile(AmeisenBotInterfaces bot)
+        public DeathknightStartAreaQuestProfile(AmeisenBotInterfaces bot):base(bot)
         {
             Quests = new Queue<List<IBotQuest>>();
 

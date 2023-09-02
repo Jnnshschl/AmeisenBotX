@@ -4,9 +4,9 @@ using System.Collections.Generic;
 
 namespace AmeisenBotX.Core.Engines.Quest.Profiles.Shino
 {
-    internal class Horde1To60GrinderProfile : IQuestProfile
+    internal class Horde1To60GrinderProfile : QuestProfile
     {
-        public Horde1To60GrinderProfile(AmeisenBotInterfaces bot)
+        public Horde1To60GrinderProfile(AmeisenBotInterfaces bot) : base(bot)
         {
             Quests = new Queue<List<IBotQuest>>();
             Quests.Enqueue(new List<IBotQuest>() {

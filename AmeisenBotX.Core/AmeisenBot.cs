@@ -50,6 +50,7 @@ using AmeisenBotX.Wow335a.Offsets;
 using AmeisenBotX.Wow548;
 using AmeisenBotX.Wow548.Combatlog.Enums;
 using AmeisenBotX.Wow548.Offsets;
+using McMaster.NETCore.Plugins;
 using Microsoft.CSharp;
 using System;
 using System.CodeDom.Compiler;
@@ -365,7 +366,8 @@ namespace AmeisenBotX.Core
                 if (Bot.Wow.IsReady)
                 {
                     // ForceQuit: ingame, QuitGame: login screen
-                    Bot.Wow.LuaDoString("pcall(ForceQuit);pcall(QuitGame)");
+                    if (ProcessToHook == default)
+                        Bot.Wow.LuaDoString("pcall(ForceQuit);pcall(QuitGame)");
 
                     // wait 3 sec for wow to exit, otherwise we kill it
                     TimeSpan timeToWait = TimeSpan.FromSeconds(3);
@@ -584,6 +586,8 @@ namespace AmeisenBotX.Core
 
         private void InitQuestProfiles()
         {
+            
+
             // add quest profiles here
             QuestProfiles = new List<IQuestProfile>()
             {
@@ -645,7 +649,36 @@ namespace AmeisenBotX.Core
             Bot.Battleground = LoadClassByName(BattlegroundEngines, Config.BattlegroundEngine);
             Bot.Grinding.Profile = LoadClassByName(GrindingProfiles, Config.GrindingProfile);
             Bot.Jobs.Profile = LoadClassByName(JobProfiles, Config.JobProfile);
-            Bot.Quest.Profile = LoadClassByName(QuestProfiles, Config.QuestProfile);
+            Bot.Quest.SelectedProfile = LoadClassByName(QuestProfiles, Config.QuestProfile);
+        }
+
+        private void LoadPlugins()
+        {
+            var pluginDirectory = "path_to_your_plugin_directory";
+
+            var loader = PluginLoader.CreateFromAssemblyFile(pluginDirectory, sharedTypes: new[] { typeof(IQuestEngine) });
+
+            // Load types from the executing assembly
+            var executingAssemblyTypes = typeof(AmeisenBot).Assembly
+                .GetTypes()
+                .Where(type => typeof(IQuestEngine).IsAssignableFrom(type) && !type.IsInterface && !type.IsAbstract);
+
+            foreach (var type in executingAssemblyTypes)
+            {
+                Debug.WriteLine($"Found QuestEngine from executing assembly: {type.FullName}");
+            }
+
+            // Load and list types from the plugin assemblies
+            foreach (var pluginType in loader
+                .LoadDefaultAssembly()
+                .GetTypes()
+                .Where(type => typeof(IQuestEngine).IsAssignableFrom(type) && !type.IsInterface && !type.IsAbstract))
+            {
+                Debug.WriteLine($"Found QuestEngine from plugin: {pluginType.FullName}");
+            }
+
+            // Dispose of the loader when done
+            loader.Dispose();
         }
 
         private void OnBagChanged(long timestamp, List<string> args)

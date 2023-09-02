@@ -104,6 +104,8 @@ namespace AmeisenBotX.Wow548.Objects
         public override void Update()
         {
             base.Update();
+
+            var player = GetPlayerDescriptor();
         }
 
         protected WowPlayerDescriptor548 GetPlayerDescriptor()

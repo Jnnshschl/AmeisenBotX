@@ -4,6 +4,7 @@ using AmeisenBotX.Core.Objects;
 using AmeisenBotX.Core.Objects.Enums;
 using AmeisenBotX.Wow.Objects.Enums;
 using System.Collections.Generic;
+using System.Linq;
 
 namespace AmeisenBotX.Core.Engines.Grinding.Profiles.Horde
 {
@@ -52,7 +53,9 @@ namespace AmeisenBotX.Core.Engines.Grinding.Profiles.Horde
 
         public override string ToString()
         {
-            return "[H][Durotar] 1 To 6 Grinding";
+            var min = Spots.Min(t => t.MinLevel);
+            var max = Spots.Max(t => t.MaxLevel);
+            return $"[H][Durotar] {min} To {max} Grinding";
         }
     }
 }

@@ -7,7 +7,7 @@ namespace AmeisenBotX.Core.Engines.Quest
     {
         List<int> CompletedQuests { get; }
 
-        IQuestProfile Profile { get; set; }
+        IQuestProfile SelectedProfile { get; set; }
 
         bool UpdatedCompletedQuests { get; set; }
 

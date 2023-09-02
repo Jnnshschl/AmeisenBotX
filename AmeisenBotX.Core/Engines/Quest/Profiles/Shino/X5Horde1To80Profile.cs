@@ -8,9 +8,9 @@ using System.Collections.Generic;
 
 namespace AmeisenBotX.Core.Engines.Quest.Profiles.Shino
 {
-    internal class X5Horde1To80Profile : IQuestProfile
+    internal class X5Horde1To80Profile : QuestProfile
     {
-        public X5Horde1To80Profile(AmeisenBotInterfaces bot)
+        public X5Horde1To80Profile(AmeisenBotInterfaces bot) : base(bot)
         {
             Quests = new Queue<List<IBotQuest>>();
             Quests.Enqueue(new List<IBotQuest>() {
