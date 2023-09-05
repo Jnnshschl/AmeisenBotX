@@ -10,6 +10,7 @@ namespace AmeisenBotX.Core.Engines.Quest
         IQuestProfile SelectedProfile { get; set; }
 
         bool UpdatedCompletedQuests { get; set; }
+        ICollection<IQuestProfile> Profiles { get; }
 
         void Enter();
 

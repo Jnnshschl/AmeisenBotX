@@ -11,7 +11,7 @@ namespace AmeisenBotX.Core.Engines.Quest.Quests.TheBarrens.Crossroads
             : base(bot, 869, "Raptor Thieves", 9, 1,
                 () => (bot.GetClosestQuestGiverByNpcId(bot.Player.Position, new List<int> { 3464 }), new Vector3(-435.95f, -2639.21f, 96.36f)),
                 () => (bot.GetClosestQuestGiverByNpcId(bot.Player.Position, new List<int> { 3464 }), new Vector3(-435.95f, -2639.21f, 96.36f)),
-                new List<IQuestObjective>()
+                () => new List<IQuestObjective>()
                 {
                     new QuestObjectiveChain(new List<IQuestObjective>()
                     {

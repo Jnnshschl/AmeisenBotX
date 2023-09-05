@@ -5,6 +5,7 @@ namespace AmeisenBotX.Core.Engines.Quest.Profiles
 {
     public interface IQuestProfile
     {
-        Queue<List<IBotQuest>> Quests { get; }
+        Queue<ICollection<IBotQuest>> Quests { get; }
+        string Name { get; }
     }
 }

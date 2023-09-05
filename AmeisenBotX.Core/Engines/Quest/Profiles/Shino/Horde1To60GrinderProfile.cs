@@ -55,9 +55,6 @@ namespace AmeisenBotX.Core.Engines.Quest.Profiles.Shino
 
         public Queue<List<IBotQuest>> Quests { get; }
 
-        public override string ToString()
-        {
-            return $"[1-60] Horde1To60GrinderProfile (Shino)";
-        }
+        public new string Name => $"[1-60] Horde1To60GrinderProfile (Shino)";
     }
 }

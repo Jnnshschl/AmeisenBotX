@@ -16,7 +16,10 @@ namespace AmeisenBotX.Core.Engines.Quest.Objects.Quests
 
     public class BotQuest : IBotQuest
     {
-        public BotQuest(AmeisenBotInterfaces bot, int id, string name, int level, int gossipId, BotQuestGetPosition start, BotQuestGetPosition end, List<IQuestObjective> objectives)
+        private Func<ICollection<IQuestObjective>> _questObjectivesInit = default;
+        private List<IQuestObjective> objectives;
+
+        public BotQuest(AmeisenBotInterfaces bot, int id, string name, int level, int gossipId, BotQuestGetPosition start, BotQuestGetPosition end, Func<ICollection<IQuestObjective>> objectives = default)
         {
             Bot = bot;
 
@@ -26,7 +29,8 @@ namespace AmeisenBotX.Core.Engines.Quest.Objects.Quests
             GossipId = gossipId;
             GetStartObject = start;
             GetEndObject = end;
-            Objectives = objectives;
+
+            _questObjectivesInit = objectives;
 
             ActionEvent = new(TimeSpan.FromMilliseconds(250));
         }
@@ -51,7 +55,19 @@ namespace AmeisenBotX.Core.Engines.Quest.Objects.Quests
 
         public string Name { get; set; }
 
-        public List<IQuestObjective> Objectives { get; set; }
+        public List<IQuestObjective> Objectives
+        {
+            get
+            {
+                if(_questObjectivesInit != default && objectives == default)
+                {
+                    objectives = _questObjectivesInit.Invoke()?.ToList();
+                }
+                return objectives;
+            }
+
+            set => objectives = value;
+        }
 
         public double Progress
         {

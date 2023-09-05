@@ -84,9 +84,6 @@ namespace AmeisenBotX.Core.Engines.Quest.Profiles.Shino
 
         public Queue<List<IBotQuest>> Quests { get; }
 
-        public override string ToString()
-        {
-            return $"[1-80] X5Horde1To80Profile (Shino)";
-        }
+        public new string Name => $"[1-80] X5Horde1To80Profile (Shino)";
     }
 }

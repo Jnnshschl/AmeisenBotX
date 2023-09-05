@@ -23,8 +23,7 @@ namespace AmeisenBotX.Core.Engines.Quest.Profiles.StartAreas
                     (
                         bot, 12593, "In Service of the Lich King", 55, 1,
                         () => (bot.GetClosestQuestGiverByDisplayId(bot.Player.Position, new List<int> { 24191 }), default),
-                        () => (bot.GetClosestQuestGiverByDisplayId(bot.Player.Position, new List<int> { 16582 }), default),
-                        null
+                        () => (bot.GetClosestQuestGiverByDisplayId(bot.Player.Position, new List<int> { 16582 }), default)
                     )
                 }
             );
@@ -38,7 +37,7 @@ namespace AmeisenBotX.Core.Engines.Quest.Profiles.StartAreas
                         bot, 12619, "The Emblazoned Runeblade", 55, 1,
                         () => (bot.GetClosestQuestGiverByDisplayId(bot.Player.Position, new List<int> { 16582 }), default),
                         () => (bot.GetClosestQuestGiverByDisplayId(bot.Player.Position, new List<int> { 16582 }), default),
-                        new List<IQuestObjective>()
+                        () => new List<IQuestObjective>()
                         {
                             new QuestObjectiveChain(new List<IQuestObjective>()
                             {
@@ -63,7 +62,7 @@ namespace AmeisenBotX.Core.Engines.Quest.Profiles.StartAreas
                         bot, 12842, "Preperation For Battle", 55, 1,
                         () => (bot.GetClosestQuestGiverByDisplayId(bot.Player.Position, new List<int> { 16582 }), default),
                         () => (bot.GetClosestQuestGiverByDisplayId(bot.Player.Position, new List<int> { 16582 }), default),
-                        new List<IQuestObjective>()
+                        () => new List<IQuestObjective>()
                         {
                             new QuestObjectiveChain(new List<IQuestObjective>()
                             {
@@ -85,7 +84,7 @@ namespace AmeisenBotX.Core.Engines.Quest.Profiles.StartAreas
                         bot, 12848, "The Endless Hunger", 55, 1,
                         () => (bot.GetClosestQuestGiverByDisplayId(bot.Player.Position, new List<int> { 16582 }), default),
                         () => (bot.GetClosestQuestGiverByDisplayId(bot.Player.Position, new List<int> { 16582 }), default),
-                        new List<IQuestObjective>()
+                        () => new List<IQuestObjective>()
                         {
                             new QuestObjectiveChain(new List<IQuestObjective>()
                             {
@@ -105,8 +104,7 @@ namespace AmeisenBotX.Core.Engines.Quest.Profiles.StartAreas
                     (
                         bot, 12636, "The Eye Of Acherus", 55, 1,
                         () => (bot.GetClosestQuestGiverByDisplayId(bot.Player.Position, new List<int> { 16582 }), default),
-                        () => (bot.GetClosestQuestGiverByDisplayId(bot.Player.Position, new List<int> { 24191 }), default),
-                        null
+                        () => (bot.GetClosestQuestGiverByDisplayId(bot.Player.Position, new List<int> { 24191 }), default)
                     )
                 }
             );
@@ -120,7 +118,7 @@ namespace AmeisenBotX.Core.Engines.Quest.Profiles.StartAreas
                         bot, 12641, "Death Comes From On High", 55, 1,
                         () => (bot.GetClosestQuestGiverByDisplayId(bot.Player.Position, new List<int> { 24191 }), default),
                         () => (bot.GetClosestQuestGiverByDisplayId(bot.Player.Position, new List<int> { 24191 }), default),
-                        new List<IQuestObjective>()
+                        () => new List<IQuestObjective>()
                         {
                             new QuestObjectiveChain(new List<IQuestObjective>()
                             {
@@ -151,7 +149,7 @@ namespace AmeisenBotX.Core.Engines.Quest.Profiles.StartAreas
                         bot, 12657, "The Might Of The Scourge", 55, 1,
                         () => (bot.GetClosestQuestGiverByDisplayId(bot.Player.Position, new List<int> { 24191 }), default),
                         () => (bot.GetClosestQuestGiverByDisplayId(bot.Player.Position, new List<int> { 25444 }), default),
-                        new List<IQuestObjective>()
+                        () => new List<IQuestObjective>()
                         {
                             new QuestObjectiveChain(new List<IQuestObjective>()
                             {
@@ -172,7 +170,7 @@ namespace AmeisenBotX.Core.Engines.Quest.Profiles.StartAreas
                         bot, 12850, "Report To Scourge Commander Thalanor", 55, 1,
                         () => (bot.GetClosestQuestGiverByDisplayId(bot.Player.Position, new List<int> { 25444 }), default),
                         () => (bot.GetClosestQuestGiverByDisplayId(bot.Player.Position, new List<int> { 25496 }), default),
-                        new List<IQuestObjective>()
+                        () => new List<IQuestObjective>()
                         {
                             new MoveToPositionQuestObjective(bot, new Vector3(2348, -5670, 382), 40.0)
                         }
@@ -189,7 +187,7 @@ namespace AmeisenBotX.Core.Engines.Quest.Profiles.StartAreas
                         bot, 12670, "The Scarlet Harvest", 55, 1,
                         () => (bot.GetClosestQuestGiverByDisplayId(bot.Player.Position, new List<int> { 25496 }), default),
                         () => (bot.GetClosestQuestGiverByDisplayId(bot.Player.Position, new List<int> { 25514 }), default),
-                        new List<IQuestObjective>()
+                        () => new List<IQuestObjective>()
                         {
                             new QuestObjectiveChain(new List<IQuestObjective>()
                             {
@@ -211,7 +209,7 @@ namespace AmeisenBotX.Core.Engines.Quest.Profiles.StartAreas
                         bot, 12678, "If Chaos Drives, Let Suffering Hold The Reins", 55, 1,
                         () => (bot.GetClosestQuestGiverByDisplayId(bot.Player.Position, new List<int> { 25514 }), new Vector3(2340, -5687, 154)),
                         () => (bot.GetClosestQuestGiverByDisplayId(bot.Player.Position, new List<int> { 25514 }), new Vector3(2340, -5687, 154)),
-                        new List<IQuestObjective>()
+                        () => new List<IQuestObjective>()
                         {
                             new QuestObjectiveChain(new List<IQuestObjective>()
                             {
@@ -225,7 +223,7 @@ namespace AmeisenBotX.Core.Engines.Quest.Profiles.StartAreas
                         bot, 12680, "Grand Theft Palomino", 55, 1,
                         () => (bot.GetClosestQuestGiverByDisplayId(bot.Player.Position, new List<int> { 16416 }), new Vector3(2340, -5687, 154)),
                         () => (bot.GetClosestQuestGiverByDisplayId(bot.Player.Position, new List<int> { 16416 }), new Vector3(2340, -5687, 154)),
-                        new List<IQuestObjective>()
+                        () => new List<IQuestObjective>()
                         {
                             // new BotActionQuestObjective(() =>
                             // stateMachine.Get<StateCombat>().Mode = CombatMode.NotAllowed),
@@ -247,7 +245,7 @@ namespace AmeisenBotX.Core.Engines.Quest.Profiles.StartAreas
                         bot, 12679, "Tonight We Dine In Havenshire", 55, 1,
                         () => (bot.GetClosestQuestGiverByDisplayId(bot.Player.Position, new List<int> { 25589 }), new Vector3(2340, -5687, 154)),
                         () => (bot.GetClosestQuestGiverByDisplayId(bot.Player.Position, new List<int> { 25589 }), new Vector3(2340, -5687, 154)),
-                        new List<IQuestObjective>()
+                        () => new List<IQuestObjective>()
                         {
                             new QuestObjectiveChain(new List<IQuestObjective>()
                             {
@@ -262,7 +260,7 @@ namespace AmeisenBotX.Core.Engines.Quest.Profiles.StartAreas
                         bot, 12733, "Death's Challenge", 55, 1,
                         () => (bot.GetClosestQuestGiverByDisplayId(bot.Player.Position, new List<int> { 26762 }), new Vector3(2340, -5687, 154)),
                         () => (bot.GetClosestQuestGiverByDisplayId(bot.Player.Position, new List<int> { 26762 }), new Vector3(2340, -5687, 154)),
-                        new List<IQuestObjective>()
+                        () => new List<IQuestObjective>()
                         {
                             new QuestObjectiveChain(new List<IQuestObjective>()
                             {
@@ -289,10 +287,7 @@ namespace AmeisenBotX.Core.Engines.Quest.Profiles.StartAreas
 
         private bool[] StartedCasting { get; } = new bool[4];
 
-        public override string ToString()
-        {
-            return $"[55-59] Deathknight Start Area (Jannis)";
-        }
+        public new string Name => $"[55-59] Deathknight Start Area (Jannis)";
 
         private bool CheckEyeCastingState(AmeisenBotInterfaces bot, int id, Vector3 positionToCast, double distance)
         {

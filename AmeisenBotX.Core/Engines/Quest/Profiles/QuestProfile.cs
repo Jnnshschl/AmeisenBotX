@@ -11,11 +11,18 @@ namespace AmeisenBotX.Core.Engines.Quest.Profiles
     {
         protected AmeisenBotInterfaces BotInterfaces { get; set; }
 
-        Queue<List<IBotQuest>> IQuestProfile.Quests => throw new NotImplementedException();
+        Queue<ICollection<IBotQuest>> IQuestProfile.Quests { get; } = new Queue<ICollection<IBotQuest>>();
 
         public QuestProfile(AmeisenBotInterfaces bot)
         {
             BotInterfaces = bot;
+        }
+
+        public string Name { get; init; }
+
+        public override string ToString()
+        {
+            return Name;
         }
     }
 }

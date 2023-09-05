@@ -20,7 +20,7 @@ namespace AmeisenBotX.Core.Engines.Quest.Objects.Objectives
             CollectOrKillAmount = collectOrKillAmount;
             QuestItemId = questItemId;
             SearchAreas = new SearchAreaEnsamble(areas);
-
+            
             Bot.CombatLog.OnPartyKill += OnPartyKill;
         }
 

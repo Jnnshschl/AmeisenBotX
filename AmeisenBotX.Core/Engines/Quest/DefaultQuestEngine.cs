@@ -31,7 +31,7 @@ namespace AmeisenBotX.Core.Engines.Quest
 
         public List<int> CompletedQuests { get; private set; }
 
-        public ICollection<IQuestProfile> Profiles { get; private set; }
+        public ICollection<IQuestProfile> Profiles { get; init; }
 
         public IQuestProfile SelectedProfile { get; set; }
 

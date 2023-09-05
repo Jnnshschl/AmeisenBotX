@@ -11,7 +11,7 @@ namespace AmeisenBotX.Core.Engines.Quest.Quests.Durotar.ValleyOfStrength
             : base(bot, 4402, "Galgar's Cactus Apple Surprise", 1, 1,
                 () => (bot.GetClosestQuestGiverByNpcId(bot.Player.Position, new List<int> { 9796 }), new Vector3(-561.63f, -4221.80f, 41.67f)),
                 () => (bot.GetClosestQuestGiverByNpcId(bot.Player.Position, new List<int> { 9796 }), new Vector3(-561.63f, -4221.80f, 41.67f)),
-                new List<IQuestObjective>()
+                () => new List<IQuestObjective>()
                 {
                     new QuestObjectiveChain(new List<IQuestObjective>()
                     {
