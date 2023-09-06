@@ -1,7 +1,6 @@
-﻿using AmeisenBotX.Core.Engines.Quest.Objects.Objectives;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 
-namespace AmeisenBotX.Core.Engines.Quest.Objects.Quests
+namespace AmeisenBotX.Common.Engines.Quest.Interfaces
 {
     public interface IBotQuest
     {
