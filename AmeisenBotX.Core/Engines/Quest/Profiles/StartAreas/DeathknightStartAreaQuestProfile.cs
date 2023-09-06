@@ -13,6 +13,8 @@ namespace AmeisenBotX.Core.Engines.Quest.Profiles.StartAreas
     {
         public DeathknightStartAreaQuestProfile(AmeisenBotInterfaces bot):base(bot)
         {
+            Name = $"[55-59] Deathknight Start Area (Jannis)";
+
             Quests = new Queue<List<IBotQuest>>();
 
             Quests.Enqueue
@@ -286,8 +288,6 @@ namespace AmeisenBotX.Core.Engines.Quest.Profiles.StartAreas
         private bool[] CastedSpell { get; } = new bool[4];
 
         private bool[] StartedCasting { get; } = new bool[4];
-
-        public new string Name => $"[55-59] Deathknight Start Area (Jannis)";
 
         private bool CheckEyeCastingState(AmeisenBotInterfaces bot, int id, Vector3 positionToCast, double distance)
         {

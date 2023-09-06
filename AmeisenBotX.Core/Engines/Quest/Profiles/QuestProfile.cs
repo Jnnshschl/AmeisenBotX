@@ -11,7 +11,7 @@ namespace AmeisenBotX.Core.Engines.Quest.Profiles
     {
         protected AmeisenBotInterfaces BotInterfaces { get; set; }
 
-        Queue<ICollection<IBotQuest>> IQuestProfile.Quests { get; } = new Queue<ICollection<IBotQuest>>();
+        public Queue<ICollection<IBotQuest>> Quests { get; } = new Queue<ICollection<IBotQuest>>();
 
         public QuestProfile(AmeisenBotInterfaces bot)
         {

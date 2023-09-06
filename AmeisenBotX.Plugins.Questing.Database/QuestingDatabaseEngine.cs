@@ -4,31 +4,27 @@ using AmeisenBotX.Core.Engines.Quest.Profiles;
 
 namespace AmeisenBotX.Plugins.Questing.Database
 {
-    public class QuestingDatabaseEngine : IQuestEngine
+    public class QuestingDatabaseEngine : DefaultQuestEngine
     {
-        public QuestingDatabaseEngine(AmeisenBotInterfaces bot)
+        public QuestingDatabaseEngine(AmeisenBotInterfaces bot):base(bot)
         {
             Bot = bot;
-            Profiles.Add(item: new StartingAreaProfile(bot) { Name = "Testing" });
+            Profiles.Clear();
+            Profiles.Add(item: new ZoneProfile(bot) { Name = "Testing" });
             SelectedProfile = Profiles.First();
         }
 
-        public List<int> CompletedQuests { get; } = new List<int>();
-
-        public IQuestProfile SelectedProfile { get; set; }
-        public bool UpdatedCompletedQuests { get; set; }
-
-        public ICollection<IQuestProfile> Profiles { get; init; } = new List<IQuestProfile>();
-        public AmeisenBotInterfaces Bot { get; }
-
-        public void Enter()
+        public new void Enter()
         {
+            base.Enter();
             //throw new NotImplementedException();
         }
 
-        public void Execute()
+        public new void Execute()
         {
+            base.Execute();
             //throw new NotImplementedException();
+            
         }
     }
 }

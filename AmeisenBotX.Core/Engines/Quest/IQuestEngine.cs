@@ -5,6 +5,8 @@ namespace AmeisenBotX.Core.Engines.Quest
 {
     public interface IQuestEngine
     {
+        AmeisenBotInterfaces Bot { get; set; }
+
         List<int> CompletedQuests { get; }
 
         IQuestProfile SelectedProfile { get; set; }

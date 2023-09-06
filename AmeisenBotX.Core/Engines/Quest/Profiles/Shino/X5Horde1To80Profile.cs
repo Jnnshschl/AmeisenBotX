@@ -12,6 +12,8 @@ namespace AmeisenBotX.Core.Engines.Quest.Profiles.Shino
     {
         public X5Horde1To80Profile(AmeisenBotInterfaces bot) : base(bot)
         {
+            Name = $"[1-80] X5Horde1To80Profile (Shino)";
+
             Quests = new Queue<List<IBotQuest>>();
             Quests.Enqueue(new List<IBotQuest>() {
                 new QYourPlaceInTheWorld(bot)
@@ -83,7 +85,5 @@ namespace AmeisenBotX.Core.Engines.Quest.Profiles.Shino
         }
 
         public Queue<List<IBotQuest>> Quests { get; }
-
-        public new string Name => $"[1-80] X5Horde1To80Profile (Shino)";
     }
 }

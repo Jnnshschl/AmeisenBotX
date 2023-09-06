@@ -8,6 +8,8 @@ namespace AmeisenBotX.Core.Engines.Quest.Profiles.Shino
     {
         public Horde1To60GrinderProfile(AmeisenBotInterfaces bot) : base(bot)
         {
+            Name = $"[1-60] Horde1To60GrinderProfile (Shino)";
+
             Quests = new Queue<List<IBotQuest>>();
             Quests.Enqueue(new List<IBotQuest>() {
                 new QDurotarGrindToLevel6(bot)
@@ -54,7 +56,5 @@ namespace AmeisenBotX.Core.Engines.Quest.Profiles.Shino
         }
 
         public Queue<List<IBotQuest>> Quests { get; }
-
-        public new string Name => $"[1-60] Horde1To60GrinderProfile (Shino)";
     }
 }

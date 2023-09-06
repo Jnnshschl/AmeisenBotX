@@ -8,11 +8,11 @@ using System.Threading.Tasks;
 
 namespace AmeisenBotX.Plugins.Questing.Database
 {
-    public class StartingAreaProfile:QuestProfile
+    public class ZoneProfile:QuestProfile
     {
-        public StartingAreaProfile(AmeisenBotInterfaces bot) :base(bot)
+        public ZoneProfile(AmeisenBotInterfaces bot) :base(bot)
         { 
-
+            
         }
     }
 }

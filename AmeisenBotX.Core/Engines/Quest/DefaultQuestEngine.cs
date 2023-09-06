@@ -37,7 +37,7 @@ namespace AmeisenBotX.Core.Engines.Quest
 
         public bool UpdatedCompletedQuests { get; set; }
 
-        private AmeisenBotInterfaces Bot { get; }
+        public AmeisenBotInterfaces Bot { get; set; }
 
         private DateTime LastAbandonQuestTime { get; set; } = DateTime.UtcNow;
 

@@ -692,6 +692,7 @@ namespace AmeisenBotX.Core
                     // This assumes the implementation of IPlugin has a parameterless constructor
                     Debug.WriteLine($"Found QuestEngine from plugin: {pluginType.FullName}");
                     var engine = (IQuestEngine)Activator.CreateInstance(pluginType, Bot);
+                    //engine.Bot = Bot;
                     QuestEnginesAvailable.Add(engine);
                 }
             }
