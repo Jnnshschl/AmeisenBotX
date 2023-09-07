@@ -1,6 +1,6 @@
 ﻿using AmeisenBotX.BehaviorTree.Enums;
-using AmeisenBotX.BehaviorTree.Interfaces;
 using AmeisenBotX.BehaviorTree.Objects;
+using AmeisenBotX.Common.BehaviorTree.Interfaces;
 using System;
 
 namespace AmeisenBotX.BehaviorTree

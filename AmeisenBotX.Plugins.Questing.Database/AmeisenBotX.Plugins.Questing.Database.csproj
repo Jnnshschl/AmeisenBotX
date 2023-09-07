@@ -7,10 +7,7 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\AmeisenBotX.Core\AmeisenBotX.Core.csproj">
-      <Private>False</Private>
-      <CopyLocalSatelliteAssemblies>False</CopyLocalSatelliteAssemblies>
-    </ProjectReference>
+    <ProjectReference Include="..\AmeisenBotX.Common\AmeisenBotX.Common.csproj" />
   </ItemGroup>
 
 </Project>

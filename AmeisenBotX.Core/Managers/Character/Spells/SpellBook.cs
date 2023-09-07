@@ -7,10 +7,11 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text.Json;
 using System.Text.Json.Serialization;
+using AmeisenBotX.Core.Managers.Character;
 
 namespace AmeisenBotX.Core.Managers.Character.Spells
 {
-    public class SpellBook
+    public class SpellBook : ISpellBook
     {
         public SpellBook(IWowInterface wowInterface)
         {

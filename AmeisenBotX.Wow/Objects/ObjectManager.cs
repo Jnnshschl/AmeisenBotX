@@ -1,4 +1,5 @@
 ﻿using AmeisenBotX.Common.Math;
+using AmeisenBotX.Common.Memory;
 using AmeisenBotX.Wow.Hook.Structs;
 using AmeisenBotX.Wow.Objects.Enums;
 using AmeisenBotX.Wow.Objects.Raw;
@@ -29,7 +30,7 @@ namespace AmeisenBotX.Wow.Objects
         protected readonly IntPtr[] wowObjectPointers;
         protected readonly IWowObject[] wowObjects;
 
-        public ObjectManager(WowMemoryApi memory)
+        public ObjectManager(IMemoryApi memory)
         {
             Memory = memory;
 
@@ -126,7 +127,7 @@ namespace AmeisenBotX.Wow.Objects
         ///<inheritdoc cref="IObjectProvider.ZoneSubName"/>
         public string ZoneSubName { get; protected set; }
 
-        protected WowMemoryApi Memory { get; }
+        protected IMemoryApi Memory { get; }
 
         protected bool PlayerGuidIsVehicle { get; set; }
 

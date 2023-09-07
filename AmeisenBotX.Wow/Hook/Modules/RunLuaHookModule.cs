@@ -1,4 +1,5 @@
-﻿using System;
+﻿using AmeisenBotX.Common.Memory;
+using System;
 using System.Collections.Generic;
 using System.Text;
 
@@ -6,7 +7,7 @@ namespace AmeisenBotX.Wow.Hook.Modules
 {
     public class RunLuaHookModule : RunAsmHookModule
     {
-        public RunLuaHookModule(Action<IntPtr> onUpdate, Action<IHookModule> tick, WowMemoryApi memory, string lua, string varName, uint allocSize = 128) : base(onUpdate, tick, memory, allocSize)
+        public RunLuaHookModule(Action<IntPtr> onUpdate, Action<IHookModule> tick, IMemoryApi memory, string lua, string varName, uint allocSize = 128) : base(onUpdate, tick, memory, allocSize)
         {
             Lua = lua;
             VarName = varName;

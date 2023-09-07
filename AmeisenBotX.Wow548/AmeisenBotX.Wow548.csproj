@@ -8,6 +8,7 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <ProjectReference Include="..\AmeisenBotX.Common\AmeisenBotX.Common.csproj" />
     <ProjectReference Include="..\AmeisenBotX.Wow\AmeisenBotX.Wow.csproj" />
   </ItemGroup>
 

@@ -1,4 +1,5 @@
-﻿using AmeisenBotX.Common.Math;
+﻿using AmeisenBotX.Common.Engines.Quest.Interfaces;
+using AmeisenBotX.Common.Math;
 using AmeisenBotX.Core.Engines.Movement.Enums;
 using AmeisenBotX.Core.Engines.Quest.Objects;
 using AmeisenBotX.Core.Engines.Quest.Objects.Objectives;

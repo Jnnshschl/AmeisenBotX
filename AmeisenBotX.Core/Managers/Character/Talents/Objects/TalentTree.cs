@@ -3,7 +3,7 @@ using System.Collections.Generic;
 
 namespace AmeisenBotX.Core.Managers.Character.Talents.Objects
 {
-    public class TalentTree
+    public class TalentTree : ITalentTree
     {
         public TalentTree(string talentString)
         {
@@ -42,13 +42,13 @@ namespace AmeisenBotX.Core.Managers.Character.Talents.Objects
         {
         }
 
-        public Dictionary<int, Talent> Tree1 { get; set; }
+        public Dictionary<int, ITalent> Tree1 { get; set; }
 
-        public Dictionary<int, Talent> Tree2 { get; set; }
+        public Dictionary<int, ITalent> Tree2 { get; set; }
 
-        public Dictionary<int, Talent> Tree3 { get; set; }
+        public Dictionary<int, ITalent> Tree3 { get; set; }
 
-        public Dictionary<int, Dictionary<int, Talent>> AsDict()
+        public Dictionary<int, Dictionary<int, ITalent>> AsDict()
         {
             return new()
             {

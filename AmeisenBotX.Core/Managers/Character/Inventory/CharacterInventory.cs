@@ -9,7 +9,7 @@ using System.Linq;
 
 namespace AmeisenBotX.Core.Managers.Character.Inventory
 {
-    public class CharacterInventory
+    public class CharacterInventory : ICharacterInventory
     {
         private readonly List<IWowInventoryItem> items;
 

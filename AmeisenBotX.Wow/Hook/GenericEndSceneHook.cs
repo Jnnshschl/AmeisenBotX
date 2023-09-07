@@ -1,4 +1,5 @@
 ﻿using AmeisenBotX.Common.Math;
+using AmeisenBotX.Common.Memory;
 using AmeisenBotX.Common.Utils;
 using AmeisenBotX.Logging;
 using AmeisenBotX.Logging.Enums;
@@ -22,7 +23,7 @@ namespace AmeisenBotX.Wow.Hook
 
         private int hookCalls;
 
-        public GenericEndSceneHook(WowMemoryApi memory)
+        public GenericEndSceneHook(IMemoryApi memory)
         {
             Memory = memory;
         }
@@ -44,7 +45,7 @@ namespace AmeisenBotX.Wow.Hook
 
         public bool IsWoWHooked => WowEndSceneAddress != IntPtr.Zero && Memory.Read(WowEndSceneAddress, out byte c) && c == 0xE9;
 
-        protected WowMemoryApi Memory { get; }
+        protected IMemoryApi Memory { get; }
 
         /// <summary>
         /// Codecave that hold the code, the bot want's to execute.

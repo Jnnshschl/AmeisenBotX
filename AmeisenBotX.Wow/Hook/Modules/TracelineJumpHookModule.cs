@@ -1,4 +1,5 @@
-﻿using System;
+﻿using AmeisenBotX.Common.Memory;
+using System;
 using System.Collections.Generic;
 using System.Text;
 
@@ -6,7 +7,7 @@ namespace AmeisenBotX.Wow.Hook.Modules
 {
     public class TracelineJumpHookModule : RunAsmHookModule
     {
-        public TracelineJumpHookModule(Action<IntPtr> onUpdate, Action<IHookModule> tick, WowMemoryApi memory) : base(onUpdate, tick, memory, 256)
+        public TracelineJumpHookModule(Action<IntPtr> onUpdate, Action<IHookModule> tick, IMemoryApi memory) : base(onUpdate, tick, memory, 256)
         {
         }
 

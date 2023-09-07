@@ -31,4 +31,8 @@
     <ProjectReference Include="..\AmeisenBotX.Wow548\AmeisenBotX.Wow548.csproj" />
   </ItemGroup>
 
+  <ItemGroup>
+    <Folder Include="Managers\Character\Spells\Objects\" />
+  </ItemGroup>
+
 </Project>

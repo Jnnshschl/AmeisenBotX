@@ -77,7 +77,7 @@ namespace AmeisenBotX.Core.Engines.Dungeon
         }
 
         ///<inheritdoc cref="IDungeonEngine.Nodes"/>
-        public List<DungeonNode> Nodes => CurrentNodes?.ToList();
+        public List<IDungeonNode> Nodes => CurrentNodes?.ToList();
 
         ///<inheritdoc cref="IDungeonEngine.Profile"/>
         public IDungeonProfile Profile { get; private set; }
@@ -88,7 +88,7 @@ namespace AmeisenBotX.Core.Engines.Dungeon
 
         private AmeisenBotConfig Config { get; }
 
-        private Queue<DungeonNode> CurrentNodes { get; set; }
+        private Queue<IDungeonNode> CurrentNodes { get; set; }
 
         private Vector3 DeathPosition { get; set; }
 

@@ -1,4 +1,5 @@
 ﻿using AmeisenBotX.Common.Math;
+using AmeisenBotX.Common.Memory;
 using AmeisenBotX.Memory;
 using AmeisenBotX.Wow;
 using AmeisenBotX.Wow.Objects;
@@ -134,7 +135,7 @@ namespace AmeisenBotX.Wow335a.Objects
 
         protected WowUnitDescriptor335a RawWowUnit { get; private set; }
 
-        public static IEnumerable<IWowAura> GetUnitAuras(WowMemoryApi memory, IntPtr unitBase, out int auraCount)
+        public static IEnumerable<IWowAura> GetUnitAuras(IMemoryApi memory, IntPtr unitBase, out int auraCount)
         {
             if (memory.Read(IntPtr.Add(unitBase, (int)memory.Offsets.AuraCount1), out int auraCount1))
             {

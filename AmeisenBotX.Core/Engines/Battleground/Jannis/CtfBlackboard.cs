@@ -1,12 +1,11 @@
-﻿using AmeisenBotX.BehaviorTree.Interfaces;
-using AmeisenBotX.Common.Math;
+﻿using AmeisenBotX.Common.Math;
 using AmeisenBotX.Wow.Objects;
 using System;
 using System.Collections.Generic;
 
 namespace AmeisenBotX.Core.Engines.Battleground.Jannis
 {
-    public class CtfBlackboard : IBlackboard
+    public class CtfBlackboard : ICtfBlackboard
     {
         public CtfBlackboard(Action updateAction)
         {

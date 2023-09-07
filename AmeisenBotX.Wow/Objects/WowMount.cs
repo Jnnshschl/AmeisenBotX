@@ -2,7 +2,7 @@
 
 namespace AmeisenBotX.Wow.Objects
 {
-    public class WowMount
+    public class WowMount : IWowMount
     {
         [JsonPropertyName("index")]
         public int Index { get; set; }

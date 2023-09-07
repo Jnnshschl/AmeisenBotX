@@ -1,4 +1,5 @@
-﻿using AmeisenBotX.Common.Math;
+﻿using AmeisenBotX.Common;
+using AmeisenBotX.Common.Math;
 using AmeisenBotX.Wow.Objects;
 using AmeisenBotX.Wow.Objects.Enums;
 using System;
@@ -10,7 +11,7 @@ namespace AmeisenBotX.Core.Managers.Threat
     /// <summary>
     /// Manager to observe environmental threats (not threat of mobs)
     /// </summary>
-    public class ThreatManager
+    public class ThreatManager : IThreatManager
     {
         public ThreatManager(AmeisenBotInterfaces bot, AmeisenBotConfig config)
         {

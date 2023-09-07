@@ -1,4 +1,5 @@
-﻿using AmeisenBotX.Common.Math;
+﻿using AmeisenBotX.Common.Engines.Battleground.Interfaces;
+using AmeisenBotX.Common.Math;
 using AmeisenBotX.Wow.Objects;
 using AmeisenBotX.Wow.Objects.Enums;
 using System;

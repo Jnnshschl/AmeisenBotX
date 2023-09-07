@@ -1,4 +1,5 @@
 ﻿using AmeisenBotX.Common.Math;
+using AmeisenBotX.Common.Memory;
 using AmeisenBotX.Common.Utils;
 using AmeisenBotX.Logging;
 using AmeisenBotX.Logging.Enums;
@@ -152,7 +153,7 @@ namespace AmeisenBotX.Wow335a
 
         public bool IsReady => Hook.IsWoWHooked;
 
-        public WowMemoryApi Memory { get; }
+        public IMemoryApi Memory { get; }
 
         public IObjectProvider ObjectProvider => ObjectManager;
 
@@ -391,7 +392,7 @@ namespace AmeisenBotX.Wow335a
             return ExecuteLuaAndRead(BotUtils.ObfuscateLua("{v:0}=GetMoney();"), out string s) ? int.TryParse(s, out int v) ? v : 0 : 0;
         }
 
-        public IEnumerable<WowMount> GetMounts()
+        public IEnumerable<IWowMount> GetMounts()
         {
             string mountJson = ExecuteLuaAndRead(BotUtils.ObfuscateLua($"{{v:0}}=\"[\"{{v:1}}=GetNumCompanions(\"MOUNT\")if {{v:1}}>0 then for b=1,{{v:1}} do {{v:4}},{{v:2}},{{v:3}}=GetCompanionInfo(\"mount\",b){{v:0}}={{v:0}}..\"{{\\\"name\\\":\\\"\"..{{v:2}}..\"\\\",\"..\"\\\"index\\\":\"..b..\",\"..\"\\\"spellId\\\":\"..{{v:3}}..\",\"..\"\\\"mountId\\\":\"..{{v:4}}..\",\"..\"}}\"if b<{{v:1}} then {{v:0}}={{v:0}}..\",\"end end end;{{v:0}}={{v:0}}..\"]\""), out string result) ? result : string.Empty;
 

@@ -5,7 +5,7 @@ using System.Linq;
 
 namespace AmeisenBotX.Core.Logic.Idle
 {
-    public class IdleActionManager
+    public class IdleActionManager : IIdleActionManager
     {
         public IdleActionManager(AmeisenBotConfig config, IEnumerable<IIdleAction> idleActions)
         {

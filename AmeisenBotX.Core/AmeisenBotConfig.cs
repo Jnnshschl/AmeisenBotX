@@ -1,4 +1,5 @@
 ﻿using AmeisenBotX.Common.Keyboard.Objects;
+using AmeisenBotX.Common.Memory;
 using AmeisenBotX.Core.Engines.Movement.Settings;
 using AmeisenBotX.Memory.Win32;
 using System;

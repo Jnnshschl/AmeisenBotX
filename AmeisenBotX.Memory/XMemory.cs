@@ -1,6 +1,9 @@
-﻿using AmeisenBotX.Logging;
+﻿using AmeisenBotX.Common.Memory;
+using AmeisenBotX.Common.Memory.Enums;
+using AmeisenBotX.Logging;
 using AmeisenBotX.Memory.Structs;
 using AmeisenBotX.Memory.Win32;
+using AmeisenBotX.Wow.Offsets;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
@@ -233,6 +236,8 @@ namespace AmeisenBotX.Memory
         }
 
         private bool Initialized { get; set; }
+
+        public IOffsetList Offsets => throw new NotImplementedException();
 
         ///<inheritdoc cref="IMemoryApi.Init"/>
         public virtual bool Init(Process process, IntPtr processHandle, IntPtr mainThreadHandle)
@@ -490,9 +495,9 @@ namespace AmeisenBotX.Memory
             {
                 SetParent(Process.MainWindowHandle, IntPtr.Zero);
                 uint style = (uint)GetWindowLong(Process.MainWindowHandle, GWL_STYLE);
-                style = (style 
-                        | (uint)WindowStyle.WS_POPUP 
-                        | (uint)WindowStyle.WS_THICKFRAME 
+                style = (style
+                        | (uint)WindowStyle.WS_POPUP
+                        | (uint)WindowStyle.WS_THICKFRAME
                         | (uint)WindowStyle.WS_CAPTION
                     ) & (~(uint)WindowStyle.WS_CHILD);
                 SetWindowLong(Process.MainWindowHandle, GWL_STYLE, (int)style);
@@ -522,7 +527,7 @@ namespace AmeisenBotX.Memory
                 dwFlags = STARTF_USESHOWWINDOW,
                 wShowWindow = SW_SHOWMINNOACTIVE
             };
-            
+
             if (CreateProcess(null, processCmd, IntPtr.Zero, IntPtr.Zero, true, 0x10, IntPtr.Zero, null, ref startupInfo, out ProcessInformation processInformation))
             {
                 processHandle = processInformation.hProcess;

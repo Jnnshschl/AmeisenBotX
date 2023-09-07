@@ -1,11 +1,12 @@
-﻿using System;
+﻿using AmeisenBotX.Common.Memory;
+using System;
 using System.Collections.Generic;
 
 namespace AmeisenBotX.Wow.Hook.Modules
 {
     public abstract class RunAsmHookModule : IHookModule
     {
-        public RunAsmHookModule(Action<IntPtr> onUpdate, Action<IHookModule> tick, WowMemoryApi memory, uint allocSize)
+        public RunAsmHookModule(Action<IntPtr> onUpdate, Action<IHookModule> tick, IMemoryApi memory, uint allocSize)
         {
             Memory = memory;
             AllocSize = allocSize;
@@ -26,7 +27,7 @@ namespace AmeisenBotX.Wow.Hook.Modules
 
         protected uint AllocSize { get; }
 
-        protected WowMemoryApi Memory { get; }
+        protected IMemoryApi Memory { get; }
 
         public abstract IntPtr GetDataPointer();
 

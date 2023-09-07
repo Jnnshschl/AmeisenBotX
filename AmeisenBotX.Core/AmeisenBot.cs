@@ -22,6 +22,7 @@ using AmeisenBotX.Core.Engines.Quest;
 using AmeisenBotX.Core.Engines.Quest.Profiles;
 using AmeisenBotX.Core.Engines.Quest.Profiles.Shino;
 using AmeisenBotX.Core.Engines.Quest.Profiles.StartAreas;
+using AmeisenBotX.Common.Engines.Quest;
 using AmeisenBotX.Core.Engines.Tactic;
 using AmeisenBotX.Core.Engines.Test;
 using AmeisenBotX.Core.Logic;
@@ -63,6 +64,8 @@ using System.Linq;
 using System.Reflection;
 using System.Text;
 using System.Threading.Tasks;
+using AmeisenBotX.Common.Engines.Battleground.Interfaces;
+using AmeisenBotX.Common.Engines.Quest.Interfaces;
 
 namespace AmeisenBotX.Core
 {

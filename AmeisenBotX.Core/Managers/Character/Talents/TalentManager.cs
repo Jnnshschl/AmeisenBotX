@@ -7,26 +7,26 @@ using System.Text;
 
 namespace AmeisenBotX.Core.Managers.Character.Talents
 {
-    public class TalentManager
+    public class TalentManager : ITalentManager
     {
         public TalentManager(IWowInterface wowInterface)
         {
             Wow = wowInterface;
         }
 
-        public TalentTree TalentTree { get; set; }
+        public ITalentTree TalentTree { get; set; }
 
         private IWowInterface Wow { get; }
 
-        public void SelectTalents(TalentTree wantedTalents, int talentPoints)
+        public void SelectTalents(ITalentTree wantedTalents, int talentPoints)
         {
-            Dictionary<int, Dictionary<int, Talent>> talentTrees = TalentTree.AsDict();
-            Dictionary<int, Dictionary<int, Talent>> wantedTalentTrees = wantedTalents.AsDict();
+            Dictionary<int, Dictionary<int, ITalent>> talentTrees = TalentTree.AsDict();
+            Dictionary<int, Dictionary<int, ITalent>> wantedTalentTrees = wantedTalents.AsDict();
 
             List<(int, int, int)> talentsToSpend = new();
 
             // order the trees to skill the main tree first
-            foreach (KeyValuePair<int, Dictionary<int, Talent>> kv in wantedTalentTrees.OrderByDescending(e => e.Value.Count))
+            foreach (KeyValuePair<int, Dictionary<int, ITalent>> kv in wantedTalentTrees.OrderByDescending(e => e.Value.Count))
             {
                 if (CheckTalentTree(ref talentPoints, kv.Key, talentTrees[kv.Key], kv.Value, out List<(int, int, int)> newTalents))
                 {
@@ -45,7 +45,7 @@ namespace AmeisenBotX.Core.Managers.Character.Talents
             TalentTree = new(Wow.GetTalents());
         }
 
-        private static bool CheckTalentTree(ref int talentPoints, int treeId, Dictionary<int, Talent> tree, Dictionary<int, Talent> wantedTree, out List<(int, int, int)> talentsToSpend)
+        private static bool CheckTalentTree(ref int talentPoints, int treeId, Dictionary<int, ITalent> tree, Dictionary<int, ITalent> wantedTree, out List<(int, int, int)> talentsToSpend)
         {
             talentsToSpend = new();
 
@@ -56,7 +56,7 @@ namespace AmeisenBotX.Core.Managers.Character.Talents
 
             bool result = false;
 
-            Talent[] wantedTreeValues = wantedTree.Values.ToArray();
+            ITalent[] wantedTreeValues = wantedTree.Values.ToArray();
 
             foreach (Talent talent in wantedTreeValues)
             {

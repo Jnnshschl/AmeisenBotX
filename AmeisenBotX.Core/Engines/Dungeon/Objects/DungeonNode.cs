@@ -3,7 +3,7 @@ using AmeisenBotX.Core.Engines.Dungeon.Enums;
 
 namespace AmeisenBotX.Core.Engines.Dungeon.Objects
 {
-    public class DungeonNode
+    public class DungeonNode : IDungeonNode
     {
         public DungeonNode(Vector3 position, DungeonNodeType type = DungeonNodeType.Normal, string extra = "")
         {

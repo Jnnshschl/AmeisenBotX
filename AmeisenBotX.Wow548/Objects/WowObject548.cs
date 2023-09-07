@@ -1,4 +1,5 @@
 ﻿using AmeisenBotX.Common.Math;
+using AmeisenBotX.Common.Memory;
 using AmeisenBotX.Wow;
 using AmeisenBotX.Wow.Objects;
 using AmeisenBotX.Wow548.Objects.Descriptors;
@@ -25,9 +26,9 @@ namespace AmeisenBotX.Wow548.Objects
 
         public BitVector32 UnitFlagsDynamic => GetObjectDescriptor().DynamicFlags;
 
-        protected WowMemoryApi Memory { get; private set; }
+        protected IMemoryApi Memory { get; private set; }
 
-        public virtual void Init(WowMemoryApi memory, IntPtr baseAddress, IntPtr descriptorAddress)
+        public virtual void Init(IMemoryApi memory, IntPtr baseAddress, IntPtr descriptorAddress)
         {
             Memory = memory;
             BaseAddress = baseAddress;

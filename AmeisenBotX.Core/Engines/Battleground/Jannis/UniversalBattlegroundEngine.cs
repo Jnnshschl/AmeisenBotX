@@ -1,4 +1,5 @@
-﻿using AmeisenBotX.Core.Engines.Battleground.Jannis.Profiles;
+﻿using AmeisenBotX.Common.Engines.Battleground.Interfaces;
+using AmeisenBotX.Core.Engines.Battleground.Jannis.Profiles;
 using AmeisenBotX.Wow.Objects.Enums;
 
 namespace AmeisenBotX.Core.Engines.Battleground.Jannis

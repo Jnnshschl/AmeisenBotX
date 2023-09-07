@@ -11,7 +11,7 @@ using System.Linq;
 
 namespace AmeisenBotX.Core.Managers.Character.Inventory
 {
-    public class CharacterEquipment
+    public class CharacterEquipment : ICharacterEquipment
     {
         private readonly Dictionary<WowEquipmentSlot, IWowInventoryItem> items;
 

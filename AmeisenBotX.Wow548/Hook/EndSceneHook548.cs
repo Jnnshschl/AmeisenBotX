@@ -1,4 +1,5 @@
 ﻿using AmeisenBotX.Common.Math;
+using AmeisenBotX.Common.Memory;
 using AmeisenBotX.Common.Utils;
 using AmeisenBotX.Logging;
 using AmeisenBotX.Logging.Enums;
@@ -13,7 +14,7 @@ namespace AmeisenBotX.Wow548.Hook
 {
     public class EndSceneHook548 : GenericEndSceneHook
     {
-        public EndSceneHook548(WowMemoryApi memory)
+        public EndSceneHook548(IMemoryApi memory)
             : base(memory)
         {
             OriginalFunctionBytes = new();

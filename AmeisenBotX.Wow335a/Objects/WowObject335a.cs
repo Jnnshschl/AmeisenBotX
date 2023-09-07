@@ -1,4 +1,5 @@
 ﻿using AmeisenBotX.Common.Math;
+using AmeisenBotX.Common.Memory;
 using AmeisenBotX.Wow;
 using AmeisenBotX.Wow.Objects;
 using AmeisenBotX.Wow.Objects.Enums;
@@ -24,11 +25,11 @@ namespace AmeisenBotX.Wow335a.Objects
 
         public WowObjectType Type { get; protected set; }
 
-        protected WowMemoryApi Memory { get; private set; }
+        protected IMemoryApi Memory { get; private set; }
 
         protected WowObjectDescriptor335a RawObject { get; private set; }
 
-        public virtual void Init(WowMemoryApi memory, IntPtr baseAddress, IntPtr descriptorAddress)
+        public virtual void Init(IMemoryApi memory, IntPtr baseAddress, IntPtr descriptorAddress)
         {
             Memory = memory;
             BaseAddress = baseAddress;

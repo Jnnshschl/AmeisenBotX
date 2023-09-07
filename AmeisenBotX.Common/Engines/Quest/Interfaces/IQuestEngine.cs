@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using AmeisenBotX.Common;
+using System.Collections.Generic;
 
 namespace AmeisenBotX.Common.Engines.Quest.Interfaces
 {

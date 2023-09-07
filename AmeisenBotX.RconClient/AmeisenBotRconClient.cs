@@ -9,7 +9,7 @@ using System.Text.Json.Serialization;
 
 namespace AmeisenBotX.RconClient
 {
-    public class AmeisenBotRconClient
+    public class AmeisenBotRconClient : IAmeisenBotRconClient
     {
         public AmeisenBotRconClient(string endpoint, string name, string wowRace, string wowGender, string wowClass, string wowRole, string image = "", string guid = "", bool validateCertificate = false)
         {

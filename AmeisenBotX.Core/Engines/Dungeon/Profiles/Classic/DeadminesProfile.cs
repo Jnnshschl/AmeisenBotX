@@ -26,7 +26,7 @@ namespace AmeisenBotX.Core.Engines.Dungeon.Profiles.Classic
 
         public string Name { get; } = "[15-18] Deadmines";
 
-        public List<DungeonNode> Nodes { get; private set; } = new()
+        public List<IDungeonNode> Nodes { get; private set; } = new List<DungeonNode>()
         {
             new(new(-16, -383, 62)),
             new(new(-34, -375, 59)),
@@ -111,7 +111,7 @@ namespace AmeisenBotX.Core.Engines.Dungeon.Profiles.Classic
             new(new(-59, -812, 42), DungeonNodeType.Boss),
             new(new(-80, -820, 40), DungeonNodeType.Boss),
             new(new(-64, -821, 41))
-        };
+        }.Cast<IDungeonNode>().ToList();
 
         public List<int> PriorityUnits { get; } = new();
 
