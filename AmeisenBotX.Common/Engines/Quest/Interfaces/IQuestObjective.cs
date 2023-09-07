@@ -1,4 +1,4 @@
-﻿namespace AmeisenBotX.Common.Engines.Quest.Interfaces
+﻿namespace AmeisenBotX.Core.Engines.Quest.Objects.Objectives
 {
     public interface IQuestObjective
     {

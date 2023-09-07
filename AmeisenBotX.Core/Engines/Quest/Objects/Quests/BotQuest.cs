@@ -5,9 +5,7 @@ using AmeisenBotX.Core.Engines.Quest.Objects.Objectives;
 using AmeisenBotX.Core.Managers.Character.Inventory;
 using AmeisenBotX.Core.Managers.Character.Inventory.Objects;
 using AmeisenBotX.Wow.Objects;
-using System;
 using System.Collections.Generic;
-using System.Linq;
 using System.Threading;
 
 namespace AmeisenBotX.Core.Engines.Quest.Objects.Quests
@@ -59,7 +57,7 @@ namespace AmeisenBotX.Core.Engines.Quest.Objects.Quests
         {
             get
             {
-                if(_questObjectivesInit != default && objectives == default)
+                if (_questObjectivesInit != default && objectives == default)
                 {
                     objectives = _questObjectivesInit.Invoke()?.ToList();
                 }

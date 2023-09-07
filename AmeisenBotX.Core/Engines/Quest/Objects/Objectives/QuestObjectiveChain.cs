@@ -1,6 +1,5 @@
-﻿using AmeisenBotX.Common.Engines.Quest.Interfaces;
+﻿using AmeisenBotX.Core.Engines.Quest.Objects.Quests;
 using System.Collections.Generic;
-using System.Linq;
 
 namespace AmeisenBotX.Core.Engines.Quest.Objects.Objectives
 {

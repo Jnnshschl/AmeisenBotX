@@ -2,6 +2,8 @@
 using AmeisenBotX.BehaviorTree.Enums;
 using AmeisenBotX.BehaviorTree.Objects;
 using AmeisenBotX.Common;
+using AmeisenBotX.Common.BehaviorTree.Interfaces;
+using AmeisenBotX.Common.Engines.Battleground.Interfaces;
 using AmeisenBotX.Common.Math;
 using AmeisenBotX.Common.Utils;
 using AmeisenBotX.Core.Engines.Movement.Enums;
@@ -26,7 +28,7 @@ namespace AmeisenBotX.Core.Engines.Battleground.Jannis.Profiles
             ActionEvent = new(TimeSpan.FromMilliseconds(500));
             LosCheckEvent = new(TimeSpan.FromMilliseconds(1000));
 
-            JBgBlackboard = new(UpdateBattlegroundInfo);
+            JBgBlackboard = new CtfBlackboard(UpdateBattlegroundInfo);
 
             KillEnemyFlagCarrierSelector = new
             (
@@ -118,10 +120,10 @@ namespace AmeisenBotX.Core.Engines.Battleground.Jannis.Profiles
                  new Leaf<CtfBlackboard>((b) => MoveToPosition(WsgDataset.GatePosition))
             );
 
-            BehaviorTree = new
+            BehaviorTree = new BehaviorTree<CtfBlackboard>
             (
                 MainSelector,
-                JBgBlackboard,
+                (CtfBlackboard)JBgBlackboard,
                 TimeSpan.FromSeconds(1)
             );
         }
@@ -151,7 +153,7 @@ namespace AmeisenBotX.Core.Engines.Battleground.Jannis.Profiles
 
         public DualSelector<CtfBlackboard> FlagSelector { get; }
 
-        public CtfBlackboard JBgBlackboard { get; set; }
+        public IBlackboard JBgBlackboard { get; set; }
 
         public Selector<CtfBlackboard> MainSelector { get; }
 

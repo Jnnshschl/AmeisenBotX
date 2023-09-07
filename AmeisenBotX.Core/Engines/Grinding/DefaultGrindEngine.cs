@@ -389,7 +389,7 @@ namespace AmeisenBotX.Core.Engines.Grinding
                 .Where(e => e.Position.GetDistance(Bot.Player.Position) <= e.Radius)
                 .OrderBy(e => e.Position.GetDistance2D(Bot.Player.Position)).FirstOrDefault();
 
-            if (nearestGrindSpot == null)
+            if (nearestGrindSpot.Equals(null))
             {
                 return false;
             }
@@ -415,7 +415,7 @@ namespace AmeisenBotX.Core.Engines.Grinding
                 .OrderBy(e => e.Position.GetDistance2D(Bot.Player.Position))
                 .FirstOrDefault();
 
-            if (nearestGrindSpot == null)
+            if (nearestGrindSpot.Equals(null))
             {
                 return false;
             }

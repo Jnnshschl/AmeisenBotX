@@ -1,9 +1,9 @@
 ﻿using System.Collections.Generic;
 
-namespace AmeisenBotX.Common.Engines.Quest.Interfaces
+namespace AmeisenBotX.Core.Engines.Quest.Objects.Quests
 {
     public interface IQuestProfile
     {
-        Queue<List<IBotQuest>> Quests { get; }
+        Queue<ICollection<IBotQuest>> Quests { get; }
     }
 }

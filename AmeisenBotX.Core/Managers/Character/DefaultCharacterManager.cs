@@ -26,19 +26,19 @@ namespace AmeisenBotX.Core.Managers.Character
             Wow = wowInterface;
             MemoryApi = memory;
 
-            Inventory = new(Wow, config);
-            Equipment = new(Wow);
-            SpellBook = new(Wow);
-            TalentManager = new(Wow);
+            Inventory = new CharacterInventory(Wow, config);
+            Equipment = new CharacterEquipment(Wow);
+            SpellBook = new SpellBook(Wow);
+            TalentManager = new TalentManager(Wow);
             LastLevelTrained = 0;
             ItemComparator = new ItemLevelComparator();
             Skills = new();
             ItemSlotsToSkip = new();
         }
 
-        public CharacterEquipment Equipment { get; }
+        public ICharacterEquipment Equipment { get; }
 
-        public CharacterInventory Inventory { get; }
+        public ICharacterInventory Inventory { get; }
 
         public IItemComparator ItemComparator { get; set; }
 
@@ -48,13 +48,13 @@ namespace AmeisenBotX.Core.Managers.Character
 
         public int Money { get; private set; }
 
-        public IEnumerable<WowMount> Mounts { get; private set; }
+        public IEnumerable<IWowMount> Mounts { get; private set; }
 
         public Dictionary<string, (int, int)> Skills { get; private set; }
 
-        public SpellBook SpellBook { get; }
+        public ISpellBook SpellBook { get; }
 
-        public TalentManager TalentManager { get; }
+        public ITalentManager TalentManager { get; }
 
         private WowMemoryApi MemoryApi { get; }
 
@@ -72,9 +72,10 @@ namespace AmeisenBotX.Core.Managers.Character
             return Inventory.Items.Any(e => Enum.IsDefined(typeof(T), e.Id));
         }
 
-        public bool IsAbleToUseArmor(WowArmor item)
+        public bool IsAbleToUseArmor(IWowInventoryItem item)
         {
-            return item?.ArmorType switch
+            
+            return (item as WowArmor)?.ArmorType switch
             {
                 WowArmorType.Plate => Skills.Any(e =>
                     e.Key.Equals("Plate Mail", StringComparison.OrdinalIgnoreCase)),
@@ -105,9 +106,9 @@ namespace AmeisenBotX.Core.Managers.Character
                    || string.Equals(item.Type, "Weapon", StringComparison.OrdinalIgnoreCase) && IsAbleToUseWeapon((WowWeapon)item);
         }
 
-        public bool IsAbleToUseWeapon(WowWeapon item)
+        public bool IsAbleToUseWeapon(IWowInventoryItem item)
         {
-            return item?.WeaponType switch
+            return (item as WowWeapon)?.WeaponType switch
             {
                 WowWeaponType.Bow => Skills.Any(e =>
                     e.Key.Equals("Bows", StringComparison.OrdinalIgnoreCase)),

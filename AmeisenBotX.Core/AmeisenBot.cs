@@ -1,7 +1,7 @@
-﻿using AmeisenBotX.Common.Math;
+﻿using AmeisenBotX.Common.Engines.Battleground.Interfaces;
+using AmeisenBotX.Common.Math;
 using AmeisenBotX.Common.Storage;
 using AmeisenBotX.Common.Utils;
-using AmeisenBotX.Core.Engines.Battleground;
 using AmeisenBotX.Core.Engines.Battleground.einTyp;
 using AmeisenBotX.Core.Engines.Battleground.Jannis;
 using AmeisenBotX.Core.Engines.Battleground.KamelBG;
@@ -19,10 +19,7 @@ using AmeisenBotX.Core.Engines.Movement;
 using AmeisenBotX.Core.Engines.Movement.Pathfinding;
 using AmeisenBotX.Core.Engines.PvP;
 using AmeisenBotX.Core.Engines.Quest;
-using AmeisenBotX.Core.Engines.Quest.Profiles;
-using AmeisenBotX.Core.Engines.Quest.Profiles.Shino;
-using AmeisenBotX.Core.Engines.Quest.Profiles.StartAreas;
-using AmeisenBotX.Common.Engines.Quest;
+using AmeisenBotX.Core.Engines.Quest.Objects.Quests;
 using AmeisenBotX.Core.Engines.Tactic;
 using AmeisenBotX.Core.Engines.Test;
 using AmeisenBotX.Core.Logic;
@@ -36,7 +33,6 @@ using AmeisenBotX.Core.Managers.Chat;
 using AmeisenBotX.Core.Managers.Threat;
 using AmeisenBotX.Logging;
 using AmeisenBotX.Logging.Enums;
-using AmeisenBotX.Memory.Win32;
 using AmeisenBotX.RconClient.Enums;
 using AmeisenBotX.RconClient.Messages;
 using AmeisenBotX.Wow;
@@ -53,19 +49,15 @@ using AmeisenBotX.Wow548.Combatlog.Enums;
 using AmeisenBotX.Wow548.Offsets;
 using McMaster.NETCore.Plugins;
 using Microsoft.CSharp;
-using System;
 using System.CodeDom.Compiler;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Drawing;
 using System.Drawing.Imaging;
 using System.IO;
-using System.Linq;
 using System.Reflection;
 using System.Text;
 using System.Threading.Tasks;
-using AmeisenBotX.Common.Engines.Battleground.Interfaces;
-using AmeisenBotX.Common.Engines.Quest.Interfaces;
 
 namespace AmeisenBotX.Core
 {
@@ -98,7 +90,7 @@ namespace AmeisenBotX.Core
             AccountName = instanceName;
             ProfileFolder = Path.GetDirectoryName(config.Path);
 
-            
+
 
             if (logfilePath == "DEFAULT")
             {
@@ -134,7 +126,7 @@ namespace AmeisenBotX.Core
             {
                 executeableVersion = FileVersionInfo.GetVersionInfo(Config.PathToWowExe).FilePrivatePart;
             }
-            
+
 
             if (Enum.TryParse(executeableVersion.ToString(), true, out WowVersion wowVersion))
             {
@@ -333,7 +325,7 @@ namespace AmeisenBotX.Core
         /// <summary>
         /// All currently loaded quest profiles.
         /// </summary>
-        public IEnumerable<IQuestProfile> QuestProfiles => QuestEnginesAvailable.SelectMany(t=>t.Profiles);
+        public IEnumerable<IQuestProfile> QuestProfiles => QuestEnginesAvailable.SelectMany(t => t.Profiles);
         public ICollection<IQuestEngine> QuestEnginesAvailable { get; set; } = new HashSet<IQuestEngine>();
         public IQuestEngine QuestEngine { get; private set; }
 

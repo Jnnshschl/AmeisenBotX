@@ -1,4 +1,5 @@
 ﻿using AmeisenBotX.Core.Engines.Movement.Enums;
+using AmeisenBotX.Core.Engines.Quest.Objects.Quests;
 using AmeisenBotX.Wow.Objects;
 using System.Collections.Generic;
 
