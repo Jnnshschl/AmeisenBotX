@@ -33,6 +33,7 @@
 
   <ItemGroup>
     <Folder Include="Managers\Character\Spells\Objects\" />
+    <Folder Include="Managers\Character\Talents\Objects\" />
   </ItemGroup>
 
 </Project>

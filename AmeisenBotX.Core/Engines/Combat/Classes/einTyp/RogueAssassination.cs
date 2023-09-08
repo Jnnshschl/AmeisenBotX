@@ -62,38 +62,38 @@ namespace AmeisenBotX.Core.Engines.Combat.Classes.einTyp
 
         public WowRole Role => WowRole.Dps;
 
-        public TalentTree Talents { get; } = new()
+        public TalentTree Talents { get; } = new TalentTree()
         {
             Tree1 = new()
             {
-                { 3, new(1, 3, 5) },
-                { 4, new(1, 4, 3) },
-                { 5, new(1, 5, 2) },
-                { 6, new(1, 6, 3) },
-                { 9, new(1, 9, 5) },
-                { 10, new(1, 10, 3) },
-                { 11, new(1, 11, 5) },
-                { 13, new(1, 13, 1) },
-                { 16, new(1, 16, 5) },
-                { 17, new(1, 17, 2) },
-                { 19, new(1, 19, 1) },
-                { 21, new(1, 21, 3) },
-                { 22, new(1, 22, 3) },
-                { 23, new(1, 23, 3) },
-                { 24, new(1, 24, 1) },
-                { 26, new(1, 26, 5) },
-                { 27, new(1, 27, 1) }
+                { 3, new Talent(1, 3, 5) },
+                { 4, new Talent(1, 4, 3) },
+                { 5, new Talent(1, 5, 2) },
+                { 6, new Talent(1, 6, 3) },
+                { 9, new Talent(1, 9, 5) },
+                { 10, new Talent(1, 10, 3) },
+                { 11, new Talent(1, 11, 5) },
+                { 13, new Talent(1, 13, 1) },
+                { 16, new Talent(1, 16, 5) },
+                { 17, new Talent(1, 17, 2) },
+                { 19, new Talent(1, 19, 1) },
+                { 21, new Talent(1, 21, 3) },
+                { 22, new Talent(1, 22, 3) },
+                { 23, new Talent(1, 23, 3) },
+                { 24, new Talent(1, 24, 1) },
+                { 26, new Talent(1, 26, 5) },
+                { 27, new Talent(1, 27, 1) }
             },
             Tree2 = new()
             {
-                { 3, new(2, 3, 5) },
-                { 6, new(2, 6, 5) },
-                { 9, new(2, 9, 5) },
-                { 12, new(2, 12, 3) }
+                { 3, new Talent(2, 3, 5) },
+                { 6, new Talent(2, 6, 5) },
+                { 9, new Talent(2, 9, 5) },
+                { 12, new Talent(2, 12, 3) }
             },
             Tree3 = new()
             {
-                { 3, new(3, 3, 2) }
+                { 3, new Talent(3, 3, 2) }
             }
         };
 

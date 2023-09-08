@@ -18,7 +18,5 @@ namespace AmeisenBotX.Core.Engines.Battleground.Jannis
         int MyTeamMaxScore { get; set; }
         int MyTeamScore { get; set; }
         IEnumerable<IWowGameobject> NearFlags { get; set; }
-
-        void Update();
     }
 }

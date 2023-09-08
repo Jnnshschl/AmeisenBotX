@@ -50,7 +50,7 @@ namespace AmeisenBotX.Common.Memory
         /// <summary>
         /// Disposes XMemory and frees all memory allocated by it.
         /// </summary>
-        public new void Dispose(bool managed = false);
+        public void Dispose(bool managed = false);
 
         /// <summary>
         /// Brings a window to the users focus.
@@ -235,6 +235,7 @@ namespace AmeisenBotX.Common.Memory
         /// <param name="size">Size of the area</param>
         /// <returns>True if successful, false if not</returns>
         bool ZeroMemory(IntPtr address, int size);
+        Process AttachProcess(int processId, out IntPtr processHandle, out IntPtr threadHandle);
 
         IOffsetList Offsets { get; }
     }

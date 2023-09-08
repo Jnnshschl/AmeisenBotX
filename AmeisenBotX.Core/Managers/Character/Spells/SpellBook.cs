@@ -8,6 +8,7 @@ using System.Linq;
 using System.Text.Json;
 using System.Text.Json.Serialization;
 using AmeisenBotX.Core.Managers.Character;
+using static AmeisenBotX.Core.Managers.Character.Spells.ISpellBook;
 
 namespace AmeisenBotX.Core.Managers.Character.Spells
 {
@@ -18,7 +19,7 @@ namespace AmeisenBotX.Core.Managers.Character.Spells
             Wow = wowInterface;
         }
 
-        public delegate void SpellBookUpdate();
+        //public delegate void SpellBookUpdate();
 
         public event SpellBookUpdate OnSpellBookUpdate;
 

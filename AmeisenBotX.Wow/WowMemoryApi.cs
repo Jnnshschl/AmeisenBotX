@@ -10,7 +10,5 @@ namespace AmeisenBotX.Wow
         {
             Offsets = offsets;
         }
-
-        public IOffsetList Offsets { get; }
     }
 }

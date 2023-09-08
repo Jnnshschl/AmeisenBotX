@@ -1,10 +1,7 @@
-﻿using AmeisenBotX.Common.Engines.Quest.Interfaces;
-using AmeisenBotX.Common.Utils;
+﻿using AmeisenBotX.Common.Utils;
 using AmeisenBotX.Core.Engines.Movement.Enums;
 using AmeisenBotX.Wow.Objects;
-using System;
 using System.Collections.Generic;
-using System.Linq;
 
 namespace AmeisenBotX.Core.Engines.Quest.Objects.Objectives
 {

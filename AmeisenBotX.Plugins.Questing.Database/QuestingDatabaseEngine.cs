@@ -1,5 +1,5 @@
 ﻿using AmeisenBotX.Common;
-using AmeisenBotX.Common.Engines.Quest.Interfaces;
+using AmeisenBotX.Core.Engines.Quest.Objects.Quests;
 
 namespace AmeisenBotX.Plugins.Questing.Database
 {
@@ -9,7 +9,7 @@ namespace AmeisenBotX.Plugins.Questing.Database
         {
             Bot = bot;
             Profiles.Clear();
-            Profiles.Add(item: new ZoneProfile(bot) { Name = "Testing Profile"});
+            Profiles.Add(item: new ZoneProfile(bot) { Name = "Testing Profile" });
             SelectedProfile = Profiles.First();
         }
 

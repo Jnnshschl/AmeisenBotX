@@ -41,11 +41,11 @@ namespace AmeisenBotX.Core.Engines.Combat.Classes.Bia10
 
         public override WowRole Role => WowRole.Dps;
 
-        public override TalentTree Talents { get; } = new()
+        public override TalentTree Talents { get; } = new TalentTree()
         {
-            Tree1 = new Dictionary<int, Talent>(),
-            Tree2 = new Dictionary<int, Talent>(),
-            Tree3 = new Dictionary<int, Talent>(),
+            Tree1 = new(),
+            Tree2 = new(),
+            Tree3 = new(),
         };
 
         public override bool UseAutoAttacks => true;

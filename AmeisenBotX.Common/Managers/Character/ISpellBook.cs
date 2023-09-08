@@ -11,5 +11,9 @@ namespace AmeisenBotX.Core.Managers.Character.Spells
         bool IsSpellKnown(string spellname);
         bool TryGetSpellByName(string spellname, out Spell spell);
         void Update();
+
+        delegate void SpellBookUpdate();
+
+        event SpellBookUpdate OnSpellBookUpdate;
     }
 }

@@ -13,10 +13,8 @@ using AmeisenBotX.Logging;
 using AmeisenBotX.Logging.Enums;
 using AmeisenBotX.Wow.Objects;
 using AmeisenBotX.Wow.Objects.Enums;
-using System;
 using System.Collections.Generic;
 using System.Globalization;
-using System.Linq;
 
 namespace AmeisenBotX.Core.Engines.Combat.Classes.Jannis
 {

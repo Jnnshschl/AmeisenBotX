@@ -1,8 +1,8 @@
 ﻿using AmeisenBotX.Common.Math;
+using AmeisenBotX.Common.Memory;
 using AmeisenBotX.Wow.Objects.Raw;
 using System;
 using System.Drawing;
-using Rect = AmeisenBotX.Memory.Win32.Rect;
 
 namespace AmeisenBotX.Overlay.Utils
 {

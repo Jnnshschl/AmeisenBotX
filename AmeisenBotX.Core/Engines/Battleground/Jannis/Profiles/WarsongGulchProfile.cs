@@ -153,7 +153,7 @@ namespace AmeisenBotX.Core.Engines.Battleground.Jannis.Profiles
 
         public DualSelector<CtfBlackboard> FlagSelector { get; }
 
-        public IBlackboard JBgBlackboard { get; set; }
+        public ICtfBlackboard JBgBlackboard { get; set; }
 
         public Selector<CtfBlackboard> MainSelector { get; }
 

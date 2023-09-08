@@ -330,7 +330,7 @@ namespace AmeisenBotX.Core.Engines.Movement
 
         private void MountUp()
         {
-            IEnumerable<WowMount> filteredMounts = Bot.Character.Mounts;
+            IEnumerable<IWowMount> filteredMounts = Bot.Character.Mounts;
 
             if (Config.UseOnlySpecificMounts)
             {
@@ -339,7 +339,7 @@ namespace AmeisenBotX.Core.Engines.Movement
 
             if (filteredMounts != null && filteredMounts.Any())
             {
-                WowMount mount = filteredMounts.ElementAt(new Random().Next(0, filteredMounts.Count()));
+                IWowMount mount = filteredMounts.ElementAt(new Random().Next(0, filteredMounts.Count()));
                 PreventMovement(TimeSpan.FromSeconds(2));
                 Bot.Wow.CallCompanion(mount.Index, "MOUNT");
             }

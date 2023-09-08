@@ -237,7 +237,7 @@ namespace AmeisenBotX.Memory
 
         private bool Initialized { get; set; }
 
-        public IOffsetList Offsets => throw new NotImplementedException();
+        public IOffsetList Offsets { get; init; }
 
         ///<inheritdoc cref="IMemoryApi.Init"/>
         public virtual bool Init(Process process, IntPtr processHandle, IntPtr mainThreadHandle)

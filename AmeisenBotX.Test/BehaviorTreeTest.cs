@@ -1,7 +1,7 @@
 ﻿using AmeisenBotX.BehaviorTree;
 using AmeisenBotX.BehaviorTree.Enums;
-using AmeisenBotX.BehaviorTree.Interfaces;
 using AmeisenBotX.BehaviorTree.Objects;
+using AmeisenBotX.Common.BehaviorTree.Interfaces;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 
 namespace AmeisenBotX.Test

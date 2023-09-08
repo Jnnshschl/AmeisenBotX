@@ -1,5 +1,6 @@
 ﻿using AmeisenBotX.Common.Keyboard.Enums;
 using AmeisenBotX.Common.Math;
+using AmeisenBotX.Common.Memory;
 using AmeisenBotX.Common.Utils;
 using AmeisenBotX.Core.Managers.Character.Comparators;
 using AmeisenBotX.Core.Managers.Character.Inventory;
@@ -21,7 +22,7 @@ namespace AmeisenBotX.Core.Managers.Character
 {
     public class DefaultCharacterManager : ICharacterManager
     {
-        public DefaultCharacterManager(IWowInterface wowInterface, WowMemoryApi memory, AmeisenBotConfig config)
+        public DefaultCharacterManager(IWowInterface wowInterface, IMemoryApi memory, AmeisenBotConfig config)
         {
             Wow = wowInterface;
             MemoryApi = memory;
@@ -56,7 +57,7 @@ namespace AmeisenBotX.Core.Managers.Character
 
         public ITalentManager TalentManager { get; }
 
-        private WowMemoryApi MemoryApi { get; }
+        private IMemoryApi MemoryApi { get; }
 
         private IWowInterface Wow { get; }
 

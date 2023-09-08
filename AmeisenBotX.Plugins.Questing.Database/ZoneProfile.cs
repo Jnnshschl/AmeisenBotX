@@ -1,5 +1,5 @@
 ﻿using AmeisenBotX.Common;
-using AmeisenBotX.Common.Engines.Quest.Interfaces;
+using AmeisenBotX.Core.Engines.Quest.Objects.Quests;
 
 namespace AmeisenBotX.Plugins.Questing.Database
 {
@@ -10,7 +10,7 @@ namespace AmeisenBotX.Plugins.Questing.Database
 
         }
 
-        public Queue<List<IBotQuest>> Quests => throw new NotImplementedException();
+        public Queue<ICollection<IBotQuest>> Quests => throw new NotImplementedException();
 
         public string Name { get; init; }
 

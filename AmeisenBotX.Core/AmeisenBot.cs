@@ -1,5 +1,6 @@
 ﻿using AmeisenBotX.Common.Engines.Battleground.Interfaces;
 using AmeisenBotX.Common.Math;
+using AmeisenBotX.Common.Memory;
 using AmeisenBotX.Common.Storage;
 using AmeisenBotX.Common.Utils;
 using AmeisenBotX.Core.Engines.Battleground.einTyp;
@@ -23,6 +24,7 @@ using AmeisenBotX.Core.Engines.Quest.Objects.Quests;
 using AmeisenBotX.Core.Engines.Tactic;
 using AmeisenBotX.Core.Engines.Test;
 using AmeisenBotX.Core.Logic;
+using AmeisenBotX.Core.Logic.Idle;
 using AmeisenBotX.Core.Logic.Idle.Actions;
 using AmeisenBotX.Core.Logic.Idle.Actions.Utils;
 using AmeisenBotX.Core.Logic.Routines;
@@ -33,6 +35,7 @@ using AmeisenBotX.Core.Managers.Chat;
 using AmeisenBotX.Core.Managers.Threat;
 using AmeisenBotX.Logging;
 using AmeisenBotX.Logging.Enums;
+using AmeisenBotX.RconClient;
 using AmeisenBotX.RconClient.Enums;
 using AmeisenBotX.RconClient.Messages;
 using AmeisenBotX.Wow;
@@ -161,7 +164,7 @@ namespace AmeisenBotX.Core
                 "AmeisenBotX.Core.Engines.Tactic."
             });
 
-            Bot.IdleActions = new(Config, new List<IIdleAction>()
+            Bot.IdleActions = new IdleActionManager(Config, new List<IIdleAction>()
             {
                 new AuctionHouseIdleAction(Bot),
                 new CheckMailsIdleAction(Bot),
@@ -679,16 +682,22 @@ namespace AmeisenBotX.Core
             // Create an instance of plugin types
             foreach (var loader in loaders)
             {
-                foreach (var pluginType in loader
-                    .LoadDefaultAssembly()
-                    .GetTypes()
-                    .Where(t => typeof(IQuestEngine).IsAssignableFrom(t) && !t.IsInterface && !t.IsAbstract))
+                try
                 {
-                    // This assumes the implementation of IPlugin has a parameterless constructor
-                    Debug.WriteLine($"Found QuestEngine from plugin: {pluginType.FullName}");
-                    var engine = (IQuestEngine)Activator.CreateInstance(pluginType, Bot);
-                    //engine.Bot = Bot;
-                    QuestEnginesAvailable.Add(engine);
+                    foreach (var pluginType in loader
+                        .LoadDefaultAssembly()
+                        .GetTypes()
+                        .Where(t => typeof(IQuestEngine).IsAssignableFrom(t) && !t.IsInterface && !t.IsAbstract))
+                    {
+                        // This assumes the implementation of IPlugin has a parameterless constructor
+                        Debug.WriteLine($"Found QuestEngine from plugin: {pluginType.FullName}");
+                        var engine = (IQuestEngine)Activator.CreateInstance(pluginType, Bot);
+                        //engine.Bot = Bot;
+                        QuestEnginesAvailable.Add(engine);
+                    }
+                }catch 
+                {
+                    loader.Dispose();
                 }
             }
         }
@@ -1119,7 +1128,7 @@ namespace AmeisenBotX.Core
                 if (!NeedToSetupRconClient && Bot.Player != null)
                 {
                     NeedToSetupRconClient = true;
-                    Bot.Rcon = new
+                    Bot.Rcon = new AmeisenBotRconClient
                     (
                         Config.RconServerAddress,
                         Bot.Db.GetUnitName(Bot.Player, out string name) ? name : "unknown",

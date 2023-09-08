@@ -219,7 +219,7 @@ namespace AmeisenBotX.Core.Engines.Dungeon
                     return BtStatus.Ongoing;
                 }
 
-                DungeonNode node = CurrentNodes.Peek();
+                IDungeonNode node = CurrentNodes.Peek();
 
                 if (node.Position.GetDistance(Bot.Player.Position) < 4.0f)
                 {
@@ -312,7 +312,7 @@ namespace AmeisenBotX.Core.Engines.Dungeon
 
             if (Profile != null)
             {
-                DungeonNode closestNode = profile.Nodes.OrderBy(e => e.Position.GetDistance(Bot.Player.Position)).FirstOrDefault();
+                IDungeonNode closestNode = profile.Nodes.OrderBy(e => e.Position.GetDistance(Bot.Player.Position)).FirstOrDefault();
                 int closestNodeIndex = profile.Nodes.IndexOf(closestNode);
 
                 for (int i = closestNodeIndex; i < profile.Nodes.Count; ++i)

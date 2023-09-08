@@ -418,7 +418,7 @@ namespace AmeisenBotX
                     System.Drawing.Color startDot = System.Drawing.Color.Cyan;
                     System.Drawing.Color endDot = i == 0 ? System.Drawing.Color.Orange : i == currentNodes.Count ? System.Drawing.Color.Orange : System.Drawing.Color.Cyan;
 
-                    Memory.Win32.Rect windowRect = AmeisenBot.Bot.Memory.GetClientSize();
+                    var windowRect = AmeisenBot.Bot.Memory.GetClientSize();
 
                     if (OverlayMath.WorldToScreen(windowRect, AmeisenBot.Bot.Objects.Camera, start, out System.Drawing.Point startPoint)
                         && OverlayMath.WorldToScreen(windowRect, AmeisenBot.Bot.Objects.Camera, end, out System.Drawing.Point endPoint))
@@ -437,7 +437,7 @@ namespace AmeisenBotX
             {
                 try
                 {
-                    Memory.Win32.Rect rc = new();
+                    AmeisenBotX.Common.Memory.Rect rc = new();
                     Memory.Win32.Win32Imports.GetWindowRect(MainWindowHandle, ref rc);
                     AmeisenBot.Config.BotWindowRect = rc;
                 }
@@ -655,7 +655,7 @@ namespace AmeisenBotX
                 // load our old window position
                 if (AmeisenBot.Config.SaveBotWindowPosition)
                 {
-                    if (MainWindowHandle != IntPtr.Zero && AmeisenBot.Config.BotWindowRect != new Memory.Win32.Rect() { Left = -1, Top = -1, Right = -1, Bottom = -1 })
+                    if (MainWindowHandle != IntPtr.Zero && AmeisenBot.Config.BotWindowRect != new AmeisenBotX.Common.Memory.Rect() { Left = -1, Top = -1, Right = -1, Bottom = -1 })
                     {
                         AmeisenBot.Bot.Memory.SetWindowPosition(MainWindowHandle, AmeisenBot.Config.BotWindowRect);
                         AmeisenLogger.I.Log("AmeisenBot", $"Loaded window position: {AmeisenBot.Config.BotWindowRect}", LogLevel.Verbose);

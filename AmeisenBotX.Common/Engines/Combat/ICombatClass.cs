@@ -62,7 +62,7 @@ namespace AmeisenBotX.Core.Engines.Combat.Classes
         /// <summary>
         /// Set the talents the bot will skill in here.
         /// </summary>
-        ITalentTree Talents { get; }
+        TalentTree Talents { get; }
 
         /// <summary>
         /// Version of the combat class.

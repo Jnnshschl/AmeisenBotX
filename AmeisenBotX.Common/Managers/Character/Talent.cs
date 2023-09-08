@@ -1,6 +1,6 @@
 ﻿namespace AmeisenBotX.Core.Managers.Character.Talents.Objects
 {
-    public class Talent : ITalent
+    public class Talent
     {
         public Talent(int tab, int num, int rank)
         {

@@ -1,18 +1,16 @@
-﻿using AmeisenBotX.Common.Engines.Quest.Interfaces;
-using AmeisenBotX.Common.Math;
+﻿using AmeisenBotX.Common.Math;
 using AmeisenBotX.Core.Engines.Movement.Enums;
 using AmeisenBotX.Core.Engines.Quest.Objects;
 using AmeisenBotX.Core.Engines.Quest.Objects.Objectives;
 using AmeisenBotX.Core.Engines.Quest.Objects.Quests;
 using AmeisenBotX.Wow.Objects.Enums;
 using System.Collections.Generic;
-using System.Linq;
 
 namespace AmeisenBotX.Core.Engines.Quest.Profiles.StartAreas
 {
     public class DeathknightStartAreaQuestProfile : QuestProfile
     {
-        public DeathknightStartAreaQuestProfile(AmeisenBotInterfaces bot):base(bot)
+        public DeathknightStartAreaQuestProfile(AmeisenBotInterfaces bot) : base(bot)
         {
             Name = $"[55-59] Deathknight Start Area (Jannis)";
 
