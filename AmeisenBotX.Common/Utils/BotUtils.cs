@@ -152,14 +152,14 @@ namespace AmeisenBotX.Common.Utils
         /// <param name="minDelay">Minimun delay to release the key</param>
         /// <param name="maxDelay">Maximum delay to release the key</param>
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static void SendKey(IntPtr windowHandle, IntPtr key, int minDelay = 20, int maxDelay = 40)
+        public static void SendKey(nint windowHandle, nint key, int minDelay = 20, int maxDelay = 40)
         {
-            SendMessage(windowHandle, WM_KEYDOWN, key, IntPtr.Zero);
+            SendMessage(windowHandle, WM_KEYDOWN, key, nint.Zero);
             Task.Delay(new Random().Next(minDelay, maxDelay)).Wait();
-            SendMessage(windowHandle, WM_KEYUP, key, IntPtr.Zero);
+            SendMessage(windowHandle, WM_KEYUP, key, nint.Zero);
         }
 
         [DllImport("user32", SetLastError = true)]
-        private static extern IntPtr SendMessage(IntPtr windowHandle, uint msg, IntPtr param, IntPtr parameter);
+        private static extern nint SendMessage(nint windowHandle, uint msg, nint param, nint parameter);
     }
 }

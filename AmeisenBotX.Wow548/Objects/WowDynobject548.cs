@@ -11,7 +11,7 @@ namespace AmeisenBotX.Wow548.Objects
 
         public ulong Caster => GetDynamicobjectDescriptor().Caster;
 
-        public new Vector3 Position => Memory.Read(IntPtr.Add(BaseAddress, (int)Memory.Offsets.WowDynobjectPosition), out Vector3 position) ? position : Vector3.Zero;
+        public new Vector3 Position => Memory.Read(nint.Add(BaseAddress, (int)Memory.Offsets.WowDynobjectPosition), out Vector3 position) ? position : Vector3.Zero;
 
         public float Radius => GetDynamicobjectDescriptor().Radius;
 

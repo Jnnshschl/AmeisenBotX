@@ -6,7 +6,7 @@ namespace AmeisenBotX.Memory.Structs
 {
     public readonly struct AllocationPool
     {
-        public AllocationPool(IntPtr address, int size)
+        public AllocationPool(nint address, int size)
         {
             Address = address;
             Size = size;
@@ -14,7 +14,7 @@ namespace AmeisenBotX.Memory.Structs
             Allocations = [];
         }
 
-        public IntPtr Address { get; }
+        public nint Address { get; }
 
         public SortedList<int, int> Allocations { get; }
 
@@ -25,7 +25,7 @@ namespace AmeisenBotX.Memory.Structs
         /// </summary>
         /// <param name="address">Allocation address</param>
         /// <returns>True, when the block has been found and freed, false if not</returns>
-        public bool Free(IntPtr address, out int size)
+        public bool Free(nint address, out int size)
         {
             int addressInt = address.ToInt32();
             int baseAddressInt = Address.ToInt32();
@@ -51,16 +51,16 @@ namespace AmeisenBotX.Memory.Structs
         /// <param name="size">Size of the wanted block</param>
         /// <param name="address">Address of the memory allocation</param>
         /// <returns>True when a block could be reserved, false if not</returns>
-        public bool Reserve(int size, out IntPtr address)
+        public bool Reserve(int size, out nint address)
         {
             if (GetNextFreeBlock(size, out int offset))
             {
                 Allocations.Add(offset, size);
-                address = IntPtr.Add(Address, offset);
+                address = nint.Add(Address, offset);
                 return true;
             }
 
-            address = IntPtr.Zero;
+            address = nint.Zero;
             return false;
         }
 

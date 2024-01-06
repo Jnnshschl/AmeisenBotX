@@ -6,9 +6,9 @@ namespace AmeisenBotX.Wow.Objects
 {
     public interface IWowObject
     {
-        IntPtr BaseAddress { get; }
+        nint BaseAddress { get; }
 
-        IntPtr DescriptorAddress { get; }
+        nint DescriptorAddress { get; }
 
         int EntryId { get; }
 
@@ -30,7 +30,7 @@ namespace AmeisenBotX.Wow.Objects
             return Position.GetDistance(b);
         }
 
-        void Init(WowMemoryApi memory, IntPtr baseAddress, IntPtr descriptorAddress);
+        void Init(WowMemoryApi memory, nint baseAddress, nint descriptorAddress);
 
         public bool IsContainer()
         {

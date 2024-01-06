@@ -6,22 +6,22 @@ namespace AmeisenBotX.Wow.Hook.Modules
 {
     public class TracelineJumpHookModule : RunAsmHookModule
     {
-        public TracelineJumpHookModule(Action<IntPtr> onUpdate, Action<IHookModule> tick, WowMemoryApi memory) : base(onUpdate, tick, memory, 256)
+        public TracelineJumpHookModule(Action<nint> onUpdate, Action<IHookModule> tick, WowMemoryApi memory) : base(onUpdate, tick, memory, 256)
         {
         }
 
         ~TracelineJumpHookModule()
         {
-            if (ExecuteAddress != IntPtr.Zero) { Memory.FreeMemory(ExecuteAddress); }
+            if (ExecuteAddress != nint.Zero) { Memory.FreeMemory(ExecuteAddress); }
         }
 
-        public IntPtr CommandAddress { get; private set; }
+        public nint CommandAddress { get; private set; }
 
-        public IntPtr DataAddress { get; private set; }
+        public nint DataAddress { get; private set; }
 
-        public IntPtr ExecuteAddress { get; private set; }
+        public nint ExecuteAddress { get; private set; }
 
-        public override IntPtr GetDataPointer()
+        public override nint GetDataPointer()
         {
             return DataAddress;
         }
@@ -32,7 +32,7 @@ namespace AmeisenBotX.Wow.Hook.Modules
 
             uint memoryNeeded = (uint)(4 + 40 + luaJumpBytes.Length + 1);
 
-            if (Memory.AllocateMemory(memoryNeeded, out IntPtr memory))
+            if (Memory.AllocateMemory(memoryNeeded, out nint memory))
             {
                 ExecuteAddress = memory;
                 CommandAddress = ExecuteAddress + 4;
@@ -40,10 +40,10 @@ namespace AmeisenBotX.Wow.Hook.Modules
 
                 Memory.WriteBytes(CommandAddress, luaJumpBytes);
 
-                IntPtr distancePointer = DataAddress;
-                IntPtr startPointer = IntPtr.Add(distancePointer, 0x4);
-                IntPtr endPointer = IntPtr.Add(startPointer, 0xC);
-                IntPtr resultPointer = IntPtr.Add(endPointer, 0xC);
+                nint distancePointer = DataAddress;
+                nint startPointer = nint.Add(distancePointer, 0x4);
+                nint endPointer = nint.Add(startPointer, 0xC);
+                nint resultPointer = nint.Add(endPointer, 0xC);
 
                 assembly = new List<string>()
                 {

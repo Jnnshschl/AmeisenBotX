@@ -12,12 +12,12 @@ namespace AmeisenBotX.Memory
         /// <summary>
         /// Native handle for the main thread.
         /// </summary>
-        public IntPtr MainThreadHandle { get; }
+        public nint MainThreadHandle { get; }
 
         /// <summary>
         /// All memory allocations.
         /// </summary>
-        public Dictionary<IntPtr, uint> MemoryAllocations { get; }
+        public Dictionary<nint, uint> MemoryAllocations { get; }
 
         /// <summary>
         /// NET process class.
@@ -27,7 +27,7 @@ namespace AmeisenBotX.Memory
         /// <summary>
         /// Native process handle.
         /// </summary>
-        public IntPtr ProcessHandle { get; }
+        public nint ProcessHandle { get; }
 
         /// <summary>
         /// Get the amount of ReadProcessMemory calls since last time.
@@ -45,7 +45,7 @@ namespace AmeisenBotX.Memory
         /// <param name="size">Allocation size in bytes</param>
         /// <param name="address">Address of the allocation</param>
         /// <returns>True if allocation was successful, false if not</returns>
-        public bool AllocateMemory(uint size, out IntPtr address);
+        public bool AllocateMemory(uint size, out nint address);
 
         /// <summary>
         /// Disposes XMemory and frees all memory allocated by it.
@@ -58,7 +58,7 @@ namespace AmeisenBotX.Memory
         /// <param name="windowHandle">Window Handle</param>
         /// <param name="rect">Position of the window</param>
         /// <param name="resizeWindow">True when you want to resize the window, false if not</param>
-        public void FocusWindow(IntPtr windowHandle, Rect rect, bool resizeWindow = true);
+        public void FocusWindow(nint windowHandle, Rect rect, bool resizeWindow = true);
 
         /// <summary>
         /// Frees all allocated memory in the process.
@@ -70,7 +70,7 @@ namespace AmeisenBotX.Memory
         /// </summary>
         /// <param name="address">Address of the allocation</param>
         /// <returns>True if freeing was successful, false if not</returns>
-        public bool FreeMemory(IntPtr address);
+        public bool FreeMemory(nint address);
 
         /// <summary>
         /// Returns the client window rect of the given window.
@@ -83,7 +83,7 @@ namespace AmeisenBotX.Memory
         /// Get the current focused window handle.
         /// </summary>
         /// <returns>Window handle</returns>
-        public IntPtr GetForegroundWindow();
+        public nint GetForegroundWindow();
 
         /// <summary>
         /// Returns the position of the supplied window.
@@ -100,7 +100,7 @@ namespace AmeisenBotX.Memory
         /// <param name="processHandle">Native process handle</param>
         /// <param name="mainThreadHandle">Native thread handle</param>
         /// <returns>True if everything was set up correctly, false if not</returns>
-        public bool Init(Process process, IntPtr processHandle, IntPtr mainThreadHandle);
+        public bool Init(Process process, nint processHandle, nint mainThreadHandle);
 
         /// <summary>
         /// Injects the current Fasm buffer and clears it.
@@ -111,7 +111,7 @@ namespace AmeisenBotX.Memory
         /// Whether we need to patch memory protection or nor. Useful when memory is write protected.
         /// </param>
         /// <returns>True when the injection was successful</returns>
-        public bool InjectAssembly(IEnumerable<string> asm, IntPtr address, bool patchMemProtection = false);
+        public bool InjectAssembly(IEnumerable<string> asm, nint address, bool patchMemProtection = false);
 
         /// <summary>
         /// Change and area of memory, by unprotecting it temporarily.
@@ -119,7 +119,7 @@ namespace AmeisenBotX.Memory
         /// <typeparam name="T"></typeparam>
         /// <param name="address">Address to apply the patch</param>
         /// <param name="data">Data of the patch</param>
-        void PatchMemory<T>(IntPtr address, T data) where T : unmanaged;
+        void PatchMemory<T>(nint address, T data) where T : unmanaged;
 
         /// <summary>
         /// Change the memory protection of an area.
@@ -129,7 +129,7 @@ namespace AmeisenBotX.Memory
         /// <param name="memoryProtection">New Protection</param>
         /// <param name="oldMemoryProtection">Old protection</param>
         /// <returns>True if it was successful, false if not</returns>
-        public bool ProtectMemory(IntPtr address, uint size, MemoryProtectionFlag memoryProtection, out MemoryProtectionFlag oldMemoryProtection);
+        public bool ProtectMemory(nint address, uint size, MemoryProtectionFlag memoryProtection, out MemoryProtectionFlag oldMemoryProtection);
 
         /// <summary>
         /// Read an unmanaged type from the processes memory.
@@ -138,7 +138,7 @@ namespace AmeisenBotX.Memory
         /// <param name="address">Address to read from</param>
         /// <param name="value">Value</param>
         /// <returns>True if reading was successful, false if not</returns>
-        public bool Read<T>(IntPtr address, out T value) where T : unmanaged;
+        public bool Read<T>(nint address, out T value) where T : unmanaged;
 
         /// <summary>
         /// Read bytes from the processes memory.
@@ -147,7 +147,7 @@ namespace AmeisenBotX.Memory
         /// <param name="size">Size of the byte array to read</param>
         /// <param name="bytes">Bytes</param>
         /// <returns>True if reading was successful, false if not</returns>
-        public bool ReadBytes(IntPtr address, int size, out byte[] bytes);
+        public bool ReadBytes(nint address, int size, out byte[] bytes);
 
         /// <summary>
         /// Read a string from the processes memory.
@@ -157,7 +157,7 @@ namespace AmeisenBotX.Memory
         /// <param name="value">String</param>
         /// <param name="bufferSize">Max bytes to read per cycle</param>
         /// <returns>True if reading was successful, false if not</returns>
-        public bool ReadString(IntPtr address, Encoding encoding, out string value, int bufferSize = 512);
+        public bool ReadString(nint address, Encoding encoding, out string value, int bufferSize = 512);
 
         /// <summary>
         /// Modifies the position of our parent window. See SetupAutoPosition() for more information.
@@ -177,7 +177,7 @@ namespace AmeisenBotX.Memory
         /// Focus the specified window.
         /// </summary>
         /// <param name="windowHandle">Window handle</param>
-        public void SetForegroundWindow(IntPtr windowHandle);
+        public void SetForegroundWindow(nint windowHandle);
 
         /// <summary>
         /// Makes the processes main window a parent of the supplied main window handle.
@@ -187,7 +187,7 @@ namespace AmeisenBotX.Memory
         /// <param name="offsetY">Offset of the parent window</param>
         /// <param name="width">Width of the window</param>
         /// <param name="height">Height of the window</param>
-        public void SetupAutoPosition(IntPtr mainWindowHandle, int offsetX, int offsetY, int width, int height);
+        public void SetupAutoPosition(nint mainWindowHandle, int offsetX, int offsetY, int width, int height);
 
         /// <summary>
         /// Set the position of a window.
@@ -195,7 +195,7 @@ namespace AmeisenBotX.Memory
         /// <param name="windowHandle">Window handle</param>
         /// <param name="rect">Position</param>
         /// <param name="resizeWindow">Should we resize the window?</param>
-        public void SetWindowPosition(IntPtr windowHandle, Rect rect, bool resizeWindow = true);
+        public void SetWindowPosition(nint windowHandle, Rect rect, bool resizeWindow = true);
 
         /// <summary>
         /// Start a process but dont focus its window.
@@ -204,7 +204,7 @@ namespace AmeisenBotX.Memory
         /// <param name="processHandle">The native process handle of the started process</param>
         /// <param name="threadHandle">The native thread handle of the started process</param>
         /// <returns>Process object</returns>
-        public Process StartProcessNoActivate(string processCmd, out IntPtr processHandle, out IntPtr threadHandle);
+        public Process StartProcessNoActivate(string processCmd, out nint processHandle, out nint threadHandle);
 
         /// <summary>
         /// Suspend the main thread of the process.
@@ -218,7 +218,7 @@ namespace AmeisenBotX.Memory
         /// <param name="address">Address to write to</param>
         /// <param name="value">Value to write</param>
         /// <returns>True if successful, false if not</returns>
-        bool Write<T>(IntPtr address, T value) where T : unmanaged;
+        bool Write<T>(nint address, T value) where T : unmanaged;
 
         /// <summary>
         /// Write bytes to the processes memory.
@@ -226,7 +226,7 @@ namespace AmeisenBotX.Memory
         /// <param name="address">Address to write to</param>
         /// <param name="bytes">Bytes to write</param>
         /// <returns>True if successful, false if not</returns>
-        bool WriteBytes(IntPtr address, byte[] bytes);
+        bool WriteBytes(nint address, byte[] bytes);
 
         /// <summary>
         /// Set a memory region to 0.
@@ -234,6 +234,6 @@ namespace AmeisenBotX.Memory
         /// <param name="address">Address of the memory</param>
         /// <param name="size">Size of the area</param>
         /// <returns>True if successful, false if not</returns>
-        bool ZeroMemory(IntPtr address, int size);
+        bool ZeroMemory(nint address, int size);
     }
 }

@@ -11,9 +11,9 @@ namespace AmeisenBotX.Wow548.Objects
     {
         protected WowObjectDescriptor548? ObjectDescriptor;
 
-        public IntPtr BaseAddress { get; private set; }
+        public nint BaseAddress { get; private set; }
 
-        public IntPtr DescriptorAddress { get; private set; }
+        public nint DescriptorAddress { get; private set; }
 
         public int EntryId => GetObjectDescriptor().EntryId;
 
@@ -27,7 +27,7 @@ namespace AmeisenBotX.Wow548.Objects
 
         protected WowMemoryApi Memory { get; private set; }
 
-        public virtual void Init(WowMemoryApi memory, IntPtr baseAddress, IntPtr descriptorAddress)
+        public virtual void Init(WowMemoryApi memory, nint baseAddress, nint descriptorAddress)
         {
             Memory = memory;
             BaseAddress = baseAddress;

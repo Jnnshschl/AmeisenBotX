@@ -51,7 +51,7 @@ namespace AmeisenBotX.Wow.Objects
 
         IWowPlayer Player { get; }
 
-        IntPtr PlayerBase { get; }
+        nint PlayerBase { get; }
 
         IWowUnit Target { get; }
 

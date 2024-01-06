@@ -45,7 +45,7 @@ namespace AmeisenBotX.Wow335a
             (
                 (x) =>
                 {
-                    if (x != IntPtr.Zero
+                    if (x != nint.Zero
                         && memory.ReadString(x, Encoding.UTF8, out string s)
                         && !string.IsNullOrWhiteSpace(s))
                     {
@@ -66,7 +66,7 @@ namespace AmeisenBotX.Wow335a
             (
                 (x) =>
                 {
-                    if (x != IntPtr.Zero
+                    if (x != nint.Zero
                         && memory.ReadString(x, Encoding.UTF8, out string s)
                         && !string.IsNullOrWhiteSpace(s))
                     {
@@ -95,7 +95,7 @@ namespace AmeisenBotX.Wow335a
             (
                 (x) =>
                 {
-                    if (x != IntPtr.Zero
+                    if (x != nint.Zero
                         && memory.ReadString(x, Encoding.UTF8, out string s)
                         && !string.IsNullOrWhiteSpace(s))
                     {
@@ -122,9 +122,9 @@ namespace AmeisenBotX.Wow335a
                 null,
                 (x) =>
                 {
-                    IntPtr dataPtr = x.GetDataPointer();
+                    nint dataPtr = x.GetDataPointer();
 
-                    if (dataPtr != IntPtr.Zero && Player != null)
+                    if (dataPtr != nint.Zero && Player != null)
                     {
                         Vector3 playerPosition = Player.Position;
                         playerPosition.Z += 1.3f;
@@ -323,7 +323,7 @@ namespace AmeisenBotX.Wow335a
             return Hook.ExecuteLuaAndRead(p, out result);
         }
 
-        public void FacePosition(IntPtr playerBase, Vector3 playerPosition, Vector3 position, bool smooth = false)
+        public void FacePosition(nint playerBase, Vector3 playerPosition, Vector3 position, bool smooth = false)
         {
             Hook.FacePosition(playerBase, playerPosition, position, smooth);
         }
@@ -447,7 +447,7 @@ namespace AmeisenBotX.Wow335a
             return false;
         }
 
-        public WowUnitReaction GetReaction(IntPtr a, IntPtr b)
+        public WowUnitReaction GetReaction(nint a, nint b)
         {
             return (WowUnitReaction)Hook.GetUnitReaction(a, b);
         }
@@ -858,7 +858,7 @@ namespace AmeisenBotX.Wow335a
             LuaDoString($"DEFAULT_CHAT_FRAME.editBox:SetText(\"{message}\") ChatEdit_SendText(DEFAULT_CHAT_FRAME.editBox, 0)");
         }
 
-        public void SetFacing(IntPtr playerBase, float angle, bool smooth = false)
+        public void SetFacing(nint playerBase, float angle, bool smooth = false)
         {
             Hook.SetFacing(playerBase, angle, smooth);
         }

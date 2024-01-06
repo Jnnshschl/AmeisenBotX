@@ -6,7 +6,7 @@ namespace AmeisenBotX.Wow.Hook.Modules
 {
     public class RunLuaHookModule : RunAsmHookModule
     {
-        public RunLuaHookModule(Action<IntPtr> onUpdate, Action<IHookModule> tick, WowMemoryApi memory, string lua, string varName, uint allocSize = 128) : base(onUpdate, tick, memory, allocSize)
+        public RunLuaHookModule(Action<nint> onUpdate, Action<IHookModule> tick, WowMemoryApi memory, string lua, string varName, uint allocSize = 128) : base(onUpdate, tick, memory, allocSize)
         {
             Lua = lua;
             VarName = varName;
@@ -14,22 +14,22 @@ namespace AmeisenBotX.Wow.Hook.Modules
 
         ~RunLuaHookModule()
         {
-            if (ReturnAddress != IntPtr.Zero) { Memory.FreeMemory(ReturnAddress); }
+            if (ReturnAddress != nint.Zero) { Memory.FreeMemory(ReturnAddress); }
         }
 
-        public IntPtr CommandAddress { get; private set; }
+        public nint CommandAddress { get; private set; }
 
-        public IntPtr ReturnAddress { get; private set; }
+        public nint ReturnAddress { get; private set; }
 
-        public IntPtr VarAddress { get; private set; }
+        public nint VarAddress { get; private set; }
 
         private string Lua { get; }
 
         private string VarName { get; }
 
-        public override IntPtr GetDataPointer()
+        public override nint GetDataPointer()
         {
-            return Memory.Read(ReturnAddress, out IntPtr pString) ? pString : IntPtr.Zero;
+            return Memory.Read(ReturnAddress, out nint pString) ? pString : nint.Zero;
         }
 
         protected override bool PrepareAsm(out IEnumerable<string> assembly)
@@ -39,7 +39,7 @@ namespace AmeisenBotX.Wow.Hook.Modules
 
             uint memoryNeeded = (uint)(4 + luaBytes.Length + 1 + luaVarBytes.Length + 1);
 
-            if (Memory.AllocateMemory(memoryNeeded, out IntPtr memory))
+            if (Memory.AllocateMemory(memoryNeeded, out nint memory))
             {
                 ReturnAddress = memory;
                 CommandAddress = ReturnAddress + 4;

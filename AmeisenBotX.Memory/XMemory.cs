@@ -39,16 +39,16 @@ namespace AmeisenBotX.Memory
         }
 
         ///<inheritdoc cref="IMemoryApi.MainThreadHandle"/>
-        public IntPtr MainThreadHandle { get; private set; }
+        public nint MainThreadHandle { get; private set; }
 
         ///<inheritdoc cref="IMemoryApi.MemoryAllocations"/>
-        public Dictionary<IntPtr, uint> MemoryAllocations => AllocationPools.ToDictionary(e => e.Address, e => (uint)e.Size);
+        public Dictionary<nint, uint> MemoryAllocations => AllocationPools.ToDictionary(e => e.Address, e => (uint)e.Size);
 
         ///<inheritdoc cref="IMemoryApi.Process"/>
         public Process Process { get; private set; }
 
         ///<inheritdoc cref="IMemoryApi.ProcessHandle"/>
-        public IntPtr ProcessHandle { get; private set; }
+        public nint ProcessHandle { get; private set; }
 
         ///<inheritdoc cref="IMemoryApi.RpmCallCount"/>
         public ulong RpmCallCount
@@ -82,7 +82,7 @@ namespace AmeisenBotX.Memory
 
         ///<inheritdoc cref="IMemoryApi.AllocateMemory"/>
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public bool AllocateMemory(uint size, out IntPtr address)
+        public bool AllocateMemory(uint size, out nint address)
         {
 #if DEBUG
             if (!Initialized) { throw new InvalidOperationException("call Init() before you do anything with this class"); }
@@ -100,12 +100,13 @@ namespace AmeisenBotX.Memory
                 }
 
                 // we need a new pool
-                int newPoolSize = Math.Max((int)size, INITIAL_POOL_SIZE);
-                IntPtr newPoolAddress = VirtualAllocEx(ProcessHandle, IntPtr.Zero, (uint)newPoolSize, AllocationType.Commit, MemoryProtectionFlag.ExecuteReadWrite);
+                nint newPoolSize = Math.Max((int)size, INITIAL_POOL_SIZE);
+                nint newPoolAddress = nint.Zero;
+                NtAllocateVirtualMemory(ProcessHandle, ref newPoolAddress, 0, ref newPoolSize, AllocationType.Commit, MemoryProtectionFlag.ExecuteReadWrite);
 
-                if (newPoolAddress != IntPtr.Zero)
+                if (newPoolAddress != nint.Zero)
                 {
-                    AllocationPool pool = new(newPoolAddress, newPoolSize);
+                    AllocationPool pool = new(newPoolAddress, newPoolSize.ToInt32());
                     AllocationPools.Add(pool);
 
                     AmeisenLogger.I.Log("XMemory", $"Created new Pool with {newPoolSize} bytes at: 0x{newPoolAddress:X}");
@@ -117,7 +118,7 @@ namespace AmeisenBotX.Memory
                     }
                 }
 
-                address = IntPtr.Zero;
+                address = nint.Zero;
                 return false;
             }
         }
@@ -127,15 +128,15 @@ namespace AmeisenBotX.Memory
         {
             GC.SuppressFinalize(this);
 
-            CloseHandle(MainThreadHandle);
-            CloseHandle(ProcessHandle);
+            NtClose(MainThreadHandle);
+            NtClose(ProcessHandle);
 
             FreeAllMemory();
         }
 
         ///<inheritdoc cref="IMemoryApi.FocusWindow"/>
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public void FocusWindow(IntPtr windowHandle, Rect rect, bool resizeWindow = true)
+        public void FocusWindow(nint windowHandle, Rect rect, bool resizeWindow = true)
         {
             WindowFlag flags = WindowFlag.AsyncWindowPos | WindowFlag.NoActivate;
 
@@ -143,7 +144,7 @@ namespace AmeisenBotX.Memory
 
             if (rect.Left > 0 && rect.Right > 0 && rect.Top > 0 && rect.Bottom > 0)
             {
-                SetWindowPos(windowHandle, IntPtr.Zero, rect.Left, rect.Top, rect.Right - rect.Left, rect.Bottom - rect.Top, (int)flags);
+                SetWindowPos(windowHandle, nint.Zero, rect.Left, rect.Top, rect.Right - rect.Left, rect.Bottom - rect.Top, (int)flags);
             }
         }
 
@@ -158,7 +159,9 @@ namespace AmeisenBotX.Memory
 
                     foreach (AllocationPool allocPool in AllocationPools)
                     {
-                        VirtualFreeEx(ProcessHandle, allocPool.Address, 0, AllocationType.Release);
+                        nint addr = allocPool.Address;
+                        nint size = 0;
+                        NtFreeVirtualMemory(ProcessHandle, ref addr, ref size, AllocationType.Release);
                     }
 
                     AllocationPools.Clear();
@@ -168,11 +171,11 @@ namespace AmeisenBotX.Memory
 
         ///<inheritdoc cref="IMemoryApi.FreeMemory"/>
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public bool FreeMemory(IntPtr address)
+        public bool FreeMemory(nint address)
         {
 #if DEBUG
             if (!Initialized) { throw new InvalidOperationException("call Init() before you do anything with this class"); }
-            if (address == IntPtr.Zero) { throw new ArgumentOutOfRangeException(nameof(address), "address must be > 0"); }
+            if (address == nint.Zero) { throw new ArgumentOutOfRangeException(nameof(address), "address must be > 0"); }
 #endif
             lock (allocLock)
             {
@@ -207,7 +210,7 @@ namespace AmeisenBotX.Memory
 
         ///<inheritdoc cref="IMemoryApi.GetForegroundWindow"/>
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public IntPtr GetForegroundWindow()
+        public nint GetForegroundWindow()
         {
             return Win32Imports.GetForegroundWindow();
         }
@@ -229,13 +232,13 @@ namespace AmeisenBotX.Memory
         private bool Initialized { get; set; }
 
         ///<inheritdoc cref="IMemoryApi.Init"/>
-        public virtual bool Init(Process process, IntPtr processHandle, IntPtr mainThreadHandle)
+        public virtual bool Init(Process process, nint processHandle, nint mainThreadHandle)
         {
             Process = process ?? throw new ArgumentNullException(nameof(process), "process cannot be null");
 
 #if DEBUG
-            if (processHandle == IntPtr.Zero) { throw new ArgumentOutOfRangeException(nameof(processHandle), "processHandle must be > 0"); }
-            if (mainThreadHandle == IntPtr.Zero) { throw new ArgumentOutOfRangeException(nameof(mainThreadHandle), "mainThreadHandle must be > 0"); }
+            if (processHandle == nint.Zero) { throw new ArgumentOutOfRangeException(nameof(processHandle), "processHandle must be > 0"); }
+            if (mainThreadHandle == nint.Zero) { throw new ArgumentOutOfRangeException(nameof(mainThreadHandle), "mainThreadHandle must be > 0"); }
 #endif
             if (Process == null || Process.HasExited)
             {
@@ -244,14 +247,14 @@ namespace AmeisenBotX.Memory
 
             ProcessHandle = processHandle;
 
-            if (ProcessHandle == IntPtr.Zero)
+            if (ProcessHandle == nint.Zero)
             {
                 return false;
             }
 
             MainThreadHandle = mainThreadHandle;
 
-            if (MainThreadHandle == IntPtr.Zero)
+            if (MainThreadHandle == nint.Zero)
             {
                 return false;
             }
@@ -261,9 +264,11 @@ namespace AmeisenBotX.Memory
             // reserve initial pool
             if (INITIAL_POOL_SIZE > 0)
             {
-                IntPtr initialPoolAddress = VirtualAllocEx(ProcessHandle, IntPtr.Zero, INITIAL_POOL_SIZE, AllocationType.Commit, MemoryProtectionFlag.ExecuteReadWrite);
+                nint poolSize = INITIAL_POOL_SIZE;
+                nint initialPoolAddress = nint.Zero;
+                NtAllocateVirtualMemory(ProcessHandle, ref initialPoolAddress, 0, ref poolSize, AllocationType.Commit, MemoryProtectionFlag.ExecuteReadWrite);
 
-                if (initialPoolAddress == IntPtr.Zero)
+                if (initialPoolAddress == nint.Zero)
                 {
                     return false;
                 }
@@ -276,18 +281,18 @@ namespace AmeisenBotX.Memory
         }
 
         ///<inheritdoc cref="IMemoryApi.InjectAssembly"/>
-        public bool InjectAssembly(IEnumerable<string> asm, IntPtr address, bool patchMemProtection = false)
+        public bool InjectAssembly(IEnumerable<string> asm, nint address, bool patchMemProtection = false)
         {
 #if DEBUG
             if (!Initialized) { throw new InvalidOperationException("call Init() before you do anything with this class"); }
             if (!asm.Any()) { throw new ArgumentOutOfRangeException(nameof(asm), "asm must contain atleast one instruction"); }
-            if (address == IntPtr.Zero) { throw new ArgumentOutOfRangeException(nameof(address), "address must be > 0"); }
+            if (address == nint.Zero) { throw new ArgumentOutOfRangeException(nameof(address), "address must be > 0"); }
 #endif
             lock (fasmLock)
             {
                 fixed (byte* pBytes = stackalloc byte[FASM_MEMORY_SIZE])
                 {
-                    if (FasmAssemble($"use32\norg 0x{address:X08}\n{string.Join('\n', asm)}", pBytes, FASM_MEMORY_SIZE, FASM_PASSES, IntPtr.Zero) == 0)
+                    if (FasmAssemble($"use32\norg 0x{address:X08}\n{string.Join('\n', asm)}", pBytes, FASM_MEMORY_SIZE, FASM_PASSES, nint.Zero) == 0)
                     {
                         FasmStateOk state = *(FasmStateOk*)pBytes;
 
@@ -295,14 +300,14 @@ namespace AmeisenBotX.Memory
                         {
                             if (ProtectMemory(address, state.OutputLength, MemoryProtectionFlag.ExecuteReadWrite, out MemoryProtectionFlag oldMemoryProtection))
                             {
-                                bool status = !NtWriteVirtualMemory(ProcessHandle, address, (void*)state.OutputData, (int)state.OutputLength, out _);
+                                bool status = NtWriteVirtualMemory(ProcessHandle, address, (void*)state.OutputData, (int)state.OutputLength, out _) == 0;
                                 ProtectMemory(address, state.OutputLength, oldMemoryProtection, out _);
                                 return status;
                             }
                         }
                         else
                         {
-                            return !NtWriteVirtualMemory(ProcessHandle, address, (void*)state.OutputData, (int)state.OutputLength, out _);
+                            return NtWriteVirtualMemory(ProcessHandle, address, (void*)state.OutputData, (int)state.OutputLength, out _) == 0;
                         }
                     }
 
@@ -314,23 +319,24 @@ namespace AmeisenBotX.Memory
 
         ///<inheritdoc cref="IMemoryApi.ProtectMemory"/>
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public bool ProtectMemory(IntPtr address, uint size, MemoryProtectionFlag memoryProtection, out MemoryProtectionFlag oldMemoryProtection)
+        public bool ProtectMemory(nint address, uint size, MemoryProtectionFlag memoryProtection, out MemoryProtectionFlag oldMemoryProtection)
         {
 #if DEBUG
             if (!Initialized) { throw new InvalidOperationException("call Init() before you do anything with this class"); }
-            if (address == IntPtr.Zero) { throw new ArgumentOutOfRangeException(nameof(address), "address must be > 0"); }
+            if (address == nint.Zero) { throw new ArgumentOutOfRangeException(nameof(address), "address must be > 0"); }
             if (size <= 0) { throw new ArgumentOutOfRangeException(nameof(size), "size must be > 0"); }
 #endif
-            return VirtualProtectEx(ProcessHandle, address, size, memoryProtection, out oldMemoryProtection);
+            nint s = new(size);
+            return NtProtectVirtualMemory(ProcessHandle, ref address, ref s, memoryProtection, out oldMemoryProtection) == 0;
         }
 
         ///<inheritdoc cref="IMemoryApi.PatchMemory"/>
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public void PatchMemory<T>(IntPtr address, T data) where T : unmanaged
+        public void PatchMemory<T>(nint address, T data) where T : unmanaged
         {
 #if DEBUG
             if (!Initialized) { throw new InvalidOperationException("call Init() before you do anything with this class"); }
-            if (address == IntPtr.Zero) { throw new ArgumentOutOfRangeException(nameof(address), "address must be > 0"); }
+            if (address == nint.Zero) { throw new ArgumentOutOfRangeException(nameof(address), "address must be > 0"); }
 #endif
             uint size = (uint)sizeof(T);
 
@@ -343,11 +349,11 @@ namespace AmeisenBotX.Memory
 
         ///<inheritdoc cref="IMemoryApi.Read"/>
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public bool Read<T>(IntPtr address, out T value) where T : unmanaged
+        public bool Read<T>(nint address, out T value) where T : unmanaged
         {
 #if DEBUG
             if (!Initialized) { throw new InvalidOperationException("call Init() before you do anything with this class"); }
-            //if (address == IntPtr.Zero) { throw new ArgumentOutOfRangeException(nameof(address), "address must be > 0"); }
+            //if (address == nint.Zero) { throw new ArgumentOutOfRangeException(nameof(address), "address must be > 0"); }
 #endif
             int size = sizeof(T);
 
@@ -366,11 +372,11 @@ namespace AmeisenBotX.Memory
 
         ///<inheritdoc cref="IMemoryApi.ReadBytes"/>
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public bool ReadBytes(IntPtr address, int size, out byte[] bytes)
+        public bool ReadBytes(nint address, int size, out byte[] bytes)
         {
 #if DEBUG
             if (!Initialized) { throw new InvalidOperationException("call Init() before you do anything with this class"); }
-            if (address == IntPtr.Zero) { throw new ArgumentOutOfRangeException(nameof(address), "address must be > 0"); }
+            if (address == nint.Zero) { throw new ArgumentOutOfRangeException(nameof(address), "address must be > 0"); }
             if (size <= 0) { throw new ArgumentOutOfRangeException(nameof(size), "size must be > 0"); }
 #endif
             byte[] buffer = new byte[size];
@@ -390,11 +396,11 @@ namespace AmeisenBotX.Memory
 
         ///<inheritdoc cref="IMemoryApi.ReadString"/>
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public bool ReadString(IntPtr address, Encoding encoding, out string value, int bufferSize = 512)
+        public bool ReadString(nint address, Encoding encoding, out string value, int bufferSize = 512)
         {
 #if DEBUG
             if (!Initialized) { throw new InvalidOperationException("call Init() before you do anything with this class"); }
-            if (address == IntPtr.Zero) { throw new ArgumentOutOfRangeException(nameof(address), "address must be > 0"); }
+            if (address == nint.Zero) { throw new ArgumentOutOfRangeException(nameof(address), "address must be > 0"); }
             if (encoding == null) { throw new ArgumentNullException(nameof(encoding), "encoding cannot be null"); }
             if (bufferSize <= 0) { throw new ArgumentOutOfRangeException(nameof(bufferSize), "bufferSize must be > 0"); }
 #endif
@@ -436,7 +442,7 @@ namespace AmeisenBotX.Memory
 #if DEBUG
             if (!Initialized) { throw new InvalidOperationException("call Init() before you do anything with this class"); }
 #endif
-            SetWindowPos(Process.MainWindowHandle, IntPtr.Zero, offsetX, offsetY, width, height, SWP_NOZORDER | SWP_NOACTIVATE);
+            SetWindowPos(Process.MainWindowHandle, nint.Zero, offsetX, offsetY, width, height, SWP_NOZORDER | SWP_NOACTIVATE);
         }
 
         ///<inheritdoc cref="IMemoryApi.ResumeMainThread"/>
@@ -451,18 +457,18 @@ namespace AmeisenBotX.Memory
 
         ///<inheritdoc cref="IMemoryApi.SetForegroundWindow"/>
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public void SetForegroundWindow(IntPtr windowHandle)
+        public void SetForegroundWindow(nint windowHandle)
         {
             Win32Imports.SetForegroundWindow(windowHandle);
         }
 
         ///<inheritdoc cref="IMemoryApi.SetupAutoPosition"/>
-        public void SetupAutoPosition(IntPtr mainWindowHandle, int offsetX, int offsetY, int width, int height)
+        public void SetupAutoPosition(nint mainWindowHandle, int offsetX, int offsetY, int width, int height)
         {
 #if DEBUG
             if (!Initialized) { throw new InvalidOperationException("call Init() before you do anything with this class"); }
 #endif
-            if (Process.MainWindowHandle != IntPtr.Zero && mainWindowHandle != IntPtr.Zero)
+            if (Process.MainWindowHandle != nint.Zero && mainWindowHandle != nint.Zero)
             {
                 SetParent(Process.MainWindowHandle, mainWindowHandle);
 
@@ -476,7 +482,7 @@ namespace AmeisenBotX.Memory
 
         ///<inheritdoc cref="IMemoryApi.SetWindowPosition"/>
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public void SetWindowPosition(IntPtr windowHandle, Rect rect, bool resizeWindow = true)
+        public void SetWindowPosition(nint windowHandle, Rect rect, bool resizeWindow = true)
         {
             WindowFlag flags = WindowFlag.AsyncWindowPos | WindowFlag.NoZOrder | WindowFlag.NoActivate;
 
@@ -484,12 +490,12 @@ namespace AmeisenBotX.Memory
 
             if (rect.Left > 0 && rect.Right > 0 && rect.Top > 0 && rect.Bottom > 0)
             {
-                SetWindowPos(windowHandle, IntPtr.Zero, rect.Left, rect.Top, rect.Right - rect.Left, rect.Bottom - rect.Top, (int)flags);
+                SetWindowPos(windowHandle, nint.Zero, rect.Left, rect.Top, rect.Right - rect.Left, rect.Bottom - rect.Top, (int)flags);
             }
         }
 
         ///<inheritdoc cref="IMemoryApi.StartProcessNoActivate"/>
-        public Process StartProcessNoActivate(string processCmd, out IntPtr processHandle, out IntPtr threadHandle)
+        public Process StartProcessNoActivate(string processCmd, out nint processHandle, out nint threadHandle)
         {
             StartupInfo startupInfo = new()
             {
@@ -498,7 +504,7 @@ namespace AmeisenBotX.Memory
                 wShowWindow = SW_SHOWMINNOACTIVE
             };
 
-            if (CreateProcess(null, processCmd, IntPtr.Zero, IntPtr.Zero, true, 0x10, IntPtr.Zero, null, ref startupInfo, out ProcessInformation processInformation))
+            if (CreateProcess(null, processCmd, nint.Zero, nint.Zero, true, 0x10, nint.Zero, null, ref startupInfo, out ProcessInformation processInformation))
             {
                 processHandle = processInformation.hProcess;
                 threadHandle = processInformation.hThread;
@@ -506,8 +512,8 @@ namespace AmeisenBotX.Memory
             }
             else
             {
-                processHandle = IntPtr.Zero;
-                threadHandle = IntPtr.Zero;
+                processHandle = nint.Zero;
+                threadHandle = nint.Zero;
                 return null;
             }
         }
@@ -524,22 +530,22 @@ namespace AmeisenBotX.Memory
 
         ///<inheritdoc cref="IMemoryApi.Write"/>
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public bool Write<T>(IntPtr address, T value) where T : unmanaged
+        public bool Write<T>(nint address, T value) where T : unmanaged
         {
 #if DEBUG
             if (!Initialized) { throw new InvalidOperationException("call Init() before you do anything with this class"); }
-            if (address == IntPtr.Zero) { throw new ArgumentOutOfRangeException(nameof(address), "address must be > 0"); }
+            if (address == nint.Zero) { throw new ArgumentOutOfRangeException(nameof(address), "address must be > 0"); }
 #endif
             return WpmGateWay(address, &value, sizeof(T));
         }
 
         ///<inheritdoc cref="IMemoryApi.WriteBytes"/>
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public bool WriteBytes(IntPtr address, byte[] bytes)
+        public bool WriteBytes(nint address, byte[] bytes)
         {
 #if DEBUG
             if (!Initialized) { throw new InvalidOperationException("call Init() before you do anything with this class"); }
-            if (address == IntPtr.Zero) { throw new ArgumentOutOfRangeException(nameof(address), "address must be > 0"); }
+            if (address == nint.Zero) { throw new ArgumentOutOfRangeException(nameof(address), "address must be > 0"); }
             if (bytes?.Length <= 0) { throw new ArgumentOutOfRangeException(nameof(bytes), "bytes size must be > 0"); }
 #endif
             fixed (byte* pBytes = bytes)
@@ -550,11 +556,11 @@ namespace AmeisenBotX.Memory
 
         ///<inheritdoc cref="IMemoryApi.ZeroMemory"/>
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public bool ZeroMemory(IntPtr address, int size)
+        public bool ZeroMemory(nint address, int size)
         {
 #if DEBUG
             if (!Initialized) { throw new InvalidOperationException("call Init() before you do anything with this class"); }
-            if (address == IntPtr.Zero) { throw new ArgumentOutOfRangeException(nameof(address), "address must be > 0"); }
+            if (address == nint.Zero) { throw new ArgumentOutOfRangeException(nameof(address), "address must be > 0"); }
             if (size <= 0) { throw new ArgumentOutOfRangeException(nameof(size), "size must be > 0"); }
 #endif
             return WriteBytes(address, new byte[size]);
@@ -570,7 +576,7 @@ namespace AmeisenBotX.Memory
         /// <param name="hDisplayPipe">FASM display pipe</param>
         /// <returns>FASM status struct pointer</returns>
         [DllImport("FASM.dll", EntryPoint = "fasm_Assemble", CharSet = CharSet.Ansi, CallingConvention = CallingConvention.StdCall)]
-        private static extern int FasmAssemble(string szSource, byte* lpMemory, int nSize, int nPassesLimit, IntPtr hDisplayPipe);
+        private static extern int FasmAssemble(string szSource, byte* lpMemory, int nSize, int nPassesLimit, nint hDisplayPipe);
 
         /// <summary>
         /// Get FASM assembler version.
@@ -587,10 +593,10 @@ namespace AmeisenBotX.Memory
         /// <param name="size">Size of the memory to read</param>
         /// <returns>True if read was successful, false if not</returns>
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        private bool RpmGateWay(IntPtr baseAddress, void* buffer, int size)
+        private bool RpmGateWay(nint baseAddress, void* buffer, int size)
         {
             ++rpmCalls;
-            return !NtReadVirtualMemory(ProcessHandle, baseAddress, buffer, size, out _);
+            return NtReadVirtualMemory(ProcessHandle, baseAddress, buffer, size, out _) == 0;
         }
 
         /// <summary>
@@ -598,13 +604,14 @@ namespace AmeisenBotX.Memory
         /// </summary>
         /// <param name="baseAddress">Address of the memory to write</param>
         /// <param name="buffer">Input bytes</param>
-        /// <param name="size">Size of the memory to write</param>
+        /// <param#
+        /// name="size">Size of the memory to write</param>
         /// <returns>True if write was successful, false if not</returns>
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        private bool WpmGateWay(IntPtr baseAddress, void* buffer, int size)
+        private bool WpmGateWay(nint baseAddress, void* buffer, int size)
         {
             ++wpmCalls;
-            return !NtWriteVirtualMemory(ProcessHandle, baseAddress, buffer, size, out _);
+            return NtWriteVirtualMemory(ProcessHandle, baseAddress, buffer, size, out _) == 0;
         }
     }
 }

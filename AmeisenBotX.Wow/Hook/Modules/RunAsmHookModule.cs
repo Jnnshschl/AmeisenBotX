@@ -5,7 +5,7 @@ namespace AmeisenBotX.Wow.Hook.Modules
 {
     public abstract class RunAsmHookModule : IHookModule
     {
-        public RunAsmHookModule(Action<IntPtr> onUpdate, Action<IHookModule> tick, WowMemoryApi memory, uint allocSize)
+        public RunAsmHookModule(Action<nint> onUpdate, Action<IHookModule> tick, WowMemoryApi memory, uint allocSize)
         {
             Memory = memory;
             AllocSize = allocSize;
@@ -15,12 +15,12 @@ namespace AmeisenBotX.Wow.Hook.Modules
 
         ~RunAsmHookModule()
         {
-            if (AsmAddress != IntPtr.Zero) { Memory.FreeMemory(AsmAddress); }
+            if (AsmAddress != nint.Zero) { Memory.FreeMemory(AsmAddress); }
         }
 
-        public IntPtr AsmAddress { get; set; }
+        public nint AsmAddress { get; set; }
 
-        public Action<IntPtr> OnDataUpdate { get; set; }
+        public Action<nint> OnDataUpdate { get; set; }
 
         public Action<IHookModule> Tick { get; set; }
 
@@ -28,12 +28,12 @@ namespace AmeisenBotX.Wow.Hook.Modules
 
         protected WowMemoryApi Memory { get; }
 
-        public abstract IntPtr GetDataPointer();
+        public abstract nint GetDataPointer();
 
         public virtual bool Inject()
         {
             if (PrepareAsm(out IEnumerable<string> assembly)
-                && Memory.AllocateMemory(AllocSize, out IntPtr address))
+                && Memory.AllocateMemory(AllocSize, out nint address))
             {
                 AsmAddress = address;
                 return Memory.InjectAssembly(assembly, address);

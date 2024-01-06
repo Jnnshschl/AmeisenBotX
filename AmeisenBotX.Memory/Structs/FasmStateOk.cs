@@ -10,6 +10,6 @@ namespace AmeisenBotX.Memory.Structs
 
         public uint OutputLength { get; set; }
 
-        public IntPtr OutputData { get; set; }
+        public nint OutputData { get; set; }
     }
 }

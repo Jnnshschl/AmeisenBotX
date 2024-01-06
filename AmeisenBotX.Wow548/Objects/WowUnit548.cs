@@ -28,9 +28,9 @@ namespace AmeisenBotX.Wow548.Objects
 
         public float CombatReach => GetUnitDescriptor().CombatReach;
 
-        public int CurrentlyCastingSpellId => Memory.Read(IntPtr.Add(BaseAddress, (int)Memory.Offsets.CurrentlyCastingSpellId), out int castingId) ? castingId : 0;
+        public int CurrentlyCastingSpellId => Memory.Read(nint.Add(BaseAddress, (int)Memory.Offsets.CurrentlyCastingSpellId), out int castingId) ? castingId : 0;
 
-        public int CurrentlyChannelingSpellId => Memory.Read(IntPtr.Add(BaseAddress, (int)Memory.Offsets.CurrentlyChannelingSpellId), out int channelingId) ? channelingId : 0;
+        public int CurrentlyChannelingSpellId => Memory.Read(nint.Add(BaseAddress, (int)Memory.Offsets.CurrentlyChannelingSpellId), out int channelingId) ? channelingId : 0;
 
         public int DisplayId => GetUnitDescriptor().DisplayId;
 
@@ -48,7 +48,7 @@ namespace AmeisenBotX.Wow548.Objects
 
         public int HolyPower => GetUnitDescriptor().Power2;
 
-        public bool IsAutoAttacking => Memory.Read(IntPtr.Add(BaseAddress, (int)Memory.Offsets.WowUnitIsAutoAttacking), out int isAutoAttacking) && isAutoAttacking == 1;
+        public bool IsAutoAttacking => Memory.Read(nint.Add(BaseAddress, (int)Memory.Offsets.WowUnitIsAutoAttacking), out int isAutoAttacking) && isAutoAttacking == 1;
 
         public bool IsDead => (Health == 0 || UnitFlagsDynamic[(int)WowUnitDynamicFlags548.Dead]) && !UnitFlags2[(int)WowUnit2Flag.FeignDeath];
 
@@ -98,7 +98,7 @@ namespace AmeisenBotX.Wow548.Objects
 
         public BitVector32 NpcFlags => GetUnitDescriptor().NpcFlags1;
 
-        public new Vector3 Position => Memory.Read(IntPtr.Add(BaseAddress, (int)Memory.Offsets.WowUnitPosition), out Vector3 position) ? position : Vector3.Zero;
+        public new Vector3 Position => Memory.Read(nint.Add(BaseAddress, (int)Memory.Offsets.WowUnitPosition), out Vector3 position) ? position : Vector3.Zero;
 
         public WowPowerType PowerType => (WowPowerType)GetUnitDescriptor().PowerType;
 
@@ -108,7 +108,7 @@ namespace AmeisenBotX.Wow548.Objects
 
         public double RagePercentage => BotMath.Percentage(Rage, MaxRage);
 
-        public float Rotation => Memory.Read(IntPtr.Add(BaseAddress, (int)Memory.Offsets.WowUnitPosition + 0x10), out float rotation) ? rotation : 0.0f;
+        public float Rotation => Memory.Read(nint.Add(BaseAddress, (int)Memory.Offsets.WowUnitPosition + 0x10), out float rotation) ? rotation : 0.0f;
 
         public int RunicPower => 0;
 
@@ -138,15 +138,15 @@ namespace AmeisenBotX.Wow548.Objects
 
         public BitVector32 UnitFlags2 => GetUnitDescriptor().Flags2;
 
-        public static IEnumerable<IWowAura> GetUnitAuras(WowMemoryApi memory, IntPtr unitBase, out int auraCount)
+        public static IEnumerable<IWowAura> GetUnitAuras(WowMemoryApi memory, nint unitBase, out int auraCount)
         {
-            if (memory.Read(IntPtr.Add(unitBase, (int)memory.Offsets.AuraCount1), out int auraCount1))
+            if (memory.Read(nint.Add(unitBase, (int)memory.Offsets.AuraCount1), out int auraCount1))
             {
                 if (auraCount1 == -1)
                 {
-                    if (memory.Read(IntPtr.Add(unitBase, (int)memory.Offsets.AuraCount2), out int auraCount2)
+                    if (memory.Read(nint.Add(unitBase, (int)memory.Offsets.AuraCount2), out int auraCount2)
                         && auraCount2 > 0
-                        && memory.Read(IntPtr.Add(unitBase, (int)memory.Offsets.AuraTable2), out IntPtr auraTable))
+                        && memory.Read(nint.Add(unitBase, (int)memory.Offsets.AuraTable2), out nint auraTable))
                     {
                         IEnumerable<IWowAura> auras = ReadAuraTable(memory, auraTable, auraCount2);
                         auraCount = auras.Count();
@@ -155,7 +155,7 @@ namespace AmeisenBotX.Wow548.Objects
                 }
                 else
                 {
-                    IEnumerable<IWowAura> auras = ReadAuraTable(memory, IntPtr.Add(unitBase, (int)memory.Offsets.AuraTable1), auraCount1);
+                    IEnumerable<IWowAura> auras = ReadAuraTable(memory, nint.Add(unitBase, (int)memory.Offsets.AuraTable1), auraCount1);
                     auraCount = auras.Count();
                     return auras;
                 }
@@ -189,7 +189,7 @@ namespace AmeisenBotX.Wow548.Objects
 
         public virtual string ReadName()
         {
-            return GetDbEntry(Memory.Offsets.WowUnitDbEntryName, out IntPtr namePtr)
+            return GetDbEntry(Memory.Offsets.WowUnitDbEntryName, out nint namePtr)
                 && Memory.ReadString(namePtr, Encoding.UTF8, out string name) ? name : "unknown";
         }
 
@@ -210,8 +210,8 @@ namespace AmeisenBotX.Wow548.Objects
 
         protected uint GetMovementFlags()
         {
-            return MovementFlags ??= Memory.Read(IntPtr.Add(BaseAddress, 0xec), out IntPtr movementFlagsPtr)
-                && Memory.Read(IntPtr.Add(movementFlagsPtr, 0x38), out uint movementFlags) ? movementFlags : 0;
+            return MovementFlags ??= Memory.Read(nint.Add(BaseAddress, 0xec), out nint movementFlagsPtr)
+                && Memory.Read(nint.Add(movementFlagsPtr, 0x38), out uint movementFlags) ? movementFlags : 0;
         }
 
         protected WowUnitDescriptor548 GetUnitDescriptor()
@@ -219,7 +219,7 @@ namespace AmeisenBotX.Wow548.Objects
             return UnitDescriptor ??= Memory.Read(DescriptorAddress + sizeof(WowObjectDescriptor548), out WowUnitDescriptor548 objPtr) ? objPtr : new();
         }
 
-        private static unsafe IEnumerable<IWowAura> ReadAuraTable(IMemoryApi memory, IntPtr buffBase, int auraCount)
+        private static unsafe IEnumerable<IWowAura> ReadAuraTable(IMemoryApi memory, nint buffBase, int auraCount)
         {
             List<IWowAura> auras = [];
 
@@ -234,12 +234,12 @@ namespace AmeisenBotX.Wow548.Objects
             return auras;
         }
 
-        private bool GetDbEntry<T>(IntPtr entryOffset, out T ptr) where T : unmanaged
+        private bool GetDbEntry<T>(nint entryOffset, out T ptr) where T : unmanaged
         {
             ptr = default;
-            return Memory.Read(IntPtr.Add(BaseAddress, (int)Memory.Offsets.WowUnitDbEntry), out IntPtr dbEntry)
-                && dbEntry != IntPtr.Zero
-                && Memory.Read(IntPtr.Add(dbEntry, (int)entryOffset), out ptr);
+            return Memory.Read(nint.Add(BaseAddress, (int)Memory.Offsets.WowUnitDbEntry), out nint dbEntry)
+                && dbEntry != nint.Zero
+                && Memory.Read(nint.Add(dbEntry, (int)entryOffset), out ptr);
         }
 
         private IEnumerable<IWowAura> ReadAuraTable()

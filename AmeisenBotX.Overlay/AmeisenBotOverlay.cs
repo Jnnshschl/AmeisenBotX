@@ -7,7 +7,7 @@ namespace AmeisenBotX.Overlay
 {
     public class AmeisenBotOverlay
     {
-        public AmeisenBotOverlay(IntPtr mainWindowHandle)
+        public AmeisenBotOverlay(nint mainWindowHandle)
         {
             LinesToRender = [];
             RectanglesToRender = [];

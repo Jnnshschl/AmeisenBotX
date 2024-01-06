@@ -60,8 +60,8 @@ namespace AmeisenBotX.Wow335a.Objects
 
         public override string ReadName()
         {
-            if (Memory.Read(IntPtr.Add(Memory.Offsets.NameStore, (int)Memory.Offsets.NameMask), out uint nameMask)
-                && Memory.Read(IntPtr.Add(Memory.Offsets.NameStore, (int)Memory.Offsets.NameBase), out uint nameBase))
+            if (Memory.Read(nint.Add(Memory.Offsets.NameStore, (int)Memory.Offsets.NameMask), out uint nameMask)
+                && Memory.Read(nint.Add(Memory.Offsets.NameStore, (int)Memory.Offsets.NameBase), out uint nameBase))
             {
                 uint shortGuid = (uint)Guid & 0xfffffff;
                 uint offset = 12 * (nameMask & shortGuid);
@@ -164,13 +164,13 @@ namespace AmeisenBotX.Wow335a.Objects
                 };
             }
 
-            if (Memory.Read(IntPtr.Add(BaseAddress, 0xA30), out uint swimFlags))
+            if (Memory.Read(nint.Add(BaseAddress, 0xA30), out uint swimFlags))
             {
                 IsSwimming = (swimFlags & 0x200000) != 0;
             }
 
-            if (Memory.Read(IntPtr.Add(BaseAddress, 0xD8), out IntPtr flyFlagsPointer)
-                && Memory.Read(IntPtr.Add(flyFlagsPointer, 0x44), out uint flyFlags))
+            if (Memory.Read(nint.Add(BaseAddress, 0xD8), out nint flyFlagsPointer)
+                && Memory.Read(nint.Add(flyFlagsPointer, 0x44), out uint flyFlags))
             {
                 IsFlying = (flyFlags & 0x2000000) != 0;
             }

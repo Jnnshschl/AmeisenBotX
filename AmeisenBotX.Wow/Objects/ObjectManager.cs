@@ -26,14 +26,14 @@ namespace AmeisenBotX.Wow.Objects
 
         protected readonly object queryLock = new();
 
-        protected readonly IntPtr[] wowObjectPointers;
+        protected readonly nint[] wowObjectPointers;
         protected readonly IWowObject[] wowObjects;
 
         public ObjectManager(WowMemoryApi memory)
         {
             Memory = memory;
 
-            wowObjectPointers = new IntPtr[MAX_OBJECT_COUNT];
+            wowObjectPointers = new nint[MAX_OBJECT_COUNT];
             wowObjects = new IWowObject[MAX_OBJECT_COUNT];
 
             PartymemberGuids = new List<ulong>();
@@ -103,7 +103,7 @@ namespace AmeisenBotX.Wow.Objects
         public IWowPlayer Player { get; protected set; }
 
         ///<inheritdoc cref="IObjectProvider.PlayerBase"/>
-        public IntPtr PlayerBase { get; protected set; }
+        public nint PlayerBase { get; protected set; }
 
         ///<inheritdoc cref="IObjectProvider.PlayerGuid"/>
         public ulong PlayerGuid { get; protected set; }
@@ -171,21 +171,21 @@ namespace AmeisenBotX.Wow.Objects
                 TargetGuid = UpdateGlobalVar<ulong>(Memory.Offsets.TargetGuid);
                 LastTargetGuid = UpdateGlobalVar<ulong>(Memory.Offsets.LastTargetGuid);
                 PetGuid = UpdateGlobalVar<ulong>(Memory.Offsets.PetGuid);
-                PlayerBase = UpdateGlobalVar<IntPtr>(Memory.Offsets.PlayerBase);
+                PlayerBase = UpdateGlobalVar<nint>(Memory.Offsets.PlayerBase);
                 MapId = UpdateGlobalVar<WowMapId>(Memory.Offsets.MapId);
                 ZoneId = UpdateGlobalVar<int>(Memory.Offsets.ZoneId);
                 GameState = UpdateGlobalVarString(Memory.Offsets.GameState);
 
-                if (Memory.Read(Memory.Offsets.CameraPointer, out IntPtr cameraPointer)
-                    && Memory.Read(IntPtr.Add(cameraPointer, (int)Memory.Offsets.CameraOffset), out cameraPointer))
+                if (Memory.Read(Memory.Offsets.CameraPointer, out nint cameraPointer)
+                    && Memory.Read(nint.Add(cameraPointer, (int)Memory.Offsets.CameraOffset), out cameraPointer))
                 {
                     Camera = UpdateGlobalVar<RawCameraInfo>(cameraPointer);
                 }
 
-                // if (MemoryApi.Read(Memory.Offsets.ZoneText, out IntPtr zoneNamePointer)) {
+                // if (MemoryApi.Read(Memory.Offsets.ZoneText, out nint zoneNamePointer)) {
                 // ZoneName = UpdateGlobalVarString(zoneNamePointer); }
 
-                // if (MemoryApi.Read(Memory.Offsets.ZoneSubText, out IntPtr zoneSubNamePointer)) {
+                // if (MemoryApi.Read(Memory.Offsets.ZoneSubText, out nint zoneSubNamePointer)) {
                 // ZoneSubName = UpdateGlobalVarString(zoneSubNamePointer); }
 
                 if (TargetGuid == 0) { Target = null; }
@@ -193,9 +193,9 @@ namespace AmeisenBotX.Wow.Objects
                 if (LastTargetGuid == 0) { LastTarget = null; }
                 if (PartyleaderGuid == 0) { Partyleader = null; }
 
-                Memory.Read(Memory.Offsets.ClientConnection, out IntPtr clientConnection);
-                Memory.Read(IntPtr.Add(clientConnection, (int)Memory.Offsets.CurrentObjectManager), out IntPtr currentObjectManager);
-                Memory.Read(IntPtr.Add(currentObjectManager, (int)Memory.Offsets.FirstObject), out IntPtr activeObjectBaseAddress);
+                Memory.Read(Memory.Offsets.ClientConnection, out nint clientConnection);
+                Memory.Read(nint.Add(clientConnection, (int)Memory.Offsets.CurrentObjectManager), out nint currentObjectManager);
+                Memory.Read(nint.Add(currentObjectManager, (int)Memory.Offsets.FirstObject), out nint activeObjectBaseAddress);
 
                 int c = 0;
                 Array.Clear(wowObjects, 0, MAX_OBJECT_COUNT);
@@ -204,7 +204,7 @@ namespace AmeisenBotX.Wow.Objects
                 for (; (int)activeObjectBaseAddress > 0 && c < MAX_OBJECT_COUNT; ++c)
                 {
                     wowObjectPointers[c] = activeObjectBaseAddress;
-                    Memory.Read(IntPtr.Add(activeObjectBaseAddress, (int)Memory.Offsets.NextObject), out activeObjectBaseAddress);
+                    Memory.Read(nint.Add(activeObjectBaseAddress, (int)Memory.Offsets.NextObject), out activeObjectBaseAddress);
                 }
 
                 ObjectCount = c;
@@ -232,15 +232,15 @@ namespace AmeisenBotX.Wow.Objects
         protected abstract void ReadParty();
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        protected T UpdateGlobalVar<T>(IntPtr address) where T : unmanaged
+        protected T UpdateGlobalVar<T>(nint address) where T : unmanaged
         {
-            return address != IntPtr.Zero && Memory.Read(address, out T v) ? v : default;
+            return address != nint.Zero && Memory.Read(address, out T v) ? v : default;
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        protected string UpdateGlobalVarString(IntPtr address, int maxLenght = 128)
+        protected string UpdateGlobalVarString(nint address, int maxLenght = 128)
         {
-            return address != IntPtr.Zero && Memory.ReadString(address, Encoding.UTF8, out string v, maxLenght) ? v : string.Empty;
+            return address != nint.Zero && Memory.ReadString(address, Encoding.UTF8, out string v, maxLenght) ? v : string.Empty;
         }
 
         /// <summary>
@@ -250,11 +250,11 @@ namespace AmeisenBotX.Wow.Objects
         /// <param name="i">Index of the object</param>
         private void ProcessObject(int i)
         {
-            IntPtr ptr = wowObjectPointers[i];
+            nint ptr = wowObjectPointers[i];
 
-            if (ptr != IntPtr.Zero
-                && Memory.Read(IntPtr.Add(ptr, (int)Memory.Offsets.WowObjectType), out WowObjectType type)
-                && Memory.Read(IntPtr.Add(ptr, (int)Memory.Offsets.WowObjectDescriptor), out IntPtr descriptorAddress))
+            if (ptr != nint.Zero
+                && Memory.Read(nint.Add(ptr, (int)Memory.Offsets.WowObjectType), out WowObjectType type)
+                && Memory.Read(nint.Add(ptr, (int)Memory.Offsets.WowObjectDescriptor), out nint descriptorAddress))
             {
                 wowObjects[i] = type switch
                 {

@@ -149,7 +149,7 @@ namespace AmeisenBotX.Wow
 
         bool ExecuteLuaAndRead((string, string) commandVariableCombo, out string result);
 
-        void FacePosition(IntPtr playerBase, Vector3 playerPosition, Vector3 position, bool smooth = false);
+        void FacePosition(nint playerBase, Vector3 playerPosition, Vector3 position, bool smooth = false);
 
         IEnumerable<int> GetCompletedQuests();
 
@@ -183,7 +183,7 @@ namespace AmeisenBotX.Wow
 
         bool GetQuestLogIdByTitle(string name, out int questLogId);
 
-        WowUnitReaction GetReaction(IntPtr a, IntPtr b);
+        WowUnitReaction GetReaction(nint a, nint b);
 
         Dictionary<int, int> GetRunesReady();
 
@@ -262,7 +262,7 @@ namespace AmeisenBotX.Wow
 
         void SendChatMessage(string msg);
 
-        void SetFacing(IntPtr playerBase, float angle, bool smooth = false);
+        void SetFacing(nint playerBase, float angle, bool smooth = false);
 
         void SetLfgRole(WowRole wowRole);
 

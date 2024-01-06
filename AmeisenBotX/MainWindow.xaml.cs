@@ -104,7 +104,7 @@ namespace AmeisenBotX
 
         private TimegatedEvent LabelUpdateEvent { get; }
 
-        private IntPtr MainWindowHandle { get; set; }
+        private nint MainWindowHandle { get; set; }
 
         private MapWindow MapWindow { get; set; }
 
@@ -644,7 +644,7 @@ namespace AmeisenBotX
                 // load our old window position
                 if (AmeisenBot.Config.SaveBotWindowPosition)
                 {
-                    if (MainWindowHandle != IntPtr.Zero && AmeisenBot.Config.BotWindowRect != new Memory.Win32.Rect() { Left = -1, Top = -1, Right = -1, Bottom = -1 })
+                    if (MainWindowHandle != nint.Zero && AmeisenBot.Config.BotWindowRect != new Memory.Win32.Rect() { Left = -1, Top = -1, Right = -1, Bottom = -1 })
                     {
                         AmeisenBot.Bot.Memory.SetWindowPosition(MainWindowHandle, AmeisenBot.Config.BotWindowRect);
                         AmeisenLogger.I.Log("AmeisenBot", $"Loaded window position: {AmeisenBot.Config.BotWindowRect}", LogLevel.Verbose);

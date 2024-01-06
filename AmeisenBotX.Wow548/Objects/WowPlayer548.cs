@@ -58,8 +58,8 @@ namespace AmeisenBotX.Wow548.Objects
 
         public override string ReadName()
         {
-            if (Memory.Read(IntPtr.Add(Memory.Offsets.NameStore, (int)Memory.Offsets.NameMask), out uint nameMask)
-                && Memory.Read(IntPtr.Add(Memory.Offsets.NameStore, (int)Memory.Offsets.NameBase), out uint nameBase))
+            if (Memory.Read(nint.Add(Memory.Offsets.NameStore, (int)Memory.Offsets.NameMask), out uint nameMask)
+                && Memory.Read(nint.Add(Memory.Offsets.NameStore, (int)Memory.Offsets.NameBase), out uint nameBase))
             {
                 uint shortGuid = (uint)Guid & 0xfffffff;
                 uint offset = 12 * (nameMask & shortGuid);

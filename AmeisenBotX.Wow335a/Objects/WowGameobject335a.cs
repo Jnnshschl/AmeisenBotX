@@ -35,7 +35,7 @@ namespace AmeisenBotX.Wow335a.Objects
             base.Update();
 
             if (Memory.Read(DescriptorAddress + WowObjectDescriptor335a.EndOffset, out WowGameobjectDescriptor335a objPtr)
-                && Memory.Read(IntPtr.Add(BaseAddress, (int)Memory.Offsets.WowGameobjectPosition), out Vector3 position))
+                && Memory.Read(nint.Add(BaseAddress, (int)Memory.Offsets.WowGameobjectPosition), out Vector3 position))
             {
                 GameObjectType = (WowGameObjectType)objPtr.GameobjectBytes1;
                 CreatedBy = objPtr.CreatedBy;

@@ -4,164 +4,164 @@ namespace AmeisenBotX.Wow.Offsets
 {
     public interface IOffsetList
     {
-        IntPtr AuraCount1 { get; }
+        nint AuraCount1 { get; }
 
-        IntPtr AuraCount2 { get; }
+        nint AuraCount2 { get; }
 
-        IntPtr AuraTable1 { get; }
+        nint AuraTable1 { get; }
 
-        IntPtr AuraTable2 { get; }
+        nint AuraTable2 { get; }
 
-        IntPtr BattlegroundFinished { get; }
+        nint BattlegroundFinished { get; }
 
-        IntPtr BattlegroundStatus { get; }
+        nint BattlegroundStatus { get; }
 
-        IntPtr BreathTimer { get; }
+        nint BreathTimer { get; }
 
-        IntPtr CameraOffset { get; }
+        nint CameraOffset { get; }
 
-        IntPtr CameraPointer { get; }
+        nint CameraPointer { get; }
 
-        IntPtr ClickToMoveAction { get; }
+        nint ClickToMoveAction { get; }
 
-        IntPtr ClickToMoveDistance { get; }
+        nint ClickToMoveDistance { get; }
 
-        IntPtr ClickToMoveGuid { get; }
+        nint ClickToMoveGuid { get; }
 
-        IntPtr ClickToMoveTurnSpeed { get; }
+        nint ClickToMoveTurnSpeed { get; }
 
-        IntPtr ClickToMoveX { get; }
+        nint ClickToMoveX { get; }
 
-        IntPtr ClientConnection { get; }
+        nint ClientConnection { get; }
 
-        IntPtr ClimbAngle { get; }
+        nint ClimbAngle { get; }
 
-        IntPtr CollisionM2C { get; }
+        nint CollisionM2C { get; }
 
-        IntPtr CollisionM2S { get; }
+        nint CollisionM2S { get; }
 
-        IntPtr CollisionWMO { get; }
+        nint CollisionWMO { get; }
 
-        IntPtr ComboPoints { get; }
+        nint ComboPoints { get; }
 
-        IntPtr CorpsePosition { get; }
+        nint CorpsePosition { get; }
 
-        IntPtr CurrentlyCastingSpellId { get; }
+        nint CurrentlyCastingSpellId { get; }
 
-        IntPtr CurrentlyChannelingSpellId { get; }
+        nint CurrentlyChannelingSpellId { get; }
 
-        IntPtr CurrentObjectManager { get; }
+        nint CurrentObjectManager { get; }
 
-        IntPtr EndSceneOffset { get; }
+        nint EndSceneOffset { get; }
 
-        IntPtr EndSceneOffsetDevice { get; }
+        nint EndSceneOffsetDevice { get; }
 
-        IntPtr EndSceneStaticDevice { get; }
+        nint EndSceneStaticDevice { get; }
 
-        IntPtr FirstObject { get; }
+        nint FirstObject { get; }
 
-        IntPtr FunctionGameobjectOnRightClick { get; }
+        nint FunctionGameobjectOnRightClick { get; }
 
-        IntPtr FunctionGetActivePlayerObject { get; }
+        nint FunctionGetActivePlayerObject { get; }
 
-        IntPtr FunctionGetLocalizedText { get; }
+        nint FunctionGetLocalizedText { get; }
 
-        IntPtr FunctionHandleTerrainClick { get; }
+        nint FunctionHandleTerrainClick { get; }
 
-        IntPtr FunctionIsOutdoors { get; }
+        nint FunctionIsOutdoors { get; }
 
-        IntPtr FunctionLuaDoString { get; }
+        nint FunctionLuaDoString { get; }
 
-        IntPtr FunctionPlayerClickToMove { get; }
+        nint FunctionPlayerClickToMove { get; }
 
-        IntPtr FunctionPlayerClickToMoveStop { get; }
+        nint FunctionPlayerClickToMoveStop { get; }
 
-        IntPtr FunctionSetTarget { get; }
+        nint FunctionSetTarget { get; }
 
-        IntPtr FunctionTraceline { get; }
+        nint FunctionTraceline { get; }
 
-        IntPtr FunctionUnitGetReaction { get; }
+        nint FunctionUnitGetReaction { get; }
 
-        IntPtr FunctionUnitOnRightClick { get; }
+        nint FunctionUnitOnRightClick { get; }
 
-        IntPtr FunctionUnitSetFacing { get; }
+        nint FunctionUnitSetFacing { get; }
 
-        IntPtr FunctionWorldFrame { get; }
+        nint FunctionWorldFrame { get; }
 
-        IntPtr FunctionWorldRender { get; }
+        nint FunctionWorldRender { get; }
 
-        IntPtr FunctionWorldRenderWorld { get; }
+        nint FunctionWorldRenderWorld { get; }
 
-        IntPtr GameState { get; }
+        nint GameState { get; }
 
-        IntPtr IsIngame { get; }
+        nint IsIngame { get; }
 
-        IntPtr IsWorldLoaded { get; }
+        nint IsWorldLoaded { get; }
 
-        IntPtr LastTargetGuid { get; }
+        nint LastTargetGuid { get; }
 
-        IntPtr LootWindowOpen { get; }
+        nint LootWindowOpen { get; }
 
-        IntPtr MapId { get; }
+        nint MapId { get; }
 
-        IntPtr NameBase { get; }
+        nint NameBase { get; }
 
-        IntPtr NameMask { get; }
+        nint NameMask { get; }
 
-        IntPtr NameStore { get; }
+        nint NameStore { get; }
 
-        IntPtr NameString { get; }
+        nint NameString { get; }
 
-        IntPtr NextObject { get; }
+        nint NextObject { get; }
 
-        IntPtr PartyLeader { get; }
+        nint PartyLeader { get; }
 
-        IntPtr PartyPlayerGuids { get; }
+        nint PartyPlayerGuids { get; }
 
-        IntPtr PetGuid { get; }
+        nint PetGuid { get; }
 
-        IntPtr PlayerBase { get; }
+        nint PlayerBase { get; }
 
-        IntPtr PlayerGuid { get; }
+        nint PlayerGuid { get; }
 
-        IntPtr RaidGroupStart { get; }
+        nint RaidGroupStart { get; }
 
-        IntPtr RaidLeader { get; }
+        nint RaidLeader { get; }
 
-        IntPtr RenderFlags { get; }
+        nint RenderFlags { get; }
 
-        IntPtr Runes { get; }
+        nint Runes { get; }
 
-        IntPtr RuneType { get; }
+        nint RuneType { get; }
 
-        IntPtr TargetGuid { get; }
+        nint TargetGuid { get; }
 
-        IntPtr TickCount { get; }
+        nint TickCount { get; }
 
-        IntPtr WowDynobjectPosition { get; }
+        nint WowDynobjectPosition { get; }
 
-        IntPtr WowGameobjectPosition { get; }
+        nint WowGameobjectPosition { get; }
 
-        IntPtr WowObjectDescriptor { get; }
+        nint WowObjectDescriptor { get; }
 
-        IntPtr WowObjectType { get; }
+        nint WowObjectType { get; }
 
-        IntPtr WowUnitDbEntry { get; }
+        nint WowUnitDbEntry { get; }
 
-        IntPtr WowUnitDbEntryName { get; }
+        nint WowUnitDbEntryName { get; }
 
-        IntPtr WowUnitDbEntryType { get; }
+        nint WowUnitDbEntryType { get; }
 
-        IntPtr WowUnitIsAutoAttacking { get; }
+        nint WowUnitIsAutoAttacking { get; }
 
-        IntPtr WowUnitPosition { get; }
+        nint WowUnitPosition { get; }
 
-        IntPtr ZoneId { get; }
+        nint ZoneId { get; }
 
-        IntPtr ZoneSubText { get; }
+        nint ZoneSubText { get; }
 
-        IntPtr ZoneText { get; }
+        nint ZoneText { get; }
 
-        void Init(IntPtr mainModuleBase);
+        void Init(nint mainModuleBase);
     }
 }

@@ -741,7 +741,7 @@ namespace AmeisenBotX.Core.Logic
         {
             if (Config.SaveWowWindowPosition && !Config.AutoPositionWow)
             {
-                if (Bot.Memory.Process.MainWindowHandle != IntPtr.Zero && Config.WowWindowRect != new Rect() { Left = -1, Top = -1, Right = -1, Bottom = -1 })
+                if (Bot.Memory.Process.MainWindowHandle != nint.Zero && Config.WowWindowRect != new Rect() { Left = -1, Top = -1, Right = -1, Bottom = -1 })
                 {
                     Bot.Memory.SetWindowPosition(Bot.Memory.Process.MainWindowHandle, Config.WowWindowRect);
                     AmeisenLogger.I.Log("AmeisenBot", $"Loaded window position: {Config.WowWindowRect}", LogLevel.Verbose);
@@ -1194,7 +1194,7 @@ namespace AmeisenBotX.Core.Logic
             if (File.Exists(Config.PathToWowExe))
             {
                 AmeisenLogger.I.Log("StartWow", "Starting WoW Process");
-                Process p = Bot.Memory.StartProcessNoActivate($"\"{Config.PathToWowExe}\" -windowed -d3d9", out IntPtr processHandle, out IntPtr mainThreadHandle);
+                Process p = Bot.Memory.StartProcessNoActivate($"\"{Config.PathToWowExe}\" -windowed -d3d9", out nint processHandle, out nint mainThreadHandle);
                 p.WaitForInputIdle();
 
                 Thread.Sleep(1000); // needed to spin up wow's window
@@ -1259,7 +1259,7 @@ namespace AmeisenBotX.Core.Logic
             // auto disable rendering when not in focus
             if (Config.AutoDisableRender && RenderSwitchEvent.Run())
             {
-                IntPtr foregroundWindow = Bot.Memory.GetForegroundWindow();
+                nint foregroundWindow = Bot.Memory.GetForegroundWindow();
                 Bot.Wow.SetRenderState(foregroundWindow == Bot.Memory.Process.MainWindowHandle);
             }
         }

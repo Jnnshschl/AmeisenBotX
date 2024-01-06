@@ -135,7 +135,6 @@ namespace AmeisenBotX.Core.Engines.Combat.Classes.Bia10
             {
                 return wowClass switch
                 {
-                    WowClass.None => string.Empty,
                     WowClass.Warrior => Warrior335a.HeroicStrike,
                     WowClass.Paladin => string.Empty,
                     WowClass.Hunter => string.Empty,

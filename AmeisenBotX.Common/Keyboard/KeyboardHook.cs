@@ -18,9 +18,9 @@ namespace AmeisenBotX.Common.Keyboard
             KeyboardProc = LowLevelKeyboardCallback;
         }
 
-        private delegate int LowLevelKeyboardProc(int nCode, IntPtr wParam, ref LowLevelKeyboardInput lParam);
+        private delegate int LowLevelKeyboardProc(int nCode, nint wParam, ref LowLevelKeyboardInput lParam);
 
-        private IntPtr HookPtr { get; set; }
+        private nint HookPtr { get; set; }
 
         private List<(KeyCode, KeyCode, Action)> Hotkeys { get; }
 
@@ -54,7 +54,7 @@ namespace AmeisenBotX.Common.Keyboard
 
         public void Disable()
         {
-            if (HookPtr != IntPtr.Zero)
+            if (HookPtr != nint.Zero)
             {
                 UnhookWindowsHookEx(HookPtr);
             }
@@ -62,7 +62,7 @@ namespace AmeisenBotX.Common.Keyboard
 
         public void Enable()
         {
-            if (HookPtr == IntPtr.Zero)
+            if (HookPtr == nint.Zero)
             {
                 HookPtr = SetWindowsHookEx
                 (
@@ -75,21 +75,21 @@ namespace AmeisenBotX.Common.Keyboard
         }
 
         [DllImport("user32", SetLastError = true)]
-        private static extern int CallNextHookEx(IntPtr hHook, int nCode, IntPtr wParam, ref LowLevelKeyboardInput lParam);
+        private static extern int CallNextHookEx(nint hHook, int nCode, nint wParam, ref LowLevelKeyboardInput lParam);
 
         [DllImport("user32", SetLastError = true)]
         private static extern short GetKeyState(KeyCode nVirtKey);
 
         [DllImport("kernel32", CharSet = CharSet.Auto, SetLastError = true)]
-        private static extern IntPtr GetModuleHandle(string lpModuleName);
+        private static extern nint GetModuleHandle(string lpModuleName);
 
         [DllImport("user32", SetLastError = true)]
-        private static extern IntPtr SetWindowsHookEx(int idHook, LowLevelKeyboardProc lpfn, IntPtr hMod, int dwThreadId);
+        private static extern nint SetWindowsHookEx(int idHook, LowLevelKeyboardProc lpfn, nint hMod, int dwThreadId);
 
         [DllImport("user32", SetLastError = true)]
-        private static extern int UnhookWindowsHookEx(IntPtr hHook);
+        private static extern int UnhookWindowsHookEx(nint hHook);
 
-        private int LowLevelKeyboardCallback(int nCode, IntPtr wParam, ref LowLevelKeyboardInput lParam)
+        private int LowLevelKeyboardCallback(int nCode, nint wParam, ref LowLevelKeyboardInput lParam)
         {
             int wParamValue = wParam.ToInt32();
 
@@ -107,7 +107,7 @@ namespace AmeisenBotX.Common.Keyboard
                 }
             }
 
-            return CallNextHookEx(IntPtr.Zero, nCode, wParam, ref lParam);
+            return CallNextHookEx(nint.Zero, nCode, wParam, ref lParam);
         }
     }
 }

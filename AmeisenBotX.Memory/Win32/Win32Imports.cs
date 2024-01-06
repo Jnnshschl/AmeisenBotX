@@ -3,7 +3,7 @@ using System.Runtime.InteropServices;
 
 namespace AmeisenBotX.Memory.Win32
 {
-    public static unsafe class Win32Imports
+    public static unsafe partial class Win32Imports
     {
         public const int GWL_EXSTYLE = -0x14;
         public const int GWL_STYLE = -16;
@@ -134,86 +134,125 @@ namespace AmeisenBotX.Memory.Win32
             WS_EX_TRANSPARENT = 0x00000020,
         }
 
-        [DllImport("user32", SetLastError = true)]
-        public static extern bool GetWindowRect(IntPtr windowHandle, ref Rect rectangle);
+        [LibraryImport("user32")]
+        [return: MarshalAs(UnmanagedType.Bool)]
+        public static partial bool GetWindowRect(nint windowHandle, ref Rect rectangle);
 
-        [DllImport("kernel32", SetLastError = true)]
-        internal static extern bool CloseHandle(IntPtr threadHandle);
-
-        [DllImport("kernel32", SetLastError = true, CharSet = CharSet.Unicode)]
-        internal static extern bool CreateProcess
+        [LibraryImport("kernel32", EntryPoint = "CreateProcessA")]
+        [return: MarshalAs(UnmanagedType.Bool)]
+        internal static partial bool CreateProcess
         (
-            string lpApplicationName,
-            string lpCommandLine,
-            IntPtr lpProcessAttributes,
-            IntPtr lpThreadAttributes,
-            bool bInheritHandles,
+            [MarshalAs(UnmanagedType.LPStr)] string lpApplicationName,
+            [MarshalAs(UnmanagedType.LPStr)] string lpCommandLine,
+            nint lpProcessAttributes,
+            nint lpThreadAttributes,
+            [MarshalAs(UnmanagedType.Bool)] bool bInheritHandles,
             uint dwCreationFlags,
-            IntPtr lpEnvironment,
-            string lpCurrentDirectory,
-            [In] ref StartupInfo lpStartupInfo,
+            nint lpEnvironment,
+            [MarshalAs(UnmanagedType.LPStr)] string lpCurrentDirectory,
+            ref StartupInfo lpStartupInfo,
             out ProcessInformation lpProcessInformation
         );
 
-        [DllImport("user32", SetLastError = true)]
-        internal static extern bool GetClientRect(IntPtr windowHandle, ref Rect rectangle);
+        [LibraryImport("user32")]
+        [return: MarshalAs(UnmanagedType.Bool)]
+        internal static partial bool GetClientRect(nint windowHandle, ref Rect rectangle);
 
-        [DllImport("user32", SetLastError = true)]
-        internal static extern IntPtr GetForegroundWindow();
+        [LibraryImport("user32")]
+        internal static partial nint GetForegroundWindow();
 
-        [DllImport("user32", SetLastError = true)]
-        internal static extern IntPtr GetParent(IntPtr hWnd);
+        [LibraryImport("user32")]
+        internal static partial nint GetParent(nint hWnd);
 
-        [DllImport("user32", SetLastError = true)]
-        internal static extern int GetWindowLong(IntPtr windowHandle, int index);
+        [LibraryImport("user32", EntryPoint = "GetWindowLongA")]
+        internal static partial int GetWindowLong(nint windowHandle, int index);
 
-        [DllImport("user32", SetLastError = true)]
-        internal static extern int GetWindowThreadProcessId(IntPtr windowHandle, int processId);
+        [LibraryImport("ntdll")]
+        internal static partial int NtAllocateVirtualMemory
+        (
+            nint processHandle,
+            ref nint address,
+            int zeroBits,
+            ref nint size,
+            AllocationType allocationType,
+            MemoryProtectionFlag protection
+        );
 
-        [DllImport("ntdll", SetLastError = true)]
-        internal static extern bool NtReadVirtualMemory(IntPtr processHandle, IntPtr baseAddress, void* buffer, int size, out IntPtr numberOfBytesRead);
+        [LibraryImport("ntdll")]
+        internal static partial int NtClose(nint Handle);
 
-        [DllImport("ntdll", SetLastError = true)]
-        internal static extern bool NtResumeThread(IntPtr threadHandle, out IntPtr suspendCount);
+        [LibraryImport("ntdll")]
+        internal static partial int NtFreeVirtualMemory
+        (
+            nint processHandle,
+            ref nint address,
+            ref nint size,
+            AllocationType allocationType
+        );
 
-        [DllImport("ntdll", SetLastError = true)]
-        internal static extern bool NtSuspendThread(IntPtr threadHandle, out IntPtr previousSuspendCount);
+        [LibraryImport("ntdll")]
+        internal static partial int NtProtectVirtualMemory
+        (
+            nint processHandle,
+            ref nint address,
+            ref nint size,
+            MemoryProtectionFlag newProtection,
+            out MemoryProtectionFlag oldProtection
+        );
 
-        [DllImport("ntdll", SetLastError = true)]
-        internal static extern bool NtWriteVirtualMemory(IntPtr processHandle, IntPtr baseAddress, void* buffer, int size, out IntPtr numberOfBytesWritten);
+        [LibraryImport("ntdll")]
+        internal static partial int NtReadVirtualMemory
+        (
+            nint processHandle, 
+            nint baseAddress, 
+            void* buffer, 
+            int size, 
+            out nint numberOfBytesRead
+        );
 
-        [DllImport("kernel32", SetLastError = true)]
-        internal static extern IntPtr OpenProcess(ProcessAccessFlag processAccess, bool inheritHandle, int processId);
+        [LibraryImport("ntdll")]
+        internal static partial int NtResumeThread(nint threadHandle, out nint suspendCount);
 
-        [DllImport("kernel32", SetLastError = true)]
-        internal static extern IntPtr OpenThread(ThreadAccessFlag threadAccess, bool inheritHandle, uint threadId);
+        [LibraryImport("ntdll")]
+        internal static partial int NtSuspendThread(nint threadHandle, out nint previousSuspendCount);
 
-        [DllImport("user32", SetLastError = true)]
-        internal static extern bool SetForegroundWindow(IntPtr hWnd);
+        [LibraryImport("ntdll")]
+        internal static partial int NtWriteVirtualMemory
+        (
+            nint processHandle, 
+            nint baseAddress, 
+            void* buffer, 
+            int size, 
+            out nint numberOfBytesWritten
+        );
 
-        [DllImport("user32", SetLastError = true)]
-        internal static extern IntPtr SetParent(IntPtr hWndChild, IntPtr hWndNewParent);
+        [LibraryImport("user32")]
+        [return: MarshalAs(UnmanagedType.Bool)]
+        internal static partial bool SetForegroundWindow(nint hWnd);
 
-        [DllImport("user32", SetLastError = true)]
-        internal static extern int SetWindowLong(IntPtr windowHandle, int index, int newLong);
+        [LibraryImport("user32")]
+        internal static partial nint SetParent(nint hWndChild, nint hWndNewParent);
 
-        [DllImport("user32", SetLastError = true)]
-        internal static extern IntPtr SetWindowPos(IntPtr windowHandle, IntPtr windowHandleInsertAfter, int x, int y, int cx, int cy, int wFlags);
+        [LibraryImport("user32", EntryPoint = "SetWindowLongA")]
+        internal static partial int SetWindowLong(nint windowHandle, int index, int newLong);
 
-        [DllImport("kernel32", SetLastError = true)]
-        internal static extern IntPtr VirtualAllocEx(IntPtr processHandle, IntPtr address, uint size, AllocationType allocationType, MemoryProtectionFlag memoryProtection);
-
-        [DllImport("kernel32", SetLastError = true)]
-        internal static extern bool VirtualFreeEx(IntPtr processHandle, IntPtr address, int size, AllocationType allocationType);
-
-        [DllImport("kernel32", SetLastError = true)]
-        internal static extern bool VirtualProtectEx(IntPtr hProcess, IntPtr lpAddress, uint dwSize, MemoryProtectionFlag flNewProtect, out MemoryProtectionFlag lpflOldProtect);
+        [LibraryImport("user32")]
+        internal static partial nint SetWindowPos
+        (
+            nint windowHandle,
+            nint windowHandleInsertAfter,
+            int x, 
+            int y, 
+            int cx, 
+            int cy, 
+            int wFlags
+        );
 
         [StructLayout(LayoutKind.Sequential)]
         public struct ProcessInformation
         {
-            public IntPtr hProcess;
-            public IntPtr hThread;
+            public nint hProcess;
+            public nint hThread;
             public int dwProcessId;
             public int dwThreadId;
         }
@@ -222,9 +261,9 @@ namespace AmeisenBotX.Memory.Win32
         public struct StartupInfo
         {
             public int cb;
-            public string lpReserved;
-            public string lpDesktop;
-            public string lpTitle;
+            public char* lpReserved;
+            public char* lpDesktop;
+            public char* lpTitle;
             public int dwX;
             public int dwY;
             public int dwXSize;
@@ -235,10 +274,10 @@ namespace AmeisenBotX.Memory.Win32
             public int dwFlags;
             public short wShowWindow;
             public short cbReserved2;
-            public IntPtr lpReserved2;
-            public IntPtr hStdInput;
-            public IntPtr hStdOutput;
-            public IntPtr hStdError;
+            public nint lpReserved2;
+            public nint hStdInput;
+            public nint hStdOutput;
+            public nint hStdError;
         }
     }
 }

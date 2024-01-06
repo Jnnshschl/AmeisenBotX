@@ -35,6 +35,6 @@ namespace AmeisenBotX.Common.Keyboard.Objects
         /// <summary>
         /// Additional information associated with the message.
         /// </summary>
-        public IntPtr AdditionalInformation { get; set; }
+        public nint AdditionalInformation { get; set; }
     }
 }

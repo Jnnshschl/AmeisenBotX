@@ -26,7 +26,7 @@ namespace AmeisenBotX.Wow548.Objects
 
         public int Level => GetGameobjectDescriptor().Level;
 
-        public new Vector3 Position => Memory.Read(IntPtr.Add(BaseAddress, (int)Memory.Offsets.WowGameobjectPosition), out Vector3 position) ? position : Vector3.Zero;
+        public new Vector3 Position => Memory.Read(nint.Add(BaseAddress, (int)Memory.Offsets.WowGameobjectPosition), out Vector3 position) ? position : Vector3.Zero;
 
         public override string ToString()
         {

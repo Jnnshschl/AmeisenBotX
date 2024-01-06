@@ -42,50 +42,50 @@ namespace AmeisenBotX.Wow.Hook
             }
         }
 
-        public bool IsWoWHooked => WowEndSceneAddress != IntPtr.Zero && Memory.Read(WowEndSceneAddress, out byte c) && c == 0xE9;
+        public bool IsWoWHooked => WowEndSceneAddress != nint.Zero && Memory.Read(WowEndSceneAddress, out byte c) && c == 0xE9;
 
         protected WowMemoryApi Memory { get; }
 
         /// <summary>
         /// Codecave that hold the code, the bot want's to execute.
         /// </summary>
-        private IntPtr CExecution { get; set; }
+        private nint CExecution { get; set; }
 
         /// <summary>
         /// Codecave that hold the original EndScene instructions and jumps back to the original function.
         /// </summary>
-        private IntPtr CGateway { get; set; }
+        private nint CGateway { get; set; }
 
         /// <summary>
         /// Codecave used to check whether the bot want's to execute code and run the IHookModule's.
         /// </summary>
-        private IntPtr CRoutine { get; set; }
+        private nint CRoutine { get; set; }
 
         /// <summary>
         /// Pointer to the GameInfo struct that contains various static information about wow that
         /// are needed on a regular basis.
         /// </summary>
-        private IntPtr GameInfoAddress { get; set; }
+        private nint GameInfoAddress { get; set; }
 
         /// <summary>
         /// Integer that instructs wow to refresh the GameInfo.
         /// </summary>
-        private IntPtr GameInfoExecuteAddress { get; set; }
+        private nint GameInfoExecuteAddress { get; set; }
 
         /// <summary>
         /// Integer tha will be set to 1 when wow finished refreshing the GameInfo data.
         /// </summary>
-        private IntPtr GameInfoExecutedAddress { get; set; }
+        private nint GameInfoExecutedAddress { get; set; }
 
         /// <summary>
         /// Integer tha will be set to 1 when we want to execute the LOS check.
         /// </summary>
-        private IntPtr GameInfoExecuteLosCheckAddress { get; set; }
+        private nint GameInfoExecuteLosCheckAddress { get; set; }
 
         /// <summary>
         /// Integer tha will be set to 1 when we're able to perform the LOS check.
         /// </summary>
-        private IntPtr GameInfoLosCheckDataAddress { get; set; }
+        private nint GameInfoLosCheckDataAddress { get; set; }
 
         /// <summary>
         /// The currently loaded hookmodules
@@ -96,7 +96,7 @@ namespace AmeisenBotX.Wow.Hook
         /// Integer that will be set to 1 if the bot wait's for code to be executed. Will be set to
         /// 0 when done.
         /// </summary>
-        private IntPtr IntShouldExecute { get; set; }
+        private nint IntShouldExecute { get; set; }
 
         /// <summary>
         /// Save the original EndScene instructions that will be restored when the hook gets disposed.
@@ -106,17 +106,17 @@ namespace AmeisenBotX.Wow.Hook
         /// <summary>
         /// Integer that is used to skip the world loaded check;
         /// </summary>
-        private IntPtr OverrideWorldCheckAddress { get; set; }
+        private nint OverrideWorldCheckAddress { get; set; }
 
         /// <summary>
         /// Pointer to the return value of the code executed on the EndScene hook.
         /// </summary>
-        private IntPtr ReturnValueAddress { get; set; }
+        private nint ReturnValueAddress { get; set; }
 
         /// <summary>
         /// The address of the EndScene function of wow.
         /// </summary>
-        private IntPtr WowEndSceneAddress { get; set; }
+        private nint WowEndSceneAddress { get; set; }
 
         /// <summary>
         /// Whether the hook should ignore if the world is not loaded or not. Used in the login
@@ -198,13 +198,13 @@ namespace AmeisenBotX.Wow.Hook
                     // some time
                 }
 
-                if (WowEndSceneAddress == IntPtr.Zero)
+                if (WowEndSceneAddress == nint.Zero)
                 {
                     AmeisenLogger.I.Log("HookManager", $"Wow seems to not be started completely, retry in 500ms", LogLevel.Verbose);
                     Task.Delay(500).Wait();
                 }
             }
-            while (WowEndSceneAddress == IntPtr.Zero);
+            while (WowEndSceneAddress == nint.Zero);
 
             if (!Memory.ReadBytes(WowEndSceneAddress, hookSize, out byte[] bytes))
             {
@@ -267,10 +267,10 @@ namespace AmeisenBotX.Wow.Hook
                 "JE @loscheck",
             ];
 
-            IntPtr distancePointer = GameInfoLosCheckDataAddress;
-            IntPtr startPointer = IntPtr.Add(distancePointer, 0x4);
-            IntPtr endPointer = IntPtr.Add(startPointer, 0xC);
-            IntPtr resultPointer = IntPtr.Add(endPointer, 0xC);
+            nint distancePointer = GameInfoLosCheckDataAddress;
+            nint startPointer = nint.Add(distancePointer, 0x4);
+            nint endPointer = nint.Add(startPointer, 0xC);
+            nint resultPointer = nint.Add(endPointer, 0xC);
 
             assemblyBuffer.Add("PUSH 0");
             assemblyBuffer.Add("PUSH 0x120171");
@@ -317,7 +317,7 @@ namespace AmeisenBotX.Wow.Hook
 
             // write the original EndScene instructions
             Memory.WriteBytes(CGateway, OriginalEndsceneBytes);
-            assemblyBuffer.Add($"JMP {IntPtr.Add(WowEndSceneAddress, hookSize)}");
+            assemblyBuffer.Add($"JMP {nint.Add(WowEndSceneAddress, hookSize)}");
 
             // jump back to the original EndScene
             if (!Memory.InjectAssembly(assemblyBuffer, CGateway + OriginalEndsceneBytes.Length))
@@ -359,11 +359,11 @@ namespace AmeisenBotX.Wow.Hook
             return InjectAndExecute(asm, false, out _);
         }
 
-        public bool InjectAndExecute(IEnumerable<string> asm, bool returns, out IntPtr returnAddress)
+        public bool InjectAndExecute(IEnumerable<string> asm, bool returns, out nint returnAddress)
         {
             if (!IsWoWHooked)
             {
-                returnAddress = IntPtr.Zero;
+                returnAddress = nint.Zero;
                 return false;
             }
 
@@ -394,12 +394,12 @@ namespace AmeisenBotX.Wow.Hook
                     // if we want to read the return value do it otherwise we're done
                     if (!returns)
                     {
-                        returnAddress = IntPtr.Zero;
+                        returnAddress = nint.Zero;
                         return true;
                     }
                     else
                     {
-                        return Memory.Read(ReturnValueAddress, out returnAddress) && returnAddress != IntPtr.Zero;
+                        return Memory.Read(ReturnValueAddress, out returnAddress) && returnAddress != nint.Zero;
                     }
                 }
                 catch (Exception ex)
@@ -409,7 +409,7 @@ namespace AmeisenBotX.Wow.Hook
                 }
             }
 
-            returnAddress = IntPtr.Zero;
+            returnAddress = nint.Zero;
             return false;
         }
 
@@ -434,43 +434,43 @@ namespace AmeisenBotX.Wow.Hook
             AmeisenLogger.I.Log("HookManager", "Allocating Codecaves", LogLevel.Verbose);
 
             // integer to check if there is code waiting to be executed
-            if (!Memory.AllocateMemory(4, out IntPtr codeToExecuteAddress)) { return false; }
+            if (!Memory.AllocateMemory(4, out nint codeToExecuteAddress)) { return false; }
 
             IntShouldExecute = codeToExecuteAddress;
 
             // integer to save the pointer to the return value
-            if (!Memory.AllocateMemory(4, out IntPtr returnValueAddress)) { return false; }
+            if (!Memory.AllocateMemory(4, out nint returnValueAddress)) { return false; }
 
             ReturnValueAddress = returnValueAddress;
 
             // codecave to override the is ingame check, used at the login
-            if (!Memory.AllocateMemory(4, out IntPtr overrideWorldCheckAddress)) { return false; }
+            if (!Memory.AllocateMemory(4, out nint overrideWorldCheckAddress)) { return false; }
 
             OverrideWorldCheckAddress = overrideWorldCheckAddress;
 
             // codecave for the original endscene code
-            if (!Memory.AllocateMemory(MEM_ALLOC_GATEWAY_SIZE, out IntPtr codecaveForGateway)) { return false; }
+            if (!Memory.AllocateMemory(MEM_ALLOC_GATEWAY_SIZE, out nint codecaveForGateway)) { return false; }
 
             CGateway = codecaveForGateway;
 
             // codecave to check whether we need to execute something
-            if (!Memory.AllocateMemory(MEM_ALLOC_ROUTINE_SIZE, out IntPtr codecaveForCheck)) { return false; }
+            if (!Memory.AllocateMemory(MEM_ALLOC_ROUTINE_SIZE, out nint codecaveForCheck)) { return false; }
 
             CRoutine = codecaveForCheck;
 
             // codecave for the code we wan't to execute
-            if (!Memory.AllocateMemory(MEM_ALLOC_EXECUTION_SIZE, out IntPtr codecaveForExecution)) { return false; }
+            if (!Memory.AllocateMemory(MEM_ALLOC_EXECUTION_SIZE, out nint codecaveForExecution)) { return false; }
 
             CExecution = codecaveForExecution;
 
             // codecave for the gameinfo execution
-            if (!Memory.AllocateMemory(4, out IntPtr gameInfoExecute)) { return false; }
+            if (!Memory.AllocateMemory(4, out nint gameInfoExecute)) { return false; }
 
             GameInfoExecuteAddress = gameInfoExecute;
             Memory.Write(GameInfoExecuteAddress, 0);
 
             // codecave for the gameinfo executed
-            if (!Memory.AllocateMemory(4, out IntPtr gameInfoExecuted)) { return false; }
+            if (!Memory.AllocateMemory(4, out nint gameInfoExecuted)) { return false; }
 
             GameInfoExecutedAddress = gameInfoExecuted;
             Memory.Write(GameInfoExecutedAddress, 0);
@@ -478,18 +478,18 @@ namespace AmeisenBotX.Wow.Hook
             // codecave for the gameinfo struct
             uint gameinfoSize = (uint)sizeof(GameInfo);
 
-            if (!Memory.AllocateMemory(gameinfoSize, out IntPtr gameInfo)) { return false; }
+            if (!Memory.AllocateMemory(gameinfoSize, out nint gameInfo)) { return false; }
 
             GameInfoAddress = gameInfo;
 
             // codecave for the gameinfo line of sight check
-            if (!Memory.AllocateMemory(4, out IntPtr executeLosCheck)) { return false; }
+            if (!Memory.AllocateMemory(4, out nint executeLosCheck)) { return false; }
 
             GameInfoExecuteLosCheckAddress = executeLosCheck;
             Memory.Write(GameInfoExecuteLosCheckAddress, 0);
 
             // codecave for the gameinfo line of sight check data
-            if (!Memory.AllocateMemory(40, out IntPtr losCheckData)) { return false; }
+            if (!Memory.AllocateMemory(40, out nint losCheckData)) { return false; }
 
             GameInfoLosCheckDataAddress = losCheckData;
 
@@ -508,14 +508,14 @@ namespace AmeisenBotX.Wow.Hook
             return true;
         }
 
-        private IntPtr GetEndScene()
+        private nint GetEndScene()
         {
-            return Memory.Read(Memory.Offsets.EndSceneStaticDevice, out IntPtr pDevice)
-                && Memory.Read(IntPtr.Add(pDevice, (int)Memory.Offsets.EndSceneOffsetDevice), out IntPtr pEnd)
-                && Memory.Read(pEnd, out IntPtr pScene)
-                && Memory.Read(IntPtr.Add(pScene, (int)Memory.Offsets.EndSceneOffset), out IntPtr pEndscene)
+            return Memory.Read(Memory.Offsets.EndSceneStaticDevice, out nint pDevice)
+                && Memory.Read(nint.Add(pDevice, (int)Memory.Offsets.EndSceneOffsetDevice), out nint pEnd)
+                && Memory.Read(pEnd, out nint pScene)
+                && Memory.Read(nint.Add(pScene, (int)Memory.Offsets.EndSceneOffset), out nint pEndscene)
                 ? pEndscene
-                : IntPtr.Zero;
+                : nint.Zero;
         }
     }
 }

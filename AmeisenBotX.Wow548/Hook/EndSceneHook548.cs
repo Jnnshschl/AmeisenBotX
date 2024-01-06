@@ -27,10 +27,10 @@ namespace AmeisenBotX.Wow548.Hook
         /// <summary>
         /// Used to save the original instruction when a function get disabled.
         /// </summary>
-        private Dictionary<IntPtr, byte> OriginalFunctionBytes { get; }
+        private Dictionary<nint, byte> OriginalFunctionBytes { get; }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public bool CallObjectFunction(IntPtr objectBaseAddress, IntPtr functionAddress, List<object>? args = null)
+        public bool CallObjectFunction(nint objectBaseAddress, nint functionAddress, List<object>? args = null)
         {
             return CallObjectFunction(objectBaseAddress, functionAddress, args, false, out _);
         }
@@ -44,11 +44,11 @@ namespace AmeisenBotX.Wow548.Hook
         /// <param name="readReturnBytes">Whether to read the retunr address or not</param>
         /// <param name="returnAddress">Return address</param>
         /// <returns>True if everything went right, false if not</returns>
-        public bool CallObjectFunction(IntPtr objectBaseAddress, IntPtr functionAddress, List<object>? args, bool readReturnBytes, out IntPtr returnAddress)
+        public bool CallObjectFunction(nint objectBaseAddress, nint functionAddress, List<object>? args, bool readReturnBytes, out nint returnAddress)
         {
 #if DEBUG
-            if (objectBaseAddress == IntPtr.Zero) { throw new ArgumentOutOfRangeException(nameof(objectBaseAddress), "objectBaseAddress is an invalid pointer"); }
-            if (functionAddress == IntPtr.Zero) { throw new ArgumentOutOfRangeException(nameof(functionAddress), "functionAddress is an invalid pointer"); }
+            if (objectBaseAddress == nint.Zero) { throw new ArgumentOutOfRangeException(nameof(objectBaseAddress), "objectBaseAddress is an invalid pointer"); }
+            if (functionAddress == nint.Zero) { throw new ArgumentOutOfRangeException(nameof(functionAddress), "functionAddress is an invalid pointer"); }
 #endif
             List<string> asm = [$"MOV ECX, {objectBaseAddress}"];
 
@@ -69,7 +69,7 @@ namespace AmeisenBotX.Wow548.Hook
                 return status;
             }
 
-            returnAddress = IntPtr.Zero;
+            returnAddress = nint.Zero;
             return InjectAndExecute(asm, readReturnBytes, out _);
         }
 
@@ -99,7 +99,7 @@ namespace AmeisenBotX.Wow548.Hook
 
             byte[] bytes = Encoding.UTF8.GetBytes(command + "\0");
 
-            if (Memory.AllocateMemory((uint)bytes.Length, out IntPtr memAlloc))
+            if (Memory.AllocateMemory((uint)bytes.Length, out nint memAlloc))
             {
                 try
                 {
@@ -126,13 +126,13 @@ namespace AmeisenBotX.Wow548.Hook
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public void ObjectRightClick(IntPtr objectBase)
+        public void ObjectRightClick(nint objectBase)
         {
             CallObjectFunction(objectBase, Memory.Offsets.FunctionGameobjectOnRightClick);
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public void SetFacing(IntPtr unitBase, float angle, bool smooth = false)
+        public void SetFacing(nint unitBase, float angle, bool smooth = false)
         {
             CallObjectFunction(unitBase, smooth ? ((OffsetList548)Memory.Offsets).FunctionUnitSetFacingSmooth : Memory.Offsets.FunctionUnitSetFacing,
             [
@@ -196,16 +196,16 @@ namespace AmeisenBotX.Wow548.Hook
 
         public bool TraceLine(Vector3 start, Vector3 end, uint flags)
         {
-            if (Memory.AllocateMemory(40, out IntPtr tracelineCodecave))
+            if (Memory.AllocateMemory(40, out nint tracelineCodecave))
             {
                 try
                 {
                     (float, Vector3, Vector3) tracelineCombo = (1.0f, start, end);
 
-                    IntPtr distancePointer = tracelineCodecave;
-                    IntPtr startPointer = IntPtr.Add(distancePointer, 0x4);
-                    IntPtr endPointer = IntPtr.Add(startPointer, 0xC);
-                    IntPtr resultPointer = IntPtr.Add(endPointer, 0xC);
+                    nint distancePointer = tracelineCodecave;
+                    nint startPointer = nint.Add(distancePointer, 0x4);
+                    nint endPointer = nint.Add(startPointer, 0xC);
+                    nint resultPointer = nint.Add(endPointer, 0xC);
 
                     if (Memory.Write(distancePointer, tracelineCombo))
                     {
@@ -222,9 +222,9 @@ namespace AmeisenBotX.Wow548.Hook
                             "RET",
                         };
 
-                        if (InjectAndExecute(asm, true, out IntPtr returnAddress))
+                        if (InjectAndExecute(asm, true, out nint returnAddress))
                         {
-                            return returnAddress != IntPtr.Zero && (returnAddress.ToInt32() & 0xFF) == 0;
+                            return returnAddress != nint.Zero && (returnAddress.ToInt32() & 0xFF) == 0;
                         }
                     }
                 }
@@ -254,11 +254,11 @@ namespace AmeisenBotX.Wow548.Hook
 
         public void ClickOnTerrain(Vector3 position)
         {
-            if (Memory.AllocateMemory(20, out IntPtr codeCaveVector3))
+            if (Memory.AllocateMemory(20, out nint codeCaveVector3))
             {
                 try
                 {
-                    if (Memory.Write(IntPtr.Add(codeCaveVector3, 8), position))
+                    if (Memory.Write(nint.Add(codeCaveVector3, 8), position))
                     {
                         InjectAndExecute(new string[]
                         {
@@ -276,9 +276,9 @@ namespace AmeisenBotX.Wow548.Hook
             }
         }
 
-        public void ClickToMove(IntPtr playerBase, Vector3 position)
+        public void ClickToMove(nint playerBase, Vector3 position)
         {
-            if (Memory.AllocateMemory(12, out IntPtr codeCaveVector3))
+            if (Memory.AllocateMemory(12, out nint codeCaveVector3))
             {
                 try
                 {
@@ -311,7 +311,7 @@ namespace AmeisenBotX.Wow548.Hook
             byte[] commandBytes = Encoding.UTF8.GetBytes(command + "\0");
             byte[] variableBytes = Encoding.UTF8.GetBytes(variable + "\0");
 
-            if (Memory.AllocateMemory((uint)commandBytes.Length + (uint)variableBytes.Length, out IntPtr memAllocCmdVar))
+            if (Memory.AllocateMemory((uint)commandBytes.Length + (uint)variableBytes.Length, out nint memAllocCmdVar))
             {
                 try
                 {
@@ -337,7 +337,7 @@ namespace AmeisenBotX.Wow548.Hook
                         "RET",
                     };
 
-                    if (InjectAndExecute(asm, true, out IntPtr returnAddress)
+                    if (InjectAndExecute(asm, true, out nint returnAddress)
                         && Memory.ReadString(returnAddress, Encoding.UTF8, out result))
                     {
                         return !string.IsNullOrWhiteSpace(result);
@@ -354,7 +354,7 @@ namespace AmeisenBotX.Wow548.Hook
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public void FacePosition(IntPtr playerBase, Vector3 playerPosition, Vector3 positionToFace, bool smooth = false)
+        public void FacePosition(nint playerBase, Vector3 playerPosition, Vector3 positionToFace, bool smooth = false)
         {
             SetFacing(playerBase, BotMath.GetFacingAngle(playerPosition, positionToFace), smooth);
         }
@@ -368,7 +368,7 @@ namespace AmeisenBotX.Wow548.Hook
             {
                 byte[] variableBytes = Encoding.UTF8.GetBytes(variable + "\0");
 
-                if (Memory.AllocateMemory((uint)variableBytes.Length, out IntPtr memAlloc))
+                if (Memory.AllocateMemory((uint)variableBytes.Length, out nint memAlloc))
                 {
                     try
                     {
@@ -384,7 +384,7 @@ namespace AmeisenBotX.Wow548.Hook
                             "RET",
                         };
 
-                        if (InjectAndExecute(asm, true, out IntPtr returnAddress)
+                        if (InjectAndExecute(asm, true, out nint returnAddress)
                             && Memory.ReadString(returnAddress, Encoding.UTF8, out result))
                         {
                             return !string.IsNullOrWhiteSpace(result);
@@ -402,17 +402,17 @@ namespace AmeisenBotX.Wow548.Hook
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public int GetUnitReaction(IntPtr a, IntPtr b)
+        public int GetUnitReaction(nint a, nint b)
         {
 #if DEBUG
-            if (a == IntPtr.Zero) { throw new ArgumentOutOfRangeException(nameof(a), "a is no valid pointer"); }
-            if (b == IntPtr.Zero) { throw new ArgumentOutOfRangeException(nameof(b), "b is no valid pointer"); }
+            if (a == nint.Zero) { throw new ArgumentOutOfRangeException(nameof(a), "a is no valid pointer"); }
+            if (b == nint.Zero) { throw new ArgumentOutOfRangeException(nameof(b), "b is no valid pointer"); }
 #endif
-            return CallObjectFunction(a, Memory.Offsets.FunctionUnitGetReaction, [b], true, out IntPtr ret)
-                && ret != IntPtr.Zero ? ret.ToInt32() : 2;
+            return CallObjectFunction(a, Memory.Offsets.FunctionUnitGetReaction, [b], true, out nint ret)
+                && ret != nint.Zero ? ret.ToInt32() : 2;
         }
 
-        private void DisableFunction(IntPtr address)
+        private void DisableFunction(nint address)
         {
             // check whether we already replaced the function or not
             if (Memory.Read(address, out byte opcode)
@@ -423,7 +423,7 @@ namespace AmeisenBotX.Wow548.Hook
             }
         }
 
-        private void EnableFunction(IntPtr address)
+        private void EnableFunction(nint address)
         {
             // check for RET opcode to be present before restoring original function
             if (OriginalFunctionBytes.ContainsKey(address)
@@ -434,7 +434,7 @@ namespace AmeisenBotX.Wow548.Hook
             }
         }
 
-        private void SaveOriginalFunctionBytes(IntPtr address)
+        private void SaveOriginalFunctionBytes(nint address)
         {
             if (Memory.Read(address, out byte opcode))
             {

@@ -63,7 +63,7 @@ namespace AmeisenBotX.Wow335a.Objects
                 && raidLeader != 0
                 && Memory.Read(Memory.Offsets.RaidGroupStart, out RawRaidStruct raidStruct))
             {
-                foreach (IntPtr raidPointer in raidStruct.GetPointers())
+                foreach (nint raidPointer in raidStruct.GetPointers())
                 {
                     if (Memory.Read(raidPointer, out ulong guid))
                     {
