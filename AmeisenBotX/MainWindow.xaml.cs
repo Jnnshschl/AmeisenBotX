@@ -612,7 +612,7 @@ namespace AmeisenBotX
                         {
                             AmeisenBot.Bot.Memory.SetupAutoPosition
                             (
-                                MainWindowHandle,
+                                new WindowInteropHelper(this).Handle,
                                 (int)((wowRect.Margin.Left + 1) * M11),
                                 (int)((wowRect.Margin.Top + 1) * M22),
                                 (int)((wowRect.ActualWidth - 1) * M11),

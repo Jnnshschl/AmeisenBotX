@@ -162,6 +162,9 @@ namespace AmeisenBotX.Memory.Win32
         internal static extern IntPtr GetForegroundWindow();
 
         [DllImport("user32", SetLastError = true)]
+        internal static extern IntPtr GetParent(IntPtr hWnd);
+
+        [DllImport("user32", SetLastError = true)]
         internal static extern int GetWindowLong(IntPtr windowHandle, int index);
 
         [DllImport("user32", SetLastError = true)]

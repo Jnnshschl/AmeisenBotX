@@ -466,7 +466,8 @@ namespace AmeisenBotX.Memory
             {
                 SetParent(Process.MainWindowHandle, mainWindowHandle);
 
-                int style = GetWindowLong(Process.MainWindowHandle, GWL_STYLE) & ~(int)WindowStyle.WS_CAPTION & ~(int)WindowStyle.WS_THICKFRAME;
+                int style = GetWindowLong(Process.MainWindowHandle, GWL_STYLE);
+                style &= ~(int)WindowStyle.WS_CAPTION & ~(int)WindowStyle.WS_THICKFRAME & ~(int)WindowStyle.WS_BORDER;
                 SetWindowLong(Process.MainWindowHandle, GWL_STYLE, style);
 
                 ResizeParentWindow(offsetX, offsetY, width, height);

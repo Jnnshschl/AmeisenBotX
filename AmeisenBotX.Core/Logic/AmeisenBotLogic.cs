@@ -26,6 +26,7 @@ using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Text;
+using System.Threading;
 
 namespace AmeisenBotX.Core.Logic
 {
@@ -1180,7 +1181,7 @@ namespace AmeisenBotX.Core.Logic
                 sb.Append($"pcall(SetCVar,\"{cvar}\",\"{value}\");");
             }
 
-            Bot.Wow.LuaDoString(sb.ToString());
+            Bot.Wow.LuaDoString(sb);
         }
 
         private BtStatus SetupWowInterface()
@@ -1196,18 +1197,20 @@ namespace AmeisenBotX.Core.Logic
                 Process p = Bot.Memory.StartProcessNoActivate($"\"{Config.PathToWowExe}\" -windowed -d3d9", out IntPtr processHandle, out IntPtr mainThreadHandle);
                 p.WaitForInputIdle();
 
+                Thread.Sleep(1000); // needed to spin up wow's window
+
                 AmeisenLogger.I.Log("StartWow", $"Attaching XMemory to {p.ProcessName} ({p.Id})");
 
                 if (Bot.Memory.Init(p, processHandle, mainThreadHandle))
                 {
                     Bot.Memory.Offsets.Init(Bot.Memory.Process.MainModule.BaseAddress);
 
-                    OnWoWStarted?.Invoke();
-
                     if (Config.SaveWowWindowPosition)
                     {
                         LoadWowWindowPosition();
                     }
+
+                    OnWoWStarted?.Invoke();
 
                     return BtStatus.Success;
                 }

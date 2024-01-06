@@ -5,6 +5,7 @@ using AmeisenBotX.Wow.Objects.Constants;
 using AmeisenBotX.Wow.Objects.Enums;
 using System;
 using System.Collections.Generic;
+using System.Text;
 
 namespace AmeisenBotX.Wow
 {
@@ -230,6 +231,8 @@ namespace AmeisenBotX.Wow
         /// <param name="lua">Code to run</param>
         /// <returns>Whether the code was executed or not</returns>
         bool LuaDoString(string lua);
+
+        bool LuaDoString(StringBuilder sb) => LuaDoString(sb.ToString());
 
         void LuaQueueBattlegroundByName(string bgName);
 
