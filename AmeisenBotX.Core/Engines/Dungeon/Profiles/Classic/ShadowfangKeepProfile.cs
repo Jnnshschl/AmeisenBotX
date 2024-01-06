@@ -24,8 +24,8 @@ namespace AmeisenBotX.Core.Engines.Dungeon.Profiles.Classic
 
         public string Name { get; } = "[22-30] Shadowfang Keep";
 
-        public List<DungeonNode> Nodes { get; } = new()
-        {
+        public List<DungeonNode> Nodes { get; } =
+        [
             new(new(-229, 2109, 77)),
             new(new(-221, 2110, 77)),
             new(new(-214, 2107, 77)),
@@ -259,9 +259,9 @@ namespace AmeisenBotX.Core.Engines.Dungeon.Profiles.Classic
             new(new(-78, 2145, 152)),
             new(new(-77, 2152, 156)),
             new(new(-82, 2158, 156)),
-        };
+        ];
 
-        public List<int> PriorityUnits { get; } = new();
+        public List<int> PriorityUnits { get; } = [];
 
         public int RequiredItemLevel { get; } = 10;
 

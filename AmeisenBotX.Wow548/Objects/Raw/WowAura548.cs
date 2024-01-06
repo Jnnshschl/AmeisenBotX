@@ -2,7 +2,7 @@
 using AmeisenBotX.Wow.Objects.Flags;
 using System.Runtime.InteropServices;
 
-namespace AmeisenBotX.Wow335a.Objects.Raw
+namespace AmeisenBotX.Wow548.Objects.Raw
 {
     [StructLayout(LayoutKind.Sequential)]
     public unsafe struct WowAura548 : IWowAura

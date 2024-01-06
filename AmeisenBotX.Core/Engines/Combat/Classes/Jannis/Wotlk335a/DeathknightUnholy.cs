@@ -32,7 +32,7 @@ namespace AmeisenBotX.Core.Engines.Combat.Classes.Jannis.Wotlk335a
 
         public override bool IsMelee => true;
 
-        public override IItemComparator ItemComparator { get; set; } = new BasicStrengthComparator(new() { WowArmorType.Shield });
+        public override IItemComparator ItemComparator { get; set; } = new BasicStrengthComparator([WowArmorType.Shield]);
 
         public override WowRole Role => WowRole.Dps;
 
@@ -46,7 +46,7 @@ namespace AmeisenBotX.Core.Engines.Combat.Classes.Jannis.Wotlk335a
                 { 6, new(1, 6, 2) },
                 { 8, new(1, 8, 5) },
             },
-            Tree2 = new(),
+            Tree2 = [],
             Tree3 = new()
             {
                 { 1, new(3, 1, 2) },

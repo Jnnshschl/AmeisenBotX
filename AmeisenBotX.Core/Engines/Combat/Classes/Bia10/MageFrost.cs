@@ -4,7 +4,6 @@ using AmeisenBotX.Core.Managers.Character.Talents.Objects;
 using AmeisenBotX.Wow.Objects;
 using AmeisenBotX.Wow.Objects.Enums;
 using AmeisenBotX.Wow335a.Constants;
-using System.Collections.Generic;
 using System.Linq;
 
 namespace AmeisenBotX.Core.Engines.Combat.Classes.Bia10
@@ -32,20 +31,20 @@ namespace AmeisenBotX.Core.Engines.Combat.Classes.Bia10
         public override bool IsMelee => false;
 
         public override IItemComparator ItemComparator { get; set; } =
-            new BasicIntellectComparator(null, new List<WowWeaponType>
-            {
+            new BasicIntellectComparator(null,
+            [
                 WowWeaponType.AxeTwoHand,
                 WowWeaponType.MaceTwoHand,
                 WowWeaponType.SwordTwoHand
-            });
+            ]);
 
         public override WowRole Role => WowRole.Dps;
 
         public override TalentTree Talents { get; } = new()
         {
-            Tree1 = new Dictionary<int, Talent>(),
-            Tree2 = new Dictionary<int, Talent>(),
-            Tree3 = new Dictionary<int, Talent>(),
+            Tree1 = [],
+            Tree2 = [],
+            Tree3 = [],
         };
 
         public override bool UseAutoAttacks => true;

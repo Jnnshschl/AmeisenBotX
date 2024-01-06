@@ -9,48 +9,48 @@ namespace AmeisenBotX.Core.Engines.Quest.Profiles.Shino
         public Horde1To60GrinderProfile(AmeisenBotInterfaces bot)
         {
             Quests = new Queue<List<IBotQuest>>();
-            Quests.Enqueue(new List<IBotQuest>() {
+            Quests.Enqueue([
                 new QDurotarGrindToLevel6(bot)
-            });
-            Quests.Enqueue(new List<IBotQuest>() {
+            ]);
+            Quests.Enqueue([
                 new QDurotarGrindToLevel9(bot)
-            });
-            Quests.Enqueue(new List<IBotQuest>() {
+            ]);
+            Quests.Enqueue([
                 new QDurotarGrindToLevel11(bot)
-            });
-            Quests.Enqueue(new List<IBotQuest>() {
+            ]);
+            Quests.Enqueue([
                 new QTheBarrensGrindToLevel14(bot)
-            });
-            Quests.Enqueue(new List<IBotQuest>() {
+            ]);
+            Quests.Enqueue([
                 new QTheBarrensGrindToLevel16(bot)
-            });
-            Quests.Enqueue(new List<IBotQuest>() {
+            ]);
+            Quests.Enqueue([
                 new QTheBarrensGrindToLevel19(bot)
-            });
-            Quests.Enqueue(new List<IBotQuest>() {
+            ]);
+            Quests.Enqueue([
                 new QStonetalonGrindToLevel23(bot)
-            });
-            Quests.Enqueue(new List<IBotQuest>() {
+            ]);
+            Quests.Enqueue([
                 new QStonetalonGrindToLevel31(bot)
-            });
-            Quests.Enqueue(new List<IBotQuest>() {
+            ]);
+            Quests.Enqueue([
                 new QDesolaceGrindToLevel35(bot)
-            });
-            Quests.Enqueue(new List<IBotQuest>() {
+            ]);
+            Quests.Enqueue([
                 new QDesolaceGrindToLevel40(bot)
-            });
-            Quests.Enqueue(new List<IBotQuest>() {
+            ]);
+            Quests.Enqueue([
                 new QTanarisGrindToLevel44(bot)
-            });
-            Quests.Enqueue(new List<IBotQuest>() {
+            ]);
+            Quests.Enqueue([
                 new QTanarisGrindToLevel49(bot)
-            });
-            Quests.Enqueue(new List<IBotQuest>() {
+            ]);
+            Quests.Enqueue([
                 new QUngoroGrindToLevel54(bot)
-            });
-            Quests.Enqueue(new List<IBotQuest>() {
+            ]);
+            Quests.Enqueue([
                 new QSilithusGrindToLevel60(bot)
-            });
+            ]);
         }
 
         public Queue<List<IBotQuest>> Quests { get; }

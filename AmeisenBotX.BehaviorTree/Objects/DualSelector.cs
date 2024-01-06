@@ -29,22 +29,9 @@ namespace AmeisenBotX.BehaviorTree.Objects
 
         public INode GetNodeToExecute()
         {
-            if (ConditionA() && ConditionB())
-            {
-                return Children[3];
-            }
-            else if (ConditionA() && !ConditionB())
-            {
-                return Children[1];
-            }
-            else if (!ConditionA() && ConditionB())
-            {
-                return Children[2];
-            }
-            else
-            {
-                return Children[0];
-            }
+            return ConditionA() && ConditionB()
+                ? Children[3]
+                : ConditionA() && !ConditionB() ? Children[1] : !ConditionA() && ConditionB() ? Children[2] : Children[0];
         }
     }
 
@@ -70,22 +57,11 @@ namespace AmeisenBotX.BehaviorTree.Objects
 
         public INode<T> GetNodeToExecute(T blackboard)
         {
-            if (ConditionA(blackboard) && ConditionB(blackboard))
-            {
-                return Children[3];
-            }
-            else if (ConditionA(blackboard) && !ConditionB(blackboard))
-            {
-                return Children[1];
-            }
-            else if (!ConditionA(blackboard) && ConditionB(blackboard))
-            {
-                return Children[2];
-            }
-            else
-            {
-                return Children[0];
-            }
+            return ConditionA(blackboard) && ConditionB(blackboard)
+                ? Children[3]
+                : ConditionA(blackboard) && !ConditionB(blackboard)
+                    ? Children[1]
+                    : !ConditionA(blackboard) && ConditionB(blackboard) ? Children[2] : Children[0];
         }
     }
 }

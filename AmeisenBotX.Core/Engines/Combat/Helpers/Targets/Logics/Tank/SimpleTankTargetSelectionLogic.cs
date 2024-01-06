@@ -49,7 +49,7 @@ namespace AmeisenBotX.Core.Engines.Combat.Helpers.Targets.Logics.Tank
             {
                 if (Bot.Objects.Partymembers.Any())
                 {
-                    Dictionary<IWowUnit, int> targets = new();
+                    Dictionary<IWowUnit, int> targets = [];
 
                     foreach (IWowUnit unit in Bot.Objects.Partymembers)
                     {

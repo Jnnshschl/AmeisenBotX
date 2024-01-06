@@ -4,9 +4,9 @@ using AmeisenBotX.Wow;
 using AmeisenBotX.Wow.Objects;
 using AmeisenBotX.Wow.Objects.Enums;
 using AmeisenBotX.Wow.Objects.Flags;
-using AmeisenBotX.Wow335a.Objects.Raw;
 using AmeisenBotX.Wow548.Objects.Descriptors;
 using AmeisenBotX.Wow548.Objects.Flags;
+using AmeisenBotX.Wow548.Objects.Raw;
 using System.Collections.Specialized;
 using System.Text;
 
@@ -221,7 +221,7 @@ namespace AmeisenBotX.Wow548.Objects
 
         private static unsafe IEnumerable<IWowAura> ReadAuraTable(IMemoryApi memory, IntPtr buffBase, int auraCount)
         {
-            List<IWowAura> auras = new();
+            List<IWowAura> auras = [];
 
             for (int i = 0; i < auraCount; ++i)
             {

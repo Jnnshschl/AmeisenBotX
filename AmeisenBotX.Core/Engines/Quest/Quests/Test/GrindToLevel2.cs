@@ -1,7 +1,6 @@
 ﻿using AmeisenBotX.Common.Math;
 using AmeisenBotX.Core.Engines.Quest.Objects.Objectives;
 using AmeisenBotX.Core.Engines.Quest.Objects.Quests;
-using System.Collections.Generic;
 
 namespace AmeisenBotX.Core.Engines.Quest.Quests.Test
 {
@@ -9,11 +8,10 @@ namespace AmeisenBotX.Core.Engines.Quest.Quests.Test
     {
         public GrindToLevel2(AmeisenBotInterfaces bot)
             : base("Test Grind Boars in Valley of Strength",
-                new List<IQuestObjective>()
-                {
-                    new QuestObjectiveChain(new List<IQuestObjective>()
-                    {
-                        new GrindingObjective(bot, 2, new List<List<Vector3>> {
+                [
+                    new QuestObjectiveChain(
+                    [
+                        new GrindingObjective(bot, 2, [
                             new()
                             {
                                 new Vector3(-486.28f, -4144.73f, 54.75f),
@@ -35,9 +33,9 @@ namespace AmeisenBotX.Core.Engines.Quest.Quests.Test
                                 new Vector3(-612.62f, -4448.09f, 45.59f),
                                 new Vector3(-619.22f, -4382.64f, 43.22f),
                             }
-                        }),
-                    })
-                })
+                        ]),
+                    ])
+                ])
         { }
     }
 }

@@ -28,9 +28,9 @@ namespace AmeisenBotX.Core.Engines.Tactic.Bosses.Naxxramas10
 
         public WowMapId MapId { get; } = WowMapId.Naxxramas;
 
-        private static List<int> AddsDisplayIds { get; } = new() { 14698, 27943 };
+        private static List<int> AddsDisplayIds { get; } = [14698, 27943];
 
-        private static List<int> AnubRekhanDisplayId { get; } = new() { 15931 };
+        private static List<int> AnubRekhanDisplayId { get; } = [15931];
 
         private AmeisenBotInterfaces Bot { get; }
 
@@ -40,8 +40,8 @@ namespace AmeisenBotX.Core.Engines.Tactic.Bosses.Naxxramas10
 
         private bool MeleeDpsIsMovingToMid { get; set; }
 
-        private List<Vector3> TankingKitingRouteA { get; } = new()
-        {
+        private List<Vector3> TankingKitingRouteA { get; } =
+        [
             new Vector3(3323, -3497, 287),
             new Vector3(3312, -3514, 287),
             new Vector3(3294, -3526, 287),
@@ -50,10 +50,10 @@ namespace AmeisenBotX.Core.Engines.Tactic.Bosses.Naxxramas10
             new Vector3(3235, -3514, 287),
             new Vector3(3223, -3497, 287),
             new Vector3(3220, -3484, 287),
-        };
+        ];
 
-        private List<Vector3> TankingKitingRouteB { get; } = new()
-        {
+        private List<Vector3> TankingKitingRouteB { get; } =
+        [
             new Vector3(3223, -3455, 287),
             new Vector3(3235, -3437, 287),
             new Vector3(3252, -3425, 287),
@@ -62,7 +62,7 @@ namespace AmeisenBotX.Core.Engines.Tactic.Bosses.Naxxramas10
             new Vector3(3312, -3437, 287),
             new Vector3(3324, -3456, 287),
             new Vector3(3326, -3465, 287),
-        };
+        ];
 
         private Queue<Vector3> TankingPathQueue { get; }
 

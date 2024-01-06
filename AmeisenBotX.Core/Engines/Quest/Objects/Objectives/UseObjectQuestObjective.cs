@@ -14,7 +14,7 @@ namespace AmeisenBotX.Core.Engines.Quest.Objects.Objectives
         public UseObjectQuestObjective(AmeisenBotInterfaces bot, int objectDisplayId, UseObjectQuestObjectiveCondition condition)
         {
             Bot = bot;
-            ObjectDisplayIds = new List<int>() { objectDisplayId };
+            ObjectDisplayIds = [objectDisplayId];
             Condition = condition;
 
             UseEvent = new(TimeSpan.FromSeconds(1));

@@ -9,7 +9,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 
-namespace AmeisenBotX.Core.Logic.CombatClasses.Shino
+namespace AmeisenBotX.Core.Engines.Combat.Classes.Shino
 {
     public abstract class TemplateCombatClass : BasicCombatClass
     {
@@ -94,9 +94,9 @@ namespace AmeisenBotX.Core.Logic.CombatClasses.Shino
             if (currentTarget != null && currentTarget.Guid != 0
                && (currentTarget.IsDead
                    || currentTarget.IsNotAttackable
-                   || (currentTarget.Auras.Any(e => Bot.Db.GetSpellName(e.SpellId) == Mage335a.Polymorph) &&
-                       nearAttackingEnemies.Where(e => e.Auras.All(aura => Bot.Db.GetSpellName(aura.SpellId) != Mage335a.Polymorph)).Any(e => e.Guid != currentTarget.Guid))
-                   || (!currentTarget.IsInCombat && nearAttackingEnemies.Any())
+                   || currentTarget.Auras.Any(e => Bot.Db.GetSpellName(e.SpellId) == Mage335a.Polymorph) &&
+                       nearAttackingEnemies.Where(e => e.Auras.All(aura => Bot.Db.GetSpellName(aura.SpellId) != Mage335a.Polymorph)).Any(e => e.Guid != currentTarget.Guid)
+                   || !currentTarget.IsInCombat && nearAttackingEnemies.Any()
                    || !IWowUnit.IsValid(Bot.Target)
                    || Bot.Db.GetReaction(Bot.Player, currentTarget) == WowUnitReaction.Friendly))
             {

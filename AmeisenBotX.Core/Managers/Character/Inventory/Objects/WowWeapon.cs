@@ -86,12 +86,7 @@ namespace AmeisenBotX.Core.Managers.Character.Inventory.Objects
                 return weaponType + handedness;
             }
 
-            if (subType.EndsWith("s"))
-            {
-                return subType.Remove(subType.Length - 1);
-            }
-
-            return subType;
+            return subType.EndsWith("s") ? subType.Remove(subType.Length - 1) : subType;
         }
     }
 }

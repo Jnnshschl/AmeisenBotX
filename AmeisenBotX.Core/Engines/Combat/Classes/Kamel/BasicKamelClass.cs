@@ -49,7 +49,7 @@ namespace AmeisenBotX.Core.Engines.Combat.Classes.Kamel
 
         #endregion Priest
 
-        public readonly Dictionary<string, DateTime> spellCoolDown = new();
+        public readonly Dictionary<string, DateTime> spellCoolDown = [];
 
         private readonly int[] useableHealingItems = new int[]
         {

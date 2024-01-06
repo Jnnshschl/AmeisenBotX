@@ -1,7 +1,6 @@
 using AmeisenBotX.Common.Math;
 using AmeisenBotX.Core.Engines.Quest.Objects.Objectives;
 using AmeisenBotX.Core.Engines.Quest.Objects.Quests;
-using System.Collections.Generic;
 
 namespace AmeisenBotX.Core.Engines.Quest.Quests.Grinder
 {
@@ -9,11 +8,10 @@ namespace AmeisenBotX.Core.Engines.Quest.Quests.Grinder
     {
         public QDesolaceGrindToLevel40(AmeisenBotInterfaces bot)
             : base("DesolaceGrindToLevel40",
-                new List<IQuestObjective>()
-                {
-                    new QuestObjectiveChain(new List<IQuestObjective>()
-                    {
-                        new GrindingObjective(bot, 40, new List<List<Vector3>> {
+                [
+                    new QuestObjectiveChain(
+                    [
+                        new GrindingObjective(bot, 40, [
                             new()
                             {
                                 new Vector3(-1884.74f, 1314.40f, 87.69f),
@@ -28,9 +26,9 @@ namespace AmeisenBotX.Core.Engines.Quest.Quests.Grinder
                                 new Vector3(-1618.47f, 1242.85f, 90.80f),
                                 new Vector3(-1655.57f, 1284.73f, 90.63f),
                             },
-                        }),
-                    })
-                })
+                        ]),
+                    ])
+                ])
         { }
     }
 }

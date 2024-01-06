@@ -13,7 +13,7 @@ namespace AmeisenBotX.Core.Logic.Idle
             IdleActions = idleActions;
 
             Rnd = new();
-            LastActions = new();
+            LastActions = [];
         }
 
         public TimeSpan Cooldown { get; private set; }

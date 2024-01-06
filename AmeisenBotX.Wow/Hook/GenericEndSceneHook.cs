@@ -230,49 +230,42 @@ namespace AmeisenBotX.Wow.Hook
                 }
             }
 
-            List<string> assemblyBuffer = new();
-
-            // check for code to be executed
-            assemblyBuffer.Add($"TEST DWORD [{IntShouldExecute}], 1");
-            assemblyBuffer.Add("JE @out");
-
-            // check if we want to override our is ingame check going to be used while we are in the
-            // login screen
-            assemblyBuffer.Add($"TEST DWORD [{OverrideWorldCheckAddress}], 1");
-            assemblyBuffer.Add("JNE @ovr");
-
-            // check for world to be loaded we dont want to execute code in the loadingscreen, cause
-            // that mostly results in crashes
-            assemblyBuffer.Add($"TEST DWORD [{Memory.Offsets.IsWorldLoaded}], 1");
-            assemblyBuffer.Add("JE @out");
-            assemblyBuffer.Add("@ovr:");
-
-            // execute our stuff and get return address
-            assemblyBuffer.Add($"CALL {CExecution}");
-            assemblyBuffer.Add($"MOV [{ReturnValueAddress}], EAX");
-
-            // finish up our execution
-            assemblyBuffer.Add("@out:");
-            assemblyBuffer.Add($"MOV DWORD [{IntShouldExecute}], 0");
-
-            // ---------------------------- # GameInfo & EventHook stuff
-            // ---------------------------- world loaded and should execute check
-            assemblyBuffer.Add($"TEST DWORD [{Memory.Offsets.IsWorldLoaded}], 1");
-            assemblyBuffer.Add("JE @skpgi");
-            assemblyBuffer.Add($"TEST DWORD [{GameInfoExecuteAddress}], 1");
-            assemblyBuffer.Add("JE @skpgi");
-
-            // isOutdoors
-            assemblyBuffer.Add($"CALL {Memory.Offsets.FunctionGetActivePlayerObject}");
-            assemblyBuffer.Add("MOV ECX, EAX");
-            assemblyBuffer.Add($"CALL {Memory.Offsets.FunctionIsOutdoors}");
-            assemblyBuffer.Add($"MOV BYTE [{GameInfoAddress}], AL");
-
-            // isTargetInLineOfSight
-            assemblyBuffer.Add($"MOV DWORD [{GameInfoAddress.ToInt32() + 1}], 0");
-
-            assemblyBuffer.Add($"TEST DWORD [{GameInfoExecuteLosCheckAddress}], 1");
-            assemblyBuffer.Add("JE @loscheck");
+            List<string> assemblyBuffer =
+            [
+                // check for code to be executed
+                $"TEST DWORD [{IntShouldExecute}], 1",
+                "JE @out",
+                // check if we want to override our is ingame check going to be used while we are in the
+                // login screen
+                $"TEST DWORD [{OverrideWorldCheckAddress}], 1",
+                "JNE @ovr",
+                // check for world to be loaded we dont want to execute code in the loadingscreen, cause
+                // that mostly results in crashes
+                $"TEST DWORD [{Memory.Offsets.IsWorldLoaded}], 1",
+                "JE @out",
+                "@ovr:",
+                // execute our stuff and get return address
+                $"CALL {CExecution}",
+                $"MOV [{ReturnValueAddress}], EAX",
+                // finish up our execution
+                "@out:",
+                $"MOV DWORD [{IntShouldExecute}], 0",
+                // ---------------------------- # GameInfo & EventHook stuff
+                // ---------------------------- world loaded and should execute check
+                $"TEST DWORD [{Memory.Offsets.IsWorldLoaded}], 1",
+                "JE @skpgi",
+                $"TEST DWORD [{GameInfoExecuteAddress}], 1",
+                "JE @skpgi",
+                // isOutdoors
+                $"CALL {Memory.Offsets.FunctionGetActivePlayerObject}",
+                "MOV ECX, EAX",
+                $"CALL {Memory.Offsets.FunctionIsOutdoors}",
+                $"MOV BYTE [{GameInfoAddress}], AL",
+                // isTargetInLineOfSight
+                $"MOV DWORD [{GameInfoAddress.ToInt32() + 1}], 0",
+                $"TEST DWORD [{GameInfoExecuteLosCheckAddress}], 1",
+                "JE @loscheck",
+            ];
 
             IntPtr distancePointer = GameInfoLosCheckDataAddress;
             IntPtr startPointer = IntPtr.Add(distancePointer, 0x4);
@@ -517,17 +510,12 @@ namespace AmeisenBotX.Wow.Hook
 
         private IntPtr GetEndScene()
         {
-            if (Memory.Read(Memory.Offsets.EndSceneStaticDevice, out IntPtr pDevice)
+            return Memory.Read(Memory.Offsets.EndSceneStaticDevice, out IntPtr pDevice)
                 && Memory.Read(IntPtr.Add(pDevice, (int)Memory.Offsets.EndSceneOffsetDevice), out IntPtr pEnd)
                 && Memory.Read(pEnd, out IntPtr pScene)
-                && Memory.Read(IntPtr.Add(pScene, (int)Memory.Offsets.EndSceneOffset), out IntPtr pEndscene))
-            {
-                return pEndscene;
-            }
-            else
-            {
-                return IntPtr.Zero;
-            }
+                && Memory.Read(IntPtr.Add(pScene, (int)Memory.Offsets.EndSceneOffset), out IntPtr pEndscene)
+                ? pEndscene
+                : IntPtr.Zero;
         }
     }
 }

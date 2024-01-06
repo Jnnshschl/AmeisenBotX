@@ -73,12 +73,7 @@ namespace AmeisenBotX.Common.Math
             float run = System.MathF.Abs(endPoint.X - startPoint.X);
             float rise = System.MathF.Abs(endPoint.Y - startPoint.Y);
 
-            if (!toPercentage)
-            {
-                return rise / run;
-            }
-
-            return (rise / run) * 100.0f;
+            return !toPercentage ? rise / run : (rise / run) * 100.0f;
         }
 
         public static bool IsFacing(Vector3 position, float rotation, Vector3 targetPosition, float maxAngleDiff = 1.5f)
@@ -113,12 +108,7 @@ namespace AmeisenBotX.Common.Math
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static float Percentage(int value, int max)
         {
-            if (value == 0 || max == 0)
-            {
-                return 0;
-            }
-
-            return value / (float)max * 100.0f;
+            return value == 0 || max == 0 ? 0 : value / (float)max * 100.0f;
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]

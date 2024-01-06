@@ -11,11 +11,10 @@ namespace AmeisenBotX.Core.Engines.Quest.Quests.Durotar.ValleyOfStrength
             : base(bot, 792, "Vile Familiars", 2, 1,
                 () => (bot.GetClosestQuestGiverByNpcId(bot.Player.Position, new List<int> { 3145 }), new Vector3(-629.05f, -4228.06f, 38.23f)),
                 () => (bot.GetClosestQuestGiverByNpcId(bot.Player.Position, new List<int> { 3145 }), new Vector3(-629.05f, -4228.06f, 38.23f)),
-                new List<IQuestObjective>()
-                {
-                    new QuestObjectiveChain(new List<IQuestObjective>()
-                    {
-                        new KillAndLootQuestObjective(bot, new List<int> { 3101 }, 8, 0, new List<List<Vector3>> {
+                [
+                    new QuestObjectiveChain(
+                    [
+                        new KillAndLootQuestObjective(bot, [3101], 8, 0, [
                             new()
                             {
                                 new Vector3(-117.28f, -4217.52f, 54.48f),
@@ -28,9 +27,9 @@ namespace AmeisenBotX.Core.Engines.Quest.Quests.Durotar.ValleyOfStrength
                                 new Vector3(-43.41f, -4226.15f, 63.76f),
                                 new Vector3(-49.32f, -4222.96f, 62.27f),
                             },
-                        }),
-                    })
-                })
+                        ]),
+                    ])
+                ])
         { }
     }
 }

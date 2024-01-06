@@ -9,8 +9,8 @@ namespace AmeisenBotX.Core.Engines.Grinding.Profiles.Horde
 {
     public class DurotarGrindTo14 : IGrindingProfile
     {
-        public List<Npc> NpcsOfInterest { get; } = new()
-        {
+        public List<Npc> NpcsOfInterest { get; } =
+        [
             new Npc("Wuark", 3167,
                 WowMapId.Kalimdor, WowZoneId.RazorHill, new Vector3(358, -4706, 14),
                 NpcType.VendorRepair),
@@ -31,10 +31,10 @@ namespace AmeisenBotX.Core.Engines.Grinding.Profiles.Horde
             new Npc("Rawrk", 5943,
                 WowMapId.Kalimdor, WowZoneId.RazorHill, new Vector3(330, -4826, 10),
                 NpcType.ProfessionTrainer, NpcSubType.FirstAidTrainer)
-        };
+        ];
 
-        public List<InteractableObject> ObjectsOfInterest { get; } = new()
-        {
+        public List<InteractableObject> ObjectsOfInterest { get; } =
+        [
             new InteractableObject(143981,
                 WowMapId.Kalimdor, WowZoneId.RazorHill, new Vector3(322, -4706, 14),
                 InteractableObjectType.Mailbox, MailboxFactionType.Horde),
@@ -48,19 +48,19 @@ namespace AmeisenBotX.Core.Engines.Grinding.Profiles.Horde
             new InteractableObject(106318,
                 WowMapId.Kalimdor, WowZoneId.RazorHill, new Vector3(440, -4214, 25),
                 InteractableObjectType.Container)
-        };
+        ];
 
         public bool RandomizeSpots => false;
 
-        public List<GrindingSpot> Spots { get; } = new()
-        {
+        public List<GrindingSpot> Spots { get; } =
+        [
             // razormane/scorpids/reptiles
             new GrindingSpot(new Vector3(393, -4312, 25), 50.0f, 6, 14),
             new GrindingSpot(new Vector3(377, -4236, 24), 50.0f, 6, 14),
             new GrindingSpot(new Vector3(445, -4143, 27), 50.0f, 6, 14),
             new GrindingSpot(new Vector3(533, -4188, 17), 50.0f, 6, 14),
             new GrindingSpot(new Vector3(504, -4300, 21), 50.0f, 6, 14)
-        };
+        ];
 
         public override string ToString()
         {

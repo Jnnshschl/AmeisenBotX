@@ -11,20 +11,20 @@ namespace AmeisenBotX.Core.Engines.Jobs.Profiles.Gathering
 
         public JobType JobType => JobType.Mining;
 
-        public List<Vector3> MailboxNodes { get; private set; } = new()
-        {
+        public List<Vector3> MailboxNodes { get; private set; } =
+        [
             new(-10643, 1157, 33),
-        };
+        ];
 
-        public List<WowOreId> OreTypes { get; } = new()
-        {
+        public List<WowOreId> OreTypes { get; } =
+        [
             WowOreId.Copper,
             WowOreId.Silver,
             WowOreId.Tin
-        };
+        ];
 
-        public List<Vector3> Path { get; } = new()
-        {
+        public List<Vector3> Path { get; } =
+        [
             new(-9799, 872, 25),
             new(-9791, 878, 24),
             new(-9783, 884, 23),
@@ -723,7 +723,7 @@ namespace AmeisenBotX.Core.Engines.Jobs.Profiles.Gathering
             new(-9822, 877, 27),
             new(-9816, 869, 26),
             new(-9807, 866, 25),
-        };
+        ];
 
         public override string ToString()
         {

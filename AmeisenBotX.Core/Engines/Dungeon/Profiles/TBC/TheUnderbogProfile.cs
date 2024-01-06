@@ -24,8 +24,8 @@ namespace AmeisenBotX.Core.Engines.Dungeon.Profiles.TBC
 
         public string Name { get; } = "[61-65] The Underbog";
 
-        public List<DungeonNode> Nodes { get; private set; } = new()
-        {
+        public List<DungeonNode> Nodes { get; private set; } =
+        [
             new(new(10, -16, -3)),
             new(new(16, -21, -3)),
             new(new(23, -25, -3)),
@@ -331,9 +331,9 @@ namespace AmeisenBotX.Core.Engines.Dungeon.Profiles.TBC
             new(new(40, -23, 19)),
             new(new(30, -28, -3)),
             new(new(22, -29, -3)),
-        };
+        ];
 
-        public List<int> PriorityUnits { get; } = new();
+        public List<int> PriorityUnits { get; } = [];
 
         public int RequiredItemLevel { get; } = 65;
 

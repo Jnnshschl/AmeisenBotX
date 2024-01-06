@@ -24,8 +24,8 @@ namespace AmeisenBotX.Core.Engines.Dungeon.Profiles.WotLK
 
         public string Name { get; } = "[68-80] Utgarde Keep";
 
-        public List<DungeonNode> Nodes { get; private set; } = new()
-        {
+        public List<DungeonNode> Nodes { get; private set; } =
+        [
             new(new(157, -85, 13)),
             new(new(165, -83, 13)),
             new(new(173, -80, 13)),
@@ -317,9 +317,9 @@ namespace AmeisenBotX.Core.Engines.Dungeon.Profiles.WotLK
             new(new(238, -326, 180)),
             new(new(242, -333, 180)),
             new(new(241, -325, 180)),
-        };
+        ];
 
-        public List<int> PriorityUnits { get; } = new();
+        public List<int> PriorityUnits { get; } = [];
 
         public int RequiredItemLevel { get; } = 100;
 

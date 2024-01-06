@@ -1,7 +1,6 @@
 using AmeisenBotX.Common.Math;
 using AmeisenBotX.Core.Engines.Quest.Objects.Objectives;
 using AmeisenBotX.Core.Engines.Quest.Objects.Quests;
-using System.Collections.Generic;
 
 namespace AmeisenBotX.Core.Engines.Quest.Quests.Grinder
 {
@@ -9,11 +8,10 @@ namespace AmeisenBotX.Core.Engines.Quest.Quests.Grinder
     {
         public QTheBarrensGrindToLevel19(AmeisenBotInterfaces bot)
             : base("TheBarrensGrindToLevel19",
-                new List<IQuestObjective>()
-                {
-                    new QuestObjectiveChain(new List<IQuestObjective>()
-                    {
-                        new GrindingObjective(bot, 19, new List<List<Vector3>> {
+                [
+                    new QuestObjectiveChain(
+                    [
+                        new GrindingObjective(bot, 19, [
                             new()
                             {
                                 new Vector3(-1905.31f, -3481.39f, 41.36f),
@@ -26,9 +24,9 @@ namespace AmeisenBotX.Core.Engines.Quest.Quests.Grinder
                                 new Vector3(-1938.34f, -3713.84f, 7.20f),
                                 new Vector3(-1877.66f, -3660.91f, 10.44f),
                             },
-                        }),
-                    })
-                })
+                        ]),
+                    ])
+                ])
         { }
     }
 }

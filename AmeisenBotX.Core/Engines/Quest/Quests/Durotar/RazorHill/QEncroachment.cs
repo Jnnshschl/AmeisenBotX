@@ -11,11 +11,10 @@ namespace AmeisenBotX.Core.Engines.Quest.Quests.Durotar.RazorHill
             : base(bot, 837, "Encroachment", 6, 1,
                 () => (bot.GetClosestQuestGiverByNpcId(bot.Player.Position, new List<int> { 3139 }), new Vector3(274.99f, -4709.30f, 17.57f)),
                 () => (bot.GetClosestQuestGiverByNpcId(bot.Player.Position, new List<int> { 3139 }), new Vector3(274.99f, -4709.30f, 17.57f)),
-                new List<IQuestObjective>()
-                {
-                    new QuestObjectiveChain(new List<IQuestObjective>()
-                    {
-                        new KillAndLootQuestObjective(bot, new List<int> { 3111 }, 4, 0, new List<List<Vector3>> {
+                [
+                    new QuestObjectiveChain(
+                    [
+                        new KillAndLootQuestObjective(bot, [3111], 4, 0, [
                             new()
                             {
                                 new Vector3(82.96f, -4643.34f, 37.46f),
@@ -43,8 +42,8 @@ namespace AmeisenBotX.Core.Engines.Quest.Quests.Durotar.RazorHill
                                 new Vector3(95.03f, -4476.37f, 40.75f),
                                 new Vector3(111.28f, -4446.82f, 38.88f),
                             },
-                        }),
-                        new KillAndLootQuestObjective(bot, new List<int> { 3112 }, 4, 0, new List<List<Vector3>> {
+                        ]),
+                        new KillAndLootQuestObjective(bot, [3112], 4, 0, [
                             new()
                             {
                                 new Vector3(60.08f, -4298.42f, 64.12f),
@@ -66,8 +65,8 @@ namespace AmeisenBotX.Core.Engines.Quest.Quests.Durotar.RazorHill
                                 new Vector3(52.69f, -4613.99f, 46.73f),
                                 new Vector3(124.53f, -4582.72f, 63.72f),
                             },
-                        }),
-                        new KillAndLootQuestObjective(bot, new List<int> { 3113 }, 4, 0, new List<List<Vector3>> {
+                        ]),
+                        new KillAndLootQuestObjective(bot, [3113], 4, 0, [
                             new()
                             {
                                 new Vector3(483.50f, -4148.08f, 24.82f),
@@ -92,8 +91,8 @@ namespace AmeisenBotX.Core.Engines.Quest.Quests.Durotar.RazorHill
                                 new Vector3(493.81f, -4256.06f, 21.15f),
                                 new Vector3(439.98f, -4229.21f, 25.41f),
                             },
-                        }),
-                        new KillAndLootQuestObjective(bot, new List<int> { 3114 }, 4, 0, new List<List<Vector3>> {
+                        ]),
+                        new KillAndLootQuestObjective(bot, [3114], 4, 0, [
                             new()
                             {
                                 new Vector3(495.71f, -4196.06f, 24.16f),
@@ -113,9 +112,9 @@ namespace AmeisenBotX.Core.Engines.Quest.Quests.Durotar.RazorHill
                                 new Vector3(-137.06f, -4010.05f, 59.34f),
                                 new Vector3(-87.46f, -4045.82f, 64.50f),
                             },
-                        }),
-                    })
-                })
+                        ]),
+                    ])
+                ])
         { }
     }
 }

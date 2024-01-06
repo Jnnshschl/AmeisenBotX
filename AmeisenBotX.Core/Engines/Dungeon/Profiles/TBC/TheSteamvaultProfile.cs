@@ -24,8 +24,8 @@ namespace AmeisenBotX.Core.Engines.Dungeon.Profiles.TBC
 
         public string Name { get; } = "[62-66] The Steamvault";
 
-        public List<DungeonNode> Nodes { get; private set; } = new()
-        {
+        public List<DungeonNode> Nodes { get; private set; } =
+        [
             new(new(-14, 7, -4)),
             new(new(-6, 5, -4)),
             new(new(-4, -3, -4)),
@@ -237,9 +237,9 @@ namespace AmeisenBotX.Core.Engines.Dungeon.Profiles.TBC
             new(new(-95, -547, 8)),
             new(new(-95, -555, 8)),
             new(new(-96, -563, 8)),
-        };
+        ];
 
-        public List<int> PriorityUnits { get; } = new();
+        public List<int> PriorityUnits { get; } = [];
 
         public int RequiredItemLevel { get; } = 70;
 

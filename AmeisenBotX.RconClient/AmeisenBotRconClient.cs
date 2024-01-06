@@ -56,7 +56,7 @@ namespace AmeisenBotX.RconClient
 
         public bool NeedToRegister { get; private set; } = true;
 
-        public List<ActionType> PendingActions { get; private set; } = new();
+        public List<ActionType> PendingActions { get; private set; } = [];
 
         public RegisterMessage RegisterMessage { get; }
 
@@ -111,14 +111,7 @@ namespace AmeisenBotX.RconClient
 
             NeedToRegister = false;
 
-            if (registerResponse.IsSuccessStatusCode)
-            {
-                return true;
-            }
-            else
-            {
-                return false;
-            }
+            return registerResponse.IsSuccessStatusCode;
         }
 
         public bool SendData(DataMessage dataMessage)

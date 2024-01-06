@@ -70,7 +70,7 @@ namespace AmeisenBotX.Core.Engines.Battleground.einTyp
             if (hasStateChanged)
             {
                 hasStateChanged = false;
-                hasFlag = Bot.Player.Auras != null && Bot.Player.Auras.Any(e => e.SpellId == 23333 || e.SpellId == 23335);
+                hasFlag = Bot.Player.Auras != null && Bot.Player.Auras.Any(e => e.SpellId is 23333 or 23335);
                 IWowUnit teamFlagCarrier = GetTeamFlagCarrier();
                 ownTeamHasFlag = teamFlagCarrier != null;
                 if (ownTeamHasFlag)
@@ -327,14 +327,7 @@ namespace AmeisenBotX.Core.Engines.Battleground.einTyp
             Bot.Db.GetSpellName(en.SpellId).Contains("Flag") || Bot.Db.GetSpellName(en.SpellId).Contains("flag")))
             .ToList();
 
-            if (flagCarrierList.Count > 0)
-            {
-                return flagCarrierList[0];
-            }
-            else
-            {
-                return null;
-            }
+            return flagCarrierList.Count > 0 ? flagCarrierList[0] : null;
         }
 
         private IWowObject GetEnemyFlagObject()
@@ -347,14 +340,7 @@ namespace AmeisenBotX.Core.Engines.Battleground.einTyp
                 .Where(x => Enum.IsDefined(typeof(WowGameObjectDisplayId), x.DisplayId)
                          && targetFlag == (WowGameObjectDisplayId)x.DisplayId).ToList();
 
-            if (flagObjectList.Count > 0)
-            {
-                return flagObjectList[0];
-            }
-            else
-            {
-                return null;
-            }
+            return flagObjectList.Count > 0 ? flagObjectList[0] : (IWowObject)null;
         }
 
         private IWowObject GetOwnFlagObject()
@@ -367,27 +353,13 @@ namespace AmeisenBotX.Core.Engines.Battleground.einTyp
                 .Where(x => Enum.IsDefined(typeof(WowGameObjectDisplayId), x.DisplayId)
                          && targetFlag == (WowGameObjectDisplayId)x.DisplayId).ToList();
 
-            if (flagObjectList.Count > 0)
-            {
-                return flagObjectList[0];
-            }
-            else
-            {
-                return null;
-            }
+            return flagObjectList.Count > 0 ? flagObjectList[0] : (IWowObject)null;
         }
 
         private IWowUnit GetTeamFlagCarrier()
         {
             List<IWowUnit> flagCarrierList = Bot.Objects.All.OfType<IWowUnit>().Where(e => (Bot.Db.GetReaction(Bot.Player, e) == WowUnitReaction.Friendly || Bot.Db.GetReaction(Bot.Player, e) == WowUnitReaction.Neutral) && !e.IsDead && e.Guid != Bot.Wow.PlayerGuid && e.Auras != null && e.Auras.Any(en => Bot.Db.GetSpellName(en.SpellId).Contains("Flag") || Bot.Db.GetSpellName(en.SpellId).Contains("flag"))).ToList();
-            if (flagCarrierList.Count > 0)
-            {
-                return flagCarrierList[0];
-            }
-            else
-            {
-                return null;
-            }
+            return flagCarrierList.Count > 0 ? flagCarrierList[0] : null;
         }
 
         private bool IsAtPosition(Vector3 position)

@@ -40,10 +40,10 @@ namespace AmeisenBotX.Core.Engines.Combat.Classes.Jannis
         {
             Bot = bot;
 
-            SpellAbortFunctions = new();
+            SpellAbortFunctions = [];
 
             CooldownManager = new(Bot.Character.SpellBook.Spells);
-            RessurrectionTargets = new();
+            RessurrectionTargets = [];
 
             TargetProviderDps = new TargetManager(Bot, WowRole.Dps, TimeSpan.FromMilliseconds(250));
             TargetProviderTank = new TargetManager(Bot, WowRole.Tank, TimeSpan.FromMilliseconds(250));
@@ -484,14 +484,7 @@ namespace AmeisenBotX.Core.Engines.Combat.Classes.Jannis
                     return false;
                 }
 
-                if (parts[1].Contains(','))
-                {
-                    parts[1] = parts[1].Split(',')[0];
-                }
-                else
-                {
-                    parts[1] = parts[1].Split('.')[0];
-                }
+                parts[1] = parts[1].Contains(',') ? parts[1].Split(',')[0] : parts[1].Split('.')[0];
 
                 if (int.TryParse(parts[0], out int castSuccessful)
                     && int.TryParse(parts[1], NumberStyles.Any, CultureInfo.InvariantCulture, out int cooldown))

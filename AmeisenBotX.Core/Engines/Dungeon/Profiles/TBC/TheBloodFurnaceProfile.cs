@@ -24,8 +24,8 @@ namespace AmeisenBotX.Core.Engines.Dungeon.Profiles.TBC
 
         public string Name { get; } = "[59-63] The Blood Furnace";
 
-        public List<DungeonNode> Nodes { get; private set; } = new()
-        {
+        public List<DungeonNode> Nodes { get; private set; } =
+        [
             new(new(-4, 15, -45)),
             new(new(-2, 7, -45)),
             new(new(-1, -1, -44)),
@@ -262,9 +262,9 @@ namespace AmeisenBotX.Core.Engines.Dungeon.Profiles.TBC
             new(new(327, -91, -25)),
             new(new(327, -83, -25)),
             new(new(323, -90, -25)),
-        };
+        ];
 
-        public List<int> PriorityUnits { get; } = new();
+        public List<int> PriorityUnits { get; } = [];
 
         public int RequiredItemLevel { get; } = 62;
 

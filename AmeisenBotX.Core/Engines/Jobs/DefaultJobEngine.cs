@@ -27,7 +27,7 @@ namespace AmeisenBotX.Core.Engines.Jobs
             BlacklistEvent = new(TimeSpan.FromSeconds(1));
             MailSentEvent = new(TimeSpan.FromSeconds(3));
 
-            NodeBlacklist = new();
+            NodeBlacklist = [];
         }
 
         public List<ulong> NodeBlacklist { get; set; }

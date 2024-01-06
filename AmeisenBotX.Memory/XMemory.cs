@@ -256,7 +256,7 @@ namespace AmeisenBotX.Memory
                 return false;
             }
 
-            AllocationPools = new();
+            AllocationPools = [];
 
             // reserve initial pool
             if (INITIAL_POOL_SIZE > 0)

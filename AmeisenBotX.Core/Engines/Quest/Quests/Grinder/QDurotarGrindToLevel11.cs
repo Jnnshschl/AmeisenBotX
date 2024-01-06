@@ -1,7 +1,6 @@
 using AmeisenBotX.Common.Math;
 using AmeisenBotX.Core.Engines.Quest.Objects.Objectives;
 using AmeisenBotX.Core.Engines.Quest.Objects.Quests;
-using System.Collections.Generic;
 
 namespace AmeisenBotX.Core.Engines.Quest.Quests.Grinder
 {
@@ -9,11 +8,10 @@ namespace AmeisenBotX.Core.Engines.Quest.Quests.Grinder
     {
         public QDurotarGrindToLevel11(AmeisenBotInterfaces bot)
             : base("DurotarGrindToLevel11",
-                new List<IQuestObjective>()
-                {
-                    new QuestObjectiveChain(new List<IQuestObjective>()
-                    {
-                        new GrindingObjective(bot, 11, new List<List<Vector3>> {
+                [
+                    new QuestObjectiveChain(
+                    [
+                        new GrindingObjective(bot, 11, [
                             new()
                             {
                                 new Vector3(483.50f, -4148.08f, 24.82f),
@@ -36,9 +34,9 @@ namespace AmeisenBotX.Core.Engines.Quest.Quests.Grinder
                                 new Vector3(-68.29f, -4052.45f, 67.38f),
                                 new Vector3(-57.18f, -4040.56f, 67.33f),
                             },
-                        }),
-                    })
-                })
+                        ]),
+                    ])
+                ])
         { }
     }
 }

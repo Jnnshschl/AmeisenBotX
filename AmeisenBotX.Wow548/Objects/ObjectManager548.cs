@@ -35,7 +35,7 @@ namespace AmeisenBotX.Wow548.Objects
 
         private IEnumerable<ulong> ReadPartymemberGuids(IntPtr party)
         {
-            List<ulong> partymemberGuids = new();
+            List<ulong> partymemberGuids = [];
 
             for (int i = 0; i < 40; i++)
             {

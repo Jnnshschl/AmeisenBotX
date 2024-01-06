@@ -63,7 +63,7 @@ namespace AmeisenBotX.Core
 
         public bool ChatProtocols { get; set; } = false;
 
-        public List<string> CustomCombatClassDependencies { get; set; } = new();
+        public List<string> CustomCombatClassDependencies { get; set; } = [];
 
         public string CustomCombatClassFile { get; set; } = string.Empty;
 
@@ -97,11 +97,11 @@ namespace AmeisenBotX.Core
 
         public string GrindingProfile { get; set; } = string.Empty;
 
-        public Dictionary<string, Keybind> Hotkeys { get; set; } = new();
+        public Dictionary<string, Keybind> Hotkeys { get; set; } = [];
 
         public bool IdleActions { get; set; } = false;
 
-        public Dictionary<string, bool> IdleActionsEnabled { get; set; } = new();
+        public Dictionary<string, bool> IdleActionsEnabled { get; set; } = [];
 
         public bool IgnoreCombatWhileMounted { get; set; } = true;
 

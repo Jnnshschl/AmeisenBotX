@@ -11,11 +11,10 @@ namespace AmeisenBotX.Core.Engines.Quest.Quests.Durotar.RazorHill
             : base(bot, 784, "Vanquish the Betrayers", 3, 1,
                 () => (bot.GetClosestQuestGiverByNpcId(bot.Player.Position, new List<int> { 3139 }), new Vector3(274.99f, -4709.30f, 17.57f)),
                 () => (bot.GetClosestQuestGiverByNpcId(bot.Player.Position, new List<int> { 3139 }), new Vector3(274.99f, -4709.30f, 17.57f)),
-                new List<IQuestObjective>()
-                {
-                    new QuestObjectiveChain(new List<IQuestObjective>()
-                    {
-                        new KillAndLootQuestObjective(bot, new List<int> { 3128 }, 10, 0, new List<List<Vector3>> {
+                [
+                    new QuestObjectiveChain(
+                    [
+                        new KillAndLootQuestObjective(bot, [3128], 10, 0, [
                             new()
                             {
                                 new Vector3(-220.08f, -4908.83f, 26.92f),
@@ -26,8 +25,8 @@ namespace AmeisenBotX.Core.Engines.Quest.Quests.Durotar.RazorHill
                                 new Vector3(-7.66f, -4982.83f, 13.48f),
                                 new Vector3(-18.87f, -4917.26f, 16.75f),
                             },
-                        }),
-                        new KillAndLootQuestObjective(bot, new List<int> { 3129 }, 8, 0, new List<List<Vector3>> {
+                        ]),
+                        new KillAndLootQuestObjective(bot, [3129], 8, 0, [
                             new()
                             {
                                 new Vector3(17.51f, -4951.48f, 14.39f),
@@ -42,15 +41,15 @@ namespace AmeisenBotX.Core.Engines.Quest.Quests.Durotar.RazorHill
                                 new Vector3(-78.06f, -5110.51f, 17.10f),
                                 new Vector3(-87.91f, -5018.34f, 16.56f),
                             },
-                        }),
-                        new KillAndLootQuestObjective(bot, new List<int> { 3192 }, 1, 0, new List<List<Vector3>> {
+                        ]),
+                        new KillAndLootQuestObjective(bot, [3192], 1, 0, [
                             new()
                             {
                                 new Vector3(-245.52f, -5119.95f, 42.64f),
                             },
-                        }),
-                    })
-                })
+                        ]),
+                    ])
+                ])
         { }
     }
 }

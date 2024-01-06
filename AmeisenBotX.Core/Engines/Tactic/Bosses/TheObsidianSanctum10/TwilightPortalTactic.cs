@@ -30,7 +30,7 @@ namespace AmeisenBotX.Core.Engines.Tactic.Bosses.TheObsidianSanctum10
 
         public WowMapId MapId { get; } = WowMapId.TheObsidianSanctum;
 
-        private static List<int> DragonDisplayId { get; } = new() { 27421, 27039 };
+        private static List<int> DragonDisplayId { get; } = [27421, 27039];
 
         private AmeisenBotInterfaces Bot { get; }
 

@@ -116,7 +116,7 @@ namespace AmeisenBotX.Wow.Cache
             }
             else if (!HerbNodes[mapId].ContainsKey(displayId))
             {
-                HerbNodes[mapId].Add(displayId, new List<Vector3>() { position });
+                HerbNodes[mapId].Add(displayId, [position]);
             }
             else if (!HerbNodes[mapId][displayId].Any(e => e == position))
             {
@@ -132,7 +132,7 @@ namespace AmeisenBotX.Wow.Cache
             }
             else if (!OreNodes[mapId].ContainsKey(displayId))
             {
-                OreNodes[mapId].Add(displayId, new List<Vector3>() { position });
+                OreNodes[mapId].Add(displayId, [position]);
             }
             else if (!OreNodes[mapId][displayId].Any(e => e == position))
             {
@@ -148,7 +148,7 @@ namespace AmeisenBotX.Wow.Cache
             }
             else if (!PointsOfInterest[mapId].ContainsKey(poiType))
             {
-                PointsOfInterest[mapId].Add(poiType, new List<Vector3>() { position });
+                PointsOfInterest[mapId].Add(poiType, [position]);
             }
             else if (!PointsOfInterest[mapId][poiType].Any(e => e == position))
             {

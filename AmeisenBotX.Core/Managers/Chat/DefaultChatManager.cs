@@ -13,7 +13,7 @@ namespace AmeisenBotX.Core.Managers.Chat
         {
             Config = config;
             DataPath = dataPath;
-            ChatMessages = new List<WowChatMessage>();
+            ChatMessages = [];
         }
 
         public event Action<WowChatMessage> OnNewChatMessage;

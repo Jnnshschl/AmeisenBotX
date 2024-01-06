@@ -11,8 +11,8 @@ namespace AmeisenBotX.Core.Logic.Idle.Actions
         {
             Bot = bot;
 
-            Emotes = new List<string>()
-            {
+            Emotes =
+            [
                 "flex",
                 "train",
                 "joke",
@@ -20,10 +20,10 @@ namespace AmeisenBotX.Core.Logic.Idle.Actions
                 "dance",
                 "sit",
                 "sleep",
-            };
+            ];
 
-            EmotesWithInteraction = new List<string>()
-            {
+            EmotesWithInteraction =
+            [
                 "hi",
                 "wink",
                 "salute",
@@ -34,7 +34,7 @@ namespace AmeisenBotX.Core.Logic.Idle.Actions
                 "roar",
                 "applaud",
                 "shy",
-            };
+            ];
 
             Rnd = new Random();
         }

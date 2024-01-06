@@ -137,7 +137,7 @@ namespace AmeisenBotX.Wow.Events
 
                     if (!Events.ContainsKey(queueElement.Item1))
                     {
-                        Events.Add(queueElement.Item1, new List<Action<long, List<string>>>() { queueElement.Item2 });
+                        Events.Add(queueElement.Item1, [queueElement.Item2]);
                         sb.Append($"{FrameName}:RegisterEvent(\"{queueElement.Item1}\");");
                     }
                     else
@@ -188,7 +188,7 @@ namespace AmeisenBotX.Wow.Events
         private void Reset()
         {
             IsActive = false;
-            Events = new();
+            Events = [];
             SubscribeQueue = new();
             UnsubscribeQueue = new();
             PendingLuaToExecute = new();

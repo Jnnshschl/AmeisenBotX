@@ -11,12 +11,12 @@ namespace AmeisenBotX.Core.Engines.Jobs.Profiles.Gathering.Jannis
 
         public JobType JobType { get; } = JobType.Mining;
 
-        public List<Vector3> MailboxNodes { get; } = new() { new(-9456, 47, 57), new(-9250, -2145, 64) };
+        public List<Vector3> MailboxNodes { get; } = [new(-9456, 47, 57), new(-9250, -2145, 64)];
 
-        public List<WowOreId> OreTypes { get; } = new() { WowOreId.Copper, WowOreId.Tin, WowOreId.Silver, WowOreId.Iron };
+        public List<WowOreId> OreTypes { get; } = [WowOreId.Copper, WowOreId.Tin, WowOreId.Silver, WowOreId.Iron];
 
-        public List<Vector3> Path { get; } = new()
-        {
+        public List<Vector3> Path { get; } =
+        [
             new(-9289, -197, 69),
             new(-9295, -209, 69),
             new(-9301, -219, 68),
@@ -996,7 +996,7 @@ namespace AmeisenBotX.Core.Engines.Jobs.Profiles.Gathering.Jannis
             new(-9258, -171, 70),
             new(-9267, -181, 70),
             new(-9278, -189, 69),
-        };
+        ];
 
         public override string ToString()
         {

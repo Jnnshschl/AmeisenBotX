@@ -24,8 +24,8 @@ namespace AmeisenBotX.Core.Engines.Dungeon.Profiles.TBC
 
         public string Name { get; } = "[60-64] The Slave Pens";
 
-        public List<DungeonNode> Nodes { get; private set; } = new()
-        {
+        public List<DungeonNode> Nodes { get; private set; } =
+        [
             new(new(120, -132, -1)),
             new(new(122, -124, 0)),
             new(new(125, -117, -1)),
@@ -347,9 +347,9 @@ namespace AmeisenBotX.Core.Engines.Dungeon.Profiles.TBC
             new(new(-185, -783, 44)),
             new(new(-189, -790, 44)),
             new(new(-191, -798, 44), DungeonNodeType.Use),
-        };
+        ];
 
-        public List<int> PriorityUnits { get; } = new();
+        public List<int> PriorityUnits { get; } = [];
 
         public int RequiredItemLevel { get; } = 65;
 

@@ -64,7 +64,7 @@ namespace AmeisenBotX.Core.Engines.Movement.Pathfinding.Objects
             // in both directions. We dont ask for the Distance2D because we want to know the
             // movement path length
 
-            List<double> distances = new();
+            List<double> distances = [];
 
             foreach (Vector3 vertex in Area)
             {
@@ -198,7 +198,7 @@ namespace AmeisenBotX.Core.Engines.Movement.Pathfinding.Objects
             float topStart = top + VisibilityRadius / 2;
 
             bool directionToggle = false;
-            List<Vector3> newSearchPath = new();
+            List<Vector3> newSearchPath = [];
 
             for (int y = 0; y < stepsTopToBottom - 1; ++y)
             {

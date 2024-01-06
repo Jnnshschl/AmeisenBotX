@@ -10,7 +10,7 @@ namespace AmeisenBotX.Core.Engines.Quest.Objects.Objectives
         public UseUnitQuestObjective(AmeisenBotInterfaces bot, int objectDisplayId, bool questgiversOnly, UseUnitQuestObjectiveCondition condition)
         {
             Bot = bot;
-            ObjectDisplayIds = new List<int>() { objectDisplayId };
+            ObjectDisplayIds = [objectDisplayId];
             Condition = condition;
             QuestgiversOnly = questgiversOnly;
         }

@@ -4,14 +4,14 @@ using System.Linq;
 
 namespace AmeisenBotX.Memory.Structs
 {
-    public struct AllocationPool
+    public readonly struct AllocationPool
     {
         public AllocationPool(IntPtr address, int size)
         {
             Address = address;
             Size = size;
 
-            Allocations = new();
+            Allocations = [];
         }
 
         public IntPtr Address { get; }

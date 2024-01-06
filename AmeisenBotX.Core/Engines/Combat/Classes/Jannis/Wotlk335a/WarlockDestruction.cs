@@ -44,7 +44,7 @@ namespace AmeisenBotX.Core.Engines.Combat.Classes.Jannis.Wotlk335a
 
         public override bool IsMelee => false;
 
-        public override IItemComparator ItemComparator { get; set; } = new BasicIntellectComparator(new() { WowArmorType.Shield });
+        public override IItemComparator ItemComparator { get; set; } = new BasicIntellectComparator([WowArmorType.Shield]);
 
         public PetManager PetManager { get; private set; }
 
@@ -52,7 +52,7 @@ namespace AmeisenBotX.Core.Engines.Combat.Classes.Jannis.Wotlk335a
 
         public override TalentTree Talents { get; } = new()
         {
-            Tree1 = new(),
+            Tree1 = [],
             Tree2 = new()
             {
                 { 2, new(2, 2, 3) },

@@ -31,7 +31,7 @@ namespace AmeisenBotX.Core.Engines.Tactic.Dungeon.PitOfSaron
 
         public WowMapId MapId { get; } = WowMapId.PitOfSaron;
 
-        private static List<int> IckDisplayId { get; } = new List<int> { 30347 };
+        private static List<int> IckDisplayId { get; } = [30347];
 
         private AmeisenBotInterfaces Bot { get; }
 

@@ -16,7 +16,7 @@ namespace AmeisenBotX.Core.Engines.Movement.Pathfinding.Objects
 
         private bool AbortedPath { get; set; } = true;
 
-        private List<SearchArea> Areas { get; } = new();
+        private List<SearchArea> Areas { get; } = [];
 
         private int CurrentSearchArea { get; set; }
 

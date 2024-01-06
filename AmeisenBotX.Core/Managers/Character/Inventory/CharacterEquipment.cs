@@ -20,7 +20,7 @@ namespace AmeisenBotX.Core.Managers.Character.Inventory
         public CharacterEquipment(IWowInterface wowInterface)
         {
             Wow = wowInterface;
-            Items = new();
+            Items = [];
         }
 
         public float AverageItemLevel { get; private set; }

@@ -30,7 +30,7 @@ namespace AmeisenBotX.Core.Engines.Combat.Classes.Jannis.Wotlk335a
 
         public override bool IsMelee => false;
 
-        public override IItemComparator ItemComparator { get; set; } = new BasicIntellectComparator(new() { WowArmorType.Shield }, new() { WowWeaponType.Sword, WowWeaponType.Mace, WowWeaponType.Axe });
+        public override IItemComparator ItemComparator { get; set; } = new BasicIntellectComparator([WowArmorType.Shield], [WowWeaponType.Sword, WowWeaponType.Mace, WowWeaponType.Axe]);
 
         public override WowRole Role => WowRole.Dps;
 
@@ -43,7 +43,7 @@ namespace AmeisenBotX.Core.Engines.Combat.Classes.Jannis.Wotlk335a
                 { 5, new(1, 5, 2) },
                 { 7, new(1, 7, 3) },
             },
-            Tree2 = new(),
+            Tree2 = [],
             Tree3 = new()
             {
                 { 1, new(3, 1, 3) },

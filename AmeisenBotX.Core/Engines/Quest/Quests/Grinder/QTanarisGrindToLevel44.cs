@@ -1,7 +1,6 @@
 using AmeisenBotX.Common.Math;
 using AmeisenBotX.Core.Engines.Quest.Objects.Objectives;
 using AmeisenBotX.Core.Engines.Quest.Objects.Quests;
-using System.Collections.Generic;
 
 namespace AmeisenBotX.Core.Engines.Quest.Quests.Grinder
 {
@@ -9,11 +8,10 @@ namespace AmeisenBotX.Core.Engines.Quest.Quests.Grinder
     {
         public QTanarisGrindToLevel44(AmeisenBotInterfaces bot)
             : base("TanarisGrindToLevel44",
-                new List<IQuestObjective>()
-                {
-                    new QuestObjectiveChain(new List<IQuestObjective>()
-                    {
-                        new GrindingObjective(bot, 44, new List<List<Vector3>> {
+                [
+                    new QuestObjectiveChain(
+                    [
+                        new GrindingObjective(bot, 44, [
                             new()
                             {
                                 new Vector3(-7304.35f, -4604.55f, 8.49f),
@@ -67,9 +65,9 @@ namespace AmeisenBotX.Core.Engines.Quest.Quests.Grinder
                                 new Vector3(-7213.31f, -4629.97f, 8.98f),
                                 new Vector3(-7215.89f, -4617.47f, 8.97f),
                             },
-                        }),
-                    })
-                })
+                        ]),
+                    ])
+                ])
         { }
     }
 }

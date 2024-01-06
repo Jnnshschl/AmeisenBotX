@@ -22,7 +22,7 @@ namespace AmeisenBotX.Core.Engines.Movement
             DistanceMovedCheckEvent = new(TimeSpan.FromMilliseconds(500));
 
             PathQueue = new();
-            PlacesToAvoidList = new();
+            PlacesToAvoidList = [];
 
             PlayerVehicle = new(bot);
         }
@@ -282,7 +282,7 @@ namespace AmeisenBotX.Core.Engines.Movement
                 {
                     CurrentSpeed = LastPosition.GetDistance2D(Bot.Player.Position) / (float)(DateTime.UtcNow - LastMovement).TotalSeconds;
 
-                    if (CurrentSpeed > 0.0f && CurrentSpeed < 0.1f)
+                    if (CurrentSpeed is > 0.0f and < 0.1f)
                     {
                         // soft stuck
                         Bot.Character.Jump();

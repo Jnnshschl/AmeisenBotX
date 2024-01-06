@@ -18,7 +18,7 @@ namespace AmeisenBotX.Common.Utils
         public static Dictionary<string, dynamic> ToDyn(this JsonElement element)
         {
             Dictionary<string, JsonElement> dict = JsonSerializer.Deserialize<Dictionary<string, JsonElement>>(element.GetRawText());
-            Dictionary<string, dynamic> result = new();
+            Dictionary<string, dynamic> result = [];
 
             foreach (KeyValuePair<string, JsonElement> d in dict)
             {

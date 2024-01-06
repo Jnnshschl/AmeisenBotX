@@ -101,7 +101,7 @@ namespace AmeisenBotX.Core.Engines.Combat.Classes.Kamel
 
         public override string Author => "Lukas";
 
-        public override Dictionary<string, dynamic> C { get; set; } = new Dictionary<string, dynamic>();
+        public override Dictionary<string, dynamic> C { get; set; } = [];
 
         public override string Description => "Resto Shaman";
 
@@ -114,7 +114,7 @@ namespace AmeisenBotX.Core.Engines.Combat.Classes.Kamel
 
         public override bool IsMelee => false;
 
-        public override IItemComparator ItemComparator { get; set; } = new BasicSpiritComparator(new() { WowArmorType.Shield }, new() { WowWeaponType.Sword, WowWeaponType.Mace, WowWeaponType.Axe });
+        public override IItemComparator ItemComparator { get; set; } = new BasicSpiritComparator([WowArmorType.Shield], [WowWeaponType.Sword, WowWeaponType.Mace, WowWeaponType.Axe]);
 
         public TimegatedEvent ManaTideTotemEvent { get; private set; }
 
@@ -122,7 +122,7 @@ namespace AmeisenBotX.Core.Engines.Combat.Classes.Kamel
 
         public override TalentTree Talents { get; } = new()
         {
-            Tree1 = new(),
+            Tree1 = [],
             Tree2 = new()
             {
                 { 3, new(2, 3, 5) },

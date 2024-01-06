@@ -14,7 +14,7 @@ namespace AmeisenBotX.Core.Engines.Combat.Classes.Kamel
 
         public override string Author => "Lukas";
 
-        public override Dictionary<string, dynamic> C { get; set; } = new Dictionary<string, dynamic>();
+        public override Dictionary<string, dynamic> C { get; set; } = [];
 
         public override string Description => "Rogue Assassination";
 
@@ -24,7 +24,7 @@ namespace AmeisenBotX.Core.Engines.Combat.Classes.Kamel
 
         public override bool IsMelee => true;
 
-        public override IItemComparator ItemComparator { get; set; } = new BasicAgilityComparator(new() { WowArmorType.Shield });
+        public override IItemComparator ItemComparator { get; set; } = new BasicAgilityComparator([WowArmorType.Shield]);
 
         public override WowRole Role => WowRole.Dps;
 

@@ -59,8 +59,8 @@ namespace AmeisenBotX.Core.Engines.Combat.Classes.Jannis.Wotlk335a
 
         public override IItemComparator ItemComparator { get; set; } = new BasicComparator
         (
-            new() { WowArmorType.Shield },
-            new() { WowWeaponType.Sword, WowWeaponType.Mace, WowWeaponType.Axe },
+            [WowArmorType.Shield],
+            [WowWeaponType.Sword, WowWeaponType.Mace, WowWeaponType.Axe],
             new Dictionary<string, double>()
             {
                 { "ITEM_MOD_CRIT_RATING_SHORT", 1.2 },
@@ -83,7 +83,7 @@ namespace AmeisenBotX.Core.Engines.Combat.Classes.Jannis.Wotlk335a
                 { 4, new(1, 4, 2) },
                 { 8, new(1, 8, 1) },
             },
-            Tree2 = new(),
+            Tree2 = [],
             Tree3 = new()
             {
                 { 1, new(3, 1, 2) },

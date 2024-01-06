@@ -24,8 +24,8 @@ namespace AmeisenBotX.Core.Engines.Dungeon.Profiles.Classic
 
         public string Name { get; } = "[17-24] Wailing Caverns";
 
-        public List<DungeonNode> Nodes { get; } = new()
-        {
+        public List<DungeonNode> Nodes { get; } =
+        [
             new(new(-163, 133, -74)),
             new(new(-156, 129, -75)),
             new(new(-148, 129, -76)),
@@ -628,9 +628,9 @@ namespace AmeisenBotX.Core.Engines.Dungeon.Profiles.Classic
             new(new(-127, 130, -79)),
             // new(new(-132, 127, -79), DungeonNodeType.Talk, "1941"), new(new(115, 243, -96),
             // DungeonNodeType.Protect, "4216"),
-        };
+        ];
 
-        public List<int> PriorityUnits { get; } = new();
+        public List<int> PriorityUnits { get; } = [];
 
         public int RequiredItemLevel { get; } = 10;
 

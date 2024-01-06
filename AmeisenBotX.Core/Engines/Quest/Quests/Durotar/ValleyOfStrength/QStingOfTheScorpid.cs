@@ -11,11 +11,10 @@ namespace AmeisenBotX.Core.Engines.Quest.Quests.Durotar.ValleyOfStrength
             : base(bot, 789, "Sting of the Scorpid", 1, 1,
                 () => (bot.GetClosestQuestGiverByNpcId(bot.Player.Position, new List<int> { 3143 }), new Vector3(-600.13f, -4186.19f, 41.27f)),
                 () => (bot.GetClosestQuestGiverByNpcId(bot.Player.Position, new List<int> { 3143 }), new Vector3(-600.13f, -4186.19f, 41.27f)),
-                new List<IQuestObjective>()
-                {
-                    new QuestObjectiveChain(new List<IQuestObjective>()
-                    {
-                        new KillAndLootQuestObjective(bot, new List<int> { 3124,3281 }, 8, 4862, new List<List<Vector3>> {
+                [
+                    new QuestObjectiveChain(
+                    [
+                        new KillAndLootQuestObjective(bot, [3124, 3281], 8, 4862, [
                             new()
                             {
                                 new Vector3(-756.20f, -4352.79f, 52.21f),
@@ -52,9 +51,9 @@ namespace AmeisenBotX.Core.Engines.Quest.Quests.Durotar.ValleyOfStrength
                                 new Vector3(-304.94f, -4437.49f, 59.06f),
                                 new Vector3(-282.79f, -4416.63f, 56.68f),
                             },
-                        }),
-                    })
-                })
+                        ]),
+                    ])
+                ])
         { }
     }
 }

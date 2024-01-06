@@ -11,11 +11,10 @@ namespace AmeisenBotX.Core.Engines.Quest.Quests.TheBarrens.Crossroads
             : base(bot, 872, "The Disruption Ends", 9, 1,
                 () => (bot.GetClosestQuestGiverByNpcId(bot.Player.Position, new List<int> { 3429 }), new Vector3(-473.20f, -2595.70f, 103.81f)),
                 () => (bot.GetClosestQuestGiverByNpcId(bot.Player.Position, new List<int> { 3429 }), new Vector3(-473.20f, -2595.70f, 103.81f)),
-                new List<IQuestObjective>()
-                {
-                    new QuestObjectiveChain(new List<IQuestObjective>()
-                    {
-                        new KillAndLootQuestObjective(bot, new List<int> { 3269 }, 8, 0, new List<List<Vector3>> {
+                [
+                    new QuestObjectiveChain(
+                    [
+                        new KillAndLootQuestObjective(bot, [3269], 8, 0, [
                             new()
                             {
                                 new Vector3(-115.32f, -3200.88f, 93.61f),
@@ -36,8 +35,8 @@ namespace AmeisenBotX.Core.Engines.Quest.Quests.TheBarrens.Crossroads
                                 new Vector3(-10.20f, -3402.27f, 88.09f),
                                 new Vector3(-6.23f, -3368.26f, 91.74f),
                             },
-                        }),
-                        new KillAndLootQuestObjective(bot, new List<int> { 3266 }, 8, 0, new List<List<Vector3>> {
+                        ]),
+                        new KillAndLootQuestObjective(bot, [3266], 8, 0, [
                             new()
                             {
                                 new Vector3(-55.60f, -3256.06f, 91.71f),
@@ -69,15 +68,15 @@ namespace AmeisenBotX.Core.Engines.Quest.Quests.TheBarrens.Crossroads
                             {
                                 new Vector3(-47.43f, -3122.76f, 91.79f),
                             },
-                        }),
-                        new KillAndLootQuestObjective(bot, new List<int> { 3438 }, 1, 5063, new List<List<Vector3>> {
+                        ]),
+                        new KillAndLootQuestObjective(bot, [3438], 1, 5063, [
                             new()
                             {
                                 new Vector3(-214.25f, -3307.53f, 91.79f),
                             },
-                        }),
-                    })
-                })
+                        ]),
+                    ])
+                ])
         { }
     }
 }

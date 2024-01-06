@@ -9,7 +9,7 @@ namespace AmeisenBotX.Core.Engines.Combat.Helpers.Aura
         public AuraManager(AmeisenBotInterfaces bot)
         {
             Bot = bot;
-            Jobs = new();
+            Jobs = [];
         }
 
         public AmeisenBotInterfaces Bot { get; }

@@ -223,8 +223,8 @@ namespace AmeisenBotX.Core.Engines.Dungeon
 
                 if (node.Position.GetDistance(Bot.Player.Position) < 4.0f)
                 {
-                    if (node.Type == DungeonNodeType.Use
-                        || node.Type == DungeonNodeType.Door)
+                    if (node.Type is DungeonNodeType.Use
+                        or DungeonNodeType.Door)
                     {
                         IWowGameobject nearestGameobject = Bot.Objects.All.OfType<IWowGameobject>()
                             .OrderBy(e => e.Position.GetDistance(node.Position))

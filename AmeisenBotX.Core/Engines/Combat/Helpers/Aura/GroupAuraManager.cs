@@ -12,9 +12,9 @@ namespace AmeisenBotX.Core.Engines.Combat.Helpers.Aura
         public GroupAuraManager(AmeisenBotInterfaces bot)
         {
             Bot = bot;
-            SpellsToKeepActiveOnParty = new();
-            RemoveBadAurasSpells = new();
-            LastBuffed = new();
+            SpellsToKeepActiveOnParty = [];
+            RemoveBadAurasSpells = [];
+            LastBuffed = [];
         }
 
         public delegate bool CastSpellOnUnit(string spellName, ulong guid);

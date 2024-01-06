@@ -7,9 +7,9 @@ namespace AmeisenBotX.Core.Managers.Character.Talents.Objects
     {
         public TalentTree(string talentString)
         {
-            Tree1 = new();
-            Tree2 = new();
-            Tree3 = new();
+            Tree1 = [];
+            Tree2 = [];
+            Tree3 = [];
 
             string[] talentSplits = talentString.Split('|');
 

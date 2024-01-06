@@ -96,7 +96,7 @@ namespace AmeisenBotX.Core.Engines.Combat.Classes.Kamel
 
         public override string Author => "Lukas";
 
-        public override Dictionary<string, dynamic> C { get; set; } = new Dictionary<string, dynamic>();
+        public override Dictionary<string, dynamic> C { get; set; } = [];
 
         public override string Description => "Warrior Fury";
 
@@ -110,7 +110,7 @@ namespace AmeisenBotX.Core.Engines.Combat.Classes.Kamel
 
         public override bool IsMelee => true;
 
-        public override IItemComparator ItemComparator { get; set; } = new BasicStrengthComparator(new() { WowArmorType.Shield }, new() { WowWeaponType.Sword, WowWeaponType.Mace, WowWeaponType.Axe, WowWeaponType.Staff, WowWeaponType.Dagger });
+        public override IItemComparator ItemComparator { get; set; } = new BasicStrengthComparator([WowArmorType.Shield], [WowWeaponType.Sword, WowWeaponType.Mace, WowWeaponType.Axe, WowWeaponType.Staff, WowWeaponType.Dagger]);
 
         //Time event
         public TimegatedEvent RendEvent { get; private set; }
@@ -150,7 +150,7 @@ namespace AmeisenBotX.Core.Engines.Combat.Classes.Kamel
                 { 26, new(2, 26, 5) },
                 { 27, new(2, 27, 1) },
             },
-            Tree3 = new(),
+            Tree3 = [],
         };
 
         public override bool UseAutoAttacks => true;

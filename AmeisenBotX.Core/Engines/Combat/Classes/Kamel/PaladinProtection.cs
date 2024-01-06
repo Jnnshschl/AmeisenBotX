@@ -82,7 +82,7 @@ namespace AmeisenBotX.Core.Engines.Combat.Classes.Kamel
 
         public override string Author => "Lukas";
 
-        public override Dictionary<string, dynamic> C { get; set; } = new Dictionary<string, dynamic>();
+        public override Dictionary<string, dynamic> C { get; set; } = [];
 
         public override string Description => "Paladin Protection 1.0";
 
@@ -94,7 +94,7 @@ namespace AmeisenBotX.Core.Engines.Combat.Classes.Kamel
 
         public override bool IsMelee => true;
 
-        public override IItemComparator ItemComparator { get; set; } = new BasicStaminaComparator(new() { WowArmorType.Shield }, new() { WowWeaponType.Sword, WowWeaponType.Mace, WowWeaponType.Axe, WowWeaponType.Staff, WowWeaponType.Dagger });
+        public override IItemComparator ItemComparator { get; set; } = new BasicStaminaComparator([WowArmorType.Shield], [WowWeaponType.Sword, WowWeaponType.Mace, WowWeaponType.Axe, WowWeaponType.Staff, WowWeaponType.Dagger]);
 
         public override WowRole Role => WowRole.Tank;
 
@@ -102,7 +102,7 @@ namespace AmeisenBotX.Core.Engines.Combat.Classes.Kamel
 
         public override TalentTree Talents { get; } = new()
         {
-            Tree1 = new(),
+            Tree1 = [],
             Tree2 = new()
             {
                 { 2, new(2, 2, 5) },

@@ -18,7 +18,7 @@ namespace AmeisenBotX.Wow548.Objects
 
         public IEnumerable<string> GetEnchantmentStrings()
         {
-            List<string> enchantments = new();
+            List<string> enchantments = [];
 
             for (int i = 0; i < ItemEnchantments.Count; ++i)
             {

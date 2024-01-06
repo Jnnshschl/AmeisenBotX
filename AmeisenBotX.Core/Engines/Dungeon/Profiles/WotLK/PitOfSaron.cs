@@ -24,8 +24,8 @@ namespace AmeisenBotX.Core.Engines.Dungeon.Profiles.WotLK
 
         public string Name { get; } = "[80+] Pit Of Saron";
 
-        public List<DungeonNode> Nodes { get; } = new()
-        {
+        public List<DungeonNode> Nodes { get; } =
+        [
             new(new(433, 212, 529)),
             new(new(441, 212, 529)),
             new(new(449, 211, 529)),
@@ -269,9 +269,9 @@ namespace AmeisenBotX.Core.Engines.Dungeon.Profiles.WotLK
             new(new(1024, 152, 628)),
             new(new(1019, 158, 628)),
             new(new(1025, 163, 628)),
-        };
+        ];
 
-        public List<int> PriorityUnits { get; } = new();
+        public List<int> PriorityUnits { get; } = [];
 
         public int RequiredItemLevel { get; } = 200;
 

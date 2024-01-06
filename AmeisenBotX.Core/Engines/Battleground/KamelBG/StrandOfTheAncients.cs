@@ -26,10 +26,10 @@ namespace AmeisenBotX.Core.Engines.Battleground.KamelBG
 
         public string Name => "Strand of the Ancients";
 
-        public List<Vector3> PathRight { get; } = new()
-        {
+        public List<Vector3> PathRight { get; } =
+        [
             new(1403, 69, 30)
-        };
+        ];
 
         private TimegatedEvent CombatEvent { get; }
 

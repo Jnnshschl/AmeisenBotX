@@ -30,7 +30,7 @@ namespace AmeisenBotX.Core.Engines.Tactic.Dungeon.ForgeOfSouls
 
         public WowMapId MapId { get; } = WowMapId.TheForgeOfSouls;
 
-        private static List<int> DevourerOfSoulsDisplayId { get; } = new() { 30148, 30149, 30150 };
+        private static List<int> DevourerOfSoulsDisplayId { get; } = [30148, 30149, 30150];
 
         public bool ExecuteTactic(WowRole role, bool isMelee, out bool preventMovement, out bool allowAttacking)
         {

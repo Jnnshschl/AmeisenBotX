@@ -1,5 +1,4 @@
 ﻿using AmeisenBotX.Core.Engines.Combat.Helpers.Aura.Objects;
-using AmeisenBotX.Core.Logic.CombatClasses.Shino;
 using AmeisenBotX.Core.Managers.Character.Comparators;
 using AmeisenBotX.Core.Managers.Character.Spells.Objects;
 using AmeisenBotX.Core.Managers.Character.Talents.Objects;
@@ -35,7 +34,7 @@ namespace AmeisenBotX.Core.Engines.Combat.Classes.Shino
 
         public override bool IsMelee => false;
 
-        public override IItemComparator ItemComparator { get; set; } = new BasicIntellectComparator(new() { WowArmorType.Shield }, new() { WowWeaponType.Sword, WowWeaponType.Mace, WowWeaponType.Axe });
+        public override IItemComparator ItemComparator { get; set; } = new BasicIntellectComparator([WowArmorType.Shield], [WowWeaponType.Sword, WowWeaponType.Mace, WowWeaponType.Axe]);
 
         public override WowRole Role => WowRole.Dps;
 
@@ -45,7 +44,7 @@ namespace AmeisenBotX.Core.Engines.Combat.Classes.Shino
             {
                 { 2, new(1, 2, 3) },
             },
-            Tree2 = new(),
+            Tree2 = [],
             Tree3 = new()
             {
                 { 1, new(3, 1, 3) },
@@ -331,11 +330,7 @@ namespace AmeisenBotX.Core.Engines.Combat.Classes.Shino
         protected override Spell GetOpeningSpell()
         {
             Spell spell = Bot.Character.SpellBook.GetSpellByName(Mage335a.FrostBolt);
-            if (spell != null)
-            {
-                return spell;
-            }
-            return Bot.Character.SpellBook.GetSpellByName(Mage335a.Fireball);
+            return spell ?? Bot.Character.SpellBook.GetSpellByName(Mage335a.Fireball);
         }
     }
 }

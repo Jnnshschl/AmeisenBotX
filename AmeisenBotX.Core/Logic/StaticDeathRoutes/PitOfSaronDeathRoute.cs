@@ -7,8 +7,8 @@ namespace AmeisenBotX.Core.Logic.StaticDeathRoutes
     {
         protected override Vector3 DeathPoint { get; } = new(5592, 2010, 514);
 
-        protected override List<Vector3> Path { get; } = new()
-        {
+        protected override List<Vector3> Path { get; } =
+        [
             new(6447, 2061, 564),
             new(6436, 2070, 563),
             new(6426, 2077, 564),
@@ -90,6 +90,6 @@ namespace AmeisenBotX.Core.Logic.StaticDeathRoutes
             new(5605, 2022, 798),
             new(5596, 2014, 798),
             new(5587, 2005, 798),
-        };
+        ];
     }
 }

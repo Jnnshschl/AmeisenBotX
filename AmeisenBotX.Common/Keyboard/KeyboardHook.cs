@@ -14,7 +14,7 @@ namespace AmeisenBotX.Common.Keyboard
     {
         public KeyboardHook()
         {
-            Hotkeys = new();
+            Hotkeys = [];
             KeyboardProc = LowLevelKeyboardCallback;
         }
 

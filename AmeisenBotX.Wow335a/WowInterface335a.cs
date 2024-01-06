@@ -29,7 +29,7 @@ namespace AmeisenBotX.Wow335a
         public WowInterface335a(WowMemoryApi memory)
         {
             Memory = memory;
-            HookModules = new();
+            HookModules = [];
 
             // lua variable names for the event hook
             string handlerName = BotUtils.FastRandomStringOnlyLetters();
@@ -477,7 +477,7 @@ namespace AmeisenBotX.Wow335a
 
         public Dictionary<string, (int, int)> GetSkills()
         {
-            Dictionary<string, (int, int)> parsedSkills = new();
+            Dictionary<string, (int, int)> parsedSkills = [];
 
             try
             {
@@ -572,12 +572,9 @@ namespace AmeisenBotX.Wow335a
         {
             string str = ExecuteLuaAndRead(BotUtils.ObfuscateLua($"{{v:0}}=\"none,0\";{{v:1}},x,x,x,x,{{v:2}}=UnitCastingInfo(\"{luaunit}\");{{v:3}}=(({{v:2}}/1000)-GetTime())*1000;{{v:0}}={{v:1}}..\",\"..{{v:3}};"), out string result) ? result : string.Empty;
 
-            if (double.TryParse(str.Split(',')[1], out double timeRemaining))
-            {
-                return (str.Split(',')[0], (int)Math.Round(timeRemaining, 0));
-            }
-
-            return (string.Empty, 0);
+            return double.TryParse(str.Split(',')[1], out double timeRemaining)
+                ? (str.Split(',')[0], (int)Math.Round(timeRemaining, 0))
+                : (string.Empty, 0);
         }
 
         public int GetUnspentTalentPoints()

@@ -22,7 +22,7 @@ namespace AmeisenBotX.Common.Storage
             BasePath = basePath;
             PartsToRemove = partsToRemove;
 
-            Storeables = new();
+            Storeables = [];
         }
 
         private string BasePath { get; }

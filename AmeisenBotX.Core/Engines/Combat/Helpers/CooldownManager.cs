@@ -8,7 +8,7 @@ namespace AmeisenBotX.Core.Engines.Combat.Helpers
     {
         public CooldownManager(IEnumerable<Spell> spells)
         {
-            Cooldowns = new();
+            Cooldowns = [];
 
             if (spells != null)
             {
@@ -33,27 +33,13 @@ namespace AmeisenBotX.Core.Engines.Combat.Helpers
 
             spellname = spellname.ToUpperInvariant();
 
-            if (Cooldowns.ContainsKey(spellname))
-            {
-                return (int)(Cooldowns[spellname] - DateTime.UtcNow).TotalMilliseconds;
-            }
-
-            return 0;
+            return Cooldowns.ContainsKey(spellname) ? (int)(Cooldowns[spellname] - DateTime.UtcNow).TotalMilliseconds : 0;
         }
 
         public bool IsSpellOnCooldown(string spellname)
         {
-            if (string.IsNullOrWhiteSpace(spellname))
-            {
-                return false;
-            }
-
-            if (Cooldowns.TryGetValue(spellname.ToUpperInvariant(), out DateTime dateTime))
-            {
-                return dateTime > DateTime.UtcNow;
-            }
-
-            return false;
+            return !string.IsNullOrWhiteSpace(spellname)
+&& Cooldowns.TryGetValue(spellname.ToUpperInvariant(), out DateTime dateTime) && dateTime > DateTime.UtcNow;
         }
 
         public bool SetSpellCooldown(string spellname, int cooldownLeftMs)

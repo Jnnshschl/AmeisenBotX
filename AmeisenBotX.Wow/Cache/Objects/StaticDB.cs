@@ -5,8 +5,8 @@ namespace AmeisenBotX.Wow.Cache.Objects
 {
     internal class StaticDB
     {
-        public static List<StaticMailbox> Mailboxes = new()
-        {
+        public static List<StaticMailbox> Mailboxes =
+        [
             new(171752, 0, -4828.28f, -1285.05f, 501.807f, true, false),
             new(171556, 0, -4949.82f, -1277.37f, 501.583f, true, false),
             new(171699, 0, -4910.38f, -976.212f, 501.408f, true, false),
@@ -212,10 +212,10 @@ namespace AmeisenBotX.Wow.Cache.Objects
             new(177044, 0, 1631.2f, 191.274f, -62.1815f, false, true),
             new(177044, 0, 1631.97f, 288.06f, -62.1824f, false, true),
             new(177044, 0, 1560.58f, 289.393f, -62.1814f, false, true)
-        };
+        ];
 
-        public static List<StaticVendor> Vendors = new()
-        {
+        public static List<StaticVendor> Vendors =
+        [
             new(54, 0, -9464.87f, 93.9896f, 58.5271f, false, false, false, false, true, true, false),
             new(66, 0, -9494.13f, 83.9096f, 56.6586f, false, false, false, false, false, true, false),
             new(74, 0, -9457.64f, 99.6884f, 58.4271f, false, false, false, false, true, true, false),
@@ -2064,6 +2064,6 @@ namespace AmeisenBotX.Wow.Cache.Objects
             new(39173, 571, 5372.67f, 2786.74f, 409.442f, false, false, false, false, false, false, true),
             new(40160, 571, 5910.08f, 720.278f, 643.425f, false, false, false, false, false, false, false),
             new(40607, 0, -8775.85f, 423.96f, 105.233f, false, false, false, false, true, true, false)
-        };
+        ];
     }
 }

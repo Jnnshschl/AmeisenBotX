@@ -11,11 +11,10 @@ namespace AmeisenBotX.Core.Engines.Quest.Quests.Durotar.ValleyOfStrength
             : base(bot, 788, "Cutting Teeth", 1, 1,
                 () => (bot.GetClosestQuestGiverByNpcId(bot.Player.Position, new List<int> { 3143 }), new Vector3(-600.13f, -4186.19f, 41.27f)),
                 () => (bot.GetClosestQuestGiverByNpcId(bot.Player.Position, new List<int> { 3143 }), new Vector3(-600.13f, -4186.19f, 41.27f)),
-                new List<IQuestObjective>()
-                {
-                    new QuestObjectiveChain(new List<IQuestObjective>()
-                    {
-                        new KillAndLootQuestObjective(bot, new List<int> { 3098 }, 8, 0, new List<List<Vector3>> {
+                [
+                    new QuestObjectiveChain(
+                    [
+                        new KillAndLootQuestObjective(bot, [3098], 8, 0, [
                             new()
                             {
                                 new Vector3(-486.28f, -4144.73f, 54.75f),
@@ -37,9 +36,9 @@ namespace AmeisenBotX.Core.Engines.Quest.Quests.Durotar.ValleyOfStrength
                                 new Vector3(-612.62f, -4448.09f, 45.59f),
                                 new Vector3(-619.22f, -4382.64f, 43.22f),
                             }
-                        }),
-                    })
-                })
+                        ]),
+                    ])
+                ])
         { }
     }
 }

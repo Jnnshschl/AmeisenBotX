@@ -13,7 +13,7 @@ namespace AmeisenBotX.Core.Engines.Quest
         {
             Bot = bot;
 
-            CompletedQuests = new();
+            CompletedQuests = [];
             QueryCompletedQuestsEvent = new(TimeSpan.FromSeconds(2));
         }
 

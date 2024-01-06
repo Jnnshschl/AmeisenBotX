@@ -34,9 +34,8 @@ namespace AmeisenBotX.Core.Engines.Combat.Classes.Jannis.Mop548
 
         public override IItemComparator ItemComparator { get; set; } = new BasicComparator
         (
-            new() { WowArmorType.Cloth, WowArmorType.Leather },
-            new()
-            {
+            [WowArmorType.Cloth, WowArmorType.Leather],
+            [
                 WowWeaponType.SwordTwoHand,
                 WowWeaponType.MaceTwoHand,
                 WowWeaponType.AxeTwoHand,
@@ -46,7 +45,7 @@ namespace AmeisenBotX.Core.Engines.Combat.Classes.Jannis.Mop548
                 WowWeaponType.Thrown,
                 WowWeaponType.Wand,
                 WowWeaponType.Dagger
-            },
+            ],
             new Dictionary<string, double>()
             {
                 { "ITEM_MOD_STAMINA_SHORT", 1.0 },
@@ -63,15 +62,9 @@ namespace AmeisenBotX.Core.Engines.Combat.Classes.Jannis.Mop548
 
         public override TalentTree Talents { get; } = new()
         {
-            Tree1 = new()
-            {
-            },
-            Tree2 = new()
-            {
-            },
-            Tree3 = new()
-            {
-            },
+            Tree1 = [],
+            Tree2 = [],
+            Tree3 = [],
         };
 
         public override bool UseAutoAttacks => true;

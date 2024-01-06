@@ -24,8 +24,8 @@ namespace AmeisenBotX.Core.Engines.Dungeon.Profiles.Classic
 
         public string Name { get; } = "[13-18] Ragefire Chasm";
 
-        public List<DungeonNode> Nodes { get; } = new()
-        {
+        public List<DungeonNode> Nodes { get; } =
+        [
             new(new(4, -15, -18)),
             new(new(1, -23, -20)),
             new(new(-1, -30, -22)),
@@ -210,9 +210,9 @@ namespace AmeisenBotX.Core.Engines.Dungeon.Profiles.Classic
             new(new(-398, 157, 8)),
             new(new(-392, 152, 8)),
             new(new(-386, 147, 8)),
-        };
+        ];
 
-        public List<int> PriorityUnits { get; } = new();
+        public List<int> PriorityUnits { get; } = [];
 
         public int RequiredItemLevel { get; } = 10;
 

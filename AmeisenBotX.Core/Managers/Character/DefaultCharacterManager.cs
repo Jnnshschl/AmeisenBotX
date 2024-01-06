@@ -32,8 +32,8 @@ namespace AmeisenBotX.Core.Managers.Character
             TalentManager = new(Wow);
             LastLevelTrained = 0;
             ItemComparator = new ItemLevelComparator();
-            Skills = new();
-            ItemSlotsToSkip = new();
+            Skills = [];
+            ItemSlotsToSkip = [];
         }
 
         public CharacterEquipment Equipment { get; }
@@ -331,7 +331,7 @@ namespace AmeisenBotX.Core.Managers.Character
         private bool GetItemsByEquipLocation(string equipLocation, out List<IWowInventoryItem> matchedItems, out int expectedItemCount)
         {
             expectedItemCount = 1;
-            matchedItems = new List<IWowInventoryItem>();
+            matchedItems = [];
 
             switch (equipLocation)
             {

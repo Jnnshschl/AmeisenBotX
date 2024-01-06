@@ -42,20 +42,20 @@ namespace AmeisenBotX.Core.Engines.Combat.Classes.Bia10
         public override bool IsMelee => false;
 
         public override IItemComparator ItemComparator { get; set; } =
-            new ShamanElementalComparator(null, new List<WowWeaponType>
-            {
+            new ShamanElementalComparator(null,
+            [
                 WowWeaponType.AxeTwoHand,
                 WowWeaponType.MaceTwoHand,
                 WowWeaponType.SwordTwoHand
-            });
+            ]);
 
         public override WowRole Role => WowRole.Dps;
 
         public override TalentTree Talents { get; } = new()
         {
-            Tree1 = new Dictionary<int, Talent>(),
-            Tree2 = new Dictionary<int, Talent>(),
-            Tree3 = new Dictionary<int, Talent>(),
+            Tree1 = [],
+            Tree2 = [],
+            Tree3 = [],
         };
 
         public override bool UseAutoAttacks => true;

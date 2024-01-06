@@ -40,23 +40,17 @@ namespace AmeisenBotX.Wow335a.Objects
 
         private ulong ReadLeaderGuid()
         {
-            if (Memory.Read(Memory.Offsets.RaidLeader, out ulong partyleaderGuid))
-            {
-                if (partyleaderGuid == 0
-                    && Memory.Read(Memory.Offsets.PartyLeader, out partyleaderGuid))
-                {
-                    return partyleaderGuid;
-                }
-
-                return partyleaderGuid;
-            }
-
-            return 0;
+            return Memory.Read(Memory.Offsets.RaidLeader, out ulong partyleaderGuid)
+                ? partyleaderGuid == 0
+                    && Memory.Read(Memory.Offsets.PartyLeader, out partyleaderGuid)
+                    ? partyleaderGuid
+                    : partyleaderGuid
+                : 0;
         }
 
         private IEnumerable<ulong> ReadPartymemberGuids()
         {
-            List<ulong> partymemberGuids = new();
+            List<ulong> partymemberGuids = [];
 
             if (Memory.Read(Memory.Offsets.PartyLeader, out ulong partyLeader)
                 && partyLeader != 0

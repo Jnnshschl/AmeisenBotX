@@ -199,14 +199,7 @@ namespace AmeisenBotX
 
         private void ButtonSidebar_Click(object sender, RoutedEventArgs e)
         {
-            if (gridSidemenu.Visibility == Visibility.Visible)
-            {
-                gridSidemenu.Visibility = Visibility.Collapsed;
-            }
-            else
-            {
-                gridSidemenu.Visibility = Visibility.Visible;
-            }
+            gridSidemenu.Visibility = gridSidemenu.Visibility == Visibility.Visible ? Visibility.Collapsed : Visibility.Visible;
         }
 
         private void CheckboxRenderCurrentPath_Checked(object sender, RoutedEventArgs e)

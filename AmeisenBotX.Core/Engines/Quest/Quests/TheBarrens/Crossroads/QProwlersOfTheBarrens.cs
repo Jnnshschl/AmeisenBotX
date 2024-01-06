@@ -11,11 +11,10 @@ namespace AmeisenBotX.Core.Engines.Quest.Quests.TheBarrens.Crossroads
             : base(bot, 903, "Prowlers of the Barrens", 10, 1,
                 () => (bot.GetClosestQuestGiverByNpcId(bot.Player.Position, new List<int> { 3338 }), new Vector3(-482.48f, -2670.19f, 97.52f)),
                 () => (bot.GetClosestQuestGiverByNpcId(bot.Player.Position, new List<int> { 3338 }), new Vector3(-482.48f, -2670.19f, 97.52f)),
-                new List<IQuestObjective>()
-                {
-                    new QuestObjectiveChain(new List<IQuestObjective>()
-                    {
-                        new KillAndLootQuestObjective(bot, new List<int> { 3425 }, 7, 5096, new List<List<Vector3>> {
+                [
+                    new QuestObjectiveChain(
+                    [
+                        new KillAndLootQuestObjective(bot, [3425], 7, 5096, [
                             new()
                             {
                                 new Vector3(1081.71f, -3481.79f, 78.82f),
@@ -109,9 +108,9 @@ namespace AmeisenBotX.Core.Engines.Quest.Quests.TheBarrens.Crossroads
                             {
                                 new Vector3(1079.38f, -3519.58f, 71.26f),
                             },
-                        }),
-                    })
-                })
+                        ]),
+                    ])
+                ])
         { }
     }
 }

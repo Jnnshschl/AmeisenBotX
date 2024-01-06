@@ -9,8 +9,8 @@ namespace AmeisenBotX.Overlay
     {
         public AmeisenBotOverlay(IntPtr mainWindowHandle)
         {
-            LinesToRender = new();
-            RectanglesToRender = new();
+            LinesToRender = [];
+            RectanglesToRender = [];
 
             OverlayWindow = new(mainWindowHandle)
             {

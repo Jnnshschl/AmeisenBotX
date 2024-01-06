@@ -236,7 +236,7 @@ namespace AmeisenBotX.Core.Engines.Movement.Objects
             int count = 0;
             Vector3 force = new();
             Vector3 vehiclePosition = Bot.Player.Position;
-            List<(Vector3, float)> objectDistances = new();
+            List<(Vector3, float)> objectDistances = [];
 
             // we need to know every objects position and distance to later apply a force pushing us
             // back from it that is relational to the objects distance.

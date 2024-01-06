@@ -162,13 +162,12 @@ namespace AmeisenBotX.Core
                 new FcfsIdleAction
                 (
                     "Look at Target/Group/NPCs/World",
-                    new()
-                    {
+                    [
                         new LookAtTargetIdleAction(Bot),
-                        new FcfsIdleAction(new() { new LookAtNpcsIdleAction(Bot), new LookAtGroupmemberIdleAction(Bot) }),
+                        new FcfsIdleAction([new LookAtNpcsIdleAction(Bot), new LookAtGroupmemberIdleAction(Bot)]),
                         new LookAtGroupIdleAction(Bot),
                         new LookAroundIdleAction(Bot)
-                    }
+                    ]
                 ),
                 new RandomEmoteIdleAction(Bot),
                 new SitByCampfireIdleAction(Bot),
@@ -533,7 +532,7 @@ namespace AmeisenBotX.Core
                          && x.Namespace != null
                          && x.Namespace.Contains(combatClassNamespace));
 
-            CombatClasses = combatClassTypes.Where(x => x.GetConstructor(new Type[] { typeof(AmeisenBotInterfaces) }) != null)
+            CombatClasses = combatClassTypes.Where(x => !x.IsAbstract && x.GetConstructor(new Type[] { typeof(AmeisenBotInterfaces) }) != null)
                 .Select(x => (ICombatClass)Activator.CreateInstance(x, Bot));
         }
 

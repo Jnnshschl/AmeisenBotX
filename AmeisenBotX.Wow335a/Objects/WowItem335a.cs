@@ -18,7 +18,7 @@ namespace AmeisenBotX.Wow335a.Objects
 
         public IEnumerable<string> GetEnchantmentStrings()
         {
-            List<string> enchantments = new();
+            List<string> enchantments = [];
 
             foreach (ItemEnchantment itemEnch in ItemEnchantments)
             {
@@ -45,8 +45,8 @@ namespace AmeisenBotX.Wow335a.Objects
                 Count = objPtr.StackCount;
                 Owner = objPtr.Owner;
 
-                ItemEnchantments = new List<ItemEnchantment>
-                {
+                ItemEnchantments =
+                [
                     objPtr.Enchantment1,
                     objPtr.Enchantment2,
                     objPtr.Enchantment3,
@@ -59,7 +59,7 @@ namespace AmeisenBotX.Wow335a.Objects
                     objPtr.Enchantment10,
                     objPtr.Enchantment11,
                     objPtr.Enchantment12,
-                };
+                ];
             }
         }
     }

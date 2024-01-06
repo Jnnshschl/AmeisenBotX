@@ -39,7 +39,7 @@ namespace AmeisenBotX.Core.Engines.Combat.Classes.Jannis.Wotlk335a
 
         public override bool IsMelee => false;
 
-        public override IItemComparator ItemComparator { get; set; } = new BasicIntellectComparator(new() { WowArmorType.Shield }, new() { WowWeaponType.Sword, WowWeaponType.Mace, WowWeaponType.Axe });
+        public override IItemComparator ItemComparator { get; set; } = new BasicIntellectComparator([WowArmorType.Shield], [WowWeaponType.Sword, WowWeaponType.Mace, WowWeaponType.Axe]);
 
         public DateTime LastEclipseCheck { get; private set; }
 
@@ -76,7 +76,7 @@ namespace AmeisenBotX.Core.Engines.Combat.Classes.Jannis.Wotlk335a
                 { 27, new(1, 27, 3) },
                 { 28, new(1, 28, 1) },
             },
-            Tree2 = new(),
+            Tree2 = [],
             Tree3 = new()
             {
                 { 1, new(3, 1, 2) },
@@ -175,20 +175,11 @@ namespace AmeisenBotX.Core.Engines.Combat.Classes.Jannis.Wotlk335a
 
         private bool NeedToHealMySelf()
         {
-            if (Bot.Player.HealthPercentage < 60
+            return Bot.Player.HealthPercentage < 60
                 && !Bot.Player.Auras.Any(e => Bot.Db.GetSpellName(e.SpellId) == Druid335a.Rejuvenation)
-                && TryCastSpell(Druid335a.Rejuvenation, 0, true))
-            {
-                return true;
-            }
-
-            if (Bot.Player.HealthPercentage < 40
-                && TryCastSpell(Druid335a.HealingTouch, 0, true))
-            {
-                return true;
-            }
-
-            return false;
+                && TryCastSpell(Druid335a.Rejuvenation, 0, true)
+|| Bot.Player.HealthPercentage < 40
+                && TryCastSpell(Druid335a.HealingTouch, 0, true);
         }
     }
 }

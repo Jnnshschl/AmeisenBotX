@@ -9,7 +9,7 @@ namespace AmeisenBotX.Core.Engines.Combat.Helpers
     {
         public InterruptManager()
         {
-            InterruptSpells = new();
+            InterruptSpells = [];
         }
 
         public delegate bool CastInterruptFunction(IWowUnit target);

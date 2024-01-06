@@ -178,17 +178,14 @@ namespace AmeisenBotX.Common.Math
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public Vector3 Normalized(float magnitude)
         {
-            if (magnitude > 0.0f)
-            {
-                return new
+            return magnitude > 0.0f
+                ? new
                 (
                     X /= magnitude,
                     Y /= magnitude,
                     Z /= magnitude
-                );
-            }
-
-            return this;
+                )
+                : this;
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -367,12 +364,7 @@ namespace AmeisenBotX.Common.Math
 
         public override bool Equals(object obj)
         {
-            if (obj is Vector3 vector)
-            {
-                return this == vector;
-            }
-
-            return false;
+            return obj is Vector3 vector && this == vector;
         }
 
         public bool Equals(Vector3 other)

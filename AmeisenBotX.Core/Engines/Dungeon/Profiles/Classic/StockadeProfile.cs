@@ -24,8 +24,8 @@ namespace AmeisenBotX.Core.Engines.Dungeon.Profiles.Classic
 
         public string Name { get; } = "[24-31] Stockade";
 
-        public List<DungeonNode> Nodes { get; } = new()
-        {
+        public List<DungeonNode> Nodes { get; } =
+        [
             new(new(54, 0, -18)),
             new(new(61, 0, -21)),
             new(new(69, 1, -24)),
@@ -119,9 +119,9 @@ namespace AmeisenBotX.Core.Engines.Dungeon.Profiles.Classic
             new(new(86, 1, -26)),
             new(new(77, 1, -26)),
             new(new(69, 1, -24)),
-        };
+        ];
 
-        public List<int> PriorityUnits { get; } = new();
+        public List<int> PriorityUnits { get; } = [];
 
         public int RequiredItemLevel { get; } = 10;
 

@@ -62,12 +62,12 @@ namespace AmeisenBotX.Core.Engines.Combat.Helpers.Healing
             OverhealingStopThreshold = overhealingStopThreshold;
             MaxOverheal = maxOverheal;
 
-            HealingSpells = new();
+            HealingSpells = [];
             MeasurementEvent = new(TimeSpan.FromSeconds(1));
-            IncomingDamage = new();
-            IncomingDamageBuffer = new();
-            SpellHealingBuffer = new();
-            SpellHealing = new();
+            IncomingDamage = [];
+            IncomingDamageBuffer = [];
+            SpellHealingBuffer = [];
+            SpellHealing = [];
 
             Bot.CombatLog.OnDamage += OnDamage;
             Bot.CombatLog.OnHeal += OnHeal;
@@ -223,7 +223,7 @@ namespace AmeisenBotX.Core.Engines.Combat.Helpers.Healing
             {
                 // prioritize target with the most incoming damage per second
                 int maxDamage = IncomingDamage.Count > 0 ? IncomingDamage.Max(e => e.Value) : 0;
-                List<(ulong, double, int)> weightedTargets = new();
+                List<(ulong, double, int)> weightedTargets = [];
 
                 foreach (IWowUnit target in targetsNeedToBeHealed)
                 {

@@ -12,8 +12,8 @@ namespace AmeisenBotX.Core.Engines.Grinding.Profiles.Alliance.Group
 
         public bool RandomizeSpots => true;
 
-        public List<GrindingSpot> Spots { get; } = new()
-        {
+        public List<GrindingSpot> Spots { get; } =
+        [
             new(new(-9039, -265, 74), 32.0f, 1, 3),
             new(new(-8890, -266, 79), 36.0f, 1, 3),
             new(new(-8952, -393, 70), 42.0f, 3, 5),
@@ -38,7 +38,7 @@ namespace AmeisenBotX.Core.Engines.Grinding.Profiles.Alliance.Group
             new(new(-10151, -3497, 23), 56.0f, 30, 35),
             new(new(-10063, -3455, 21), 56.0f, 35, 80),
             new(new(-10006, -3555, 22), 56.0f, 35, 80),
-        };
+        ];
 
         public override string ToString()
         {

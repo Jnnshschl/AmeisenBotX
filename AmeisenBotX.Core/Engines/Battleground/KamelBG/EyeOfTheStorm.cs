@@ -25,18 +25,18 @@ namespace AmeisenBotX.Core.Engines.Battleground.KamelBG
 
         public string Name => "Eye of the Storm";
 
-        public List<Vector3> PathBase { get; } = new List<Vector3>()
-        {
+        public List<Vector3> PathBase { get; } =
+        [
             new Vector3(2284, 1731, 1189),//Mage Tower
             new Vector3(2286, 1402, 1197),//Draenei Ruins
             new Vector3(2048, 1393, 1194),//Blood Elf Tower
             new Vector3(2043, 1729, 1189)//Fel Reaver Ruins
-        };
+        ];
 
-        public List<Vector3> PathFlag { get; } = new List<Vector3>()
-        {
+        public List<Vector3> PathFlag { get; } =
+        [
             new Vector3(2176, 1570, 1159)//Flag
-        };
+        ];
 
         private AmeisenBotInterfaces Bot { get; }
 
@@ -188,14 +188,7 @@ namespace AmeisenBotX.Core.Engines.Battleground.KamelBG
 
         public void Faction()
         {
-            if (!Bot.Player.IsHorde())
-            {
-                FactionFlagState = "Alliance Controlled";
-            }
-            else
-            {
-                FactionFlagState = "Hord Controlled";
-            }
+            FactionFlagState = !Bot.Player.IsHorde() ? "Alliance Controlled" : "Hord Controlled";
         }
 
         public void Reset()

@@ -65,7 +65,7 @@ namespace AmeisenBotX.Core.Engines.Battleground.KamelBG
             {
                 hasStateChanged = false;
                 //hasFlag = Bot.NewBot.GetBuffs(WowLuaUnit.Player).Any(e => e.Contains("flag") || e.Contains("Flag"));
-                hasFlag = Bot.Player.Auras != null && Bot.Player.Auras.Any(e => e.SpellId == 23333 || e.SpellId == 23335);
+                hasFlag = Bot.Player.Auras != null && Bot.Player.Auras.Any(e => e.SpellId is 23333 or 23335);
                 FlagCarrier = hasFlag ? Bot.Player : GetFlagCarrier();
                 if (FlagCarrier == null)
                 {
@@ -174,14 +174,7 @@ namespace AmeisenBotX.Core.Engines.Battleground.KamelBG
         private IWowUnit GetFlagCarrier()
         {
             List<IWowUnit> flagCarrierList = Bot.Objects.All.OfType<IWowUnit>().Where(e => e.Guid != Bot.Wow.PlayerGuid && e.Auras != null && e.Auras.Any(en => Bot.Db.GetSpellName(en.SpellId).Contains("Flag") || Bot.Db.GetSpellName(en.SpellId).Contains("flag"))).ToList();
-            if (flagCarrierList.Count > 0)
-            {
-                return flagCarrierList[0];
-            }
-            else
-            {
-                return null;
-            }
+            return flagCarrierList.Count > 0 ? flagCarrierList[0] : null;
         }
 
         private IWowObject GetFlagObject()
@@ -195,14 +188,7 @@ namespace AmeisenBotX.Core.Engines.Battleground.KamelBG
                 .Where(x => Enum.IsDefined(typeof(WowGameObjectDisplayId), x.DisplayId)
                          && targetFlag == (WowGameObjectDisplayId)x.DisplayId).ToList();
 
-            if (flagObjectList.Count > 0)
-            {
-                return flagObjectList[0];
-            }
-            else
-            {
-                return null;
-            }
+            return flagObjectList.Count > 0 ? flagObjectList[0] : (IWowObject)null;
         }
 
         private void OnFlagAlliance(long timestamp, List<string> args)

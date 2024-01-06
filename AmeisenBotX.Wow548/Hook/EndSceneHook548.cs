@@ -16,7 +16,7 @@ namespace AmeisenBotX.Wow548.Hook
         public EndSceneHook548(WowMemoryApi memory)
             : base(memory)
         {
-            OriginalFunctionBytes = new();
+            OriginalFunctionBytes = [];
         }
 
         /// <summary>
@@ -50,7 +50,7 @@ namespace AmeisenBotX.Wow548.Hook
             if (objectBaseAddress == IntPtr.Zero) { throw new ArgumentOutOfRangeException(nameof(objectBaseAddress), "objectBaseAddress is an invalid pointer"); }
             if (functionAddress == IntPtr.Zero) { throw new ArgumentOutOfRangeException(nameof(functionAddress), "functionAddress is an invalid pointer"); }
 #endif
-            List<string> asm = new() { $"MOV ECX, {objectBaseAddress}" };
+            List<string> asm = [$"MOV ECX, {objectBaseAddress}"];
 
             if (args != null)
             {
@@ -134,11 +134,11 @@ namespace AmeisenBotX.Wow548.Hook
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public void SetFacing(IntPtr unitBase, float angle, bool smooth = false)
         {
-            CallObjectFunction(unitBase, smooth ? ((OffsetList548)Memory.Offsets).FunctionUnitSetFacingSmooth : Memory.Offsets.FunctionUnitSetFacing, new()
-            {
+            CallObjectFunction(unitBase, smooth ? ((OffsetList548)Memory.Offsets).FunctionUnitSetFacingSmooth : Memory.Offsets.FunctionUnitSetFacing,
+            [
                 angle.ToString(CultureInfo.InvariantCulture).Replace(',', '.'),
                 Environment.TickCount
-            });
+            ]);
         }
 
         public void SetRenderState(bool renderingEnabled)
@@ -284,7 +284,7 @@ namespace AmeisenBotX.Wow548.Hook
                 {
                     if (Memory.Write(codeCaveVector3, position))
                     {
-                        CallObjectFunction(playerBase, Memory.Offsets.FunctionPlayerClickToMove, new() { codeCaveVector3 });
+                        CallObjectFunction(playerBase, Memory.Offsets.FunctionPlayerClickToMove, [codeCaveVector3]);
                     }
                 }
                 finally
@@ -408,7 +408,7 @@ namespace AmeisenBotX.Wow548.Hook
             if (a == IntPtr.Zero) { throw new ArgumentOutOfRangeException(nameof(a), "a is no valid pointer"); }
             if (b == IntPtr.Zero) { throw new ArgumentOutOfRangeException(nameof(b), "b is no valid pointer"); }
 #endif
-            return CallObjectFunction(a, Memory.Offsets.FunctionUnitGetReaction, new() { b }, true, out IntPtr ret)
+            return CallObjectFunction(a, Memory.Offsets.FunctionUnitGetReaction, [b], true, out IntPtr ret)
                 && ret != IntPtr.Zero ? ret.ToInt32() : 2;
         }
 

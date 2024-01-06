@@ -50,7 +50,7 @@ namespace AmeisenBotX.Core.Engines.Combat.Helpers.Targets.Validation.Special
 
         private bool TempleOfTheJadeSerpent(IWowUnit unit)
         {
-            return unit.Auras.Any(e => e.SpellId == 113315 || e.SpellId == 106062); // Peril and Strafe || Wise Mari
+            return unit.Auras.Any(e => e.SpellId is 113315 or 106062); // Peril and Strafe || Wise Mari
         }
 
         private bool ThroneOfTidesIsLadyNazjarChanneling(IWowUnit unit)

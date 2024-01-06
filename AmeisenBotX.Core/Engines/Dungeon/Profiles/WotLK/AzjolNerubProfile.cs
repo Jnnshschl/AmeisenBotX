@@ -24,8 +24,8 @@ namespace AmeisenBotX.Core.Engines.Dungeon.Profiles.WotLK
 
         public string Name { get; } = "[70-80] Azjol Nerub";
 
-        public List<DungeonNode> Nodes { get; private set; } = new()
-        {
+        public List<DungeonNode> Nodes { get; private set; } =
+        [
             new(new(413, 796, 831)),
             new(new(418, 790, 830)),
             new(new(423, 784, 828)),
@@ -210,9 +210,9 @@ namespace AmeisenBotX.Core.Engines.Dungeon.Profiles.WotLK
             new(new(427, 65, 246)),
             new(new(420, 61, 246)),
             new(new(413, 58, 249)),
-        };
+        ];
 
-        public List<int> PriorityUnits { get; } = new();
+        public List<int> PriorityUnits { get; } = [];
 
         public int RequiredItemLevel { get; } = 100;
 

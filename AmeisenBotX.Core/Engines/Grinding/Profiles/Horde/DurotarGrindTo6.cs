@@ -9,8 +9,8 @@ namespace AmeisenBotX.Core.Engines.Grinding.Profiles.Horde
 {
     public class DurotarGrindTo6 : IGrindingProfile
     {
-        public List<Npc> NpcsOfInterest { get; } = new()
-        {
+        public List<Npc> NpcsOfInterest { get; } =
+        [
             new Npc("Duokna", 3158,
                 WowMapId.Kalimdor, WowZoneId.ValleyofTrials, new Vector3(-565, -4214, 41),
                 NpcType.VendorSellBuy),
@@ -27,19 +27,19 @@ namespace AmeisenBotX.Core.Engines.Grinding.Profiles.Horde
             new Npc("Mai'ah", 5884,
                 WowMapId.Kalimdor, WowZoneId.ValleyofTrials, new Vector3(-625, -4210, 38),
                 NpcType.ClassTrainer, NpcSubType.MageTrainer)
-        };
+        ];
 
-        public List<InteractableObject> ObjectsOfInterest { get; } = new()
-        {
+        public List<InteractableObject> ObjectsOfInterest { get; } =
+        [
             new InteractableObject(3084,
                 WowMapId.Kalimdor, WowZoneId.ValleyofTrials, new Vector3(-602, -4250, 37),
                 InteractableObjectType.Fire)
-        };
+        ];
 
         public bool RandomizeSpots => true;
 
-        public List<GrindingSpot> Spots { get; } = new()
-        {
+        public List<GrindingSpot> Spots { get; } =
+        [
             // pigs
             new GrindingSpot(new Vector3(-546, -4308, 38), 45.0f, 1, 3),
             new GrindingSpot(new Vector3(-450, -4258, 48), 45.0f, 1, 3),
@@ -48,7 +48,7 @@ namespace AmeisenBotX.Core.Engines.Grinding.Profiles.Horde
             new GrindingSpot(new Vector3(-379, -4096, 49), 55.0f, 2, 7),
             new GrindingSpot(new Vector3(-399, -4116, 50), 55.0f, 2, 7),
             new GrindingSpot(new Vector3(-284, -4179, 51), 55.0f, 2, 7),
-        };
+        ];
 
         public override string ToString()
         {

@@ -26,8 +26,8 @@ namespace AmeisenBotX.Core.Engines.Combat.Classes.Bia10
         {
             Bot = bot;
 
-            SpellAbortFunctions = new List<Func<bool>>();
-            ResurrectionTargets = new Dictionary<string, DateTime>();
+            SpellAbortFunctions = [];
+            ResurrectionTargets = [];
 
             CooldownManager = new CooldownManager(Bot.Character.SpellBook.Spells);
             InterruptManager = new InterruptManager();
@@ -314,17 +314,8 @@ namespace AmeisenBotX.Core.Engines.Combat.Classes.Bia10
 
         public bool ValidateSpell(string spellName, bool checkGCD)
         {
-            if (!Bot.Character.SpellBook.IsSpellKnown(spellName) || !Bot.Objects.IsTargetInLineOfSight)
-            {
-                return false;
-            }
-
-            if (CooldownManager.IsSpellOnCooldown(spellName) || checkGCD && IsGCD())
-            {
-                return false;
-            }
-
-            return !Bot.Player.IsCasting;
+            return Bot.Character.SpellBook.IsSpellKnown(spellName) && Bot.Objects.IsTargetInLineOfSight
+&& !CooldownManager.IsSpellOnCooldown(spellName) && (!checkGCD || !IsGCD()) && !Bot.Player.IsCasting;
         }
 
         protected bool CheckForWeaponEnchantment(WowEquipmentSlot slot, string enchantmentName, string spellToCastEnchantment)

@@ -244,7 +244,7 @@ namespace AmeisenBotX.Wow335a.Objects
 
         private static unsafe IEnumerable<IWowAura> ReadAuraTable(IMemoryApi memory, IntPtr buffBase, int auraCount)
         {
-            List<IWowAura> auras = new();
+            List<IWowAura> auras = [];
 
             if (auraCount > 40)
             {

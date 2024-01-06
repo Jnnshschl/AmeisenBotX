@@ -11,11 +11,10 @@ namespace AmeisenBotX.Core.Engines.Quest.Quests.TheBarrens.Crossroads
             : base(bot, 867, "Harpy Raiders", 12, 1,
                 () => (bot.GetClosestQuestGiverByNpcId(bot.Player.Position, new List<int> { 3449 }), new Vector3(-474.89f, -2607.74f, 127.89f)),
                 () => (bot.GetClosestQuestGiverByNpcId(bot.Player.Position, new List<int> { 3449 }), new Vector3(-474.89f, -2607.74f, 127.89f)),
-                new List<IQuestObjective>()
-                {
-                    new QuestObjectiveChain(new List<IQuestObjective>()
-                    {
-                        new KillAndLootQuestObjective(bot, new List<int> { 3276,3277,3279,3280,3278,3452 }, 8, 5064, new List<List<Vector3>> {
+                [
+                    new QuestObjectiveChain(
+                    [
+                        new KillAndLootQuestObjective(bot, [3276, 3277, 3279, 3280, 3278, 3452], 8, 5064, [
                             new()
                             {
                                 new Vector3(550.50f, -1152.00f, 91.79f),
@@ -30,9 +29,9 @@ namespace AmeisenBotX.Core.Engines.Quest.Quests.TheBarrens.Crossroads
                                 new Vector3(905.31f, -1307.79f, 105.10f),
                                 new Vector3(822.24f, -1261.96f, 107.57f),
                             },
-                        }),
-                    })
-                })
+                        ]),
+                    ])
+                ])
         { }
     }
 }

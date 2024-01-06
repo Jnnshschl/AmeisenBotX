@@ -24,8 +24,8 @@ namespace AmeisenBotX.Core.Engines.Dungeon.Profiles.WotLK
 
         public string Name { get; } = "[80+] Forge of Souls";
 
-        public List<DungeonNode> Nodes { get; } = new()
-        {
+        public List<DungeonNode> Nodes { get; } =
+        [
             new(new(4921, 2177, 639)),
             new(new(4918, 2184, 639)),
             new(new(4914, 2191, 639)),
@@ -217,9 +217,9 @@ namespace AmeisenBotX.Core.Engines.Dungeon.Profiles.WotLK
             new(new(5654, 2498, 709)),
             new(new(5659, 2504, 709)),
             new(new(5664, 2510, 709)),
-        };
+        ];
 
-        public List<int> PriorityUnits { get; } = new() { 30270 };
+        public List<int> PriorityUnits { get; } = [30270];
 
         public int RequiredItemLevel { get; } = 200;
 

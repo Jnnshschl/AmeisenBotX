@@ -6,7 +6,7 @@ namespace AmeisenBotX.Common.Storage
 {
     public abstract class SimpleConfigurable : IStoreable
     {
-        public Dictionary<string, dynamic> Configurables { get; protected set; } = new();
+        public Dictionary<string, dynamic> Configurables { get; protected set; } = [];
 
         public virtual void Load(Dictionary<string, JsonElement> objects)
         {

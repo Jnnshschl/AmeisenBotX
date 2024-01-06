@@ -127,7 +127,7 @@ namespace AmeisenBotX.Core.Engines.Battleground.Jannis.Profiles
 
         private interface IWsgDataset
         {
-            static readonly List<int> BuffDisplayIds = new() { 5991, 5995, 5931 };
+            static readonly List<int> BuffDisplayIds = [5991, 5995, 5931];
 
             Vector3 EnemyBasePosition { get; }
 
@@ -168,10 +168,7 @@ namespace AmeisenBotX.Core.Engines.Battleground.Jannis.Profiles
 
         public void Execute()
         {
-            if (WsgDataset == null)
-            {
-                WsgDataset = Bot.Player.IsAlliance() ? new AllianceWsgDataset() : new HordeWsgDataset();
-            }
+            WsgDataset ??= Bot.Player.IsAlliance() ? new AllianceWsgDataset() : new HordeWsgDataset();
 
             BehaviorTree.Tick();
         }
@@ -433,8 +430,8 @@ namespace AmeisenBotX.Core.Engines.Battleground.Jannis.Profiles
                     }
 
                     JBgBlackboard.NearFlags = Bot.Objects.All.OfType<IWowGameobject>()
-                                                 .Where(e => e.DisplayId == (int)WowGameObjectDisplayId.WsgAllianceFlag
-                                                          || e.DisplayId == (int)WowGameObjectDisplayId.WsgHordeFlag);
+                                                 .Where(e => e.DisplayId is ((int)WowGameObjectDisplayId.WsgAllianceFlag)
+                                                          or ((int)WowGameObjectDisplayId.WsgHordeFlag));
                 }
             }
             catch (Exception ex)

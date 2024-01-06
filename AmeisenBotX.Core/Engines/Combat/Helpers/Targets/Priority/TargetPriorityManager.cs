@@ -9,13 +9,13 @@ namespace AmeisenBotX.Core.Engines.Combat.Helpers.Targets.Priority
     {
         public TargetPriorityManager()
         {
-            Prioritizers = new();
+            Prioritizers = [];
             ListTargetPrioritizer = new();
         }
 
         public TargetPriorityManager(ITargetPrioritizer validator)
         {
-            Prioritizers = new() { validator };
+            Prioritizers = [validator];
             ListTargetPrioritizer = new();
         }
 

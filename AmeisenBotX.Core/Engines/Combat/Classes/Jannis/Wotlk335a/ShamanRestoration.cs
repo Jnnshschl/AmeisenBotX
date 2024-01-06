@@ -30,13 +30,13 @@ namespace AmeisenBotX.Core.Engines.Combat.Classes.Jannis.Wotlk335a
 
         public override bool IsMelee => false;
 
-        public override IItemComparator ItemComparator { get; set; } = new BasicSpiritComparator(new() { WowArmorType.Shield });
+        public override IItemComparator ItemComparator { get; set; } = new BasicSpiritComparator([WowArmorType.Shield]);
 
         public override WowRole Role => WowRole.Heal;
 
         public override TalentTree Talents { get; } = new()
         {
-            Tree1 = new(),
+            Tree1 = [],
             Tree2 = new()
             {
                 { 3, new(2, 3, 5) },

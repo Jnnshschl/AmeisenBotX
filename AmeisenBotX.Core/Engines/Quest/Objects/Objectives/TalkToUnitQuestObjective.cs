@@ -14,7 +14,7 @@ namespace AmeisenBotX.Core.Engines.Quest.Objects.Objectives
         public TalkToUnitQuestObjective(AmeisenBotInterfaces bot, int displayId, List<int> gossipIds, TalkToUnitQuestObjectiveCondition condition)
         {
             Bot = bot;
-            DisplayIds = new List<int>() { displayId };
+            DisplayIds = [displayId];
             GossipIds = gossipIds;
             Condition = condition;
 

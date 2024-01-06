@@ -35,8 +35,8 @@ namespace AmeisenBotX.Test
             float clampedA = BotMath.ClampAngle(9.0f);
             float clampedB = BotMath.ClampAngle(-3.0f);
 
-            Assert.IsTrue(clampedA >= 0.0f && clampedA <= MathF.Tau);
-            Assert.IsTrue(clampedB >= 0.0f && clampedB <= MathF.Tau);
+            Assert.IsTrue(clampedA is >= 0.0f and <= MathF.Tau);
+            Assert.IsTrue(clampedB is >= 0.0f and <= MathF.Tau);
         }
 
         [TestMethod]

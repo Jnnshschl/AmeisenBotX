@@ -31,11 +31,14 @@ namespace AmeisenBotX.Views
             else if (WowItem.GetType() == typeof(WowMoneyItem)) { labelIcon.Content = "💰"; }
             else if (WowItem.GetType() == typeof(WowProjectile) || WowItem.GetType() == typeof(WowQuiver)) { labelIcon.Content = "🏹"; }
             else if (WowItem.GetType() == typeof(WowQuestItem)) { labelIcon.Content = "💡"; }
-            else if (WowItem.GetType() == typeof(WowReagent)) { labelIcon.Content = "🧪"; }
-            else if (WowItem.GetType() == typeof(WowRecipe)) { labelIcon.Content = "📜"; }
-            else if (WowItem.GetType() == typeof(WowTradeGoods)) { labelIcon.Content = "📦"; }
-            else if (WowItem.GetType() == typeof(WowMiscellaneousItem)) { labelIcon.Content = "📦"; }
-            else { labelIcon.Content = "❓"; }
+            else
+            {
+                labelIcon.Content = WowItem.GetType() == typeof(WowReagent)
+                ? "🧪"
+                : WowItem.GetType() == typeof(WowRecipe)
+                ? "📜"
+                : WowItem.GetType() == typeof(WowTradeGoods) ? "📦" : WowItem.GetType() == typeof(WowMiscellaneousItem) ? "📦" : (object)"❓";
+            }
 
             labelItemType.Content = $"{WowItem.Type} - {WowItem.Subtype} - iLvl {WowItem.ItemLevel} - {WowItem.Durability}/{WowItem.MaxDurability}";
 

@@ -32,13 +32,13 @@ namespace AmeisenBotX.Core.Engines.Combat.Classes.Jannis.Wotlk335a
 
         public override bool IsMelee => true;
 
-        public override IItemComparator ItemComparator { get; set; } = new BasicArmorComparator(null, new() { WowWeaponType.SwordTwoHand, WowWeaponType.MaceTwoHand, WowWeaponType.AxeTwoHand });
+        public override IItemComparator ItemComparator { get; set; } = new BasicArmorComparator(null, [WowWeaponType.SwordTwoHand, WowWeaponType.MaceTwoHand, WowWeaponType.AxeTwoHand]);
 
         public override WowRole Role => WowRole.Tank;
 
         public override TalentTree Talents { get; } = new()
         {
-            Tree1 = new(),
+            Tree1 = [],
             Tree2 = new()
             {
                 { 2, new(2, 2, 5) },

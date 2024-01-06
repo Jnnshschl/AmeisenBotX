@@ -24,8 +24,8 @@ namespace AmeisenBotX.Core.Engines.Dungeon.Profiles.TBC
 
         public string Name { get; } = "[58-62] Hellfire Ramparts";
 
-        public List<DungeonNode> Nodes { get; private set; } = new()
-        {
+        public List<DungeonNode> Nodes { get; private set; } =
+        [
             new(new(-1355, 1641, 68)),
             new(new(-1350, 1647, 69)),
             new(new(-1345, 1653, 69)),
@@ -206,9 +206,9 @@ namespace AmeisenBotX.Core.Engines.Dungeon.Profiles.TBC
             new(new(-1424, 1760, 82)),
             new(new(-1427, 1767, 82)),
             new(new(-1429, 1771, 82), DungeonNodeType.Use),
-        };
+        ];
 
-        public List<int> PriorityUnits { get; } = new();
+        public List<int> PriorityUnits { get; } = [];
 
         public int RequiredItemLevel { get; } = 60;
 

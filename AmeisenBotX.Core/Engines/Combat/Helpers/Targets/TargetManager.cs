@@ -54,14 +54,7 @@ namespace AmeisenBotX.Core.Engines.Combat.Helpers.Targets
         {
             if (TargetSwitchEvent.Run())
             {
-                if (TargetSelectionLogic.SelectTarget(out IEnumerable<IWowUnit> newPossibleTargets))
-                {
-                    PossibleTargets = newPossibleTargets;
-                }
-                else
-                {
-                    PossibleTargets = null;
-                }
+                PossibleTargets = TargetSelectionLogic.SelectTarget(out IEnumerable<IWowUnit> newPossibleTargets) ? newPossibleTargets : null;
             }
 
             possibleTargets = PossibleTargets;

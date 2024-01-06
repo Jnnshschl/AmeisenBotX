@@ -9,7 +9,7 @@ namespace AmeisenBotX.Core.Engines.Quest.Objects.Objectives
         public MoveToObjectQuestObjective(AmeisenBotInterfaces bot, int objectDisplayId, double distance)
         {
             Bot = bot;
-            ObjectDisplayIds = new List<int>() { objectDisplayId };
+            ObjectDisplayIds = [objectDisplayId];
             Distance = distance;
         }
 

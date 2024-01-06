@@ -489,7 +489,7 @@ namespace AmeisenBotX
             textboxEventPull.Text = Config.EventPullMs.ToString(CultureInfo.InvariantCulture);
             textboxFollowSpecificCharacterName.Text = Config.SpecificCharacterToFollow;
             textboxFriends.Text = Config.Friends;
-            textboxItemSellBlacklist.Text = string.Join(",", Config.ItemSellBlacklist ?? new List<string>());
+            textboxItemSellBlacklist.Text = string.Join(",", Config.ItemSellBlacklist ?? []);
             textboxMailHeader.Text = Config.JobEngineMailHeader;
             textboxMailReceiver.Text = Config.JobEngineMailReceiver;
             textboxMailText.Text = Config.JobEngineMailText;
@@ -529,7 +529,7 @@ namespace AmeisenBotX
             }
 
             // Idle Actions
-            IdleActionItems = new();
+            IdleActionItems = [];
 
             if (AmeisenBot?.Bot.IdleActions.IdleActions != null)
             {

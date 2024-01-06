@@ -31,11 +31,11 @@ namespace AmeisenBotX.Core.Logic
 {
     public class AmeisenBotLogic : IAmeisenBotLogic
     {
-        private readonly List<IStaticDeathRoute> StaticDeathRoutes = new()
-        {
+        private readonly List<IStaticDeathRoute> StaticDeathRoutes =
+        [
             new ForgeOfSoulsDeathRoute(),
             new PitOfSaronDeathRoute()
-        };
+        ];
 
         public AmeisenBotLogic(AmeisenBotConfig config, AmeisenBotInterfaces bot)
         {
@@ -60,7 +60,7 @@ namespace AmeisenBotX.Core.Logic
             UnitsLootedCleanupEvent = new(TimeSpan.FromMilliseconds(1000));
             UpdateFood = new(TimeSpan.FromMilliseconds(1000));
 
-            UnitsLooted = new();
+            UnitsLooted = [];
             UnitsToLoot = new();
 
             MovementManager = new
@@ -1004,7 +1004,7 @@ namespace AmeisenBotX.Core.Logic
             {
                 if (Bot.Objects.Partymembers.Any())
                 {
-                    List<ulong> guids = new();
+                    List<ulong> guids = [];
 
                     if (Bot.Objects.Partyleader != null && Bot.Player.DistanceTo(Bot.Objects.Partyleader) < 6.0f)
                     {
@@ -1107,13 +1107,13 @@ namespace AmeisenBotX.Core.Logic
 
         private void SetCVars()
         {
-            List<(string, string)> cvars = new()
-            {
+            List<(string, string)> cvars =
+            [
                 ("maxfps", $"{Config.MaxFps}"),
                 ("maxfpsbk", $"{Config.MaxFps}"),
                 ("AutoInteract", "1"),
                 ("AutoLootDefault", "0"),
-            };
+            ];
 
             if (Config.AutoSetUlowGfxSettings)
             {

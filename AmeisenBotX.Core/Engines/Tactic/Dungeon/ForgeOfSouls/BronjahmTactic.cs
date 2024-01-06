@@ -30,7 +30,7 @@ namespace AmeisenBotX.Core.Engines.Tactic.Dungeon.ForgeOfSouls
 
         public WowMapId MapId { get; } = WowMapId.TheForgeOfSouls;
 
-        private static List<int> BronjahmDisplayId { get; } = new List<int> { 30226 };
+        private static List<int> BronjahmDisplayId { get; } = [30226];
 
         public bool ExecuteTactic(WowRole role, bool isMelee, out bool preventMovement, out bool allowAttacking)
         {
@@ -94,7 +94,7 @@ namespace AmeisenBotX.Core.Engines.Tactic.Dungeon.ForgeOfSouls
                         }
                     }
                 }
-                else if (role == WowRole.Dps || role == WowRole.Heal)
+                else if (role is WowRole.Dps or WowRole.Heal)
                 {
                     float distanceToMid = Bot.Player.Position.GetDistance(Area);
 

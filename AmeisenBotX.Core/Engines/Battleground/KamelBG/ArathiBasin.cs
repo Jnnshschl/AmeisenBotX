@@ -17,7 +17,7 @@ namespace AmeisenBotX.Core.Engines.Battleground.KamelBG
 
             CaptureFlagEvent = new(TimeSpan.FromSeconds(1));
             CombatEvent = new(TimeSpan.FromSeconds(2));
-            FlagsNodelist = new();
+            FlagsNodelist = [];
         }
 
         public string Author => "Lukas";
@@ -28,14 +28,14 @@ namespace AmeisenBotX.Core.Engines.Battleground.KamelBG
 
         public string Name => "Arathi Basin";
 
-        public List<Vector3> Path { get; } = new()
-        {
+        public List<Vector3> Path { get; } =
+        [
             new(975, 1043, -44),    // Blacksmith
             new(803, 875, -55),     // Farm
             new(1144, 844, -110),   // GoldMine
             new(852, 1151, 11),     // LumberMill
             new(1166, 1203, -56)    // Stable
-        };
+        ];
 
         private AmeisenBotInterfaces Bot { get; }
 

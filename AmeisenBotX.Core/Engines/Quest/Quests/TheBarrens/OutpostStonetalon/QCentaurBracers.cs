@@ -11,11 +11,10 @@ namespace AmeisenBotX.Core.Engines.Quest.Quests.TheBarrens.OutpostStonetalon
             : base(bot, 855, "Centaur Bracers", 9, 1,
                 () => (bot.GetClosestQuestGiverByNpcId(bot.Player.Position, new List<int> { 3389 }), new Vector3(-307.14f, -1971.95f, 96.48f)),
                 () => (bot.GetClosestQuestGiverByNpcId(bot.Player.Position, new List<int> { 3389 }), new Vector3(-307.14f, -1971.95f, 96.48f)),
-                new List<IQuestObjective>()
-                {
-                    new QuestObjectiveChain(new List<IQuestObjective>()
-                    {
-                        new KillAndLootQuestObjective(bot, new List<int> { 3272,3273,3274,3275,3397,5837,5838,5841,9523,9524,3394,3395,3396,9456 }, 15, 5030, new List<List<Vector3>> {
+                [
+                    new QuestObjectiveChain(
+                    [
+                        new KillAndLootQuestObjective(bot, [3272, 3273, 3274, 3275, 3397, 5837, 5838, 5841, 9523, 9524, 3394, 3395, 3396, 9456], 15, 5030, [
                             new()
                             {
                                 new Vector3(-1478.94f, -3013.48f, 91.79f),
@@ -98,9 +97,9 @@ namespace AmeisenBotX.Core.Engines.Quest.Quests.TheBarrens.OutpostStonetalon
                             {
                                 new Vector3(-911.83f, -2942.02f, 91.79f),
                             },
-                        }),
-                    })
-                })
+                        ]),
+                    ])
+                ])
         { }
     }
 }

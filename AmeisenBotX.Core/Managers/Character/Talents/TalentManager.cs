@@ -23,7 +23,7 @@ namespace AmeisenBotX.Core.Managers.Character.Talents
             Dictionary<int, Dictionary<int, Talent>> talentTrees = TalentTree.AsDict();
             Dictionary<int, Dictionary<int, Talent>> wantedTalentTrees = wantedTalents.AsDict();
 
-            List<(int, int, int)> talentsToSpend = new();
+            List<(int, int, int)> talentsToSpend = [];
 
             // order the trees to skill the main tree first
             foreach (KeyValuePair<int, Dictionary<int, Talent>> kv in wantedTalentTrees.OrderByDescending(e => e.Value.Count))
@@ -47,7 +47,7 @@ namespace AmeisenBotX.Core.Managers.Character.Talents
 
         private static bool CheckTalentTree(ref int talentPoints, int treeId, Dictionary<int, Talent> tree, Dictionary<int, Talent> wantedTree, out List<(int, int, int)> talentsToSpend)
         {
-            talentsToSpend = new();
+            talentsToSpend = [];
 
             if (talentPoints == 0)
             {

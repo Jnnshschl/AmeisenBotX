@@ -35,7 +35,7 @@ namespace AmeisenBotX.Core.Engines.Combat.Classes.einTyp
 
         public IEnumerable<int> BlacklistedTargetDisplayIds { get; set; }
 
-        public Dictionary<string, dynamic> Configureables { get; set; } = new Dictionary<string, dynamic>();
+        public Dictionary<string, dynamic> Configureables { get; set; } = [];
 
         public string Description => "...";
 
@@ -89,7 +89,7 @@ namespace AmeisenBotX.Core.Engines.Combat.Classes.einTyp
                 { 5, new(2, 5, 5) },
                 { 11, new(2, 11, 1) }
             },
-            Tree3 = new()
+            Tree3 = []
         };
 
         public string Version => "1.0";
@@ -264,7 +264,7 @@ namespace AmeisenBotX.Core.Engines.Combat.Classes.einTyp
                 return false;
             }
 
-            List<IWowUnit> wowUnits = Bot.Objects.All.OfType<IWowUnit>().Where(e => Bot.Db.GetReaction(Bot.Player, e) != WowUnitReaction.Friendly && Bot.Db.GetReaction(Bot.Player, e) != WowUnitReaction.Neutral).ToList();
+            List<IWowUnit> wowUnits = Bot.Objects.All.OfType<IWowUnit>().Where(e => Bot.Db.GetReaction(Bot.Player, e) is not WowUnitReaction.Friendly and not WowUnitReaction.Neutral).ToList();
             bool newTargetFound = false;
             int targetHealth = (target == null || target.IsDead || target.Health < 1) ? 2147483647 : target.Health;
             bool inCombat = target != null && target.IsInCombat;

@@ -9,7 +9,7 @@ namespace AmeisenBotX.Core.Engines.Combat.Helpers.Targets.Validation
     {
         public TargetValidationManager(ITargetValidator validator)
         {
-            Validators = new() { validator };
+            Validators = [validator];
             BlacklistTargetValidator = new();
         }
 

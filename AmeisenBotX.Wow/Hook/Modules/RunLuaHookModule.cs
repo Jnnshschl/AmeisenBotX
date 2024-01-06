@@ -29,12 +29,7 @@ namespace AmeisenBotX.Wow.Hook.Modules
 
         public override IntPtr GetDataPointer()
         {
-            if (Memory.Read(ReturnAddress, out IntPtr pString))
-            {
-                return pString;
-            }
-
-            return IntPtr.Zero;
+            return Memory.Read(ReturnAddress, out IntPtr pString) ? pString : IntPtr.Zero;
         }
 
         protected override bool PrepareAsm(out IEnumerable<string> assembly)

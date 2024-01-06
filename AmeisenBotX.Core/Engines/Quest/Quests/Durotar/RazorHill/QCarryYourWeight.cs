@@ -11,11 +11,10 @@ namespace AmeisenBotX.Core.Engines.Quest.Quests.Durotar.RazorHill
             : base(bot, 791, "Carry Your Weight", 4, 1,
                 () => (bot.GetClosestQuestGiverByNpcId(bot.Player.Position, new List<int> { 3147 }), new Vector3(384.74f, -4600.13f, 76.17f)),
                 () => (bot.GetClosestQuestGiverByNpcId(bot.Player.Position, new List<int> { 3147 }), new Vector3(384.74f, -4600.13f, 76.17f)),
-                new List<IQuestObjective>()
-                {
-                    new QuestObjectiveChain(new List<IQuestObjective>()
-                    {
-                        new KillAndLootQuestObjective(bot, new List<int> { 3119,3120,3128,3129,3192,5808,5809 }, 8, 4870, new List<List<Vector3>> {
+                [
+                    new QuestObjectiveChain(
+                    [
+                        new KillAndLootQuestObjective(bot, [3119, 3120, 3128, 3129, 3192, 5808, 5809], 8, 4870, [
                             new()
                             {
                                 new Vector3(-220.08f, -4908.83f, 26.92f),
@@ -39,9 +38,9 @@ namespace AmeisenBotX.Core.Engines.Quest.Quests.Durotar.RazorHill
                                 new Vector3(-1054.21f, -4745.53f, 16.66f),
                                 new Vector3(-1005.58f, -4766.97f, 12.67f),
                             },
-                        }),
-                    })
-                })
+                        ]),
+                    ])
+                ])
         { }
     }
 }

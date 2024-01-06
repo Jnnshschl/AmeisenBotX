@@ -37,16 +37,16 @@ namespace AmeisenBotX.Core.Engines.Combat.Classes.Jannis.Wotlk335a
 
         public override bool IsMelee => true;
 
-        public override IItemComparator ItemComparator { get; set; } = new BasicStaminaComparator(new()
-        {
+        public override IItemComparator ItemComparator { get; set; } = new BasicStaminaComparator(
+        [
             WowArmorType.Idol,
             WowArmorType.Libram,
             WowArmorType.Sigil,
             WowArmorType.Totem,
             WowArmorType.Cloth,
             WowArmorType.Leather
-        }, new()
-        {
+        ],
+        [
             WowWeaponType.SwordTwoHand,
             WowWeaponType.MaceTwoHand,
             WowWeaponType.AxeTwoHand,
@@ -56,7 +56,7 @@ namespace AmeisenBotX.Core.Engines.Combat.Classes.Jannis.Wotlk335a
             WowWeaponType.Thrown,
             WowWeaponType.Wand,
             WowWeaponType.Dagger
-        });
+        ]);
 
         public override WowRole Role => WowRole.Tank;
 
