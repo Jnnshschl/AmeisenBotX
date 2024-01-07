@@ -5,11 +5,9 @@ namespace AmeisenBotX.Memory.Win32
 {
     public static unsafe partial class Win32Imports
     {
-        public const int GWL_EXSTYLE = -0x14;
         public const int GWL_STYLE = -16;
         public const int STARTF_USESHOWWINDOW = 1;
         public const int SW_SHOWMINNOACTIVE = 7;
-        public const int SW_SHOWNOACTIVATE = 4;
         public const int SWP_NOACTIVATE = 0x10;
         public const int SWP_NOZORDER = 0x4;
 
@@ -138,6 +136,15 @@ namespace AmeisenBotX.Memory.Win32
         [return: MarshalAs(UnmanagedType.Bool)]
         public static partial bool GetWindowRect(nint windowHandle, ref Rect rectangle);
 
+        [LibraryImport("ntdll", SetLastError = true)]
+        public static partial int NtOpenProcess
+        (
+            out nint ProcessHandle,
+            int DesiredAccess,
+            ref ObjectAttributes ObjectAttributes,
+            ref ClientId ClientId
+        );
+
         [LibraryImport("kernel32", EntryPoint = "CreateProcessA")]
         [return: MarshalAs(UnmanagedType.Bool)]
         internal static partial bool CreateProcess
@@ -203,10 +210,10 @@ namespace AmeisenBotX.Memory.Win32
         [LibraryImport("ntdll")]
         internal static partial int NtReadVirtualMemory
         (
-            nint processHandle, 
-            nint baseAddress, 
-            void* buffer, 
-            int size, 
+            nint processHandle,
+            nint baseAddress,
+            void* buffer,
+            int size,
             out nint numberOfBytesRead
         );
 
@@ -219,10 +226,10 @@ namespace AmeisenBotX.Memory.Win32
         [LibraryImport("ntdll")]
         internal static partial int NtWriteVirtualMemory
         (
-            nint processHandle, 
-            nint baseAddress, 
-            void* buffer, 
-            int size, 
+            nint processHandle,
+            nint baseAddress,
+            void* buffer,
+            int size,
             out nint numberOfBytesWritten
         );
 
@@ -241,13 +248,30 @@ namespace AmeisenBotX.Memory.Win32
         (
             nint windowHandle,
             nint windowHandleInsertAfter,
-            int x, 
-            int y, 
-            int cx, 
-            int cy, 
+            int x,
+            int y,
+            int cx,
+            int cy,
             int wFlags
         );
 
+        [StructLayout(LayoutKind.Sequential)]
+        public struct ClientId
+        {
+            public nint UniqueProcess;
+            public nint UniqueThread;
+        }
+
+        [StructLayout(LayoutKind.Sequential)]
+        public struct ObjectAttributes
+        {
+            public int Length;
+            public nint RootDirectory;
+            public nint ObjectName;
+            public uint Attributes;
+            public nint SecurityDescriptor;
+            public nint SecurityQualityOfService;
+        }
         [StructLayout(LayoutKind.Sequential)]
         public struct ProcessInformation
         {

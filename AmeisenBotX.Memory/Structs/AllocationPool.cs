@@ -4,21 +4,13 @@ using System.Linq;
 
 namespace AmeisenBotX.Memory.Structs
 {
-    public readonly struct AllocationPool
+    public readonly struct AllocationPool(nint address, int size)
     {
-        public AllocationPool(nint address, int size)
-        {
-            Address = address;
-            Size = size;
+        public nint Address { get; } = address;
 
-            Allocations = [];
-        }
+        public SortedList<int, int> Allocations { get; } = [];
 
-        public nint Address { get; }
-
-        public SortedList<int, int> Allocations { get; }
-
-        public int Size { get; }
+        public int Size { get; } = size;
 
         /// <summary>
         /// Free a memory block in the pool
@@ -80,7 +72,7 @@ namespace AmeisenBotX.Memory.Structs
                         KeyValuePair<int, int> allocation = Allocations.ElementAt(i);
                         int allocationEnd = allocation.Key + allocation.Value;
 
-                        // when there is a next element, used it as the limiter, if not use the
+                        // when there is a next element, use it as the limiter, if not use the
                         // whole remaining space
                         int memoryLeft = i + 1 < Allocations.Count
                             ? Allocations.ElementAt(i + 1).Key - allocationEnd

@@ -21,7 +21,7 @@ namespace AmeisenBotX.Memory
         private const int FASM_PASSES = 100;
 
         // initial memory pool size
-        private const int INITIAL_POOL_SIZE = 0; // 16384;
+        private const int INITIAL_POOL_SIZE = 16384;
 
         // lock needs to be static as FASM isn't thread safe
         private static readonly object fasmLock = new();
@@ -55,12 +55,9 @@ namespace AmeisenBotX.Memory
         {
             get
             {
-                unchecked
-                {
-                    ulong val = rpmCalls;
-                    rpmCalls = 0;
-                    return val;
-                }
+                ulong val = rpmCalls;
+                rpmCalls = 0;
+                return val;
             }
         }
 
@@ -69,16 +66,15 @@ namespace AmeisenBotX.Memory
         {
             get
             {
-                unchecked
-                {
-                    ulong val = wpmCalls;
-                    wpmCalls = 0;
-                    return val;
-                }
+                ulong val = wpmCalls;
+                wpmCalls = 0;
+                return val;
             }
         }
 
         private List<AllocationPool> AllocationPools { get; set; }
+
+        private bool Initialized { get; set; }
 
         ///<inheritdoc cref="IMemoryApi.AllocateMemory"/>
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -102,9 +98,9 @@ namespace AmeisenBotX.Memory
                 // we need a new pool
                 nint newPoolSize = Math.Max((int)size, INITIAL_POOL_SIZE);
                 nint newPoolAddress = nint.Zero;
-                NtAllocateVirtualMemory(ProcessHandle, ref newPoolAddress, 0, ref newPoolSize, AllocationType.Commit, MemoryProtectionFlag.ExecuteReadWrite);
+                int result = NtAllocateVirtualMemory(ProcessHandle, ref newPoolAddress, 0, ref newPoolSize, AllocationType.Commit, MemoryProtectionFlag.ExecuteReadWrite);
 
-                if (newPoolAddress != nint.Zero)
+                if (result == 0 && newPoolAddress != nint.Zero)
                 {
                     AllocationPool pool = new(newPoolAddress, newPoolSize.ToInt32());
                     AllocationPools.Add(pool);
@@ -127,10 +123,8 @@ namespace AmeisenBotX.Memory
         public void Dispose()
         {
             GC.SuppressFinalize(this);
-
             NtClose(MainThreadHandle);
             NtClose(ProcessHandle);
-
             FreeAllMemory();
         }
 
@@ -186,11 +180,18 @@ namespace AmeisenBotX.Memory
                     {
                         AmeisenLogger.I.Log("XMemory", $"Freed {size} bytes in Pool[{i}] at: 0x{address:X}");
 
-                        // if (AllocationPools[i].Allocations.Count == 0 &&
-                        // VirtualFreeEx(ProcessHandle, AllocationPools[i].Address, 0,
-                        // AllocationType.Release)) { AmeisenLogger.I.Log("XMemory", $"Freed
-                        // Pool[{i}] with {AllocationPools[i].Size} bytes at: 0x{address:X}");
-                        // AllocationPools.RemoveAt(i); }
+                        // pool freeing is not needed at the moment, disabling it to reduce memory new allocations
+                        if (false && AllocationPools[i].Allocations.Count == 0)
+                        {
+                            nint addr = AllocationPools[i].Address;
+                            nint s = 0;
+
+                            if (NtFreeVirtualMemory(ProcessHandle, ref addr, ref s, AllocationType.Release) == 0)
+                            {
+                                AmeisenLogger.I.Log("XMemory", $"Freed Pool[{i}] with {AllocationPools[i].Size} bytes at: 0x{addr:X}");
+                                AllocationPools.RemoveAt(i);
+                            }
+                        }
 
                         return true;
                     }
@@ -228,9 +229,6 @@ namespace AmeisenBotX.Memory
 
             return rect;
         }
-
-        private bool Initialized { get; set; }
-
         ///<inheritdoc cref="IMemoryApi.Init"/>
         public virtual bool Init(Process process, nint processHandle, nint mainThreadHandle)
         {
@@ -317,19 +315,6 @@ namespace AmeisenBotX.Memory
             }
         }
 
-        ///<inheritdoc cref="IMemoryApi.ProtectMemory"/>
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public bool ProtectMemory(nint address, uint size, MemoryProtectionFlag memoryProtection, out MemoryProtectionFlag oldMemoryProtection)
-        {
-#if DEBUG
-            if (!Initialized) { throw new InvalidOperationException("call Init() before you do anything with this class"); }
-            if (address == nint.Zero) { throw new ArgumentOutOfRangeException(nameof(address), "address must be > 0"); }
-            if (size <= 0) { throw new ArgumentOutOfRangeException(nameof(size), "size must be > 0"); }
-#endif
-            nint s = new(size);
-            return NtProtectVirtualMemory(ProcessHandle, ref address, ref s, memoryProtection, out oldMemoryProtection) == 0;
-        }
-
         ///<inheritdoc cref="IMemoryApi.PatchMemory"/>
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public void PatchMemory<T>(nint address, T data) where T : unmanaged
@@ -347,6 +332,18 @@ namespace AmeisenBotX.Memory
             }
         }
 
+        ///<inheritdoc cref="IMemoryApi.ProtectMemory"/>
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public bool ProtectMemory(nint address, uint size, MemoryProtectionFlag memoryProtection, out MemoryProtectionFlag oldMemoryProtection)
+        {
+#if DEBUG
+            if (!Initialized) { throw new InvalidOperationException("call Init() before you do anything with this class"); }
+            if (address == nint.Zero) { throw new ArgumentOutOfRangeException(nameof(address), "address must be > 0"); }
+            if (size <= 0) { throw new ArgumentOutOfRangeException(nameof(size), "size must be > 0"); }
+#endif
+            nint s = new(size);
+            return NtProtectVirtualMemory(ProcessHandle, ref address, ref s, memoryProtection, out oldMemoryProtection) == 0;
+        }
         ///<inheritdoc cref="IMemoryApi.Read"/>
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public bool Read<T>(nint address, out T value) where T : unmanaged
