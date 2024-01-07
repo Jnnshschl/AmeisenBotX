@@ -1,13 +1,12 @@
 ﻿using AmeisenBotX.Wow.Objects;
+using System;
 using System.Collections.Generic;
 
 namespace AmeisenBotX.Core.Engines.Quest.Objects.Objectives
 {
-    public delegate bool UseUnitQuestObjectiveCondition();
-
     public class UseUnitQuestObjective : IQuestObjective
     {
-        public UseUnitQuestObjective(AmeisenBotInterfaces bot, int objectDisplayId, bool questgiversOnly, UseUnitQuestObjectiveCondition condition)
+        public UseUnitQuestObjective(AmeisenBotInterfaces bot, int objectDisplayId, bool questgiversOnly, Func<bool> condition)
         {
             Bot = bot;
             ObjectDisplayIds = [objectDisplayId];
@@ -15,7 +14,7 @@ namespace AmeisenBotX.Core.Engines.Quest.Objects.Objectives
             QuestgiversOnly = questgiversOnly;
         }
 
-        public UseUnitQuestObjective(AmeisenBotInterfaces bot, List<int> objectDisplayIds, bool questgiversOnly, UseUnitQuestObjectiveCondition condition)
+        public UseUnitQuestObjective(AmeisenBotInterfaces bot, List<int> objectDisplayIds, bool questgiversOnly, Func<bool> condition)
         {
             Bot = bot;
             ObjectDisplayIds = objectDisplayIds;
@@ -29,7 +28,7 @@ namespace AmeisenBotX.Core.Engines.Quest.Objects.Objectives
 
         private AmeisenBotInterfaces Bot { get; }
 
-        private UseUnitQuestObjectiveCondition Condition { get; }
+        private Func<bool> Condition { get; }
 
         private List<int> ObjectDisplayIds { get; }
 

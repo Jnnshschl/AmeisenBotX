@@ -1,5 +1,6 @@
 ﻿using System;
 
+#pragma warning disable CA1069
 namespace AmeisenBotX.Common.Keyboard.Enums
 {
     [Flags]
@@ -201,3 +202,4 @@ namespace AmeisenBotX.Common.Keyboard.Enums
         Zoom = 0xfb
     }
 }
+#pragma warning restore CA1069

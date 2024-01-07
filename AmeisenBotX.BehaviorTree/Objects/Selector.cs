@@ -6,17 +6,11 @@ namespace AmeisenBotX.BehaviorTree.Objects
     /// <summary>
     /// Executes a when input is true and b when it is false.
     /// </summary>
-    public class Selector : IComposite
+    public class Selector(Func<bool> condition, INode nodeA, INode nodeB) : IComposite
     {
-        public Selector(Func<bool> condition, INode nodeA, INode nodeB) : base()
-        {
-            Condition = condition;
-            Children = new INode[] { nodeA, nodeB };
-        }
+        public INode[] Children { get; } = [nodeA, nodeB];
 
-        public INode[] Children { get; }
-
-        public Func<bool> Condition { get; }
+        public Func<bool> Condition { get; } = condition;
 
         public BtStatus Execute()
         {
@@ -29,17 +23,11 @@ namespace AmeisenBotX.BehaviorTree.Objects
         }
     }
 
-    public class Selector<T> : IComposite<T>
+    public class Selector<T>(Func<T, bool> condition, INode<T> nodeA, INode<T> nodeB) : IComposite<T>
     {
-        public Selector(Func<T, bool> condition, INode<T> nodeA, INode<T> nodeB) : base()
-        {
-            Condition = condition;
-            Children = new INode<T>[] { nodeA, nodeB };
-        }
+        public INode<T>[] Children { get; } = [nodeA, nodeB];
 
-        public INode<T>[] Children { get; }
-
-        public Func<T, bool> Condition { get; }
+        public Func<T, bool> Condition { get; } = condition;
 
         public BtStatus Execute(T blackboard)
         {

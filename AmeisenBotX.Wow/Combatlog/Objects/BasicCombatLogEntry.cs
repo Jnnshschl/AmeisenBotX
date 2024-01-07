@@ -51,7 +51,7 @@ namespace AmeisenBotX.Wow.Combatlog.Objects
             string[] splitted = eventArgs[fields.Type]
                 .Replace("SPELL_BUILDING", "SPELLBUILDING")
                 .Replace("SPELL_PERIODIC", "SPELLPERIODIC")
-                .Split(new char[] { '_' }, 2);
+                .Split(['_'], 2);
 
             if (splitted.Length < 2)
             {

@@ -4,11 +4,8 @@ using AmeisenBotX.Core.Engines.Quest.Objects.Quests;
 
 namespace AmeisenBotX.Core.Engines.Quest.Quests.Grinder
 {
-    internal class QTheBarrensGrindToLevel14 : GrindingBotQuest
-    {
-        public QTheBarrensGrindToLevel14(AmeisenBotInterfaces bot)
-            : base("TheBarrensGrindToLevel14",
-                [
+    internal class QTheBarrensGrindToLevel14(AmeisenBotInterfaces bot) : GrindingBotQuest("TheBarrensGrindToLevel14",
+            [
                     new QuestObjectiveChain(
                     [
                         new GrindingObjective(bot, 14, [
@@ -26,6 +23,6 @@ namespace AmeisenBotX.Core.Engines.Quest.Quests.Grinder
                         ]),
                     ])
                 ])
-        { }
+    {
     }
 }

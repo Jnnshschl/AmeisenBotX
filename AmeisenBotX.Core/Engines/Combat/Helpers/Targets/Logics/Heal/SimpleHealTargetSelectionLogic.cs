@@ -4,12 +4,8 @@ using System.Linq;
 
 namespace AmeisenBotX.Core.Engines.Combat.Helpers.Targets.Logics.Heal
 {
-    public class SimpleHealTargetSelectionLogic : BasicTargetSelectionLogic
+    public class SimpleHealTargetSelectionLogic(AmeisenBotInterfaces bot) : BasicTargetSelectionLogic(bot)
     {
-        public SimpleHealTargetSelectionLogic(AmeisenBotInterfaces bot) : base(bot)
-        {
-        }
-
         public override bool SelectTarget(out IEnumerable<IWowUnit> possibleTargets)
         {
             List<IWowUnit> healableUnits = new(Bot.Objects.Partymembers)

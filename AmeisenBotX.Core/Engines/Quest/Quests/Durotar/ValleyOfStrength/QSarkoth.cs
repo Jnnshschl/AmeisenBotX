@@ -5,13 +5,10 @@ using System.Collections.Generic;
 
 namespace AmeisenBotX.Core.Engines.Quest.Quests.Durotar.ValleyOfStrength
 {
-    internal class QSarkoth : BotQuest
-    {
-        public QSarkoth(AmeisenBotInterfaces bot)
-            : base(bot, 790, "Sarkoth", 1, 1,
-                () => (bot.GetClosestQuestGiverByNpcId(bot.Player.Position, new List<int> { 3287 }), new Vector3(-397.76f, -4108.99f, 50.29f)),
-                () => (bot.GetClosestQuestGiverByNpcId(bot.Player.Position, new List<int> { 3287 }), new Vector3(-397.76f, -4108.99f, 50.29f)),
-                [
+    internal class QSarkoth(AmeisenBotInterfaces bot) : BotQuest(bot, 790, "Sarkoth", 1, 1,
+            () => (bot.GetClosestQuestGiverByNpcId(bot.Player.Position, new List<int> { 3287 }), new Vector3(-397.76f, -4108.99f, 50.29f)),
+            () => (bot.GetClosestQuestGiverByNpcId(bot.Player.Position, new List<int> { 3287 }), new Vector3(-397.76f, -4108.99f, 50.29f)),
+            [
                     new QuestObjectiveChain(
                     [
                         new KillAndLootQuestObjective(bot, [3281], 1, 4905, [
@@ -22,6 +19,6 @@ namespace AmeisenBotX.Core.Engines.Quest.Quests.Durotar.ValleyOfStrength
                         ]),
                     ])
                 ])
-        { }
+    {
     }
 }

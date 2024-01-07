@@ -12,20 +12,15 @@ using System.Text.Json;
 
 namespace AmeisenBotX.Core.Engines.Combat.Classes.einTyp
 {
-    public class PaladinProtection : ICombatClass
+    public class PaladinProtection(AmeisenBotInterfaces bot) : ICombatClass
     {
-        private readonly AmeisenBotInterfaces Bot;
-        private readonly string[] runningEmotes = { "/question", "/talk" };
-        private readonly string[] standingEmotes = { "/bow" };
+        private readonly AmeisenBotInterfaces Bot = bot;
+        private readonly string[] runningEmotes = ["/question", "/talk"];
+        private readonly string[] standingEmotes = ["/bow"];
         private bool computeNewRoute = false;
         private double distanceToTarget = 0;
         private bool multipleTargets = false;
         private bool standing = false;
-
-        public PaladinProtection(AmeisenBotInterfaces bot)
-        {
-            Bot = bot;
-        }
 
         public string Author => "einTyp";
 

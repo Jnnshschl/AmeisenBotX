@@ -7,22 +7,15 @@ using System.IO;
 
 namespace AmeisenBotX.Core.Managers.Chat
 {
-    public class DefaultChatManager : IChatManager
+    public class DefaultChatManager(AmeisenBotConfig config, string dataPath) : IChatManager
     {
-        public DefaultChatManager(AmeisenBotConfig config, string dataPath)
-        {
-            Config = config;
-            DataPath = dataPath;
-            ChatMessages = [];
-        }
-
         public event Action<WowChatMessage> OnNewChatMessage;
 
-        public List<WowChatMessage> ChatMessages { get; }
+        public List<WowChatMessage> ChatMessages { get; } = [];
 
-        private AmeisenBotConfig Config { get; }
+        private AmeisenBotConfig Config { get; } = config;
 
-        private string DataPath { get; }
+        private string DataPath { get; } = dataPath;
 
         public string ProtocolName(string type)
         {

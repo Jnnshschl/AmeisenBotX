@@ -10,17 +10,11 @@ namespace AmeisenBotX.Core.Managers.Threat
     /// <summary>
     /// Manager to observe environmental threats (not threat of mobs)
     /// </summary>
-    public class ThreatManager
+    public class ThreatManager(AmeisenBotInterfaces bot, AmeisenBotConfig config)
     {
-        public ThreatManager(AmeisenBotInterfaces bot, AmeisenBotConfig config)
-        {
-            Bot = bot;
-            Config = config;
-        }
+        private AmeisenBotInterfaces Bot { get; } = bot;
 
-        private AmeisenBotInterfaces Bot { get; }
-
-        private AmeisenBotConfig Config { get; }
+        private AmeisenBotConfig Config { get; } = config;
 
         /// <summary>
         /// This method tries to calculate how dangerous a position is for us.
@@ -48,7 +42,7 @@ namespace AmeisenBotX.Core.Managers.Threat
 
             if (hostilePlayers.Any())
             {
-                foreach (IWowPlayer player in hostilePlayers)
+                foreach (IWowPlayer player in hostilePlayers.Cast<IWowPlayer>())
                 {
                     float leveldiffMult = MathF.Max(0.0f, MathF.Tanh(player.Level - Bot.Player.Level));
 

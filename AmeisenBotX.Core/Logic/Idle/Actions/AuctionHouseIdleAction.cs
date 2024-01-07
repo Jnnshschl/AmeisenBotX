@@ -8,14 +8,8 @@ using System.Linq;
 
 namespace AmeisenBotX.Core.Logic.Idle.Actions
 {
-    public class AuctionHouseIdleAction : IIdleAction
+    public class AuctionHouseIdleAction(AmeisenBotInterfaces bot) : IIdleAction
     {
-        public AuctionHouseIdleAction(AmeisenBotInterfaces bot)
-        {
-            Bot = bot;
-            Rnd = new Random();
-        }
-
         public bool AutopilotOnly => true;
 
         public DateTime Cooldown { get; set; }
@@ -30,7 +24,7 @@ namespace AmeisenBotX.Core.Logic.Idle.Actions
 
         private DateTime AuctioneerTalkTime { get; set; }
 
-        private AmeisenBotInterfaces Bot { get; }
+        private AmeisenBotInterfaces Bot { get; } = bot;
 
         private Vector3 CurrentAuctioneer { get; set; }
 
@@ -38,7 +32,7 @@ namespace AmeisenBotX.Core.Logic.Idle.Actions
 
         private bool ReturnedToOrigin { get; set; }
 
-        private Random Rnd { get; }
+        private Random Rnd { get; } = new Random();
 
         private bool TalkedToAuctioneer { get; set; }
 

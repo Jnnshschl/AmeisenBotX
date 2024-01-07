@@ -6,14 +6,9 @@ namespace AmeisenBotX.BehaviorTree.Objects
     /// Executes a sequence of nodes until all nodes returned success. If a node fails or the
     /// sequence finished, it gets resetted.
     /// </summary>
-    public class Sequence : IComposite
+    public class Sequence(params INode[] children) : IComposite
     {
-        public Sequence(params INode[] children)
-        {
-            Children = children;
-        }
-
-        public INode[] Children { get; }
+        public INode[] Children { get; } = children;
 
         public int Counter { get; private set; }
 
@@ -55,14 +50,9 @@ namespace AmeisenBotX.BehaviorTree.Objects
         }
     }
 
-    public class Sequence<T> : IComposite<T>
+    public class Sequence<T>(params INode<T>[] children) : IComposite<T>
     {
-        public Sequence(params INode<T>[] children)
-        {
-            Children = children;
-        }
-
-        public INode<T>[] Children { get; }
+        public INode<T>[] Children { get; } = children;
 
         public int Counter { get; private set; }
 

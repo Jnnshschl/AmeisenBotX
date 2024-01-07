@@ -8,24 +8,17 @@ using System.Linq;
 
 namespace AmeisenBotX.Core.Engines.Combat.Helpers.Targets.Logics
 {
-    public abstract class BasicTargetSelectionLogic
+    public abstract class BasicTargetSelectionLogic(AmeisenBotInterfaces bot)
     {
-        public BasicTargetSelectionLogic(AmeisenBotInterfaces bot)
-        {
-            Bot = bot;
-            TargetValidator = new(new IsValidAliveTargetValidator());
-            TargetPrioritizer = new();
-        }
-
         public IEnumerable<int> BlacklistedTargets { get; set; }
 
-        public AmeisenBotInterfaces Bot { get; }
+        public AmeisenBotInterfaces Bot { get; } = bot;
 
         public IEnumerable<int> PriorityTargets { get; set; }
 
-        public TargetPriorityManager TargetPrioritizer { get; set; }
+        public TargetPriorityManager TargetPrioritizer { get; set; } = new();
 
-        public TargetValidationManager TargetValidator { get; set; }
+        public TargetValidationManager TargetValidator { get; set; } = new(new IsValidAliveTargetValidator());
 
         public abstract bool SelectTarget(out IEnumerable<IWowUnit> wowUnit);
 

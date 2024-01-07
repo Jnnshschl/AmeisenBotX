@@ -393,6 +393,7 @@ namespace AmeisenBotX.Core.Logic
                 WowClass.Mage => NpcSubType.MageTrainer,
                 WowClass.Warlock => NpcSubType.WarlockTrainer,
                 WowClass.Druid => NpcSubType.DruidTrainer,
+                _ => throw new NotImplementedException(),
             };
         }
 
@@ -478,7 +479,7 @@ namespace AmeisenBotX.Core.Logic
                 if (File.Exists(configWtfPath))
                 {
                     bool editedFile = false;
-                    List<string> content = File.ReadAllLines(configWtfPath).ToList();
+                    List<string> content = [.. File.ReadAllLines(configWtfPath)];
 
                     if (!content.Any(e => e.Contains($"SET REALMLIST {Config.Realmlist}", StringComparison.OrdinalIgnoreCase)))
                     {

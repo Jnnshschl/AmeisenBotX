@@ -23,13 +23,13 @@ namespace AmeisenBotX.Wow548.Objects.Raw
 
         public fixed int Pad1[5];
 
-        public bool IsActive => ((WowAuraFlag)Flags).HasFlag(WowAuraFlag.Active);
+        public readonly bool IsActive => ((WowAuraFlag)Flags).HasFlag(WowAuraFlag.Active);
 
-        public bool IsHarmful => ((WowAuraFlag)Flags).HasFlag(WowAuraFlag.Harmful);
+        public readonly bool IsHarmful => ((WowAuraFlag)Flags).HasFlag(WowAuraFlag.Harmful);
 
-        public bool IsPassive => ((WowAuraFlag)Flags).HasFlag(WowAuraFlag.Passive);
+        public readonly bool IsPassive => ((WowAuraFlag)Flags).HasFlag(WowAuraFlag.Passive);
 
-        public override string ToString()
+        public override readonly string ToString()
         {
             return $"{SpellId} (lvl. {Level}) x{StackCount} [CG: {Creator}], Harmful: {IsHarmful}, Passive: {IsPassive}";
         }

@@ -6,17 +6,11 @@ using System.Linq;
 
 namespace AmeisenBotX.Core.Logic.Idle.Actions
 {
-    public class LookAtGroupIdleAction : IIdleAction
+    public class LookAtGroupIdleAction(AmeisenBotInterfaces bot) : IIdleAction
     {
-        public LookAtGroupIdleAction(AmeisenBotInterfaces bot)
-        {
-            Bot = bot;
-            Rnd = new Random();
-        }
-
         public bool AutopilotOnly => false;
 
-        public AmeisenBotInterfaces Bot { get; }
+        public AmeisenBotInterfaces Bot { get; } = bot;
 
         public DateTime Cooldown { get; set; }
 
@@ -28,9 +22,7 @@ namespace AmeisenBotX.Core.Logic.Idle.Actions
 
         public int MinDuration => 0;
 
-        private IEnumerable<IWowUnit> NearPartymembers { get; set; }
-
-        private Random Rnd { get; }
+        private Random Rnd { get; } = new Random();
 
         public bool Enter()
         {

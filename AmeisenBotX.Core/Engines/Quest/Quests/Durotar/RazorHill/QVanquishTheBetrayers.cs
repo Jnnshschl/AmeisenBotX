@@ -5,13 +5,10 @@ using System.Collections.Generic;
 
 namespace AmeisenBotX.Core.Engines.Quest.Quests.Durotar.RazorHill
 {
-    internal class QVanquishTheBetrayers : BotQuest
-    {
-        public QVanquishTheBetrayers(AmeisenBotInterfaces bot)
-            : base(bot, 784, "Vanquish the Betrayers", 3, 1,
-                () => (bot.GetClosestQuestGiverByNpcId(bot.Player.Position, new List<int> { 3139 }), new Vector3(274.99f, -4709.30f, 17.57f)),
-                () => (bot.GetClosestQuestGiverByNpcId(bot.Player.Position, new List<int> { 3139 }), new Vector3(274.99f, -4709.30f, 17.57f)),
-                [
+    internal class QVanquishTheBetrayers(AmeisenBotInterfaces bot) : BotQuest(bot, 784, "Vanquish the Betrayers", 3, 1,
+            () => (bot.GetClosestQuestGiverByNpcId(bot.Player.Position, new List<int> { 3139 }), new Vector3(274.99f, -4709.30f, 17.57f)),
+            () => (bot.GetClosestQuestGiverByNpcId(bot.Player.Position, new List<int> { 3139 }), new Vector3(274.99f, -4709.30f, 17.57f)),
+            [
                     new QuestObjectiveChain(
                     [
                         new KillAndLootQuestObjective(bot, [3128], 10, 0, [
@@ -50,6 +47,6 @@ namespace AmeisenBotX.Core.Engines.Quest.Quests.Durotar.RazorHill
                         ]),
                     ])
                 ])
-        { }
+    {
     }
 }

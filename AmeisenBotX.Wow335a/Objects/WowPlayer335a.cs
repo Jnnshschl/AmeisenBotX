@@ -111,8 +111,8 @@ namespace AmeisenBotX.Wow335a.Objects
             {
                 RawWowPlayer = obj;
 
-                questlogEntries = new QuestlogEntry[]
-                {
+                questlogEntries =
+                [
                     obj.QuestlogEntry1,
                     obj.QuestlogEntry2,
                     obj.QuestlogEntry3,
@@ -138,10 +138,10 @@ namespace AmeisenBotX.Wow335a.Objects
                     obj.QuestlogEntry23,
                     obj.QuestlogEntry24,
                     obj.QuestlogEntry25,
-                };
+                ];
 
-                itemEnchantments = new VisibleItemEnchantment[]
-                {
+                itemEnchantments =
+                [
                     obj.VisibleItemEnchantment1,
                     obj.VisibleItemEnchantment2,
                     obj.VisibleItemEnchantment3,
@@ -161,7 +161,7 @@ namespace AmeisenBotX.Wow335a.Objects
                     obj.VisibleItemEnchantment17,
                     obj.VisibleItemEnchantment18,
                     obj.VisibleItemEnchantment19,
-                };
+                ];
             }
 
             if (Memory.Read(nint.Add(BaseAddress, 0xA30), out uint swimFlags))

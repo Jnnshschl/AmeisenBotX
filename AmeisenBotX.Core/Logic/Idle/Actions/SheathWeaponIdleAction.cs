@@ -2,16 +2,11 @@
 
 namespace AmeisenBotX.Core.Logic.Idle.Actions
 {
-    public class SheathWeaponIdleAction : IIdleAction
+    public class SheathWeaponIdleAction(AmeisenBotInterfaces bot) : IIdleAction
     {
-        public SheathWeaponIdleAction(AmeisenBotInterfaces bot)
-        {
-            Bot = bot;
-        }
-
         public bool AutopilotOnly => false;
 
-        public AmeisenBotInterfaces Bot { get; }
+        public AmeisenBotInterfaces Bot { get; } = bot;
 
         public DateTime Cooldown { get; set; }
 

@@ -12,9 +12,9 @@ namespace AmeisenBotX.Wow548.Objects
     {
         protected WowPlayerDescriptor548? PlayerDescriptor;
 
-        private IEnumerable<VisibleItemEnchantment> itemEnchantments;
+        private readonly IEnumerable<VisibleItemEnchantment>? itemEnchantments;
 
-        private IEnumerable<QuestlogEntry> questlogEntries;
+        private readonly IEnumerable<QuestlogEntry>? questlogEntries;
 
         public int ComboPoints => Memory.Read(Memory.Offsets.ComboPoints, out byte comboPoints) ? comboPoints : 0;
 
@@ -24,11 +24,11 @@ namespace AmeisenBotX.Wow548.Objects
 
         public bool IsUnderwater { get; set; }
 
-        public IEnumerable<VisibleItemEnchantment> ItemEnchantments => itemEnchantments;
+        public IEnumerable<VisibleItemEnchantment>? ItemEnchantments => itemEnchantments;
 
         public int NextLevelXp => GetPlayerDescriptor().NextLevelXp;
 
-        public IEnumerable<QuestlogEntry> QuestlogEntries => questlogEntries;
+        public IEnumerable<QuestlogEntry>? QuestlogEntries => questlogEntries;
 
         public int Xp => GetPlayerDescriptor().Xp;
 

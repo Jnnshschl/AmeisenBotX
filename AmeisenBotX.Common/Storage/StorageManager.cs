@@ -6,30 +6,29 @@ using System.Text.Json.Serialization;
 
 namespace AmeisenBotX.Common.Storage
 {
-    public class StorageManager
+    /// <summary>
+    /// Helper class used to save configureable values in json files. Files will be named after
+    /// their full class name (including namespace).
+    /// </summary>
+    /// <param name="basePath">Folder to save the json files in.</param>
+    /// <param name="partsToRemove">
+    /// Strings that are going to be removed from the final filename, use this to remove
+    /// namespace parts from them.
+    /// </param>
+    public class StorageManager(string basePath, IEnumerable<string> partsToRemove = null)
     {
-        /// <summary>
-        /// Helper class used to save configureable values in json files. Files will be named after
-        /// their full class name (including namespace).
-        /// </summary>
-        /// <param name="basePath">Folder to save the json files in.</param>
-        /// <param name="partsToRemove">
-        /// Strings that are going to be removed from the final filename, use this to remove
-        /// namespace parts from them.
-        /// </param>
-        public StorageManager(string basePath, IEnumerable<string> partsToRemove = null)
+        private static readonly JsonSerializerOptions Options = new()
         {
-            BasePath = basePath;
-            PartsToRemove = partsToRemove;
+            AllowTrailingCommas = true,
+            WriteIndented = true,
+            NumberHandling = JsonNumberHandling.AllowReadingFromString
+        };
 
-            Storeables = [];
-        }
+        private string BasePath { get; } = basePath;
 
-        private string BasePath { get; }
+        private IEnumerable<string> PartsToRemove { get; } = partsToRemove;
 
-        private IEnumerable<string> PartsToRemove { get; }
-
-        private List<IStoreable> Storeables { get; set; }
+        private List<IStoreable> Storeables { get; set; } = [];
 
         public void Load(IStoreable s)
         {
@@ -49,13 +48,9 @@ namespace AmeisenBotX.Common.Storage
                     return;
                 }
 
-                s.Load(JsonSerializer.Deserialize<Dictionary<string, JsonElement>>(File.ReadAllText(fullPath), new JsonSerializerOptions() { AllowTrailingCommas = true, NumberHandling = JsonNumberHandling.AllowReadingFromString }));
+                s.Load(JsonSerializer.Deserialize<Dictionary<string, JsonElement>>(File.ReadAllText(fullPath), Options));
             }
-            catch
-            {
-                // AmeisenLogger.I.Log("CombatClass", $"Failed to load {s.GetType().Name}
-                // ({fullPath}):\n{ex}", LogLevel.Error);
-            }
+            catch { }
         }
 
         public void LoadAll()
@@ -90,13 +85,9 @@ namespace AmeisenBotX.Common.Storage
                 }
 
                 IOUtils.CreateDirectoryIfNotExists(Path.GetDirectoryName(fullPath));
-                File.WriteAllText(fullPath, JsonSerializer.Serialize(data, new JsonSerializerOptions() { WriteIndented = true }));
+                File.WriteAllText(fullPath, JsonSerializer.Serialize(data, Options));
             }
-            catch
-            {
-                // AmeisenLogger.I.Log("CombatClass", $"Failed to save {s.GetType().Name}
-                // ({fullPath}):\n{ex}", LogLevel.Error);
-            }
+            catch { }
         }
 
         public void SaveAll()

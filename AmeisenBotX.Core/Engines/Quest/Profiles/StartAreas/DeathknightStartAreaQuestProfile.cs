@@ -39,7 +39,7 @@ namespace AmeisenBotX.Core.Engines.Quest.Profiles.StartAreas
                         [
                             new QuestObjectiveChain(
                             [
-                                new CollectQuestObjectiveDEPRECATED(bot, 38607, 1, 7961,
+                                new CollectQuestObjectiveOld(bot, 38607, 1, 7961,
                                 [
                                     new AreaNode(new Vector3(2504, -5563, 421), 32.0)
                                 ]),

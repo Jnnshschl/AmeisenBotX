@@ -7,19 +7,13 @@ namespace AmeisenBotX.BehaviorTree.Objects
     /// Special selector that runs the first node where the condition returns true. If none returned
     /// true, the fallbackNode will be executed
     /// </summary>
-    public class Waterfall : IComposite
+    public class Waterfall(INode fallbackNode, params (Func<bool> condition, INode node)[] conditionNodePairs) : IComposite
     {
-        public Waterfall(INode fallbackNode, params (Func<bool> condition, INode node)[] conditionNodePairs) : base()
-        {
-            FallbackNode = fallbackNode;
-            ConditionNodePairs = conditionNodePairs;
-        }
-
         public INode[] Children { get; }
 
-        public (Func<bool> condition, INode node)[] ConditionNodePairs { get; }
+        public (Func<bool> condition, INode node)[] ConditionNodePairs { get; } = conditionNodePairs;
 
-        public INode FallbackNode { get; }
+        public INode FallbackNode { get; } = fallbackNode;
 
         public BtStatus Execute()
         {
@@ -40,19 +34,13 @@ namespace AmeisenBotX.BehaviorTree.Objects
         }
     }
 
-    public class Waterfall<T> : IComposite<T>
+    public class Waterfall<T>(INode<T> fallbackNode, params (Func<T, bool> condition, INode<T> node)[] conditionNodePairs) : IComposite<T>
     {
-        public Waterfall(INode<T> fallbackNode, params (Func<T, bool> condition, INode<T> node)[] conditionNodePairs) : base()
-        {
-            FallbackNode = fallbackNode;
-            ConditionNodePairs = conditionNodePairs;
-        }
-
         public INode<T>[] Children { get; }
 
-        public (Func<T, bool> condition, INode<T> node)[] ConditionNodePairs { get; }
+        public (Func<T, bool> condition, INode<T> node)[] ConditionNodePairs { get; } = conditionNodePairs;
 
-        public INode<T> FallbackNode { get; }
+        public INode<T> FallbackNode { get; } = fallbackNode;
 
         public BtStatus Execute(T blackboard)
         {

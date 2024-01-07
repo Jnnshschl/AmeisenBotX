@@ -4,12 +4,8 @@ using System.Text;
 
 namespace AmeisenBotX.Wow.Hook.Modules
 {
-    public class TracelineJumpHookModule : RunAsmHookModule
+    public class TracelineJumpHookModule(Action<nint> onUpdate, Action<IHookModule> tick, WowMemoryApi memory) : RunAsmHookModule(onUpdate, tick, memory, 256)
     {
-        public TracelineJumpHookModule(Action<nint> onUpdate, Action<IHookModule> tick, WowMemoryApi memory) : base(onUpdate, tick, memory, 256)
-        {
-        }
-
         ~TracelineJumpHookModule()
         {
             if (ExecuteAddress != nint.Zero) { Memory.FreeMemory(ExecuteAddress); }

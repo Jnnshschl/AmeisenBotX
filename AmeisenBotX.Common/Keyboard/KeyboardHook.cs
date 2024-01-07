@@ -10,7 +10,7 @@ namespace AmeisenBotX.Common.Keyboard
     /// <summary>
     /// This is a global keyboard hook used to manage hotkeys.
     /// </summary>
-    public class KeyboardHook
+    public partial class KeyboardHook
     {
         public KeyboardHook()
         {
@@ -56,7 +56,7 @@ namespace AmeisenBotX.Common.Keyboard
         {
             if (HookPtr != nint.Zero)
             {
-                UnhookWindowsHookEx(HookPtr);
+                _ = UnhookWindowsHookEx(HookPtr);
             }
         }
 
@@ -74,20 +74,20 @@ namespace AmeisenBotX.Common.Keyboard
             }
         }
 
-        [DllImport("user32", SetLastError = true)]
-        private static extern int CallNextHookEx(nint hHook, int nCode, nint wParam, ref LowLevelKeyboardInput lParam);
+        [LibraryImport("user32")]
+        private static partial int CallNextHookEx(nint hHook, int nCode, nint wParam, ref LowLevelKeyboardInput lParam);
 
-        [DllImport("user32", SetLastError = true)]
-        private static extern short GetKeyState(KeyCode nVirtKey);
+        [LibraryImport("user32")]
+        private static partial short GetKeyState(KeyCode nVirtKey);
 
-        [DllImport("kernel32", CharSet = CharSet.Auto, SetLastError = true)]
-        private static extern nint GetModuleHandle(string lpModuleName);
+        [LibraryImport("kernel32", EntryPoint = "GetModuleHandleA", StringMarshalling = StringMarshalling.Utf16)]
+        private static partial nint GetModuleHandle(string lpModuleName);
 
-        [DllImport("user32", SetLastError = true)]
-        private static extern nint SetWindowsHookEx(int idHook, LowLevelKeyboardProc lpfn, nint hMod, int dwThreadId);
+        [LibraryImport("user32", EntryPoint = "SetWindowsHookExA")]
+        private static partial nint SetWindowsHookEx(int idHook, LowLevelKeyboardProc lpfn, nint hMod, int dwThreadId);
 
-        [DllImport("user32", SetLastError = true)]
-        private static extern int UnhookWindowsHookEx(nint hHook);
+        [LibraryImport("user32")]
+        private static partial int UnhookWindowsHookEx(nint hHook);
 
         private int LowLevelKeyboardCallback(int nCode, nint wParam, ref LowLevelKeyboardInput lParam)
         {

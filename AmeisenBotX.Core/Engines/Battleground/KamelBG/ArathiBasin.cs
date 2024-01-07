@@ -9,22 +9,13 @@ using System.Linq;
 
 namespace AmeisenBotX.Core.Engines.Battleground.KamelBG
 {
-    internal class ArathiBasin : IBattlegroundEngine
+    internal class ArathiBasin(AmeisenBotInterfaces bot) : IBattlegroundEngine
     {
-        public ArathiBasin(AmeisenBotInterfaces bot)
-        {
-            Bot = bot;
-
-            CaptureFlagEvent = new(TimeSpan.FromSeconds(1));
-            CombatEvent = new(TimeSpan.FromSeconds(2));
-            FlagsNodelist = [];
-        }
-
         public string Author => "Lukas";
 
         public string Description => "Arathi Basin";
 
-        public List<Flags> FlagsNodelist { get; set; }
+        public List<Flags> FlagsNodelist { get; set; } = [];
 
         public string Name => "Arathi Basin";
 
@@ -37,11 +28,11 @@ namespace AmeisenBotX.Core.Engines.Battleground.KamelBG
             new(1166, 1203, -56)    // Stable
         ];
 
-        private AmeisenBotInterfaces Bot { get; }
+        private AmeisenBotInterfaces Bot { get; } = bot;
 
-        private TimegatedEvent CaptureFlagEvent { get; }
+        private TimegatedEvent CaptureFlagEvent { get; } = new(TimeSpan.FromSeconds(1));
 
-        private TimegatedEvent CombatEvent { get; }
+        private TimegatedEvent CombatEvent { get; } = new(TimeSpan.FromSeconds(2));
 
         private int CurrentNodeCounter { get; set; }
 

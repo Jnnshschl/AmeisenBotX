@@ -7,20 +7,15 @@ using System.Linq;
 
 namespace AmeisenBotX.Core.Engines.Movement.Objects
 {
-    public class BasicVehicle
+    public class BasicVehicle(AmeisenBotInterfaces bot)
     {
-        public BasicVehicle(AmeisenBotInterfaces bot)
-        {
-            Bot = bot;
-        }
-
         public delegate void MoveCharacter(Vector3 positionToGoTo);
 
         public DateTime LastUpdate { get; private set; }
 
         public Vector3 Velocity { get; private set; }
 
-        private AmeisenBotInterfaces Bot { get; }
+        private AmeisenBotInterfaces Bot { get; } = bot;
 
         public Vector3 AvoidObstacles(float maxSteering, float maxVelocity, float multiplier)
         {

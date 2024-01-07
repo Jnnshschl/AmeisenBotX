@@ -81,6 +81,7 @@ namespace AmeisenBotX.Core.Engines.Tactic.Bosses.Naxxramas10
                 WowRole.Tank => DoTank(out handlesMovement, out allowAttacking),
                 WowRole.Heal => DoDpsHeal(false, out handlesMovement, out allowAttacking),
                 WowRole.Dps => DoDpsHeal(isMelee, out handlesMovement, out allowAttacking),
+                _ => throw new NotImplementedException(),
             };
         }
 

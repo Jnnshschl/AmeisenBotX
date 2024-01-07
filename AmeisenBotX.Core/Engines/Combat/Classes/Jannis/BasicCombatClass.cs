@@ -22,19 +22,19 @@ namespace AmeisenBotX.Core.Engines.Combat.Classes.Jannis
 {
     public abstract class BasicCombatClass : SimpleConfigurable, ICombatClass
     {
-        private readonly int[] useableHealingItems = new int[]
-                                                                                                                                                                                                                                                                                                                                                                                {
+        private readonly int[] useableHealingItems =
+                                                                                                                                                                                                                                                                                                                                                                                [
             // potions
             118, 929, 1710, 2938, 3928, 4596, 5509, 13446, 22829, 33447,
             // healthstones
             5509, 5510, 5511, 5512, 9421, 19013, 22103, 36889, 36892,
-        };
+        ];
 
-        private readonly int[] useableManaItems = new int[]
-        {
+        private readonly int[] useableManaItems =
+        [
             // potions
             2245, 3385, 3827, 6149, 13443, 13444, 33448, 22832,
-        };
+        ];
 
         protected BasicCombatClass(AmeisenBotInterfaces bot)
         {
@@ -276,9 +276,9 @@ namespace AmeisenBotX.Core.Engines.Combat.Classes.Jannis
 
         protected bool CheckForWeaponEnchantment(WowEquipmentSlot slot, string enchantmentName, string spellToCastEnchantment)
         {
-            if (Bot.Character.Equipment.Items.ContainsKey(slot))
+            if (Bot.Character.Equipment.Items.TryGetValue(slot, out IWowInventoryItem value))
             {
-                int itemId = Bot.Character.Equipment.Items[slot].Id;
+                int itemId = value.Id;
 
                 if (itemId > 0)
                 {
@@ -316,13 +316,14 @@ namespace AmeisenBotX.Core.Engines.Combat.Classes.Jannis
                     {
                         if (Bot.Db.GetUnitName(player, out string name))
                         {
-                            if (!RessurrectionTargets.ContainsKey(name))
+                            if (!RessurrectionTargets.TryGetValue(name, out DateTime value))
                             {
-                                RessurrectionTargets.Add(name, DateTime.UtcNow + TimeSpan.FromSeconds(10));
+                                value = DateTime.UtcNow + TimeSpan.FromSeconds(10);
+                                RessurrectionTargets.Add(name, value);
                                 return TryCastSpell(spellName, player.Guid, true);
                             }
 
-                            if (RessurrectionTargets[name] < DateTime.UtcNow)
+                            if (value < DateTime.UtcNow)
                             {
                                 return TryCastSpell(spellName, player.Guid, true);
                             }

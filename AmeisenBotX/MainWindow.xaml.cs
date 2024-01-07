@@ -30,6 +30,19 @@ namespace AmeisenBotX
 {
     public partial class MainWindow : Window
     {
+        private static readonly JsonSerializerOptions Options = new()
+        {
+            AllowTrailingCommas = true,
+            NumberHandling = JsonNumberHandling.AllowReadingFromString,
+            WriteIndented = true,
+        };
+
+        private static readonly JsonSerializerOptions OptionsFields = new()
+        {
+            WriteIndented = true,
+            IncludeFields = true
+        };
+
         public MainWindow(string dataPath, string configPath)
         {
             if (!Directory.Exists(dataPath)) { throw new FileNotFoundException(dataPath); }
@@ -157,13 +170,12 @@ namespace AmeisenBotX
 
             return size;
         }
-
         private static bool TryLoadConfig(string configPath, out AmeisenBotConfig config)
         {
             if (!string.IsNullOrWhiteSpace(configPath))
             {
                 config = File.Exists(configPath)
-                    ? JsonSerializer.Deserialize<AmeisenBotConfig>(File.ReadAllText(configPath), new JsonSerializerOptions() { AllowTrailingCommas = true, NumberHandling = JsonNumberHandling.AllowReadingFromString })
+                    ? JsonSerializer.Deserialize<AmeisenBotConfig>(File.ReadAllText(configPath), Options)
                     : new();
 
                 config.Path = configPath;
@@ -187,7 +199,7 @@ namespace AmeisenBotX
             if (configWindow.SaveConfig)
             {
                 AmeisenBot.ReloadConfig(configWindow.Config);
-                File.WriteAllText(AmeisenBot.Config.Path, JsonSerializer.Serialize(configWindow.Config, new JsonSerializerOptions() { WriteIndented = true }));
+                File.WriteAllText(AmeisenBot.Config.Path, JsonSerializer.Serialize(configWindow.Config, Options));
 
                 KeyboardHook.Clear();
                 LoadHotkeys();
@@ -446,7 +458,6 @@ namespace AmeisenBotX
                 }
             }
         }
-
         private void SaveConfig()
         {
             if (AmeisenBot != null
@@ -454,7 +465,7 @@ namespace AmeisenBotX
                 && !string.IsNullOrWhiteSpace(AmeisenBot.Config.Path)
                 && Directory.Exists(Path.GetDirectoryName(AmeisenBot.Config.Path)))
             {
-                File.WriteAllText(AmeisenBot.Config.Path, JsonSerializer.Serialize(AmeisenBot.Config, new JsonSerializerOptions() { WriteIndented = true, IncludeFields = true }));
+                File.WriteAllText(AmeisenBot.Config.Path, JsonSerializer.Serialize(AmeisenBot.Config, OptionsFields));
             }
         }
 

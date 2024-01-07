@@ -26,6 +26,12 @@ namespace AmeisenBotX.Wow335a
     /// </summary>
     public class WowInterface335a : IWowInterface
     {
+        private static readonly JsonSerializerOptions Options = new()
+        {
+            AllowTrailingCommas = true,
+            NumberHandling = JsonNumberHandling.AllowReadingFromString
+        };
+
         public WowInterface335a(WowMemoryApi memory)
         {
             Memory = memory;
@@ -334,7 +340,7 @@ namespace AmeisenBotX.Wow335a
             {
                 if (result != null && result.Length > 0)
                 {
-                    return result.Split(new char[] { ';' }, StringSplitOptions.RemoveEmptyEntries)
+                    return result.Split(';', StringSplitOptions.RemoveEmptyEntries)
                         .Select(e => int.TryParse(e, out int n) ? n : (int?)null)
                         .Where(e => e.HasValue)
                         .Select(e => e.Value);
@@ -368,7 +374,7 @@ namespace AmeisenBotX.Wow335a
                 // ignored
             }
 
-            return Array.Empty<string>();
+            return [];
         }
 
         public string GetInventoryItems()
@@ -397,14 +403,14 @@ namespace AmeisenBotX.Wow335a
 
             try
             {
-                return JsonSerializer.Deserialize<List<WowMount>>(mountJson, new JsonSerializerOptions() { AllowTrailingCommas = true, NumberHandling = JsonNumberHandling.AllowReadingFromString });
+                return JsonSerializer.Deserialize<List<WowMount>>(mountJson, Options);
             }
             catch (Exception e)
             {
                 AmeisenLogger.I.Log("CharacterManager", $"Failed to parse Mounts JSON:\n{mountJson}\n{e}", LogLevel.Error);
             }
 
-            return Array.Empty<WowMount>();
+            return [];
         }
 
         public bool GetNumQuestLogChoices(out int numChoices)
@@ -865,12 +871,12 @@ namespace AmeisenBotX.Wow335a
 
         public void SetLfgRole(WowRole combatClassRole)
         {
-            int[] roleBools = new int[3]
-            {
-                combatClassRole == WowRole.Tank ? 1:0,
-                combatClassRole == WowRole.Heal ? 1:0,
-                combatClassRole == WowRole.Dps ? 1:0
-            };
+            int[] roleBools =
+            [
+                combatClassRole == WowRole.Tank ? 1 : 0,
+                combatClassRole == WowRole.Heal ? 1 : 0,
+                combatClassRole == WowRole.Dps ? 1 : 0
+            ];
 
             LuaDoString($"SetLFGRoles(0, {roleBools[0]}, {roleBools[1]}, {roleBools[2]});LFDRoleCheckPopupAcceptButton:Click()");
         }

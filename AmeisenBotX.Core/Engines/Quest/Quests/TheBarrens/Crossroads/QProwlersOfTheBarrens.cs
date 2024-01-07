@@ -5,13 +5,10 @@ using System.Collections.Generic;
 
 namespace AmeisenBotX.Core.Engines.Quest.Quests.TheBarrens.Crossroads
 {
-    internal class QProwlersOfTheBarrens : BotQuest
-    {
-        public QProwlersOfTheBarrens(AmeisenBotInterfaces bot)
-            : base(bot, 903, "Prowlers of the Barrens", 10, 1,
-                () => (bot.GetClosestQuestGiverByNpcId(bot.Player.Position, new List<int> { 3338 }), new Vector3(-482.48f, -2670.19f, 97.52f)),
-                () => (bot.GetClosestQuestGiverByNpcId(bot.Player.Position, new List<int> { 3338 }), new Vector3(-482.48f, -2670.19f, 97.52f)),
-                [
+    internal class QProwlersOfTheBarrens(AmeisenBotInterfaces bot) : BotQuest(bot, 903, "Prowlers of the Barrens", 10, 1,
+            () => (bot.GetClosestQuestGiverByNpcId(bot.Player.Position, new List<int> { 3338 }), new Vector3(-482.48f, -2670.19f, 97.52f)),
+            () => (bot.GetClosestQuestGiverByNpcId(bot.Player.Position, new List<int> { 3338 }), new Vector3(-482.48f, -2670.19f, 97.52f)),
+            [
                     new QuestObjectiveChain(
                     [
                         new KillAndLootQuestObjective(bot, [3425], 7, 5096, [
@@ -111,6 +108,6 @@ namespace AmeisenBotX.Core.Engines.Quest.Quests.TheBarrens.Crossroads
                         ]),
                     ])
                 ])
-        { }
+    {
     }
 }

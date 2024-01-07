@@ -23,6 +23,12 @@ namespace AmeisenBotX.Wow548
     /// </summary>
     public class WowInterface548 : IWowInterface
     {
+        private static readonly JsonSerializerOptions Options = new()
+        {
+            AllowTrailingCommas = true,
+            NumberHandling = JsonNumberHandling.AllowReadingFromString
+        };
+
         public WowInterface548(WowMemoryApi memory)
         {
             Memory = memory;
@@ -331,14 +337,14 @@ namespace AmeisenBotX.Wow548
             {
                 if (result != null && result.Length > 0)
                 {
-                    return result.Split(new char[] { ';' }, StringSplitOptions.RemoveEmptyEntries)
+                    return result.Split(';', StringSplitOptions.RemoveEmptyEntries)
                         .Select(e => int.TryParse(e, out int n) ? n : (int?)null)
                         .Where(e => e.HasValue)
                         .Select(e => e.Value);
                 }
             }
 
-            return Array.Empty<int>();
+            return [];
         }
 
         public string GetEquipmentItems()
@@ -365,7 +371,7 @@ namespace AmeisenBotX.Wow548
                 // ignored
             }
 
-            return Array.Empty<string>();
+            return [];
         }
 
         public string GetInventoryItems()
@@ -388,13 +394,13 @@ namespace AmeisenBotX.Wow548
             return ExecuteLuaAndRead(BotUtils.ObfuscateLua("{v:0}=GetMoney();"), out string s) ? int.TryParse(s, out int v) ? v : 0 : 0;
         }
 
-        public IEnumerable<WowMount> GetMounts()
+        public IEnumerable<WowMount>? GetMounts()
         {
             string mountJson = ExecuteLuaAndRead(BotUtils.ObfuscateLua($"{{v:0}}=\"[\"{{v:1}}=GetNumCompanions(\"MOUNT\")if {{v:1}}>0 then for b=1,{{v:1}} do {{v:4}},{{v:2}},{{v:3}}=GetCompanionInfo(\"mount\",b){{v:0}}={{v:0}}..\"{{\\\"name\\\":\\\"\"..{{v:2}}..\"\\\",\"..\"\\\"index\\\":\"..b..\",\"..\"\\\"spellId\\\":\"..{{v:3}}..\",\"..\"\\\"mountId\\\":\"..{{v:4}}..\",\"..\"}}\"if b<{{v:1}} then {{v:0}}={{v:0}}..\",\"end end end;{{v:0}}={{v:0}}..\"]\""), out string result) ? result : string.Empty;
 
             try
             {
-                return JsonSerializer.Deserialize<List<WowMount>>(mountJson, new JsonSerializerOptions() { AllowTrailingCommas = true, NumberHandling = JsonNumberHandling.AllowReadingFromString });
+                return JsonSerializer.Deserialize<List<WowMount>>(mountJson, Options);
             }
             catch (Exception e)
             {
@@ -1003,12 +1009,12 @@ namespace AmeisenBotX.Wow548
 
         public void SetLfgRole(WowRole combatClassRole)
         {
-            int[] roleBools = new int[3]
-            {
-                combatClassRole == WowRole.Tank ? 1:0,
-                combatClassRole == WowRole.Heal ? 1:0,
-                combatClassRole == WowRole.Dps ? 1:0
-            };
+            int[] roleBools =
+            [
+                combatClassRole == WowRole.Tank ? 1 : 0,
+                combatClassRole == WowRole.Heal ? 1 : 0,
+                combatClassRole == WowRole.Dps ? 1 : 0
+            ];
 
             LuaDoString($"SetLFGRoles(0, {roleBools[0]}, {roleBools[1]}, {roleBools[2]});LFDRoleCheckPopupAcceptButton:Click()");
         }

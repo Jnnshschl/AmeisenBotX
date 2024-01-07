@@ -13,7 +13,7 @@ using static AmeisenBotX.Memory.Win32.Win32Imports;
 
 namespace AmeisenBotX.Memory
 {
-    public unsafe class XMemory : IMemoryApi
+    public unsafe partial class XMemory : IMemoryApi
     {
         // FASM configuration, if you encounter fasm error, try to increase the values
         private const int FASM_MEMORY_SIZE = 8192;
@@ -123,8 +123,8 @@ namespace AmeisenBotX.Memory
         public void Dispose()
         {
             GC.SuppressFinalize(this);
-            NtClose(MainThreadHandle);
-            NtClose(ProcessHandle);
+            _ = NtClose(MainThreadHandle);
+            _ = NtClose(ProcessHandle);
             FreeAllMemory();
         }
 
@@ -229,6 +229,7 @@ namespace AmeisenBotX.Memory
 
             return rect;
         }
+
         ///<inheritdoc cref="IMemoryApi.Init"/>
         public virtual bool Init(Process process, nint processHandle, nint mainThreadHandle)
         {
@@ -344,6 +345,7 @@ namespace AmeisenBotX.Memory
             nint s = new(size);
             return NtProtectVirtualMemory(ProcessHandle, ref address, ref s, memoryProtection, out oldMemoryProtection) == 0;
         }
+
         ///<inheritdoc cref="IMemoryApi.Read"/>
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public bool Read<T>(nint address, out T value) where T : unmanaged
@@ -471,7 +473,7 @@ namespace AmeisenBotX.Memory
 
                 int style = GetWindowLong(Process.MainWindowHandle, GWL_STYLE);
                 style &= ~(int)WindowStyle.WS_CAPTION & ~(int)WindowStyle.WS_THICKFRAME & ~(int)WindowStyle.WS_BORDER;
-                SetWindowLong(Process.MainWindowHandle, GWL_STYLE, style);
+                _ = SetWindowLong(Process.MainWindowHandle, GWL_STYLE, style);
 
                 ResizeParentWindow(offsetX, offsetY, width, height);
             }
@@ -572,15 +574,17 @@ namespace AmeisenBotX.Memory
         /// <param name="nPassesLimit">FASM pass limit</param>
         /// <param name="hDisplayPipe">FASM display pipe</param>
         /// <returns>FASM status struct pointer</returns>
-        [DllImport("FASM.dll", EntryPoint = "fasm_Assemble", CharSet = CharSet.Ansi, CallingConvention = CallingConvention.StdCall)]
-        private static extern int FasmAssemble(string szSource, byte* lpMemory, int nSize, int nPassesLimit, nint hDisplayPipe);
+        [LibraryImport("FASM.dll", EntryPoint = "fasm_Assemble", StringMarshalling = StringMarshalling.Utf8)]
+        [UnmanagedCallConv(CallConvs = new Type[] { typeof(CallConvStdcall) })]
+        private static partial int FasmAssemble(string szSource, byte* lpMemory, int nSize, int nPassesLimit, nint hDisplayPipe);
 
         /// <summary>
         /// Get FASM assembler version.
         /// </summary>
         /// <returns>Version</returns>
-        [DllImport("FASM.dll", EntryPoint = "fasm_GetVersion", CharSet = CharSet.Ansi, CallingConvention = CallingConvention.StdCall)]
-        private static extern int FasmGetVersion();
+        [LibraryImport("FASM.dll", EntryPoint = "fasm_GetVersion")]
+        [UnmanagedCallConv(CallConvs = new Type[] { typeof(CallConvStdcall) })]
+        private static partial int FasmGetVersion();
 
         /// <summary>
         /// Gateway function to monitor ReadProcessMemory calls.

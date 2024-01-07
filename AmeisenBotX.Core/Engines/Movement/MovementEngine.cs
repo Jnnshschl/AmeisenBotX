@@ -10,23 +10,8 @@ using System.Linq;
 
 namespace AmeisenBotX.Core.Engines.Movement
 {
-    public class MovementEngine : IMovementEngine
+    public class MovementEngine(AmeisenBotInterfaces bot, AmeisenBotConfig config) : IMovementEngine
     {
-        public MovementEngine(AmeisenBotInterfaces bot, AmeisenBotConfig config)
-        {
-            Bot = bot;
-            Config = config;
-
-            FindPathEvent = new(TimeSpan.FromMilliseconds(500));
-            RefreshPathEvent = new(TimeSpan.FromMilliseconds(500));
-            DistanceMovedCheckEvent = new(TimeSpan.FromMilliseconds(500));
-
-            PathQueue = new();
-            PlacesToAvoidList = [];
-
-            PlayerVehicle = new(bot);
-        }
-
         public float CurrentSpeed { get; private set; }
 
         public bool IsAllowedToMove => DateTime.UtcNow > MovementBlockedUntil;
@@ -47,27 +32,27 @@ namespace AmeisenBotX.Core.Engines.Movement
 
         public Vector3 UnstuckTarget { get; private set; }
 
-        private AmeisenBotInterfaces Bot { get; }
+        private AmeisenBotInterfaces Bot { get; } = bot;
 
-        private AmeisenBotConfig Config { get; }
+        private AmeisenBotConfig Config { get; } = config;
 
-        private TimegatedEvent DistanceMovedCheckEvent { get; }
+        private TimegatedEvent DistanceMovedCheckEvent { get; } = new(TimeSpan.FromMilliseconds(500));
 
-        private TimegatedEvent FindPathEvent { get; }
+        private TimegatedEvent FindPathEvent { get; } = new(TimeSpan.FromMilliseconds(500));
 
         private Vector3 LastTargetPosition { get; set; }
 
         private DateTime MovementBlockedUntil { get; set; }
 
-        private Queue<Vector3> PathQueue { get; set; }
+        private Queue<Vector3> PathQueue { get; set; } = new();
 
-        private List<(Vector3 position, float radius, DateTime until)> PlacesToAvoidList { get; set; }
+        private List<(Vector3 position, float radius, DateTime until)> PlacesToAvoidList { get; set; } = [];
 
-        private BasicVehicle PlayerVehicle { get; set; }
+        private BasicVehicle PlayerVehicle { get; set; } = new(bot);
 
         private PreventMovementType PreventMovementType { get; set; }
 
-        private TimegatedEvent RefreshPathEvent { get; }
+        private TimegatedEvent RefreshPathEvent { get; } = new(TimeSpan.FromMilliseconds(500));
 
         private bool TriedToMountUp { get; set; }
 
@@ -254,7 +239,7 @@ namespace AmeisenBotX.Core.Engines.Movement
                 places.AddRange(aoeEffects.Select(e => (e.Position, e.Radius)));
             }
 
-            if (places.Any())
+            if (places.Count != 0)
             {
                 // build mean position and move away x meters from it x is the biggest distance
                 // we have to move

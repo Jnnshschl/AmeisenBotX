@@ -3,14 +3,9 @@ using AmeisenBotX.Wow.Objects.Enums;
 
 namespace AmeisenBotX.Core.Engines.Combat.Helpers.Targets.Validation.Basic
 {
-    public class IsAttackableTargetValidator : ITargetValidator
+    public class IsAttackableTargetValidator(AmeisenBotInterfaces bot) : ITargetValidator
     {
-        public IsAttackableTargetValidator(AmeisenBotInterfaces bot)
-        {
-            Bot = bot;
-        }
-
-        private AmeisenBotInterfaces Bot { get; }
+        private AmeisenBotInterfaces Bot { get; } = bot;
 
         public bool IsValid(IWowUnit unit)
         {

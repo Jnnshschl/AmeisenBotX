@@ -13,15 +13,15 @@ namespace AmeisenBotX.Wow335a.Objects.Raw
 
         public ulong PartymemberGuid4 { get; set; }
 
-        public ulong[] AsArray()
+        public readonly ulong[] AsArray()
         {
-            return new ulong[]
-            {
+            return
+            [
                 PartymemberGuid1,
                 PartymemberGuid2,
                 PartymemberGuid3,
                 PartymemberGuid4,
-            };
+            ];
         }
     }
 }

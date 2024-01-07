@@ -5,14 +5,9 @@ using System.Linq;
 
 namespace AmeisenBotX.Core.Managers.Character.Comparators.Objects
 {
-    public class GearscoreFactory
+    public class GearscoreFactory(Dictionary<string, double> statMultiplicators)
     {
-        public GearscoreFactory(Dictionary<string, double> statMultiplicators)
-        {
-            StatMultiplicators = statMultiplicators;
-        }
-
-        private Dictionary<string, double> StatMultiplicators { get; }
+        private Dictionary<string, double> StatMultiplicators { get; } = statMultiplicators;
 
         public double Calculate(IWowInventoryItem item)
         {

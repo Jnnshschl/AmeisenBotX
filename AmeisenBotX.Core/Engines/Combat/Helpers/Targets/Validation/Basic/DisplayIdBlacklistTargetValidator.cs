@@ -4,14 +4,9 @@ using System.Linq;
 
 namespace AmeisenBotX.Core.Engines.Combat.Helpers.Targets.Validation.Basic
 {
-    public class DisplayIdBlacklistTargetValidator : ITargetValidator
+    public class DisplayIdBlacklistTargetValidator(IEnumerable<int> blacklistedGuids = null) : ITargetValidator
     {
-        public DisplayIdBlacklistTargetValidator(IEnumerable<int> blacklistedGuids = null)
-        {
-            Blacklist = blacklistedGuids ?? new List<int>();
-        }
-
-        public IEnumerable<int> Blacklist { get; set; }
+        public IEnumerable<int> Blacklist { get; set; } = blacklistedGuids ?? new List<int>();
 
         public bool IsValid(IWowUnit unit)
         {

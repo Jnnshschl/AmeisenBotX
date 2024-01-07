@@ -11,14 +11,8 @@ using System.Text;
 
 namespace AmeisenBotX.Wow548.Hook
 {
-    public class EndSceneHook548 : GenericEndSceneHook
+    public class EndSceneHook548(WowMemoryApi memory) : GenericEndSceneHook(memory)
     {
-        public EndSceneHook548(WowMemoryApi memory)
-            : base(memory)
-        {
-            OriginalFunctionBytes = [];
-        }
-
         /// <summary>
         /// Used to save the old render flags of wow.
         /// </summary>
@@ -27,7 +21,7 @@ namespace AmeisenBotX.Wow548.Hook
         /// <summary>
         /// Used to save the original instruction when a function get disabled.
         /// </summary>
-        private Dictionary<nint, byte> OriginalFunctionBytes { get; }
+        private Dictionary<nint, byte> OriginalFunctionBytes { get; } = [];
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public bool CallObjectFunction(nint objectBaseAddress, nint functionAddress, List<object>? args = null)
@@ -209,8 +203,8 @@ namespace AmeisenBotX.Wow548.Hook
 
                     if (Memory.Write(distancePointer, tracelineCombo))
                     {
-                        string[] asm = new string[]
-                        {
+                        string[] asm =
+                        [
                             "PUSH 0",
                             $"PUSH {flags}",
                             $"PUSH {distancePointer}",
@@ -220,7 +214,7 @@ namespace AmeisenBotX.Wow548.Hook
                             $"CALL {Memory.Offsets.FunctionTraceline}",
                             "ADD ESP, 0x18",
                             "RET",
-                        };
+                        ];
 
                         if (InjectAndExecute(asm, true, out nint returnAddress))
                         {
@@ -322,8 +316,8 @@ namespace AmeisenBotX.Wow548.Hook
 
                     Memory.WriteBytes(memAllocCmdVar, bytesToWrite);
 
-                    string[] asm = new string[]
-                    {
+                    string[] asm =
+                    [
                         "PUSH 0",
                         $"PUSH {memAllocCmdVar}",
                         $"PUSH {memAllocCmdVar}",
@@ -335,7 +329,7 @@ namespace AmeisenBotX.Wow548.Hook
                         $"PUSH {memAllocCmdVar + commandBytes.Length}",
                         $"CALL {Memory.Offsets.FunctionGetLocalizedText}",
                         "RET",
-                    };
+                    ];
 
                     if (InjectAndExecute(asm, true, out nint returnAddress)
                         && Memory.ReadString(returnAddress, Encoding.UTF8, out result))
@@ -374,15 +368,15 @@ namespace AmeisenBotX.Wow548.Hook
                     {
                         Memory.WriteBytes(memAlloc, variableBytes);
 
-                        string[] asm = new string[]
-                        {
+                        string[] asm =
+                        [
                             $"CALL {Memory.Offsets.FunctionGetActivePlayerObject}",
                             "MOV ECX, EAX",
                             "PUSH -1",
                             $"PUSH {memAlloc}",
                             $"CALL {Memory.Offsets.FunctionGetLocalizedText}",
                             "RET",
-                        };
+                        ];
 
                         if (InjectAndExecute(asm, true, out nint returnAddress)
                             && Memory.ReadString(returnAddress, Encoding.UTF8, out result))
@@ -426,11 +420,11 @@ namespace AmeisenBotX.Wow548.Hook
         private void EnableFunction(nint address)
         {
             // check for RET opcode to be present before restoring original function
-            if (OriginalFunctionBytes.ContainsKey(address)
+            if (OriginalFunctionBytes.TryGetValue(address, out byte value)
                 && Memory.Read(address, out byte opcode)
                 && opcode == 0xC3)
             {
-                Memory.PatchMemory(address, OriginalFunctionBytes[address]);
+                Memory.PatchMemory(address, value);
             }
         }
 
@@ -438,11 +432,7 @@ namespace AmeisenBotX.Wow548.Hook
         {
             if (Memory.Read(address, out byte opcode))
             {
-                if (!OriginalFunctionBytes.ContainsKey(address))
-                {
-                    OriginalFunctionBytes.Add(address, opcode);
-                }
-                else
+                if (!OriginalFunctionBytes.TryAdd(address, opcode))
                 {
                     OriginalFunctionBytes[address] = opcode;
                 }

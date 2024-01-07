@@ -4,26 +4,14 @@ using AmeisenBotX.Wow.Objects.Enums;
 
 namespace AmeisenBotX.Core.Objects
 {
-    public class Npc
+    public class Npc(string name, int entryId, WowMapId mapId, WowZoneId zoneId, Vector3 position, NpcType type, NpcSubType subType = NpcSubType.None)
     {
-        public readonly int EntryId;
-        public readonly NpcSubType SubType;
-        public readonly NpcType Type;
-        public WowMapId MapId;
-        public string Name;
-        public Vector3 Position;
-        public WowZoneId ZoneId;
-
-        public Npc(string name, int entryId, WowMapId mapId, WowZoneId zoneId, Vector3 position,
-            NpcType type, NpcSubType subType = NpcSubType.None)
-        {
-            Name = name;
-            EntryId = entryId;
-            MapId = mapId;
-            ZoneId = zoneId;
-            Position = position;
-            Type = type;
-            SubType = subType;
-        }
+        public readonly int EntryId = entryId;
+        public readonly NpcSubType SubType = subType;
+        public readonly NpcType Type = type;
+        public WowMapId MapId = mapId;
+        public string Name = name;
+        public Vector3 Position = position;
+        public WowZoneId ZoneId = zoneId;
     }
 }

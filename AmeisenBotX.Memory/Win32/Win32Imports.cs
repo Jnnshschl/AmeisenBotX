@@ -121,7 +121,9 @@ namespace AmeisenBotX.Memory.Win32
             WS_SIZEBOX = WS_THICKFRAME,
             WS_TILEDWINDOW = WS_OVERLAPPEDWINDOW,
 
+#pragma warning disable CA1069
             WS_OVERLAPPEDWINDOW = WS_OVERLAPPED | WS_CAPTION | WS_SYSMENU | WS_THICKFRAME | WS_MINIMIZEBOX | WS_MAXIMIZEBOX,
+#pragma warning restore CA1069
             WS_POPUPWINDOW = WS_POPUP | WS_BORDER | WS_SYSMENU,
             WS_CHILDWINDOW = WS_CHILD,
 
@@ -136,7 +138,7 @@ namespace AmeisenBotX.Memory.Win32
         [return: MarshalAs(UnmanagedType.Bool)]
         public static partial bool GetWindowRect(nint windowHandle, ref Rect rectangle);
 
-        [LibraryImport("ntdll", SetLastError = true)]
+        [LibraryImport("ntdll")]
         public static partial int NtOpenProcess
         (
             out nint ProcessHandle,
@@ -272,6 +274,7 @@ namespace AmeisenBotX.Memory.Win32
             public nint SecurityDescriptor;
             public nint SecurityQualityOfService;
         }
+
         [StructLayout(LayoutKind.Sequential)]
         public struct ProcessInformation
         {

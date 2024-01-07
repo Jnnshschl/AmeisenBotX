@@ -1,5 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Runtime.InteropServices;
 
 namespace AmeisenBotX.Wow335a.Objects.Raw
@@ -87,10 +86,10 @@ namespace AmeisenBotX.Wow335a.Objects.Raw
 
         public nint RaidPlayer9 { get; set; }
 
-        public IEnumerable<nint> GetPointers()
+        public readonly IEnumerable<nint> GetPointers()
         {
-            return new List<nint>()
-            {
+            return
+            [
                 RaidPlayer1,
                 RaidPlayer2,
                 RaidPlayer3,
@@ -131,7 +130,7 @@ namespace AmeisenBotX.Wow335a.Objects.Raw
                 RaidPlayer38,
                 RaidPlayer39,
                 RaidPlayer40
-            };
+            ];
         }
     }
 }

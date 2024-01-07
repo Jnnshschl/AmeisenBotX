@@ -7,27 +7,19 @@ using System.Linq;
 
 namespace AmeisenBotX.Core.Engines.Quest
 {
-    public class DefaultQuestEngine : IQuestEngine
+    public class DefaultQuestEngine(AmeisenBotInterfaces bot) : IQuestEngine
     {
-        public DefaultQuestEngine(AmeisenBotInterfaces bot)
-        {
-            Bot = bot;
-
-            CompletedQuests = [];
-            QueryCompletedQuestsEvent = new(TimeSpan.FromSeconds(2));
-        }
-
-        public List<int> CompletedQuests { get; private set; }
+        public List<int> CompletedQuests { get; private set; } = [];
 
         public IQuestProfile Profile { get; set; }
 
         public bool UpdatedCompletedQuests { get; set; }
 
-        private AmeisenBotInterfaces Bot { get; }
+        private AmeisenBotInterfaces Bot { get; } = bot;
 
         private DateTime LastAbandonQuestTime { get; set; } = DateTime.UtcNow;
 
-        private TimegatedEvent QueryCompletedQuestsEvent { get; }
+        private TimegatedEvent QueryCompletedQuestsEvent { get; } = new(TimeSpan.FromSeconds(2));
 
         public void Enter()
         {

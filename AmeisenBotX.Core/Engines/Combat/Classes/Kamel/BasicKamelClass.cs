@@ -51,19 +51,19 @@ namespace AmeisenBotX.Core.Engines.Combat.Classes.Kamel
 
         public readonly Dictionary<string, DateTime> spellCoolDown = [];
 
-        private readonly int[] useableHealingItems = new int[]
-        {
+        private readonly int[] useableHealingItems =
+        [
             // potions
             118, 929, 1710, 2938, 3928, 4596, 5509, 13446, 22829, 33447,
             // healthstones
             5509, 5510, 5511, 5512, 9421, 19013, 22103, 36889, 36892,
-        };
+        ];
 
-        private readonly int[] useableManaItems = new int[]
-        {
+        private readonly int[] useableManaItems =
+        [
             // potions
             2245, 3385, 3827, 6149, 13443, 13444, 33448, 22832,
-        };
+        ];
 
         protected BasicKamelClass()
         {
@@ -177,9 +177,9 @@ namespace AmeisenBotX.Core.Engines.Combat.Classes.Kamel
 
         public bool CheckForWeaponEnchantment(WowEquipmentSlot slot, string enchantmentName, string spellToCastEnchantment)
         {
-            if (Bot.Character.Equipment.Items.ContainsKey(slot))
+            if (Bot.Character.Equipment.Items.TryGetValue(slot, out IWowInventoryItem value))
             {
-                int itemId = Bot.Character.Equipment.Items[slot].Id;
+                int itemId = value.Id;
 
                 if (itemId > 0)
                 {
@@ -324,7 +324,7 @@ namespace AmeisenBotX.Core.Engines.Combat.Classes.Kamel
                 Bot.Player
             };
 
-            partyMemberToHeal = partyMemberToHeal.Where(e => e.IsDead).OrderBy(e => e.HealthPercentage).ToList();
+            partyMemberToHeal = [.. partyMemberToHeal.Where(e => e.IsDead).OrderBy(e => e.HealthPercentage)];
 
             if (RevivePlayerEvent.Run() && partyMemberToHeal.Count > 0)
             {

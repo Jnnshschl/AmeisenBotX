@@ -4,11 +4,8 @@ using AmeisenBotX.Core.Engines.Quest.Objects.Quests;
 
 namespace AmeisenBotX.Core.Engines.Quest.Quests.Grinder
 {
-    internal class QStonetalonGrindToLevel31 : GrindingBotQuest
-    {
-        public QStonetalonGrindToLevel31(AmeisenBotInterfaces bot)
-            : base("StonetalonGrindToLevel31",
-                [
+    internal class QStonetalonGrindToLevel31(AmeisenBotInterfaces bot) : GrindingBotQuest("StonetalonGrindToLevel31",
+            [
                     new QuestObjectiveChain(
                     [
                         new GrindingObjective(bot, 31, [
@@ -36,6 +33,6 @@ namespace AmeisenBotX.Core.Engines.Quest.Quests.Grinder
                         ]),
                     ])
                 ])
-        { }
+    {
     }
 }

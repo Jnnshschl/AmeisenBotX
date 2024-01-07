@@ -5,13 +5,10 @@ using System.Collections.Generic;
 
 namespace AmeisenBotX.Core.Engines.Quest.Quests.Durotar.ValleyOfStrength
 {
-    internal class QStingOfTheScorpid : BotQuest
-    {
-        public QStingOfTheScorpid(AmeisenBotInterfaces bot)
-            : base(bot, 789, "Sting of the Scorpid", 1, 1,
-                () => (bot.GetClosestQuestGiverByNpcId(bot.Player.Position, new List<int> { 3143 }), new Vector3(-600.13f, -4186.19f, 41.27f)),
-                () => (bot.GetClosestQuestGiverByNpcId(bot.Player.Position, new List<int> { 3143 }), new Vector3(-600.13f, -4186.19f, 41.27f)),
-                [
+    internal class QStingOfTheScorpid(AmeisenBotInterfaces bot) : BotQuest(bot, 789, "Sting of the Scorpid", 1, 1,
+            () => (bot.GetClosestQuestGiverByNpcId(bot.Player.Position, new List<int> { 3143 }), new Vector3(-600.13f, -4186.19f, 41.27f)),
+            () => (bot.GetClosestQuestGiverByNpcId(bot.Player.Position, new List<int> { 3143 }), new Vector3(-600.13f, -4186.19f, 41.27f)),
+            [
                     new QuestObjectiveChain(
                     [
                         new KillAndLootQuestObjective(bot, [3124, 3281], 8, 4862, [
@@ -54,6 +51,6 @@ namespace AmeisenBotX.Core.Engines.Quest.Quests.Durotar.ValleyOfStrength
                         ]),
                     ])
                 ])
-        { }
+    {
     }
 }

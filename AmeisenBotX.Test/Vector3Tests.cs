@@ -178,14 +178,14 @@ namespace AmeisenBotX.Test
                 Assert.Fail();
             }
 
-            float[] x = new float[] { 2f, 1f, 2000f };
+            float[] x = [2f, 1f, 2000f];
             float[] y = a.ToArray();
 
             Assert.AreEqual(x[0], y[0]);
             Assert.AreEqual(x[1], y[1]);
             Assert.AreEqual(x[2], y[2]);
 
-            Assert.AreEqual(a, Vector3.FromArray(y));
+            Assert.AreEqual(a, new(y));
 
             Vector3 c = new(a);
 

@@ -5,13 +5,15 @@ using System.Linq;
 
 namespace AmeisenBotX.Core.Logic.Idle.Actions
 {
-    public class RandomEmoteIdleAction : IIdleAction
+    public class RandomEmoteIdleAction(AmeisenBotInterfaces bot) : IIdleAction
     {
-        public RandomEmoteIdleAction(AmeisenBotInterfaces bot)
-        {
-            Bot = bot;
+        public bool AutopilotOnly => false;
 
-            Emotes =
+        public AmeisenBotInterfaces Bot { get; } = bot;
+
+        public DateTime Cooldown { get; set; }
+
+        public List<string> Emotes { get; } =
             [
                 "flex",
                 "train",
@@ -22,7 +24,7 @@ namespace AmeisenBotX.Core.Logic.Idle.Actions
                 "sleep",
             ];
 
-            EmotesWithInteraction =
+        public List<string> EmotesWithInteraction { get; } =
             [
                 "hi",
                 "wink",
@@ -36,19 +38,6 @@ namespace AmeisenBotX.Core.Logic.Idle.Actions
                 "shy",
             ];
 
-            Rnd = new Random();
-        }
-
-        public bool AutopilotOnly => false;
-
-        public AmeisenBotInterfaces Bot { get; }
-
-        public DateTime Cooldown { get; set; }
-
-        public List<string> Emotes { get; }
-
-        public List<string> EmotesWithInteraction { get; }
-
         public int MaxCooldown => 168 * 1000;
 
         public int MaxDuration => 0;
@@ -57,7 +46,7 @@ namespace AmeisenBotX.Core.Logic.Idle.Actions
 
         public int MinDuration => 0;
 
-        private Random Rnd { get; }
+        private Random Rnd { get; } = new Random();
 
         public bool Enter()
         {

@@ -3,27 +3,19 @@ using AmeisenBotX.Core.Engines.Movement.Enums;
 
 namespace AmeisenBotX.Core.Engines.Quest.Objects.Objectives
 {
-    public class MoveVehicleToPositionQuestObjective : IQuestObjective
+    public class MoveVehicleToPositionQuestObjective(AmeisenBotInterfaces bot, Vector3 position, double distance, MovementAction movementAction = MovementAction.Move) : IQuestObjective
     {
-        public MoveVehicleToPositionQuestObjective(AmeisenBotInterfaces bot, Vector3 position, double distance, MovementAction movementAction = MovementAction.Move)
-        {
-            Bot = bot;
-            WantedPosition = position;
-            Distance = distance;
-            MovementAction = movementAction;
-        }
-
         public bool Finished => Progress == 100.0;
 
         public double Progress => Bot.Objects.Vehicle != null && WantedPosition.GetDistance(Bot.Objects.Vehicle.Position) < Distance ? 100.0 : 0.0;
 
-        private AmeisenBotInterfaces Bot { get; }
+        private AmeisenBotInterfaces Bot { get; } = bot;
 
-        private double Distance { get; }
+        private double Distance { get; } = distance;
 
-        private MovementAction MovementAction { get; }
+        private MovementAction MovementAction { get; } = movementAction;
 
-        private Vector3 WantedPosition { get; }
+        private Vector3 WantedPosition { get; } = position;
 
         public void Execute()
         {

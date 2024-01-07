@@ -5,13 +5,10 @@ using System.Collections.Generic;
 
 namespace AmeisenBotX.Core.Engines.Quest.Quests.TheBarrens.Crossroads
 {
-    internal class QPlainstriderMenace : BotQuest
-    {
-        public QPlainstriderMenace(AmeisenBotInterfaces bot)
-            : base(bot, 844, "Plainstrider Menace", 10, 1,
-                () => (bot.GetClosestQuestGiverByNpcId(bot.Player.Position, new List<int> { 3338 }), new Vector3(-482.48f, -2670.19f, 97.52f)),
-                () => (bot.GetClosestQuestGiverByNpcId(bot.Player.Position, new List<int> { 3338 }), new Vector3(-482.48f, -2670.19f, 97.52f)),
-                [
+    internal class QPlainstriderMenace(AmeisenBotInterfaces bot) : BotQuest(bot, 844, "Plainstrider Menace", 10, 1,
+            () => (bot.GetClosestQuestGiverByNpcId(bot.Player.Position, new List<int> { 3338 }), new Vector3(-482.48f, -2670.19f, 97.52f)),
+            () => (bot.GetClosestQuestGiverByNpcId(bot.Player.Position, new List<int> { 3338 }), new Vector3(-482.48f, -2670.19f, 97.52f)),
+            [
                     new QuestObjectiveChain(
                     [
                         new KillAndLootQuestObjective(bot, [3244, 3245, 3246], 7, 5087, [
@@ -35,6 +32,6 @@ namespace AmeisenBotX.Core.Engines.Quest.Quests.TheBarrens.Crossroads
                         ]),
                     ])
                 ])
-        { }
+    {
     }
 }

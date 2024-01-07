@@ -86,8 +86,8 @@ namespace AmeisenBotX.Core
         public AmeisenBot(string instanceName, AmeisenBotConfig config, string logfilePath = "DEFAULT", LogLevel initialLogLevel = LogLevel.Verbose)
         {
             if (string.IsNullOrWhiteSpace(instanceName)) { throw new ArgumentException("instanceName cannot be empty or whitespace", nameof(config)); }
-            if (string.IsNullOrWhiteSpace(config.Path)) { throw new ArgumentException("config.Path cannot be empty, make sure you set it after loading the config", nameof(config)); }
-            if (!File.Exists(config.Path)) { throw new ArgumentException("config.Path does not exist", nameof(config)); }
+            if (string.IsNullOrWhiteSpace(config.Path)) { throw new ArgumentException("config path cannot be empty, make sure you set it after loading the config", nameof(config)); }
+            if (!File.Exists(config.Path)) { throw new ArgumentException("config path does not exist", nameof(config)); }
 
             Config = config ?? throw new ArgumentException("config cannot be null", nameof(config));
 
@@ -708,8 +708,8 @@ namespace AmeisenBotX.Core
                     // get the item id and try again
                     itemJson = Bot.Wow.GetItemByNameOrLink
                     (
-                        itemLink.Split(new string[] { "Hitem:" }, StringSplitOptions.RemoveEmptyEntries)[1]
-                            .Split(new string[] { ":" }, StringSplitOptions.RemoveEmptyEntries)[0]
+                        itemLink.Split(["Hitem:"], StringSplitOptions.RemoveEmptyEntries)[1]
+                            .Split([":"], StringSplitOptions.RemoveEmptyEntries)[0]
                     );
 
                     item = ItemFactory.BuildSpecificItem(ItemFactory.ParseItem(itemJson));
@@ -1005,7 +1005,7 @@ namespace AmeisenBotX.Core
 
                         Bot.Rcon.PullPendingActions();
 
-                        if (Bot.Rcon.PendingActions.Any())
+                        if (Bot.Rcon.PendingActions.Count != 0)
                         {
                             switch (Bot.Rcon.PendingActions.First())
                             {

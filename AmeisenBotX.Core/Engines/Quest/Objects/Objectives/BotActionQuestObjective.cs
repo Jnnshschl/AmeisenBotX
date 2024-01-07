@@ -2,14 +2,9 @@
 
 namespace AmeisenBotX.Core.Engines.Quest.Objects.Objectives
 {
-    public class BotActionQuestObjective : IQuestObjective
+    public class BotActionQuestObjective(Action action) : IQuestObjective
     {
-        public BotActionQuestObjective(Action action)
-        {
-            Action = action;
-        }
-
-        public Action Action { get; }
+        public Action Action { get; } = action;
 
         public bool Finished => Progress == 100.0;
 

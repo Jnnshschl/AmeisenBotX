@@ -8,7 +8,7 @@ using System.Threading.Tasks;
 
 namespace AmeisenBotX.Common.Utils
 {
-    public static class BotUtils
+    public static partial class BotUtils
     {
         private const uint WM_KEYDOWN = 0x100;
         private const uint WM_KEYUP = 0x101;
@@ -159,7 +159,7 @@ namespace AmeisenBotX.Common.Utils
             SendMessage(windowHandle, WM_KEYUP, key, nint.Zero);
         }
 
-        [DllImport("user32", SetLastError = true)]
-        private static extern nint SendMessage(nint windowHandle, uint msg, nint param, nint parameter);
+        [LibraryImport("user32")]
+        private static partial nint SendMessage(nint windowHandle, uint msg, nint param, nint parameter);
     }
 }

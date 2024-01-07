@@ -6,23 +6,15 @@ using System;
 
 namespace AmeisenBotX.Core.Logic.Leafs
 {
-    public class MoveToLeaf : INode
+    public class MoveToLeaf(AmeisenBotInterfaces bot, Func<IWowUnit> getUnit, INode child = null, float maxDistance = 3.2f) : INode
     {
-        public MoveToLeaf(AmeisenBotInterfaces bot, Func<IWowUnit> getUnit, INode child = null, float maxDistance = 3.2f)
-        {
-            Bot = bot;
-            GetUnit = getUnit;
-            Child = child;
-            MaxDistance = maxDistance;
-        }
+        protected AmeisenBotInterfaces Bot { get; } = bot;
 
-        protected AmeisenBotInterfaces Bot { get; }
+        protected INode Child { get; set; } = child;
 
-        protected INode Child { get; set; }
+        protected Func<IWowUnit> GetUnit { get; } = getUnit;
 
-        protected Func<IWowUnit> GetUnit { get; }
-
-        protected float MaxDistance { get; }
+        protected float MaxDistance { get; } = maxDistance;
 
         protected bool NeedToStopMoving { get; set; }
 

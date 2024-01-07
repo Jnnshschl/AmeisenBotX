@@ -4,13 +4,8 @@ using AmeisenBotX.Wow.Objects;
 
 namespace AmeisenBotX.Wow548.Objects
 {
-    public class ObjectManager548 : ObjectManager<WowObject548, WowUnit548, WowPlayer548, WowGameobject548, WowDynobject548, WowItem548, WowCorpse548, WowContainer548>
+    public class ObjectManager548(WowMemoryApi memory) : ObjectManager<WowObject548, WowUnit548, WowPlayer548, WowGameobject548, WowDynobject548, WowItem548, WowCorpse548, WowContainer548>(memory)
     {
-        public ObjectManager548(WowMemoryApi memory)
-            : base(memory)
-        {
-        }
-
         protected override void ReadParty()
         {
             if (ReadPartyPointer(out nint party)

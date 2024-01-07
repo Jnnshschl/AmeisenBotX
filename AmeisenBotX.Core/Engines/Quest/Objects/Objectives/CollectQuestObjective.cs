@@ -9,19 +9,9 @@ using System.Linq;
 
 namespace AmeisenBotX.Core.Engines.Quest.Objects.Objectives
 {
-    public class CollectQuestObjective : IQuestObjective
+    public class CollectQuestObjective(AmeisenBotInterfaces bot, int itemId, int itemAmount, List<int> gameObjectIds, List<Vector3> positions) : IQuestObjective
     {
-        public CollectQuestObjective(AmeisenBotInterfaces bot, int itemId, int itemAmount, List<int> gameObjectIds, List<Vector3> positions)
-        {
-            Bot = bot;
-            ItemId = itemId;
-            WantedItemAmount = itemAmount;
-            GameObjectIds = gameObjectIds;
-            Area = positions.Select(pos => new AreaNode(pos, 10.0)).ToList();
-            RightClickEvent = new(TimeSpan.FromMilliseconds(1500));
-        }
-
-        public List<AreaNode> Area { get; set; }
+        public List<AreaNode> Area { get; set; } = positions.Select(pos => new AreaNode(pos, 10.0)).ToList();
 
         public bool Finished => Math.Abs(Progress - 100.0) < 0.0001;
 
@@ -39,15 +29,15 @@ namespace AmeisenBotX.Core.Engines.Quest.Objects.Objectives
             }
         }
 
-        private AmeisenBotInterfaces Bot { get; }
+        private AmeisenBotInterfaces Bot { get; } = bot;
 
-        private List<int> GameObjectIds { get; }
+        private List<int> GameObjectIds { get; } = gameObjectIds;
 
-        private int ItemId { get; }
+        private int ItemId { get; } = itemId;
 
-        private TimegatedEvent RightClickEvent { get; }
+        private TimegatedEvent RightClickEvent { get; } = new(TimeSpan.FromMilliseconds(1500));
 
-        private int WantedItemAmount { get; }
+        private int WantedItemAmount { get; } = itemAmount;
 
         public void Execute()
         {

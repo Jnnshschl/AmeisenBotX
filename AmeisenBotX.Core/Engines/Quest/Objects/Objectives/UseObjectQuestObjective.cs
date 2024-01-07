@@ -7,11 +7,9 @@ using System.Linq;
 
 namespace AmeisenBotX.Core.Engines.Quest.Objects.Objectives
 {
-    public delegate bool UseObjectQuestObjectiveCondition();
-
     public class UseObjectQuestObjective : IQuestObjective
     {
-        public UseObjectQuestObjective(AmeisenBotInterfaces bot, int objectDisplayId, UseObjectQuestObjectiveCondition condition)
+        public UseObjectQuestObjective(AmeisenBotInterfaces bot, int objectDisplayId, Func<bool> condition)
         {
             Bot = bot;
             ObjectDisplayIds = [objectDisplayId];
@@ -20,7 +18,7 @@ namespace AmeisenBotX.Core.Engines.Quest.Objects.Objectives
             UseEvent = new(TimeSpan.FromSeconds(1));
         }
 
-        public UseObjectQuestObjective(AmeisenBotInterfaces bot, List<int> objectDisplayIds, UseObjectQuestObjectiveCondition condition)
+        public UseObjectQuestObjective(AmeisenBotInterfaces bot, List<int> objectDisplayIds, Func<bool> condition)
         {
             Bot = bot;
             ObjectDisplayIds = objectDisplayIds;
@@ -35,7 +33,7 @@ namespace AmeisenBotX.Core.Engines.Quest.Objects.Objectives
 
         private AmeisenBotInterfaces Bot { get; }
 
-        private UseObjectQuestObjectiveCondition Condition { get; }
+        private Func<bool> Condition { get; }
 
         private IWowGameobject IWowGameobject { get; set; }
 

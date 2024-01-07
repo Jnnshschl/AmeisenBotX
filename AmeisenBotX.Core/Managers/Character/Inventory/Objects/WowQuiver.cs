@@ -1,9 +1,6 @@
 ﻿namespace AmeisenBotX.Core.Managers.Character.Inventory.Objects
 {
-    public class WowQuiver : WowBasicItem
+    public class WowQuiver(IWowInventoryItem wowBasicItem) : WowBasicItem(wowBasicItem)
     {
-        public WowQuiver(IWowInventoryItem wowBasicItem) : base(wowBasicItem)
-        {
-        }
     }
 }

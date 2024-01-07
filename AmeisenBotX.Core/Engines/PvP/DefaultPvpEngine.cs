@@ -15,8 +15,6 @@ namespace AmeisenBotX.Core.Engines.PvP
             (
                 new Leaf(() => BtStatus.Ongoing),
                 (() => QueueStatus == 0, new Leaf(QueueForBattlegrounds))
-            // (() => QueueStatus == 2, new Leaf(() => { Bot.Wow.AcceptBattlegroundInvite(); return
-            // BtStatus.Success; }))
             );
 
             Bt = new(mainNode);

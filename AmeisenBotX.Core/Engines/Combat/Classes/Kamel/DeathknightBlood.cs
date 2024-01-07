@@ -13,14 +13,8 @@ using System.Text.Json;
 
 namespace AmeisenBotX.Core.Engines.Combat.Classes.Kamel
 {
-    public class DeathknightBlood : ICombatClass
+    public class DeathknightBlood(AmeisenBotInterfaces bot) : ICombatClass
     {
-        public DeathknightBlood(AmeisenBotInterfaces bot)
-        {
-            Bot = bot;
-            TargetProvider = new TargetManager(new SimpleDpsTargetSelectionLogic(bot), TimeSpan.FromMilliseconds(250));//Heal/Tank/DPS
-        }
-
         public string Author => "Kamel";
 
         public IEnumerable<int> BlacklistedTargetDisplayIds { get; set; }
@@ -47,7 +41,7 @@ namespace AmeisenBotX.Core.Engines.Combat.Classes.Kamel
 
         public bool TargetInLineOfSight { get; set; }
 
-        public ITargetProvider TargetProvider { get; internal set; }
+        public ITargetProvider TargetProvider { get; internal set; } = new TargetManager(new SimpleDpsTargetSelectionLogic(bot), TimeSpan.FromMilliseconds(250));//Heal/Tank/DPS
 
         public string Version => "1.0";
 
@@ -55,7 +49,7 @@ namespace AmeisenBotX.Core.Engines.Combat.Classes.Kamel
 
         public WowClass WowClass => WowClass.Deathknight;
 
-        private AmeisenBotInterfaces Bot { get; }
+        private AmeisenBotInterfaces Bot { get; } = bot;
 
         public void AttackTarget()
         {

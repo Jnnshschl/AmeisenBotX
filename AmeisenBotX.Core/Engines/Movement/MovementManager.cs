@@ -4,14 +4,9 @@ using System.Collections.Generic;
 
 namespace AmeisenBotX.Core.Engines.Movement
 {
-    public class MovementManager
+    public class MovementManager(IEnumerable<IMovementProvider> providers)
     {
-        public MovementManager(IEnumerable<IMovementProvider> providers)
-        {
-            Providers = providers;
-        }
-
-        public IEnumerable<IMovementProvider> Providers { get; set; }
+        public IEnumerable<IMovementProvider> Providers { get; set; } = providers;
 
         public Vector3 Target { get; private set; }
 

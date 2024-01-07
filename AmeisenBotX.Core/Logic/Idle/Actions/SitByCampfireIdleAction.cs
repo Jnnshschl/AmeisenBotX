@@ -5,17 +5,11 @@ using System.Linq;
 
 namespace AmeisenBotX.Core.Logic.Idle.Actions
 {
-    public class SitByCampfireIdleAction : IIdleAction
+    public class SitByCampfireIdleAction(AmeisenBotInterfaces bot) : IIdleAction
     {
-        public SitByCampfireIdleAction(AmeisenBotInterfaces bot)
-        {
-            Bot = bot;
-            Rnd = new Random();
-        }
-
         public bool AutopilotOnly => false;
 
-        public AmeisenBotInterfaces Bot { get; }
+        public AmeisenBotInterfaces Bot { get; } = bot;
 
         public DateTime Cooldown { get; set; }
 
@@ -29,7 +23,7 @@ namespace AmeisenBotX.Core.Logic.Idle.Actions
 
         private bool PlacedCampfire { get; set; }
 
-        private Random Rnd { get; }
+        private Random Rnd { get; } = new Random();
 
         private bool SatDown { get; set; }
 

@@ -9,14 +9,8 @@ using System.Linq;
 
 namespace AmeisenBotX.Core.Logic.Idle.Actions
 {
-    public class CheckMailsIdleAction : IIdleAction
+    public class CheckMailsIdleAction(AmeisenBotInterfaces bot) : IIdleAction
     {
-        public CheckMailsIdleAction(AmeisenBotInterfaces bot)
-        {
-            Bot = bot;
-            Rnd = new Random();
-        }
-
         public bool AutopilotOnly => true;
 
         public DateTime Cooldown { get; set; }
@@ -29,7 +23,7 @@ namespace AmeisenBotX.Core.Logic.Idle.Actions
 
         public int MinDuration => 1 * 60 * 1000;
 
-        private AmeisenBotInterfaces Bot { get; }
+        private AmeisenBotInterfaces Bot { get; } = bot;
 
         private bool CheckedMails { get; set; }
 
@@ -41,7 +35,7 @@ namespace AmeisenBotX.Core.Logic.Idle.Actions
 
         private bool ReturnedToOrigin { get; set; }
 
-        private Random Rnd { get; }
+        private Random Rnd { get; } = new Random();
 
         public bool Enter()
         {

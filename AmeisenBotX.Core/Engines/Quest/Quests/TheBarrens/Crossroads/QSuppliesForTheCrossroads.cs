@@ -5,13 +5,10 @@ using System.Collections.Generic;
 
 namespace AmeisenBotX.Core.Engines.Quest.Quests.TheBarrens.Crossroads
 {
-    internal class QSuppliesForTheCrossroads : BotQuest
-    {
-        public QSuppliesForTheCrossroads(AmeisenBotInterfaces bot)
-            : base(bot, 5041, "Supplies for the Crossroads", 9, 1,
-                () => (bot.GetClosestQuestGiverByNpcId(bot.Player.Position, new List<int> { 3429 }), new Vector3(-473.20f, -2595.70f, 103.81f)),
-                () => (bot.GetClosestQuestGiverByNpcId(bot.Player.Position, new List<int> { 3429 }), new Vector3(-473.20f, -2595.70f, 103.81f)),
-                [
+    internal class QSuppliesForTheCrossroads(AmeisenBotInterfaces bot) : BotQuest(bot, 5041, "Supplies for the Crossroads", 9, 1,
+            () => (bot.GetClosestQuestGiverByNpcId(bot.Player.Position, new List<int> { 3429 }), new Vector3(-473.20f, -2595.70f, 103.81f)),
+            () => (bot.GetClosestQuestGiverByNpcId(bot.Player.Position, new List<int> { 3429 }), new Vector3(-473.20f, -2595.70f, 103.81f)),
+            [
                     new QuestObjectiveChain(
                     [
                         new CollectQuestObjective(bot, 12708, 1, [175708], [
@@ -22,6 +19,6 @@ namespace AmeisenBotX.Core.Engines.Quest.Quests.TheBarrens.Crossroads
                         ]),
                     ])
                 ])
-        { }
+    {
     }
 }

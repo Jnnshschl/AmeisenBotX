@@ -13,7 +13,7 @@ namespace AmeisenBotX.Memory.Win32
 
         public int Bottom { get; set; }
 
-        public override bool Equals(object obj)
+        public override readonly bool Equals(object obj)
         {
             return obj != null
                 && obj.GetType() == typeof(Margins)
@@ -23,7 +23,7 @@ namespace AmeisenBotX.Memory.Win32
                 && ((Margins)obj).Bottom == Bottom;
         }
 
-        public override int GetHashCode()
+        public override readonly int GetHashCode()
         {
             unchecked
             {

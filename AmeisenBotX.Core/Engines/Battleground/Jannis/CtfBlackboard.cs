@@ -6,13 +6,8 @@ using System.Collections.Generic;
 
 namespace AmeisenBotX.Core.Engines.Battleground.Jannis
 {
-    public class CtfBlackboard : IBlackboard
+    public class CtfBlackboard(Action updateAction) : IBlackboard
     {
-        public CtfBlackboard(Action updateAction)
-        {
-            UpdateAction = updateAction;
-        }
-
         public IWowUnit EnemyTeamFlagCarrier { get; set; }
 
         public Vector3 EnemyTeamFlagPos { get; set; }
@@ -35,7 +30,7 @@ namespace AmeisenBotX.Core.Engines.Battleground.Jannis
 
         public IEnumerable<IWowGameobject> NearFlags { get; set; }
 
-        private Action UpdateAction { get; }
+        private Action UpdateAction { get; } = updateAction;
 
         public void Update()
         {

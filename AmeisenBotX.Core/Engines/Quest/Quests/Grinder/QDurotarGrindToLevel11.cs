@@ -4,11 +4,8 @@ using AmeisenBotX.Core.Engines.Quest.Objects.Quests;
 
 namespace AmeisenBotX.Core.Engines.Quest.Quests.Grinder
 {
-    internal class QDurotarGrindToLevel11 : GrindingBotQuest
-    {
-        public QDurotarGrindToLevel11(AmeisenBotInterfaces bot)
-            : base("DurotarGrindToLevel11",
-                [
+    internal class QDurotarGrindToLevel11(AmeisenBotInterfaces bot) : GrindingBotQuest("DurotarGrindToLevel11",
+            [
                     new QuestObjectiveChain(
                     [
                         new GrindingObjective(bot, 11, [
@@ -37,6 +34,6 @@ namespace AmeisenBotX.Core.Engines.Quest.Quests.Grinder
                         ]),
                     ])
                 ])
-        { }
+    {
     }
 }

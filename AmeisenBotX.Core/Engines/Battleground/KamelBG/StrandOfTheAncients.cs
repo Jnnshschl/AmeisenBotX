@@ -9,18 +9,11 @@ using System.Linq;
 
 namespace AmeisenBotX.Core.Engines.Battleground.KamelBG
 {
-    internal class StrandOfTheAncients : IBattlegroundEngine
+    internal class StrandOfTheAncients(AmeisenBotInterfaces bot) : IBattlegroundEngine
     {
-        public StrandOfTheAncients(AmeisenBotInterfaces bot)
-        {
-            Bot = bot;
-
-            CombatEvent = new(TimeSpan.FromSeconds(2));
-        }
-
         public string Author => "Lukas";
 
-        public AmeisenBotInterfaces Bot { get; }
+        public AmeisenBotInterfaces Bot { get; } = bot;
 
         public string Description => "Strand of the Ancients";
 
@@ -31,7 +24,7 @@ namespace AmeisenBotX.Core.Engines.Battleground.KamelBG
             new(1403, 69, 30)
         ];
 
-        private TimegatedEvent CombatEvent { get; }
+        private TimegatedEvent CombatEvent { get; } = new(TimeSpan.FromSeconds(2));
 
         public void Combat()
         {

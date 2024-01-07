@@ -5,13 +5,10 @@ using System.Collections.Generic;
 
 namespace AmeisenBotX.Core.Engines.Quest.Quests.Durotar.RazorHill
 {
-    internal class QEncroachment : BotQuest
-    {
-        public QEncroachment(AmeisenBotInterfaces bot)
-            : base(bot, 837, "Encroachment", 6, 1,
-                () => (bot.GetClosestQuestGiverByNpcId(bot.Player.Position, new List<int> { 3139 }), new Vector3(274.99f, -4709.30f, 17.57f)),
-                () => (bot.GetClosestQuestGiverByNpcId(bot.Player.Position, new List<int> { 3139 }), new Vector3(274.99f, -4709.30f, 17.57f)),
-                [
+    internal class QEncroachment(AmeisenBotInterfaces bot) : BotQuest(bot, 837, "Encroachment", 6, 1,
+            () => (bot.GetClosestQuestGiverByNpcId(bot.Player.Position, new List<int> { 3139 }), new Vector3(274.99f, -4709.30f, 17.57f)),
+            () => (bot.GetClosestQuestGiverByNpcId(bot.Player.Position, new List<int> { 3139 }), new Vector3(274.99f, -4709.30f, 17.57f)),
+            [
                     new QuestObjectiveChain(
                     [
                         new KillAndLootQuestObjective(bot, [3111], 4, 0, [
@@ -115,6 +112,6 @@ namespace AmeisenBotX.Core.Engines.Quest.Quests.Durotar.RazorHill
                         ]),
                     ])
                 ])
-        { }
+    {
     }
 }

@@ -4,14 +4,9 @@ using System.Globalization;
 
 namespace AmeisenBotX.Core.Managers.Character.Comparators
 {
-    public class ArmsItemComparator : IItemComparator
+    public class ArmsItemComparator(AmeisenBotInterfaces bot) : IItemComparator
     {
-        private readonly AmeisenBotInterfaces Bot;
-
-        public ArmsItemComparator(AmeisenBotInterfaces bot)
-        {
-            Bot = bot;
-        }
+        private readonly AmeisenBotInterfaces Bot = bot;
 
         public bool IsBetter(IWowInventoryItem current, IWowInventoryItem item)
         {

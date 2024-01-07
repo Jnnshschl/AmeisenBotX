@@ -14,44 +14,29 @@ namespace AmeisenBotX.Core.Engines.Quest.Objects.Quests
 {
     public delegate (IWowObject, Vector3) BotQuestGetPosition();
 
-    public class BotQuest : IBotQuest
+    public class BotQuest(AmeisenBotInterfaces bot, int id, string name, int level, int gossipId, BotQuestGetPosition start, BotQuestGetPosition end, List<IQuestObjective> objectives) : IBotQuest
     {
-        public BotQuest(AmeisenBotInterfaces bot, int id, string name, int level, int gossipId, BotQuestGetPosition start, BotQuestGetPosition end, List<IQuestObjective> objectives)
-        {
-            Bot = bot;
-
-            Id = id;
-            Name = name;
-            Level = level;
-            GossipId = gossipId;
-            GetStartObject = start;
-            GetEndObject = end;
-            Objectives = objectives;
-
-            ActionEvent = new(TimeSpan.FromMilliseconds(250));
-        }
-
         public bool Accepted { get; set; }
 
-        public TimegatedEvent ActionEvent { get; }
+        public TimegatedEvent ActionEvent { get; } = new(TimeSpan.FromMilliseconds(250));
 
         public bool ActionToggle { get; set; }
 
         public bool Finished => (Objectives != null && Objectives.All(e => e.Finished)) || Progress == 100.0;
 
-        public BotQuestGetPosition GetEndObject { get; set; }
+        public BotQuestGetPosition GetEndObject { get; set; } = end;
 
-        public BotQuestGetPosition GetStartObject { get; set; }
+        public BotQuestGetPosition GetStartObject { get; set; } = start;
 
-        public int GossipId { get; set; }
+        public int GossipId { get; set; } = gossipId;
 
-        public int Id { get; set; }
+        public int Id { get; set; } = id;
 
-        public int Level { get; set; }
+        public int Level { get; set; } = level;
 
-        public string Name { get; set; }
+        public string Name { get; set; } = name;
 
-        public List<IQuestObjective> Objectives { get; set; }
+        public List<IQuestObjective> Objectives { get; set; } = objectives;
 
         public double Progress
         {
@@ -67,7 +52,7 @@ namespace AmeisenBotX.Core.Engines.Quest.Objects.Quests
 
         public bool Returned { get; set; }
 
-        private AmeisenBotInterfaces Bot { get; }
+        private AmeisenBotInterfaces Bot { get; } = bot;
 
         private bool CheckedIfAccepted { get; set; } = false;
 
@@ -183,8 +168,8 @@ namespace AmeisenBotX.Core.Engines.Quest.Objects.Quests
                                             // get the item id and try again
                                             itemJson = Bot.Wow.GetItemByNameOrLink
                                             (
-                                                itemLink.Split(new string[] { "Hitem:" }, StringSplitOptions.RemoveEmptyEntries)[1]
-                                                        .Split(new string[] { ":" }, StringSplitOptions.RemoveEmptyEntries)[0]
+                                                itemLink.Split("Hitem:", StringSplitOptions.RemoveEmptyEntries)[1]
+                                                        .Split(":", StringSplitOptions.RemoveEmptyEntries)[0]
                                             );
 
                                             item = ItemFactory.BuildSpecificItem(ItemFactory.ParseItem(itemJson));

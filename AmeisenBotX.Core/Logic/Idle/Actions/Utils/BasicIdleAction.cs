@@ -35,10 +35,7 @@ namespace AmeisenBotX.Core.Logic.Idle.Actions.Utils
 
         public virtual void Execute()
         {
-            if (SelectedAction != null)
-            {
-                SelectedAction.Execute();
-            }
+            SelectedAction?.Execute();
         }
 
         public override string ToString()

@@ -1,28 +1,20 @@
 ﻿using AmeisenBotX.Core.Managers.Character.Inventory.Objects;
+using System;
 using System.Linq;
 
 namespace AmeisenBotX.Core.Engines.Quest.Objects.Objectives
 {
-    public delegate bool UseItemQuestObjectiveCondition();
-
-    public class UseItemQuestObjective : IQuestObjective
+    public class UseItemQuestObjective(AmeisenBotInterfaces bot, int itemId, Func<bool> condition) : IQuestObjective
     {
-        public UseItemQuestObjective(AmeisenBotInterfaces bot, int itemId, UseItemQuestObjectiveCondition condition)
-        {
-            Bot = bot;
-            ItemId = itemId;
-            Condition = condition;
-        }
-
         public bool Finished => Progress == 100.0;
 
         public double Progress => Condition() ? 100.0 : 0.0;
 
-        private AmeisenBotInterfaces Bot { get; }
+        private AmeisenBotInterfaces Bot { get; } = bot;
 
-        private UseItemQuestObjectiveCondition Condition { get; }
+        private Func<bool> Condition { get; } = condition;
 
-        private int ItemId { get; }
+        private int ItemId { get; } = itemId;
 
         public void Execute()
         {

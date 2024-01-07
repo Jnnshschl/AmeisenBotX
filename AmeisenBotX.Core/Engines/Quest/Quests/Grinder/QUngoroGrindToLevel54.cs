@@ -4,11 +4,8 @@ using AmeisenBotX.Core.Engines.Quest.Objects.Quests;
 
 namespace AmeisenBotX.Core.Engines.Quest.Quests.Grinder
 {
-    internal class QUngoroGrindToLevel54 : GrindingBotQuest
-    {
-        public QUngoroGrindToLevel54(AmeisenBotInterfaces bot)
-            : base("UngoroGrindToLevel54",
-                [
+    internal class QUngoroGrindToLevel54(AmeisenBotInterfaces bot) : GrindingBotQuest("UngoroGrindToLevel54",
+            [
                     new QuestObjectiveChain(
                     [
                         new GrindingObjective(bot, 54, [
@@ -31,6 +28,6 @@ namespace AmeisenBotX.Core.Engines.Quest.Quests.Grinder
                         ]),
                     ])
                 ])
-        { }
+    {
     }
 }

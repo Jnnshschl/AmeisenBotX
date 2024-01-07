@@ -7,16 +7,11 @@ using System.Text;
 
 namespace AmeisenBotX.Core.Managers.Character.Talents
 {
-    public class TalentManager
+    public class TalentManager(IWowInterface wowInterface)
     {
-        public TalentManager(IWowInterface wowInterface)
-        {
-            Wow = wowInterface;
-        }
-
         public TalentTree TalentTree { get; set; }
 
-        private IWowInterface Wow { get; }
+        private IWowInterface Wow { get; } = wowInterface;
 
         public void SelectTalents(TalentTree wantedTalents, int talentPoints)
         {
@@ -34,7 +29,7 @@ namespace AmeisenBotX.Core.Managers.Character.Talents
                 }
             }
 
-            if (talentsToSpend.Any())
+            if (talentsToSpend.Count != 0)
             {
                 SpendTalents(talentsToSpend);
             }
@@ -56,7 +51,7 @@ namespace AmeisenBotX.Core.Managers.Character.Talents
 
             bool result = false;
 
-            Talent[] wantedTreeValues = wantedTree.Values.ToArray();
+            Talent[] wantedTreeValues = [.. wantedTree.Values];
 
             foreach (Talent talent in wantedTreeValues)
             {
@@ -64,13 +59,13 @@ namespace AmeisenBotX.Core.Managers.Character.Talents
 
                 Talent wantedTalent = talent;
 
-                if (tree.ContainsKey(wantedTalent.Num))
+                if (tree.TryGetValue(wantedTalent.Num, out Talent value))
                 {
-                    int wantedRank = Math.Min(wantedTalent.Rank, tree[wantedTalent.Num].MaxRank);
+                    int wantedRank = Math.Min(wantedTalent.Rank, value.MaxRank);
 
-                    if (tree[wantedTalent.Num].Rank < wantedRank)
+                    if (value.Rank < wantedRank)
                     {
-                        int amount = Math.Min(talentPoints, wantedRank - tree[wantedTalent.Num].Rank);
+                        int amount = Math.Min(talentPoints, wantedRank - value.Rank);
 
                         talentsToSpend.Add((treeId, wantedTalent.Num, amount));
 

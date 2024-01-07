@@ -5,13 +5,10 @@ using System.Collections.Generic;
 
 namespace AmeisenBotX.Core.Engines.Quest.Quests.Durotar.ValleyOfStrength
 {
-    internal class QVileFamiliars : BotQuest
-    {
-        public QVileFamiliars(AmeisenBotInterfaces bot)
-            : base(bot, 792, "Vile Familiars", 2, 1,
-                () => (bot.GetClosestQuestGiverByNpcId(bot.Player.Position, new List<int> { 3145 }), new Vector3(-629.05f, -4228.06f, 38.23f)),
-                () => (bot.GetClosestQuestGiverByNpcId(bot.Player.Position, new List<int> { 3145 }), new Vector3(-629.05f, -4228.06f, 38.23f)),
-                [
+    internal class QVileFamiliars(AmeisenBotInterfaces bot) : BotQuest(bot, 792, "Vile Familiars", 2, 1,
+            () => (bot.GetClosestQuestGiverByNpcId(bot.Player.Position, new List<int> { 3145 }), new Vector3(-629.05f, -4228.06f, 38.23f)),
+            () => (bot.GetClosestQuestGiverByNpcId(bot.Player.Position, new List<int> { 3145 }), new Vector3(-629.05f, -4228.06f, 38.23f)),
+            [
                     new QuestObjectiveChain(
                     [
                         new KillAndLootQuestObjective(bot, [3101], 8, 0, [
@@ -30,6 +27,6 @@ namespace AmeisenBotX.Core.Engines.Quest.Quests.Durotar.ValleyOfStrength
                         ]),
                     ])
                 ])
-        { }
+    {
     }
 }

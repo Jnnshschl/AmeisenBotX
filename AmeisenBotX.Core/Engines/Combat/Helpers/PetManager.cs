@@ -3,32 +3,21 @@ using System;
 
 namespace AmeisenBotX.Core.Engines.Combat.Helpers
 {
-    public class PetManager
+    public class PetManager(AmeisenBotInterfaces bot, TimeSpan healPetCooldown, Func<bool> castMendPetFunction, Func<bool> castCallPetFunction, Func<bool> castRevivePetFunction)
     {
-        public PetManager(AmeisenBotInterfaces bot, TimeSpan healPetCooldown, Func<bool> castMendPetFunction, Func<bool> castCallPetFunction, Func<bool> castRevivePetFunction)
-        {
-            Bot = bot;
-            HealPetCooldown = healPetCooldown;
-            CastMendPet = castMendPetFunction;
-            CastCallPet = castCallPetFunction;
-            CastRevivePet = castRevivePetFunction;
+        public AmeisenBotInterfaces Bot { get; set; } = bot;
 
-            CallPetEvent = new(TimeSpan.FromSeconds(8));
-        }
+        public Func<bool> CastCallPet { get; set; } = castCallPetFunction;
 
-        public AmeisenBotInterfaces Bot { get; set; }
+        public Func<bool> CastMendPet { get; set; } = castMendPetFunction;
 
-        public Func<bool> CastCallPet { get; set; }
+        public Func<bool> CastRevivePet { get; set; } = castRevivePetFunction;
 
-        public Func<bool> CastMendPet { get; set; }
-
-        public Func<bool> CastRevivePet { get; set; }
-
-        public TimeSpan HealPetCooldown { get; set; }
+        public TimeSpan HealPetCooldown { get; set; } = healPetCooldown;
 
         public DateTime LastMendPetUsed { get; private set; }
 
-        private TimegatedEvent CallPetEvent { get; }
+        private TimegatedEvent CallPetEvent { get; } = new(TimeSpan.FromSeconds(8));
 
         private bool CallReviveToggle { get; set; }
 

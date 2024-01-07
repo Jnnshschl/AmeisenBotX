@@ -4,17 +4,11 @@ using System.Collections.Generic;
 
 namespace AmeisenBotX.Core.Engines.Combat.Helpers.Aura
 {
-    public class AuraManager
+    public class AuraManager(AmeisenBotInterfaces bot)
     {
-        public AuraManager(AmeisenBotInterfaces bot)
-        {
-            Bot = bot;
-            Jobs = [];
-        }
+        public AmeisenBotInterfaces Bot { get; } = bot;
 
-        public AmeisenBotInterfaces Bot { get; }
-
-        public List<IAuraJob> Jobs { get; set; }
+        public List<IAuraJob> Jobs { get; set; } = [];
 
         public bool Tick(IEnumerable<IWowAura> auras)
         {

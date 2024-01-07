@@ -4,11 +4,8 @@ using AmeisenBotX.Core.Engines.Quest.Objects.Quests;
 
 namespace AmeisenBotX.Core.Engines.Quest.Quests.Grinder
 {
-    internal class QSilithusGrindToLevel60 : GrindingBotQuest
-    {
-        public QSilithusGrindToLevel60(AmeisenBotInterfaces bot)
-            : base("SilithusGrindToLevel60",
-                [
+    internal class QSilithusGrindToLevel60(AmeisenBotInterfaces bot) : GrindingBotQuest("SilithusGrindToLevel60",
+            [
                     new QuestObjectiveChain(
                     [
                         new GrindingObjective(bot, 60, [
@@ -30,6 +27,6 @@ namespace AmeisenBotX.Core.Engines.Quest.Quests.Grinder
                         ]),
                     ])
                 ])
-        { }
+    {
     }
 }

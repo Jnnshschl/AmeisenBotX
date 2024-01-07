@@ -167,7 +167,10 @@ namespace AmeisenBotX.Core.Engines.Combat.Classes.Kamel
                     Bot.Player
                 };
 
-                CastBuff = CastBuff.Where(e => !e.Auras.Any(e => Bot.Db.GetSpellName(e.SpellId) == "Blessing of Kings") && !e.IsDead).OrderBy(e => e.HealthPercentage).ToList();
+                CastBuff =
+                [
+                    .. CastBuff.Where(e => !e.Auras.Any(e => Bot.Db.GetSpellName(e.SpellId) == "Blessing of Kings") && !e.IsDead).OrderBy(e => e.HealthPercentage),
+                ];
 
                 if (CastBuff != null)
                 {

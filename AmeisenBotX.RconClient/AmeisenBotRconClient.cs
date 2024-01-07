@@ -11,6 +11,12 @@ namespace AmeisenBotX.RconClient
 {
     public class AmeisenBotRconClient
     {
+        public static readonly JsonSerializerOptions Options = new()
+        {
+            AllowTrailingCommas = true,
+            NumberHandling = JsonNumberHandling.AllowReadingFromString
+        };
+
         public AmeisenBotRconClient(string endpoint, string name, string wowRace, string wowGender, string wowClass, string wowRole, string image = "", string guid = "", bool validateCertificate = false)
         {
             Endpoint = endpoint;
@@ -94,7 +100,7 @@ namespace AmeisenBotX.RconClient
 
             if (dataResponse.IsSuccessStatusCode)
             {
-                PendingActions = JsonSerializer.Deserialize<List<ActionType>>(dataResponse.Content.ReadAsStringAsync().Result, new JsonSerializerOptions() { AllowTrailingCommas = true, NumberHandling = JsonNumberHandling.AllowReadingFromString });
+                PendingActions = JsonSerializer.Deserialize<List<ActionType>>(dataResponse.Content.ReadAsStringAsync().Result, Options);
                 return true;
             }
             else

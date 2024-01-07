@@ -118,9 +118,7 @@ namespace AmeisenBotX.Common.Math
             // calculates the arctan to get the radians (arctan(alpha) = rise / run)
             double radAngle = System.Math.Atan(slope / 100);
             // converts the radians in degrees
-            double degAngle = radAngle * 180 / System.Math.PI;
-
-            return degAngle;
+            return radAngle * 180 / System.Math.PI;
         }
     }
 }

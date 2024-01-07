@@ -5,13 +5,10 @@ using System.Collections.Generic;
 
 namespace AmeisenBotX.Core.Engines.Quest.Quests.TheBarrens.Crossroads
 {
-    internal class QHarpyRaiders : BotQuest
-    {
-        public QHarpyRaiders(AmeisenBotInterfaces bot)
-            : base(bot, 867, "Harpy Raiders", 12, 1,
-                () => (bot.GetClosestQuestGiverByNpcId(bot.Player.Position, new List<int> { 3449 }), new Vector3(-474.89f, -2607.74f, 127.89f)),
-                () => (bot.GetClosestQuestGiverByNpcId(bot.Player.Position, new List<int> { 3449 }), new Vector3(-474.89f, -2607.74f, 127.89f)),
-                [
+    internal class QHarpyRaiders(AmeisenBotInterfaces bot) : BotQuest(bot, 867, "Harpy Raiders", 12, 1,
+            () => (bot.GetClosestQuestGiverByNpcId(bot.Player.Position, new List<int> { 3449 }), new Vector3(-474.89f, -2607.74f, 127.89f)),
+            () => (bot.GetClosestQuestGiverByNpcId(bot.Player.Position, new List<int> { 3449 }), new Vector3(-474.89f, -2607.74f, 127.89f)),
+            [
                     new QuestObjectiveChain(
                     [
                         new KillAndLootQuestObjective(bot, [3276, 3277, 3279, 3280, 3278, 3452], 8, 5064, [
@@ -32,6 +29,6 @@ namespace AmeisenBotX.Core.Engines.Quest.Quests.TheBarrens.Crossroads
                         ]),
                     ])
                 ])
-        { }
+    {
     }
 }

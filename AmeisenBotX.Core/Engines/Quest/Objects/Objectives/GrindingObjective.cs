@@ -8,32 +8,23 @@ using System.Linq;
 
 namespace AmeisenBotX.Core.Engines.Quest.Objects.Objectives
 {
-    internal class GrindingObjective : IQuestObjective
+    internal class GrindingObjective(AmeisenBotInterfaces bot, int targetLevel, List<List<Vector3>> grindingAreas, List<Vector3> vendorsLocation = null) : IQuestObjective
     {
-        public GrindingObjective(AmeisenBotInterfaces bot, int targetLevel,
-            List<List<Vector3>> grindingAreas, List<Vector3> vendorsLocation = null)
-        {
-            Bot = bot;
-            WantedLevel = targetLevel;
-            SearchAreas = new SearchAreaEnsamble(grindingAreas);
-            VendorsLocation = vendorsLocation;
-        }
-
         public bool Finished => Bot.Player.Level >= WantedLevel;
 
         public double Progress => 100.0 * (Bot.Player.Level + Bot.Player.XpPercentage / 100.0) / WantedLevel;
 
-        public List<Vector3> VendorsLocation { get; }
+        public List<Vector3> VendorsLocation { get; } = vendorsLocation;
 
-        private AmeisenBotInterfaces Bot { get; }
+        private AmeisenBotInterfaces Bot { get; } = bot;
 
         private Vector3 CurrentNode { get; set; }
 
         private IWowUnit IWowUnit { get; set; }
 
-        private SearchAreaEnsamble SearchAreas { get; }
+        private SearchAreaEnsamble SearchAreas { get; } = new SearchAreaEnsamble(grindingAreas);
 
-        private int WantedLevel { get; }
+        private int WantedLevel { get; } = targetLevel;
 
         public void Execute()
         {

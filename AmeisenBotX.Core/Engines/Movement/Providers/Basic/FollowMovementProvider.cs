@@ -8,26 +8,17 @@ using System.Linq;
 
 namespace AmeisenBotX.Core.Engines.Movement.Providers.Basic
 {
-    public class FollowMovementProvider : IMovementProvider
+    public class FollowMovementProvider(AmeisenBotInterfaces bot, AmeisenBotConfig config) : IMovementProvider
     {
-        public FollowMovementProvider(AmeisenBotInterfaces bot, AmeisenBotConfig config)
-        {
-            Bot = bot;
-            Config = config;
+        private AmeisenBotInterfaces Bot { get; } = bot;
 
-            Random = new();
-            OffsetCheckEvent = new(TimeSpan.FromMilliseconds(30000));
-        }
-
-        private AmeisenBotInterfaces Bot { get; }
-
-        private AmeisenBotConfig Config { get; }
+        private AmeisenBotConfig Config { get; } = config;
 
         private Vector3 FollowOffset { get; set; }
 
-        private TimegatedEvent OffsetCheckEvent { get; }
+        private TimegatedEvent OffsetCheckEvent { get; } = new(TimeSpan.FromMilliseconds(30000));
 
-        private Random Random { get; }
+        private Random Random { get; } = new();
 
         public bool Get(out Vector3 position, out MovementAction type)
         {
@@ -74,11 +65,11 @@ namespace AmeisenBotX.Core.Engines.Movement.Providers.Basic
             if (wowPlayers.Any())
             {
                 IWowUnit[] playersToTry =
-                {
+                [
                     Config.FollowSpecificCharacter ? wowPlayers.FirstOrDefault(p => Bot.Db.GetUnitName(p, out string name) && name.Equals(Config.SpecificCharacterToFollow, StringComparison.OrdinalIgnoreCase)) : null,
                     Config.FollowGroupLeader ? Bot.Objects.Partyleader : null,
                     Config.FollowGroupMembers ? Bot.Objects.Partymembers.FirstOrDefault() : null
-                };
+                ];
 
                 foreach (IWowUnit unit in playersToTry)
                 {

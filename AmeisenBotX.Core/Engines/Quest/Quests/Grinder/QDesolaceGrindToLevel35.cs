@@ -4,11 +4,8 @@ using AmeisenBotX.Core.Engines.Quest.Objects.Quests;
 
 namespace AmeisenBotX.Core.Engines.Quest.Quests.Grinder
 {
-    internal class QDesolaceGrindToLevel35 : GrindingBotQuest
-    {
-        public QDesolaceGrindToLevel35(AmeisenBotInterfaces bot)
-            : base("DesolaceGrindToLevel35",
-                [
+    internal class QDesolaceGrindToLevel35(AmeisenBotInterfaces bot) : GrindingBotQuest("DesolaceGrindToLevel35",
+            [
                     new QuestObjectiveChain(
                     [
                         new GrindingObjective(bot, 35, [
@@ -28,6 +25,6 @@ namespace AmeisenBotX.Core.Engines.Quest.Quests.Grinder
                         ]),
                     ])
                 ])
-        { }
+    {
     }
 }

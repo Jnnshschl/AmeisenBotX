@@ -9,16 +9,8 @@ using System.Linq;
 
 namespace AmeisenBotX.Core.Engines.Battleground.KamelBG
 {
-    internal class EyeOfTheStorm : IBattlegroundEngine
+    internal class EyeOfTheStorm(AmeisenBotInterfaces bot) : IBattlegroundEngine
     {
-        public EyeOfTheStorm(AmeisenBotInterfaces bot)
-        {
-            Bot = bot;
-
-            CaptureFlagEvent = new(TimeSpan.FromSeconds(1));
-            CombatEvent = new(TimeSpan.FromSeconds(2));
-        }
-
         public string Author => "Lukas";
 
         public string Description => "Eye of the Storm";
@@ -38,11 +30,11 @@ namespace AmeisenBotX.Core.Engines.Battleground.KamelBG
             new Vector3(2176, 1570, 1159)//Flag
         ];
 
-        private AmeisenBotInterfaces Bot { get; }
+        private AmeisenBotInterfaces Bot { get; } = bot;
 
-        private TimegatedEvent CaptureFlagEvent { get; }
+        private TimegatedEvent CaptureFlagEvent { get; } = new(TimeSpan.FromSeconds(1));
 
-        private TimegatedEvent CombatEvent { get; }
+        private TimegatedEvent CombatEvent { get; } = new(TimeSpan.FromSeconds(2));
 
         private int CurrentNodeCounter { get; set; }
 

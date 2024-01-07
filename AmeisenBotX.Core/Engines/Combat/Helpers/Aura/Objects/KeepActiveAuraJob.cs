@@ -6,20 +6,13 @@ using System.Linq;
 
 namespace AmeisenBotX.Core.Engines.Combat.Helpers.Aura.Objects
 {
-    public class KeepActiveAuraJob : IAuraJob
+    public class KeepActiveAuraJob(IAmeisenBotDb db, string name, Func<bool> action) : IAuraJob
     {
-        public KeepActiveAuraJob(IAmeisenBotDb db, string name, Func<bool> action)
-        {
-            Db = db;
-            Name = name;
-            Action = action;
-        }
+        public Func<bool> Action { get; set; } = action;
 
-        public Func<bool> Action { get; set; }
+        public string Name { get; set; } = name;
 
-        public string Name { get; set; }
-
-        private IAmeisenBotDb Db { get; }
+        private IAmeisenBotDb Db { get; } = db;
 
         public bool Run(IEnumerable<IWowAura> auras)
         {

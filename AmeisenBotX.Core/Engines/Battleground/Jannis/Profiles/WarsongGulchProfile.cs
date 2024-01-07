@@ -18,6 +18,12 @@ namespace AmeisenBotX.Core.Engines.Battleground.Jannis.Profiles
 {
     public class WarsongGulchProfile : IBattlegroundProfile
     {
+        private static readonly JsonSerializerOptions Options = new()
+        {
+            AllowTrailingCommas = true,
+            NumberHandling = JsonNumberHandling.AllowReadingFromString
+        };
+
         public WarsongGulchProfile(AmeisenBotInterfaces bot)
         {
             Bot = bot;
@@ -383,7 +389,7 @@ namespace AmeisenBotX.Core.Engines.Battleground.Jannis.Profiles
             {
                 if (Bot.Wow.ExecuteLuaAndRead(BotUtils.ObfuscateLua($"{{v:0}}=\"{{\"_,stateA,textA,_,_,_,_,_,_,_,_,_=GetWorldStateUIInfo(2)_,stateH,textH,_,_,_,_,_,_,_,_,_=GetWorldStateUIInfo(3)flagXA,flagYA=GetBattlefieldFlagPosition(1)flagXH,flagYH=GetBattlefieldFlagPosition(2){{v:0}}={{v:0}}..\"\\\"allianceState\\\" : \\\"\"..stateA..\"\\\",\"{{v:0}}={{v:0}}..\"\\\"allianceText\\\" : \\\"\"..textA..\"\\\",\"{{v:0}}={{v:0}}..\"\\\"hordeState\\\" : \\\"\"..stateH..\"\\\",\"{{v:0}}={{v:0}}..\"\\\"hordeText\\\" : \\\"\"..textH..\"\\\",\"{{v:0}}={{v:0}}..\"\\\"allianceFlagX\\\" : \\\"\"..flagXA..\"\\\",\"{{v:0}}={{v:0}}..\"\\\"allianceFlagY\\\" : \\\"\"..flagYA..\"\\\",\"{{v:0}}={{v:0}}..\"\\\"hordeFlagX\\\" : \\\"\"..flagXH..\"\\\",\"{{v:0}}={{v:0}}..\"\\\"hordeFlagY\\\" : \\\"\"..flagYH..\"\\\"\"{{v:0}}={{v:0}}..\"}}\""), out string result))
                 {
-                    Dictionary<string, dynamic> bgState = JsonSerializer.Deserialize<JsonElement>(result, new JsonSerializerOptions() { AllowTrailingCommas = true, NumberHandling = JsonNumberHandling.AllowReadingFromString }).ToDyn();
+                    Dictionary<string, dynamic> bgState = JsonSerializer.Deserialize<JsonElement>(result, Options).ToDyn();
 
                     string[] splittedScoreH = ((string)bgState["hordeText"]).Split('/');
                     string[] splittedScoreA = ((string)bgState["allianceText"]).Split('/');
@@ -434,9 +440,7 @@ namespace AmeisenBotX.Core.Engines.Battleground.Jannis.Profiles
                                                           or ((int)WowGameObjectDisplayId.WsgHordeFlag));
                 }
             }
-            catch (Exception ex)
-            {
-            }
+            catch { }
         }
 
         private BtStatus UseNearestFlag(CtfBlackboard blackboard)

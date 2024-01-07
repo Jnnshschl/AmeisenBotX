@@ -26,7 +26,7 @@ namespace AmeisenBotX.Test
         [TestMethod]
         public void ByteArrayToStringTest()
         {
-            byte[] bytes = new byte[] { 0x0, 0x35, 0xff };
+            byte[] bytes = [0x0, 0x35, 0xff];
             string s = BotUtils.ByteArrayToString(bytes);
             Assert.AreEqual("00 35 FF", s);
         }

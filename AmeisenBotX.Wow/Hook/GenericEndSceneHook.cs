@@ -13,7 +13,7 @@ using System.Threading.Tasks;
 
 namespace AmeisenBotX.Wow.Hook
 {
-    public class GenericEndSceneHook
+    public class GenericEndSceneHook(WowMemoryApi memory)
     {
         private const int MEM_ALLOC_EXECUTION_SIZE = 4096;
         private const int MEM_ALLOC_GATEWAY_SIZE = 24;
@@ -21,11 +21,6 @@ namespace AmeisenBotX.Wow.Hook
         private readonly object hookLock = new();
 
         private int hookCalls;
-
-        public GenericEndSceneHook(WowMemoryApi memory)
-        {
-            Memory = memory;
-        }
 
         public event Action<GameInfo> OnGameInfoPush;
 
@@ -44,7 +39,7 @@ namespace AmeisenBotX.Wow.Hook
 
         public bool IsWoWHooked => WowEndSceneAddress != nint.Zero && Memory.Read(WowEndSceneAddress, out byte c) && c == 0xE9;
 
-        protected WowMemoryApi Memory { get; }
+        protected WowMemoryApi Memory { get; } = memory;
 
         /// <summary>
         /// Codecave that hold the code, the bot want's to execute.
@@ -225,7 +220,7 @@ namespace AmeisenBotX.Wow.Hook
             {
                 if (!module.Inject())
                 {
-                    AmeisenLogger.I.Log("HookManager", $"Failed to inject {nameof(module)} module", LogLevel.Error);
+                    AmeisenLogger.I.Log("HookManager", $"Failed to inject {module.GetType().FullName}", LogLevel.Error);
                     return false;
                 }
             }

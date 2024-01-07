@@ -6,17 +6,11 @@ namespace AmeisenBotX.BehaviorTree.Objects
     /// BehaviorTree Node that executes a node before executing annother node. Use this to update
     /// stuff before executing a node.
     /// </summary>
-    public class Annotator : INode
+    public class Annotator(INode annotationNode, INode child) : INode
     {
-        public Annotator(INode annotationNode, INode child) : base()
-        {
-            AnnotationNode = annotationNode;
-            Child = child;
-        }
+        public INode AnnotationNode { get; set; } = annotationNode;
 
-        public INode AnnotationNode { get; set; }
-
-        public INode Child { get; set; }
+        public INode Child { get; set; } = child;
 
         public BtStatus Execute()
         {
@@ -30,17 +24,11 @@ namespace AmeisenBotX.BehaviorTree.Objects
         }
     }
 
-    public class Annotator<T> : INode<T>
+    public class Annotator<T>(INode<T> annotationNode, INode<T> child) : INode<T>
     {
-        public Annotator(INode<T> annotationNode, INode<T> child) : base()
-        {
-            AnnotationNode = annotationNode;
-            Child = child;
-        }
+        public INode<T> AnnotationNode { get; set; } = annotationNode;
 
-        public INode<T> AnnotationNode { get; set; }
-
-        public INode<T> Child { get; set; }
+        public INode<T> Child { get; set; } = child;
 
         public BtStatus Execute(T blackboard)
         {

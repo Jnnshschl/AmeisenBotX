@@ -1,23 +1,22 @@
 ﻿using AmeisenBotX.Core.Engines.Movement.Enums;
 using AmeisenBotX.Wow.Objects;
 using AmeisenBotX.Wow.Objects.Enums;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 
 namespace AmeisenBotX.Core.Engines.Quest.Objects.Objectives
 {
-    public delegate bool KillUnitQuestObjectiveCondition();
-
     public class KillUnitQuestObjective : IQuestObjective
     {
-        public KillUnitQuestObjective(AmeisenBotInterfaces bot, int objectDisplayId, KillUnitQuestObjectiveCondition condition)
+        public KillUnitQuestObjective(AmeisenBotInterfaces bot, int objectDisplayId, Func<bool> condition)
         {
             Bot = bot;
             ObjectDisplayIds = new Dictionary<int, int>() { { 0, objectDisplayId } };
             Condition = condition;
         }
 
-        public KillUnitQuestObjective(AmeisenBotInterfaces bot, Dictionary<int, int> objectDisplayIds, KillUnitQuestObjectiveCondition condition)
+        public KillUnitQuestObjective(AmeisenBotInterfaces bot, Dictionary<int, int> objectDisplayIds, Func<bool> condition)
         {
             Bot = bot;
             ObjectDisplayIds = objectDisplayIds;
@@ -30,7 +29,7 @@ namespace AmeisenBotX.Core.Engines.Quest.Objects.Objectives
 
         private AmeisenBotInterfaces Bot { get; }
 
-        private KillUnitQuestObjectiveCondition Condition { get; }
+        private Func<bool> Condition { get; }
 
         private Dictionary<int, int> ObjectDisplayIds { get; }
 
@@ -53,7 +52,7 @@ namespace AmeisenBotX.Core.Engines.Quest.Objects.Objectives
 
                 Unit = Bot.Objects.All
                     .OfType<IWowUnit>()
-                    .Where(e => !e.IsDead && ObjectDisplayIds.Values.Contains(e.DisplayId))
+                    .Where(e => !e.IsDead && ObjectDisplayIds.ContainsValue(e.DisplayId))
                     .OrderBy(e => e.Position.GetDistance(Bot.Player.Position))
                     .OrderBy(e => ObjectDisplayIds.First(x => x.Value == e.DisplayId).Key)
                     .FirstOrDefault();

@@ -3,14 +3,9 @@ using System;
 
 namespace AmeisenBotX.BehaviorTree.Objects
 {
-    public class Leaf : INode
+    public class Leaf(Func<BtStatus> behaviorTreeAction) : INode
     {
-        public Leaf(Func<BtStatus> behaviorTreeAction) : base()
-        {
-            BehaviorTreeAction = behaviorTreeAction;
-        }
-
-        public Func<BtStatus> BehaviorTreeAction { get; set; }
+        public Func<BtStatus> BehaviorTreeAction { get; set; } = behaviorTreeAction;
 
         public BtStatus Execute()
         {
@@ -23,14 +18,9 @@ namespace AmeisenBotX.BehaviorTree.Objects
         }
     }
 
-    public class Leaf<T> : INode<T>
+    public class Leaf<T>(Func<T, BtStatus> behaviorTreeAction) : INode<T>
     {
-        public Leaf(Func<T, BtStatus> behaviorTreeAction) : base()
-        {
-            BehaviorTreeAction = behaviorTreeAction;
-        }
-
-        public Func<T, BtStatus> BehaviorTreeAction { get; set; }
+        public Func<T, BtStatus> BehaviorTreeAction { get; set; } = behaviorTreeAction;
 
         public BtStatus Execute(T blackboard)
         {

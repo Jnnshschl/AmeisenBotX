@@ -4,18 +4,11 @@ using System.Collections.Generic;
 
 namespace AmeisenBotX.Core.Managers.Character.Comparators
 {
-    public class SimpleItemComparator : IItemComparator
+    public class SimpleItemComparator(DefaultCharacterManager characterManager, Dictionary<string, double> statPriorities) : IItemComparator
     {
-        public SimpleItemComparator(DefaultCharacterManager characterManager, Dictionary<string, double> statPriorities)
-        {
-            // This introduces a cyclic dependency. Are we fine with that?
-            CharacterManager = characterManager;
-            GearscoreFactory = new(statPriorities);
-        }
+        protected GearscoreFactory GearscoreFactory { get; set; } = new(statPriorities);
 
-        protected GearscoreFactory GearscoreFactory { get; set; }
-
-        private DefaultCharacterManager CharacterManager { get; }
+        private DefaultCharacterManager CharacterManager { get; } = characterManager;
 
         public bool IsBetter(IWowInventoryItem current, IWowInventoryItem item)
         {

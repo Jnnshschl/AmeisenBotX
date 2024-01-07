@@ -4,24 +4,13 @@ using AmeisenBotX.Wow.Objects.Enums;
 
 namespace AmeisenBotX.Core.Objects
 {
-    public class InteractableObject
+    public class InteractableObject(int entryId, WowMapId mapId, WowZoneId zoneId, Vector3 position, InteractableObjectType objectType, MailboxFactionType factionType = MailboxFactionType.None)
     {
-        public readonly MailboxFactionType FactionType;
-        public readonly InteractableObjectType ObjectType;
-        public int EntryId;
-        public WowMapId MapId;
-        public Vector3 Position;
-        public WowZoneId ZoneId;
-
-        public InteractableObject(int entryId, WowMapId mapId, WowZoneId zoneId, Vector3 position,
-            InteractableObjectType objectType, MailboxFactionType factionType = MailboxFactionType.None)
-        {
-            EntryId = entryId;
-            MapId = mapId;
-            ZoneId = zoneId;
-            Position = position;
-            ObjectType = objectType;
-            FactionType = factionType;
-        }
+        public readonly MailboxFactionType FactionType = factionType;
+        public readonly InteractableObjectType ObjectType = objectType;
+        public int EntryId = entryId;
+        public WowMapId MapId = mapId;
+        public Vector3 Position = position;
+        public WowZoneId ZoneId = zoneId;
     }
 }

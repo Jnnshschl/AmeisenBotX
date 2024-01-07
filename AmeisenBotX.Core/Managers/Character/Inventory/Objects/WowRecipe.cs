@@ -1,9 +1,6 @@
 ﻿namespace AmeisenBotX.Core.Managers.Character.Inventory.Objects
 {
-    public class WowRecipe : WowBasicItem
+    public class WowRecipe(IWowInventoryItem wowBasicItem) : WowBasicItem(wowBasicItem)
     {
-        public WowRecipe(IWowInventoryItem wowBasicItem) : base(wowBasicItem)
-        {
-        }
     }
 }

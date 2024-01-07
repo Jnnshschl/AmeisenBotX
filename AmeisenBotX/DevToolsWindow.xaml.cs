@@ -82,7 +82,7 @@ namespace AmeisenBotX
             string[] splitByBrace = splitByPos[1].Split("]", 2);
 
             string[] posComponents = splitByBrace[0].Split(", ");
-            string[] cleanComponents = { "", "", "" };
+            string[] cleanComponents = ["", "", ""];
 
             for (int i = 0; i < posComponents.Length; i++)
             {

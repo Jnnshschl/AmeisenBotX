@@ -3,16 +3,8 @@ using System.Collections.Generic;
 
 namespace AmeisenBotX.Wow.Hook.Modules
 {
-    public abstract class RunAsmHookModule : IHookModule
+    public abstract class RunAsmHookModule(Action<nint> onUpdate, Action<IHookModule> tick, WowMemoryApi memory, uint allocSize) : IHookModule
     {
-        public RunAsmHookModule(Action<nint> onUpdate, Action<IHookModule> tick, WowMemoryApi memory, uint allocSize)
-        {
-            Memory = memory;
-            AllocSize = allocSize;
-            OnDataUpdate = onUpdate;
-            Tick = tick;
-        }
-
         ~RunAsmHookModule()
         {
             if (AsmAddress != nint.Zero) { Memory.FreeMemory(AsmAddress); }
@@ -20,13 +12,13 @@ namespace AmeisenBotX.Wow.Hook.Modules
 
         public nint AsmAddress { get; set; }
 
-        public Action<nint> OnDataUpdate { get; set; }
+        public Action<nint> OnDataUpdate { get; set; } = onUpdate;
 
-        public Action<IHookModule> Tick { get; set; }
+        public Action<IHookModule> Tick { get; set; } = tick;
 
-        protected uint AllocSize { get; }
+        protected uint AllocSize { get; } = allocSize;
 
-        protected WowMemoryApi Memory { get; }
+        protected WowMemoryApi Memory { get; } = memory;
 
         public abstract nint GetDataPointer();
 
@@ -38,10 +30,8 @@ namespace AmeisenBotX.Wow.Hook.Modules
                 AsmAddress = address;
                 return Memory.InjectAssembly(assembly, address);
             }
-            else
-            {
-                return false;
-            }
+
+            return false;
         }
 
         protected abstract bool PrepareAsm(out IEnumerable<string> assembly);

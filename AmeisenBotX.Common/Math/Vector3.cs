@@ -8,7 +8,7 @@ namespace AmeisenBotX.Common.Math
     [StructLayout(LayoutKind.Sequential)]
     public struct Vector3 : IEquatable<Vector3>
     {
-        public static Vector3 Zero { get; } = new(0, 0, 0);
+        public static readonly Vector3 Zero = new(0, 0, 0);
 
         public Vector3(float a)
         {
@@ -24,12 +24,16 @@ namespace AmeisenBotX.Common.Math
             Z = z;
         }
 
-        public bool AnySubZero()
+        public readonly bool AnySubZero()
         {
             return X < 0.0f || Y < 0.0f || Z < 0.0f;
         }
 
-        public Vector3(Vector3 position) : this(position.X, position.Y, position.Z)
+        public Vector3(Vector3 v3) : this(v3.X, v3.Y, v3.Z)
+        {
+        }
+
+        public Vector3(float[] array) : this(array[0], array[1], array[2])
         {
         }
 
@@ -38,12 +42,6 @@ namespace AmeisenBotX.Common.Math
         public float Y { get; set; }
 
         public float Z { get; set; }
-
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static Vector3 FromArray(float[] array)
-        {
-            return new(array[0], array[1], array[2]);
-        }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static Vector3 operator -(Vector3 a, Vector3 b)
@@ -202,19 +200,19 @@ namespace AmeisenBotX.Common.Math
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public float GetDistance(Vector3 v)
+        public readonly float GetDistance(Vector3 v)
         {
             return MathF.Sqrt(MathF.Pow(X - v.X, 2) + MathF.Pow(Y - v.Y, 2) + MathF.Pow(Z - v.Z, 2));
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public float GetDistance2D(Vector3 v)
+        public readonly float GetDistance2D(Vector3 v)
         {
             return MathF.Sqrt(MathF.Pow(X - v.X, 2) + MathF.Pow(Y - v.Y, 2));
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public override int GetHashCode()
+        public override readonly int GetHashCode()
         {
             unchecked
             {
@@ -223,25 +221,25 @@ namespace AmeisenBotX.Common.Math
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public float Dot()
+        public readonly float Dot()
         {
             return MathF.Pow(X, 2) + MathF.Pow(Y, 2) + MathF.Pow(Z, 2);
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public float Dot2D()
+        public readonly float Dot2D()
         {
             return MathF.Pow(X, 2) + MathF.Pow(Y, 2);
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public float GetMagnitude()
+        public readonly float GetMagnitude()
         {
             return MathF.Sqrt(Dot());
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public float GetMagnitude2D()
+        public readonly float GetMagnitude2D()
         {
             return MathF.Sqrt(Dot2D());
         }
@@ -351,23 +349,23 @@ namespace AmeisenBotX.Common.Math
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public float[] ToArray()
+        public readonly float[] ToArray()
         {
-            return new float[3] { X, Y, Z };
+            return [X, Y, Z];
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public override string ToString()
+        public override readonly string ToString()
         {
             return $"{X}, {Y}, {Z}";
         }
 
-        public override bool Equals(object obj)
+        public override readonly bool Equals(object obj)
         {
             return obj is Vector3 vector && this == vector;
         }
 
-        public bool Equals(Vector3 other)
+        public readonly bool Equals(Vector3 other)
         {
             return this == other;
         }

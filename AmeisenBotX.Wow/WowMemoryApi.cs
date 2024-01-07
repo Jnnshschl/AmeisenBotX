@@ -3,14 +3,8 @@ using AmeisenBotX.Wow.Offsets;
 
 namespace AmeisenBotX.Wow
 {
-    public class WowMemoryApi : XMemory
+    public class WowMemoryApi(IOffsetList offsets) : XMemory()
     {
-        public WowMemoryApi(IOffsetList offsets)
-            : base()
-        {
-            Offsets = offsets;
-        }
-
-        public IOffsetList Offsets { get; }
+        public IOffsetList Offsets { get; } = offsets;
     }
 }

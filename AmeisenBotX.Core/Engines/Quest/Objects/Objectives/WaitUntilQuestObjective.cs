@@ -1,15 +1,10 @@
-﻿namespace AmeisenBotX.Core.Engines.Quest.Objects.Objectives
+﻿using System;
+
+namespace AmeisenBotX.Core.Engines.Quest.Objects.Objectives
 {
-    public delegate bool WaitUntilQuestObjectiveCondition();
-
-    public class WaitUntilQuestObjective : IQuestObjective
+    public class WaitUntilQuestObjective(Func<bool> condition) : IQuestObjective
     {
-        public WaitUntilQuestObjective(WaitUntilQuestObjectiveCondition condition)
-        {
-            Condition = condition;
-        }
-
-        public WaitUntilQuestObjectiveCondition Condition { get; }
+        public Func<bool> Condition { get; } = condition;
 
         public bool Finished { get; set; }
 

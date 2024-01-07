@@ -1,25 +1,18 @@
-﻿namespace AmeisenBotX.Core.Engines.Quest.Objects.Objectives
+﻿using System;
+
+namespace AmeisenBotX.Core.Engines.Quest.Objects.Objectives
 {
-    public delegate bool CastVehicleSpellQuestObjectiveCondition();
-
-    public class CastVehicleSpellQuestObjective : IQuestObjective
+    public class CastVehicleSpellQuestObjective(AmeisenBotInterfaces bot, int spellId, Func<bool> condition) : IQuestObjective
     {
-        public CastVehicleSpellQuestObjective(AmeisenBotInterfaces bot, int spellId, CastVehicleSpellQuestObjectiveCondition condition)
-        {
-            Bot = bot;
-            SpellId = spellId;
-            Condition = condition;
-        }
-
         public bool Finished => Progress == 100.0;
 
         public double Progress => Condition() ? 100.0 : 0.0;
 
-        private AmeisenBotInterfaces Bot { get; }
+        private AmeisenBotInterfaces Bot { get; } = bot;
 
-        private CastVehicleSpellQuestObjectiveCondition Condition { get; }
+        private Func<bool> Condition { get; } = condition;
 
-        private int SpellId { get; }
+        private int SpellId { get; } = spellId;
 
         public void Execute()
         {

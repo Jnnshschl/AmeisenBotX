@@ -2,17 +2,11 @@
 
 namespace AmeisenBotX.Core.Logic.Idle.Actions
 {
-    public class LookAroundIdleAction : IIdleAction
+    public class LookAroundIdleAction(AmeisenBotInterfaces bot) : IIdleAction
     {
-        public LookAroundIdleAction(AmeisenBotInterfaces bot)
-        {
-            Bot = bot;
-            Rnd = new Random();
-        }
-
         public bool AutopilotOnly => false;
 
-        public AmeisenBotInterfaces Bot { get; }
+        public AmeisenBotInterfaces Bot { get; } = bot;
 
         public DateTime Cooldown { get; set; }
 
@@ -24,7 +18,7 @@ namespace AmeisenBotX.Core.Logic.Idle.Actions
 
         public int MinDuration => 0;
 
-        private Random Rnd { get; }
+        private Random Rnd { get; } = new Random();
 
         public bool Enter()
         {

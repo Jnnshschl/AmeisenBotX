@@ -4,11 +4,8 @@ using AmeisenBotX.Core.Engines.Quest.Objects.Quests;
 
 namespace AmeisenBotX.Core.Engines.Quest.Quests.Test
 {
-    internal class GrindToLevel2 : GrindingBotQuest
-    {
-        public GrindToLevel2(AmeisenBotInterfaces bot)
-            : base("Test Grind Boars in Valley of Strength",
-                [
+    internal class GrindToLevel2(AmeisenBotInterfaces bot) : GrindingBotQuest("Test Grind Boars in Valley of Strength",
+            [
                     new QuestObjectiveChain(
                     [
                         new GrindingObjective(bot, 2, [
@@ -36,6 +33,6 @@ namespace AmeisenBotX.Core.Engines.Quest.Quests.Test
                         ]),
                     ])
                 ])
-        { }
+    {
     }
 }

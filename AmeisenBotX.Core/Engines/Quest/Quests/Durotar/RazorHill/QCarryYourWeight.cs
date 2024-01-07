@@ -5,13 +5,10 @@ using System.Collections.Generic;
 
 namespace AmeisenBotX.Core.Engines.Quest.Quests.Durotar.RazorHill
 {
-    internal class QCarryYourWeight : BotQuest
-    {
-        public QCarryYourWeight(AmeisenBotInterfaces bot)
-            : base(bot, 791, "Carry Your Weight", 4, 1,
-                () => (bot.GetClosestQuestGiverByNpcId(bot.Player.Position, new List<int> { 3147 }), new Vector3(384.74f, -4600.13f, 76.17f)),
-                () => (bot.GetClosestQuestGiverByNpcId(bot.Player.Position, new List<int> { 3147 }), new Vector3(384.74f, -4600.13f, 76.17f)),
-                [
+    internal class QCarryYourWeight(AmeisenBotInterfaces bot) : BotQuest(bot, 791, "Carry Your Weight", 4, 1,
+            () => (bot.GetClosestQuestGiverByNpcId(bot.Player.Position, new List<int> { 3147 }), new Vector3(384.74f, -4600.13f, 76.17f)),
+            () => (bot.GetClosestQuestGiverByNpcId(bot.Player.Position, new List<int> { 3147 }), new Vector3(384.74f, -4600.13f, 76.17f)),
+            [
                     new QuestObjectiveChain(
                     [
                         new KillAndLootQuestObjective(bot, [3119, 3120, 3128, 3129, 3192, 5808, 5809], 8, 4870, [
@@ -41,6 +38,6 @@ namespace AmeisenBotX.Core.Engines.Quest.Quests.Durotar.RazorHill
                         ]),
                     ])
                 ])
-        { }
+    {
     }
 }

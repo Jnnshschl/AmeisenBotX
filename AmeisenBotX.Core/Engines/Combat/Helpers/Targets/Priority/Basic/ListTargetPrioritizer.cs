@@ -4,14 +4,9 @@ using System.Linq;
 
 namespace AmeisenBotX.Core.Engines.Combat.Helpers.Targets.Priority.Basic
 {
-    public class ListTargetPrioritizer : ITargetPrioritizer
+    public class ListTargetPrioritizer(IEnumerable<int> priorityDisplayIds = null) : ITargetPrioritizer
     {
-        public ListTargetPrioritizer(IEnumerable<int> priorityDisplayIds = null)
-        {
-            PriorityDisplayIds = priorityDisplayIds ?? new List<int>();
-        }
-
-        public IEnumerable<int> PriorityDisplayIds { get; set; }
+        public IEnumerable<int> PriorityDisplayIds { get; set; } = priorityDisplayIds ?? new List<int>();
 
         public bool HasPriority(IWowUnit unit)
         {

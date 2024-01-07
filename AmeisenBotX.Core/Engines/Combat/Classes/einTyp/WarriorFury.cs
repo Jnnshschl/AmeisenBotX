@@ -12,12 +12,12 @@ using System.Text.Json;
 
 namespace AmeisenBotX.Core.Engines.Combat.Classes.einTyp
 {
-    public class WarriorFury : ICombatClass
+    public class WarriorFury(AmeisenBotInterfaces bot) : ICombatClass
     {
-        private readonly AmeisenBotInterfaces Bot;
-        private readonly string[] runningEmotes = { "/train", "/cackle", "/silly" };
-        private readonly WarriorFurySpells spells;
-        private readonly string[] standingEmotes = { "/shimmy", "/dance", "/twiddle", "/highfive" };
+        private readonly AmeisenBotInterfaces Bot = bot;
+        private readonly string[] runningEmotes = ["/train", "/cackle", "/silly"];
+        private readonly WarriorFurySpells spells = new(bot);
+        private readonly string[] standingEmotes = ["/shimmy", "/dance", "/twiddle", "/highfive"];
         private bool computeNewRoute = false;
         private double distanceToTarget = 0;
 
@@ -25,13 +25,6 @@ namespace AmeisenBotX.Core.Engines.Combat.Classes.einTyp
 
         private bool multipleTargets = false;
         private bool standing = false;
-
-        public WarriorFury(AmeisenBotInterfaces bot)
-        {
-            Bot = bot;
-
-            spells = new WarriorFurySpells(bot);
-        }
 
         public string Author => "einTyp";
 

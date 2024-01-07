@@ -180,7 +180,10 @@ namespace AmeisenBotX.Core.Engines.Combat.Classes.Kamel
                     Bot.Player
                 };
 
-                CastBuff = CastBuff.Where(e => (!e.Auras.Any(e => Bot.Db.GetSpellName(e.SpellId) == "Prayer of Fortitude") || !e.Auras.Any(e => Bot.Db.GetSpellName(e.SpellId) == "Prayer of Shadow Protection")) && !e.IsDead).OrderBy(e => e.HealthPercentage).ToList();
+                CastBuff =
+                [
+                    .. CastBuff.Where(e => (!e.Auras.Any(e => Bot.Db.GetSpellName(e.SpellId) == "Prayer of Fortitude") || !e.Auras.Any(e => Bot.Db.GetSpellName(e.SpellId) == "Prayer of Shadow Protection")) && !e.IsDead).OrderBy(e => e.HealthPercentage),
+                ];
 
                 if (CastBuff != null)
                 {
@@ -274,7 +277,7 @@ namespace AmeisenBotX.Core.Engines.Combat.Classes.Kamel
                 Bot.Player
             };
 
-            partyMemberToHeal = partyMemberToHeal.Where(e => e.HealthPercentage <= 94 && !e.IsDead).OrderBy(e => e.HealthPercentage).ToList();
+            partyMemberToHeal = [.. partyMemberToHeal.Where(e => e.HealthPercentage <= 94 && !e.IsDead).OrderBy(e => e.HealthPercentage)];
 
             if (partyMemberToHeal.Count > 0)
             {

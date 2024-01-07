@@ -7,11 +7,9 @@ using System.Linq;
 
 namespace AmeisenBotX.Core.Engines.Quest.Objects.Objectives
 {
-    public delegate bool TalkToUnitQuestObjectiveCondition();
-
     public class TalkToUnitQuestObjective : IQuestObjective
     {
-        public TalkToUnitQuestObjective(AmeisenBotInterfaces bot, int displayId, List<int> gossipIds, TalkToUnitQuestObjectiveCondition condition)
+        public TalkToUnitQuestObjective(AmeisenBotInterfaces bot, int displayId, List<int> gossipIds, Func<bool> condition)
         {
             Bot = bot;
             DisplayIds = [displayId];
@@ -21,7 +19,7 @@ namespace AmeisenBotX.Core.Engines.Quest.Objects.Objectives
             TalkEvent = new(TimeSpan.FromMilliseconds(500));
         }
 
-        public TalkToUnitQuestObjective(AmeisenBotInterfaces bot, List<int> displayIds, List<int> gossipIds, TalkToUnitQuestObjectiveCondition condition)
+        public TalkToUnitQuestObjective(AmeisenBotInterfaces bot, List<int> displayIds, List<int> gossipIds, Func<bool> condition)
         {
             Bot = bot;
             DisplayIds = displayIds;
@@ -37,7 +35,7 @@ namespace AmeisenBotX.Core.Engines.Quest.Objects.Objectives
 
         private AmeisenBotInterfaces Bot { get; }
 
-        private TalkToUnitQuestObjectiveCondition Condition { get; }
+        private Func<bool> Condition { get; }
 
         private int Counter { get; set; }
 

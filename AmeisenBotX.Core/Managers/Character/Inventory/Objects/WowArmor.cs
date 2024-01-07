@@ -7,7 +7,7 @@ namespace AmeisenBotX.Core.Managers.Character.Inventory.Objects
     {
         public WowArmor(IWowInventoryItem wowBasicItem) : base(wowBasicItem)
         {
-            if (Subtype.ToLowerInvariant().EndsWith("s"))
+            if (Subtype.ToLowerInvariant().EndsWith('s'))
             {
                 Subtype = Subtype.Remove(Subtype.Length - 1);
             }

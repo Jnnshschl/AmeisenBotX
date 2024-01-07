@@ -6,17 +6,11 @@ using System.Linq;
 
 namespace AmeisenBotX.Core.Engines.Combat.Helpers.Targets.Validation.Basic
 {
-    public class IsReachableTargetValidator : ITargetValidator
+    public class IsReachableTargetValidator(AmeisenBotInterfaces bot, float maxDistance = 80.0f) : ITargetValidator
     {
-        public IsReachableTargetValidator(AmeisenBotInterfaces bot, float maxDistance = 80.0f)
-        {
-            Bot = bot;
-            MaxDistance = maxDistance;
-        }
+        private AmeisenBotInterfaces Bot { get; } = bot;
 
-        private AmeisenBotInterfaces Bot { get; }
-
-        private float MaxDistance { get; }
+        private float MaxDistance { get; } = maxDistance;
 
         public bool IsValid(IWowUnit unit)
         {

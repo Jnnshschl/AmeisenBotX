@@ -8,13 +8,8 @@ using System.Linq;
 
 namespace AmeisenBotX.Wow335a.Objects
 {
-    public class ObjectManager335a : ObjectManager<WowObject335a, WowUnit335a, WowPlayer335a, WowGameobject335a, WowDynobject335a, WowItem335a, WowCorpse335a, WowContainer335a>
+    public class ObjectManager335a(WowMemoryApi memory) : ObjectManager<WowObject335a, WowUnit335a, WowPlayer335a, WowGameobject335a, WowDynobject335a, WowItem335a, WowCorpse335a, WowContainer335a>(memory)
     {
-        public ObjectManager335a(WowMemoryApi memory)
-            : base(memory)
-        {
-        }
-
         protected override void ReadParty()
         {
             PartyleaderGuid = ReadLeaderGuid();

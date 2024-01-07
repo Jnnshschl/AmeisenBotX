@@ -117,8 +117,8 @@ namespace AmeisenBotX.Logging
         {
             if (Enabled)
             {
-                Enabled = false;
                 LogFileWriterTick();
+                Enabled = false;
             }
         }
 

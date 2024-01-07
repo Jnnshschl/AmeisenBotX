@@ -7,25 +7,17 @@ using System.Linq;
 
 namespace AmeisenBotX.Core.Engines.Combat.Helpers.Aura
 {
-    public class GroupAuraManager
+    public class GroupAuraManager(AmeisenBotInterfaces bot)
     {
-        public GroupAuraManager(AmeisenBotInterfaces bot)
-        {
-            Bot = bot;
-            SpellsToKeepActiveOnParty = [];
-            RemoveBadAurasSpells = [];
-            LastBuffed = [];
-        }
-
         public delegate bool CastSpellOnUnit(string spellName, ulong guid);
 
-        public List<((string, WowDispelType), CastSpellOnUnit)> RemoveBadAurasSpells { get; private set; }
+        public List<((string, WowDispelType), CastSpellOnUnit)> RemoveBadAurasSpells { get; private set; } = [];
 
-        public List<(string, CastSpellOnUnit)> SpellsToKeepActiveOnParty { get; private set; }
+        public List<(string, CastSpellOnUnit)> SpellsToKeepActiveOnParty { get; private set; } = [];
 
-        private AmeisenBotInterfaces Bot { get; }
+        private AmeisenBotInterfaces Bot { get; } = bot;
 
-        private Dictionary<ulong, TimegatedEvent> LastBuffed { get; }
+        private Dictionary<ulong, TimegatedEvent> LastBuffed { get; } = [];
 
         public bool Tick()
         {
@@ -37,11 +29,11 @@ namespace AmeisenBotX.Core.Engines.Combat.Helpers.Aura
                     {
                         if (!wowUnit.Auras.Any(e => Bot.Db.GetSpellName(e.SpellId) == auraCombo.Item1))
                         {
-                            if (!LastBuffed.ContainsKey(wowUnit.Guid))
+                            if (!LastBuffed.TryGetValue(wowUnit.Guid, out TimegatedEvent value))
                             {
                                 LastBuffed.Add(wowUnit.Guid, new(TimeSpan.FromSeconds(30)));
                             }
-                            else if (LastBuffed[wowUnit.Guid].Run())
+                            else if (value.Run())
                             {
                                 return auraCombo.Item2.Invoke(auraCombo.Item1, wowUnit.Guid);
                             }

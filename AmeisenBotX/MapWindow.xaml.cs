@@ -520,15 +520,8 @@ namespace AmeisenBotX
 
         private void SetupGraphics()
         {
-            if (Graphics != null)
-            {
-                Graphics.Dispose();
-            }
-
-            if (Bitmap != null)
-            {
-                Bitmap.Dispose();
-            }
+            Graphics?.Dispose();
+            Bitmap?.Dispose();
 
             int width = (int)mapCanvasBackground.ActualWidth;
             int height = (int)mapCanvasBackground.ActualHeight;

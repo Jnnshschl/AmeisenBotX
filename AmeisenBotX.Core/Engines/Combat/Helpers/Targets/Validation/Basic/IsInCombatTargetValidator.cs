@@ -3,14 +3,9 @@ using System.Linq;
 
 namespace AmeisenBotX.Core.Engines.Combat.Helpers.Targets.Validation.Basic
 {
-    public class IsThreatTargetValidator : ITargetValidator
+    public class IsThreatTargetValidator(AmeisenBotInterfaces bot) : ITargetValidator
     {
-        public IsThreatTargetValidator(AmeisenBotInterfaces bot)
-        {
-            Bot = bot;
-        }
-
-        private AmeisenBotInterfaces Bot { get; }
+        private AmeisenBotInterfaces Bot { get; } = bot;
 
         public bool IsValid(IWowUnit unit)
         {

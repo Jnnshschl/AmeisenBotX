@@ -7,36 +7,25 @@ using System.Linq;
 
 namespace AmeisenBotX.Core.Engines.Quest.Objects.Objectives
 {
-    public class CollectQuestObjectiveDEPRECATED : IQuestObjective
+    public class CollectQuestObjectiveOld(AmeisenBotInterfaces bot, int itemId, int itemAmount, int objectDisplayId, List<AreaNode> area) : IQuestObjective
     {
-        public CollectQuestObjectiveDEPRECATED(AmeisenBotInterfaces bot, int itemId, int itemAmount, int objectDisplayId, List<AreaNode> area)
-        {
-            Bot = bot;
-            ItemId = itemId;
-            WantedItemAmount = itemAmount;
-            ObjectDisplayId = objectDisplayId;
-            Area = area;
-
-            RightClickEvent = new(TimeSpan.FromSeconds(1));
-        }
-
-        public List<AreaNode> Area { get; set; }
+        public List<AreaNode> Area { get; set; } = area;
 
         public bool Finished => Progress == 100.0;
 
         public double Progress => Math.Round(CurrentItemAmount / (double)WantedItemAmount * 100.0, 1);
 
-        private AmeisenBotInterfaces Bot { get; }
+        private AmeisenBotInterfaces Bot { get; } = bot;
 
         private int CurrentItemAmount => Bot.Character.Inventory.Items.Count(e => e.Id == ItemId);
 
-        private int ItemId { get; }
+        private int ItemId { get; } = itemId;
 
-        private int ObjectDisplayId { get; }
+        private int ObjectDisplayId { get; } = objectDisplayId;
 
-        private TimegatedEvent RightClickEvent { get; }
+        private TimegatedEvent RightClickEvent { get; } = new(TimeSpan.FromSeconds(1));
 
-        private int WantedItemAmount { get; }
+        private int WantedItemAmount { get; } = itemAmount;
 
         public void Execute()
         {

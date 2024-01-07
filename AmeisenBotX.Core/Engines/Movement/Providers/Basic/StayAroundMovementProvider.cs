@@ -5,14 +5,9 @@ using System;
 
 namespace AmeisenBotX.Core.Engines.Movement.Providers.Basic
 {
-    public class StayAroundMovementProvider : IMovementProvider
+    public class StayAroundMovementProvider(Func<(IWowUnit, float, float)> getUnit) : IMovementProvider
     {
-        public StayAroundMovementProvider(Func<(IWowUnit, float, float)> getUnit)
-        {
-            GetUnit = getUnit;
-        }
-
-        public Func<(IWowUnit, float, float)> GetUnit { get; }
+        public Func<(IWowUnit, float, float)> GetUnit { get; } = getUnit;
 
         public bool Get(out Vector3 position, out MovementAction type)
         {

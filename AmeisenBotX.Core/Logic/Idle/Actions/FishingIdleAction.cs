@@ -11,17 +11,11 @@ using System.Linq;
 
 namespace AmeisenBotX.Core.Logic.Idle.Actions
 {
-    public class FishingIdleAction : IIdleAction
+    public class FishingIdleAction(AmeisenBotInterfaces bot) : IIdleAction
     {
-        public FishingIdleAction(AmeisenBotInterfaces bot)
-        {
-            Bot = bot;
-            Rnd = new Random();
-        }
-
         public bool AutopilotOnly => true;
 
-        public AmeisenBotInterfaces Bot { get; }
+        public AmeisenBotInterfaces Bot { get; } = bot;
 
         public DateTime Cooldown { get; set; }
 
@@ -45,7 +39,7 @@ namespace AmeisenBotX.Core.Logic.Idle.Actions
 
         public bool Started { get; set; }
 
-        private Random Rnd { get; }
+        private Random Rnd { get; } = new Random();
 
         public bool Enter()
         {

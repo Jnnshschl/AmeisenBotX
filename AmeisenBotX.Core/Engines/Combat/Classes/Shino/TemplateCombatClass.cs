@@ -11,14 +11,8 @@ using System.Linq;
 
 namespace AmeisenBotX.Core.Engines.Combat.Classes.Shino
 {
-    public abstract class TemplateCombatClass : BasicCombatClass
+    public abstract class TemplateCombatClass(AmeisenBotInterfaces bot) : BasicCombatClass(bot)
     {
-        public TemplateCombatClass(AmeisenBotInterfaces bot) : base(bot)
-        {
-            //this line cause a bug because it run out of index
-            //Bot.EventHookManager.Subscribe("UI_ERROR_MESSAGE", (t, a) => OnUIErrorMessage(a[0]));
-        }
-
         public new string Author { get; } = "Shino";
 
         private DateTime LastFailedOpener { get; set; } = DateTime.Now;

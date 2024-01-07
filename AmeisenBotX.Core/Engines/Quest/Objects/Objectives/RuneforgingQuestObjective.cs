@@ -4,27 +4,17 @@ using System;
 
 namespace AmeisenBotX.Core.Engines.Quest.Objects.Objectives
 {
-    public delegate bool EnchantItemQuestObjectiveCondition();
-
-    public class RuneforgingQuestObjective : IQuestObjective
+    public class RuneforgingQuestObjective(AmeisenBotInterfaces bot, Func<bool> condition) : IQuestObjective
     {
-        public RuneforgingQuestObjective(AmeisenBotInterfaces bot, EnchantItemQuestObjectiveCondition condition)
-        {
-            Bot = bot;
-            Condition = condition;
-
-            EnchantEvent = new(TimeSpan.FromSeconds(1));
-        }
-
         public bool Finished => Progress == 100.0;
 
         public double Progress => Condition() ? 100.0 : 0.0;
 
-        private AmeisenBotInterfaces Bot { get; }
+        private AmeisenBotInterfaces Bot { get; } = bot;
 
-        private EnchantItemQuestObjectiveCondition Condition { get; }
+        private Func<bool> Condition { get; } = condition;
 
-        private TimegatedEvent EnchantEvent { get; }
+        private TimegatedEvent EnchantEvent { get; } = new(TimeSpan.FromSeconds(1));
 
         public void Execute()
         {

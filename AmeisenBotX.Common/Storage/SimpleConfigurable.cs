@@ -10,9 +10,9 @@ namespace AmeisenBotX.Common.Storage
 
         public virtual void Load(Dictionary<string, JsonElement> objects)
         {
-            if (objects.ContainsKey("Configurables"))
+            if (objects.TryGetValue("Configurables", out JsonElement value))
             {
-                foreach (KeyValuePair<string, dynamic> x in objects["Configurables"].ToDyn())
+                foreach (KeyValuePair<string, dynamic> x in value.ToDyn())
                 {
                     if (Configurables.ContainsKey(x.Key))
                     {

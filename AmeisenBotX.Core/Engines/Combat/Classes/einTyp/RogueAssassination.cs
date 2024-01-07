@@ -12,12 +12,12 @@ using System.Text.Json;
 
 namespace AmeisenBotX.Core.Engines.Combat.Classes.einTyp
 {
-    public class RogueAssassination : ICombatClass
+    public class RogueAssassination(AmeisenBotInterfaces bot) : ICombatClass
     {
-        private readonly AmeisenBotInterfaces Bot;
+        private readonly AmeisenBotInterfaces Bot = bot;
         private readonly bool hasTargetMoved = false;
-        private readonly RogueAssassinSpells spells;
-        private readonly string[] standingEmotes = { "/bored" };
+        private readonly RogueAssassinSpells spells = new(bot);
+        private readonly string[] standingEmotes = ["/bored"];
         private bool computeNewRoute = false;
 
         private double distanceToBehindTarget = 0;
@@ -32,13 +32,6 @@ namespace AmeisenBotX.Core.Engines.Combat.Classes.einTyp
         private bool standing = false;
 
         private bool wasInStealth = false;
-
-        public RogueAssassination(AmeisenBotInterfaces bot)
-        {
-            Bot = bot;
-
-            spells = new RogueAssassinSpells(bot);
-        }
 
         public string Author => "einTyp";
 

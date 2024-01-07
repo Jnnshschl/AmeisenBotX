@@ -10,12 +10,13 @@ using System.Text.Json.Serialization;
 
 namespace AmeisenBotX.Core.Managers.Character.Spells
 {
-    public class SpellBook
+    public class SpellBook(IWowInterface wowInterface)
     {
-        public SpellBook(IWowInterface wowInterface)
+        private static readonly JsonSerializerOptions Options = new()
         {
-            Wow = wowInterface;
-        }
+            AllowTrailingCommas = true,
+            NumberHandling = JsonNumberHandling.AllowReadingFromString
+        };
 
         public delegate void SpellBookUpdate();
 
@@ -23,7 +24,7 @@ namespace AmeisenBotX.Core.Managers.Character.Spells
 
         public IEnumerable<Spell> Spells { get; private set; }
 
-        private IWowInterface Wow { get; }
+        private IWowInterface Wow { get; } = wowInterface;
 
         public Spell GetSpellByName(string spellname)
         {
@@ -40,14 +41,13 @@ namespace AmeisenBotX.Core.Managers.Character.Spells
             spell = GetSpellByName(spellname);
             return spell != null;
         }
-
         public void Update()
         {
             string rawSpells = Wow.GetSpells();
 
             try
             {
-                Spells = JsonSerializer.Deserialize<List<Spell>>(rawSpells, new JsonSerializerOptions() { AllowTrailingCommas = true, NumberHandling = JsonNumberHandling.AllowReadingFromString })
+                Spells = JsonSerializer.Deserialize<List<Spell>>(rawSpells, Options)
                     .OrderBy(e => e.Name)
                     .ThenByDescending(e => e.Rank);
 

@@ -11,7 +11,7 @@ using System.Threading.Tasks;
 
 namespace AmeisenBotX.Wow.Objects
 {
-    public abstract class ObjectManager<TObject, TUnit, TPlayer, TGameobject, TDynobject, TItem, TCorpse, TContainer> : IObjectProvider
+    public abstract class ObjectManager<TObject, TUnit, TPlayer, TGameobject, TDynobject, TItem, TCorpse, TContainer>(WowMemoryApi memory) : IObjectProvider
         where TObject : IWowObject, new()
         where TUnit : IWowUnit, new()
         where TPlayer : IWowPlayer, new()
@@ -26,21 +26,8 @@ namespace AmeisenBotX.Wow.Objects
 
         protected readonly object queryLock = new();
 
-        protected readonly nint[] wowObjectPointers;
-        protected readonly IWowObject[] wowObjects;
-
-        public ObjectManager(WowMemoryApi memory)
-        {
-            Memory = memory;
-
-            wowObjectPointers = new nint[MAX_OBJECT_COUNT];
-            wowObjects = new IWowObject[MAX_OBJECT_COUNT];
-
-            PartymemberGuids = new List<ulong>();
-            PartyPetGuids = new List<ulong>();
-            Partymembers = new List<IWowUnit>();
-            PartyPets = new List<IWowUnit>();
-        }
+        protected readonly nint[] wowObjectPointers = new nint[MAX_OBJECT_COUNT];
+        protected readonly IWowObject[] wowObjects = new IWowObject[MAX_OBJECT_COUNT];
 
         ///<inheritdoc cref="IObjectProvider.OnObjectUpdateComplete"/>
         public event Action<IEnumerable<IWowObject>> OnObjectUpdateComplete;
@@ -82,16 +69,16 @@ namespace AmeisenBotX.Wow.Objects
         public ulong PartyleaderGuid { get; protected set; }
 
         ///<inheritdoc cref="IObjectProvider.PartymemberGuids"/>
-        public IEnumerable<ulong> PartymemberGuids { get; protected set; }
+        public IEnumerable<ulong> PartymemberGuids { get; protected set; } = new List<ulong>();
 
         ///<inheritdoc cref="IObjectProvider.Partymembers"/>
-        public IEnumerable<IWowUnit> Partymembers { get; protected set; }
+        public IEnumerable<IWowUnit> Partymembers { get; protected set; } = new List<IWowUnit>();
 
         ///<inheritdoc cref="IObjectProvider.PartyPetGuids"/>
-        public IEnumerable<ulong> PartyPetGuids { get; protected set; }
+        public IEnumerable<ulong> PartyPetGuids { get; protected set; } = new List<ulong>();
 
         ///<inheritdoc cref="IObjectProvider.PartyPets"/>
-        public IEnumerable<IWowUnit> PartyPets { get; protected set; }
+        public IEnumerable<IWowUnit> PartyPets { get; protected set; } = new List<IWowUnit>();
 
         ///<inheritdoc cref="IObjectProvider.Pet"/>
         public IWowUnit Pet { get; protected set; }
@@ -126,7 +113,7 @@ namespace AmeisenBotX.Wow.Objects
         ///<inheritdoc cref="IObjectProvider.ZoneSubName"/>
         public string ZoneSubName { get; protected set; }
 
-        protected WowMemoryApi Memory { get; }
+        protected WowMemoryApi Memory { get; } = memory;
 
         protected bool PlayerGuidIsVehicle { get; set; }
 

@@ -4,14 +4,9 @@ using System;
 
 namespace AmeisenBotX.Core.Logic.Leafs
 {
-    public class SuccessLeaf : INode
+    public class SuccessLeaf(Action action = null) : INode
     {
-        public SuccessLeaf(Action action = null)
-        {
-            Action = action;
-        }
-
-        private Action Action { get; }
+        private Action Action { get; } = action;
 
         public BtStatus Execute()
         {

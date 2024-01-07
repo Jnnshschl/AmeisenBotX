@@ -80,19 +80,13 @@ namespace AmeisenBotX.BehaviorTree
         }
     }
 
-    public class Tree
+    public class Tree(INode node, bool resumeOngoingNodes = false)
     {
-        public Tree(INode node, bool resumeOngoingNodes = false)
-        {
-            RootNode = node;
-            ResumeOngoingNodes = resumeOngoingNodes;
-        }
-
         public INode OngoingNode { get; private set; }
 
-        public bool ResumeOngoingNodes { get; set; }
+        public bool ResumeOngoingNodes { get; set; } = resumeOngoingNodes;
 
-        public INode RootNode { get; set; }
+        public INode RootNode { get; set; } = node;
 
         public BtStatus Tick()
         {

@@ -8,6 +8,7 @@ namespace AmeisenBotX.Core.Engines.Movement.Pathfinding.Objects
         public SearchAreaEnsamble(List<List<Vector3>> searchAreas)
         {
             CurrentSearchArea = 0;
+
             foreach (List<Vector3> area in searchAreas)
             {
                 Areas.Add(new(area));

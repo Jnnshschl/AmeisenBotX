@@ -7,17 +7,11 @@ using System.Linq;
 
 namespace AmeisenBotX.Core.Logic.Idle.Actions
 {
-    public class SitToChairIdleAction : IIdleAction
+    public class SitToChairIdleAction(AmeisenBotInterfaces bot, double maxDistance) : IIdleAction
     {
-        public SitToChairIdleAction(AmeisenBotInterfaces bot, double maxDistance)
-        {
-            Bot = bot;
-            MaxDistance = maxDistance;
-        }
-
         public bool AutopilotOnly => false;
 
-        public AmeisenBotInterfaces Bot { get; }
+        public AmeisenBotInterfaces Bot { get; } = bot;
 
         public DateTime Cooldown { get; set; }
 
@@ -31,7 +25,7 @@ namespace AmeisenBotX.Core.Logic.Idle.Actions
 
         private IWowGameobject CurrentSeat { get; set; }
 
-        private double MaxDistance { get; }
+        private double MaxDistance { get; } = maxDistance;
 
         private bool SatDown { get; set; }
 

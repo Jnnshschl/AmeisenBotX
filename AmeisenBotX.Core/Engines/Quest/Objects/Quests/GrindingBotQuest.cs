@@ -4,23 +4,17 @@ using System.Linq;
 
 namespace AmeisenBotX.Core.Engines.Quest.Objects.Quests
 {
-    internal class GrindingBotQuest : IBotQuest
+    internal class GrindingBotQuest(string name, List<IQuestObjective> objectives) : IBotQuest
     {
-        public GrindingBotQuest(string name, List<IQuestObjective> objectives)
-        {
-            Name = name;
-            Objectives = objectives;
-        }
-
         public bool Accepted => true;
 
         public bool Finished => Objectives != null && Objectives.All(e => e.Finished);
 
         public int Id => -1;
 
-        public string Name { get; }
+        public string Name { get; } = name;
 
-        public List<IQuestObjective> Objectives { get; }
+        public List<IQuestObjective> Objectives { get; } = objectives;
 
         public bool Returned => Finished;
 

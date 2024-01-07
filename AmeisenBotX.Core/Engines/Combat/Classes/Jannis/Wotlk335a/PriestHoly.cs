@@ -163,7 +163,7 @@ namespace AmeisenBotX.Core.Engines.Combat.Classes.Jannis.Wotlk335a
                 }
 
                 double healthDifference = target.MaxHealth - target.Health;
-                List<KeyValuePair<int, string>> spellsToTry = SpellUsageHealDict.Where(e => e.Key <= healthDifference).OrderByDescending(e => e.Key).ToList();
+                List<KeyValuePair<int, string>> spellsToTry = [.. SpellUsageHealDict.Where(e => e.Key <= healthDifference).OrderByDescending(e => e.Key)];
 
                 foreach (KeyValuePair<int, string> keyValuePair in spellsToTry)
                 {

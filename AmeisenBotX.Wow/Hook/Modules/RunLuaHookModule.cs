@@ -4,14 +4,8 @@ using System.Text;
 
 namespace AmeisenBotX.Wow.Hook.Modules
 {
-    public class RunLuaHookModule : RunAsmHookModule
+    public class RunLuaHookModule(Action<nint> onUpdate, Action<IHookModule> tick, WowMemoryApi memory, string lua, string varName, uint allocSize = 128) : RunAsmHookModule(onUpdate, tick, memory, allocSize)
     {
-        public RunLuaHookModule(Action<nint> onUpdate, Action<IHookModule> tick, WowMemoryApi memory, string lua, string varName, uint allocSize = 128) : base(onUpdate, tick, memory, allocSize)
-        {
-            Lua = lua;
-            VarName = varName;
-        }
-
         ~RunLuaHookModule()
         {
             if (ReturnAddress != nint.Zero) { Memory.FreeMemory(ReturnAddress); }
@@ -23,9 +17,9 @@ namespace AmeisenBotX.Wow.Hook.Modules
 
         public nint VarAddress { get; private set; }
 
-        private string Lua { get; }
+        private string Lua { get; } = lua;
 
-        private string VarName { get; }
+        private string VarName { get; } = varName;
 
         public override nint GetDataPointer()
         {
@@ -48,8 +42,8 @@ namespace AmeisenBotX.Wow.Hook.Modules
                 Memory.WriteBytes(CommandAddress, luaBytes);
                 Memory.WriteBytes(VarAddress, luaVarBytes);
 
-                assembly = new List<string>()
-                {
+                assembly =
+                [
                     "X:",
                     "PUSH 0",
                     $"PUSH {CommandAddress}",
@@ -63,12 +57,12 @@ namespace AmeisenBotX.Wow.Hook.Modules
                     $"CALL {Memory.Offsets.FunctionGetLocalizedText}",
                     $"MOV DWORD [{ReturnAddress}], EAX",
                     $"RET"
-                };
+                ];
 
                 return true;
             }
 
-            assembly = Array.Empty<string>();
+            assembly = [];
             return false;
         }
     }

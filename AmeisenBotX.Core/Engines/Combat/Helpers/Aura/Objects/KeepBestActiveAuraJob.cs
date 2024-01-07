@@ -6,17 +6,11 @@ using System.Linq;
 
 namespace AmeisenBotX.Core.Engines.Combat.Helpers.Aura.Objects
 {
-    public class KeepBestActiveAuraJob : IAuraJob
+    public class KeepBestActiveAuraJob(IAmeisenBotDb db, IEnumerable<(string, Func<bool>)> actions) : IAuraJob
     {
-        public KeepBestActiveAuraJob(IAmeisenBotDb db, IEnumerable<(string, Func<bool>)> actions)
-        {
-            Db = db;
-            Actions = actions;
-        }
+        public IEnumerable<(string, Func<bool>)> Actions { get; set; } = actions;
 
-        public IEnumerable<(string, Func<bool>)> Actions { get; set; }
-
-        private IAmeisenBotDb Db { get; }
+        private IAmeisenBotDb Db { get; } = db;
 
         public bool Run(IEnumerable<IWowAura> auras)
         {

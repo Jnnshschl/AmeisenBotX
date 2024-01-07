@@ -23,16 +23,16 @@ namespace AmeisenBotX.Memory.Win32
             return left.Equals(right);
         }
 
-        public override bool Equals(object obj)
+        public override readonly bool Equals(object obj)
         {
             return obj.GetType() == typeof(Rect)
-                       && ((Rect)obj).Left == Left
-                       && ((Rect)obj).Top == Top
-                       && ((Rect)obj).Right == Right
-                       && ((Rect)obj).Bottom == Bottom;
+                && ((Rect)obj).Left == Left
+                && ((Rect)obj).Top == Top
+                && ((Rect)obj).Right == Right
+                && ((Rect)obj).Bottom == Bottom;
         }
 
-        public override int GetHashCode()
+        public override readonly int GetHashCode()
         {
             unchecked
             {
@@ -40,7 +40,7 @@ namespace AmeisenBotX.Memory.Win32
             }
         }
 
-        public override string ToString()
+        public override readonly string ToString()
         {
             return $"Left: {Left} Top: {Top} Right: {Right} Bottom: {Bottom}";
         }

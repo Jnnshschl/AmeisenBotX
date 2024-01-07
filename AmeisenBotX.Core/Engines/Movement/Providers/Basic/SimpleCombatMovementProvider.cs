@@ -5,14 +5,9 @@ using AmeisenBotX.Wow.Objects.Enums;
 
 namespace AmeisenBotX.Core.Engines.Movement.Providers.Basic
 {
-    public class SimpleCombatMovementProvider : IMovementProvider
+    public class SimpleCombatMovementProvider(AmeisenBotInterfaces bot) : IMovementProvider
     {
-        public SimpleCombatMovementProvider(AmeisenBotInterfaces bot)
-        {
-            Bot = bot;
-        }
-
-        private AmeisenBotInterfaces Bot { get; }
+        private AmeisenBotInterfaces Bot { get; } = bot;
 
         public bool Get(out Vector3 position, out MovementAction type)
         {

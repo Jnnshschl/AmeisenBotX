@@ -5,28 +5,19 @@ using System.Linq;
 
 namespace AmeisenBotX.Core.Logic.Idle
 {
-    public class IdleActionManager
+    public class IdleActionManager(AmeisenBotConfig config, IEnumerable<IIdleAction> idleActions)
     {
-        public IdleActionManager(AmeisenBotConfig config, IEnumerable<IIdleAction> idleActions)
-        {
-            Config = config;
-            IdleActions = idleActions;
-
-            Rnd = new();
-            LastActions = [];
-        }
-
         public TimeSpan Cooldown { get; private set; }
 
         public DateTime ExecuteUntil { get; private set; }
 
-        public IEnumerable<IIdleAction> IdleActions { get; set; }
+        public IEnumerable<IIdleAction> IdleActions { get; set; } = idleActions;
 
         public DateTime LastActionExecuted { get; private set; }
 
-        public List<KeyValuePair<DateTime, IIdleAction>> LastActions { get; private set; }
+        public List<KeyValuePair<DateTime, IIdleAction>> LastActions { get; private set; } = [];
 
-        private AmeisenBotConfig Config { get; }
+        private AmeisenBotConfig Config { get; } = config;
 
         private IIdleAction CurrentAction { get; set; }
 
@@ -34,7 +25,7 @@ namespace AmeisenBotX.Core.Logic.Idle
 
         private int MinActionCooldown { get; } = 12 * 1000;
 
-        private Random Rnd { get; }
+        private Random Rnd { get; } = new();
 
         public void Reset()
         {
