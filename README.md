@@ -1,28 +1,28 @@
-# AmeisenBotX
+# AmeisenBotX 🐜
 
-Hopefully the last rewrite of my WoW bot. I've learned much during the other 2 attempts so i decided to rewrite it from scratch. The aim of this bot is to create a human like group player that assists you on your adventure. From managing it's equipment to gathering resources the bot should do anything on its own.
+This marks the final iteration of my WoW bot, drawing from lessons learned in the previous two attempts and rebuilt from the ground up. The main focus of this bot is to emulate a human-like group player, playing the game alongside you, handling tasks from equipment management to resource gathering throughout your adventure. 🤖🔄
 
-If you need more support or just want to say hi, join our discord https://discord.gg/hynCAdfjpy
+For additional support or just to say hi, feel free to join our Discord: [AmeisenBotX Discord](https://discord.gg/hynCAdfjpy) 🚀
 
-See the bot in action: https://www.youtube.com/channel/UCxwiiRjjQVETtatGzKAoIcQ
+Watch the bot in action on our YouTube channel: [AmeisenBotX YouTube](https://www.youtube.com/channel/UCxwiiRjjQVETtatGzKAoIcQ) 🎥
 
-Currently supported versions:
+### Currently Supported Versions:
 
-* 3.3.5a 12340
-* 5.4.8 18414
+- 3.3.5a 12340
+- 5.4.8 18414
 
-# Disclaimer
+# Disclaimer 📚
 
-This software is intended for educational purposes only!
+This software is designed for educational purposes only! 
 
-# Credits
+**Note:** I've used it for a long time on private servers without any bans or problems. 
 
-❤️ recastnavigation - https://github.com/recastnavigation/recastnavigation
+# Credits 🙌
 
-❤️ TrinityCore - https://github.com/TrinityCore/TrinityCore
+- **recastnavigation**: [GitHub](https://github.com/recastnavigation/recastnavigation)
+- **TrinityCore**: [GitHub](https://github.com/TrinityCore/TrinityCore)
+- **flat assembler**: [GitHub](https://github.com/flatAssembler/flatAssembler)
 
-❤️ flat assembler - https://flatassembler.net/
-
-# Screenshots
+# Screenshots 📸
 
 ![Main Window](https://raw.githubusercontent.com/Jnnshschl/AmeisenBotX/master/images/mainWindow.PNG "Main Window")
