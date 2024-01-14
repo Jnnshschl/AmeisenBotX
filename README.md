@@ -21,7 +21,7 @@ This software is designed for educational purposes only!
 
 - **recastnavigation**: [GitHub](https://github.com/recastnavigation/recastnavigation)
 - **TrinityCore**: [GitHub](https://github.com/TrinityCore/TrinityCore)
-- **flat assembler**: [GitHub](https://github.com/flatAssembler/flatAssembler)
+- **flat assembler**: [flatassembler.net](https://flatassembler.net/)
 
 # Screenshots 📸
 
