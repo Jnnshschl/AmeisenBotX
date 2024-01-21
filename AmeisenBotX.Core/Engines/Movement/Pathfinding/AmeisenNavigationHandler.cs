@@ -26,7 +26,7 @@ namespace AmeisenBotX.Core.Engines.Movement.Pathfinding
         {
             try
             {
-                return Client.IsConnected ? Client.Send((byte)EMessageType.PATH, (mapId, origin, target, 2)).AsArray<Vector3>() : [];
+                return Client.IsConnected ? Client.Send((byte)EMessageType.PATH, (mapId, origin, target, PathRequestFlag.BezierCurve)).AsArray<Vector3>() : [];
             }
             catch
             {
